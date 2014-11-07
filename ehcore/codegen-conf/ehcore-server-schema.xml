@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.4.0.xsd">
+
+<!-- Configure the database connection here -->
+<jdbc>
+    <driver>com.mysql.jdbc.Driver</driver>
+    <url>jdbc:mysql://localhost:3306/ehcore</url>
+    <user>ehcore</user>
+    <password>ehcore</password>
+</jdbc>
+
+<generator>
+    <!-- The default code generator. You can override this one, to generate your own code style
+    Defaults to org.jooq.util.DefaultGenerator -->
+    <name>org.jooq.util.DefaultGenerator</name>
+    <generate>
+        <daos>true</daos>
+    </generate>
+    <database>
+        <!-- The database type. The format here is:
+        org.util.[database].[database]Database -->
+        <name>org.jooq.util.mysql.MySQLDatabase</name>
+        
+        <!-- The database schema (or in the absence of schema support, in your RDBMS this
+            can be the owner, user, database name) to be generated -->
+        <inputSchema>ehcore</inputSchema>
+        <!-- All elements that are generated from your schema
+            (A Java regular expression. Use the pipe to separate several expressions)
+            Watch out for case-sensitivity. Depending on your database, this might be important! -->
+        <includes>
+        eh_users | eh_user_devices | eh_user_groups | eh_groups | eh_group_members
+        </includes>
+            <!-- All elements that are excluded from your schema
+            (A Java regular expression. Use the pipe to separate several expressions).
+            Excludes match before includes -->
+        <excludes></excludes>   
+    </database>
+    <target>
+        <!-- The destination package of your generated classes (within the destination directory) -->
+        <packageName>com.everhomes.server.schema</packageName>
+        <!-- The destination directory of your generated classes --> 
+        <!-- code generation will be run under the project root using maven, it is then relative to where POM file locates -->   
+        <directory>src/main/java</directory>
+    </target>
+</generator>
+
+</configuration>
