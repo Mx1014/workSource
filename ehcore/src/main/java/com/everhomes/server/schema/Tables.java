@@ -14,6 +14,11 @@ package com.everhomes.server.schema;
 public class Tables {
 
 	/**
+	 * The table ehcore.eh_borders
+	 */
+	public static final com.everhomes.server.schema.tables.EhBorders EH_BORDERS = com.everhomes.server.schema.tables.EhBorders.EH_BORDERS;
+
+	/**
 	 * The table ehcore.eh_groups
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroups EH_GROUPS = com.everhomes.server.schema.tables.EhGroups.EH_GROUPS;
@@ -29,12 +34,12 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUsers EH_USERS = com.everhomes.server.schema.tables.EhUsers.EH_USERS;
 
 	/**
-	 * The table ehcore.eh_user_devices
-	 */
-	public static final com.everhomes.server.schema.tables.EhUserDevices EH_USER_DEVICES = com.everhomes.server.schema.tables.EhUserDevices.EH_USER_DEVICES;
-
-	/**
 	 * The table ehcore.eh_user_groups
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserGroups EH_USER_GROUPS = com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS;
+
+	/**
+	 * The table ehcore.eh_user_identifiers
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserIdentifiers EH_USER_IDENTIFIERS = com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
 }

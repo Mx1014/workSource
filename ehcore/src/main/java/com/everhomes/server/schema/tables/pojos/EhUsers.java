@@ -11,11 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -222611009;
+	private static final long serialVersionUID = -1052999489;
 
 	private java.lang.Long     id;
-	private java.lang.String   name;
-	private java.lang.String   description;
+	private java.lang.String   accountName;
+	private java.lang.String   nickName;
 	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
 	private java.lang.String   passwordHash;
@@ -24,15 +24,15 @@ public class EhUsers implements java.io.Serializable {
 
 	public EhUsers(
 		java.lang.Long     id,
-		java.lang.String   name,
-		java.lang.String   description,
+		java.lang.String   accountName,
+		java.lang.String   nickName,
 		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
 		java.lang.String   passwordHash
 	) {
 		this.id = id;
-		this.name = name;
-		this.description = description;
+		this.accountName = accountName;
+		this.nickName = nickName;
 		this.status = status;
 		this.createTime = createTime;
 		this.passwordHash = passwordHash;
@@ -46,20 +46,20 @@ public class EhUsers implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.String getName() {
-		return this.name;
+	public java.lang.String getAccountName() {
+		return this.accountName;
 	}
 
-	public void setName(java.lang.String name) {
-		this.name = name;
+	public void setAccountName(java.lang.String accountName) {
+		this.accountName = accountName;
 	}
 
-	public java.lang.String getDescription() {
-		return this.description;
+	public java.lang.String getNickName() {
+		return this.nickName;
 	}
 
-	public void setDescription(java.lang.String description) {
-		this.description = description;
+	public void setNickName(java.lang.String nickName) {
+		this.nickName = nickName;
 	}
 
 	public java.lang.Byte getStatus() {

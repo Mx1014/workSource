@@ -28,7 +28,8 @@
             (A Java regular expression. Use the pipe to separate several expressions)
             Watch out for case-sensitivity. Depending on your database, this might be important! -->
         <includes>
-        eh_users | eh_user_devices | eh_user_groups | eh_groups | eh_group_members
+        eh_users | eh_user_identifiers | eh_user_groups | eh_groups | eh_group_members |
+        eh_borders
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

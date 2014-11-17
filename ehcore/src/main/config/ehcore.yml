@@ -3,6 +3,7 @@
 #
 logging.path: ./
 logging.file: ehcore.log
+logging.level: DEBUG
 
 #
 # Server configuration

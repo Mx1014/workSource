@@ -17,7 +17,7 @@
         </mvc:interceptor>
         <mvc:interceptor>
             <mvc:mapping path="/**" />
-            <bean class="com.everhomes.controller.WebRequestApiKeyInterceptor" />
+            <bean class="com.everhomes.controller.WebRequestInterceptor" />
         </mvc:interceptor>
     </mvc:interceptors> 
     

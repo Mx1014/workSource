@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> implements org.jooq.Record6<java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.sql.Timestamp, java.lang.String> {
 
-	private static final long serialVersionUID = 1563217277;
+	private static final long serialVersionUID = 2067603018;
 
 	/**
 	 * Setter for <code>ehcore.eh_users.id</code>. id of the record
@@ -28,30 +28,30 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_users.name</code>.
+	 * Setter for <code>ehcore.eh_users.account_name</code>.
 	 */
-	public void setName(java.lang.String value) {
+	public void setAccountName(java.lang.String value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_users.name</code>.
+	 * Getter for <code>ehcore.eh_users.account_name</code>.
 	 */
-	public java.lang.String getName() {
+	public java.lang.String getAccountName() {
 		return (java.lang.String) getValue(1);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_users.description</code>.
+	 * Setter for <code>ehcore.eh_users.nick_name</code>.
 	 */
-	public void setDescription(java.lang.String value) {
+	public void setNickName(java.lang.String value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_users.description</code>.
+	 * Getter for <code>ehcore.eh_users.nick_name</code>.
 	 */
-	public java.lang.String getDescription() {
+	public java.lang.String getNickName() {
 		return (java.lang.String) getValue(2);
 	}
 
@@ -142,7 +142,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field2() {
-		return com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAME;
+		return com.everhomes.server.schema.tables.EhUsers.EH_USERS.ACCOUNT_NAME;
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field3() {
-		return com.everhomes.server.schema.tables.EhUsers.EH_USERS.DESCRIPTION;
+		return com.everhomes.server.schema.tables.EhUsers.EH_USERS.NICK_NAME;
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	 */
 	@Override
 	public java.lang.String value2() {
-		return getName();
+		return getAccountName();
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	 */
 	@Override
 	public java.lang.String value3() {
-		return getDescription();
+		return getNickName();
 	}
 
 	/**
@@ -239,7 +239,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	 */
 	@Override
 	public EhUsersRecord value2(java.lang.String value) {
-		setName(value);
+		setAccountName(value);
 		return this;
 	}
 
@@ -248,7 +248,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	 */
 	@Override
 	public EhUsersRecord value3(java.lang.String value) {
-		setDescription(value);
+		setNickName(value);
 		return this;
 	}
 
@@ -301,12 +301,12 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	/**
 	 * Create a detached, initialised EhUsersRecord
 	 */
-	public EhUsersRecord(java.lang.Long id, java.lang.String name, java.lang.String description, java.lang.Byte status, java.sql.Timestamp createTime, java.lang.String passwordHash) {
+	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.Byte status, java.sql.Timestamp createTime, java.lang.String passwordHash) {
 		super(com.everhomes.server.schema.tables.EhUsers.EH_USERS);
 
 		setValue(0, id);
-		setValue(1, name);
-		setValue(2, description);
+		setValue(1, accountName);
+		setValue(2, nickName);
 		setValue(3, status);
 		setValue(4, createTime);
 		setValue(5, passwordHash);

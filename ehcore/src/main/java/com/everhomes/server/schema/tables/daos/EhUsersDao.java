@@ -48,17 +48,24 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
-	 * Fetch records that have <code>name IN (values)</code>
+	 * Fetch records that have <code>account_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByAccountName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.ACCOUNT_NAME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>description IN (values)</code>
+	 * Fetch a unique record that has <code>account_name = value</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByDescription(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.DESCRIPTION, values);
+	public com.everhomes.server.schema.tables.pojos.EhUsers fetchOneByAccountName(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhUsers.EH_USERS.ACCOUNT_NAME, value);
+	}
+
+	/**
+	 * Fetch records that have <code>nick_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNickName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NICK_NAME, values);
 	}
 
 	/**

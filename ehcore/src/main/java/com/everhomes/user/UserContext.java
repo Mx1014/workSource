@@ -4,6 +4,7 @@ public class UserContext {
     private static ThreadLocal<UserContext> s_userContexts = new ThreadLocal<UserContext>();
     
     private User user;
+    private UserLogin login;
     
     public UserContext() {
     }
@@ -27,5 +28,13 @@ public class UserContext {
     
     public void setUser(User user) {
         this.user = user;
+    }
+    
+    public UserLogin getLogin() {
+        return this.login;
+    }
+    
+    public void setLogin(UserLogin login) {
+        this.login = login;
     }
 }

@@ -18,20 +18,23 @@ public class Keys {
 	// IDENTITY definitions
 	// -------------------------------------------------------------------------
 
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = Identities0.IDENTITY_EH_BORDERS;
 
 	// -------------------------------------------------------------------------
 	// UNIQUE and PRIMARY KEY definitions
 	// -------------------------------------------------------------------------
 
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBordersRecord> KEY_EH_BORDERS_PRIMARY = UniqueKeys0.KEY_EH_BORDERS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord> KEY_EH_GROUPS_PRIMARY = UniqueKeys0.KEY_EH_GROUPS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord> KEY_EH_GROUPS_U_EH_GROUP_NAME = UniqueKeys0.KEY_EH_GROUPS_U_EH_GROUP_NAME;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> KEY_EH_GROUP_MEMBERS_PRIMARY = UniqueKeys0.KEY_EH_GROUP_MEMBERS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER = UniqueKeys0.KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord> KEY_EH_USERS_PRIMARY = UniqueKeys0.KEY_EH_USERS_PRIMARY;
-	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserDevicesRecord> KEY_EH_USER_DEVICES_PRIMARY = UniqueKeys0.KEY_EH_USER_DEVICES_PRIMARY;
-	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserDevicesRecord> KEY_EH_USER_DEVICES_U_EH_USER_DEVICE_TYPE_NUMBER = UniqueKeys0.KEY_EH_USER_DEVICES_U_EH_USER_DEVICE_TYPE_NUMBER;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord> KEY_EH_USERS_U_EH_USER_ACCOUNT_NAME = UniqueKeys0.KEY_EH_USERS_U_EH_USER_ACCOUNT_NAME;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_PRIMARY = UniqueKeys0.KEY_EH_USER_GROUPS_PRIMARY;
-	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_U_USR_GRP_OWNER_GROUP = UniqueKeys0.KEY_EH_USER_GROUPS_U_USR_GRP_OWNER_GROUP;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_U_EH_USR_GRP_OWNER_GROUP = UniqueKeys0.KEY_EH_USER_GROUPS_U_EH_USR_GRP_OWNER_GROUP;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_PRIMARY = UniqueKeys0.KEY_EH_USER_IDENTIFIERS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN = UniqueKeys0.KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
@@ -42,15 +45,21 @@ public class Keys {
 	// [#1459] distribute members to avoid static initialisers > 64kb
 	// -------------------------------------------------------------------------
 
+	private static class Identities0 extends org.jooq.impl.AbstractKeys {
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = createIdentity(com.everhomes.server.schema.tables.EhBorders.EH_BORDERS, com.everhomes.server.schema.tables.EhBorders.EH_BORDERS.ID);
+	}
+
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBordersRecord> KEY_EH_BORDERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhBorders.EH_BORDERS, com.everhomes.server.schema.tables.EhBorders.EH_BORDERS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord> KEY_EH_GROUPS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS, com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord> KEY_EH_GROUPS_U_EH_GROUP_NAME = createUniqueKey(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS, com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.NAME);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> KEY_EH_GROUP_MEMBERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER = createUniqueKey(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.GROUP_ID, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_TYPE, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord> KEY_EH_USERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUsers.EH_USERS, com.everhomes.server.schema.tables.EhUsers.EH_USERS.ID);
-		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserDevicesRecord> KEY_EH_USER_DEVICES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserDevices.EH_USER_DEVICES, com.everhomes.server.schema.tables.EhUserDevices.EH_USER_DEVICES.ID);
-		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserDevicesRecord> KEY_EH_USER_DEVICES_U_EH_USER_DEVICE_TYPE_NUMBER = createUniqueKey(com.everhomes.server.schema.tables.EhUserDevices.EH_USER_DEVICES, com.everhomes.server.schema.tables.EhUserDevices.EH_USER_DEVICES.DEVICE_TYPE, com.everhomes.server.schema.tables.EhUserDevices.EH_USER_DEVICES.DEVICE_NUMBER);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord> KEY_EH_USERS_U_EH_USER_ACCOUNT_NAME = createUniqueKey(com.everhomes.server.schema.tables.EhUsers.EH_USERS, com.everhomes.server.schema.tables.EhUsers.EH_USERS.ACCOUNT_NAME);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.ID);
-		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_U_USR_GRP_OWNER_GROUP = createUniqueKey(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.OWNER_UID, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.GROUP_ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_U_EH_USR_GRP_OWNER_GROUP = createUniqueKey(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.OWNER_UID, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.GROUP_ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN = createUniqueKey(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.OWNER_UID, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 	}
 }
