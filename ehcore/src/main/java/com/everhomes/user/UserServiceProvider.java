@@ -2,9 +2,6 @@ package com.everhomes.user;
 
 import java.util.List;
 
-import com.everhomes.user.rest.LoginToken;
-import com.everhomes.user.rest.SignupToken;
-
 public interface UserServiceProvider {
     void createUser(User user);
     void updateUser(User user);

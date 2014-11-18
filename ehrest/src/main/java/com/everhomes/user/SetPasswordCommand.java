@@ -1,4 +1,4 @@
-package com.everhomes.user.rest;
+package com.everhomes.user;
 
 import javax.validation.constraints.NotNull;
 

@@ -1,4 +1,4 @@
-package com.everhomes.user.rest;
+package com.everhomes.user;
 
 public class LogonByTokenCommand {
     private String loginToken;

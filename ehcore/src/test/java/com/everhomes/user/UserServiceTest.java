@@ -16,8 +16,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.rest.LoginToken;
-import com.everhomes.user.rest.SignupToken;
 import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.Version;
 

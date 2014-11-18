@@ -35,8 +35,6 @@ import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserLogin.Status;
-import com.everhomes.user.rest.LoginToken;
-import com.everhomes.user.rest.SignupToken;
 import com.everhomes.util.ActionCallback;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;

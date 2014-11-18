@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.border.AddBorderCommand;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.border.rest.AddBorderCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.RestControllerBase;
 import com.everhomes.rest.RestResponse;

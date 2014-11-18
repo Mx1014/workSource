@@ -20,11 +20,11 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.LoginToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserServiceProvider;
-import com.everhomes.user.rest.LoginToken;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 

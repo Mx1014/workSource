@@ -1,4 +1,4 @@
-package com.everhomes.border.rest;
+package com.everhomes.border;
 
 import javax.validation.constraints.NotNull;
 
