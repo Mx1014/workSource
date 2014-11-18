@@ -6,7 +6,9 @@ public class LogonCommand {
     @NotNull
     private String userIdentifier;
     
+    @NotNull
     private String password;
+    
     private String deviceIdentifier;
     
     public LogonCommand() {

@@ -2,28 +2,30 @@ package com.everhomes.border;
 
 import javax.validation.constraints.NotNull;
 
-import com.everhomes.border.BorderStatus;
-
-public class AddBorderCommand {
+public class UpdateBorderCommand {
     @NotNull
+    private int id;
+    
     private String privateAddress;
     
-    @NotNull
-    private int privatePort;
+    private Integer privatePort;
     
-    @NotNull
     private String publicAddress;
     
-    @NotNull
-    private int publicPort;
+    private Integer publicPort;
     
-    @NotNull
     private BorderStatus status;
     
     private String configTag;
+    
     private String description;
 
-    public AddBorderCommand() {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPrivateAddress() {
@@ -34,11 +36,11 @@ public class AddBorderCommand {
         this.privateAddress = privateAddress;
     }
 
-    public int getPrivatePort() {
+    public Integer getPrivatePort() {
         return privatePort;
     }
 
-    public void setPrivatePort(int privatePort) {
+    public void setPrivatePort(Integer privatePort) {
         this.privatePort = privatePort;
     }
 
@@ -50,11 +52,11 @@ public class AddBorderCommand {
         this.publicAddress = publicAddress;
     }
 
-    public int getPublicPort() {
+    public Integer getPublicPort() {
         return publicPort;
     }
 
-    public void setPublicPort(int publicPort) {
+    public void setPublicPort(Integer publicPort) {
         this.publicPort = publicPort;
     }
 

@@ -1,6 +1,9 @@
 package com.everhomes.user;
 
+import javax.validation.constraints.NotNull;
+
 public class LogonByTokenCommand {
+    @NotNull
     private String loginToken;
     
     public LogonByTokenCommand() {
