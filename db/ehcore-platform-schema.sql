@@ -296,4 +296,13 @@ INSERT INTO `eh_apps`(`id`, `name`) VALUES(0, 'System');
 INSERT INTO `eh_apps`(`id`, `name`) VALUES(1, 'Messaging');
 INSERT INTO `eh_apps`(`id`, `name`) VALUES(2, 'Forum');
 
+DROP TABLE IF EXISTS `eh_sequences`;
+CREATE TABLE `eh_sequences` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `domain` VARCHAR(32) NOT NULL,
+    `start_seq` BIGINT NOT NULL DEFAULT 1,
+    
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET foreign_key_checks = 1;

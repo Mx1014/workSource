@@ -17,6 +17,7 @@ import com.everhomes.sharding.Server;
 import com.everhomes.sharding.ServerStatus;
 import com.everhomes.sharding.ServerType;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.PasswordHash;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },
@@ -37,16 +38,9 @@ public class ConfigInitializer {
     static class ContextConfiguration {
     }
 
-    @Ignore @Test
+    @Test
     public void setupServerConfig() {
         Server server;
-        
-        server = new Server();
-        server.setAddressUri("192.168.1.223");
-        server.setAddressPort(6379);
-        server.setServerType(ServerType.RedisStorage.ordinal());
-        server.setStatus(ServerStatus.enabled.ordinal());
-        shardingProvider.createServer(server);
         
         server = new Server();
         server.setAddressUri("192.168.1.223");
@@ -54,5 +48,13 @@ public class ConfigInitializer {
         server.setServerType(ServerType.RedisCache.ordinal());
         server.setStatus(ServerStatus.enabled.ordinal());
         shardingProvider.createServer(server);
+    }
+    
+    @Ignore @Test
+    public void setupPassword() {
+        try {
+            System.out.println("Password: " + PasswordHash.createHash("password"));
+        } catch(Exception e) {
+        }
     }
 }

@@ -352,7 +352,6 @@ public class UserServiceProviderImpl implements UserServiceProvider {
                 identifier.setClaimStatus((byte)IdentifierClaimStatus.verifying.ordinal());
                 identifier.setVerificationCode(verificationCode);
                 identifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                
                 createIdentifier(identifier);
                 
                 // TODO

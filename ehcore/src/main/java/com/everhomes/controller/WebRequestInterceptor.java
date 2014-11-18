@@ -126,11 +126,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         
         if(loginTokenString == null) {
             for(Cookie cookie : request.getCookies()) {
-                if(LOGGER.isTraceEnabled())
-                    LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue());
+                if(LOGGER.isDebugEnabled())
+                    LOGGER.debug("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
                 
-                if(cookie.getName().equals("token"))
+                if(cookie.getName().equals("token")) {
                     loginTokenString = cookie.getValue();
+                    break;
+                }
             }
         }
  

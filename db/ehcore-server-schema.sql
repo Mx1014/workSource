@@ -5,31 +5,44 @@ use ehcore;
 DROP TABLE IF EXISTS `eh_users`;
 CREATE TABLE `eh_users` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `name` VARCHAR(128) NOT NULL,
-    `description` VARCHAR(192) DEFAULT '',
+    `account_name` VARCHAR(64) NOT NULL,
+    `nick_name` VARCHAR(32),
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
     `create_time` DATETIME NOT NULL,
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_user_account_name`(`account_name`),
+    INDEX `i_eh_user_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `eh_user_devices`;
-CREATE TABLE `eh_user_devices` (
+#
+# populate default system user root/password
+#
+INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `password_hash`) VALUES (1, 'root', 'system user', 1, 
+    UTC_TIME(), '10:8e70e9c1ebf861202a28ed0020c4db0f4d9a3a3d29fb1c4d:40d84ad3b14b8da5575274136678ca1ab07d114e1d04ef70');
+
+#
+# Reserve first 1000 user ids
+#
+INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES ('EhUsers', 1000);
+
+DROP TABLE IF EXISTS `eh_user_identifiers`;
+CREATE TABLE `eh_user_identifiers` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
-    `device_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
-    `device_number` VARCHAR(128),
-    `device_manufacture_id` VARCHAR(64),
-    `verification_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not verified, 1: waiting for verification, 2: verified',
+    `identifier_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+    `identifier_token` VARCHAR(128),
     `verification_code` VARCHAR(16),
+    `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: free standing, 1: claiming, 2: claim verifying, 3: claimed',
     `create_time` DATETIME NOT NULL,
+    `notify_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_user_device_type_number`(`device_type`, `device_number`),
-    INDEX `i_eh_user_device_manufacture_id`(`device_manufacture_id`),
-    INDEX `i_eh_user_device_create_time`(`create_time`),
-    INDEX `i_eh_user_device_last_user_time`(`last_use_time`),
-    INDEX `i_eh_user_device_last_notify_time`(`last_use_time`)
+    UNIQUE `u_eh_user_idf_owner_type_token`(`owner_uid`, `identifier_type`, `identifier_token`),
+    INDEX `i_eh_user_idf_owner`(`owner_uid`),
+    INDEX `i_eh_user_idf_type_token`(`identifier_type`, `identifier_token`),
+    INDEX `i_eh_user_idf_create_time`(`create_time`),
+    INDEX `i_eh_user_idf_notify_time`(`notify_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 # 
@@ -45,9 +58,9 @@ CREATE TABLE `eh_user_groups` (
     `create_time` DATETIME NOT NULL,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_usr_grp_owner_group`(`owner_uid`, `group_id`),
-    INDEX `i_usr_grp_owner`(`owner_uid`),
-    INDEX `i_usr_grp_create_time`(`create_time`)
+    UNIQUE `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
+    INDEX `i_eh_usr_grp_owner`(`owner_uid`),
+    INDEX `i_eh_usr_grp_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `eh_groups`;
@@ -79,6 +92,21 @@ CREATE TABLE `eh_group_members` (
     INDEX `i_eh_grp_member_group_id` (`group_id`),
     INDEX `i_eh_grp_member_member` (`member_type`, `member_id`),
     INDEX `i_eh_grp_member_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_borders`;
+CREATE TABLE `eh_borders` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `private_address` VARCHAR(128) NOT NULL,
+    `private_port` INTEGER NOT NULL DEFAULT 8086,
+    `public_address` VARCHAR(128) NOT NULL,
+    `public_port` INTEGER NOT NULL DEFAULT 80,
+    `status` INTEGER NOT NULL DEFAULT 0 COMMENT '0 : disabled, 1: enabled',
+    `config_tag` VARCHAR(32),
+    `description` VARCHAR(256),
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_border_config_tag`(`config_tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;
