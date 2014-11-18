@@ -51,7 +51,7 @@ public class CoreServerBootstrapBean {
             acl.setPrivilegeId(Privilege.All);
             acl.setGrantType((byte)1);
             acl.setCreatorUid(User.ROOT_UID);
-            acl.setRoleId(Role.ResourceAdmin);
+            acl.setRoleId(Role.SystemAdmin);
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
         }
