@@ -61,11 +61,11 @@ forum.flush.interval: 3000
 #
 redis: 
     bus:
-        host: 192.168.1.223
+        host: 192.168.5.113
         port: 6379
     store:
         master:
-            host: 192.168.1.223
+            host: 192.168.5.113
             port: 6379
 
 #

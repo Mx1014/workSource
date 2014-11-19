@@ -17,8 +17,12 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.border.UpdateBorderCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.RestControllerBase;
+import com.everhomes.persist.server.AddPersistServerCommand;
+import com.everhomes.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.sharding.Server;
+import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -27,6 +31,9 @@ import com.everhomes.util.RuntimeErrorException;
 public class AdminController extends RestControllerBase {
     @Autowired
     private BorderProvider borderProvider;
+    
+    @Autowired
+    private ShardingProvider shardingProvider;
     
     @Autowired
     private AclProvider aclProvider;
@@ -44,7 +51,7 @@ public class AdminController extends RestControllerBase {
         border.setPrivatePort(cmd.getPrivatePort());
         border.setPublicAddress(cmd.getPublicAddress());
         border.setPublicPort(cmd.getPublicPort());
-        border.setStatus(cmd.getStatus().ordinal());
+        border.setStatus(cmd.getStatus());
         border.setConfigTag(cmd.getConfigTag());
         border.setDescription(cmd.getDescription());
         this.borderProvider.createBorder(border);
@@ -77,7 +84,7 @@ public class AdminController extends RestControllerBase {
         if(cmd.getPublicPort() != null)
             border.setPublicPort(cmd.getPublicPort());
         if(cmd.getStatus() != null) {
-            border.setStatus(cmd.getStatus().ordinal());
+            border.setStatus(cmd.getStatus());
         }
         this.borderProvider.updateBorder(border);
         return new RestResponse(border);   
@@ -109,5 +116,73 @@ public class AdminController extends RestControllerBase {
         
         List<Border> borders = this.borderProvider.listAllBorders();
         return new RestResponse(borders);
+    }
+    
+    @RequestMapping("addPersistServer")
+    public RestResponse addPersistServer(@Valid AddPersistServerCommand cmd) {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+        
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+        
+        Server server = new Server();
+        server.setMasterId(cmd.getMasterId());
+        server.setAddressUri(cmd.getAddressUri());
+        server.setAddressPort(cmd.getAddressPort());
+        server.setServerType(cmd.getServerType());
+        if(cmd.getStatus() == null)
+            server.setStatus(1);
+        else
+            server.setStatus(cmd.getStatus());
+        server.setConfigTag(cmd.getConfigTag());
+        server.setDescription(cmd.getDescription());
+        
+        this.shardingProvider.createServer(server);
+
+        return new RestResponse(server);
+    }
+    
+    @RequestMapping("updatePersistServer")
+    public RestResponse updatePersistServer(@Valid UpdatePersistServerCommand cmd) {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+        
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+        
+        Server server = this.shardingProvider.getServerById(cmd.getId());
+        if(server == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id parameter value");
+               
+        if(cmd.getMasterId() != null)
+            server.setMasterId(cmd.getMasterId());
+        if(cmd.getAddressUri() != null)
+            server.setAddressUri(cmd.getAddressUri());
+        if(cmd.getAddressPort() != null)
+            server.setAddressPort(cmd.getAddressPort());
+        if(cmd.getServerType() != null)
+            server.setServerType(cmd.getServerType());
+        if(cmd.getStatus() != null)
+            server.setStatus(cmd.getStatus());
+        if(cmd.getConfigTag() != null)
+            server.setConfigTag(cmd.getConfigTag());
+        if(cmd.getDescription() != null)
+            server.setDescription(cmd.getDescription());
+        
+        this.shardingProvider.updateServer(server);
+        return new RestResponse(server);   
+     }
+    
+    @RequestMapping("listPersistServer")
+    public RestResponse listPersitServers() {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+            UserContext.current().getUser().getId(), Privilege.Visible, null)) {
+        
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+        
+        List<Server> servers = this.shardingProvider.listAllServers();
+        return new RestResponse(servers);
     }
 }

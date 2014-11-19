@@ -14,7 +14,7 @@ public class UpdateBorderCommand {
     
     private Integer publicPort;
     
-    private BorderStatus status;
+    private Integer status;
     
     private String configTag;
     
@@ -60,11 +60,11 @@ public class UpdateBorderCommand {
         this.publicPort = publicPort;
     }
 
-    public BorderStatus getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(BorderStatus status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

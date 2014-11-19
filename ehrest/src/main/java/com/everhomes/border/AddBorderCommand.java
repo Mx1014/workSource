@@ -2,8 +2,6 @@ package com.everhomes.border;
 
 import javax.validation.constraints.NotNull;
 
-import com.everhomes.border.BorderStatus;
-
 public class AddBorderCommand {
     @NotNull
     private String privateAddress;
@@ -18,7 +16,7 @@ public class AddBorderCommand {
     private int publicPort;
     
     @NotNull
-    private BorderStatus status;
+    private Integer status;
     
     private String configTag;
     private String description;
@@ -58,11 +56,11 @@ public class AddBorderCommand {
         this.publicPort = publicPort;
     }
 
-    public BorderStatus getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(BorderStatus status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
