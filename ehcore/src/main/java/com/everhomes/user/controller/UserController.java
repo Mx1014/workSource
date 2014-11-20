@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.RequireAuthentication;
-import com.everhomes.controller.RestControllerBase;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.LoginToken;
@@ -31,7 +32,7 @@ import com.everhomes.util.RuntimeErrorException;
 
 @RestController
 @RequestMapping("/user")
-public class UserController extends RestControllerBase {
+public class UserController extends ControllerBase {
 
     @Autowired
     private UserServiceProvider userProvider;
@@ -41,6 +42,7 @@ public class UserController extends RestControllerBase {
     
     @RequestMapping("signup")
     @RequireAuthentication(false)
+    @RestReturn(String.class)
     public RestResponse signup(@Valid SignupCommand cmd) {
         IdentifierType type = IdentifierType.fromString(cmd.getType());
         SignupToken token = userProvider.signup(type, cmd.getToken());
@@ -50,6 +52,7 @@ public class UserController extends RestControllerBase {
     
     @RequestMapping("resendVerificationCode")
     @RequireAuthentication(false)
+    @RestReturn(String.class)
     public RestResponse resendVerificationCode(@Valid ResendVerificationCodeCommand cmd) {
         SignupToken token = SignupToken.fromTokenString(cmd.getSignupToken());
         if(token == null) {
@@ -62,6 +65,7 @@ public class UserController extends RestControllerBase {
     
     @RequestMapping("verifyAndLogon")
     @RequireAuthentication(false)
+    @RestReturn(LogonCommandResponse.class)
     public RestResponse verifyAndLogon(@Valid VerifyAndLogonCommand cmd, HttpServletResponse response) {
         SignupToken token = SignupToken.fromTokenString(cmd.getSignupToken());
         if(token == null) {
@@ -80,6 +84,7 @@ public class UserController extends RestControllerBase {
     
     @RequestMapping("logon")
     @RequireAuthentication(false)
+    @RestReturn(LogonCommandResponse.class)
     public RestResponse logon(@Valid LogonCommand cmd, HttpServletResponse response) {
         UserLogin login = this.userProvider.logon(cmd.getUserIdentifier(), cmd.getPassword(), cmd.getDeviceIdentifier());
         LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
@@ -93,6 +98,7 @@ public class UserController extends RestControllerBase {
     
     @RequestMapping("logonByToken")
     @RequireAuthentication(false)
+    @RestReturn(LogonCommandResponse.class)
     public RestResponse logonByToken(@Valid LogonByTokenCommand cmd, HttpServletResponse response) {
         LoginToken loginToken = LoginToken.fromTokenString(cmd.getLoginToken());
         if(loginToken == null)
@@ -109,6 +115,7 @@ public class UserController extends RestControllerBase {
     }
     
     @RequestMapping("setPassword")
+    @RestReturn(String.class)
     public RestResponse setPassword(@Valid SetPasswordCommand cmd) throws Exception {
         User user = UserContext.current().getUser();
         
@@ -129,6 +136,7 @@ public class UserController extends RestControllerBase {
     }
     
     @RequestMapping("logoff")
+    @RestReturn(String.class)
     public RestResponse logoff(HttpServletResponse response) {
         UserLogin login = UserContext.current().getLogin();
         this.userProvider.logoff(login);

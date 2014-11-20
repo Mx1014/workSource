@@ -5,6 +5,9 @@ logging.path: ./
 logging.file: ehcore.log
 logging.level: DEBUG
 
+#spring.view.prefix: /WEB-INF/jsp/
+#spring.view.suffix: .jsp
+
 #
 # Server configuration
 #

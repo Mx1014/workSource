@@ -16,7 +16,8 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.border.UpdateBorderCommand;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.controller.RestControllerBase;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
 import com.everhomes.persist.server.AddPersistServerCommand;
 import com.everhomes.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.RestResponse;
@@ -28,7 +29,7 @@ import com.everhomes.util.RuntimeErrorException;
 
 @RestController
 @RequestMapping("/admin")
-public class AdminController extends RestControllerBase {
+public class AdminController extends ControllerBase {
     @Autowired
     private BorderProvider borderProvider;
     
@@ -39,6 +40,7 @@ public class AdminController extends RestControllerBase {
     private AclProvider aclProvider;
 
     @RequestMapping("addBorder")
+    @RestReturn(Border.class)
     public RestResponse addBorder(@Valid AddBorderCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -60,6 +62,7 @@ public class AdminController extends RestControllerBase {
     }
     
     @RequestMapping("updateBorder")
+    @RestReturn(Border.class)
     public RestResponse updateBorder(@Valid UpdateBorderCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -91,6 +94,7 @@ public class AdminController extends RestControllerBase {
     }
     
     @RequestMapping("removeBorder")
+    @RestReturn(Border.class)
     public RestResponse updateBorder(@RequestParam(value="id", required=true) int id) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -107,6 +111,7 @@ public class AdminController extends RestControllerBase {
     }
     
     @RequestMapping("listBorder")
+    @RestReturn(value=Border.class, collection=true)
     public RestResponse listBorder() {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Visible, null)) {
@@ -119,6 +124,7 @@ public class AdminController extends RestControllerBase {
     }
     
     @RequestMapping("addPersistServer")
+    @RestReturn(Server.class)
     public RestResponse addPersistServer(@Valid AddPersistServerCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -144,6 +150,7 @@ public class AdminController extends RestControllerBase {
     }
     
     @RequestMapping("updatePersistServer")
+    @RestReturn(Server.class)
     public RestResponse updatePersistServer(@Valid UpdatePersistServerCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -172,9 +179,10 @@ public class AdminController extends RestControllerBase {
         
         this.shardingProvider.updateServer(server);
         return new RestResponse(server);   
-     }
+    }
     
     @RequestMapping("listPersistServer")
+    @RestReturn(value=Server.class, collection=true)
     public RestResponse listPersitServers() {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Visible, null)) {

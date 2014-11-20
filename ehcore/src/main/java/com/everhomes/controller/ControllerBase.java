@@ -26,12 +26,12 @@ import com.everhomes.util.StringHelper;
  *
  */
 @RequireAuthentication(true)
-public class RestControllerBase {
+public class ControllerBase {
     
     private static Map<String, RestMethod> s_restMethodMap = new HashMap<String, RestMethod>();  
     private static List<RestMethod> s_restMethodList = new ArrayList<RestMethod>();
     
-    public RestControllerBase() {
+    public ControllerBase() {
         for(RestMethod restMethod: RestDiscover.discover(this.getClass(), null)) {
             s_restMethodMap.put(restMethod.getUri(), restMethod);
             s_restMethodList.add(restMethod);
@@ -57,8 +57,8 @@ public class RestControllerBase {
         return responseEntity;
     }
     
-    public static Map<String, RestMethod> getRestMethodMap() {
-        return s_restMethodMap;
+    public static RestMethod getRestMethod(String uri) {
+        return s_restMethodMap.get(uri);
     }
     
     public static List<RestMethod> getRestMethodList() {

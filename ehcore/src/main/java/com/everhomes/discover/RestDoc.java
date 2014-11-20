@@ -7,16 +7,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies REST API return object meta information
+ * Specifies REST API related documentation on methods, parameters and fields in returned objects
  * 
  * @author Kelven Yang
  *
  */
-@Target(value={ ElementType.METHOD })
+@Target(value={ ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RestReturn {
-    Class<?> value ();
-    boolean collection () default false;
-    boolean html() default false;
+public @interface RestDoc {
+    String value();
 }
