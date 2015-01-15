@@ -17,6 +17,8 @@ logging.level: DEBUG
 #server.sessionTimeout:
 
 upload.max.size: 10000000
+heartbeat.interval: 10000
+scheduler.pool.size: 100
 
 #
 # Server production management/monitoring configuration
@@ -64,11 +66,11 @@ forum.flush.interval: 3000
 #
 redis: 
     bus:
-        host: 192.168.1.223
+        host: redis-server
         port: 6379
     store:
         master:
-            host: 192.168.1.223
+            host: redis-server
             port: 6379
 
 #

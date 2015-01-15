@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 1175435514;
+	private static final long serialVersionUID = -695360471;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -55,6 +55,11 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.private_flag</code>. 0: public, 1: private
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> PRIVATE_FLAG = createField("private_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: public, 1: private");
+
+	/**
+	 * The column <code>ehcore.eh_groups.join_policy</code>. 0: free join(public group), 1: should be approved by operator/owner
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Integer> JOIN_POLICY = createField("join_policy", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: free join(public group), 1: should be approved by operator/owner");
 
 	/**
 	 * Create a <code>ehcore.eh_groups</code> table reference

@@ -12,15 +12,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <start-class>com.everhomes.core.App</start-class>
+        <start-class>com.everhomes.core.CoreServerApp</start-class>
         
         <jooq.version>3.4.1</jooq.version>
+        <tomcat.version>8.0.8</tomcat.version>
     </properties>
     
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.1.1.RELEASE</version>
+        <version>1.1.9.RELEASE</version>
     </parent>
 
     <dependencies>
@@ -43,6 +44,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -180,7 +185,7 @@
         <plugins>
             <plugin> 
                 <artifactId>maven-compiler-plugin</artifactId> 
-                <version>2.3.2</version> 
+                <version>3.2</version> 
                 <configuration>
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>

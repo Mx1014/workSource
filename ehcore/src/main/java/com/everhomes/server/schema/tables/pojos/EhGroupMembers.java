@@ -11,14 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1701214053;
+	private static final long serialVersionUID = -2067178153;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
 	private java.lang.String   memberType;
 	private java.lang.Long     memberId;
-	private java.lang.Integer  memberRoleFlag;
+	private java.lang.Long     memberRole;
+	private java.lang.Integer  memberStatus;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp approveTime;
 
 	public EhGroupMembers() {}
 
@@ -27,15 +29,19 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.Long     groupId,
 		java.lang.String   memberType,
 		java.lang.Long     memberId,
-		java.lang.Integer  memberRoleFlag,
-		java.sql.Timestamp createTime
+		java.lang.Long     memberRole,
+		java.lang.Integer  memberStatus,
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp approveTime
 	) {
 		this.id = id;
 		this.groupId = groupId;
 		this.memberType = memberType;
 		this.memberId = memberId;
-		this.memberRoleFlag = memberRoleFlag;
+		this.memberRole = memberRole;
+		this.memberStatus = memberStatus;
 		this.createTime = createTime;
+		this.approveTime = approveTime;
 	}
 
 	public java.lang.Long getId() {
@@ -70,12 +76,20 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.memberId = memberId;
 	}
 
-	public java.lang.Integer getMemberRoleFlag() {
-		return this.memberRoleFlag;
+	public java.lang.Long getMemberRole() {
+		return this.memberRole;
 	}
 
-	public void setMemberRoleFlag(java.lang.Integer memberRoleFlag) {
-		this.memberRoleFlag = memberRoleFlag;
+	public void setMemberRole(java.lang.Long memberRole) {
+		this.memberRole = memberRole;
+	}
+
+	public java.lang.Integer getMemberStatus() {
+		return this.memberStatus;
+	}
+
+	public void setMemberStatus(java.lang.Integer memberStatus) {
+		this.memberStatus = memberStatus;
 	}
 
 	public java.sql.Timestamp getCreateTime() {
@@ -84,5 +98,13 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getApproveTime() {
+		return this.approveTime;
+	}
+
+	public void setApproveTime(java.sql.Timestamp approveTime) {
+		this.approveTime = approveTime;
 	}
 }

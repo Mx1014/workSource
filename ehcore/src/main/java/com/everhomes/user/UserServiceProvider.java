@@ -17,16 +17,4 @@ public interface UserServiceProvider {
     void deleteIdentifier(long id);
     UserIdentifier findIdentifierById(long id);
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
-    
-    SignupToken signup(IdentifierType identifierType, String identifierToken);
-    UserIdentifier findIdentifierByToken(SignupToken signupToken);
-    void resendVerficationCode(SignupToken signupToken);
-    UserLogin verifyAndLogon(SignupToken signupToken, String verificationCode, String deviceIdentifier);
-    
-    UserLogin logon(String userIdentifierToken, String password, String deviceIdentifier);
-    UserLogin logonByToken(LoginToken loginToken);
-    UserLogin findLoginByToken(LoginToken loginToken);
-    void logoff(UserLogin login);
-    
-    boolean isValidLoginToken(LoginToken loginToken);
 }

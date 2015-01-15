@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1276235708;
+	private static final long serialVersionUID = 757933118;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
 	private java.lang.Long     groupId;
-	private java.lang.Integer  memberRoleFlag;
+	private java.lang.Long     memberRole;
+	private java.lang.Integer  memberStatus;
 	private java.sql.Timestamp createTime;
 
 	public EhUserGroups() {}
@@ -25,13 +26,15 @@ public class EhUserGroups implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     ownerUid,
 		java.lang.Long     groupId,
-		java.lang.Integer  memberRoleFlag,
+		java.lang.Long     memberRole,
+		java.lang.Integer  memberStatus,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
 		this.groupId = groupId;
-		this.memberRoleFlag = memberRoleFlag;
+		this.memberRole = memberRole;
+		this.memberStatus = memberStatus;
 		this.createTime = createTime;
 	}
 
@@ -59,12 +62,20 @@ public class EhUserGroups implements java.io.Serializable {
 		this.groupId = groupId;
 	}
 
-	public java.lang.Integer getMemberRoleFlag() {
-		return this.memberRoleFlag;
+	public java.lang.Long getMemberRole() {
+		return this.memberRole;
 	}
 
-	public void setMemberRoleFlag(java.lang.Integer memberRoleFlag) {
-		this.memberRoleFlag = memberRoleFlag;
+	public void setMemberRole(java.lang.Long memberRole) {
+		this.memberRole = memberRole;
+	}
+
+	public java.lang.Integer getMemberStatus() {
+		return this.memberStatus;
+	}
+
+	public void setMemberStatus(java.lang.Integer memberStatus) {
+		this.memberStatus = memberStatus;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

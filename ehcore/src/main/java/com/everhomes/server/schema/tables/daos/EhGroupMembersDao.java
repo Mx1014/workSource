@@ -69,10 +69,17 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>member_role_flag IN (values)</code>
+	 * Fetch records that have <code>member_role IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberRoleFlag(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_ROLE_FLAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberRole(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_ROLE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>member_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberStatus(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_STATUS, values);
 	}
 
 	/**
@@ -80,5 +87,12 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.CREATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>approve_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByApproveTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.APPROVE_TIME, values);
 	}
 }

@@ -3,9 +3,10 @@ package com.everhomes.bootstrap;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.Acl;
@@ -13,6 +14,11 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.bus.LocalBusMessageClassRegistry;
+import com.everhomes.rpc.server.PingRequestPdu;
+import com.everhomes.rpc.server.PingResponsePdu;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
@@ -24,7 +30,7 @@ import com.everhomes.util.DateHelper;
  *
  */
 @Component
-public class CoreServerBootstrapBean {
+public class CoreServerBootstrapBean implements ApplicationListener<ApplicationEvent> {
     
     @Autowired
     private PlatformBootstrap platformBootstrap;
@@ -32,7 +38,12 @@ public class CoreServerBootstrapBean {
     @Autowired
     private AclProvider aclProvider;
     
-    @PostConstruct
+    @Autowired
+    private LocalBusMessageClassRegistry messageClassRegistry;
+    
+    @Autowired
+    private AppProvider appProvider;
+    
     private void setup() {
         // Create default ACL
         List<Long> roles = aclProvider.getRolesFromResourceAssignments("system", null, EhUsers.class.getSimpleName(), User.ROOT_UID, null);
@@ -54,6 +65,43 @@ public class CoreServerBootstrapBean {
             acl.setRoleId(Role.SystemAdmin);
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType("extension");
+            acl.setPrivilegeId(Privilege.Visible);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.SystemExtension);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+        }
+        
+        App app = this.appProvider.findAppById(App.APPID_EXTENSION);
+        if(app == null) {
+            app = new App();
+            app.setId(App.APPID_EXTENSION);
+            app.setAppKey("b86ddb3b-ac77-4a65-ae03-7e8482a3db70");
+            app.setSecretKey("2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ");
+            app.setName("SystemExtension");
+            app.setStatus((byte)1);
+            this.appProvider.createApp(app);
+        }
+    }
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        if(event instanceof ContextRefreshedEvent) {
+            if(messageClassRegistry.getPackages().isEmpty()) {
+                messageClassRegistry.addPackage("com.everhomes");
+                messageClassRegistry.scan(this.getClass().getClassLoader());
+            }
+            
+            // package scan does not work in one jar solution provided in Spring Boot
+            // still have to resgister class in other jar manually here
+            messageClassRegistry.registerNameAnnotatedClass(PingRequestPdu.class);
+            messageClassRegistry.registerNameAnnotatedClass(PingResponsePdu.class);
+            
+            setup();
         }
     }
 }

@@ -11,14 +11,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <start-class>com.everhomes.border.App</start-class>
+        <start-class>com.everhomes.border.BorderServerApp</start-class>
         
+        <java.version>1.8</java.version>
+        <tomcat.version>8.0.8</tomcat.version>
     </properties>
     
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.1.1.RELEASE</version>
+        <version>1.1.9.RELEASE</version>
     </parent>
 
     <distributionManagement>
@@ -41,65 +43,30 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-redis</artifactId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>       
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
         </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>        
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.9</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>1.2.2</version>
-        </dependency>        
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
-        </dependency>        
-        <dependency>
-            <groupId>org.jolokia</groupId>
-            <artifactId>jolokia-core</artifactId>
-        </dependency>
-        <dependency>  
-            <groupId>com.sun.xml.ws</groupId>  
-            <artifactId>jaxws-rt</artifactId>  
-            <version>2.1.4</version>  
-            <type>jar</type>  
-            <scope>compile</scope>  
         </dependency>       
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.everhomes</groupId>
-            <artifactId>ehplatform</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3</version>
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
-            <artifactId>ehplatform-persist</artifactId>
+            <artifactId>ehrest</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -113,7 +80,7 @@
         <plugins>
             <plugin> 
                 <artifactId>maven-compiler-plugin</artifactId> 
-                <version>2.3.2</version> 
+                <version>3.2</version> 
                 <configuration>
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>

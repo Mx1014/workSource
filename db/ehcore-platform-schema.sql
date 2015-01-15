@@ -69,7 +69,11 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('db.init
 DROP TABLE IF EXISTS `eh_messages`;
 CREATE TABLE `eh_messages` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `message_seq` BIGINT NOT NULL COMMENT 'message sequence id generated at server side',
+    `sender_uid` BIGINT NOT NULL,
+    `channel_type` VARCHAR(32) NOT NULL,
+    `channel_token` VARCHAR(32) NOT NULL,
     `message_text` TEXT COMMENT 'message content',
     `app_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'default to messaging app itself',
     `message_meta` TEXT COMMENT 'encoded message meta info',
@@ -77,12 +81,14 @@ CREATE TABLE `eh_messages` (
     `sender_tag` VARCHAR(32) COMMENT 'sender generated tag',
     `create_time` DATETIME NOT NULL COMMENT 'message creation time',
     PRIMARY KEY (`id`),
+    INDEX `i_eh_msgs_namespace`(`namespace_id`),
     INDEX `i_eh_msgs_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `eh_message_boxs`;
 CREATE TABLE `eh_message_boxs` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `box_key` VARCHAR(64) NOT NULL COMMENT 'message box unique identifier',
     `message_id` BIGINT NOT NULL COMMENT 'foreign key to message record',
     `message_seq` BIGINT NOT NULL COMMENT 'message sequence id that identifies the message',
@@ -91,6 +97,7 @@ CREATE TABLE `eh_message_boxs` (
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_mbx_msg_id` (`message_id`) REFERENCES `eh_messages` (`id`) ON DELETE CASCADE,
     UNIQUE `u_eh_mbx_msg_box_seqs`(`message_seq`, `box_seq`),
+    INDEX `i_eh_mbx_namespace`(`namespace_id`),
     INDEX `i_eh_mbx_msg_seq`(`message_seq`),
     INDEX `i_eh_mbx_box_seq`(`box_seq`),
     INDEX `i_eh_mbx_create_time`(`create_time`)
@@ -99,6 +106,7 @@ CREATE TABLE `eh_message_boxs` (
 DROP TABLE IF EXISTS `eh_forums`;
 CREATE TABLE `eh_forums` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `owner_type` VARCHAR(32) NOT NULL,
     `owner_id` BIGINT,
     `name` VARCHAR(64) NOT NULL,
@@ -118,6 +126,7 @@ CREATE TABLE `eh_forums` (
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_frm_owner_name`(`owner_type`, `owner_id`, `name`),
+    INDEX `i_eh_frm_namespace`(`namespace_id`),
     INDEX `i_eh_frm_owner`(`owner_type`, `owner_id`),
     INDEX `i_eh_frm_post_count` (`post_count`),
     INDEX `i_eh_frm_modify_seq` (`modify_seq`),
@@ -257,6 +266,7 @@ INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(4, 0, 'ResourceCreator
 INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(5, 0, 'ResourceAdmin');
 INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(6, 0, 'ResourceOperator');
 INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(7, 0, 'ResourceUser');
+INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(8, 0, 'SystemExtension');
 
 DROP TABLE IF EXISTS `eh_acl_role_assignments`;
 CREATE TABLE `eh_acl_role_assignments` (
@@ -284,7 +294,7 @@ CREATE TABLE `eh_apps` (
     `name` VARCHAR(128) NOT NULL,
     `description` VARCHAR(2048),
     `status` tinyint NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
-    `create_time` DATETIME NOT NULL,
+    `create_time` DATETIME,
 
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_app_reg_app_key`(`app_key`),
@@ -292,7 +302,6 @@ CREATE TABLE `eh_apps` (
     INDEX `i_eh_app_reg_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE `eh_apps` AUTO_INCREMENT = 4096;
-INSERT INTO `eh_apps`(`id`, `name`) VALUES(0, 'System');
 INSERT INTO `eh_apps`(`id`, `name`) VALUES(1, 'Messaging');
 INSERT INTO `eh_apps`(`id`, `name`) VALUES(2, 'Forum');
 
@@ -304,5 +313,15 @@ CREATE TABLE `eh_sequences` (
     
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_namespaces`;
+CREATE TABLE `eh_namespaces` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `name` VARCHAR(64),
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_ns_name`(`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 
 SET foreign_key_checks = 1;

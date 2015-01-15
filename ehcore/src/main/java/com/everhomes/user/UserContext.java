@@ -1,10 +1,13 @@
 package com.everhomes.user;
 
+import com.everhomes.app.App;
+
 public class UserContext {
     private static ThreadLocal<UserContext> s_userContexts = new ThreadLocal<UserContext>();
     
     private User user;
     private UserLogin login;
+    private App callerApp;
     
     public UserContext() {
     }
@@ -28,6 +31,14 @@ public class UserContext {
     
     public void setUser(User user) {
         this.user = user;
+    }
+    
+    public App getCallerApp() {
+        return callerApp;
+    }
+    
+    public void setCallerApp(App app) {
+        this.callerApp = app;
     }
     
     public UserLogin getLogin() {

@@ -28,6 +28,9 @@ public class UserServiceTest {
     private UserServiceProvider userProvider;
     
     @Autowired
+    private UserService userService;
+    
+    @Autowired
     private ShardingProvider shardingProvider;
     
     @Configuration
@@ -111,14 +114,14 @@ public class UserServiceTest {
     
     @Ignore @Test
     public void testSignup() {
-        SignupToken token = this.userProvider.signup(IdentifierType.mobile, "14081234567");
+        SignupToken token = this.userService.signup(IdentifierType.mobile, "14081234567");
         System.out.println("Signup token: " + token.getTokenString());
     }
     
     @Ignore @Test
     public void testVerifyAndLogon() {
         SignupToken token = SignupToken.fromTokenString("eyJ1c2VySWQiOjEsImlkZW50aWZpZXJUeXBlIjoibW9iaWxlIiwiaWRlbnRpZmllclRva2VuIjoiMTQwODEyMzQ1NjcifQ");
-        UserLogin login = this.userProvider.verifyAndLogon(token, "414846", "virtual device");
+        UserLogin login = this.userService.verifyAndLogon(token, "414846", "virtual device");
         
         LoginToken loginToken = new LoginToken(token.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
         System.out.println("Login token: " + loginToken.getTokenString());
@@ -127,7 +130,7 @@ public class UserServiceTest {
     @Test
     public void testLoginByToken() {
         LoginToken token = LoginToken.fromTokenString("eyJ1c2VySWQiOjEsImxvZ2luSWQiOjEsImxvZ2luSW5zdGFuY2VOdW1iZXIiOi0xMzY5Njg0ODEzfQ");
-        this.userProvider.logonByToken(token);
+        this.userService.logonByToken(token);
     }
 }
 

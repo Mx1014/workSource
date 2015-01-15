@@ -11,4 +11,6 @@ public interface UserServiceErrorCode {
     static final int ERROR_UNABLE_TO_LOCATE_USER = 10005;
     static final int ERROR_USER_NOT_EXIST = 10006;
     static final int ERROR_INVALID_PASSWORD = 10007;
+    static final int ERROR_INVALID_MESSAGE_JSON_DATA = 10008;
+    static final int ERROR_MISSING_MESSAGE_CHANNEL = 10009;
 }

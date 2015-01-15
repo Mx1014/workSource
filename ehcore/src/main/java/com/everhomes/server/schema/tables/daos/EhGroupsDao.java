@@ -88,4 +88,11 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByPrivateFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.PRIVATE_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>join_policy IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByJoinPolicy(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.JOIN_POLICY, values);
+	}
 }

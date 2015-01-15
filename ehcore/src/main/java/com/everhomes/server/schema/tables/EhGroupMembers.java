@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = -1136183798;
+	private static final long serialVersionUID = -1376865189;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -37,9 +37,9 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.member_type</code>.
+	 * The column <code>ehcore.eh_group_members.member_type</code>. member object type, for example, type could be User, Group, etc
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_TYPE = createField("member_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_TYPE = createField("member_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this, "member object type, for example, type could be User, Group, etc");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.member_id</code>.
@@ -47,14 +47,24 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> MEMBER_ID = createField("member_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.member_role_flag</code>.
+	 * The column <code>ehcore.eh_group_members.member_role</code>. Default to ResourceUser role
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Integer> MEMBER_ROLE_FLAG = createField("member_role_flag", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> MEMBER_ROLE = createField("member_role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "Default to ResourceUser role");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Integer> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.approve_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> APPROVE_TIME = createField("approve_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_group_members</code> table reference

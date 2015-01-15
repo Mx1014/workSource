@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> {
 
-	private static final long serialVersionUID = 1646354127;
+	private static final long serialVersionUID = 1850380089;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_groups</code>
@@ -42,9 +42,14 @@ public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_user_groups.member_role_flag</code>.
+	 * The column <code>ehcore.eh_user_groups.member_role</code>. default to ResourceUser role
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Integer> MEMBER_ROLE_FLAG = createField("member_role_flag", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> MEMBER_ROLE = createField("member_role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "default to ResourceUser role");
+
+	/**
+	 * The column <code>ehcore.eh_user_groups.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Integer> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_user_groups.create_time</code>.

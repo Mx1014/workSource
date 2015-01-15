@@ -19,7 +19,7 @@ CREATE TABLE `eh_users` (
 # populate default system user root/password
 #
 INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `password_hash`) VALUES (1, 'root', 'system user', 1, 
-    UTC_TIME(), '10:8e70e9c1ebf861202a28ed0020c4db0f4d9a3a3d29fb1c4d:40d84ad3b14b8da5575274136678ca1ab07d114e1d04ef70');
+    NOW(), '10:8e70e9c1ebf861202a28ed0020c4db0f4d9a3a3d29fb1c4d:40d84ad3b14b8da5575274136678ca1ab07d114e1d04ef70');
 
 #
 # Reserve first 1000 user ids
@@ -54,7 +54,8 @@ CREATE TABLE `eh_user_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
     `group_id` BIGINT,
-    `member_role_flag` INTEGER NOT NULL DEFAULT 0, 
+    `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'default to ResourceUser role', 
+    `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `create_time` DATETIME NOT NULL,
     
     PRIMARY KEY (`id`),
@@ -71,6 +72,7 @@ CREATE TABLE `eh_groups` (
     `member_count` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME NOT NULL,
     `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
+    `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_group_name` (`name`),
@@ -82,16 +84,19 @@ DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `group_id` BIGINT NOT NULL,
-    `member_type` VARCHAR(32),
-    `member_id` BIGINT ,
-    `member_role_flag` INTEGER NOT NULL DEFAULT 0, 
+    `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type, for example, type could be User, Group, etc',
+    `member_id` BIGINT,
+    `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',    
+    `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `create_time` DATETIME NOT NULL,
+    `approve_time` DATETIME,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_grp_member` (`group_id`, `member_type`, `member_id`),
     INDEX `i_eh_grp_member_group_id` (`group_id`),
     INDEX `i_eh_grp_member_member` (`member_type`, `member_id`),
-    INDEX `i_eh_grp_member_create_time` (`create_time`)
+    INDEX `i_eh_grp_member_create_time` (`create_time`),
+    INDEX `i_eh_grp_member_approve_time` (`approve_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `eh_borders`;

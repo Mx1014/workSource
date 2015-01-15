@@ -3,6 +3,7 @@ package com.everhomes.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -12,7 +13,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import com.everhomes.bus.CoreBusReceiver;
 
@@ -28,6 +31,9 @@ import com.everhomes.bus.CoreBusReceiver;
  */
 @Configuration
 @ImportResource(value="classpath*:**/applicationContext.xml")
+@EnableWebSocket
+@EnableCaching
+@EnableScheduling
 public class AppConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
     

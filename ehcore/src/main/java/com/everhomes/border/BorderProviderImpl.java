@@ -1,38 +1,36 @@
 package com.everhomes.border;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
-import org.jooq.RecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.cache.DirtyTrackingProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBordersDao;
-import com.everhomes.server.schema.tables.pojos.EhBorders;
 import com.everhomes.server.schema.tables.records.EhBordersRecord;
 import com.everhomes.util.ConvertHelper;
 
+/**
+ * Border server administration implementation
+ * 
+ * @author Kelven Yang
+ *
+ */
 @Component
 public class BorderProviderImpl implements BorderProvider {
 
     @Autowired
-    private DirtyTrackingProvider trackingProvider;
-    
-    @Autowired
     private DbProvider dbProvider;
     
-    private List<Border> borders = new ArrayList<Border>();
-    private long lastLoadingTimestamp;
-    
     @Override
+    @CacheEvict(value="Border", key = "'list'")
     public void createBorder(Border border) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         
@@ -42,57 +40,41 @@ public class BorderProviderImpl implements BorderProvider {
         if(query.execute() > 0) {
             border.setId(query.getReturnedRecord().getId());
         }
-        
-        this.trackingProvider.updateTrackingTimestamp(NameMapper.getDirtyTrackingNameFromTablePojo(EhBorders.class), false);
     }
 
     @Override
+    @CacheEvict(value="Border", key = "{#border.id, 'list'}")
     public void updateBorder(Border border) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
         EhBordersDao dao = new EhBordersDao(context.configuration());
         dao.update(border);
-        
-        this.trackingProvider.updateTrackingTimestamp(NameMapper.getDirtyTrackingNameFromTablePojo(EhBorders.class), false);
     }
 
     @Override
+    @CacheEvict(value="Border", key = "{#id, 'list'}")
     public void deleteBorderById(int id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
         EhBordersDao dao = new EhBordersDao(context.configuration());
         dao.deleteById(id);
-        
-        this.trackingProvider.updateTrackingTimestamp(NameMapper.getDirtyTrackingNameFromTablePojo(EhBorders.class), false);
     }
 
     @Override
+    @Cacheable(value="Border", key="#id")
     public Border findBorderById(int id) {
-        List<Border> l = listAllBorders();
-        for(Border border : l) {
-            if(border.getId() == id)
-                return border;
-        }
-        
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBordersDao dao = new EhBordersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), Border.class);
     }
 
     @Override
+    @Cacheable(value="Border", key="'list'")
     public synchronized List<Border> listAllBorders() {
-        long dirtyTimestamp = this.trackingProvider.getTrackingTimestamp(NameMapper.getDirtyTrackingNameFromTablePojo(EhBorders.class), false);
-        if(dirtyTimestamp == 0 || this.lastLoadingTimestamp != dirtyTimestamp) {
-            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-            
-            borders = context.select().from(Tables.EH_BORDERS).fetch().map(new RecordMapper<Record, Border>() {
-
-                @Override
-                public Border map(Record record) {
-                    return ConvertHelper.convert(record,  Border.class);
-                }
-            });
-            this.lastLoadingTimestamp = dirtyTimestamp;
-        }
-        
-        return borders;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_BORDERS).fetch().map((Record record) -> {
+            return ConvertHelper.convert(record,  Border.class);
+        });
     }
 }

@@ -62,10 +62,17 @@ public class EhUserGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>member_role_flag IN (values)</code>
+	 * Fetch records that have <code>member_role IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByMemberRoleFlag(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.MEMBER_ROLE_FLAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByMemberRole(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.MEMBER_ROLE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>member_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByMemberStatus(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.MEMBER_STATUS, values);
 	}
 
 	/**

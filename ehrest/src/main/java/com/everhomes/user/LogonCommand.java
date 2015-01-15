@@ -11,6 +11,8 @@ public class LogonCommand {
     
     private String deviceIdentifier;
     
+    private Integer namespaceId;
+    
     public LogonCommand() {
     }
 
@@ -36,5 +38,13 @@ public class LogonCommand {
 
     public void setDeviceIdentifier(String deviceIdentifier) {
         this.deviceIdentifier = deviceIdentifier;
+    }
+    
+    public Integer getNamespaceId() {
+        return this.namespaceId;
+    }
+    
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 }

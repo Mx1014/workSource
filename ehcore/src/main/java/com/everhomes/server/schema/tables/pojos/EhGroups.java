@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2009000481;
+	private static final long serialVersionUID = -211193923;
 
 	private java.lang.Long     id;
 	private java.lang.String   name;
@@ -19,6 +19,7 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.Long     memberCount;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     privateFlag;
+	private java.lang.Integer  joinPolicy;
 
 	public EhGroups() {}
 
@@ -28,7 +29,8 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.Long     creatorUid,
 		java.lang.Long     memberCount,
 		java.sql.Timestamp createTime,
-		java.lang.Byte     privateFlag
+		java.lang.Byte     privateFlag,
+		java.lang.Integer  joinPolicy
 	) {
 		this.id = id;
 		this.name = name;
@@ -36,6 +38,7 @@ public class EhGroups implements java.io.Serializable {
 		this.memberCount = memberCount;
 		this.createTime = createTime;
 		this.privateFlag = privateFlag;
+		this.joinPolicy = joinPolicy;
 	}
 
 	public java.lang.Long getId() {
@@ -84,5 +87,13 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setPrivateFlag(java.lang.Byte privateFlag) {
 		this.privateFlag = privateFlag;
+	}
+
+	public java.lang.Integer getJoinPolicy() {
+		return this.joinPolicy;
+	}
+
+	public void setJoinPolicy(java.lang.Integer joinPolicy) {
+		this.joinPolicy = joinPolicy;
 	}
 }

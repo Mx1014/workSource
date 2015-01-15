@@ -1,13 +1,15 @@
 package com.everhomes.border;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 @Configuration
 @ImportResource(value="classpath*:**/applicationContext.xml")
+@EnableWebSocket
+@EnableWebSocketMessageBroker
+@EnableScheduling
 public class AppConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
-
 }

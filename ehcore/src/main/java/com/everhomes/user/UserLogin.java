@@ -1,5 +1,6 @@
 package com.everhomes.user;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
@@ -14,27 +15,48 @@ import java.util.Random;
  * @author Kelven Yang
  *
  */
-public class UserLogin {
+public class UserLogin implements Serializable {
+    private static final long serialVersionUID = 7244772864801329872L;
+
     public enum Status { loggedOff, loggedIn };
     
     private long userId;
     private int loginId;
     private String deviceIdentifier;
+    private int namespaceId;
     
     private Status status;
+    private Integer loginBorderId;
     private int loginInstanceNumber;
     private long lastAccessTick;
     
     public UserLogin() {
     }
     
-    public UserLogin(long userId, int loginId, String identifier) {
+    public UserLogin(int namespaceId, long userId, int loginId, String identifier) {
+        this.namespaceId = namespaceId;
         this.userId = userId;
         this.loginId = loginId;
         this.deviceIdentifier = identifier;
         loginInstanceNumber = new Random().nextInt();
         lastAccessTick = System.currentTimeMillis();
         status = Status.loggedOff;
+    }
+    
+    public int getNamespaceId() {
+        return this.namespaceId;
+    }
+    
+    public void setNamespaceId(int namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    
+    public Integer getLoginBorderId() {
+        return this.loginBorderId;
+    }
+    
+    public void setLoginBorderId(Integer loginBorderId) {
+        this.loginBorderId = loginBorderId;
     }
     
     public long getUserId() {
@@ -87,5 +109,10 @@ public class UserLogin {
         if(status == Status.loggedOff) {
             this.loginInstanceNumber++;
         }
+    }
+    
+    public LoginToken getLoginToken() {
+        LoginToken token = new LoginToken(this.userId, this.loginId, this.loginInstanceNumber);
+        return token;
     }
 }

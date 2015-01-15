@@ -2,6 +2,12 @@ package com.everhomes.border;
 
 import java.util.List;
 
+/**
+ * Border server administration interface
+ * 
+ * @author Kelven Yang
+ *
+ */
 public interface BorderProvider {
     void createBorder(Border border);
     void updateBorder(Border border);

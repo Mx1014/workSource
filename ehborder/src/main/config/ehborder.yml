@@ -8,11 +8,19 @@ logging.file: ehborder.log
 # Server configuration
 #
 
-#server.address:
-#server.port:
+server.address: 0.0.0.0
+server.port: 9090
 #server.sessionTimeout:
 
+border.id: 1
+border.app.key: b86ddb3b-ac77-4a65-ae03-7e8482a3db70
+border.app.secret: 2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ
+
+core.service.uri: http://localhost:8080
+
 upload.max.size: 10000000
+heartbeat.interval: 10000
+scheduler.pool.size: 100
 
 #
 # Server production management/monitoring configuration

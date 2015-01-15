@@ -1,5 +1,6 @@
 package com.everhomes.group;
 
+import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -10,10 +11,13 @@ import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.ReflectionUtils;
 
+import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -26,8 +30,7 @@ import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback;
-import com.everhomes.util.MapReduceCallback;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import static com.everhomes.server.schema.Tables.*;
 
@@ -55,6 +58,7 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
     }
 
     @Override
+    @CacheEvict(value = "Group", key="#group.id")
     public void updateGroup(Group group) {
         assert(group.getId() != null);
         
@@ -64,6 +68,7 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
     }
 
     @Override
+    @CacheEvict(value = "Group", key="#group.id")
     public void deleteGroup(Group group) {
         assert(group.getId() != null);
         
@@ -73,6 +78,7 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
     }
 
     @Override
+    @CacheEvict(value = "Group", key="#id")
     public void deleteGroup(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, id));
         EhGroupsDao dao = new EhGroupsDao(context.configuration());
@@ -80,6 +86,7 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
     }
 
     @Override
+    @Cacheable(value = "Group", key="#id")
     public Group findGroupById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, id));
         EhGroupsDao dao = new EhGroupsDao(context.configuration());
@@ -91,21 +98,22 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
         groupMember.setId(id);
         groupMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
-        this.dbProvider.execute(new TransactionCallback<Object>() {
-            @Override
-            public Object doInTransaction(TransactionStatus status) {
-                Group group = findGroupById(groupMember.getGroupId());
-                if(group == null)
-                    throw new InvalidParameterException("Missing group info in GroupMember parameter");
-                
-                DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMembers.class, id));
-                EhGroupMembersDao dao = new EhGroupMembersDao(context.configuration());
-                dao.insert(groupMember);
-                
-                group.setMemberCount(1 + group.getMemberCount().longValue());
-                updateGroup(group);
-                return null;
-            }
+        this.dbProvider.execute((TransactionStatus status) -> {
+            Group group = findGroupById(groupMember.getGroupId());
+            if(group == null)
+                throw new InvalidParameterException("Missing group info in GroupMember parameter");
+            
+            DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMembers.class, id));
+            EhGroupMembersDao dao = new EhGroupMembersDao(context.configuration());
+            dao.insert(groupMember);
+            
+            group.setMemberCount(1 + group.getMemberCount().longValue());
+            updateGroup(group);
+            
+            CacheAccessor accessor = this.cacheProvider.getCacheAccessor("GroupMemberList-" + groupMember.getGroupId());
+            accessor.clear();
+            
+            return null;
         });
     }
     
@@ -115,6 +123,18 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMembers.class, groupMember.getId()));
         EhGroupMembersDao dao = new EhGroupMembersDao(context.configuration());
         dao.update(groupMember);
+        
+        CacheAccessor accessor = this.cacheProvider.getCacheAccessor("GroupMember");
+        
+        // clear id cache
+        Method method = ReflectionUtils.findMethod(GroupServiceProviderImpl.class, "findGroupMemberById");
+        accessor.evict(this, method, groupMember.getId());
+        
+        method = ReflectionUtils.findMethod(GroupServiceProviderImpl.class, "findGroupMemberByMemberInfo");
+        accessor.evict(this, method, groupMember.getGroupId(), groupMember.getMemberType(), groupMember.getMemberId());
+        
+        accessor = this.cacheProvider.getCacheAccessor("GroupMemberList-" + groupMember.getGroupId());
+        accessor.clear();
     }
     
     public void deleteGroupMember(final GroupMember groupMember) {
@@ -123,75 +143,91 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
     }
     
     public void deleteGroupMemberById(final long id) {
-        this.dbProvider.execute(new TransactionCallback<Object>() {
-            @Override
-            public Object doInTransaction(TransactionStatus status) {
-                GroupMember member = findGroupMemberById(id);
+        boolean[] found = new boolean[1];
+        GroupMember[] foundMember = new GroupMember[1];
+        
+        this.dbProvider.execute((TransactionStatus status)-> {
+            GroupMember member = findGroupMemberById(id);
+            
+            // make it idempotent
+            if(member != null) {
+                Group group = findGroupById(member.getGroupId());
                 
-                // make it idempotent
-                if(member != null) {
-                    Group group = findGroupById(member.getGroupId());
-                    
-                    DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMembers.class, id));
-                    EhGroupMembersDao dao = new EhGroupMembersDao(context.configuration());
-                    dao.delete(member);
-                    
-                    if(group != null) {
-                        group.setMemberCount(group.getMemberCount().longValue() - 1);
-                        updateGroup(group);
-                    }
+                DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMembers.class, id));
+                EhGroupMembersDao dao = new EhGroupMembersDao(context.configuration());
+                dao.delete(member);
+                
+                found[0] = true;
+                foundMember[0] = member;
+                
+                if(group != null) {
+                    group.setMemberCount(group.getMemberCount().longValue() - 1);
+                    updateGroup(group);
                 }
-
-                return null;
             }
+
+            return null;
         });
+        
+        if(found[0]) {
+            CacheAccessor accessor = this.cacheProvider.getCacheAccessor("GroupMember");
+            
+            // clear id cache
+            Method method = ReflectionUtils.findMethod(GroupServiceProviderImpl.class, "findGroupMemberById");
+            accessor.evict(this, method, id);
+            
+            method = ReflectionUtils.findMethod(GroupServiceProviderImpl.class, "findGroupMemberByMemberInfo");
+            accessor.evict(this, method, foundMember[0].getGroupId(), foundMember[0].getMemberType(), foundMember[0].getMemberId());
+            
+            accessor = this.cacheProvider.getCacheAccessor("GroupMemberList-" + foundMember[0].getGroupId());
+            accessor.clear();
+        }
     }
     
+    @Cacheable(value = "GroupMember", key="#id")
     public GroupMember findGroupMemberById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMembers.class, id));
         EhGroupMembersDao dao = new EhGroupMembersDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), GroupMember.class);
     }
     
+    @Cacheable(value = "GroupMember", key="{#groupId, #memberType, #memberId}")
     public GroupMember findGroupMemberByMemberInfo(final long groupId, final String memberType, final long memberId) {
         final GroupMember[] result = new GroupMember[1];
-        
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroupMembers.class), result, new MapReduceCallback<DSLContext, Object>() {
-            @Override
-            public boolean map(DSLContext context, Object reducingContext) {
+
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroupMembers.class), result, 
+            (DSLContext context, Object reducingContext) -> {
                 EhGroupMembersRecord record = (EhGroupMembersRecord)context.select().from(EH_GROUP_MEMBERS)
-                    .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
-                    .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
-                    .and(EH_GROUP_MEMBERS.MEMBER_ID.eq(memberId))
-                    .fetchOne();
-                
+                .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
+                .and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(memberType))
+                .and(EH_GROUP_MEMBERS.MEMBER_ID.eq(memberId))
+                .fetchOne();
+            
                 if(record != null) {
                     result[0] = ConvertHelper.convert(record, GroupMember.class);
                     return false;
                 }
                 
                 return true;
-            }
-        });
-
+            });
+        
         return result[0];
     }
-    
-    public List<GroupMember> listGroupMembers(final GroupMemberLocator locator, final int count) {
-        final List<GroupMember> members = new ArrayList<GroupMember>();
 
-        if(locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroupMembers.class);
-            ShardIterator shardIterator = new ShardIterator(accessSpec);
+    public List<GroupMember> listGroupMembers(final GroupMemberLocator locator, final int count) {
+        CacheAccessor cacheAccessor = this.cacheProvider.getCacheAccessor("GroupMemberList-" + locator.getGroupId());
+        String cacheKey = locator.getHashString() + count;
+        return cacheAccessor.get(cacheKey, () -> {
+            final List<GroupMember> members = new ArrayList<GroupMember>();
+    
+            if(locator.getShardIterator() == null) {
+                AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroupMembers.class);
+                ShardIterator shardIterator = new ShardIterator(accessSpec);
+                
+                locator.setShardIterator(shardIterator);
+            }
             
-            locator.setShardIterator(shardIterator);
-        }
-        
-        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, new IterationMapReduceCallback<DSLContext, Object>() {
-            @Override
-            public IterationMapReduceCallback.AfterAction doInIteration(
-                    DSLContext context, Object reducingContext) {
-        
+            this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
                 SelectConditionStep<Record> query = context.select()
                         .from(EH_GROUP_MEMBERS)
                         .where(EH_GROUP_MEMBERS.GROUP_ID.eq(locator.getGroupId()));
@@ -206,19 +242,19 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
                         return null;
                     }
                 });
-
+    
                 if(members.size() >= count) {
                     locator.setAnchor(members.get(members.size() -1).getId());
                     return AfterAction.done;
                 }
                 
                 return AfterAction.next;
+            });
+    
+            if(members.size() > 0) {
+                locator.setAnchor(members.get(members.size() -1).getId());
             }
+            return members;
         });
-
-        if(members.size() > 0) {
-            locator.setAnchor(members.get(members.size() -1).getId());
-        }
-        return members;
     }
 }

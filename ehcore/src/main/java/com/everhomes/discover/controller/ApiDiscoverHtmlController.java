@@ -9,6 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.controller.RequireAuthentication;
 
+/**
+ * 
+ * API listing and API test controller
+ * 
+ * @author Kelven Yang
+ *
+ */
 @Controller
 public class ApiDiscoverHtmlController extends ControllerBase {
     @RequestMapping("/api/**")
@@ -18,7 +25,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
         if(uri.startsWith("/api"))
             uri = uri.substring(4);
 
-        if(uri.isEmpty() || uri.equals("**")) {
+        if(uri.isEmpty() || uri.equals("**") || uri.equals("/") || uri.equals("/*")) {
             model.addAttribute("restMethods", ControllerBase.getRestMethodList());
             return "api-list"; 
         } else {

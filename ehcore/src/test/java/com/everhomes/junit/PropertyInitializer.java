@@ -20,6 +20,8 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("redis.store.master.host", "192.168.1.223")
             .withProperty("redis.store.master.port", "6379")
             .withProperty("upload.max.size", 100000)
+            .withProperty("heartbeat.interval", 10000)
+            .withProperty("scheduler.pool.size", 100)
             .withProperty("messaging.msgbox.size", 10)
             .withProperty("messaging.batch.size", 10)
             .withProperty("forum.postbox.size", 10)

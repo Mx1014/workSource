@@ -7,7 +7,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.connector.Response;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,7 @@ import com.everhomes.user.LoginToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceProvider;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -38,7 +38,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebRequestInterceptor.class);
 
     @Autowired
-    private UserServiceProvider userServiceProvider;
+    private UserService userService;
+   
+    @Autowired
+    private UserServiceProvider userProvider;
     
     @Autowired
     private AppProvider appProvider;
@@ -76,9 +79,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if(isProtected(handler)) {
             LoginToken token = getLoginToken(request);
             if(!isValid(token)) {
+                if(UserContext.current().getCallerApp() != null)
+                    return true;
+                
                 response.setContentType("application/json");
-                RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL, Response.SC_FORBIDDEN, "Authentication is required");
-                response.setStatus(Response.SC_FORBIDDEN);
+                RestResponse restResponse = new RestResponse(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Authentication is required");
                 
                 response.getWriter().write(StringHelper.toJsonString(restResponse));
                 response.flushBuffer();
@@ -94,7 +99,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if(token == null)
             return false;
         
-        return this.userServiceProvider.isValidLoginToken(token);
+        return this.userService.isValidLoginToken(token);
     }
     
     private boolean isProtected(Object handler) {
@@ -125,13 +130,15 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         }
         
         if(loginTokenString == null) {
-            for(Cookie cookie : request.getCookies()) {
-                if(LOGGER.isDebugEnabled())
-                    LOGGER.debug("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
-                
-                if(cookie.getName().equals("token")) {
-                    loginTokenString = cookie.getValue();
-                    break;
+            if(request.getCookies() != null) {
+                for(Cookie cookie : request.getCookies()) {
+                    if(LOGGER.isDebugEnabled())
+                        LOGGER.debug("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue() + ", path: " + cookie.getPath());
+                    
+                    if(cookie.getName().equals("token")) {
+                        loginTokenString = cookie.getValue();
+                        break;
+                    }
                 }
             }
         }
@@ -142,12 +149,14 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     }
     
     private boolean checkProtectedRequest(HttpServletRequest request) {
-        for(Cookie cookie : request.getCookies()) {
-            if(LOGGER.isTraceEnabled())
-                LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue());
-            
-            if(cookie.getName().equals("token"))
-                return true;
+        if(request.getCookies() != null) {
+            for(Cookie cookie : request.getCookies()) {
+                if(LOGGER.isTraceEnabled())
+                    LOGGER.trace("HttpRequest cookie " + cookie.getName() + ": " + cookie.getValue());
+                
+                if(cookie.getName().equals("token"))
+                    return true;
+            }
         }
         
         Map<String, String[]> paramMap = request.getParameterMap();
@@ -163,6 +172,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             LOGGER.warn("Invalid app key: " + appKey);
             return false;
         }
+        
+        UserContext.current().setCallerApp(app);
         
         Map<String, String> mapForSignature = new HashMap<String, String>();
         for(Map.Entry<String, String[]> entry : paramMap.entrySet()) {
@@ -182,11 +193,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     }
     
     private void setupUserContext(LoginToken loginToken) {
-        UserLogin login = this.userServiceProvider.findLoginByToken(loginToken);
+        UserLogin login = this.userService.findLoginByToken(loginToken);
         UserContext context = UserContext.current();
         context.setLogin(login);
         
-        User user = this.userServiceProvider.findUserById(login.getUserId());
+        User user = this.userProvider.findUserById(login.getUserId());
         context.setUser(user);
     }
     

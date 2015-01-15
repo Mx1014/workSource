@@ -1,4 +1,4 @@
-package com.everhomes.core;
+package com.everhomes.border;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -20,11 +20,10 @@ import org.springframework.context.annotation.ComponentScan;
     DataSourceAutoConfiguration.class, 
     HibernateJpaAutoConfiguration.class
 })
-public class App {
+public class BorderServerApp {
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(App.class);
+        SpringApplication app = new SpringApplication(BorderServerApp.class);
         app.setShowBanner(false);
-        app.setWebEnvironment(true);
         app.run(args);
     }
 }
