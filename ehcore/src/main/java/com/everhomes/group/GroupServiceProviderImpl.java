@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.RecordMapper;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -234,13 +233,10 @@ public class GroupServiceProviderImpl implements GroupServiceProvider {
                 if(locator.getAnchor() != null)
                     query = query.and(EH_GROUP_MEMBERS.ID.gt(locator.getAnchor().longValue()));
                 query.orderBy(EH_GROUP_MEMBERS.GROUP_ID.asc()).limit(count - members.size());
-                query.fetch().map(new RecordMapper<Record, GroupMember>() {
-                    @Override
-                    public GroupMember map(Record arg) {
+                query.fetch().map((Record arg) -> {
                         GroupMember member = ConvertHelper.convert(arg, GroupMember.class);
                         members.add(member);
                         return null;
-                    }
                 });
     
                 if(members.size() >= count) {

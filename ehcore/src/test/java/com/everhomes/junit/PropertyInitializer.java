@@ -24,6 +24,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("scheduler.pool.size", 100)
             .withProperty("messaging.msgbox.size", 10)
             .withProperty("messaging.batch.size", 10)
+            .withProperty("messaging.routing.block.size", 10)
             .withProperty("forum.postbox.size", 10)
             .withProperty("forum.flush.interval", 3000)
             .withProperty("db.master", "jdbc:mysql://ehcore:ehcore@127.0.0.1:3306/ehcore")
