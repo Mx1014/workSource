@@ -1,7 +1,59 @@
+#
+# A speical note about the schema design below (KY)
+#
+# To balance performance and flexibility, some tables carry general purpose integer fields and string fields,
+# interpretation of these fields will be determined by the application on top of, at database level, we only
+# provide general indexing support for these fields, it is the responsibility of the application to map queries that
+# are against to these fields.
+#
+# Initially, only two of string-type general purpose fields are indexed, more indices can be added during operating
+# time, tuning changes about the indexing will be sync-ed back into schema design afterwards
+#
+#
+
 SET foreign_key_checks = 0;
 
 use ehcore;
 
+#
+# member of global parition
+#
+DROP TABLE IF EXISTS `eh_categories`;
+CREATE TABLE `eh_categories`(
+    `id` INTEGER NOT NULL,
+    `parent_id` INTEGER,
+    `name` VARCHAR(128) NOT NULL,
+    `path` VARCHAR(1024),
+    `default_order` INTEGER,
+    `status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_category_name`(`parent_id`, `name`),
+    INDEX `i_eh_category_path`(`path`),
+    INDEX `i_eh_category_order`(`default_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_state_triggers`;
+CREATE TABLE `eh_state_triggers` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `object_type` VARCHAR(32),
+    `object_id` BIGINT,
+    `trigger_state` INTEGER,
+    `flow_type` INTEGER,
+    `flow_data` TEXT,
+    `order` INTEGER,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of user-related partition group
+#
 DROP TABLE IF EXISTS `eh_users`;
 CREATE TABLE `eh_users` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -10,6 +62,7 @@ CREATE TABLE `eh_users` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
     `create_time` DATETIME NOT NULL,
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
+
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_user_account_name`(`account_name`),
     INDEX `i_eh_user_create_time`(`create_time`)
@@ -26,6 +79,9 @@ INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time
 #
 INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES ('EhUsers', 1000);
 
+#
+# member of eh_users partition
+#
 DROP TABLE IF EXISTS `eh_user_identifiers`;
 CREATE TABLE `eh_user_identifiers` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -46,6 +102,8 @@ CREATE TABLE `eh_user_identifiers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 # 
+# member of eh_users partition
+#
 # Used for duplicated recording of group membership that user is involved in
 # stored in the same shard as of its owner user
 #
@@ -53,6 +111,7 @@ DROP TABLE IF EXISTS `eh_user_groups`;
 CREATE TABLE `eh_user_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `group_discriminator` VARCHAR(32) COMMENT 'redendant info for quickly distinguishing associated group', 
     `group_id` BIGINT,
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'default to ResourceUser role', 
     `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
@@ -64,22 +123,104 @@ CREATE TABLE `eh_user_groups` (
     INDEX `i_eh_usr_grp_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of eh_users partition group
+#
+DROP TABLE IF EXISTS `eh_user_blacklist`;
+CREATE TABLE `eh_user_blacklist` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_usr_blk_owner_target`(`owner_uid`, `target_type`, `target_id`),
+    INDEX `i_usr_blk_owner`(`owner_uid`),
+    INDEX `i_usr_blk_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_users partition group
+#
+DROP TABLE IF EXISTS `eh_user_favorates`;
+CREATE TABLE `eh_user_favorites` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+
+    PRIMARY KEY (`id`),
+    UNIQUE `u_usr_favorite_target`(`owner_uid`, `target_type`, `target_id`),
+    INDEX `i_usr_favorite_owner`(`owner_uid`),
+    INDEX `i_usr_favorite_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_users partition group
+#
+DROP TABLE IF EXISTS `eh_user_profiles`;
+CREATE TABLE `eh_user_profiles`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
+    `item_name` VARCHAR(32),
+    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `target_value` TEXT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_user_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
+    INDEX `i_user_prof_owner`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of grouping related partition group
+#
 DROP TABLE IF EXISTS `eh_groups`;
 CREATE TABLE `eh_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `name` VARCHAR(128) NOT NULL,
+    `avatar` VARCHAR(256),
+    `description` TEXT,
     `creator_uid` BIGINT NOT NULL,
     `member_count` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME NOT NULL,
+    `delete_time` DATETIME,
     `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
     `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner',
+    `city_id` BIGINT,
+    `discriminator` VARCHAR(32),
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `comment_tag1` VARCHAR(128),
+    `comment_tag2` VARCHAR(128),
+    `comment_tag3` VARCHAR(128),
+    `comment_tag4` VARCHAR(128),
+    `comment_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_group_name` (`name`),
-    INDEX `i_eh_group_creator` (`creator_uid`),
-    INDEX `i_eh_group_create_time` (`create_time`)
+    UNIQUE `u_eh_group_name`(`name`, `city_id`, `discriminator`),
+    INDEX `i_eh_group_creator`(`creator_uid`),
+    INDEX `i_eh_group_create_time` (`create_time`),
+    INDEX `i_eh_group_delete_time` (`delete_time`),
+    INDEX `i_eh_group_itag1`(`integral_tag1`),
+    INDEX `i_eh_group_itag2`(`integral_tag2`),
+    INDEX `i_eh_group_ctag1`(`comment_tag1`),
+    INDEX `i_eh_group_ctag2`(`comment_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of eh_groups partition group
+#
 DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -99,6 +240,9 @@ CREATE TABLE `eh_group_members` (
     INDEX `i_eh_grp_member_approve_time` (`approve_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global partition
+#
 DROP TABLE IF EXISTS `eh_borders`;
 CREATE TABLE `eh_borders` (
     `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
@@ -112,6 +256,346 @@ CREATE TABLE `eh_borders` (
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_border_config_tag`(`config_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_countries`;
+CREATE TABLE `eh_countries` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `name` VARCHAR(64),
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_country_name`(`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_provinces`;
+CREATE TABLE `eh_provinces` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `country_id` INTEGER NOT NULL,
+    `name` VARCHAR(64),
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_province_country_id`(`country_id`) REFERENCES `eh_countries`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_province_name`(`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_cities`;
+CREATE TABLE `eh_cities` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `country_id` INTEGER NOT NULL,
+    `province_id` INTEGER,
+    `name` VARCHAR(64),
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_city_country_id`(`country_id`) REFERENCES `eh_countries`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY `fk_city_province_id`(`province_id`) REFERENCES `eh_provinces`(`id`) ON DELETE CASCADE,
+    
+    INDEX `i_eh_city_name`(`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_areas`;
+CREATE TABLE `eh_areas` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `city_id` INTEGER NOT NULL,
+    `name` VARCHAR(64),
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_area_city_id`(`city_id`) REFERENCES `eh_cities`(`id`) ON DELETE CASCADE,
+    
+    INDEX `i_eh_area_name`(`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of the partition group
+#
+DROP TABLE IF EXISTS `eh_communities`;
+CREATE TABLE `eh_communities`(
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `area_id` INTEGER NOT NULL,
+    `area_name` VARCHAR(64) COMMENT 'redundant for query optimization',
+    `name` VARCHAR(64),
+    `alias_name` VARCHAR(64),
+    `address` VARCHAR(512),
+    `zipcode` VARCHAR(64),
+    `description` TEXT,
+    `detail_description` TEXT,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `comment_tag1` VARCHAR(128),
+    `comment_tag2` VARCHAR(128),
+    `comment_tag3` VARCHAR(128),
+    `comment_tag4` VARCHAR(128),
+    `comment_tag5` VARCHAR(128),
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_community_area_name`(`area_name`),
+    INDEX `i_eh_community_name`(`name`),
+    INDEX `i_eh_community_alias_name`(`alias_name`),
+    INDEX `i_eh_community_address`(`address`),
+    INDEX `i_eh_community_zipcode`(`zipcode`),
+    INDEX `i_eh_community_create_time`(`create_time`),
+    INDEX `i_eh_community_delete_time`(`delete_time`),
+    INDEX `i_eh_community_itag1`(`integral_tag1`),
+    INDEX `i_eh_community_itag2`(`integral_tag2`),
+    INDEX `i_eh_community_ctag1`(`comment_tag1`),
+    INDEX `i_eh_community_ctag2`(`comment_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community forum, admin group will be managed in community profile 
+#
+DROP TABLE IF EXISTS `eh_community_profiles`;
+CREATE TABLE `eh_community_profiles` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `item_name` VARCHAR(32),
+    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `target_value` TEXT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_community_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
+    INDEX `i_community_prof_owner`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# Key table in address related partition group
+#
+DROP TABLE IF EXISTS `eh_addresses`;
+CREATE TABLE `eh_addresses` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT,
+    `address` VARCHAR(1024),
+    `address_alias` VARCHAR(1024),
+    `building_name` VARCHAR(128),
+    `building_alias_name` VARCHAR(128),
+    `appartment_name` VARCHAR(128),
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `comment_tag1` VARCHAR(128),
+    `comment_tag2` VARCHAR(128),
+    `comment_tag3` VARCHAR(128),
+    `comment_tag4` VARCHAR(128),
+    `comment_tag5` VARCHAR(128),
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_address_address`(`address`),
+    INDEX `i_eh_address_address_alias`(`address_alias`),
+    INDEX `i_eh_address_building_apt_name`(`building_name`, `appartment_name`),
+    INDEX `i_eh_address_building_alias_apt_name`(`building_alias_name`, `appartment_name`),
+    INDEX `i_eh_address_create_name`(`create_time`),
+    INDEX `i_eh_address_delete_name`(`delete_time`),
+    INDEX `i_eh_address_itag1`(`integral_tag1`),
+    INDEX `i_eh_address_itag2`(`integral_tag2`),
+    INDEX `i_eh_address_ctag1`(`comment_tag1`),
+    INDEX `i_eh_address_ctag2`(`comment_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_address partition group
+#
+DROP TABLE IF EXISTS `eh_address_claims`;
+CREATE TABLE `eh_address_claims` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `address_id` BIGINT NOT NULL,
+    `entity_type` VARCHAR(32) NOT NULL,
+    `entity_id` BIGINT NOT NULL,
+    `initiator_uid` BIGINT NOT NULL,
+    `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: unclaimed, 1: claiming, 2: claimed',
+    `operator_uid` BIGINT,
+    `process_code` TINYINT,
+    `process_details` TEXT,
+    `proof_resource_id` VARCHAR(256),
+    `proof_resource_path` VARCHAR(1024),
+    `create_time` DATETIME,
+    `process_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `comment_tag1` VARCHAR(128),
+    `comment_tag2` VARCHAR(128),
+    `comment_tag3` VARCHAR(128),
+    `comment_tag4` VARCHAR(128),
+    `comment_tag5` VARCHAR(128),
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_addr_claim_address_id`(`address_id`) REFERENCES `eh_addresses`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_addr_claim_target_entity`(`entity_type`, `entity_id`),
+    INDEX `i_eh_addr_claim_initiator_uid`(`initiator_uid`),
+    INDEX `i_eh_addr_claim_operator_uid`(`operator_uid`),
+    INDEX `i_eh_addr_claim_create_time`(`create_time`),
+    INDEX `i_eh_addr_claim_process_time`(`process_time`),
+    INDEX `i_eh_addr_claim_itag1`(`integral_tag1`),
+    INDEX `i_eh_addr_claim_itag2`(`integral_tag2`),
+    INDEX `i_eh_addr_claim_ctag1`(`comment_tag1`),
+    INDEX `i_eh_addr_claim_ctag2`(`comment_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# Member of eh_groups partition group, inherited from eh_groups
+# pseudo table, its records can be distinguished by descriminator field in eh_groups table  
+#
+DROP TABLE IF EXISTS `eh_families`;
+
+#
+# member of eh_groups(eh_families) partition group
+#
+DROP TABLE IF EXISTS `eh_family_followers`;
+CREATE TABLE eh_family_followers (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_family` BIGINT NOT NULL,
+    `follower_family` BIGINT NOT NULL,
+    `alias_name` VARCHAR(64),
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `i_fm_follower_follower`(`owner_family`, `follower_family`),
+    INDEX `i_fm_follower_owner`(`owner_family`),
+    INDEX `i_fm_follower_create_time`(`create_time`),
+    INDEX `i_fm_follower_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_groups(eh_families) partition group
+#
+DROP TABLE IF EXISTS `eh_followed_families`;
+CREATE TABLE `eh_followed_families`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_family` BIGINT NOT NULL,
+    `followed_family` BIGINT NOT NULL,
+    `alias_name` VARCHAR(64),
+    
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `i_fm_followed_followed`(`owner_family`, `followed_family`),
+    INDEX `i_fm_followed_owner`(`owner_family`),
+    INDEX `i_fm_followed_create_time`(`create_time`),
+    INDEX `i_fm_followed_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of the partition group
+#
+DROP TABLE IF EXISTS `eh_banners`;
+CREATE TABLE `eh_banners` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `appId` BIGINT,
+    `name` VARCHAR(128),
+    `description` TEXT,
+    `banner_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: advertisement, 2: backend',
+    `vendor_tag` VARCHAR(64),
+    `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
+    `flow_data` TEXT,
+    `resource_id` VARCHAR(128),
+    `resource_path` VARCHAR(256),
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
+    `group_id` BIGINT COMMENT 'point to the group created for the banner',
+    `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_banner_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_banners partition
+# banner distribution scope will be managed through banner profile in item group named as 'scope'
+#
+DROP TABLE IF EXISTS `eh_banner_profiles`;
+CREATE TABLE `eh_banner_profiles` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner banner id',
+    `item_name` VARCHAR(32),
+    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `target_value` TEXT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_banner_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
+    INDEX `i_banner_prof_owner`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_banners partition
+#
+DROP TABLE IF EXISTS `eh_banner_clicks`;
+CREATE TABLE `eh_banner_clicks`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `uuid` VARCHAR(64) NOT NULL,
+    `banner_id` BIGINT NOT NULL,
+    `uid` BIGINT NOT NULL,
+    `family_id` BIGINT COMMENT 'redundant info for query optimization',
+    `click_count` BIGINT,
+    `last_click_time` DATETIME,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_banner_clk_uuid`(`uuid`),
+    UNIQUE `u_banner_clk_user`(`banner_id`, `uid`),
+    INDEX `i_banner_clk_last_time`(`last_click_time`),
+    INDEX `i_banner_clk_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_banners partition
+#
+DROP TABLE IF EXISTS `eh_banner_orders`;
+CREATE TABLE `eh_banner_orders` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `banner_id` BIGINT NOT NULL,
+    `uid` BIGINT NOT NULL,
+    `vendor_order_tag` VARCHAR(64),
+    `amount` DECIMAL,
+    `description` TEXT,
+    `purchase_time` DATETIME,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_banner_order_banner`(`banner_id`),
+    INDEX `i_eh_banner_order_user`(`uid`),
+    INDEX `i_eh_banner_order_purchase_time`(`purchase_time`),
+    INDEX `i_eh_banner_order_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;
