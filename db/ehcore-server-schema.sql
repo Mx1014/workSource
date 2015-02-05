@@ -630,7 +630,7 @@ CREATE TABLE `eh_banner_profiles` (
 DROP TABLE IF EXISTS `eh_banner_clicks`;
 CREATE TABLE `eh_banner_clicks`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `uuid` VARCHAR(64) NOT NULL,
+    `uuid` VARCHAR(36) NOT NULL,
     `banner_id` BIGINT NOT NULL,
     `uid` BIGINT NOT NULL,
     `family_id` BIGINT COMMENT 'redundant info for query optimization',
@@ -714,6 +714,272 @@ CREATE TABLE `eh_rtxt_resources`(
     INDEX `i_rtxt_res_checksum`(`checksum`),
     INDEX `i_rtxt_res_create_time`(`create_time`),
     INDEX `i_rtxt_res_access_time`(`access_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of event partition group
+# old event subscription table and other event related profile items will be consolidated
+# in eh_event_profiles table
+#
+# Only if there are queries from event to other entities, there is a need to have
+# associated field in eh_events table, otherwise, store associated references in
+# eh_event_profiles table, for example, associated groups, forums of the event
+#
+DROP TABLE IF EXISTS `eh_events`;
+CREATE TABLE `eh_events`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `subject` VARCHAR(512),
+    `description` TEXT,
+    `location` TEXT,
+    `contact_person` VARCHAR(128),
+    `contact_number` VARCHAR(64),
+    `start_time_ms` BIGINT,
+    `start_time` DATETIME,
+    `end_time_ms` BIGINT,
+    `end_time` DATETIME,
+    `max_attendee_count` INTEGER NOT NULL DEFAULT 0,
+    `signup_attendee_count` INTEGER NOT NULL DEFAULT 0,
+    `signup_family_count` INTEGER NOT NULL DEFAULT 0,
+    `checkin_attendee_count` INTEGER NOT NULL DEFAULT 0,
+    `checkin_family_count` INTEGER NOT NULL DEFAULT 0,
+    `ticket_flag` TINYINT NOT NULL DEFAULT 0,
+    `max_ticket_per_family` INTEGER NOT NULL DEFAULT 0,
+    `ticket_group_id` BIGINT,
+    `banner_id` BIGINT,
+    `creator_uid` BIGINT,
+    `creator_family_id` BIGINT,
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_event_start_time_ms`(`start_time_ms`),
+    INDEX `i_event_end_time_ms`(`end_time_ms`),
+    INDEX `i_event_creator_uid`(`creator_uid`),
+    INDEX `i_activity_create_time`(`create_time`),
+    INDEX `i_activity_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of event partition group
+#
+DROP TABLE IF EXISTS `eh_event_roster`;
+CREATE TABLE `eh_event_roster`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `uuid` VARCHAR(36) NOT NULL,
+    `event_id` BIGINT NOT NULL,
+    `uid` BIGINT,
+    `family_id` BIGINT,
+    `adult_count` INTEGER NOT NULL DEFAULT 0,
+    `child_count` INTEGER NOT NULL DEFAULT 0,
+    `signup_flag` TINYINT NOT NULL DEFAULT 0,
+    `signup_uid` BIGINT,
+    `signup_time` DATETIME,
+    `create_time` DATETIME,
+
+    PRIMARY KEY (`id`),
+    UNIQUE `u_event_roster_uuid`(`uuid`),
+    UNIQUE `u_event_roster_attendee`(`event_id`, `uid`),
+    INDEX `i_event_roster_signup_time`(`signup_time`),
+    INDEX `i_event_roster_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of event partition group
+#
+DROP TABLE IF EXISTS `eh_event_ticket_groups`;
+CREATE TABLE `eh_event_ticket_groups`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `event_id` BIGINT,
+    `name` VARCHAR(32),
+    `total_count` INTEGER,
+    `allocated_count` INTEGER,
+    `create_time` DATETIME,
+
+    PRIMARY KEY (`id`),
+    UNIQUE `u_event_tg_name`(`event_id`, `name`),
+    INDEX `i_event_tg_event_id`(`event_id`),
+    INDEX `i_event_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of event partition group
+#
+DROP TABLE IF EXISTS `eh_event_tickets`;
+CREATE TABLE `eh_event_tickets`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `event_id` BIGINT,
+    `ticket_group_id` BIGINT,
+    `ticket_number` VARCHAR(128),
+    `uid` BIGINT,
+    `family_id` BIGINT,
+    `status` TINYINT COMMENT '0: free, 1: allocated',
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_event_ticket_ticket`(`ticket_group_id`, `ticket_number`),
+    INDEX `i_event_ticket_event`(`event_id`),
+    INDEX `i_event_ticket_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_events partition group
+#
+DROP TABLE IF EXISTS `eh_event_profiles`;
+CREATE TABLE `eh_event_profiles`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner event id',
+    `item_name` VARCHAR(32),
+    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `target_value` TEXT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_event_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
+    INDEX `i_event_prof_owner`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of activity partition group
+#
+DROP TABLE IF EXISTS `eh_activities`;
+CREATE TABLE `eh_activities` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `subject` VARCHAR(512),
+    `description` TEXT,
+    `location` TEXT,
+    `contact_person` VARCHAR(128),
+    `contact_number` VARCHAR(64),
+    `start_time_ms` BIGINT,
+    `start_time` DATETIME,
+    `end_time_ms` BIGINT,
+    `end_time` DATETIME,
+    `signup_flag` TINYINT,
+    `confirm_flag` TINYINT,
+    `max_attendee_count` INTEGER,
+    `signup_attendee_count` INTEGER,
+    `signup_family_count` INTEGER,
+    `checkin_attendee_count` INTEGER,
+    `checkin_family_count` INTEGER,
+    `confirm_attendee_count` INTEGER,
+    `confirm_family_count` INTEGER,
+    `creator_uid` BIGINT,
+    `creator_family_id` BIGINT,
+    `post_id` BIGINT COMMENT 'associated post id',
+    `group_discriminator` VARCHAR(32) COMMENT 'associated group if any',
+    `group_id` BIGINT,
+    `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
+    `change_version` INTEGER NOT NULL DEFAULT 1,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_activity_start_time_ms`(`start_time_ms`),
+    INDEX `i_activity_end_time_ms`(`end_time_ms`),
+    INDEX `i_activity_creator_uid`(`creator_uid`),
+    INDEX `i_activity_post_id`(`post_id`),
+    INDEX `i_activity_group`(`group_discriminator`, `group_id`),
+    INDEX `i_activity_create_time`(`create_time`),
+    INDEX `i_activity_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_activities partition group
+#
+DROP TABLE IF EXISTS `eh_activity_roster`;
+CREATE TABLE `eh_activity_roster`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `uuid` VARCHAR(36) NOT NULL,
+    `activity_id` BIGINT NOT NULL,
+    `uid` BIGINT,
+    `family_id` BIGINT,
+    `adult_count` INTEGER NOT NULL DEFAULT 0,
+    `child_count` INTEGER NOT NULL DEFAULT 0,
+    `signup_flag` TINYINT NOT NULL DEFAULT 0,
+    `signup_uid` BIGINT,
+    `confirm_flag` BIGINT NOT NULL DEFAULT 0,
+    `confirm_uid` BIGINT,
+    `confirm_family_id` BIGINT,
+    `confirm_time` DATETIME,
+    `lottery_flag` TINYINT NOT NULL DEFAULT 0,
+    `lottery_time` DATETIME,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_activity_uuid`(`uuid`),
+    UNIQUE `u_activity_user`(`activity_id`, `uid`),
+    INDEX `i_activity_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of polling management partition group
+#
+DROP TABLE IF EXISTS `eh_polls`;
+CREATE TABLE `eh_polls` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `subject` VARCHAR(512),
+    `description` TEXT,
+    `start_time_ms` BIGINT,
+    `start_time` DATETIME,
+    `end_time_ms` BIGINT,
+    `end_time` DATETIME,
+    `multi_select_flag` TINYINT NOT NULL DEFAULT 0,
+    `anonymous_flag` TINYINT NOT NULL DEFAULT 0,
+    `poll_count` INTEGER NOT NULL DEFAULT 0,
+    `creator_uid` BIGINT,
+    `creator_family_id` BIGINT,
+    `post_id` BIGINT COMMENT 'associated post in forum',
+    `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
+    `change_version` INTEGER NOT NULL DEFAULT 1,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_poll_start_time_ms`(`start_time_ms`),
+    INDEX `i_poll_end_time_ms`(`end_time_ms`),
+    INDEX `i_poll_creator_uid`(`creator_uid`),
+    INDEX `i_poll_post_id`(`post_id`),
+    INDEX `i_poll_create_time`(`create_time`),
+    INDEX `i_poll_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_polls partition
+#
+DROP TABLE IF EXISTS `eh_poll_items`;
+CREATE TABLE `eh_poll_items`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `poll_id` BIGINT,
+    `subject` VARCHAR(512),
+    `resource_id` BIGINT,
+    `vote_count` INTEGER NOT NULL DEFAULT 0,
+    `change_version` INTEGER NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_poll_item_poll`(`poll_id`),
+    INDEX `i_poll_item_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_polls partition
+#
+DROP TABLE IF EXISTS `eh_poll_votes`;
+CREATE TABLE `eh_poll_votes`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `poll_id` BIGINT,
+    `item_id` BIGINT,
+    `voter_uid` BIGINT,
+    `voter_family_id` BIGINT,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `i_poll_vote_vote`(`poll_id`, `item_id`, `voter_uid`),
+    INDEX `i_poll_vote_poll`(`poll_id`),
+    INDEX `i_poll_vote_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;
