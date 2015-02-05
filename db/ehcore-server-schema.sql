@@ -52,6 +52,76 @@ CREATE TABLE `eh_state_triggers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_search_keywords`;
+CREATE TABLE `eh_search_keywords`(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `scope` VARCHAR(32),
+    `scope_id` BIGINT,
+    `keyword` VARCHAR(128),
+    `weight` INTEGER,
+    `frequency` INTEGER,
+    `version` INTEGER,
+    `update_time` DATETIME,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_kword_scoped_kword`(`scope`, `scope_id`, `keyword`),
+    INDEX `i_kword_weight_frequency`(`weight`, `frequency`),
+    INDEX `i_kword_update_time`(`update_time`),
+    INDEX `i_kword_create_time`(`create_time`),
+    INDEX `i_kword_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+# for compatibility reason, this table is basically cloned from old DB
+#
+DROP TABLE IF EXISTS `eh_app_promotions`;
+CREATE TABLE `eh_app_promotions` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(128),
+    `channel` INTEGER COMMENT '1: offical site, 2: app store, 3: manual',
+    `version` VARCHAR(256),
+    `path` VARCHAR(1024),
+    `file_name` VARCHAR(128),
+    `link` VARCHAR(1024),
+    `download_count` INTEGER NOT NULL DEFAULT 0,
+    `register_count` INTEGER NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_app_promo_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+# for compatibility reason, this table is basically cloned from old DB
+#
+DROP TABLE IF EXISTS `eh_stats_by_city`;
+CREATE TABLE `eh_stats_by_city` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `city_id` INTEGER,
+    `stats_date` VARCHAR(32),
+    `stats_type` INTEGER,
+    `reg_user_count` BIGINT,
+    `addr_user_count` BIGINT,
+    `pending_user_count` BIGINT,
+    `community_count` BIGINT,
+    `apt_count` BIGINT,
+    `pending_apt_count` BIGINT,
+    `post_count` BIGINT,
+    `post_comment_count` BIGINT,
+    `post_like_count` BIGINT,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_stats_city_report`(`city_id`, `stats_date`, `stats_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
 # key table of user-related partition group
 #
 DROP TABLE IF EXISTS `eh_users`;
@@ -435,8 +505,7 @@ CREATE TABLE `eh_address_claims` (
     `operator_uid` BIGINT,
     `process_code` TINYINT,
     `process_details` TEXT,
-    `proof_resource_id` VARCHAR(256),
-    `proof_resource_path` VARCHAR(1024),
+    `proof_resource_id` BIGINT,
     `create_time` DATETIME,
     `process_time` DATETIME,
     `delete_time` DATETIME,
@@ -523,8 +592,7 @@ CREATE TABLE `eh_banners` (
     `vendor_tag` VARCHAR(64),
     `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
     `flow_data` TEXT,
-    `resource_id` VARCHAR(128),
-    `resource_path` VARCHAR(256),
+    `resource_id` BIGINT,
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
     `group_id` BIGINT COMMENT 'point to the group created for the banner',
     `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
@@ -596,6 +664,56 @@ CREATE TABLE `eh_banner_orders` (
     INDEX `i_eh_banner_order_user`(`uid`),
     INDEX `i_eh_banner_order_purchase_time`(`purchase_time`),
     INDEX `i_eh_banner_order_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# Resource management
+# key table of binary resource management partition group
+#
+DROP TABLE IF EXISTS `eh_binary_resources`;
+CREATE TABLE `eh_binary_resources` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `checksum` VARCHAR(128),
+    `store_type` VARCHAR(32) COMMENT 'content store type',
+    `store_uri` VARCHAR(32) COMMENT 'identify the store instance',
+    `content_type` VARCHAR(32) COMMENT 'object content type',
+    `content_length` BIGINT,
+    `content_uri` VARCHAR(1024) COMMENT 'object link info on storage',
+    `reference_count` BIGINT,
+    `create_time` DATETIME,
+    `access_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_bin_res_checksum`(`checksum`),
+    INDEX `i_bin_res_create_time`(`create_time`),
+    INDEX `i_bin_res_access_time`(`access_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# Resource management
+# key table of rich text resource management partition group
+#
+DROP TABLE IF EXISTS `eh_rtxt_resources`;
+CREATE TABLE `eh_rtxt_resources`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `checksum` VARCHAR(128),
+    `tile` TEXT,
+    `author` TEXT,
+    `description` TEXT,
+    `cover_res_id` BIGINT,
+    `store_type` VARCHAR(32) COMMENT 'content store type',
+    `store_uri` VARCHAR(32) COMMENT 'identify the store instance',
+    `content_type` VARCHAR(32) COMMENT 'object content type',
+    `content_length` BIGINT,
+    `content_uri` VARCHAR(1024) COMMENT 'object link info on storage',
+    `reference_count` BIGINT,
+    `create_time` DATETIME,
+    `access_time` DATETIME,
+
+    PRIMARY KEY (`id`),
+    INDEX `i_rtxt_res_checksum`(`checksum`),
+    INDEX `i_rtxt_res_create_time`(`create_time`),
+    INDEX `i_rtxt_res_access_time`(`access_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;
