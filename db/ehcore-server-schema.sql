@@ -122,6 +122,38 @@ CREATE TABLE `eh_stats_by_city` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_templates`;
+CREATE TABLE `eh_templates`(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(64),
+    `path` VARCHAR(256),
+    `type` TINYINT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_template_name`(`name`)    
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_feedbacks`;
+CREATE TABLE `eh_feedbacks`(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `uid` BIGINT,
+    `business_id` BIGINT,
+    `subject` VARCHAR(256),
+    `content` TEXT,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_feedback_create_time`(`create_time`),
+    INDEX `i_eh_feedback_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
 # key table of user-related partition group
 #
 DROP TABLE IF EXISTS `eh_users`;
@@ -506,6 +538,7 @@ CREATE TABLE `eh_address_claims` (
     `process_code` TINYINT,
     `process_details` TEXT,
     `proof_resource_id` BIGINT,
+    `proof_resource_url` VARCHAR(512),
     `create_time` DATETIME,
     `process_time` DATETIME,
     `delete_time` DATETIME,
@@ -593,6 +626,7 @@ CREATE TABLE `eh_banners` (
     `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
     `flow_data` TEXT,
     `resource_id` BIGINT,
+    `resource_url` VARCHAR(512), 
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
     `group_id` BIGINT COMMENT 'point to the group created for the banner',
     `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
@@ -955,6 +989,7 @@ CREATE TABLE `eh_poll_items`(
     `poll_id` BIGINT,
     `subject` VARCHAR(512),
     `resource_id` BIGINT,
+    `resource_url` VARCHAR(512),
     `vote_count` INTEGER NOT NULL DEFAULT 0,
     `change_version` INTEGER NOT NULL DEFAULT 0,
     `create_time` DATETIME,
@@ -980,6 +1015,94 @@ CREATE TABLE `eh_poll_votes`(
     UNIQUE `i_poll_vote_vote`(`poll_id`, `item_id`, `voter_uid`),
     INDEX `i_poll_vote_poll`(`poll_id`),
     INDEX `i_poll_vote_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of business management partition group
+#
+DROP TABLE IF EXISTS `eh_business`;
+CREATE TABLE `eh_business`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `name` VARCHAR(128),
+    `contact_number` VARCHAR(64), 
+    `category_id` BIGINT,
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(64),
+    `change_version` INTEGER,
+    `create_time` DATETIME,
+    `delete_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_biz_name`(`name`),
+    INDEX `i_eh_biz_geohash`(`geohash`),
+    INDEX `i_eh_biz_create_time`(`create_time`),
+    INDEX `i_eh_biz_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_business partition group
+#
+DROP TABLE IF EXISTS `eh_business_profiles`;
+CREATE TABLE `eh_business_profiles`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
+    `item_name` VARCHAR(32),
+    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `target_value` TEXT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_biz_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
+    INDEX `i_biz_prof_owner`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_business partition group
+#
+DROP TABLE IF EXISTS `eh_biz_coupon_groups`;
+CREATE TABLE `eh_biz_coupon_groups`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `business_id` BIGINT,
+    `name` VARCHAR(128),
+    `description` TEXT,
+    `verification_code` VARCHAR(64),
+    `tag` VARCHAR(500),
+    `rank` INTEGER,
+    `link_url` VARCHAR(256),
+    `status` INTEGER,
+    `start_time` DATETIME,
+    `expire_time` DATETIME,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_biz_coupon_business_id`(`business_id`),
+    INDEX `i_eh_biz_name`(`name`),
+    INDEX `i_eh_biz_start_time`(`start_time`),
+    INDEX `i_eh_biz_expire_time`(`expire_time`),
+    INDEX `i_eh_biz_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_business partition group
+#
+DROP TABLE IF EXISTS `eh_biz_coupon`;
+CREATE TABLE `eh_biz_coupon`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `business_id` BIGINT,
+    `coupon_group_id` BIGINT,
+    `coupon_number` VARCHAR(128),
+    `uid` BIGINT,
+    `family_id` BIGINT,
+    `status` INTEGER,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_biz_coupon_business_id`(`business_id`),    
+    INDEX `i_eh_biz_coupon_number`(`coupon_group_id`, `coupon_number`),    
+    INDEX `i_eh_biz_coupon_create_time`(`create_time`)    
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;
