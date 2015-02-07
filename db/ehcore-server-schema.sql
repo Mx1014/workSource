@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
     `id` INTEGER NOT NULL,
     `parent_id` INTEGER,
+    `link_id` INTEGER COMMENT 'point to the linked category (similar to soft link in file system)',
     `name` VARCHAR(128) NOT NULL,
     `path` VARCHAR(1024),
     `default_order` INTEGER,
