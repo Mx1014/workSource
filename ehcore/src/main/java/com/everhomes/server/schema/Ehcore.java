@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1390494998;
+	private static final long serialVersionUID = 1215697085;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -34,11 +34,52 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Table<?>> getTables0() {
 		return java.util.Arrays.<org.jooq.Table<?>>asList(
+			com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES,
+			com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER,
+			com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES,
+			com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS,
+			com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS,
+			com.everhomes.server.schema.tables.EhAreas.EH_AREAS,
+			com.everhomes.server.schema.tables.EhBanners.EH_BANNERS,
+			com.everhomes.server.schema.tables.EhBannerClicks.EH_BANNER_CLICKS,
+			com.everhomes.server.schema.tables.EhBannerOrders.EH_BANNER_ORDERS,
+			com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES,
+			com.everhomes.server.schema.tables.EhBinaryResources.EH_BINARY_RESOURCES,
+			com.everhomes.server.schema.tables.EhBizCoupon.EH_BIZ_COUPON,
+			com.everhomes.server.schema.tables.EhBizCouponGroups.EH_BIZ_COUPON_GROUPS,
 			com.everhomes.server.schema.tables.EhBorders.EH_BORDERS,
+			com.everhomes.server.schema.tables.EhBusiness.EH_BUSINESS,
+			com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES,
+			com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES,
+			com.everhomes.server.schema.tables.EhCities.EH_CITIES,
+			com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES,
+			com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES,
+			com.everhomes.server.schema.tables.EhCountries.EH_COUNTRIES,
+			com.everhomes.server.schema.tables.EhEvents.EH_EVENTS,
+			com.everhomes.server.schema.tables.EhEventProfiles.EH_EVENT_PROFILES,
+			com.everhomes.server.schema.tables.EhEventRoster.EH_EVENT_ROSTER,
+			com.everhomes.server.schema.tables.EhEventTickets.EH_EVENT_TICKETS,
+			com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS,
+			com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS,
+			com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS,
+			com.everhomes.server.schema.tables.EhFollowedFamilies.EH_FOLLOWED_FAMILIES,
 			com.everhomes.server.schema.tables.EhGroups.EH_GROUPS,
 			com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS,
+			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
+			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
+			com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES,
+			com.everhomes.server.schema.tables.EhProvinces.EH_PROVINCES,
+			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,
+			com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS,
+			com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS,
+			com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS,
+			com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY,
+			com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES,
 			com.everhomes.server.schema.tables.EhUsers.EH_USERS,
+			com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST,
 			com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS,
-			com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS);
+			com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS,
+			com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES,
+			com.everhomes.server.schema.tables.EhUserScopedConfigurations.EH_USER_SCOPED_CONFIGURATIONS);
 	}
 }

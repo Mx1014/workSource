@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> {
 
-	private static final long serialVersionUID = 1850380089;
+	private static final long serialVersionUID = -1563549090;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_groups</code>
@@ -35,6 +35,11 @@ public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_user_groups.owner_uid</code>. owner user id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> OWNER_UID = createField("owner_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner user id");
+
+	/**
+	 * The column <code>ehcore.eh_user_groups.group_discriminator</code>. redendant info for quickly distinguishing associated group
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.String> GROUP_DISCRIMINATOR = createField("group_discriminator", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "redendant info for quickly distinguishing associated group");
 
 	/**
 	 * The column <code>ehcore.eh_user_groups.group_id</code>.

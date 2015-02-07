@@ -29,7 +29,17 @@
             Watch out for case-sensitivity. Depending on your database, this might be important! -->
         <includes>
         eh_users | eh_user_identifiers | eh_user_groups | eh_groups | eh_group_members |
-        eh_borders
+        eh_borders | eh_categories | eh_state_triggers | eh_search_keywords | eh_app_promotions |
+        eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks | eh_user_blacklist |
+        eh_user_favorates | eh_user_profiles | eh_user_scoped_configurations | 
+        eh_countries | eh_provinces | eh_cities | eh_areas | eh_communities | 
+        eh_community_profiles | eh_addresses | eh_address_claims | eh_family_followers |
+        eh_followed_families | eh_banners | eh_banner_profiles | eh_banner_clicks | 
+        eh_banner_orders | eh_binary_resources | eh_rtxt_resources | 
+        eh_events | eh_event_roster | eh_event_ticket_groups | eh_event_tickets |
+        eh_event_profiles | eh_activities | eh_activity_roster | eh_polls |
+        eh_poll_items | eh_poll_votes | eh_business | eh_business_profiles | 
+        eh_biz_coupon_groups | eh_biz_coupon
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

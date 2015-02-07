@@ -11,10 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = 757933118;
+	private static final long serialVersionUID = -402452316;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
+	private java.lang.String   groupDiscriminator;
 	private java.lang.Long     groupId;
 	private java.lang.Long     memberRole;
 	private java.lang.Integer  memberStatus;
@@ -25,6 +26,7 @@ public class EhUserGroups implements java.io.Serializable {
 	public EhUserGroups(
 		java.lang.Long     id,
 		java.lang.Long     ownerUid,
+		java.lang.String   groupDiscriminator,
 		java.lang.Long     groupId,
 		java.lang.Long     memberRole,
 		java.lang.Integer  memberStatus,
@@ -32,6 +34,7 @@ public class EhUserGroups implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
+		this.groupDiscriminator = groupDiscriminator;
 		this.groupId = groupId;
 		this.memberRole = memberRole;
 		this.memberStatus = memberStatus;
@@ -52,6 +55,14 @@ public class EhUserGroups implements java.io.Serializable {
 
 	public void setOwnerUid(java.lang.Long ownerUid) {
 		this.ownerUid = ownerUid;
+	}
+
+	public java.lang.String getGroupDiscriminator() {
+		return this.groupDiscriminator;
+	}
+
+	public void setGroupDiscriminator(java.lang.String groupDiscriminator) {
+		this.groupDiscriminator = groupDiscriminator;
 	}
 
 	public java.lang.Long getGroupId() {

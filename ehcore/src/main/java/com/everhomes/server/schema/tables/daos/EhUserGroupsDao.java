@@ -55,6 +55,13 @@ public class EhUserGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>group_discriminator IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByGroupDiscriminator(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.GROUP_DISCRIMINATOR, values);
+	}
+
+	/**
 	 * Fetch records that have <code>group_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByGroupId(java.lang.Long... values) {

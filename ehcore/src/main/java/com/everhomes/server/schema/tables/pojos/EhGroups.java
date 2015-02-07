@@ -11,34 +11,79 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -211193923;
+	private static final long serialVersionUID = 714752569;
 
 	private java.lang.Long     id;
 	private java.lang.String   name;
+	private java.lang.String   avatar;
+	private java.lang.String   description;
 	private java.lang.Long     creatorUid;
 	private java.lang.Long     memberCount;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp deleteTime;
 	private java.lang.Byte     privateFlag;
 	private java.lang.Integer  joinPolicy;
+	private java.lang.Long     cityId;
+	private java.lang.String   discriminator;
+	private java.lang.Long     integralTag1;
+	private java.lang.Long     integralTag2;
+	private java.lang.Long     integralTag3;
+	private java.lang.Long     integralTag4;
+	private java.lang.Long     integralTag5;
+	private java.lang.String   commentTag1;
+	private java.lang.String   commentTag2;
+	private java.lang.String   commentTag3;
+	private java.lang.String   commentTag4;
+	private java.lang.String   commentTag5;
 
 	public EhGroups() {}
 
 	public EhGroups(
 		java.lang.Long     id,
 		java.lang.String   name,
+		java.lang.String   avatar,
+		java.lang.String   description,
 		java.lang.Long     creatorUid,
 		java.lang.Long     memberCount,
 		java.sql.Timestamp createTime,
+		java.sql.Timestamp deleteTime,
 		java.lang.Byte     privateFlag,
-		java.lang.Integer  joinPolicy
+		java.lang.Integer  joinPolicy,
+		java.lang.Long     cityId,
+		java.lang.String   discriminator,
+		java.lang.Long     integralTag1,
+		java.lang.Long     integralTag2,
+		java.lang.Long     integralTag3,
+		java.lang.Long     integralTag4,
+		java.lang.Long     integralTag5,
+		java.lang.String   commentTag1,
+		java.lang.String   commentTag2,
+		java.lang.String   commentTag3,
+		java.lang.String   commentTag4,
+		java.lang.String   commentTag5
 	) {
 		this.id = id;
 		this.name = name;
+		this.avatar = avatar;
+		this.description = description;
 		this.creatorUid = creatorUid;
 		this.memberCount = memberCount;
 		this.createTime = createTime;
+		this.deleteTime = deleteTime;
 		this.privateFlag = privateFlag;
 		this.joinPolicy = joinPolicy;
+		this.cityId = cityId;
+		this.discriminator = discriminator;
+		this.integralTag1 = integralTag1;
+		this.integralTag2 = integralTag2;
+		this.integralTag3 = integralTag3;
+		this.integralTag4 = integralTag4;
+		this.integralTag5 = integralTag5;
+		this.commentTag1 = commentTag1;
+		this.commentTag2 = commentTag2;
+		this.commentTag3 = commentTag3;
+		this.commentTag4 = commentTag4;
+		this.commentTag5 = commentTag5;
 	}
 
 	public java.lang.Long getId() {
@@ -55,6 +100,22 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setName(java.lang.String name) {
 		this.name = name;
+	}
+
+	public java.lang.String getAvatar() {
+		return this.avatar;
+	}
+
+	public void setAvatar(java.lang.String avatar) {
+		this.avatar = avatar;
+	}
+
+	public java.lang.String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(java.lang.String description) {
+		this.description = description;
 	}
 
 	public java.lang.Long getCreatorUid() {
@@ -81,6 +142,14 @@ public class EhGroups implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
+	public java.sql.Timestamp getDeleteTime() {
+		return this.deleteTime;
+	}
+
+	public void setDeleteTime(java.sql.Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
+	}
+
 	public java.lang.Byte getPrivateFlag() {
 		return this.privateFlag;
 	}
@@ -95,5 +164,101 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setJoinPolicy(java.lang.Integer joinPolicy) {
 		this.joinPolicy = joinPolicy;
+	}
+
+	public java.lang.Long getCityId() {
+		return this.cityId;
+	}
+
+	public void setCityId(java.lang.Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public java.lang.String getDiscriminator() {
+		return this.discriminator;
+	}
+
+	public void setDiscriminator(java.lang.String discriminator) {
+		this.discriminator = discriminator;
+	}
+
+	public java.lang.Long getIntegralTag1() {
+		return this.integralTag1;
+	}
+
+	public void setIntegralTag1(java.lang.Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+
+	public java.lang.Long getIntegralTag2() {
+		return this.integralTag2;
+	}
+
+	public void setIntegralTag2(java.lang.Long integralTag2) {
+		this.integralTag2 = integralTag2;
+	}
+
+	public java.lang.Long getIntegralTag3() {
+		return this.integralTag3;
+	}
+
+	public void setIntegralTag3(java.lang.Long integralTag3) {
+		this.integralTag3 = integralTag3;
+	}
+
+	public java.lang.Long getIntegralTag4() {
+		return this.integralTag4;
+	}
+
+	public void setIntegralTag4(java.lang.Long integralTag4) {
+		this.integralTag4 = integralTag4;
+	}
+
+	public java.lang.Long getIntegralTag5() {
+		return this.integralTag5;
+	}
+
+	public void setIntegralTag5(java.lang.Long integralTag5) {
+		this.integralTag5 = integralTag5;
+	}
+
+	public java.lang.String getCommentTag1() {
+		return this.commentTag1;
+	}
+
+	public void setCommentTag1(java.lang.String commentTag1) {
+		this.commentTag1 = commentTag1;
+	}
+
+	public java.lang.String getCommentTag2() {
+		return this.commentTag2;
+	}
+
+	public void setCommentTag2(java.lang.String commentTag2) {
+		this.commentTag2 = commentTag2;
+	}
+
+	public java.lang.String getCommentTag3() {
+		return this.commentTag3;
+	}
+
+	public void setCommentTag3(java.lang.String commentTag3) {
+		this.commentTag3 = commentTag3;
+	}
+
+	public java.lang.String getCommentTag4() {
+		return this.commentTag4;
+	}
+
+	public void setCommentTag4(java.lang.String commentTag4) {
+		this.commentTag4 = commentTag4;
+	}
+
+	public java.lang.String getCommentTag5() {
+		return this.commentTag5;
+	}
+
+	public void setCommentTag5(java.lang.String commentTag5) {
+		this.commentTag5 = commentTag5;
 	}
 }

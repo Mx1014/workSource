@@ -14,9 +14,149 @@ package com.everhomes.server.schema;
 public class Tables {
 
 	/**
+	 * The table ehcore.eh_activities
+	 */
+	public static final com.everhomes.server.schema.tables.EhActivities EH_ACTIVITIES = com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES;
+
+	/**
+	 * The table ehcore.eh_activity_roster
+	 */
+	public static final com.everhomes.server.schema.tables.EhActivityRoster EH_ACTIVITY_ROSTER = com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER;
+
+	/**
+	 * The table ehcore.eh_addresses
+	 */
+	public static final com.everhomes.server.schema.tables.EhAddresses EH_ADDRESSES = com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES;
+
+	/**
+	 * The table ehcore.eh_address_claims
+	 */
+	public static final com.everhomes.server.schema.tables.EhAddressClaims EH_ADDRESS_CLAIMS = com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS;
+
+	/**
+	 * The table ehcore.eh_app_promotions
+	 */
+	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
+
+	/**
+	 * The table ehcore.eh_areas
+	 */
+	public static final com.everhomes.server.schema.tables.EhAreas EH_AREAS = com.everhomes.server.schema.tables.EhAreas.EH_AREAS;
+
+	/**
+	 * The table ehcore.eh_banners
+	 */
+	public static final com.everhomes.server.schema.tables.EhBanners EH_BANNERS = com.everhomes.server.schema.tables.EhBanners.EH_BANNERS;
+
+	/**
+	 * The table ehcore.eh_banner_clicks
+	 */
+	public static final com.everhomes.server.schema.tables.EhBannerClicks EH_BANNER_CLICKS = com.everhomes.server.schema.tables.EhBannerClicks.EH_BANNER_CLICKS;
+
+	/**
+	 * The table ehcore.eh_banner_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhBannerOrders EH_BANNER_ORDERS = com.everhomes.server.schema.tables.EhBannerOrders.EH_BANNER_ORDERS;
+
+	/**
+	 * The table ehcore.eh_banner_profiles
+	 */
+	public static final com.everhomes.server.schema.tables.EhBannerProfiles EH_BANNER_PROFILES = com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES;
+
+	/**
+	 * The table ehcore.eh_binary_resources
+	 */
+	public static final com.everhomes.server.schema.tables.EhBinaryResources EH_BINARY_RESOURCES = com.everhomes.server.schema.tables.EhBinaryResources.EH_BINARY_RESOURCES;
+
+	/**
+	 * The table ehcore.eh_biz_coupon
+	 */
+	public static final com.everhomes.server.schema.tables.EhBizCoupon EH_BIZ_COUPON = com.everhomes.server.schema.tables.EhBizCoupon.EH_BIZ_COUPON;
+
+	/**
+	 * The table ehcore.eh_biz_coupon_groups
+	 */
+	public static final com.everhomes.server.schema.tables.EhBizCouponGroups EH_BIZ_COUPON_GROUPS = com.everhomes.server.schema.tables.EhBizCouponGroups.EH_BIZ_COUPON_GROUPS;
+
+	/**
 	 * The table ehcore.eh_borders
 	 */
 	public static final com.everhomes.server.schema.tables.EhBorders EH_BORDERS = com.everhomes.server.schema.tables.EhBorders.EH_BORDERS;
+
+	/**
+	 * The table ehcore.eh_business
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusiness EH_BUSINESS = com.everhomes.server.schema.tables.EhBusiness.EH_BUSINESS;
+
+	/**
+	 * The table ehcore.eh_business_profiles
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessProfiles EH_BUSINESS_PROFILES = com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES;
+
+	/**
+	 * The table ehcore.eh_categories
+	 */
+	public static final com.everhomes.server.schema.tables.EhCategories EH_CATEGORIES = com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES;
+
+	/**
+	 * The table ehcore.eh_cities
+	 */
+	public static final com.everhomes.server.schema.tables.EhCities EH_CITIES = com.everhomes.server.schema.tables.EhCities.EH_CITIES;
+
+	/**
+	 * The table ehcore.eh_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunities EH_COMMUNITIES = com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES;
+
+	/**
+	 * The table ehcore.eh_community_profiles
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
+
+	/**
+	 * The table ehcore.eh_countries
+	 */
+	public static final com.everhomes.server.schema.tables.EhCountries EH_COUNTRIES = com.everhomes.server.schema.tables.EhCountries.EH_COUNTRIES;
+
+	/**
+	 * The table ehcore.eh_events
+	 */
+	public static final com.everhomes.server.schema.tables.EhEvents EH_EVENTS = com.everhomes.server.schema.tables.EhEvents.EH_EVENTS;
+
+	/**
+	 * The table ehcore.eh_event_profiles
+	 */
+	public static final com.everhomes.server.schema.tables.EhEventProfiles EH_EVENT_PROFILES = com.everhomes.server.schema.tables.EhEventProfiles.EH_EVENT_PROFILES;
+
+	/**
+	 * The table ehcore.eh_event_roster
+	 */
+	public static final com.everhomes.server.schema.tables.EhEventRoster EH_EVENT_ROSTER = com.everhomes.server.schema.tables.EhEventRoster.EH_EVENT_ROSTER;
+
+	/**
+	 * The table ehcore.eh_event_tickets
+	 */
+	public static final com.everhomes.server.schema.tables.EhEventTickets EH_EVENT_TICKETS = com.everhomes.server.schema.tables.EhEventTickets.EH_EVENT_TICKETS;
+
+	/**
+	 * The table ehcore.eh_event_ticket_groups
+	 */
+	public static final com.everhomes.server.schema.tables.EhEventTicketGroups EH_EVENT_TICKET_GROUPS = com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS;
+
+	/**
+	 * The table ehcore.eh_family_followers
+	 */
+	public static final com.everhomes.server.schema.tables.EhFamilyFollowers EH_FAMILY_FOLLOWERS = com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS;
+
+	/**
+	 * The table ehcore.eh_feedbacks
+	 */
+	public static final com.everhomes.server.schema.tables.EhFeedbacks EH_FEEDBACKS = com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS;
+
+	/**
+	 * The table ehcore.eh_followed_families
+	 */
+	public static final com.everhomes.server.schema.tables.EhFollowedFamilies EH_FOLLOWED_FAMILIES = com.everhomes.server.schema.tables.EhFollowedFamilies.EH_FOLLOWED_FAMILIES;
 
 	/**
 	 * The table ehcore.eh_groups
@@ -29,9 +169,64 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhGroupMembers EH_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS;
 
 	/**
+	 * The table ehcore.eh_polls
+	 */
+	public static final com.everhomes.server.schema.tables.EhPolls EH_POLLS = com.everhomes.server.schema.tables.EhPolls.EH_POLLS;
+
+	/**
+	 * The table ehcore.eh_poll_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhPollItems EH_POLL_ITEMS = com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS;
+
+	/**
+	 * The table ehcore.eh_poll_votes
+	 */
+	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
+
+	/**
+	 * The table ehcore.eh_provinces
+	 */
+	public static final com.everhomes.server.schema.tables.EhProvinces EH_PROVINCES = com.everhomes.server.schema.tables.EhProvinces.EH_PROVINCES;
+
+	/**
+	 * The table ehcore.eh_rtxt_resources
+	 */
+	public static final com.everhomes.server.schema.tables.EhRtxtResources EH_RTXT_RESOURCES = com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES;
+
+	/**
+	 * The table ehcore.eh_scoped_configurations
+	 */
+	public static final com.everhomes.server.schema.tables.EhScopedConfigurations EH_SCOPED_CONFIGURATIONS = com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS;
+
+	/**
+	 * The table ehcore.eh_search_keywords
+	 */
+	public static final com.everhomes.server.schema.tables.EhSearchKeywords EH_SEARCH_KEYWORDS = com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS;
+
+	/**
+	 * The table ehcore.eh_state_triggers
+	 */
+	public static final com.everhomes.server.schema.tables.EhStateTriggers EH_STATE_TRIGGERS = com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS;
+
+	/**
+	 * The table ehcore.eh_stats_by_city
+	 */
+	public static final com.everhomes.server.schema.tables.EhStatsByCity EH_STATS_BY_CITY = com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY;
+
+	/**
+	 * The table ehcore.eh_templates
+	 */
+	public static final com.everhomes.server.schema.tables.EhTemplates EH_TEMPLATES = com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES;
+
+	/**
 	 * The table ehcore.eh_users
 	 */
 	public static final com.everhomes.server.schema.tables.EhUsers EH_USERS = com.everhomes.server.schema.tables.EhUsers.EH_USERS;
+
+	/**
+	 * The table ehcore.eh_user_blacklist
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserBlacklist EH_USER_BLACKLIST = com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST;
 
 	/**
 	 * The table ehcore.eh_user_groups
@@ -42,4 +237,14 @@ public class Tables {
 	 * The table ehcore.eh_user_identifiers
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserIdentifiers EH_USER_IDENTIFIERS = com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
+
+	/**
+	 * The table ehcore.eh_user_profiles
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserProfiles EH_USER_PROFILES = com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES;
+
+	/**
+	 * The table ehcore.eh_user_scoped_configurations
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserScopedConfigurations EH_USER_SCOPED_CONFIGURATIONS = com.everhomes.server.schema.tables.EhUserScopedConfigurations.EH_USER_SCOPED_CONFIGURATIONS;
 }
