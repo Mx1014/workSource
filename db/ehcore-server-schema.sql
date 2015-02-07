@@ -99,6 +99,29 @@ CREATE TABLE `eh_app_promotions` (
 
 #
 # member of global partition
+#
+DROP TABLE IF EXISTS `eh_scoped_configurations`;
+CREATE TABLE `eh_scoped_configurations`(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `app_id` BIGINT,
+    `scope_type` VARCHAR(32),
+    `scope_id` BIGINT,
+    `name` VARCHAR(32),
+    `item_group` VARCHAR(32),
+    `item_name` VARCHAR(32),
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `item_value` TEXT,
+    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_scoped_cfg_combo`(`app_id`, `scope_type`, `scope_id`, `name`, `item_group`, `item_name`),
+    INDEX `i_eh_scoped_cfg_name`(`app_id`, `scope_type`, `scope_id`, `name`)
+);
+
+#
+# member of global partition
 # for compatibility reason, this table is basically cloned from old DB
 #
 DROP TABLE IF EXISTS `eh_stats_by_city`;
@@ -280,6 +303,31 @@ CREATE TABLE `eh_user_profiles`(
     UNIQUE `u_user_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
     INDEX `i_user_prof_owner`(`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_users partition
+#
+DROP TABLE IF EXISTS `eh_user_scoped_configurations`;
+CREATE TABLE `eh_user_scoped_configurations`(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
+    `app_id` BIGINT,
+    `scope_type` VARCHAR(32),
+    `scope_id` BIGINT,
+    `name` VARCHAR(32),
+    `item_group` VARCHAR(32),
+    `item_name` VARCHAR(32),
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `item_value` TEXT,
+    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_scoped_cfg_owner`(`owner_id`),
+    INDEX `i_eh_scoped_cfg_combo`(`owner_id`, `app_id`, `scope_type`, `scope_id`, `name`, `item_group`, `item_name`),
+    INDEX `i_eh_scoped_cfg_name`(`owner_id`, `app_id`, `scope_type`, `scope_id`, `name`)
+);
 
 #
 # key table of grouping related partition group
