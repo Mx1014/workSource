@@ -1,0 +1,9 @@
+cscope.*
+tags
+db/test.sql
+.classpath
+.project
+.settings
+ehcore.log
+ehcore/atomikos
+ehrest/target
