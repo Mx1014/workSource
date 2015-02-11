@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.bootstrap;
 
 import org.springframework.beans.factory.annotation.Autowired;

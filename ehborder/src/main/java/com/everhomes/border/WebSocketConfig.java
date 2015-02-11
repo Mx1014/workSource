@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.border;
 
 import org.springframework.context.annotation.Bean;
