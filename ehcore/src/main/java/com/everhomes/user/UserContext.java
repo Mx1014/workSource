@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.user;
 
 import com.everhomes.app.App;

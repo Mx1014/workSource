@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.junit;
 
 import org.springframework.context.ApplicationContextInitializer;

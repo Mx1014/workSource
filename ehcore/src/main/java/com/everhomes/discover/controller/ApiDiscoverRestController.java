@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.discover.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;

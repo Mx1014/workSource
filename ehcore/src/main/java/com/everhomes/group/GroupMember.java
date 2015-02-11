@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.group;
 
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;

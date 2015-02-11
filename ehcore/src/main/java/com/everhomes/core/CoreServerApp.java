@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.core;
 
 import org.springframework.boot.SpringApplication;

@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.user;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;

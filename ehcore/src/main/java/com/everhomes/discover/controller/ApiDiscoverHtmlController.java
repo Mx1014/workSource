@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.discover.controller;
 
 import javax.servlet.http.HttpServletRequest;
