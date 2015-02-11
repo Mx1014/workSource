@@ -8,6 +8,7 @@ import com.everhomes.discover.ItemType;
 public class LogonCommandResponse {
     private long uid;
     private String loginToken;
+    private String contentServer;
 
     @ItemType(String.class)
     private List<String> accessPoints;
@@ -34,6 +35,14 @@ public class LogonCommandResponse {
 
     public void setLoginToken(String loginToken) {
         this.loginToken = loginToken;
+    }
+    
+    public String getContentServer() {
+        return contentServer;
+    }
+    
+    public void setContentServer(String contentServer) {
+        this.contentServer = contentServer;
     }
     
     public List<String> getAccessPoints() {
