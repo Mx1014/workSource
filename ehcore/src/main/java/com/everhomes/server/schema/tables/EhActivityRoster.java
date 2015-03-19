@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> {
 
-	private static final long serialVersionUID = 1041131926;
+	private static final long serialVersionUID = 430259572;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activity_roster</code>
@@ -141,7 +141,7 @@ public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_ACTIVITY_UUID, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_ACTIVITY_USER);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_UUID, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_USER);
 	}
 
 	/**

@@ -48,6 +48,13 @@ public class EhPollsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPolls.EH_POLLS.NAMESPACE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>subject IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchBySubject(java.lang.String... values) {

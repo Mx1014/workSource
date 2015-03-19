@@ -48,6 +48,13 @@ public class EhBusinessProfilesDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
+	 * Fetch records that have <code>app_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByAppId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.APP_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByOwnerId(java.lang.Long... values) {
@@ -62,17 +69,17 @@ public class EhBusinessProfilesDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>item_group IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByItemGroup(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.ITEM_GROUP, values);
-	}
-
-	/**
 	 * Fetch records that have <code>item_kind IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByItemKind(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.ITEM_KIND, values);
+	}
+
+	/**
+	 * Fetch records that have <code>item_value IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByItemValue(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.ITEM_VALUE, values);
 	}
 
 	/**
@@ -90,9 +97,72 @@ public class EhBusinessProfilesDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>target_value IN (values)</code>
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByTargetValue(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.TARGET_VALUE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinessProfiles> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.STRING_TAG5, values);
 	}
 }

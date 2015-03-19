@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> implements org.jooq.Record19<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Timestamp, java.sql.Timestamp, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String> {
 
-	private static final long serialVersionUID = 49741439;
+	private static final long serialVersionUID = 150779415;
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.id</code>. id of the record
@@ -210,72 +210,72 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.comment_tag1</code>.
+	 * Setter for <code>ehcore.eh_addresses.string_tag1</code>.
 	 */
-	public void setCommentTag1(java.lang.String value) {
+	public void setStringTag1(java.lang.String value) {
 		setValue(14, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.comment_tag1</code>.
+	 * Getter for <code>ehcore.eh_addresses.string_tag1</code>.
 	 */
-	public java.lang.String getCommentTag1() {
+	public java.lang.String getStringTag1() {
 		return (java.lang.String) getValue(14);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.comment_tag2</code>.
+	 * Setter for <code>ehcore.eh_addresses.string_tag2</code>.
 	 */
-	public void setCommentTag2(java.lang.String value) {
+	public void setStringTag2(java.lang.String value) {
 		setValue(15, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.comment_tag2</code>.
+	 * Getter for <code>ehcore.eh_addresses.string_tag2</code>.
 	 */
-	public java.lang.String getCommentTag2() {
+	public java.lang.String getStringTag2() {
 		return (java.lang.String) getValue(15);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.comment_tag3</code>.
+	 * Setter for <code>ehcore.eh_addresses.string_tag3</code>.
 	 */
-	public void setCommentTag3(java.lang.String value) {
+	public void setStringTag3(java.lang.String value) {
 		setValue(16, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.comment_tag3</code>.
+	 * Getter for <code>ehcore.eh_addresses.string_tag3</code>.
 	 */
-	public java.lang.String getCommentTag3() {
+	public java.lang.String getStringTag3() {
 		return (java.lang.String) getValue(16);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.comment_tag4</code>.
+	 * Setter for <code>ehcore.eh_addresses.string_tag4</code>.
 	 */
-	public void setCommentTag4(java.lang.String value) {
+	public void setStringTag4(java.lang.String value) {
 		setValue(17, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.comment_tag4</code>.
+	 * Getter for <code>ehcore.eh_addresses.string_tag4</code>.
 	 */
-	public java.lang.String getCommentTag4() {
+	public java.lang.String getStringTag4() {
 		return (java.lang.String) getValue(17);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.comment_tag5</code>.
+	 * Setter for <code>ehcore.eh_addresses.string_tag5</code>.
 	 */
-	public void setCommentTag5(java.lang.String value) {
+	public void setStringTag5(java.lang.String value) {
 		setValue(18, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.comment_tag5</code>.
+	 * Getter for <code>ehcore.eh_addresses.string_tag5</code>.
 	 */
-	public java.lang.String getCommentTag5() {
+	public java.lang.String getStringTag5() {
 		return (java.lang.String) getValue(18);
 	}
 
@@ -428,7 +428,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field15() {
-		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG1;
+		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG1;
 	}
 
 	/**
@@ -436,7 +436,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field16() {
-		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG2;
+		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG2;
 	}
 
 	/**
@@ -444,7 +444,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field17() {
-		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG3;
+		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG3;
 	}
 
 	/**
@@ -452,7 +452,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field18() {
-		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG4;
+		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG4;
 	}
 
 	/**
@@ -460,7 +460,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public org.jooq.Field<java.lang.String> field19() {
-		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG5;
+		return com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG5;
 	}
 
 	/**
@@ -580,7 +580,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public java.lang.String value15() {
-		return getCommentTag1();
+		return getStringTag1();
 	}
 
 	/**
@@ -588,7 +588,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public java.lang.String value16() {
-		return getCommentTag2();
+		return getStringTag2();
 	}
 
 	/**
@@ -596,7 +596,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public java.lang.String value17() {
-		return getCommentTag3();
+		return getStringTag3();
 	}
 
 	/**
@@ -604,7 +604,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public java.lang.String value18() {
-		return getCommentTag4();
+		return getStringTag4();
 	}
 
 	/**
@@ -612,7 +612,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public java.lang.String value19() {
-		return getCommentTag5();
+		return getStringTag5();
 	}
 
 	/**
@@ -746,7 +746,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public EhAddressesRecord value15(java.lang.String value) {
-		setCommentTag1(value);
+		setStringTag1(value);
 		return this;
 	}
 
@@ -755,7 +755,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public EhAddressesRecord value16(java.lang.String value) {
-		setCommentTag2(value);
+		setStringTag2(value);
 		return this;
 	}
 
@@ -764,7 +764,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public EhAddressesRecord value17(java.lang.String value) {
-		setCommentTag3(value);
+		setStringTag3(value);
 		return this;
 	}
 
@@ -773,7 +773,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public EhAddressesRecord value18(java.lang.String value) {
-		setCommentTag4(value);
+		setStringTag4(value);
 		return this;
 	}
 
@@ -782,7 +782,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	 */
 	@Override
 	public EhAddressesRecord value19(java.lang.String value) {
-		setCommentTag5(value);
+		setStringTag5(value);
 		return this;
 	}
 
@@ -808,7 +808,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	/**
 	 * Create a detached, initialised EhAddressesRecord
 	 */
-	public EhAddressesRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String address, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String appartmentName, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String commentTag1, java.lang.String commentTag2, java.lang.String commentTag3, java.lang.String commentTag4, java.lang.String commentTag5) {
+	public EhAddressesRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String address, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String appartmentName, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES);
 
 		setValue(0, id);
@@ -825,10 +825,10 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		setValue(11, integralTag3);
 		setValue(12, integralTag4);
 		setValue(13, integralTag5);
-		setValue(14, commentTag1);
-		setValue(15, commentTag2);
-		setValue(16, commentTag3);
-		setValue(17, commentTag4);
-		setValue(18, commentTag5);
+		setValue(14, stringTag1);
+		setValue(15, stringTag2);
+		setValue(16, stringTag3);
+		setValue(17, stringTag4);
+		setValue(18, stringTag5);
 	}
 }

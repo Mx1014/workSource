@@ -11,79 +11,82 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = 714752569;
+	private static final long serialVersionUID = -1026395971;
 
 	private java.lang.Long     id;
+	private java.lang.Integer  namespaceId;
 	private java.lang.String   name;
 	private java.lang.String   avatar;
 	private java.lang.String   description;
 	private java.lang.Long     creatorUid;
-	private java.lang.Long     memberCount;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 	private java.lang.Byte     privateFlag;
 	private java.lang.Integer  joinPolicy;
-	private java.lang.Long     cityId;
 	private java.lang.String   discriminator;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
 	private java.lang.Long     integralTag4;
 	private java.lang.Long     integralTag5;
-	private java.lang.String   commentTag1;
-	private java.lang.String   commentTag2;
-	private java.lang.String   commentTag3;
-	private java.lang.String   commentTag4;
-	private java.lang.String   commentTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
+	private java.lang.Long     regionId;
+	private java.lang.Long     memberCount;
 
 	public EhGroups() {}
 
 	public EhGroups(
 		java.lang.Long     id,
+		java.lang.Integer  namespaceId,
 		java.lang.String   name,
 		java.lang.String   avatar,
 		java.lang.String   description,
 		java.lang.Long     creatorUid,
-		java.lang.Long     memberCount,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
 		java.lang.Byte     privateFlag,
 		java.lang.Integer  joinPolicy,
-		java.lang.Long     cityId,
 		java.lang.String   discriminator,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
 		java.lang.Long     integralTag4,
 		java.lang.Long     integralTag5,
-		java.lang.String   commentTag1,
-		java.lang.String   commentTag2,
-		java.lang.String   commentTag3,
-		java.lang.String   commentTag4,
-		java.lang.String   commentTag5
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5,
+		java.lang.Long     regionId,
+		java.lang.Long     memberCount
 	) {
 		this.id = id;
+		this.namespaceId = namespaceId;
 		this.name = name;
 		this.avatar = avatar;
 		this.description = description;
 		this.creatorUid = creatorUid;
-		this.memberCount = memberCount;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
 		this.privateFlag = privateFlag;
 		this.joinPolicy = joinPolicy;
-		this.cityId = cityId;
 		this.discriminator = discriminator;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
 		this.integralTag4 = integralTag4;
 		this.integralTag5 = integralTag5;
-		this.commentTag1 = commentTag1;
-		this.commentTag2 = commentTag2;
-		this.commentTag3 = commentTag3;
-		this.commentTag4 = commentTag4;
-		this.commentTag5 = commentTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
+		this.regionId = regionId;
+		this.memberCount = memberCount;
 	}
 
 	public java.lang.Long getId() {
@@ -92,6 +95,14 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.String getName() {
@@ -126,14 +137,6 @@ public class EhGroups implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 	}
 
-	public java.lang.Long getMemberCount() {
-		return this.memberCount;
-	}
-
-	public void setMemberCount(java.lang.Long memberCount) {
-		this.memberCount = memberCount;
-	}
-
 	public java.sql.Timestamp getCreateTime() {
 		return this.createTime;
 	}
@@ -164,14 +167,6 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setJoinPolicy(java.lang.Integer joinPolicy) {
 		this.joinPolicy = joinPolicy;
-	}
-
-	public java.lang.Long getCityId() {
-		return this.cityId;
-	}
-
-	public void setCityId(java.lang.Long cityId) {
-		this.cityId = cityId;
 	}
 
 	public java.lang.String getDiscriminator() {
@@ -222,43 +217,59 @@ public class EhGroups implements java.io.Serializable {
 		this.integralTag5 = integralTag5;
 	}
 
-	public java.lang.String getCommentTag1() {
-		return this.commentTag1;
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
 	}
 
-	public void setCommentTag1(java.lang.String commentTag1) {
-		this.commentTag1 = commentTag1;
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
 	}
 
-	public java.lang.String getCommentTag2() {
-		return this.commentTag2;
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
 	}
 
-	public void setCommentTag2(java.lang.String commentTag2) {
-		this.commentTag2 = commentTag2;
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
 	}
 
-	public java.lang.String getCommentTag3() {
-		return this.commentTag3;
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
 	}
 
-	public void setCommentTag3(java.lang.String commentTag3) {
-		this.commentTag3 = commentTag3;
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
 	}
 
-	public java.lang.String getCommentTag4() {
-		return this.commentTag4;
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
 	}
 
-	public void setCommentTag4(java.lang.String commentTag4) {
-		this.commentTag4 = commentTag4;
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
 	}
 
-	public java.lang.String getCommentTag5() {
-		return this.commentTag5;
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
 	}
 
-	public void setCommentTag5(java.lang.String commentTag5) {
-		this.commentTag5 = commentTag5;
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Long getRegionId() {
+		return this.regionId;
+	}
+
+	public void setRegionId(java.lang.Long regionId) {
+		this.regionId = regionId;
+	}
+
+	public java.lang.Long getMemberCount() {
+		return this.memberCount;
+	}
+
+	public void setMemberCount(java.lang.Long memberCount) {
+		this.memberCount = memberCount;
 	}
 }

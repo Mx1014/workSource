@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFollowedFamilies extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord> {
 
-	private static final long serialVersionUID = -2062087748;
+	private static final long serialVersionUID = 2067804974;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_followed_families</code>
@@ -91,7 +91,7 @@ public class EhFollowedFamilies extends org.jooq.impl.TableImpl<com.everhomes.se
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_FOLLOWED_FAMILIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_FOLLOWED_FAMILIES_I_FM_FOLLOWED_FOLLOWED);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_FOLLOWED_FAMILIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_FOLLOWED_FAMILIES_I_EH_FM_FOLLOWED_FOLLOWED);
 	}
 
 	/**

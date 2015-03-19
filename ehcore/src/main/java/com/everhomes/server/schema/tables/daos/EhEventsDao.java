@@ -48,6 +48,13 @@ public class EhEventsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEvents> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEvents.EH_EVENTS.NAMESPACE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>subject IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEvents> fetchBySubject(java.lang.String... values) {

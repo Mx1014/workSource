@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord> {
 
-	private static final long serialVersionUID = -233533965;
+	private static final long serialVersionUID = 2075538157;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_scoped_configurations</code>
@@ -32,6 +32,11 @@ public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhome
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_scoped_configurations.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_scoped_configurations.app_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> APP_ID = createField("app_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
@@ -47,24 +52,19 @@ public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhome
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_scoped_configurations.name</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_scoped_configurations.item_group</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> ITEM_GROUP = createField("item_group", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_scoped_configurations.item_name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> ITEM_NAME = createField("item_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_scoped_configurations.item_kind</code>. 0, opaque value, 1: entity
+	 * The column <code>ehcore.eh_scoped_configurations.item_kind</code>. 0, opaque json value, 1: entity
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Byte> ITEM_KIND = createField("item_kind", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0, opaque value, 1: entity");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Byte> ITEM_KIND = createField("item_kind", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0, opaque json value, 1: entity");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.item_value</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> ITEM_VALUE = createField("item_value", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_scoped_configurations.target_type</code>.
@@ -77,14 +77,59 @@ public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhome
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_scoped_configurations.item_value</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> ITEM_VALUE = createField("item_value", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_scoped_configurations.apply_policy</code>. 0: default, 1: override, 2: revert
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Byte> APPLY_POLICY = createField("apply_policy", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: default, 1: override, 2: revert");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.integral_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> INTEGRAL_TAG1 = createField("integral_tag1", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.integral_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> INTEGRAL_TAG2 = createField("integral_tag2", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.integral_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> INTEGRAL_TAG3 = createField("integral_tag3", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.integral_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> INTEGRAL_TAG4 = createField("integral_tag4", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.integral_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> INTEGRAL_TAG5 = createField("integral_tag5", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.string_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> STRING_TAG1 = createField("string_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.string_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> STRING_TAG2 = createField("string_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.string_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> STRING_TAG3 = createField("string_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.string_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> STRING_TAG4 = createField("string_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scoped_configurations.string_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_scoped_configurations</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEventTicketGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEventTicketGroupsRecord> {
 
-	private static final long serialVersionUID = -1597881934;
+	private static final long serialVersionUID = 1351105957;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_event_ticket_groups</code>
@@ -91,7 +91,7 @@ public class EhEventTicketGroups extends org.jooq.impl.TableImpl<com.everhomes.s
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventTicketGroupsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventTicketGroupsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_EVENT_TICKET_GROUPS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_EVENT_TICKET_GROUPS_U_EVENT_TG_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventTicketGroupsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_EVENT_TICKET_GROUPS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_EVENT_TICKET_GROUPS_U_EH_EVT_TG_NAME);
 	}
 
 	/**

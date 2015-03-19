@@ -48,6 +48,13 @@ public class EhBinaryResourcesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBinaryResources> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBinaryResources.EH_BINARY_RESOURCES.NAMESPACE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>checksum IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBinaryResources> fetchByChecksum(java.lang.String... values) {

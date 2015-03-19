@@ -48,6 +48,13 @@ public class EhBannerProfilesDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
+	 * Fetch records that have <code>app_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByAppId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.APP_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByOwnerId(java.lang.Long... values) {
@@ -62,17 +69,17 @@ public class EhBannerProfilesDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>item_group IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByItemGroup(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.ITEM_GROUP, values);
-	}
-
-	/**
 	 * Fetch records that have <code>item_kind IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByItemKind(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.ITEM_KIND, values);
+	}
+
+	/**
+	 * Fetch records that have <code>item_value IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByItemValue(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.ITEM_VALUE, values);
 	}
 
 	/**
@@ -90,9 +97,72 @@ public class EhBannerProfilesDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>target_value IN (values)</code>
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByTargetValue(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.TARGET_VALUE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBannerProfiles> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES.STRING_TAG5, values);
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEventRoster extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEventRosterRecord> {
 
-	private static final long serialVersionUID = 189923655;
+	private static final long serialVersionUID = -1318252093;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_event_roster</code>
@@ -116,7 +116,7 @@ public class EhEventRoster extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventRosterRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventRosterRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_EVENT_ROSTER_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_EVENT_ROSTER_U_EVENT_ROSTER_UUID, com.everhomes.server.schema.Keys.KEY_EH_EVENT_ROSTER_U_EVENT_ROSTER_ATTENDEE);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventRosterRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_EVENT_ROSTER_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_EVENT_ROSTER_U_EH_EVT_ROSTER_UUID, com.everhomes.server.schema.Keys.KEY_EH_EVENT_ROSTER_U_EH_EVT_ROSTER_ATTENDEE);
 	}
 
 	/**

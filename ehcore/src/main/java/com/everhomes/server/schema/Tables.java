@@ -39,11 +39,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
 
 	/**
-	 * The table ehcore.eh_areas
-	 */
-	public static final com.everhomes.server.schema.tables.EhAreas EH_AREAS = com.everhomes.server.schema.tables.EhAreas.EH_AREAS;
-
-	/**
 	 * The table ehcore.eh_banners
 	 */
 	public static final com.everhomes.server.schema.tables.EhBanners EH_BANNERS = com.everhomes.server.schema.tables.EhBanners.EH_BANNERS;
@@ -99,11 +94,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCategories EH_CATEGORIES = com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES;
 
 	/**
-	 * The table ehcore.eh_cities
-	 */
-	public static final com.everhomes.server.schema.tables.EhCities EH_CITIES = com.everhomes.server.schema.tables.EhCities.EH_CITIES;
-
-	/**
 	 * The table ehcore.eh_communities
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunities EH_COMMUNITIES = com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES;
@@ -112,11 +102,6 @@ public class Tables {
 	 * The table ehcore.eh_community_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
-
-	/**
-	 * The table ehcore.eh_countries
-	 */
-	public static final com.everhomes.server.schema.tables.EhCountries EH_COUNTRIES = com.everhomes.server.schema.tables.EhCountries.EH_COUNTRIES;
 
 	/**
 	 * The table ehcore.eh_events
@@ -184,11 +169,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
-	 * The table ehcore.eh_provinces
-	 */
-	public static final com.everhomes.server.schema.tables.EhProvinces EH_PROVINCES = com.everhomes.server.schema.tables.EhProvinces.EH_PROVINCES;
-
-	/**
 	 * The table ehcore.eh_rtxt_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhRtxtResources EH_RTXT_RESOURCES = com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES;
@@ -242,9 +222,4 @@ public class Tables {
 	 * The table ehcore.eh_user_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserProfiles EH_USER_PROFILES = com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES;
-
-	/**
-	 * The table ehcore.eh_user_scoped_configurations
-	 */
-	public static final com.everhomes.server.schema.tables.EhUserScopedConfigurations EH_USER_SCOPED_CONFIGURATIONS = com.everhomes.server.schema.tables.EhUserScopedConfigurations.EH_USER_SCOPED_CONFIGURATIONS;
 }

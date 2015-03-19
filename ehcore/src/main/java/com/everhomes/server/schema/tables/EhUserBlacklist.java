@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserBlacklist extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserBlacklistRecord> {
 
-	private static final long serialVersionUID = -728959801;
+	private static final long serialVersionUID = -1193450023;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_blacklist</code>
@@ -91,7 +91,7 @@ public class EhUserBlacklist extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserBlacklistRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserBlacklistRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_USER_BLACKLIST_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_USER_BLACKLIST_U_USR_BLK_OWNER_TARGET);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserBlacklistRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_USER_BLACKLIST_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_USER_BLACKLIST_U_EH_USR_BLK_OWNER_TARGET);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPollVotes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPollVotesRecord> {
 
-	private static final long serialVersionUID = -12808145;
+	private static final long serialVersionUID = -402662697;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_poll_votes</code>
@@ -91,7 +91,7 @@ public class EhPollVotes extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollVotesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollVotesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_POLL_VOTES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_POLL_VOTES_I_POLL_VOTE_VOTE);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollVotesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_POLL_VOTES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_POLL_VOTES_I_EH_POLL_VOTE_VOTER);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBinaryResources extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBinaryResourcesRecord> {
 
-	private static final long serialVersionUID = -459673999;
+	private static final long serialVersionUID = -1500401483;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_binary_resources</code>
@@ -30,6 +30,11 @@ public class EhBinaryResources extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_binary_resources.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBinaryResourcesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_binary_resources.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBinaryResourcesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_binary_resources.checksum</code>.

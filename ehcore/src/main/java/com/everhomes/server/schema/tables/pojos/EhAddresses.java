@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 638385105;
+	private static final long serialVersionUID = 198512075;
 
 	private java.lang.Long     id;
 	private java.lang.Long     communityId;
@@ -27,11 +27,11 @@ public class EhAddresses implements java.io.Serializable {
 	private java.lang.Long     integralTag3;
 	private java.lang.Long     integralTag4;
 	private java.lang.Long     integralTag5;
-	private java.lang.String   commentTag1;
-	private java.lang.String   commentTag2;
-	private java.lang.String   commentTag3;
-	private java.lang.String   commentTag4;
-	private java.lang.String   commentTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
 
 	public EhAddresses() {}
 
@@ -50,11 +50,11 @@ public class EhAddresses implements java.io.Serializable {
 		java.lang.Long     integralTag3,
 		java.lang.Long     integralTag4,
 		java.lang.Long     integralTag5,
-		java.lang.String   commentTag1,
-		java.lang.String   commentTag2,
-		java.lang.String   commentTag3,
-		java.lang.String   commentTag4,
-		java.lang.String   commentTag5
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5
 	) {
 		this.id = id;
 		this.communityId = communityId;
@@ -70,11 +70,11 @@ public class EhAddresses implements java.io.Serializable {
 		this.integralTag3 = integralTag3;
 		this.integralTag4 = integralTag4;
 		this.integralTag5 = integralTag5;
-		this.commentTag1 = commentTag1;
-		this.commentTag2 = commentTag2;
-		this.commentTag3 = commentTag3;
-		this.commentTag4 = commentTag4;
-		this.commentTag5 = commentTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
 	}
 
 	public java.lang.Long getId() {
@@ -189,43 +189,43 @@ public class EhAddresses implements java.io.Serializable {
 		this.integralTag5 = integralTag5;
 	}
 
-	public java.lang.String getCommentTag1() {
-		return this.commentTag1;
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
 	}
 
-	public void setCommentTag1(java.lang.String commentTag1) {
-		this.commentTag1 = commentTag1;
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
 	}
 
-	public java.lang.String getCommentTag2() {
-		return this.commentTag2;
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
 	}
 
-	public void setCommentTag2(java.lang.String commentTag2) {
-		this.commentTag2 = commentTag2;
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
 	}
 
-	public java.lang.String getCommentTag3() {
-		return this.commentTag3;
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
 	}
 
-	public void setCommentTag3(java.lang.String commentTag3) {
-		this.commentTag3 = commentTag3;
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
 	}
 
-	public java.lang.String getCommentTag4() {
-		return this.commentTag4;
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
 	}
 
-	public void setCommentTag4(java.lang.String commentTag4) {
-		this.commentTag4 = commentTag4;
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
 	}
 
-	public java.lang.String getCommentTag5() {
-		return this.commentTag5;
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
 	}
 
-	public void setCommentTag5(java.lang.String commentTag5) {
-		this.commentTag5 = commentTag5;
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
 	}
 }

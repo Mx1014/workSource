@@ -48,6 +48,13 @@ public class EhBusinessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sc
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusiness> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusiness.EH_BUSINESS.NAMESPACE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusiness> fetchByName(java.lang.String... values) {

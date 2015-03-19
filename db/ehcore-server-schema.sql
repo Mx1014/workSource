@@ -1,14 +1,30 @@
 #
 # A speical note about the schema design below (KY)
 #
-# To balance performance and flexibility, some tables carry general purpose integer fields and string fields,
-# interpretation of these fields will be determined by the application on top of, at database level, we only
-# provide general indexing support for these fields, it is the responsibility of the application to map queries that
-# are against to these fields.
+# Custom fileds
+# 	To balance performance and flexibility, some tables carry general purpose integer fields and string fields,
+# 	interpretation of these fields will be determined by the applications on top of, at database level, we only
+# 	provide general indexing support for these fields, it is the responsibility of the application to map queries that
+# 	are against to these fields.
 #
-# Initially, only two of string-type general purpose fields are indexed, more indices can be added during operating
-# time, tuning changes about the indexing will be sync-ed back into schema design afterwards
+# 	Initially, only two of string-type general purpose fields are indexed, more indices can be added during operating
+# 	time, tuning changes about the indexing will be sync-ed back into schema design afterwards
 #
+# namespaces and application modules
+#	Reusable modules are abstracted under the concept of application. The platform provides built-in application modules
+#	such as messaging app module, form app module, etc. These built-in application modules running in the context of 
+#	core server. When a application module has external counterpart at third-party servers or remote client endpoint, 
+#	the API it provides requires to go through the authentication system via appkey/secret key pair
+#
+#   Namespace is used to put related resources into distinct domains
+#
+# namespace and application usage rules
+#	Shared resources (usually system defined) that are common to all namespaces do not need namespace_id field
+#	First level resources that will have distinct value in different namespace domains should have namespace_id field
+#	Secondary level resources do not need namespace_id field
+#	objects that can carry information generated from multiple application modules, should have app_id field
+#	all entity profile items have app_id, so that it allows other application modules to attach application specific
+#	profile information
 #
 
 SET foreign_key_checks = 0;
@@ -17,6 +33,7 @@ use ehcore;
 
 #
 # member of global parition
+# shared among namespaces, no application module specific information
 #
 DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
@@ -99,25 +116,43 @@ CREATE TABLE `eh_app_promotions` (
 
 #
 # member of global partition
+# 
+# <scope_type, scope_id> defines the scope that the configuration is applied to, for example, 
+#	<'system', NULL> may be used to identify a global system scope
+#	<'community', cumminity-id> may be used to dentify a porticular community
+#
 #
 DROP TABLE IF EXISTS `eh_scoped_configurations`;
 CREATE TABLE `eh_scoped_configurations`(
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `namespace_id` INTEGER,
     `app_id` BIGINT,
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
-    `name` VARCHAR(32),
-    `item_group` VARCHAR(32),
     `item_name` VARCHAR(32),
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json value, 1: entity',
+    `item_value` TEXT,
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `item_value` TEXT,
     `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
     
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    
     PRIMARY KEY (`id`),
-    INDEX `i_eh_scoped_cfg_combo`(`app_id`, `scope_type`, `scope_id`, `name`, `item_group`, `item_name`),
-    INDEX `i_eh_scoped_cfg_name`(`app_id`, `scope_type`, `scope_id`, `name`)
+    INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
+    INDEX `i_eh_scoped_cfg_itag1`(`integral_tag1`),
+    INDEX `i_eh_scoped_cfg_itag2`(`integral_tag2`),
+    INDEX `i_eh_scoped_cfg_stag1`(`string_tag1`),
+    INDEX `i_eh_scoped_cfg_stag2`(`string_tag2`)
 );
 
 #
@@ -127,7 +162,7 @@ CREATE TABLE `eh_scoped_configurations`(
 DROP TABLE IF EXISTS `eh_stats_by_city`;
 CREATE TABLE `eh_stats_by_city` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `city_id` INTEGER,
+    `city_id` INTEGER COMMENT 'id in eh_regions table of the city',
     `stats_date` VARCHAR(32),
     `stats_type` INTEGER,
     `reg_user_count` BIGINT,
@@ -262,9 +297,9 @@ CREATE TABLE `eh_user_blacklist` (
     `delete_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_usr_blk_owner_target`(`owner_uid`, `target_type`, `target_id`),
-    INDEX `i_usr_blk_owner`(`owner_uid`),
-    INDEX `i_usr_blk_create_time`(`create_time`)
+    UNIQUE `u_eh_usr_blk_owner_target`(`owner_uid`, `target_type`, `target_id`),
+    INDEX `i_eh_usr_blk_owner`(`owner_uid`),
+    INDEX `i_eh_usr_blk_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -280,9 +315,9 @@ CREATE TABLE `eh_user_favorites` (
     `delete_time` DATETIME,
 
     PRIMARY KEY (`id`),
-    UNIQUE `u_usr_favorite_target`(`owner_uid`, `target_type`, `target_id`),
-    INDEX `i_usr_favorite_owner`(`owner_uid`),
-    INDEX `i_usr_favorite_create_time`(`create_time`)
+    UNIQUE `u_eh_usr_favorite_target`(`owner_uid`, `target_type`, `target_id`),
+    INDEX `i_eh_usr_favorite_owner`(`owner_uid`),
+    INDEX `i_eh_usr_favorite_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -291,60 +326,52 @@ CREATE TABLE `eh_user_favorites` (
 DROP TABLE IF EXISTS `eh_user_profiles`;
 CREATE TABLE `eh_user_profiles`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`app_id` BIGINT,    
     `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
     `item_name` VARCHAR(32),
-    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
+    `item_value` TEXT,
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `target_value` TEXT,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_user_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
-    INDEX `i_user_prof_owner`(`owner_id`)
+    INDEX `i_eh_uprof_item`(`app_id`, `owner_id`, `item_name`),
+    INDEX `i_eh_uprof_owner`(`owner_id`),
+    INDEX `i_eh_uprof_itag1`(`integral_tag1`),
+    INDEX `i_eh_uprof_itag2`(`integral_tag2`),
+    INDEX `i_eh_uprof_stag1`(`string_tag1`),
+    INDEX `i_eh_uprof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_users partition
-#
-DROP TABLE IF EXISTS `eh_user_scoped_configurations`;
-CREATE TABLE `eh_user_scoped_configurations`(
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
-    `app_id` BIGINT,
-    `scope_type` VARCHAR(32),
-    `scope_id` BIGINT,
-    `name` VARCHAR(32),
-    `item_group` VARCHAR(32),
-    `item_name` VARCHAR(32),
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
-    `target_type` VARCHAR(32),
-    `target_id` BIGINT,
-    `item_value` TEXT,
-    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_scoped_cfg_owner`(`owner_id`),
-    INDEX `i_eh_scoped_cfg_combo`(`owner_id`, `app_id`, `scope_type`, `scope_id`, `name`, `item_group`, `item_name`),
-    INDEX `i_eh_scoped_cfg_name`(`owner_id`, `app_id`, `scope_type`, `scope_id`, `name`)
-);
-
-#
 # key table of grouping related partition group
-#
+# Usually there is no need for group object to carry information for other applications, therefore there is
+# not an app_id field, we still put some custom fields here, as group table may be inherited(records of subclassed object
+# will be identified by discriminator), these custom fields may be used for such purpose
+# 
 DROP TABLE IF EXISTS `eh_groups`;
 CREATE TABLE `eh_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `name` VARCHAR(128) NOT NULL,
     `avatar` VARCHAR(256),
     `description` TEXT,
     `creator_uid` BIGINT NOT NULL,
-    `member_count` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME,
     `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
     `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner',
-    `city_id` BIGINT,
     `discriminator` VARCHAR(32),
     
     `integral_tag1` BIGINT,
@@ -352,25 +379,62 @@ CREATE TABLE `eh_groups` (
     `integral_tag3` BIGINT,
     `integral_tag4` BIGINT,
     `integral_tag5` BIGINT,
-    `comment_tag1` VARCHAR(128),
-    `comment_tag2` VARCHAR(128),
-    `comment_tag3` VARCHAR(128),
-    `comment_tag4` VARCHAR(128),
-    `comment_tag5` VARCHAR(128),
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    `region_id` BIGINT COMMENT 'group region information, it is usually city id in eh_regions table',
+    `member_count` BIGINT NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_group_name`(`name`, `city_id`, `discriminator`),
+    UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `region_id`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
     INDEX `i_eh_group_itag1`(`integral_tag1`),
     INDEX `i_eh_group_itag2`(`integral_tag2`),
-    INDEX `i_eh_group_ctag1`(`comment_tag1`),
-    INDEX `i_eh_group_ctag2`(`comment_tag2`)
+    INDEX `i_eh_group_stag1`(`string_tag1`),
+    INDEX `i_eh_group_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_groups partition group
+#
+DROP TABLES IF EXISTS `eh_group_profiles`;
+CREATE TABLE `eh_group_profiles` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT,
+    `owner_id` BIGINT NOT NULL COMMENT 'owner group id',
+    `item_name` VARCHAR(32),
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
+    `item_value` TEXT,
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_gprof_item`(`app_id`, `owner_id`, `item_name`),
+    INDEX `i_eh_gprof_owner`(`owner_id`),
+    INDEX `i_eh_gprof_itag1`(`integral_tag1`),
+    INDEX `i_eh_gprof_itag2`(`integral_tag2`),
+    INDEX `i_eh_gprof_stag1`(`string_tag1`),
+    INDEX `i_eh_gprof_stag2`(`string_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_groups partition group
+# secondary resource objects
 #
 DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (
@@ -379,6 +443,7 @@ CREATE TABLE `eh_group_members` (
     `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type, for example, type could be User, Group, etc',
     `member_id` BIGINT,
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',    
+    `member_tag` VARCHAR(32) COMMENT 'can be used to represent member nick name within the group',
     `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `create_time` DATETIME NOT NULL,
     `approve_time` DATETIME,
@@ -412,72 +477,32 @@ CREATE TABLE `eh_borders` (
 #
 # member of global partition
 #
-DROP TABLE IF EXISTS `eh_countries`;
-CREATE TABLE `eh_countries` (
+DROP TABLE IF EXISTS `eh_regions`;
+CREATE TABLE `eh_regions` (
     `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `name` VARCHAR(64),
+    `parent_id` INTEGER COMMENT 'id of the parent region', 
+	`name` VARCHAR(64),
+	`path` VARCHAR(512) COMMENT 'path from the root',
+    `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area',
+	`iso_code` VARCHAR(32) COMMENT 'international standard code for the region if exists',
+	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
     
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_country_name`(`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of global partition
-#
-DROP TABLE IF EXISTS `eh_provinces`;
-CREATE TABLE `eh_provinces` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `country_id` INTEGER NOT NULL,
-    `name` VARCHAR(64),
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
-    
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_province_country_id`(`country_id`) REFERENCES `eh_countries`(`id`) ON DELETE CASCADE,
-    INDEX `i_eh_province_name`(`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of global partition
-#
-DROP TABLE IF EXISTS `eh_cities`;
-CREATE TABLE `eh_cities` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `country_id` INTEGER NOT NULL,
-    `province_id` INTEGER,
-    `name` VARCHAR(64),
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
-    
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_city_country_id`(`country_id`) REFERENCES `eh_countries`(`id`) ON DELETE CASCADE,
-    FOREIGN KEY `fk_city_province_id`(`province_id`) REFERENCES `eh_provinces`(`id`) ON DELETE CASCADE,
-    
-    INDEX `i_eh_city_name`(`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of global partition
-#
-DROP TABLE IF EXISTS `eh_areas`;
-CREATE TABLE `eh_areas` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `city_id` INTEGER NOT NULL,
-    `name` VARCHAR(64),
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
-    
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_area_city_id`(`city_id`) REFERENCES `eh_cities`(`id`) ON DELETE CASCADE,
-    
-    INDEX `i_eh_area_name`(`name`)
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_region_name`(`parent_id`, `name`),
+    INDEX `i_eh_region_path`(`path`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # key table of the partition group
+# shared resource objects, custom fields may not really be needed
 #
 DROP TABLE IF EXISTS `eh_communities`;
 CREATE TABLE `eh_communities`(
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `area_id` INTEGER NOT NULL,
+    `city_id` INTEGER NOT NULL COMMENT 'city id in region table',
+    `city_name` VARCHAR(64),
+    `area_id` INTEGER NOT NULL COMMENT 'id of the region where area locates in',
     `area_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `name` VARCHAR(64),
     `alias_name` VARCHAR(64),
@@ -493,11 +518,11 @@ CREATE TABLE `eh_communities`(
     `integral_tag3` BIGINT,
     `integral_tag4` BIGINT,
     `integral_tag5` BIGINT,
-    `comment_tag1` VARCHAR(128),
-    `comment_tag2` VARCHAR(128),
-    `comment_tag3` VARCHAR(128),
-    `comment_tag4` VARCHAR(128),
-    `comment_tag5` VARCHAR(128),
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_community_area_name`(`area_name`),
@@ -509,8 +534,8 @@ CREATE TABLE `eh_communities`(
     INDEX `i_eh_community_delete_time`(`delete_time`),
     INDEX `i_eh_community_itag1`(`integral_tag1`),
     INDEX `i_eh_community_itag2`(`integral_tag2`),
-    INDEX `i_eh_community_ctag1`(`comment_tag1`),
-    INDEX `i_eh_community_ctag2`(`comment_tag2`)
+    INDEX `i_eh_community_stag1`(`string_tag1`),
+    INDEX `i_eh_community_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -520,21 +545,37 @@ CREATE TABLE `eh_communities`(
 DROP TABLE IF EXISTS `eh_community_profiles`;
 CREATE TABLE `eh_community_profiles` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT,
     `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
     `item_name` VARCHAR(32),
-    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
+    `item_value` TEXT,
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `target_value` TEXT,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_community_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
-    INDEX `i_community_prof_owner`(`owner_id`)
+    INDEX `i_eh_cprof_item`(`app_id`, `owner_id`, `item_name`),
+    INDEX `i_eh_cprof_owner`(`owner_id`),
+    INDEX `i_eh_cprof_itag1`(`integral_tag1`),
+    INDEX `i_eh_cprof_itag2`(`integral_tag2`),
+    INDEX `i_eh_cprof_stag1`(`string_tag1`),
+    INDEX `i_eh_cprof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # Key table in address related partition group
+# shared resources, custom fields may not really be needed
 #
 DROP TABLE IF EXISTS `eh_addresses`;
 CREATE TABLE `eh_addresses` (
@@ -553,23 +594,23 @@ CREATE TABLE `eh_addresses` (
     `integral_tag3` BIGINT,
     `integral_tag4` BIGINT,
     `integral_tag5` BIGINT,
-    `comment_tag1` VARCHAR(128),
-    `comment_tag2` VARCHAR(128),
-    `comment_tag3` VARCHAR(128),
-    `comment_tag4` VARCHAR(128),
-    `comment_tag5` VARCHAR(128),
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    INDEX `i_eh_address_address`(`address`),
-    INDEX `i_eh_address_address_alias`(`address_alias`),
-    INDEX `i_eh_address_building_apt_name`(`building_name`, `appartment_name`),
-    INDEX `i_eh_address_building_alias_apt_name`(`building_alias_name`, `appartment_name`),
-    INDEX `i_eh_address_create_name`(`create_time`),
-    INDEX `i_eh_address_delete_name`(`delete_time`),
-    INDEX `i_eh_address_itag1`(`integral_tag1`),
-    INDEX `i_eh_address_itag2`(`integral_tag2`),
-    INDEX `i_eh_address_ctag1`(`comment_tag1`),
-    INDEX `i_eh_address_ctag2`(`comment_tag2`)
+    INDEX `i_eh_addr_address`(`address`),
+    INDEX `i_eh_addr_address_alias`(`address_alias`),
+    INDEX `i_eh_addr_building_apt_name`(`building_name`, `appartment_name`),
+    INDEX `i_eh_addr_building_alias_apt_name`(`building_alias_name`, `appartment_name`),
+    INDEX `i_eh_addr_create_name`(`create_time`),
+    INDEX `i_eh_addr_delete_name`(`delete_time`),
+    INDEX `i_eh_addr_itag1`(`integral_tag1`),
+    INDEX `i_eh_addr_itag2`(`integral_tag2`),
+    INDEX `i_eh_addr_stag1`(`string_tag1`),
+    INDEX `i_eh_addr_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -578,6 +619,7 @@ CREATE TABLE `eh_addresses` (
 DROP TABLE IF EXISTS `eh_address_claims`;
 CREATE TABLE `eh_address_claims` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `address_id` BIGINT NOT NULL,
     `entity_type` VARCHAR(32) NOT NULL,
     `entity_id` BIGINT NOT NULL,
@@ -597,11 +639,11 @@ CREATE TABLE `eh_address_claims` (
     `integral_tag3` BIGINT,
     `integral_tag4` BIGINT,
     `integral_tag5` BIGINT,
-    `comment_tag1` VARCHAR(128),
-    `comment_tag2` VARCHAR(128),
-    `comment_tag3` VARCHAR(128),
-    `comment_tag4` VARCHAR(128),
-    `comment_tag5` VARCHAR(128),
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_addr_claim_address_id`(`address_id`) REFERENCES `eh_addresses`(`id`) ON DELETE CASCADE,
@@ -612,8 +654,8 @@ CREATE TABLE `eh_address_claims` (
     INDEX `i_eh_addr_claim_process_time`(`process_time`),
     INDEX `i_eh_addr_claim_itag1`(`integral_tag1`),
     INDEX `i_eh_addr_claim_itag2`(`integral_tag2`),
-    INDEX `i_eh_addr_claim_ctag1`(`comment_tag1`),
-    INDEX `i_eh_addr_claim_ctag2`(`comment_tag2`)
+    INDEX `i_eh_addr_claim_stag1`(`string_tag1`),
+    INDEX `i_eh_addr_claim_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -624,9 +666,10 @@ DROP TABLE IF EXISTS `eh_families`;
 
 #
 # member of eh_groups(eh_families) partition group
+# secondary resource objects (after eh_families)
 #
 DROP TABLE IF EXISTS `eh_family_followers`;
-CREATE TABLE eh_family_followers (
+CREATE TABLE `eh_family_followers` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_family` BIGINT NOT NULL,
     `follower_family` BIGINT NOT NULL,
@@ -636,13 +679,14 @@ CREATE TABLE eh_family_followers (
     
     PRIMARY KEY (`id`),
     UNIQUE `i_fm_follower_follower`(`owner_family`, `follower_family`),
-    INDEX `i_fm_follower_owner`(`owner_family`),
-    INDEX `i_fm_follower_create_time`(`create_time`),
-    INDEX `i_fm_follower_delete_time`(`delete_time`)
+    INDEX `i_eh_fm_follower_owner`(`owner_family`),
+    INDEX `i_eh_fm_follower_create_time`(`create_time`),
+    INDEX `i_eh_fm_follower_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_groups(eh_families) partition group
+# secondary resource objects (after eh_families)
 #
 DROP TABLE IF EXISTS `eh_followed_families`;
 CREATE TABLE `eh_followed_families`(
@@ -655,18 +699,20 @@ CREATE TABLE `eh_followed_families`(
     `delete_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `i_fm_followed_followed`(`owner_family`, `followed_family`),
-    INDEX `i_fm_followed_owner`(`owner_family`),
-    INDEX `i_fm_followed_create_time`(`create_time`),
-    INDEX `i_fm_followed_delete_time`(`delete_time`)
+    UNIQUE `i_eh_fm_followed_followed`(`owner_family`, `followed_family`),
+    INDEX `i_eh_fm_followed_owner`(`owner_family`),
+    INDEX `i_eh_fm_followed_create_time`(`create_time`),
+    INDEX `i_eh_fm_followed_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # key table of the partition group
+# first level resource objects
 #
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `appId` BIGINT,
     `name` VARCHAR(128),
     `description` TEXT,
@@ -694,21 +740,37 @@ CREATE TABLE `eh_banners` (
 DROP TABLE IF EXISTS `eh_banner_profiles`;
 CREATE TABLE `eh_banner_profiles` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT,
     `owner_id` BIGINT NOT NULL COMMENT 'owner banner id',
     `item_name` VARCHAR(32),
-    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
+    `item_value` TEXT,
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `target_value` TEXT,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_banner_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
-    INDEX `i_banner_prof_owner`(`owner_id`)
+    INDEX `i_eh_bprof_item`(`app_id`, `owner_id`, `item_name`),
+    INDEX `i_eh_bprof_owner`(`owner_id`),
+    INDEX `i_eh_bprof_itag1`(`integral_tag1`),
+    INDEX `i_eh_bprof_itag2`(`integral_tag2`),
+    INDEX `i_eh_bprof_stag1`(`string_tag1`),
+    INDEX `i_eh_bprof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_banners partition
+# secondary resource objects (after eh_banners)
 #
 DROP TABLE IF EXISTS `eh_banner_clicks`;
 CREATE TABLE `eh_banner_clicks`(
@@ -722,14 +784,15 @@ CREATE TABLE `eh_banner_clicks`(
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_banner_clk_uuid`(`uuid`),
-    UNIQUE `u_banner_clk_user`(`banner_id`, `uid`),
-    INDEX `i_banner_clk_last_time`(`last_click_time`),
-    INDEX `i_banner_clk_create_time`(`create_time`)
+    UNIQUE `u_eh_banner_clk_uuid`(`uuid`),
+    UNIQUE `u_eh_banner_clk_user`(`banner_id`, `uid`),
+    INDEX `i_eh_banner_clk_last_time`(`last_click_time`),
+    INDEX `i_eh_banner_clk_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_banners partition
+# secondary resource objects(after eh_banners)
 #
 DROP TABLE IF EXISTS `eh_banner_orders`;
 CREATE TABLE `eh_banner_orders` (
@@ -756,6 +819,7 @@ CREATE TABLE `eh_banner_orders` (
 DROP TABLE IF EXISTS `eh_binary_resources`;
 CREATE TABLE `eh_binary_resources` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `checksum` VARCHAR(128),
     `store_type` VARCHAR(32) COMMENT 'content store type',
     `store_uri` VARCHAR(32) COMMENT 'identify the store instance',
@@ -767,9 +831,9 @@ CREATE TABLE `eh_binary_resources` (
     `access_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    INDEX `i_bin_res_checksum`(`checksum`),
-    INDEX `i_bin_res_create_time`(`create_time`),
-    INDEX `i_bin_res_access_time`(`access_time`)
+    INDEX `i_eh_bin_res_checksum`(`checksum`),
+    INDEX `i_eh_bin_res_create_time`(`create_time`),
+    INDEX `i_eh_bin_res_access_time`(`access_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -779,6 +843,7 @@ CREATE TABLE `eh_binary_resources` (
 DROP TABLE IF EXISTS `eh_rtxt_resources`;
 CREATE TABLE `eh_rtxt_resources`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `checksum` VARCHAR(128),
     `tile` TEXT,
     `author` TEXT,
@@ -794,9 +859,9 @@ CREATE TABLE `eh_rtxt_resources`(
     `access_time` DATETIME,
 
     PRIMARY KEY (`id`),
-    INDEX `i_rtxt_res_checksum`(`checksum`),
-    INDEX `i_rtxt_res_create_time`(`create_time`),
-    INDEX `i_rtxt_res_access_time`(`access_time`)
+    INDEX `i_eh_rtxt_res_checksum`(`checksum`),
+    INDEX `i_eh_rtxt_res_create_time`(`create_time`),
+    INDEX `i_eh_rtxt_res_access_time`(`access_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -811,6 +876,7 @@ CREATE TABLE `eh_rtxt_resources`(
 DROP TABLE IF EXISTS `eh_events`;
 CREATE TABLE `eh_events`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `subject` VARCHAR(512),
     `description` TEXT,
     `location` TEXT,
@@ -837,11 +903,11 @@ CREATE TABLE `eh_events`(
     `delete_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    INDEX `i_event_start_time_ms`(`start_time_ms`),
-    INDEX `i_event_end_time_ms`(`end_time_ms`),
-    INDEX `i_event_creator_uid`(`creator_uid`),
-    INDEX `i_activity_create_time`(`create_time`),
-    INDEX `i_activity_delete_time`(`delete_time`)
+    INDEX `i_eh_evt_start_time_ms`(`start_time_ms`),
+    INDEX `i_eh_evt_end_time_ms`(`end_time_ms`),
+    INDEX `i_eh_evt_creator_uid`(`creator_uid`),
+    INDEX `i_eh_evt_create_time`(`create_time`),
+    INDEX `i_eh_evt_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -862,10 +928,10 @@ CREATE TABLE `eh_event_roster`(
     `create_time` DATETIME,
 
     PRIMARY KEY (`id`),
-    UNIQUE `u_event_roster_uuid`(`uuid`),
-    UNIQUE `u_event_roster_attendee`(`event_id`, `uid`),
-    INDEX `i_event_roster_signup_time`(`signup_time`),
-    INDEX `i_event_roster_create_time`(`create_time`)
+    UNIQUE `u_eh_evt_roster_uuid`(`uuid`),
+    UNIQUE `u_eh_evt_roster_attendee`(`event_id`, `uid`),
+    INDEX `i_eh_evt_roster_signup_time`(`signup_time`),
+    INDEX `i_eh_evt_roster_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -881,13 +947,14 @@ CREATE TABLE `eh_event_ticket_groups`(
     `create_time` DATETIME,
 
     PRIMARY KEY (`id`),
-    UNIQUE `u_event_tg_name`(`event_id`, `name`),
-    INDEX `i_event_tg_event_id`(`event_id`),
-    INDEX `i_event_create_time`(`create_time`)
+    UNIQUE `u_eh_evt_tg_name`(`event_id`, `name`),
+    INDEX `i_eh_evt_tg_event_id`(`event_id`),
+    INDEX `i_eh_evt_tg_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of event partition group
+# secondary resource objects (after eh_events)
 #
 DROP TABLE IF EXISTS `eh_event_tickets`;
 CREATE TABLE `eh_event_tickets`(
@@ -901,36 +968,55 @@ CREATE TABLE `eh_event_tickets`(
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_event_ticket_ticket`(`ticket_group_id`, `ticket_number`),
-    INDEX `i_event_ticket_event`(`event_id`),
-    INDEX `i_event_ticket_create_time`(`create_time`)
+    UNIQUE `u_eh_evt_ticket_ticket`(`ticket_group_id`, `ticket_number`),
+    INDEX `i_eh_evt_ticket_event`(`event_id`),
+    INDEX `i_eh_evt_ticket_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_events partition group
+# entity profile for eh_events
 #
 DROP TABLE IF EXISTS `eh_event_profiles`;
 CREATE TABLE `eh_event_profiles`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT,
     `owner_id` BIGINT NOT NULL COMMENT 'owner event id',
     `item_name` VARCHAR(32),
-    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
+    `item_value` TEXT,
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `target_value` TEXT,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_event_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
-    INDEX `i_event_prof_owner`(`owner_id`)
+    INDEX `i_eh_evt_prof_item`(`owner_id`, `item_name`),
+    INDEX `i_eh_evt_prof_owner`(`owner_id`),
+    INDEX `i_eh_evt_prof_itag1`(`integral_tag1`),
+    INDEX `i_eh_evt_prof_itag2`(`integral_tag2`),
+    INDEX `i_eh_evt_prof_stag1`(`string_tag1`),
+    INDEX `i_eh_evt_prof_stag2`(`string_tag2`)
+    
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # key table of activity partition group
+# first level resource objects
 #
 DROP TABLE IF EXISTS `eh_activities`;
 CREATE TABLE `eh_activities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `subject` VARCHAR(512),
     `description` TEXT,
     `location` TEXT,
@@ -960,17 +1046,18 @@ CREATE TABLE `eh_activities` (
     `delete_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    INDEX `i_activity_start_time_ms`(`start_time_ms`),
-    INDEX `i_activity_end_time_ms`(`end_time_ms`),
-    INDEX `i_activity_creator_uid`(`creator_uid`),
-    INDEX `i_activity_post_id`(`post_id`),
-    INDEX `i_activity_group`(`group_discriminator`, `group_id`),
-    INDEX `i_activity_create_time`(`create_time`),
-    INDEX `i_activity_delete_time`(`delete_time`)
+    INDEX `i_eh_act_start_time_ms`(`start_time_ms`),
+    INDEX `i_eh_act_end_time_ms`(`end_time_ms`),
+    INDEX `i_eh_act_creator_uid`(`creator_uid`),
+    INDEX `i_eh_act_post_id`(`post_id`),
+    INDEX `i_eh_act_group`(`group_discriminator`, `group_id`),
+    INDEX `i_eh_act_create_time`(`create_time`),
+    INDEX `i_eh_act_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_activities partition group
+# secondary resource objects (after eh_events)
 #
 DROP TABLE IF EXISTS `eh_activity_roster`;
 CREATE TABLE `eh_activity_roster`(
@@ -992,17 +1079,19 @@ CREATE TABLE `eh_activity_roster`(
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_activity_uuid`(`uuid`),
-    UNIQUE `u_activity_user`(`activity_id`, `uid`),
-    INDEX `i_activity_create_time`(`create_time`)
+    UNIQUE `u_eh_act_roster_uuid`(`uuid`),
+    UNIQUE `u_eh_act_roster_user`(`activity_id`, `uid`),
+    INDEX `i_eh_act_roster_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # key table of polling management partition group
+# First level resource objects
 #
 DROP TABLE IF EXISTS `eh_polls`;
 CREATE TABLE `eh_polls` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `subject` VARCHAR(512),
     `description` TEXT,
     `start_time_ms` BIGINT,
@@ -1021,16 +1110,17 @@ CREATE TABLE `eh_polls` (
     `delete_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    INDEX `i_poll_start_time_ms`(`start_time_ms`),
-    INDEX `i_poll_end_time_ms`(`end_time_ms`),
-    INDEX `i_poll_creator_uid`(`creator_uid`),
-    INDEX `i_poll_post_id`(`post_id`),
-    INDEX `i_poll_create_time`(`create_time`),
-    INDEX `i_poll_delete_time`(`delete_time`)
+    INDEX `i_eh_poll_start_time_ms`(`start_time_ms`),
+    INDEX `i_eh_poll_end_time_ms`(`end_time_ms`),
+    INDEX `i_eh_poll_creator_uid`(`creator_uid`),
+    INDEX `i_eh_poll_post_id`(`post_id`),
+    INDEX `i_eh_poll_create_time`(`create_time`),
+    INDEX `i_eh_poll_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_polls partition
+# secondary resource objects (after eh_polls)
 #
 DROP TABLE IF EXISTS `eh_poll_items`;
 CREATE TABLE `eh_poll_items`(
@@ -1044,12 +1134,13 @@ CREATE TABLE `eh_poll_items`(
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    INDEX `i_poll_item_poll`(`poll_id`),
-    INDEX `i_poll_item_create_time`(`create_time`)
+    INDEX `i_eh_poll_item_poll`(`poll_id`),
+    INDEX `i_eh_poll_item_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_polls partition
+# secondary resource objects(after eh_pools)
 #
 DROP TABLE IF EXISTS `eh_poll_votes`;
 CREATE TABLE `eh_poll_votes`(
@@ -1061,17 +1152,19 @@ CREATE TABLE `eh_poll_votes`(
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    UNIQUE `i_poll_vote_vote`(`poll_id`, `item_id`, `voter_uid`),
-    INDEX `i_poll_vote_poll`(`poll_id`),
-    INDEX `i_poll_vote_create_time`(`create_time`)
+    UNIQUE `i_eh_poll_vote_voter`(`poll_id`, `item_id`, `voter_uid`),
+    INDEX `i_eh_poll_vote_poll`(`poll_id`),
+    INDEX `i_eh_poll_vote_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # key table of business management partition group
+# First level resource objects
 #
 DROP TABLE IF EXISTS `eh_business`;
 CREATE TABLE `eh_business`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER,
     `name` VARCHAR(128),
     `contact_number` VARCHAR(64), 
     `category_id` BIGINT,
@@ -1091,25 +1184,42 @@ CREATE TABLE `eh_business`(
 
 #
 # member of eh_business partition group
+# entity profile info for eh_business objects
 #
 DROP TABLE IF EXISTS `eh_business_profiles`;
 CREATE TABLE `eh_business_profiles`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT,
     `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
     `item_name` VARCHAR(32),
-    `item_group` VARCHAR(32) COMMENT 'tag the profile item group that item belongs to',
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque value, 1: entity',
+    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
+    `item_value` TEXT,
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `target_value` TEXT,
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_biz_prof_item`(`owner_id`, `item_name`, `item_group`, `item_kind`),
-    INDEX `i_biz_prof_owner`(`owner_id`)
+    INDEX `i_eh_biz_prof_item`(`app_id`, `owner_id`, `item_name`),
+    INDEX `i_eh_biz_prof_owner`(`owner_id`),
+    INDEX `i_eh_biz_prof_itag1`(`integral_tag1`),
+    INDEX `i_eh_biz_prof_itag2`(`integral_tag2`),
+    INDEX `i_eh_biz_prof_stag1`(`string_tag1`),
+    INDEX `i_eh_biz_prof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_business partition group
+# secondary resource objects (after owner eh_business object)
 #
 DROP TABLE IF EXISTS `eh_biz_coupon_groups`;
 CREATE TABLE `eh_biz_coupon_groups`(
@@ -1127,15 +1237,16 @@ CREATE TABLE `eh_biz_coupon_groups`(
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
-    INDEX `i_eh_biz_coupon_business_id`(`business_id`),
-    INDEX `i_eh_biz_name`(`name`),
-    INDEX `i_eh_biz_start_time`(`start_time`),
-    INDEX `i_eh_biz_expire_time`(`expire_time`),
-    INDEX `i_eh_biz_create_time`(`create_time`)
+    INDEX `i_eh_biz_grp_business_id`(`business_id`),
+    INDEX `i_eh_biz_grp_name`(`name`),
+    INDEX `i_eh_biz_grp_start_time`(`start_time`),
+    INDEX `i_eh_biz_grp_expire_time`(`expire_time`),
+    INDEX `i_eh_biz_grp_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of eh_business partition group
+# secondary resource objects (after owner eh_business object)
 #
 DROP TABLE IF EXISTS `eh_biz_coupon`;
 CREATE TABLE `eh_biz_coupon`(

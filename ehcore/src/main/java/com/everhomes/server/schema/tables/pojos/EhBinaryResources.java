@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBinaryResources implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1406941823;
+	private static final long serialVersionUID = -1457791691;
 
 	private java.lang.Long     id;
+	private java.lang.Integer  namespaceId;
 	private java.lang.String   checksum;
 	private java.lang.String   storeType;
 	private java.lang.String   storeUri;
@@ -28,6 +29,7 @@ public class EhBinaryResources implements java.io.Serializable {
 
 	public EhBinaryResources(
 		java.lang.Long     id,
+		java.lang.Integer  namespaceId,
 		java.lang.String   checksum,
 		java.lang.String   storeType,
 		java.lang.String   storeUri,
@@ -39,6 +41,7 @@ public class EhBinaryResources implements java.io.Serializable {
 		java.sql.Timestamp accessTime
 	) {
 		this.id = id;
+		this.namespaceId = namespaceId;
 		this.checksum = checksum;
 		this.storeType = storeType;
 		this.storeUri = storeUri;
@@ -56,6 +59,14 @@ public class EhBinaryResources implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.String getChecksum() {

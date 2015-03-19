@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRtxtResources implements java.io.Serializable {
 
-	private static final long serialVersionUID = -776104456;
+	private static final long serialVersionUID = -188398554;
 
 	private java.lang.Long     id;
+	private java.lang.Integer  namespaceId;
 	private java.lang.String   checksum;
 	private java.lang.String   tile;
 	private java.lang.String   author;
@@ -32,6 +33,7 @@ public class EhRtxtResources implements java.io.Serializable {
 
 	public EhRtxtResources(
 		java.lang.Long     id,
+		java.lang.Integer  namespaceId,
 		java.lang.String   checksum,
 		java.lang.String   tile,
 		java.lang.String   author,
@@ -47,6 +49,7 @@ public class EhRtxtResources implements java.io.Serializable {
 		java.sql.Timestamp accessTime
 	) {
 		this.id = id;
+		this.namespaceId = namespaceId;
 		this.checksum = checksum;
 		this.tile = tile;
 		this.author = author;
@@ -68,6 +71,14 @@ public class EhRtxtResources implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.String getChecksum() {

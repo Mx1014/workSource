@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStatsByCityRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhStatsByCityRecord> implements org.jooq.Record14<java.lang.Integer, java.lang.Integer, java.lang.String, java.lang.Integer, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 646987129;
+	private static final long serialVersionUID = 665546337;
 
 	/**
 	 * Setter for <code>ehcore.eh_stats_by_city.id</code>.
@@ -28,14 +28,14 @@ public class EhStatsByCityRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_stats_by_city.city_id</code>.
+	 * Setter for <code>ehcore.eh_stats_by_city.city_id</code>. id in eh_regions table of the city
 	 */
 	public void setCityId(java.lang.Integer value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_stats_by_city.city_id</code>.
+	 * Getter for <code>ehcore.eh_stats_by_city.city_id</code>. id in eh_regions table of the city
 	 */
 	public java.lang.Integer getCityId() {
 		return (java.lang.Integer) getValue(1);

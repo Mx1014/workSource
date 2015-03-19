@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStatsByCity extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhStatsByCityRecord> {
 
-	private static final long serialVersionUID = 347022947;
+	private static final long serialVersionUID = -142388555;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_stats_by_city</code>
@@ -32,9 +32,9 @@ public class EhStatsByCity extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_stats_by_city.city_id</code>.
+	 * The column <code>ehcore.eh_stats_by_city.city_id</code>. id in eh_regions table of the city
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Integer> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Integer> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.INTEGER, this, "id in eh_regions table of the city");
 
 	/**
 	 * The column <code>ehcore.eh_stats_by_city.stats_date</code>.

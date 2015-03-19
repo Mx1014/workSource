@@ -48,6 +48,13 @@ public class EhScopedConfigurationsDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.NAMESPACE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>app_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByAppId(java.lang.Long... values) {
@@ -69,20 +76,6 @@ public class EhScopedConfigurationsDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
-	 * Fetch records that have <code>name IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.NAME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>item_group IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByItemGroup(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ITEM_GROUP, values);
-	}
-
-	/**
 	 * Fetch records that have <code>item_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByItemName(java.lang.String... values) {
@@ -94,6 +87,13 @@ public class EhScopedConfigurationsDao extends org.jooq.impl.DAOImpl<com.everhom
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByItemKind(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ITEM_KIND, values);
+	}
+
+	/**
+	 * Fetch records that have <code>item_value IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByItemValue(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ITEM_VALUE, values);
 	}
 
 	/**
@@ -111,16 +111,79 @@ public class EhScopedConfigurationsDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
-	 * Fetch records that have <code>item_value IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByItemValue(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ITEM_VALUE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>apply_policy IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByApplyPolicy(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.APPLY_POLICY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScopedConfigurations> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.STRING_TAG5, values);
 	}
 }

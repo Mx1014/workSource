@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEventProfiles extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEventProfilesRecord> {
 
-	private static final long serialVersionUID = -245464729;
+	private static final long serialVersionUID = 204226547;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_event_profiles</code>
@@ -32,6 +32,11 @@ public class EhEventProfiles extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
+	 * The column <code>ehcore.eh_event_profiles.app_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> APP_ID = createField("app_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_event_profiles.owner_id</code>. owner event id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner event id");
@@ -42,14 +47,14 @@ public class EhEventProfiles extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> ITEM_NAME = createField("item_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_event_profiles.item_group</code>. tag the profile item group that item belongs to
+	 * The column <code>ehcore.eh_event_profiles.item_kind</code>. 0, opaque json object, 1: entity
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> ITEM_GROUP = createField("item_group", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "tag the profile item group that item belongs to");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Byte> ITEM_KIND = createField("item_kind", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0, opaque json object, 1: entity");
 
 	/**
-	 * The column <code>ehcore.eh_event_profiles.item_kind</code>. 0, opaque value, 1: entity
+	 * The column <code>ehcore.eh_event_profiles.item_value</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Byte> ITEM_KIND = createField("item_kind", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0, opaque value, 1: entity");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> ITEM_VALUE = createField("item_value", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_event_profiles.target_type</code>.
@@ -62,9 +67,54 @@ public class EhEventProfiles extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_event_profiles.target_value</code>.
+	 * The column <code>ehcore.eh_event_profiles.integral_tag1</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> TARGET_VALUE = createField("target_value", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> INTEGRAL_TAG1 = createField("integral_tag1", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.integral_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> INTEGRAL_TAG2 = createField("integral_tag2", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.integral_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> INTEGRAL_TAG3 = createField("integral_tag3", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.integral_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> INTEGRAL_TAG4 = createField("integral_tag4", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.integral_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.Long> INTEGRAL_TAG5 = createField("integral_tag5", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.string_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> STRING_TAG1 = createField("string_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.string_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> STRING_TAG2 = createField("string_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.string_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> STRING_TAG3 = createField("string_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.string_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> STRING_TAG4 = createField("string_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_event_profiles.string_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventProfilesRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_event_profiles</code> table reference
@@ -101,7 +151,7 @@ public class EhEventProfiles extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventProfilesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventProfilesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_EVENT_PROFILES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_EVENT_PROFILES_U_EVENT_PROF_ITEM);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhEventProfilesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_EVENT_PROFILES_PRIMARY);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRtxtResources extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRtxtResourcesRecord> {
 
-	private static final long serialVersionUID = 1425402357;
+	private static final long serialVersionUID = 1100708471;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rtxt_resources</code>
@@ -30,6 +30,11 @@ public class EhRtxtResources extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_rtxt_resources.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRtxtResourcesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_rtxt_resources.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRtxtResourcesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rtxt_resources.checksum</code>.

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> {
 
-	private static final long serialVersionUID = 1814361114;
+	private static final long serialVersionUID = -1086031584;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_address_claims</code>
@@ -30,6 +30,11 @@ public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_address_claims.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_address_claims.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_address_claims.address_id</code>.
@@ -122,29 +127,29 @@ public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.Long> INTEGRAL_TAG5 = createField("integral_tag5", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_claims.comment_tag1</code>.
+	 * The column <code>ehcore.eh_address_claims.string_tag1</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> COMMENT_TAG1 = createField("comment_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> STRING_TAG1 = createField("string_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_claims.comment_tag2</code>.
+	 * The column <code>ehcore.eh_address_claims.string_tag2</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> COMMENT_TAG2 = createField("comment_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> STRING_TAG2 = createField("string_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_claims.comment_tag3</code>.
+	 * The column <code>ehcore.eh_address_claims.string_tag3</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> COMMENT_TAG3 = createField("comment_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> STRING_TAG3 = createField("string_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_claims.comment_tag4</code>.
+	 * The column <code>ehcore.eh_address_claims.string_tag4</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> COMMENT_TAG4 = createField("comment_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> STRING_TAG4 = createField("string_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_claims.comment_tag5</code>.
+	 * The column <code>ehcore.eh_address_claims.string_tag5</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> COMMENT_TAG5 = createField("comment_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_address_claims</code> table reference

@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2067178153;
+	private static final long serialVersionUID = 1662412453;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
 	private java.lang.String   memberType;
 	private java.lang.Long     memberId;
 	private java.lang.Long     memberRole;
+	private java.lang.String   memberTag;
 	private java.lang.Integer  memberStatus;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp approveTime;
@@ -30,6 +31,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   memberType,
 		java.lang.Long     memberId,
 		java.lang.Long     memberRole,
+		java.lang.String   memberTag,
 		java.lang.Integer  memberStatus,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp approveTime
@@ -39,6 +41,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.memberType = memberType;
 		this.memberId = memberId;
 		this.memberRole = memberRole;
+		this.memberTag = memberTag;
 		this.memberStatus = memberStatus;
 		this.createTime = createTime;
 		this.approveTime = approveTime;
@@ -82,6 +85,14 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setMemberRole(java.lang.Long memberRole) {
 		this.memberRole = memberRole;
+	}
+
+	public java.lang.String getMemberTag() {
+		return this.memberTag;
+	}
+
+	public void setMemberTag(java.lang.String memberTag) {
+		this.memberTag = memberTag;
 	}
 
 	public java.lang.Integer getMemberStatus() {

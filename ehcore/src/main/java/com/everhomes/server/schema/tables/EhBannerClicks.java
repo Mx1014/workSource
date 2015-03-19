@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBannerClicks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannerClicksRecord> {
 
-	private static final long serialVersionUID = 665957388;
+	private static final long serialVersionUID = 648394686;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banner_clicks</code>
@@ -101,7 +101,7 @@ public class EhBannerClicks extends org.jooq.impl.TableImpl<com.everhomes.server
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannerClicksRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannerClicksRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_BANNER_CLICKS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_BANNER_CLICKS_U_BANNER_CLK_UUID, com.everhomes.server.schema.Keys.KEY_EH_BANNER_CLICKS_U_BANNER_CLK_USER);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannerClicksRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_BANNER_CLICKS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_BANNER_CLICKS_U_EH_BANNER_CLK_UUID, com.everhomes.server.schema.Keys.KEY_EH_BANNER_CLICKS_U_EH_BANNER_CLK_USER);
 	}
 
 	/**

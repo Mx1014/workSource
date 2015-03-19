@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1524051918;
+	private static final long serialVersionUID = 1364995324;
 
 	private java.lang.Long     id;
+	private java.lang.Integer  namespaceId;
 	private java.lang.Long     appid;
 	private java.lang.String   name;
 	private java.lang.String   description;
@@ -34,6 +35,7 @@ public class EhBanners implements java.io.Serializable {
 
 	public EhBanners(
 		java.lang.Long     id,
+		java.lang.Integer  namespaceId,
 		java.lang.Long     appid,
 		java.lang.String   name,
 		java.lang.String   description,
@@ -51,6 +53,7 @@ public class EhBanners implements java.io.Serializable {
 		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
+		this.namespaceId = namespaceId;
 		this.appid = appid;
 		this.name = name;
 		this.description = description;
@@ -74,6 +77,14 @@ public class EhBanners implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getAppid() {

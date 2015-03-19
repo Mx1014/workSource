@@ -139,37 +139,37 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag1 IN (values)</code>
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommentTag1(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG1, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG1, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag2 IN (values)</code>
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommentTag2(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG2, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG2, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag3 IN (values)</code>
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommentTag3(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG3, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG3, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag4 IN (values)</code>
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommentTag4(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG4, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG4, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag5 IN (values)</code>
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommentTag5(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.COMMENT_TAG5, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG5, values);
 	}
 }

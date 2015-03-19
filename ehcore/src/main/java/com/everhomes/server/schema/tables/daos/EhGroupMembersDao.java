@@ -76,6 +76,13 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>member_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_TAG, values);
+	}
+
+	/**
 	 * Fetch records that have <code>member_status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberStatus(java.lang.Integer... values) {

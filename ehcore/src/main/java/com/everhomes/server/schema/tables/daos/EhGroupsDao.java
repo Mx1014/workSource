@@ -48,6 +48,13 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.NAMESPACE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByName(java.lang.String... values) {
@@ -76,13 +83,6 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
-	 * Fetch records that have <code>member_count IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByMemberCount(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.MEMBER_COUNT, values);
-	}
-
-	/**
 	 * Fetch records that have <code>create_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCreateTime(java.sql.Timestamp... values) {
@@ -108,13 +108,6 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByJoinPolicy(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.JOIN_POLICY, values);
-	}
-
-	/**
-	 * Fetch records that have <code>city_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCityId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CITY_ID, values);
 	}
 
 	/**
@@ -160,37 +153,51 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag1 IN (values)</code>
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCommentTag1(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.COMMENT_TAG1, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG1, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag2 IN (values)</code>
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCommentTag2(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.COMMENT_TAG2, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG2, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag3 IN (values)</code>
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCommentTag3(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.COMMENT_TAG3, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG3, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag4 IN (values)</code>
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCommentTag4(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.COMMENT_TAG4, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG4, values);
 	}
 
 	/**
-	 * Fetch records that have <code>comment_tag5 IN (values)</code>
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCommentTag5(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.COMMENT_TAG5, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>region_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>member_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByMemberCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.MEMBER_COUNT, values);
 	}
 }

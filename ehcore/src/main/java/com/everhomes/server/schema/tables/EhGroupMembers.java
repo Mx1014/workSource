@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = -1376865189;
+	private static final long serialVersionUID = 422779251;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -50,6 +50,11 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_group_members.member_role</code>. Default to ResourceUser role
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> MEMBER_ROLE = createField("member_role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "Default to ResourceUser role");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.member_tag</code>. can be used to represent member nick name within the group
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_TAG = createField("member_tag", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "can be used to represent member nick name within the group");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active

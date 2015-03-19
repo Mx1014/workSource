@@ -11,49 +11,76 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhScopedConfigurations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1033007268;
+	private static final long serialVersionUID = -665797802;
 
 	private java.lang.Integer id;
+	private java.lang.Integer namespaceId;
 	private java.lang.Long    appId;
 	private java.lang.String  scopeType;
 	private java.lang.Long    scopeId;
-	private java.lang.String  name;
-	private java.lang.String  itemGroup;
 	private java.lang.String  itemName;
 	private java.lang.Byte    itemKind;
+	private java.lang.String  itemValue;
 	private java.lang.String  targetType;
 	private java.lang.Long    targetId;
-	private java.lang.String  itemValue;
 	private java.lang.Byte    applyPolicy;
+	private java.lang.Long    integralTag1;
+	private java.lang.Long    integralTag2;
+	private java.lang.Long    integralTag3;
+	private java.lang.Long    integralTag4;
+	private java.lang.Long    integralTag5;
+	private java.lang.String  stringTag1;
+	private java.lang.String  stringTag2;
+	private java.lang.String  stringTag3;
+	private java.lang.String  stringTag4;
+	private java.lang.String  stringTag5;
 
 	public EhScopedConfigurations() {}
 
 	public EhScopedConfigurations(
 		java.lang.Integer id,
+		java.lang.Integer namespaceId,
 		java.lang.Long    appId,
 		java.lang.String  scopeType,
 		java.lang.Long    scopeId,
-		java.lang.String  name,
-		java.lang.String  itemGroup,
 		java.lang.String  itemName,
 		java.lang.Byte    itemKind,
+		java.lang.String  itemValue,
 		java.lang.String  targetType,
 		java.lang.Long    targetId,
-		java.lang.String  itemValue,
-		java.lang.Byte    applyPolicy
+		java.lang.Byte    applyPolicy,
+		java.lang.Long    integralTag1,
+		java.lang.Long    integralTag2,
+		java.lang.Long    integralTag3,
+		java.lang.Long    integralTag4,
+		java.lang.Long    integralTag5,
+		java.lang.String  stringTag1,
+		java.lang.String  stringTag2,
+		java.lang.String  stringTag3,
+		java.lang.String  stringTag4,
+		java.lang.String  stringTag5
 	) {
 		this.id = id;
+		this.namespaceId = namespaceId;
 		this.appId = appId;
 		this.scopeType = scopeType;
 		this.scopeId = scopeId;
-		this.name = name;
-		this.itemGroup = itemGroup;
 		this.itemName = itemName;
 		this.itemKind = itemKind;
+		this.itemValue = itemValue;
 		this.targetType = targetType;
 		this.targetId = targetId;
-		this.itemValue = itemValue;
 		this.applyPolicy = applyPolicy;
+		this.integralTag1 = integralTag1;
+		this.integralTag2 = integralTag2;
+		this.integralTag3 = integralTag3;
+		this.integralTag4 = integralTag4;
+		this.integralTag5 = integralTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
 	}
 
 	public java.lang.Integer getId() {
@@ -62,6 +89,14 @@ public class EhScopedConfigurations implements java.io.Serializable {
 
 	public void setId(java.lang.Integer id) {
 		this.id = id;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getAppId() {
@@ -88,22 +123,6 @@ public class EhScopedConfigurations implements java.io.Serializable {
 		this.scopeId = scopeId;
 	}
 
-	public java.lang.String getName() {
-		return this.name;
-	}
-
-	public void setName(java.lang.String name) {
-		this.name = name;
-	}
-
-	public java.lang.String getItemGroup() {
-		return this.itemGroup;
-	}
-
-	public void setItemGroup(java.lang.String itemGroup) {
-		this.itemGroup = itemGroup;
-	}
-
 	public java.lang.String getItemName() {
 		return this.itemName;
 	}
@@ -118,6 +137,14 @@ public class EhScopedConfigurations implements java.io.Serializable {
 
 	public void setItemKind(java.lang.Byte itemKind) {
 		this.itemKind = itemKind;
+	}
+
+	public java.lang.String getItemValue() {
+		return this.itemValue;
+	}
+
+	public void setItemValue(java.lang.String itemValue) {
+		this.itemValue = itemValue;
 	}
 
 	public java.lang.String getTargetType() {
@@ -136,19 +163,91 @@ public class EhScopedConfigurations implements java.io.Serializable {
 		this.targetId = targetId;
 	}
 
-	public java.lang.String getItemValue() {
-		return this.itemValue;
-	}
-
-	public void setItemValue(java.lang.String itemValue) {
-		this.itemValue = itemValue;
-	}
-
 	public java.lang.Byte getApplyPolicy() {
 		return this.applyPolicy;
 	}
 
 	public void setApplyPolicy(java.lang.Byte applyPolicy) {
 		this.applyPolicy = applyPolicy;
+	}
+
+	public java.lang.Long getIntegralTag1() {
+		return this.integralTag1;
+	}
+
+	public void setIntegralTag1(java.lang.Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+
+	public java.lang.Long getIntegralTag2() {
+		return this.integralTag2;
+	}
+
+	public void setIntegralTag2(java.lang.Long integralTag2) {
+		this.integralTag2 = integralTag2;
+	}
+
+	public java.lang.Long getIntegralTag3() {
+		return this.integralTag3;
+	}
+
+	public void setIntegralTag3(java.lang.Long integralTag3) {
+		this.integralTag3 = integralTag3;
+	}
+
+	public java.lang.Long getIntegralTag4() {
+		return this.integralTag4;
+	}
+
+	public void setIntegralTag4(java.lang.Long integralTag4) {
+		this.integralTag4 = integralTag4;
+	}
+
+	public java.lang.Long getIntegralTag5() {
+		return this.integralTag5;
+	}
+
+	public void setIntegralTag5(java.lang.Long integralTag5) {
+		this.integralTag5 = integralTag5;
+	}
+
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
+	}
+
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
+	}
+
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
+	}
+
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
+	}
+
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
+	}
+
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
 	}
 }
