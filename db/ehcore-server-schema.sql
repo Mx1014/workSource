@@ -1,5 +1,5 @@
 #
-# A speical note about the schema design below (KY)
+# Special notes about the schema design below (KY)
 #
 # Custom fileds
 # 	To balance performance and flexibility, some tables carry general purpose integer fields and string fields,
@@ -7,24 +7,30 @@
 # 	provide general indexing support for these fields, it is the responsibility of the application to map queries that
 # 	are against to these fields.
 #
-# 	Initially, only two of string-type general purpose fields are indexed, more indices can be added during operating
+# 	Initially, only two of integral-type and string-type fields are indexed, more indices can be added during operating
 # 	time, tuning changes about the indexing will be sync-ed back into schema design afterwards
 #
 # namespaces and application modules
 #	Reusable modules are abstracted under the concept of application. The platform provides built-in application modules
-#	such as messaging app module, form app module, etc. These built-in application modules running in the context of 
-#	core server. When a application module has external counterpart at third-party servers or remote client endpoint, 
-#	the API it provides requires to go through the authentication system via appkey/secret key pair
+#	such as messaging application module, forum application module, etc. These built-in application modules are running 
+#   in the context of core server. When a application module has external counterpart at third-party servers or remote client endpoints, 
+#	the API it provides requires to go through the authentication system via appkey/secret key pair mechanism
 #
 #   Namespace is used to put related resources into distinct domains
 #
-# namespace and application usage rules
+# namespace and application design rules
 #	Shared resources (usually system defined) that are common to all namespaces do not need namespace_id field
-#	First level resources that will have distinct value in different namespace domains should have namespace_id field
+#	First level resources usually have namespace_id field
 #	Secondary level resources do not need namespace_id field
-#	objects that can carry information generated from multiple application modules, should have app_id field
-#	all entity profile items have app_id, so that it allows other application modules to attach application specific
-#	profile information
+#	objects that can carry information generated from multiple application modules usualy have app_id field
+#	all profile items have app_id field, so that it allows other application modules to attach application specific
+#	profile information into it
+#
+# name convention
+#	index prefix: i_eh_
+#	unique index prefix: u_eh_
+#	foreign key constraint prefix: fk_eh_
+# 	table prefix: eh_
 #
 
 SET foreign_key_checks = 0;
@@ -264,9 +270,8 @@ CREATE TABLE `eh_user_identifiers` (
 
 # 
 # member of eh_users partition
-#
-# Used for duplicated recording of group membership that user is involved in
-# stored in the same shard as of its owner user
+# Used for duplicated recording of group membership that user is involved in order to store 
+# it in the same shard as of its owner user
 #
 DROP TABLE IF EXISTS `eh_user_groups`;
 CREATE TABLE `eh_user_groups` (
@@ -501,8 +506,8 @@ DROP TABLE IF EXISTS `eh_communities`;
 CREATE TABLE `eh_communities`(
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `city_id` INTEGER NOT NULL COMMENT 'city id in region table',
-    `city_name` VARCHAR(64),
-    `area_id` INTEGER NOT NULL COMMENT 'id of the region where area locates in',
+    `city_name` VARCHAR(64) COMMENT 'redundant for query optimization',
+    `area_id` INTEGER NOT NULL COMMENT 'area id in region table',
     `area_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `name` VARCHAR(64),
     `alias_name` VARCHAR(64),
