@@ -32,6 +32,15 @@
 #	foreign key constraint prefix: fk_eh_
 # 	table prefix: eh_
 #
+# record deletion
+# 	There are two deletion policies in regards to deletion
+#		mark-deletion: mark it as deleted, wait for lazy cleanup or archive
+#		remove-deletion: completely remove it from database
+#
+#   for the mark-deletion policy, the convention is to have a delete_time field which not only marks up the deletion
+#	but also the deletion time
+#
+#
 
 SET foreign_key_checks = 0;
 
@@ -51,11 +60,13 @@ CREATE TABLE `eh_categories`(
     `default_order` INTEGER,
     `status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
     `create_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used', 
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_category_name`(`parent_id`, `name`),
     INDEX `i_eh_category_path`(`path`),
-    INDEX `i_eh_category_order`(`default_order`)
+    INDEX `i_eh_category_order`(`default_order`),
+    INDEX `i_eh_category_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -70,7 +81,7 @@ CREATE TABLE `eh_state_triggers` (
     `flow_type` INTEGER,
     `flow_data` TEXT,
     `order` INTEGER,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, it is used to control program logic, makes more sense to just remove it',
     
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -88,15 +99,13 @@ CREATE TABLE `eh_search_keywords`(
     `frequency` INTEGER,
     `version` INTEGER,
     `update_time` DATETIME,
-    `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_kword_scoped_kword`(`scope`, `scope_id`, `keyword`),
     INDEX `i_kword_weight_frequency`(`weight`, `frequency`),
     INDEX `i_kword_update_time`(`update_time`),
-    INDEX `i_kword_create_time`(`create_time`),
-    INDEX `i_kword_delete_time`(`delete_time`)
+    INDEX `i_kword_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -115,9 +124,11 @@ CREATE TABLE `eh_app_promotions` (
     `download_count` INTEGER NOT NULL DEFAULT 0,
     `register_count` INTEGER NOT NULL DEFAULT 0,
     `create_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
-    INDEX `i_app_promo_create_time`(`create_time`)
+    INDEX `i_app_promo_create_time`(`create_time`),
+    INDEX `i_app_promo_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -181,9 +192,11 @@ CREATE TABLE `eh_stats_by_city` (
     `post_comment_count` BIGINT,
     `post_like_count` BIGINT,
     `create_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_stats_city_report`(`city_id`, `stats_date`, `stats_type`)
+    UNIQUE `u_stats_city_report`(`city_id`, `stats_date`, `stats_type`),
+    INDEX `u_stats_delete_time`(`delete_time`)    
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -211,11 +224,51 @@ CREATE TABLE `eh_feedbacks`(
     `subject` VARCHAR(256),
     `content` TEXT,
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_feedback_create_time`(`create_time`),
     INDEX `i_eh_feedback_delete_time`(`delete_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_audit_logs`;
+CREATE TABLE `eh_audit_logs`(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `app_id` BIGINT COMMENT 'application that provides the operation',
+    `operator_uid` BIGINT,
+	`requestor_uid` BIGINT COMMENT 'user who initiated the original request',
+    `operation_name` VARCHAR(32),
+    `result_code` INTEGER COMMENT '0: common positive result, otherwise, application defined result code', 
+    `reason` VARCHAR(256),
+	`resource_type` VARCHAR(32) COMMENT 'operation related resource type',
+	`resource_id` BIGINT COMMENT 'operation related resource id',
+
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+	
+    `create_time` DATETIME COMMENT 'time of the operation that was performed',
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_audit_operator_uid`(`operator_uid`),
+    INDEX `i_eh_audit_requestor_uid`(`requestor_uid`),
+    INDEX `i_eh_audit_create_time`(`create_time`),
+    INDEX `i_eh_audit_delete_time`(`delete_time`),
+    INDEX `i_eh_audit_itag1`(`integral_tag1`),
+    INDEX `i_eh_audit_itag2`(`integral_tag2`),
+    INDEX `i_eh_audit_stag1`(`string_tag1`),
+    INDEX `i_eh_audit_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -228,6 +281,7 @@ CREATE TABLE `eh_users` (
     `nick_name` VARCHAR(32),
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
     `create_time` DATETIME NOT NULL,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy. may be valuable for user to restore account',
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
 
     PRIMARY KEY (`id`),
@@ -257,7 +311,7 @@ CREATE TABLE `eh_user_identifiers` (
     `identifier_token` VARCHAR(128),
     `verification_code` VARCHAR(16),
     `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: free standing, 1: claiming, 2: claim verifying, 3: claimed',
-    `create_time` DATETIME NOT NULL,
+    `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     `notify_time` DATETIME,
     
     PRIMARY KEY (`id`),
@@ -281,7 +335,7 @@ CREATE TABLE `eh_user_groups` (
     `group_id` BIGINT,
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'default to ResourceUser role', 
     `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
-    `create_time` DATETIME NOT NULL,
+    `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
@@ -298,8 +352,7 @@ CREATE TABLE `eh_user_blacklist` (
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_usr_blk_owner_target`(`owner_uid`, `target_type`, `target_id`),
@@ -316,8 +369,7 @@ CREATE TABLE `eh_user_favorites` (
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
 
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_usr_favorite_target`(`owner_uid`, `target_type`, `target_id`),
@@ -374,7 +426,7 @@ CREATE TABLE `eh_groups` (
     `description` TEXT,
     `creator_uid` BIGINT NOT NULL,
     `create_time` DATETIME NOT NULL,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
     `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner',
     `discriminator` VARCHAR(32),
@@ -450,7 +502,7 @@ CREATE TABLE `eh_group_members` (
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',    
     `member_tag` VARCHAR(32) COMMENT 'can be used to represent member nick name within the group',
     `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
-    `create_time` DATETIME NOT NULL,
+    `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     `approve_time` DATETIME,
     
     PRIMARY KEY (`id`),
@@ -516,7 +568,7 @@ CREATE TABLE `eh_communities`(
     `description` TEXT,
     `detail_description` TEXT,
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
@@ -592,7 +644,7 @@ CREATE TABLE `eh_addresses` (
     `building_alias_name` VARCHAR(128),
     `appartment_name` VARCHAR(128),
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
@@ -637,7 +689,7 @@ CREATE TABLE `eh_address_claims` (
     `proof_resource_url` VARCHAR(512),
     `create_time` DATETIME,
     `process_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be useful',
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
@@ -679,14 +731,12 @@ CREATE TABLE `eh_family_followers` (
     `owner_family` BIGINT NOT NULL,
     `follower_family` BIGINT NOT NULL,
     `alias_name` VARCHAR(64),
-    `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `i_fm_follower_follower`(`owner_family`, `follower_family`),
     INDEX `i_eh_fm_follower_owner`(`owner_family`),
-    INDEX `i_eh_fm_follower_create_time`(`create_time`),
-    INDEX `i_eh_fm_follower_delete_time`(`delete_time`)
+    INDEX `i_eh_fm_follower_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -700,14 +750,12 @@ CREATE TABLE `eh_followed_families`(
     `followed_family` BIGINT NOT NULL,
     `alias_name` VARCHAR(64),
     
-    `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `i_eh_fm_followed_followed`(`owner_family`, `followed_family`),
     INDEX `i_eh_fm_followed_owner`(`owner_family`),
-    INDEX `i_eh_fm_followed_create_time`(`create_time`),
-    INDEX `i_eh_fm_followed_delete_time`(`delete_time`)
+    INDEX `i_eh_fm_followed_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -732,10 +780,11 @@ CREATE TABLE `eh_banners` (
     `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
     `order` INTEGER NOT NULL DEFAULT 0,
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
-    INDEX `i_eh_banner_create_time`(`create_time`)
+    INDEX `i_eh_banner_create_time`(`create_time`),
+    INDEX `i_eh_banner_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -905,7 +954,7 @@ CREATE TABLE `eh_events`(
     `order` INTEGER NOT NULL DEFAULT 0,
     `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_evt_start_time_ms`(`start_time_ms`),
@@ -930,7 +979,7 @@ CREATE TABLE `eh_event_roster`(
     `signup_flag` TINYINT NOT NULL DEFAULT 0,
     `signup_uid` BIGINT,
     `signup_time` DATETIME,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
 
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_evt_roster_uuid`(`uuid`),
@@ -949,7 +998,7 @@ CREATE TABLE `eh_event_ticket_groups`(
     `name` VARCHAR(32),
     `total_count` INTEGER,
     `allocated_count` INTEGER,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
 
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_evt_tg_name`(`event_id`, `name`),
@@ -970,7 +1019,7 @@ CREATE TABLE `eh_event_tickets`(
     `uid` BIGINT,
     `family_id` BIGINT,
     `status` TINYINT COMMENT '0: free, 1: allocated',
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_evt_ticket_ticket`(`ticket_group_id`, `ticket_number`),
@@ -1048,7 +1097,7 @@ CREATE TABLE `eh_activities` (
     `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
     `change_version` INTEGER NOT NULL DEFAULT 1,
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_act_start_time_ms`(`start_time_ms`),
@@ -1081,7 +1130,7 @@ CREATE TABLE `eh_activity_roster`(
     `confirm_time` DATETIME,
     `lottery_flag` TINYINT NOT NULL DEFAULT 0,
     `lottery_time` DATETIME,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_act_roster_uuid`(`uuid`),
@@ -1112,7 +1161,7 @@ CREATE TABLE `eh_polls` (
     `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
     `change_version` INTEGER NOT NULL DEFAULT 1,
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_poll_start_time_ms`(`start_time_ms`),
@@ -1136,7 +1185,7 @@ CREATE TABLE `eh_poll_items`(
     `resource_url` VARCHAR(512),
     `vote_count` INTEGER NOT NULL DEFAULT 0,
     `change_version` INTEGER NOT NULL DEFAULT 0,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_poll_item_poll`(`poll_id`),
@@ -1154,7 +1203,7 @@ CREATE TABLE `eh_poll_votes`(
     `item_id` BIGINT,
     `voter_uid` BIGINT,
     `voter_family_id` BIGINT,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     UNIQUE `i_eh_poll_vote_voter`(`poll_id`, `item_id`, `voter_uid`),
@@ -1178,7 +1227,7 @@ CREATE TABLE `eh_business`(
     `geohash` VARCHAR(64),
     `change_version` INTEGER,
     `create_time` DATETIME,
-    `delete_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_biz_name`(`name`),
@@ -1239,7 +1288,7 @@ CREATE TABLE `eh_biz_coupon_groups`(
     `status` INTEGER,
     `start_time` DATETIME,
     `expire_time` DATETIME,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_biz_grp_business_id`(`business_id`),
@@ -1262,7 +1311,7 @@ CREATE TABLE `eh_biz_coupon`(
     `uid` BIGINT,
     `family_id` BIGINT,
     `status` INTEGER,
-    `create_time` DATETIME,
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_biz_coupon_business_id`(`business_id`),    
