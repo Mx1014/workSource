@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1052999489;
+	private static final long serialVersionUID = -911931215;
 
 	private java.lang.Long     id;
 	private java.lang.String   accountName;
 	private java.lang.String   nickName;
 	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp deleteTime;
 	private java.lang.String   passwordHash;
 
 	public EhUsers() {}
@@ -28,6 +29,7 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.String   nickName,
 		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
+		java.sql.Timestamp deleteTime,
 		java.lang.String   passwordHash
 	) {
 		this.id = id;
@@ -35,6 +37,7 @@ public class EhUsers implements java.io.Serializable {
 		this.nickName = nickName;
 		this.status = status;
 		this.createTime = createTime;
+		this.deleteTime = deleteTime;
 		this.passwordHash = passwordHash;
 	}
 
@@ -76,6 +79,14 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getDeleteTime() {
+		return this.deleteTime;
+	}
+
+	public void setDeleteTime(java.sql.Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.String getPasswordHash() {

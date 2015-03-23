@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFeedbacksRecord> {
 
-	private static final long serialVersionUID = -198090257;
+	private static final long serialVersionUID = 396089941;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_feedbacks</code>
@@ -57,9 +57,9 @@ public class EhFeedbacks extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_feedbacks.delete_time</code>.
+	 * The column <code>ehcore.eh_feedbacks.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be valuable");
 
 	/**
 	 * Create a <code>ehcore.eh_feedbacks</code> table reference

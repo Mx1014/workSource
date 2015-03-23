@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPollVotes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPollVotesRecord> {
 
-	private static final long serialVersionUID = -402662697;
+	private static final long serialVersionUID = 736838667;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_poll_votes</code>
@@ -52,9 +52,9 @@ public class EhPollVotes extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollVotesRecord, java.lang.Long> VOTER_FAMILY_ID = createField("voter_family_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_poll_votes.create_time</code>.
+	 * The column <code>ehcore.eh_poll_votes.create_time</code>. remove-deletion policy, user directly managed data
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollVotesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollVotesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "remove-deletion policy, user directly managed data");
 
 	/**
 	 * Create a <code>ehcore.eh_poll_votes</code> table reference

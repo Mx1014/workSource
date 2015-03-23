@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> {
 
-	private static final long serialVersionUID = -1771706539;
+	private static final long serialVersionUID = 1167148523;
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.id</code>. id of the record
@@ -210,14 +210,14 @@ public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_address_claims.delete_time</code>.
+	 * Setter for <code>ehcore.eh_address_claims.delete_time</code>. mark-deletion policy, historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
 		setValue(14, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_address_claims.delete_time</code>.
+	 * Getter for <code>ehcore.eh_address_claims.delete_time</code>. mark-deletion policy, historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
 		return (java.sql.Timestamp) getValue(14);

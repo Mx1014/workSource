@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = 1383139934;
+	private static final long serialVersionUID = -1393888620;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -37,14 +37,14 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "city id in region table");
 
 	/**
-	 * The column <code>ehcore.eh_communities.city_name</code>.
+	 * The column <code>ehcore.eh_communities.city_name</code>. redundant for query optimization
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> CITY_NAME = createField("city_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> CITY_NAME = createField("city_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "redundant for query optimization");
 
 	/**
-	 * The column <code>ehcore.eh_communities.area_id</code>. id of the region where area locates in
+	 * The column <code>ehcore.eh_communities.area_id</code>. area id in region table
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> AREA_ID = createField("area_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "id of the region where area locates in");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> AREA_ID = createField("area_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "area id in region table");
 
 	/**
 	 * The column <code>ehcore.eh_communities.area_name</code>. redundant for query optimization
@@ -87,9 +87,9 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_communities.delete_time</code>.
+	 * The column <code>ehcore.eh_communities.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
 
 	/**
 	 * The column <code>ehcore.eh_communities.integral_tag1</code>.

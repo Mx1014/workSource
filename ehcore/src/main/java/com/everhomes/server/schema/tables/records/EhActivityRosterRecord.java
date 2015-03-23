@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> implements org.jooq.Record16<java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.Byte, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Timestamp, java.lang.Byte, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 703157911;
+	private static final long serialVersionUID = 254373771;
 
 	/**
 	 * Setter for <code>ehcore.eh_activity_roster.id</code>. id of the record
@@ -224,14 +224,14 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_activity_roster.create_time</code>.
+	 * Setter for <code>ehcore.eh_activity_roster.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
 		setValue(15, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_activity_roster.create_time</code>.
+	 * Getter for <code>ehcore.eh_activity_roster.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public java.sql.Timestamp getCreateTime() {
 		return (java.sql.Timestamp) getValue(15);

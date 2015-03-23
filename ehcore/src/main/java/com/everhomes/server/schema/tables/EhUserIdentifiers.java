@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserIdentifiers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> {
 
-	private static final long serialVersionUID = 1785215290;
+	private static final long serialVersionUID = -1154966972;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_identifiers</code>
@@ -57,9 +57,9 @@ public class EhUserIdentifiers extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord, java.lang.Byte> CLAIM_STATUS = createField("claim_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: free standing, 1: claiming, 2: claim verifying, 3: claimed");
 
 	/**
-	 * The column <code>ehcore.eh_user_identifiers.create_time</code>.
+	 * The column <code>ehcore.eh_user_identifiers.create_time</code>. remove-deletion policy, user directly managed data
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "remove-deletion policy, user directly managed data");
 
 	/**
 	 * The column <code>ehcore.eh_user_identifiers.notify_time</code>.

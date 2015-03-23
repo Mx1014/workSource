@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusiness extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBusinessRecord> {
 
-	private static final long serialVersionUID = -1996389486;
+	private static final long serialVersionUID = 1120436130;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_business</code>
@@ -77,9 +77,9 @@ public class EhBusiness extends org.jooq.impl.TableImpl<com.everhomes.server.sch
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_business.delete_time</code>.
+	 * The column <code>ehcore.eh_business.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be valuable");
 
 	/**
 	 * Create a <code>ehcore.eh_business</code> table reference

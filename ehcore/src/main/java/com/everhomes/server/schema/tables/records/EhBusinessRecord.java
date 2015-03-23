@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinessRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhBusinessRecord> implements org.jooq.Record11<java.lang.Long, java.lang.Integer, java.lang.String, java.lang.String, java.lang.Long, java.lang.Double, java.lang.Double, java.lang.String, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1776731763;
+	private static final long serialVersionUID = 845312185;
 
 	/**
 	 * Setter for <code>ehcore.eh_business.id</code>. id of the record
@@ -154,14 +154,14 @@ public class EhBusinessRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_business.delete_time</code>.
+	 * Setter for <code>ehcore.eh_business.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
 		setValue(10, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_business.delete_time</code>.
+	 * Getter for <code>ehcore.eh_business.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public java.sql.Timestamp getDeleteTime() {
 		return (java.sql.Timestamp) getValue(10);

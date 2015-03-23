@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEventRoster extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEventRosterRecord> {
 
-	private static final long serialVersionUID = -1318252093;
+	private static final long serialVersionUID = -184941753;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_event_roster</code>
@@ -77,9 +77,9 @@ public class EhEventRoster extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventRosterRecord, java.sql.Timestamp> SIGNUP_TIME = createField("signup_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_event_roster.create_time</code>.
+	 * The column <code>ehcore.eh_event_roster.create_time</code>. remove-deletion policy, user directly managed data
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventRosterRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventRosterRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "remove-deletion policy, user directly managed data");
 
 	/**
 	 * Create a <code>ehcore.eh_event_roster</code> table reference

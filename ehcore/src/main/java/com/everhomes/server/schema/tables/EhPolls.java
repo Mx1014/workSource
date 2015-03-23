@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPolls extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPollsRecord> {
 
-	private static final long serialVersionUID = 1695182310;
+	private static final long serialVersionUID = -1503621772;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_polls</code>
@@ -112,9 +112,9 @@ public class EhPolls extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_polls.delete_time</code>.
+	 * The column <code>ehcore.eh_polls.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be valuable");
 
 	/**
 	 * Create a <code>ehcore.eh_polls</code> table reference

@@ -102,11 +102,4 @@ public class EhSearchKeywordsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhSearchKeywords> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.CREATE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>delete_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhSearchKeywords> fetchByDeleteTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.DELETE_TIME, values);
-	}
 }

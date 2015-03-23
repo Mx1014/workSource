@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = 368090322;
+	private static final long serialVersionUID = -541986392;
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.id</code>. id of the record
@@ -42,28 +42,28 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_communities.city_name</code>.
+	 * Setter for <code>ehcore.eh_communities.city_name</code>. redundant for query optimization
 	 */
 	public void setCityName(java.lang.String value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_communities.city_name</code>.
+	 * Getter for <code>ehcore.eh_communities.city_name</code>. redundant for query optimization
 	 */
 	public java.lang.String getCityName() {
 		return (java.lang.String) getValue(2);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_communities.area_id</code>. id of the region where area locates in
+	 * Setter for <code>ehcore.eh_communities.area_id</code>. area id in region table
 	 */
 	public void setAreaId(java.lang.Integer value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_communities.area_id</code>. id of the region where area locates in
+	 * Getter for <code>ehcore.eh_communities.area_id</code>. area id in region table
 	 */
 	public java.lang.Integer getAreaId() {
 		return (java.lang.Integer) getValue(3);
@@ -182,14 +182,14 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_communities.delete_time</code>.
+	 * Setter for <code>ehcore.eh_communities.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
 		setValue(12, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_communities.delete_time</code>.
+	 * Getter for <code>ehcore.eh_communities.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
 		return (java.sql.Timestamp) getValue(12);

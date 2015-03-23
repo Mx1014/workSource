@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAppPromotions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord> {
 
-	private static final long serialVersionUID = -540378120;
+	private static final long serialVersionUID = -637408128;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_app_promotions</code>
@@ -75,6 +75,11 @@ public class EhAppPromotions extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_app_promotions.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_app_promotions.delete_time</code>. mark-deletion policy, historic data may be valuable
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be valuable");
 
 	/**
 	 * Create a <code>ehcore.eh_app_promotions</code> table reference

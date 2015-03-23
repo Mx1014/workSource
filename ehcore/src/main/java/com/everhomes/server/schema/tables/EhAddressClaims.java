@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> {
 
-	private static final long serialVersionUID = -1086031584;
+	private static final long serialVersionUID = -49774764;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_address_claims</code>
@@ -97,9 +97,9 @@ public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.sql.Timestamp> PROCESS_TIME = createField("process_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_claims.delete_time</code>.
+	 * The column <code>ehcore.eh_address_claims.delete_time</code>. mark-deletion policy, historic data may be useful
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be useful");
 
 	/**
 	 * The column <code>ehcore.eh_address_claims.integral_tag1</code>.

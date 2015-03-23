@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> implements org.jooq.Record7<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Integer, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 334523466;
+	private static final long serialVersionUID = -1529200426;
 
 	/**
 	 * Setter for <code>ehcore.eh_user_groups.id</code>. id of the record
@@ -98,14 +98,14 @@ public class EhUserGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_user_groups.create_time</code>.
+	 * Setter for <code>ehcore.eh_user_groups.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_user_groups.create_time</code>.
+	 * Getter for <code>ehcore.eh_user_groups.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public java.sql.Timestamp getCreateTime() {
 		return (java.sql.Timestamp) getValue(6);

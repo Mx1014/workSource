@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhSearchKeywords implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1566891985;
+	private static final long serialVersionUID = 1112118885;
 
 	private java.lang.Integer  id;
 	private java.lang.String   scope;
@@ -22,7 +22,6 @@ public class EhSearchKeywords implements java.io.Serializable {
 	private java.lang.Integer  version;
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp deleteTime;
 
 	public EhSearchKeywords() {}
 
@@ -35,8 +34,7 @@ public class EhSearchKeywords implements java.io.Serializable {
 		java.lang.Integer  frequency,
 		java.lang.Integer  version,
 		java.sql.Timestamp updateTime,
-		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.scope = scope;
@@ -47,7 +45,6 @@ public class EhSearchKeywords implements java.io.Serializable {
 		this.version = version;
 		this.updateTime = updateTime;
 		this.createTime = createTime;
-		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Integer getId() {
@@ -120,13 +117,5 @@ public class EhSearchKeywords implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.sql.Timestamp getDeleteTime() {
-		return this.deleteTime;
-	}
-
-	public void setDeleteTime(java.sql.Timestamp deleteTime) {
-		this.deleteTime = deleteTime;
 	}
 }

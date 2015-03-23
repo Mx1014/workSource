@@ -74,11 +74,4 @@ public class EhUserBlacklistDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserBlacklist> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST.CREATE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>delete_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserBlacklist> fetchByDeleteTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST.DELETE_TIME, values);
-	}
 }

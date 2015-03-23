@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCategoriesRecord> {
 
-	private static final long serialVersionUID = 2090734461;
+	private static final long serialVersionUID = 504954540;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_categories</code>
@@ -65,6 +65,11 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_categories.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_categories.delete_time</code>. mark-deletion policy. It is much more safer to do so if an allocated category is broadly used
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. It is much more safer to do so if an allocated category is broadly used");
 
 	/**
 	 * Create a <code>ehcore.eh_categories</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAppPromotions implements java.io.Serializable {
 
-	private static final long serialVersionUID = -614780848;
+	private static final long serialVersionUID = -497573388;
 
 	private java.lang.Integer  id;
 	private java.lang.String   name;
@@ -23,6 +23,7 @@ public class EhAppPromotions implements java.io.Serializable {
 	private java.lang.Integer  downloadCount;
 	private java.lang.Integer  registerCount;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp deleteTime;
 
 	public EhAppPromotions() {}
 
@@ -36,7 +37,8 @@ public class EhAppPromotions implements java.io.Serializable {
 		java.lang.String   link,
 		java.lang.Integer  downloadCount,
 		java.lang.Integer  registerCount,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
 		this.name = name;
@@ -48,6 +50,7 @@ public class EhAppPromotions implements java.io.Serializable {
 		this.downloadCount = downloadCount;
 		this.registerCount = registerCount;
 		this.createTime = createTime;
+		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Integer getId() {
@@ -128,5 +131,13 @@ public class EhAppPromotions implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getDeleteTime() {
+		return this.deleteTime;
+	}
+
+	public void setDeleteTime(java.sql.Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 }
