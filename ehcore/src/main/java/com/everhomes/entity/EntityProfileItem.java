@@ -24,6 +24,9 @@ public class EntityProfileItem implements Serializable {
     private java.lang.String stringTag3;
     private java.lang.String stringTag4;
     private java.lang.String stringTag5;
+    
+    private Class<?> ownerEntityPojoClass;
+    private Class<?> itemPojoClass;
 
     public EntityProfileItem() {}
 
@@ -209,5 +212,21 @@ public class EntityProfileItem implements Serializable {
 
     public void setStringTag5(java.lang.String stringTag5) {
         this.stringTag5 = stringTag5;
+    }
+
+    public Class<?> getOwnerEntityPojoClass() {
+        return ownerEntityPojoClass;
+    }
+
+    public void setOwnerEntityPojoClass(Class<?> ownerEntityPojoClass) {
+        this.ownerEntityPojoClass = ownerEntityPojoClass;
+    }
+
+    public Class<?> getItemPojoClass() {
+        return itemPojoClass;
+    }
+
+    public void setItemPojoClass(Class<?> itemPojoClass) {
+        this.itemPojoClass = itemPojoClass;
     }
 }

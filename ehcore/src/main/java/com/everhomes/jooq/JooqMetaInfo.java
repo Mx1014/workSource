@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.jooq;
 
+import org.jooq.Record;
+
 /**
  * JooqMetaInfo is used to store JOOQ generated classes meta information
  *
@@ -37,5 +39,17 @@ public class JooqMetaInfo {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+    
+    public Record getBlankRecordObject() {
+        if(this.recordClass != null) {
+            try {
+                return (Record)this.recordClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                assert(false);
+            }
+        }
+        
+        return null;
     }
 }

@@ -9,8 +9,20 @@
     <name>ehcore</name>
     <url>http://www.everhomes.com</url>
 
+	<distributionManagement>
+	    <repository>
+	      <id>everhomes.repo</id>
+	      <name>Internal Repository</name>
+	      <url>http://mvn-mirror.lab.everhomes.com:8081/artifactory/libs-snapshot-local</url>
+	    </repository>
+    </distributionManagement>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+        <!-- override java compiler version to 1.6 since Andriod is also using the artifact -->
+        <java.source.version>1.6</java.source.version>
+        <java.target.version>1.6</java.target.version>
     </properties>
     
     <dependencies>
