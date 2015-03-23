@@ -16,9 +16,9 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
     public void initialize(ConfigurableApplicationContext applicationContext) {
          applicationContext.getEnvironment().getPropertySources().addFirst(
            new MockPropertySource()
-            .withProperty("redis.bus.host", "192.168.1.223")
+            .withProperty("redis.bus.host", "redis-server")
             .withProperty("redis.bus.port", "6379")
-            .withProperty("redis.store.master.host", "192.168.1.223")
+            .withProperty("redis.store.master.host", "redis-server")
             .withProperty("redis.store.master.port", "6379")
             .withProperty("upload.max.size", 100000)
             .withProperty("heartbeat.interval", 10000)

@@ -11,14 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserBlacklist implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1038869903;
+	private static final long serialVersionUID = 935649883;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
 	private java.lang.String   targetType;
 	private java.lang.Long     targetId;
 	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp deleteTime;
 
 	public EhUserBlacklist() {}
 
@@ -27,15 +26,13 @@ public class EhUserBlacklist implements java.io.Serializable {
 		java.lang.Long     ownerUid,
 		java.lang.String   targetType,
 		java.lang.Long     targetId,
-		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.createTime = createTime;
-		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Long getId() {
@@ -76,13 +73,5 @@ public class EhUserBlacklist implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.sql.Timestamp getDeleteTime() {
-		return this.deleteTime;
-	}
-
-	public void setDeleteTime(java.sql.Timestamp deleteTime) {
-		this.deleteTime = deleteTime;
 	}
 }

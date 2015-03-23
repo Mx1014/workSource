@@ -137,4 +137,11 @@ public class EhStatsByCityDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhStatsByCity> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>delete_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhStatsByCity> fetchByDeleteTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.DELETE_TIME, values);
+	}
 }

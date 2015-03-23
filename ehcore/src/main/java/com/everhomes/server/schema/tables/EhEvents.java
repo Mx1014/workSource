@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEvents extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEventsRecord> {
 
-	private static final long serialVersionUID = -1740463065;
+	private static final long serialVersionUID = -787781587;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_events</code>
@@ -152,9 +152,9 @@ public class EhEvents extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_events.delete_time</code>.
+	 * The column <code>ehcore.eh_events.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be valuable");
 
 	/**
 	 * Create a <code>ehcore.eh_events</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBannersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> implements org.jooq.Record17<java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.lang.String, java.lang.Byte, java.lang.String, java.lang.Long, java.lang.String, java.lang.Byte, java.lang.Long, java.lang.Long, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1233269669;
+	private static final long serialVersionUID = 2089393531;
 
 	/**
 	 * Setter for <code>ehcore.eh_banners.id</code>. id of the record
@@ -238,14 +238,14 @@ public class EhBannersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everh
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_banners.delete_time</code>.
+	 * Setter for <code>ehcore.eh_banners.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
 		setValue(16, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_banners.delete_time</code>.
+	 * Getter for <code>ehcore.eh_banners.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public java.sql.Timestamp getDeleteTime() {
 		return (java.sql.Timestamp) getValue(16);

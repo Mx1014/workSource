@@ -11,14 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFollowedFamilies implements java.io.Serializable {
 
-	private static final long serialVersionUID = -906144253;
+	private static final long serialVersionUID = 4880009;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerFamily;
 	private java.lang.Long     followedFamily;
 	private java.lang.String   aliasName;
 	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp deleteTime;
 
 	public EhFollowedFamilies() {}
 
@@ -27,15 +26,13 @@ public class EhFollowedFamilies implements java.io.Serializable {
 		java.lang.Long     ownerFamily,
 		java.lang.Long     followedFamily,
 		java.lang.String   aliasName,
-		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.ownerFamily = ownerFamily;
 		this.followedFamily = followedFamily;
 		this.aliasName = aliasName;
 		this.createTime = createTime;
-		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Long getId() {
@@ -76,13 +73,5 @@ public class EhFollowedFamilies implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.sql.Timestamp getDeleteTime() {
-		return this.deleteTime;
-	}
-
-	public void setDeleteTime(java.sql.Timestamp deleteTime) {
-		this.deleteTime = deleteTime;
 	}
 }

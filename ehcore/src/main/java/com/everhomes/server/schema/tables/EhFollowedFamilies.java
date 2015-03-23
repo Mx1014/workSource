@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFollowedFamilies extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord> {
 
-	private static final long serialVersionUID = 2067804974;
+	private static final long serialVersionUID = 1906149672;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_followed_families</code>
@@ -47,14 +47,9 @@ public class EhFollowedFamilies extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord, java.lang.String> ALIAS_NAME = createField("alias_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_followed_families.create_time</code>.
+	 * The column <code>ehcore.eh_followed_families.create_time</code>. remove-deletion policy, user directly managed data
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_followed_families.delete_time</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFollowedFamiliesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "remove-deletion policy, user directly managed data");
 
 	/**
 	 * Create a <code>ehcore.eh_followed_families</code> table reference

@@ -44,7 +44,7 @@ public class ConfigInitializer {
         Server server;
         
         server = new Server();
-        server.setAddressUri("192.168.1.223");
+        server.setAddressUri("redis-server");
         server.setAddressPort(6379);
         server.setServerType(ServerType.RedisCache.ordinal());
         server.setStatus(ServerStatus.enabled.ordinal());

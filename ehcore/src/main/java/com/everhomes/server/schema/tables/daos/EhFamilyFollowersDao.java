@@ -74,11 +74,4 @@ public class EhFamilyFollowersDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyFollowers> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS.CREATE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>delete_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyFollowers> fetchByDeleteTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS.DELETE_TIME, values);
-	}
 }

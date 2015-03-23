@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPollVotesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPollVotesRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 622770067;
+	private static final long serialVersionUID = 37364277;
 
 	/**
 	 * Setter for <code>ehcore.eh_poll_votes.id</code>. id of the record
@@ -84,14 +84,14 @@ public class EhPollVotesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_poll_votes.create_time</code>.
+	 * Setter for <code>ehcore.eh_poll_votes.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_poll_votes.create_time</code>.
+	 * Getter for <code>ehcore.eh_poll_votes.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public java.sql.Timestamp getCreateTime() {
 		return (java.sql.Timestamp) getValue(5);

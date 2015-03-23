@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStateTriggers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhStateTriggersRecord> {
 
-	private static final long serialVersionUID = 957126102;
+	private static final long serialVersionUID = 983540080;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_state_triggers</code>
@@ -62,9 +62,9 @@ public class EhStateTriggers extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Integer> ORDER = createField("order", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_state_triggers.create_time</code>.
+	 * The column <code>ehcore.eh_state_triggers.create_time</code>. remove-deletion policy, it is used to control program logic, makes more sense to just remove it
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "remove-deletion policy, it is used to control program logic, makes more sense to just remove it");
 
 	/**
 	 * Create a <code>ehcore.eh_state_triggers</code> table reference

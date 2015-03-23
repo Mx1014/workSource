@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBizCouponGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord> {
 
-	private static final long serialVersionUID = -2128649064;
+	private static final long serialVersionUID = -724938020;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_biz_coupon_groups</code>
@@ -82,9 +82,9 @@ public class EhBizCouponGroups extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord, java.sql.Timestamp> EXPIRE_TIME = createField("expire_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_biz_coupon_groups.create_time</code>.
+	 * The column <code>ehcore.eh_biz_coupon_groups.create_time</code>. remove-deletion policy, user directly managed data
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "remove-deletion policy, user directly managed data");
 
 	/**
 	 * Create a <code>ehcore.eh_biz_coupon_groups</code> table reference

@@ -83,6 +83,13 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>delete_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByDeleteTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.DELETE_TIME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>password_hash IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPasswordHash(java.lang.String... values) {

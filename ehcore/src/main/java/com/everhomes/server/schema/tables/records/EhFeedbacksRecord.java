@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhFeedbacksRecord> implements org.jooq.Record7<java.lang.Integer, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1663850251;
+	private static final long serialVersionUID = -613828911;
 
 	/**
 	 * Setter for <code>ehcore.eh_feedbacks.id</code>.
@@ -98,14 +98,14 @@ public class EhFeedbacksRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_feedbacks.delete_time</code>.
+	 * Setter for <code>ehcore.eh_feedbacks.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_feedbacks.delete_time</code>.
+	 * Getter for <code>ehcore.eh_feedbacks.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public java.sql.Timestamp getDeleteTime() {
 		return (java.sql.Timestamp) getValue(6);

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 1637704985;
+	private static final long serialVersionUID = 1796745001;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -62,9 +62,9 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_groups.delete_time</code>.
+	 * The column <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, multi-purpose base entity");
 
 	/**
 	 * The column <code>ehcore.eh_groups.private_flag</code>. 0: public, 1: private

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBizCouponGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord> implements org.jooq.Record12<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Integer, java.lang.String, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1698539253;
+	private static final long serialVersionUID = 255536957;
 
 	/**
 	 * Setter for <code>ehcore.eh_biz_coupon_groups.id</code>. id of the record
@@ -168,14 +168,14 @@ public class EhBizCouponGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_biz_coupon_groups.create_time</code>.
+	 * Setter for <code>ehcore.eh_biz_coupon_groups.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
 		setValue(11, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_biz_coupon_groups.create_time</code>.
+	 * Getter for <code>ehcore.eh_biz_coupon_groups.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public java.sql.Timestamp getCreateTime() {
 		return (java.sql.Timestamp) getValue(11);

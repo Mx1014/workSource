@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStatsByCity implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1582358866;
+	private static final long serialVersionUID = 595429130;
 
 	private java.lang.Integer  id;
 	private java.lang.Integer  cityId;
@@ -27,6 +27,7 @@ public class EhStatsByCity implements java.io.Serializable {
 	private java.lang.Long     postCommentCount;
 	private java.lang.Long     postLikeCount;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp deleteTime;
 
 	public EhStatsByCity() {}
 
@@ -44,7 +45,8 @@ public class EhStatsByCity implements java.io.Serializable {
 		java.lang.Long     postCount,
 		java.lang.Long     postCommentCount,
 		java.lang.Long     postLikeCount,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
 		this.cityId = cityId;
@@ -60,6 +62,7 @@ public class EhStatsByCity implements java.io.Serializable {
 		this.postCommentCount = postCommentCount;
 		this.postLikeCount = postLikeCount;
 		this.createTime = createTime;
+		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Integer getId() {
@@ -172,5 +175,13 @@ public class EhStatsByCity implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getDeleteTime() {
+		return this.deleteTime;
+	}
+
+	public void setDeleteTime(java.sql.Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 }

@@ -109,4 +109,11 @@ public class EhAppPromotionsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAppPromotions> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>delete_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAppPromotions> fetchByDeleteTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.DELETE_TIME, values);
+	}
 }
