@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.entity;
 
-import java.lang.reflect.Method;
-
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -11,6 +9,8 @@ import org.jooq.impl.DAOImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -55,6 +55,7 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
         }
     }
     
+    @CacheEvict(value = "EntityProfile", key="{#item.itemPojoClass.simpleName, #item.id}")
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void updateProfileItem(EntityProfileItem item) {
         assert(item.getOwnerEntityPojoClass() != null);
@@ -78,6 +79,7 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
         }
     }
     
+    @CacheEvict(value = "EntityProfile", key="{#item.itemPojoClass.simpleName, #item.id}")
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void deleteProfileItem(EntityProfileItem item) {
         assert(item.getOwnerEntityPojoClass() != null);
@@ -101,6 +103,7 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
         }
     }
     
+    @Cacheable(value = "EntityProfile", key="{#entityProfileItemPojoClz.simpleName, #itemId}")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public EntityProfileItem findProfileItemById(Class<?> entityPojoClz,  
             Class<?> entityProfileItemPojoClz, long itemId) {
@@ -117,32 +120,7 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
             (DSLContext context, Object reducingContext) -> {
                 EntityProfileItem item = context.select().from(meta.getTableName())
                 .where(((TableField)blankRecord.field("id")).eq(itemId))
-                .fetchOne().map((Record r)-> {
-                    EntityProfileItem val = new EntityProfileItem();
-                    val.setOwnerEntityPojoClass(entityPojoClz);
-                    val.setItemPojoClass(entityProfileItemPojoClz);
-                    
-                    val.setId(r.getValue((Field<Long>)r.field("id")));
-                    val.setAppId(r.getValue((Field<Long>)r.field("app_id")));
-                    val.setOwnerId(r.getValue((Field<Long>)r.field("owner_id")));
-                    val.setItemName(r.getValue((Field<String>)r.field("item_name")));
-                    val.setItemKind(r.getValue((Field<Byte>)r.field("item_kind")));
-                    val.setItemValue(r.getValue((Field<String>)r.field("item_value")));
-                    val.setTargetType(r.getValue((Field<String>)r.field("target_type")));
-                    val.setTargetId(r.getValue((Field<Long>)r.field("target_id")));
-                    val.setIntegralTag1(r.getValue((Field<Long>)r.field("integral_tag1")));
-                    val.setIntegralTag2(r.getValue((Field<Long>)r.field("integral_tag2")));
-                    val.setIntegralTag3(r.getValue((Field<Long>)r.field("integral_tag3")));
-                    val.setIntegralTag4(r.getValue((Field<Long>)r.field("integral_tag4")));
-                    val.setIntegralTag5(r.getValue((Field<Long>)r.field("integral_tag5")));
-                    val.setStringTag1(r.getValue((Field<String>)r.field("string_tag1")));
-                    val.setStringTag2(r.getValue((Field<String>)r.field("string_tag2")));
-                    val.setStringTag3(r.getValue((Field<String>)r.field("string_tag3")));
-                    val.setStringTag4(r.getValue((Field<String>)r.field("string_tag4")));
-                    val.setStringTag5(r.getValue((Field<String>)r.field("string_tag5")));
-                                       
-                    return val;
-                });
+                .fetchOne().map(new EntityProfileItemRecordMapper(entityPojoClz, entityProfileItemPojoClz));
                 
                 if(item != null) {
                     result[0] = item;

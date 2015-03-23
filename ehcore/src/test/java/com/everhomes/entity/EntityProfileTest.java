@@ -94,5 +94,14 @@ public class EntityProfileTest extends TestCase {
             System.out.println("item name: " + item.getItemName());
         else
             System.out.println("item not found");
+        
+        // using debugger to verify if cache has been successfully put in-use for second call
+        item = this.profileProvider.findProfileItemById(EhBanners.class, EhBannerProfiles.class, 2);
+        if(item != null)
+            System.out.println("item name: " + item.getItemName());
+        else
+            System.out.println("item not found");
     }
+    
+    
 }
