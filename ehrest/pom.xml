@@ -23,6 +23,8 @@
         <!-- override java compiler version to 1.6 since Andriod is also using the artifact -->
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
+        
+     	<maven.test.skip>true</maven.test.skip>
     </properties>
     
     <dependencies>
