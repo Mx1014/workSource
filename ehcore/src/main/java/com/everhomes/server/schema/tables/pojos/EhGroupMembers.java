@@ -11,16 +11,18 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1662412453;
+	private static final long serialVersionUID = 921955381;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
 	private java.lang.String   memberType;
 	private java.lang.Long     memberId;
 	private java.lang.Long     memberRole;
-	private java.lang.String   memberTag;
+	private java.lang.String   memberAvatar;
+	private java.lang.String   memberNickName;
 	private java.lang.Integer  memberStatus;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp approveTime;
 
 	public EhGroupMembers() {}
@@ -31,9 +33,11 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   memberType,
 		java.lang.Long     memberId,
 		java.lang.Long     memberRole,
-		java.lang.String   memberTag,
+		java.lang.String   memberAvatar,
+		java.lang.String   memberNickName,
 		java.lang.Integer  memberStatus,
 		java.sql.Timestamp createTime,
+		java.lang.Long     operatorUid,
 		java.sql.Timestamp approveTime
 	) {
 		this.id = id;
@@ -41,9 +45,11 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.memberType = memberType;
 		this.memberId = memberId;
 		this.memberRole = memberRole;
-		this.memberTag = memberTag;
+		this.memberAvatar = memberAvatar;
+		this.memberNickName = memberNickName;
 		this.memberStatus = memberStatus;
 		this.createTime = createTime;
+		this.operatorUid = operatorUid;
 		this.approveTime = approveTime;
 	}
 
@@ -87,12 +93,20 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.memberRole = memberRole;
 	}
 
-	public java.lang.String getMemberTag() {
-		return this.memberTag;
+	public java.lang.String getMemberAvatar() {
+		return this.memberAvatar;
 	}
 
-	public void setMemberTag(java.lang.String memberTag) {
-		this.memberTag = memberTag;
+	public void setMemberAvatar(java.lang.String memberAvatar) {
+		this.memberAvatar = memberAvatar;
+	}
+
+	public java.lang.String getMemberNickName() {
+		return this.memberNickName;
+	}
+
+	public void setMemberNickName(java.lang.String memberNickName) {
+		this.memberNickName = memberNickName;
 	}
 
 	public java.lang.Integer getMemberStatus() {
@@ -109,6 +123,14 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
 	}
 
 	public java.sql.Timestamp getApproveTime() {

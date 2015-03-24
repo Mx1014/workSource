@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 1451480997;
+	private static final long serialVersionUID = 1059994080;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -52,9 +52,14 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> MEMBER_ROLE = createField("member_role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "Default to ResourceUser role");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.member_tag</code>. can be used to represent member nick name within the group
+	 * The column <code>ehcore.eh_group_members.member_avatar</code>. avatar image identifier in storage sub-system
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_TAG = createField("member_tag", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "can be used to represent member nick name within the group");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_AVATAR = createField("member_avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "avatar image identifier in storage sub-system");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.member_nick_name</code>. member nick name within the group
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_NICK_NAME = createField("member_nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "member nick name within the group");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
@@ -67,9 +72,14 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "remove-deletion policy, user directly managed data");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.approve_time</code>.
+	 * The column <code>ehcore.eh_group_members.operator_uid</code>. redundant auditing info
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> APPROVE_TIME = createField("approve_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "redundant auditing info");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> APPROVE_TIME = createField("approve_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "redundant auditing info");
 
 	/**
 	 * Create a <code>ehcore.eh_group_members</code> table reference

@@ -34,6 +34,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAddressClaims EH_ADDRESS_CLAIMS = com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS;
 
 	/**
+	 * The table ehcore.eh_address_claim_stats
+	 */
+	public static final com.everhomes.server.schema.tables.EhAddressClaimStats EH_ADDRESS_CLAIM_STATS = com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS;
+
+	/**
 	 * The table ehcore.eh_app_promotions
 	 */
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
@@ -134,11 +139,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhFamilyFollowers EH_FAMILY_FOLLOWERS = com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS;
 
 	/**
-	 * The table ehcore.eh_feedbacks
-	 */
-	public static final com.everhomes.server.schema.tables.EhFeedbacks EH_FEEDBACKS = com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS;
-
-	/**
 	 * The table ehcore.eh_followed_families
 	 */
 	public static final com.everhomes.server.schema.tables.EhFollowedFamilies EH_FOLLOWED_FAMILIES = com.everhomes.server.schema.tables.EhFollowedFamilies.EH_FOLLOWED_FAMILIES;
@@ -154,6 +154,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhGroupMembers EH_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS;
 
 	/**
+	 * The table ehcore.eh_group_profiles
+	 */
+	public static final com.everhomes.server.schema.tables.EhGroupProfiles EH_GROUP_PROFILES = com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES;
+
+	/**
 	 * The table ehcore.eh_polls
 	 */
 	public static final com.everhomes.server.schema.tables.EhPolls EH_POLLS = com.everhomes.server.schema.tables.EhPolls.EH_POLLS;
@@ -167,6 +172,11 @@ public class Tables {
 	 * The table ehcore.eh_poll_votes
 	 */
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
+
+	/**
+	 * The table ehcore.eh_regions
+	 */
+	public static final com.everhomes.server.schema.tables.EhRegions EH_REGIONS = com.everhomes.server.schema.tables.EhRegions.EH_REGIONS;
 
 	/**
 	 * The table ehcore.eh_rtxt_resources

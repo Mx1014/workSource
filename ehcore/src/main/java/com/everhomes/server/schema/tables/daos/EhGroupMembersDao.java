@@ -76,10 +76,17 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>member_tag IN (values)</code>
+	 * Fetch records that have <code>member_avatar IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberTag(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_TAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberAvatar(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_AVATAR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>member_nick_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberNickName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_NICK_NAME, values);
 	}
 
 	/**
@@ -94,6 +101,13 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.CREATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.OPERATOR_UID, values);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -1358378125;
+	private static final long serialVersionUID = -301430644;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -38,6 +38,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER,
 			com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES,
 			com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS,
+			com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS,
 			com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS,
 			com.everhomes.server.schema.tables.EhBanners.EH_BANNERS,
 			com.everhomes.server.schema.tables.EhBannerClicks.EH_BANNER_CLICKS,
@@ -58,13 +59,14 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhEventTickets.EH_EVENT_TICKETS,
 			com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS,
 			com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS,
-			com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS,
 			com.everhomes.server.schema.tables.EhFollowedFamilies.EH_FOLLOWED_FAMILIES,
 			com.everhomes.server.schema.tables.EhGroups.EH_GROUPS,
 			com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS,
+			com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
 			com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES,
+			com.everhomes.server.schema.tables.EhRegions.EH_REGIONS,
 			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,
 			com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS,
 			com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS,
