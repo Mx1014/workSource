@@ -1,5 +1,7 @@
 package com.everhomes.entity;
 
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.junit.Ignore;
@@ -20,6 +22,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqDiscover;
 import com.everhomes.jooq.JooqMetaInfo;
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.server.schema.tables.daos.EhBannerProfilesDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhBannerProfiles;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
@@ -47,10 +50,9 @@ public class EntityProfileTest extends TestCase {
         })
     static class ContextConfiguration {
     }
-
+    
     @Ignore @Test
     public void testBannerProfile() {
- /*       
         EhBannerProfilesDao dao = new EhBannerProfilesDao(
                 dbProvider.getDslContext(dbUrl).configuration());
         EhBannerProfiles item = new EhBannerProfiles();
@@ -62,10 +64,9 @@ public class EntityProfileTest extends TestCase {
         item.setTargetId(1L);
         item.setId(1L);
         dao.insert(item);
-*/
-/*        
+
         EntityProfileItem item2 = new EntityProfileItem();
-        item2.setOwnerId(200L);
+        item2.setOwnerId(100L);
         item2.setAppId(1L);
         item2.setItemName("item2");
         item2.setItemKind((byte)1);
@@ -74,7 +75,6 @@ public class EntityProfileTest extends TestCase {
         item2.setId(2L);
         
         profileProvider.createProfileItem(EhBanners.class, 1, EhBannerProfiles.class, item2);
- */       
     }
     
     @Ignore @Test
@@ -86,7 +86,7 @@ public class EntityProfileTest extends TestCase {
         System.out.println("dao class: " + meta.getDaoClass().getName());
     }
     
-    @Test
+    @Ignore @Test
     public void testFindProfileItemById() {
         EntityProfileItem item = this.profileProvider.findProfileItemById(EhBanners.class, EhBannerProfiles.class, 2);
         
@@ -103,5 +103,24 @@ public class EntityProfileTest extends TestCase {
             System.out.println("item not found");
     }
     
-    
+    @Test
+    public void testListProfileItems() {
+        List<EntityProfileItem> items = this.profileProvider.listEntityProfileItems(
+            EhBanners.class, 100, EhBannerProfiles.class);
+        
+        for(EntityProfileItem item: items) {
+            System.out.println("item name: " + item.getItemName());
+        }
+        
+        // udate item to test profile list cache-invalidation
+        items.get(0).setItemName("item1");
+        this.profileProvider.updateProfileItem(items.get(0));
+        
+        items = this.profileProvider.listEntityProfileItems(
+                EhBanners.class, 100, EhBannerProfiles.class);
+            
+        for(EntityProfileItem item: items) {
+            System.out.println("item name: " + item.getItemName());
+        }
+    }
 }

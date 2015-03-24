@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.entity;
 
+import java.util.List;
+
 /**
  * General entity profile management
  * 
@@ -12,6 +14,14 @@ package com.everhomes.entity;
  *
  */
 public interface EntityProfileProvider {
+    /**
+     * Create a profile item
+     * 
+     * @param entityPojoClz owner entity Pojo class
+     * @param entityId owner Id owner entity id
+     * @param entityProfileItemPojoClz profile item Pojo class
+     * @param item profile item
+     */
     void createProfileItem(Class<?> entityPojoClz, long entityId, 
             Class<?> entityProfileItemPojoClz, EntityProfileItem item);
     
@@ -30,9 +40,20 @@ public interface EntityProfileProvider {
     void deleteProfileItem(EntityProfileItem item);
 
     /**
-     * Find profile item by id
+     * Find profile item from item id
      * 
      */
     EntityProfileItem findProfileItemById(Class<?> entityPojoClz,  
             Class<?> entityProfileItemPojoClz, long itemId);
+    
+    /**
+     * List all profile items of the entity. Assume the number of profile items of any entity
+     * object is limited. therefore no pagination is needed
+     * 
+     * @param entityPojoClz
+     * @param entityId
+     * @return
+     */
+    List<EntityProfileItem> listEntityProfileItems(Class<?> entityPojoClz, long entityId,
+        Class<?> itemPojoClz); 
 }
