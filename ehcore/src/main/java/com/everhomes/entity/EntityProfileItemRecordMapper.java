@@ -20,6 +20,7 @@ public class EntityProfileItemRecordMapper implements RecordMapper<Record, Entit
         this.itemPojoClass = itemPojoClass;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public EntityProfileItem map(Record r) {
         EntityProfileItem item = new EntityProfileItem();

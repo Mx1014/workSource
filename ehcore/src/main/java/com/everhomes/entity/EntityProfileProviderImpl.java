@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.entity;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -15,9 +14,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
 
-import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
