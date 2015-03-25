@@ -2,7 +2,31 @@
 package com.everhomes.entity;
 
 public enum EntityProfileItemValueKind {
-    OpaqueJsonObject,
-    EntityDescriptor
+    OPAQUE_JSON_OBJECT((byte)0), ENTITY_DESCRIPTOR((byte)1);
+    
+    private byte code;
+    
+    private EntityProfileItemValueKind(byte code) {
+        this.code = code;
+    }
+    
+    public byte getCode() {
+        return this.code;
+    }
+    
+    public static EntityProfileItemValueKind fromCode(byte code) {
+        switch(code) {
+        case 0 :
+            return OPAQUE_JSON_OBJECT;
+            
+        case 1 :
+            return ENTITY_DESCRIPTOR;
+                    
+        default :
+            assert(false);
+        }
+        
+        return null;
+    }
 }
 

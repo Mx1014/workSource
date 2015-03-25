@@ -69,6 +69,13 @@ public class EhRegionsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>level IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByLevel(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.LEVEL, values);
+	}
+
+	/**
 	 * Fetch records that have <code>scope_code IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByScopeCode(java.lang.Byte... values) {

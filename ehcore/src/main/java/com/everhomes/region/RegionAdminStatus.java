@@ -2,7 +2,7 @@
 package com.everhomes.region;
 
 public enum RegionAdminStatus {
-    inactive((byte)1), active((byte)2), locked((byte)3), deleted((byte)4);
+    INACTIVE((byte)1), ACTIVE((byte)2), LOCKED((byte)3), DELETED((byte)4);
     
     private byte code;
     
@@ -17,15 +17,16 @@ public enum RegionAdminStatus {
     public static RegionAdminStatus fromCode(byte code) {
         switch(code) {
         case 1:
-            return inactive;
+            return INACTIVE;
+            
         case 2:
-            return active;
+            return ACTIVE;
             
         case 3:
-            return locked;
+            return LOCKED;
             
         case 4:
-            return deleted;
+            return DELETED;
             
         default :
             assert(false);

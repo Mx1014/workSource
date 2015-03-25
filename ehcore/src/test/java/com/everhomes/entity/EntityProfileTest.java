@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.entity;
 
 import java.util.List;
@@ -103,7 +104,7 @@ public class EntityProfileTest extends TestCase {
             System.out.println("item not found");
     }
     
-    @Test
+    @Ignore @Test
     public void testListProfileItems() {
         List<EntityProfileItem> items = this.profileProvider.listEntityProfileItems(
             EhBanners.class, 100, EhBannerProfiles.class);

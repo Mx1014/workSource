@@ -542,14 +542,18 @@ CREATE TABLE `eh_regions` (
     `parent_id` INTEGER COMMENT 'id of the parent region', 
 	`name` VARCHAR(64),
 	`path` VARCHAR(512) COMMENT 'path from the root',
+	`level` INTEGER NOT NULL DEFAULT 0,
     `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area',
 	`iso_code` VARCHAR(32) COMMENT 'international standard code for the region if exists',
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
     
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_region_name`(`parent_id`, `name`),
-    INDEX `i_eh_region_path`(`path`)
+ 	INDEX `i_eh_region_name_level`(`name`, `level`),   
+    INDEX `i_eh_region_path`(`path`),
+ 	INDEX `i_eh_region_path_level`(`path`, `level`),   
+ 	INDEX `i_eh_region_parent`(`parent_id`)   
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #

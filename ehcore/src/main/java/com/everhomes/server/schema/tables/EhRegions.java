@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRegionsRecord> {
 
-	private static final long serialVersionUID = 154897334;
+	private static final long serialVersionUID = 1372308632;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_regions</code>
@@ -47,6 +47,11 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.String> PATH = createField("path", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "path from the root");
 
 	/**
+	 * The column <code>ehcore.eh_regions.level</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> LEVEL = createField("level", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT, this, "0 : country, 1: state/province, 2: city, 3: area");
@@ -62,9 +67,9 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.String> TEL_CODE = createField("tel_code", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "primary telephone area code");
 
 	/**
-	 * The column <code>ehcore.eh_regions.status</code>. 1: created, 2: active, 3: locked, 4: deleted
+	 * The column <code>ehcore.eh_regions.status</code>. 1: inactive, 2: active, 3: locked, 4: mark as deleted
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: created, 2: active, 3: locked, 4: deleted");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: inactive, 2: active, 3: locked, 4: mark as deleted");
 
 	/**
 	 * Create a <code>ehcore.eh_regions</code> table reference

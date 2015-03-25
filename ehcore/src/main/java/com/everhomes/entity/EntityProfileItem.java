@@ -102,12 +102,25 @@ public class EntityProfileItem implements Serializable {
         this.itemName = itemName;
     }
 
+    public EntityProfileItemValueKind getItemKindEnum() {
+        if(this.itemKind != null)
+            return EntityProfileItemValueKind.fromCode(this.itemKind);
+        return null;
+    }
+    
     public java.lang.Byte getItemKind() {
         return this.itemKind;
     }
 
     public void setItemKind(java.lang.Byte itemKind) {
         this.itemKind = itemKind;
+    }
+    
+    public void setItemKindEnum(EntityProfileItemValueKind itemKind) {
+        if(itemKind != null)
+            this.itemKind = itemKind.getCode();
+        else
+            this.itemKind = null;
     }
 
     public java.lang.String getItemValue() {
