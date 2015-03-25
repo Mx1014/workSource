@@ -128,7 +128,7 @@ public class UserServiceTest {
         System.out.println("Login token: " + loginToken.getTokenString());
     }
     
-    @Test
+    @Ignore @Test
     public void testLoginByToken() {
         LoginToken token = LoginToken.fromTokenString("eyJ1c2VySWQiOjEsImxvZ2luSWQiOjEsImxvZ2luSW5zdGFuY2VOdW1iZXIiOi0xMzY5Njg0ODEzfQ");
         this.userService.logonByToken(token);

@@ -499,11 +499,13 @@ CREATE TABLE `eh_group_members` (
     `group_id` BIGINT NOT NULL,
     `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type, for example, type could be User, Group, etc',
     `member_id` BIGINT,
-    `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',    
-    `member_tag` VARCHAR(32) COMMENT 'can be used to represent member nick name within the group',
+    `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
+    `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
+  	`member_nick_name` VARCHAR(32) COMMENT 'member nick name within the group',
     `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
-    `approve_time` DATETIME,
+    `operator_uid` BIGINT COMMENT 'redundant auditing info',
+    `approve_time` DATETIME COMMENT 'redundant auditing info',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_grp_member` (`group_id`, `member_type`, `member_id`),
@@ -540,14 +542,18 @@ CREATE TABLE `eh_regions` (
     `parent_id` INTEGER COMMENT 'id of the parent region', 
 	`name` VARCHAR(64),
 	`path` VARCHAR(512) COMMENT 'path from the root',
+	`level` INTEGER NOT NULL DEFAULT 0,
     `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area',
 	`iso_code` VARCHAR(32) COMMENT 'international standard code for the region if exists',
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: created, 2: active, 3: locked, 4: deleted',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
     
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_region_name`(`parent_id`, `name`),
-    INDEX `i_eh_region_path`(`path`)
+ 	INDEX `i_eh_region_name_level`(`name`, `level`),   
+    INDEX `i_eh_region_path`(`path`),
+ 	INDEX `i_eh_region_path_level`(`path`, `level`),   
+ 	INDEX `i_eh_region_parent`(`parent_id`)   
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -668,6 +674,22 @@ CREATE TABLE `eh_addresses` (
     INDEX `i_eh_addr_itag2`(`integral_tag2`),
     INDEX `i_eh_addr_stag1`(`string_tag1`),
     INDEX `i_eh_addr_stag2`(`string_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_address partition group
+#
+DROP TABLE IF EXISTS `eh_address_claim_stats`;
+CREATE TABLE `eh_address_claim_stats` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`namespace_id` INTEGER,
+	`address_id` BIGINT NOT NULL,
+	`claimed_count` INTEGER NOT NULL DEFAULT 0,
+	`claiming_count` INTEGER NOT NULL DEFAULT 0,
+	
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_addr_claim_stats_addr_id`(`address_id`) REFERENCES `eh_addresses`(`id`) ON DELETE CASCADE,
+	INDEX `i_eh_addr_claim_ns_id`(`namespace_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
