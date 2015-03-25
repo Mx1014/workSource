@@ -114,9 +114,9 @@ public class RegionProviderImpl implements RegionProvider {
         
         if(status != null) {
             if(condition != null)
-                condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(status.getCode()));
+                condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
             else
-                condition = Tables.EH_REGIONS.SCOPE_CODE.eq(status.getCode());
+                condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
         }
         
         if(condition != null) {
@@ -159,7 +159,7 @@ public class RegionProviderImpl implements RegionProvider {
             condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
         
         if(status != null)
-            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(status.getCode()));
+            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
         
         if(condition != null) {
             selectStep.where(condition);
@@ -218,7 +218,7 @@ public class RegionProviderImpl implements RegionProvider {
             condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
         
         if(status != null)
-            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(status.getCode()));
+            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
         
         if(condition != null) {
             selectStep.where(condition);

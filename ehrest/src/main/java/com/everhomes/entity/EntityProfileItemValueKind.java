@@ -14,8 +14,11 @@ public enum EntityProfileItemValueKind {
         return this.code;
     }
     
-    public static EntityProfileItemValueKind fromCode(byte code) {
-        switch(code) {
+    public static EntityProfileItemValueKind fromCode(Byte code) {
+        if(code == null)
+            return null;
+        
+        switch(code.byteValue()) {
         case 0 :
             return OPAQUE_JSON_OBJECT;
             

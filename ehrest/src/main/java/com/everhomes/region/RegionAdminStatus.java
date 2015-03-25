@@ -14,8 +14,11 @@ public enum RegionAdminStatus {
         return this.code;
     }
     
-    public static RegionAdminStatus fromCode(byte code) {
-        switch(code) {
+    public static RegionAdminStatus fromCode(Byte code) {
+        if(code == null)
+            return null;
+        
+        switch(code.byteValue()) {
         case 1:
             return INACTIVE;
             

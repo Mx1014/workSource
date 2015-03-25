@@ -14,8 +14,11 @@ public enum RegionScope {
         return this.code;
     }
 
-    public static RegionScope fromCode(byte code) {
-        switch(code) {
+    public static RegionScope fromCode(Byte code) {
+        if(code == null)
+            return null;
+        
+        switch(code.byteValue()) {
         case 0 :
             return COUNTRY;
             
