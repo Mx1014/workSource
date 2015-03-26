@@ -100,14 +100,14 @@ public class RegionProviderTest  extends TestCase {
     @SuppressWarnings("unchecked")
     @Test
     public void test() {
-        List<Region> regions = this.regionProvider.listRegion(RegionScope.CITY, null, 
+        List<Region> regions = this.regionProvider.listRegions(RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {
             System.out.println("region: " + region.toString());
         }
         
-        regions = this.regionProvider.listDescendantRegion(null, RegionScope.CITY, null, 
+        regions = this.regionProvider.listDescendantRegions(null, RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {

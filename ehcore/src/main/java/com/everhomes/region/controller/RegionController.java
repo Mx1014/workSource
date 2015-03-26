@@ -52,7 +52,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listRegion(RegionScope.fromCode(cmd.getScope()), 
+        List<Region> entityResultList = this.regionProvider.listRegions(RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
         List<RegionDTO> dtoResultList = entityResultList.stream()
@@ -73,7 +73,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listChildRegion(cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listChildRegions(cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
@@ -88,14 +88,14 @@ public class RegionController extends ControllerBase {
     @RestReturn(value=RegionDTO.class, collection=true)
     public RestResponse listDescendants(@Valid ListRegionCommand cmd) {
         if(LOGGER.isTraceEnabled())
-            LOGGER.trace("API request /region/listChildren: " + cmd.toString());
+            LOGGER.trace("API request /region/listDescendants: " + cmd.toString());
 
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listDescendantRegion(cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listDescendantRegions(cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         

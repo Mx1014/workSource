@@ -43,6 +43,9 @@ public class RegionProviderImpl implements RegionProvider {
     @Autowired
     private DbProvider dbProvider;
     
+    @Caching(evict = { @CacheEvict(value="listRegion"),
+            @CacheEvict(value="listChildRegion"),
+            @CacheEvict(value="listDescendantRegion") })
     @Override
     public void createRegion(Region region) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -81,7 +84,10 @@ public class RegionProviderImpl implements RegionProvider {
         dao.deleteById(region.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="Region", key="#regionId") })
+    @Caching(evict = { @CacheEvict(value="Region", key="#regionId"),
+            @CacheEvict(value="listRegion"),
+            @CacheEvict(value="listChildRegion"),
+            @CacheEvict(value="listDescendantRegion") })
     @Override
     public void deleteRegionById(long regionId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -101,7 +107,7 @@ public class RegionProviderImpl implements RegionProvider {
     @Cacheable(value = "listRegion")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<Region> listRegion(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+    public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
@@ -139,7 +145,7 @@ public class RegionProviderImpl implements RegionProvider {
     @Cacheable(value = "listChildRegion")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<Region> listChildRegion(Long parentRegionId, RegionScope scope, 
+    public List<Region> listChildRegions(Long parentRegionId, RegionScope scope, 
             RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -181,7 +187,7 @@ public class RegionProviderImpl implements RegionProvider {
     @Cacheable(value = "listDescendantRegion")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<Region> listDescendantRegion(Long parentRegionId, RegionScope scope, 
+    public List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, 
             RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 
         List<Region> result = new ArrayList<>();
