@@ -52,13 +52,13 @@ use ehcore;
 #
 DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
-    `id` INTEGER NOT NULL,
-    `parent_id` INTEGER,
-    `link_id` INTEGER COMMENT 'point to the linked category (similar to soft link in file system)',
+    `id` BIGINT NOT NULL,
+    `parent_id` BIGINT,
+    `link_id` BIGINT COMMENT 'point to the linked category (similar to soft link in file system)',
     `name` VARCHAR(128) NOT NULL,
     `path` VARCHAR(1024),
     `default_order` INTEGER,
-    `status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used', 
     
@@ -74,7 +74,7 @@ CREATE TABLE `eh_categories`(
 #
 DROP TABLE IF EXISTS `eh_state_triggers`;
 CREATE TABLE `eh_state_triggers` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `object_type` VARCHAR(32),
     `object_id` BIGINT,
     `trigger_state` INTEGER,
@@ -91,7 +91,7 @@ CREATE TABLE `eh_state_triggers` (
 #
 DROP TABLE IF EXISTS `eh_search_keywords`;
 CREATE TABLE `eh_search_keywords`(
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `scope` VARCHAR(32),
     `scope_id` BIGINT,
     `keyword` VARCHAR(128),
@@ -114,7 +114,7 @@ CREATE TABLE `eh_search_keywords`(
 #
 DROP TABLE IF EXISTS `eh_app_promotions`;
 CREATE TABLE `eh_app_promotions` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(128),
     `channel` INTEGER COMMENT '1: offical site, 2: app store, 3: manual',
     `version` VARCHAR(256),
@@ -141,7 +141,7 @@ CREATE TABLE `eh_app_promotions` (
 #
 DROP TABLE IF EXISTS `eh_scoped_configurations`;
 CREATE TABLE `eh_scoped_configurations`(
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `namespace_id` INTEGER,
     `app_id` BIGINT,
     `scope_type` VARCHAR(32),
@@ -178,8 +178,8 @@ CREATE TABLE `eh_scoped_configurations`(
 #
 DROP TABLE IF EXISTS `eh_stats_by_city`;
 CREATE TABLE `eh_stats_by_city` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `city_id` INTEGER COMMENT 'id in eh_regions table of the city',
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `city_id` BIGINT COMMENT 'id in eh_regions table of the city',
     `stats_date` VARCHAR(32),
     `stats_type` INTEGER,
     `reg_user_count` BIGINT,
@@ -204,7 +204,7 @@ CREATE TABLE `eh_stats_by_city` (
 #
 DROP TABLE IF EXISTS `eh_templates`;
 CREATE TABLE `eh_templates`(
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(64),
     `path` VARCHAR(256),
     `type` TINYINT,
@@ -218,7 +218,7 @@ CREATE TABLE `eh_templates`(
 #
 DROP TABLE IF EXISTS `eh_feedbacks`;
 CREATE TABLE `eh_feedbacks`(
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `uid` BIGINT,
     `business_id` BIGINT,
     `subject` VARCHAR(256),
@@ -236,7 +236,7 @@ CREATE TABLE `eh_feedbacks`(
 #
 DROP TABLE IF EXISTS `eh_audit_logs`;
 CREATE TABLE `eh_audit_logs`(
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `app_id` BIGINT COMMENT 'application that provides the operation',
     `operator_uid` BIGINT,
 	`requestor_uid` BIGINT COMMENT 'user who initiated the original request',
@@ -334,7 +334,7 @@ CREATE TABLE `eh_user_groups` (
     `group_discriminator` VARCHAR(32) COMMENT 'redendant info for quickly distinguishing associated group', 
     `group_id` BIGINT,
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'default to ResourceUser role', 
-    `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
@@ -502,7 +502,7 @@ CREATE TABLE `eh_group_members` (
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
     `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
   	`member_nick_name` VARCHAR(32) COMMENT 'member nick name within the group',
-    `member_status` INTEGER NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     `operator_uid` BIGINT COMMENT 'redundant auditing info',
     `approve_time` DATETIME COMMENT 'redundant auditing info',
@@ -538,8 +538,8 @@ CREATE TABLE `eh_borders` (
 #
 DROP TABLE IF EXISTS `eh_regions`;
 CREATE TABLE `eh_regions` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `parent_id` INTEGER COMMENT 'id of the parent region', 
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `parent_id` BIGINT COMMENT 'id of the parent region', 
 	`name` VARCHAR(64),
 	`path` VARCHAR(512) COMMENT 'path from the root',
 	`level` INTEGER NOT NULL DEFAULT 0,
@@ -563,9 +563,9 @@ CREATE TABLE `eh_regions` (
 DROP TABLE IF EXISTS `eh_communities`;
 CREATE TABLE `eh_communities`(
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `city_id` INTEGER NOT NULL COMMENT 'city id in region table',
+    `city_id` BIGINT NOT NULL COMMENT 'city id in region table',
     `city_name` VARCHAR(64) COMMENT 'redundant for query optimization',
-    `area_id` INTEGER NOT NULL COMMENT 'area id in region table',
+    `area_id` BIGINT NOT NULL COMMENT 'area id in region table',
     `area_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `name` VARCHAR(64),
     `alias_name` VARCHAR(64),
@@ -1116,7 +1116,7 @@ CREATE TABLE `eh_activities` (
     `post_id` BIGINT COMMENT 'associated post id',
     `group_discriminator` VARCHAR(32) COMMENT 'associated group if any',
     `group_id` BIGINT,
-    `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
+    `status` TINYINT COMMENT '0: inactive, 1: drafting, 2: active',
     `change_version` INTEGER NOT NULL DEFAULT 1,
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
@@ -1180,7 +1180,7 @@ CREATE TABLE `eh_polls` (
     `creator_uid` BIGINT,
     `creator_family_id` BIGINT,
     `post_id` BIGINT COMMENT 'associated post in forum',
-    `status` INTEGER COMMENT '0: inactive, 1: drafting, 2: active',
+    `status` TINYINT COMMENT '0: inactive, 1: drafting, 2: active',
     `change_version` INTEGER NOT NULL DEFAULT 1,
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
@@ -1307,7 +1307,7 @@ CREATE TABLE `eh_biz_coupon_groups`(
     `tag` VARCHAR(500),
     `rank` INTEGER,
     `link_url` VARCHAR(256),
-    `status` INTEGER,
+    `status` TINYINT,
     `start_time` DATETIME,
     `expire_time` DATETIME,
     `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
@@ -1332,7 +1332,7 @@ CREATE TABLE `eh_biz_coupon`(
     `coupon_number` VARCHAR(128),
     `uid` BIGINT,
     `family_id` BIGINT,
-    `status` INTEGER,
+    `status` TINYINT,
     `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),

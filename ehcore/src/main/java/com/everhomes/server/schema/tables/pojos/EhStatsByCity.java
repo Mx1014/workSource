@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStatsByCity implements java.io.Serializable {
 
-	private static final long serialVersionUID = 595429130;
+	private static final long serialVersionUID = 1906173812;
 
-	private java.lang.Integer  id;
-	private java.lang.Integer  cityId;
+	private java.lang.Long     id;
+	private java.lang.Long     cityId;
 	private java.lang.String   statsDate;
 	private java.lang.Integer  statsType;
 	private java.lang.Long     regUserCount;
@@ -32,8 +32,8 @@ public class EhStatsByCity implements java.io.Serializable {
 	public EhStatsByCity() {}
 
 	public EhStatsByCity(
-		java.lang.Integer  id,
-		java.lang.Integer  cityId,
+		java.lang.Long     id,
+		java.lang.Long     cityId,
 		java.lang.String   statsDate,
 		java.lang.Integer  statsType,
 		java.lang.Long     regUserCount,
@@ -65,19 +65,19 @@ public class EhStatsByCity implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 	}
 
-	public java.lang.Integer getId() {
+	public java.lang.Long getId() {
 		return this.id;
 	}
 
-	public void setId(java.lang.Integer id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 
-	public java.lang.Integer getCityId() {
+	public java.lang.Long getCityId() {
 		return this.cityId;
 	}
 
-	public void setCityId(java.lang.Integer cityId) {
+	public void setCityId(java.lang.Long cityId) {
 		this.cityId = cityId;
 	}
 

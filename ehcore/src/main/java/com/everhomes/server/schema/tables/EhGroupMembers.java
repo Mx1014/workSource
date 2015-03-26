@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 1059994080;
+	private static final long serialVersionUID = 1941993829;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -64,7 +64,7 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	/**
 	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Integer> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: active");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.create_time</code>. remove-deletion policy, user directly managed data

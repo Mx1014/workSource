@@ -20,7 +20,7 @@ public interface RegionProvider {
     void deleteRegionById(long regionId);
     Region findRegionById(long regionId);
     
-    List<Region> listRegion(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy);
-    List<Region> listChildRegion(Long parentRegionId, RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy);
-    List<Region> listDescendantRegion(Long parentRegionId, RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy);
+    List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy);
+    List<Region> listChildRegions(Long parentRegionId, RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy);
+    List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy);
 }

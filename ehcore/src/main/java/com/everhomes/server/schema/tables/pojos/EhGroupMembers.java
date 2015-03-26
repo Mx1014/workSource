@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 921955381;
+	private static final long serialVersionUID = 1724794083;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
@@ -20,7 +20,7 @@ public class EhGroupMembers implements java.io.Serializable {
 	private java.lang.Long     memberRole;
 	private java.lang.String   memberAvatar;
 	private java.lang.String   memberNickName;
-	private java.lang.Integer  memberStatus;
+	private java.lang.Byte     memberStatus;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp approveTime;
@@ -35,7 +35,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.Long     memberRole,
 		java.lang.String   memberAvatar,
 		java.lang.String   memberNickName,
-		java.lang.Integer  memberStatus,
+		java.lang.Byte     memberStatus,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp approveTime
@@ -109,11 +109,11 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.memberNickName = memberNickName;
 	}
 
-	public java.lang.Integer getMemberStatus() {
+	public java.lang.Byte getMemberStatus() {
 		return this.memberStatus;
 	}
 
-	public void setMemberStatus(java.lang.Integer memberStatus) {
+	public void setMemberStatus(java.lang.Byte memberStatus) {
 		this.memberStatus = memberStatus;
 	}
 

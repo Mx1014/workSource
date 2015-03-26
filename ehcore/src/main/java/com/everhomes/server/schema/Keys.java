@@ -18,15 +18,15 @@ public class Keys {
 	// IDENTITY definitions
 	// -------------------------------------------------------------------------
 
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Integer> IDENTITY_EH_APP_PROMOTIONS = Identities0.IDENTITY_EH_APP_PROMOTIONS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> IDENTITY_EH_APP_PROMOTIONS = Identities0.IDENTITY_EH_APP_PROMOTIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = Identities0.IDENTITY_EH_BORDERS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> IDENTITY_EH_COMMUNITIES = Identities0.IDENTITY_EH_COMMUNITIES;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> IDENTITY_EH_REGIONS = Identities0.IDENTITY_EH_REGIONS;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Integer> IDENTITY_EH_SCOPED_CONFIGURATIONS = Identities0.IDENTITY_EH_SCOPED_CONFIGURATIONS;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Integer> IDENTITY_EH_SEARCH_KEYWORDS = Identities0.IDENTITY_EH_SEARCH_KEYWORDS;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Integer> IDENTITY_EH_STATE_TRIGGERS = Identities0.IDENTITY_EH_STATE_TRIGGERS;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Integer> IDENTITY_EH_STATS_BY_CITY = Identities0.IDENTITY_EH_STATS_BY_CITY;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Integer> IDENTITY_EH_TEMPLATES = Identities0.IDENTITY_EH_TEMPLATES;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> IDENTITY_EH_REGIONS = Identities0.IDENTITY_EH_REGIONS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> IDENTITY_EH_SCOPED_CONFIGURATIONS = Identities0.IDENTITY_EH_SCOPED_CONFIGURATIONS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Long> IDENTITY_EH_SEARCH_KEYWORDS = Identities0.IDENTITY_EH_SEARCH_KEYWORDS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Long> IDENTITY_EH_STATE_TRIGGERS = Identities0.IDENTITY_EH_STATE_TRIGGERS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Long> IDENTITY_EH_STATS_BY_CITY = Identities0.IDENTITY_EH_STATS_BY_CITY;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Long> IDENTITY_EH_TEMPLATES = Identities0.IDENTITY_EH_TEMPLATES;
 
 	// -------------------------------------------------------------------------
 	// UNIQUE and PRIMARY KEY definitions
@@ -111,15 +111,15 @@ public class Keys {
 	// -------------------------------------------------------------------------
 
 	private static class Identities0 extends org.jooq.impl.AbstractKeys {
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Integer> IDENTITY_EH_APP_PROMOTIONS = createIdentity(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS, com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> IDENTITY_EH_APP_PROMOTIONS = createIdentity(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS, com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = createIdentity(com.everhomes.server.schema.tables.EhBorders.EH_BORDERS, com.everhomes.server.schema.tables.EhBorders.EH_BORDERS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> IDENTITY_EH_COMMUNITIES = createIdentity(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES, com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> IDENTITY_EH_REGIONS = createIdentity(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS, com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Integer> IDENTITY_EH_SCOPED_CONFIGURATIONS = createIdentity(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS, com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Integer> IDENTITY_EH_SEARCH_KEYWORDS = createIdentity(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Integer> IDENTITY_EH_STATE_TRIGGERS = createIdentity(com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS, com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Integer> IDENTITY_EH_STATS_BY_CITY = createIdentity(com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY, com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Integer> IDENTITY_EH_TEMPLATES = createIdentity(com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES, com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> IDENTITY_EH_REGIONS = createIdentity(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS, com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> IDENTITY_EH_SCOPED_CONFIGURATIONS = createIdentity(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS, com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Long> IDENTITY_EH_SEARCH_KEYWORDS = createIdentity(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Long> IDENTITY_EH_STATE_TRIGGERS = createIdentity(com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS, com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStatsByCityRecord, java.lang.Long> IDENTITY_EH_STATS_BY_CITY = createIdentity(com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY, com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Long> IDENTITY_EH_TEMPLATES = createIdentity(com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES, com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES.ID);
 	}
 
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {

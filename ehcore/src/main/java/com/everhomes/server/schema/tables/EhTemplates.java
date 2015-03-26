@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhTemplates extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhTemplatesRecord> {
 
-	private static final long serialVersionUID = -977907384;
+	private static final long serialVersionUID = 1638499193;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_templates</code>
@@ -29,7 +29,7 @@ public class EhTemplates extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	/**
 	 * The column <code>ehcore.eh_templates.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_templates.name</code>.
@@ -72,7 +72,7 @@ public class EhTemplates extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Integer> getIdentity() {
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhTemplatesRecord, java.lang.Long> getIdentity() {
 		return com.everhomes.server.schema.Keys.IDENTITY_EH_TEMPLATES;
 	}
 

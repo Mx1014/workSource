@@ -141,7 +141,7 @@ public class EhPollsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	/**
 	 * Fetch records that have <code>status IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByStatus(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPolls.EH_POLLS.STATUS, values);
 	}
 

@@ -50,7 +50,7 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>city_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCityId(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCityId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.CITY_ID, values);
 	}
 
@@ -64,7 +64,7 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>area_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAreaId(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAreaId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.AREA_ID, values);
 	}
 

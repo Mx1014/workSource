@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -452754620;
+	private static final long serialVersionUID = -398382850;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -38,7 +38,7 @@ public class EhActivities implements java.io.Serializable {
 	private java.lang.Long     postId;
 	private java.lang.String   groupDiscriminator;
 	private java.lang.Long     groupId;
-	private java.lang.Integer  status;
+	private java.lang.Byte     status;
 	private java.lang.Integer  changeVersion;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
@@ -71,7 +71,7 @@ public class EhActivities implements java.io.Serializable {
 		java.lang.Long     postId,
 		java.lang.String   groupDiscriminator,
 		java.lang.Long     groupId,
-		java.lang.Integer  status,
+		java.lang.Byte     status,
 		java.lang.Integer  changeVersion,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime
@@ -307,11 +307,11 @@ public class EhActivities implements java.io.Serializable {
 		this.groupId = groupId;
 	}
 
-	public java.lang.Integer getStatus() {
+	public java.lang.Byte getStatus() {
 		return this.status;
 	}
 
-	public void setStatus(java.lang.Integer status) {
+	public void setStatus(java.lang.Byte status) {
 		this.status = status;
 	}
 

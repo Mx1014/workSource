@@ -79,7 +79,7 @@ redis:
 #
 db:
     driver: com.mysql.jdbc.Driver
-    master: jdbc:mysql://ehcore:ehcore@127.0.0.1:3306/ehcore
+    master: jdbc:mysql://ehcore:ehcore@127.0.0.1:3306/ehcore?characterEncoding=UTF-8
     conn:
         pool: 128
     tx:

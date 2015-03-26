@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPolls extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPollsRecord> {
 
-	private static final long serialVersionUID = -1503621772;
+	private static final long serialVersionUID = -1018710637;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_polls</code>
@@ -99,7 +99,7 @@ public class EhPolls extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	/**
 	 * The column <code>ehcore.eh_polls.status</code>. 0: inactive, 1: drafting, 2: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollsRecord, java.lang.Integer> STATUS = createField("status", org.jooq.impl.SQLDataType.INTEGER, this, "0: inactive, 1: drafting, 2: active");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPollsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0: inactive, 1: drafting, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_polls.change_version</code>.

@@ -32,7 +32,7 @@ public class RegionProviderTest  extends TestCase {
     @Autowired
     RegionProvider regionProvider;
     
-    List<Integer> newRecordIds = new ArrayList<Integer>();
+    List<Long> newRecordIds = new ArrayList<Long>();
     
     @Configuration
     @ComponentScan(basePackages = {
@@ -100,14 +100,14 @@ public class RegionProviderTest  extends TestCase {
     @SuppressWarnings("unchecked")
     @Test
     public void test() {
-        List<Region> regions = this.regionProvider.listRegion(RegionScope.CITY, null, 
+        List<Region> regions = this.regionProvider.listRegions(RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {
             System.out.println("region: " + region.toString());
         }
         
-        regions = this.regionProvider.listDescendantRegion(null, RegionScope.CITY, null, 
+        regions = this.regionProvider.listDescendantRegions(null, RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {
@@ -117,7 +117,7 @@ public class RegionProviderTest  extends TestCase {
     
     @After
     public void tearDown() {
-        for(Integer id : this.newRecordIds) {
+        for(Long id : this.newRecordIds) {
             this.regionProvider.deleteRegionById(id);
         }
     }

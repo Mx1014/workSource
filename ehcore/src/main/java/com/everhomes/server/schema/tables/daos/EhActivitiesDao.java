@@ -218,7 +218,7 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	/**
 	 * Fetch records that have <code>status IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByStatus(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.STATUS, values);
 	}
 

@@ -99,7 +99,7 @@ public class EhBizCouponGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>status IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBizCouponGroups> fetchByStatus(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBizCouponGroups> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBizCouponGroups.EH_BIZ_COUPON_GROUPS.STATUS, values);
 	}
 

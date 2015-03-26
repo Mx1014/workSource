@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -1393888620;
+	private static final long serialVersionUID = -885160934;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -34,7 +34,7 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_communities.city_id</code>. city id in region table
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "city id in region table");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "city id in region table");
 
 	/**
 	 * The column <code>ehcore.eh_communities.city_name</code>. redundant for query optimization
@@ -44,7 +44,7 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_communities.area_id</code>. area id in region table
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> AREA_ID = createField("area_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "area id in region table");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> AREA_ID = createField("area_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "area id in region table");
 
 	/**
 	 * The column <code>ehcore.eh_communities.area_name</code>. redundant for query optimization

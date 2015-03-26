@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStateTriggers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhStateTriggersRecord> {
 
-	private static final long serialVersionUID = 983540080;
+	private static final long serialVersionUID = -505473009;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_state_triggers</code>
@@ -29,7 +29,7 @@ public class EhStateTriggers extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_state_triggers.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_state_triggers.object_type</code>.
@@ -92,7 +92,7 @@ public class EhStateTriggers extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Integer> getIdentity() {
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhStateTriggersRecord, java.lang.Long> getIdentity() {
 		return com.everhomes.server.schema.Keys.IDENTITY_EH_STATE_TRIGGERS;
 	}
 

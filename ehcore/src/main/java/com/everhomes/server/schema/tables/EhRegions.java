@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRegionsRecord> {
 
-	private static final long serialVersionUID = 1372308632;
+	private static final long serialVersionUID = -1105340162;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_regions</code>
@@ -29,12 +29,12 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	/**
 	 * The column <code>ehcore.eh_regions.id</code>. id of the record
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "id of the record");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
 	 * The column <code>ehcore.eh_regions.parent_id</code>. id of the parent region
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> PARENT_ID = createField("parent_id", org.jooq.impl.SQLDataType.INTEGER, this, "id of the parent region");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> PARENT_ID = createField("parent_id", org.jooq.impl.SQLDataType.BIGINT, this, "id of the parent region");
 
 	/**
 	 * The column <code>ehcore.eh_regions.name</code>.
@@ -97,7 +97,7 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> getIdentity() {
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> getIdentity() {
 		return com.everhomes.server.schema.Keys.IDENTITY_EH_REGIONS;
 	}
 

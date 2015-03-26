@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBizCouponGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord> {
 
-	private static final long serialVersionUID = -724938020;
+	private static final long serialVersionUID = -515328937;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_biz_coupon_groups</code>
@@ -69,7 +69,7 @@ public class EhBizCouponGroups extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_biz_coupon_groups.status</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord, java.lang.Integer> STATUS = createField("status", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBizCouponGroupsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_biz_coupon_groups.start_time</code>.

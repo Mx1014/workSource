@@ -43,6 +43,9 @@ public class RegionProviderImpl implements RegionProvider {
     @Autowired
     private DbProvider dbProvider;
     
+    @Caching(evict = { @CacheEvict(value="listRegion"),
+            @CacheEvict(value="listChildRegion"),
+            @CacheEvict(value="listDescendantRegion") })
     @Override
     public void createRegion(Region region) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -81,13 +84,16 @@ public class RegionProviderImpl implements RegionProvider {
         dao.deleteById(region.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="Region", key="#regionId") })
+    @Caching(evict = { @CacheEvict(value="Region", key="#regionId"),
+            @CacheEvict(value="listRegion"),
+            @CacheEvict(value="listChildRegion"),
+            @CacheEvict(value="listDescendantRegion") })
     @Override
     public void deleteRegionById(long regionId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
         
-        dao.deleteById((int)regionId);
+        dao.deleteById(regionId);
     }
 
     @Cacheable(value="Region", key="#regionId")
@@ -95,13 +101,13 @@ public class RegionProviderImpl implements RegionProvider {
     public Region findRegionById(long regionId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        return ConvertHelper.convert(dao.findById((int)regionId), Region.class);
+        return ConvertHelper.convert(dao.findById(regionId), Region.class);
     }
 
     @Cacheable(value = "listRegion")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<Region> listRegion(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+    public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
@@ -139,7 +145,7 @@ public class RegionProviderImpl implements RegionProvider {
     @Cacheable(value = "listChildRegion")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<Region> listChildRegion(Long parentRegionId, RegionScope scope, 
+    public List<Region> listChildRegions(Long parentRegionId, RegionScope scope, 
             RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -151,7 +157,7 @@ public class RegionProviderImpl implements RegionProvider {
         Condition condition = null;
         
         if(parentRegionId != null)
-            condition = Tables.EH_REGIONS.PARENT_ID.eq((int)parentRegionId.longValue());
+            condition = Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue());
         else
             condition = Tables.EH_REGIONS.PARENT_ID.isNull();
             
@@ -181,7 +187,7 @@ public class RegionProviderImpl implements RegionProvider {
     @Cacheable(value = "listDescendantRegion")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<Region> listDescendantRegion(Long parentRegionId, RegionScope scope, 
+    public List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, 
             RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 
         List<Region> result = new ArrayList<>();
@@ -210,7 +216,7 @@ public class RegionProviderImpl implements RegionProvider {
         Condition condition = Tables.EH_REGIONS.PATH.like(pathLike);
         
         if(parentRegionId != null)
-            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq((int)parentRegionId.longValue()));
+            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
         else
             condition = condition.and(Tables.EH_REGIONS.PARENT_ID.isNull());
             

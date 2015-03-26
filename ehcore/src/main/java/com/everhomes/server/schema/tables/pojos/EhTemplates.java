@@ -11,20 +11,20 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhTemplates implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1144711078;
+	private static final long serialVersionUID = -175618174;
 
-	private java.lang.Integer id;
-	private java.lang.String  name;
-	private java.lang.String  path;
-	private java.lang.Byte    type;
+	private java.lang.Long   id;
+	private java.lang.String name;
+	private java.lang.String path;
+	private java.lang.Byte   type;
 
 	public EhTemplates() {}
 
 	public EhTemplates(
-		java.lang.Integer id,
-		java.lang.String  name,
-		java.lang.String  path,
-		java.lang.Byte    type
+		java.lang.Long   id,
+		java.lang.String name,
+		java.lang.String path,
+		java.lang.Byte   type
 	) {
 		this.id = id;
 		this.name = name;
@@ -32,11 +32,11 @@ public class EhTemplates implements java.io.Serializable {
 		this.type = type;
 	}
 
-	public java.lang.Integer getId() {
+	public java.lang.Long getId() {
 		return this.id;
 	}
 
-	public void setId(java.lang.Integer id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 

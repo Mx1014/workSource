@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = -1872495375;
+	private static final long serialVersionUID = 356373345;
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.id</code>. id of the record
@@ -366,15 +366,15 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Setter for <code>ehcore.eh_activities.status</code>. 0: inactive, 1: drafting, 2: active
 	 */
-	public void setStatus(java.lang.Integer value) {
+	public void setStatus(java.lang.Byte value) {
 		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.status</code>. 0: inactive, 1: drafting, 2: active
 	 */
-	public java.lang.Integer getStatus() {
-		return (java.lang.Integer) getValue(25);
+	public java.lang.Byte getStatus() {
+		return (java.lang.Byte) getValue(25);
 	}
 
 	/**
@@ -445,7 +445,7 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhActivitiesRecord
 	 */
-	public EhActivitiesRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Integer status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
+	public EhActivitiesRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES);
 
 		setValue(0, id);
