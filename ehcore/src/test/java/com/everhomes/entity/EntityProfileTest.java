@@ -52,7 +52,7 @@ public class EntityProfileTest extends TestCase {
     static class ContextConfiguration {
     }
     
-    @Ignore @Test
+    @Test
     public void testBannerProfile() {
         EhBannerProfilesDao dao = new EhBannerProfilesDao(
                 dbProvider.getDslContext(dbUrl).configuration());
@@ -65,6 +65,7 @@ public class EntityProfileTest extends TestCase {
         item.setTargetId(1L);
         item.setId(1L);
         dao.insert(item);
+        System.out.println("item id: " + item.getId());
 
         EntityProfileItem item2 = new EntityProfileItem();
         item2.setOwnerId(100L);
@@ -73,9 +74,10 @@ public class EntityProfileTest extends TestCase {
         item2.setItemKind((byte)1);
         item2.setTargetType("EhUsers");
         item2.setTargetId(101L);
-        item2.setId(2L);
+        //item2.setId(2L);
         
         profileProvider.createProfileItem(EhBanners.class, 1, EhBannerProfiles.class, item2);
+        System.out.println("item id: " + item2.getId());
     }
     
     @Ignore @Test

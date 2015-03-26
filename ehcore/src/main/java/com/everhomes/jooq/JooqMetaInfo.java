@@ -2,6 +2,7 @@
 package com.everhomes.jooq;
 
 import org.jooq.Record;
+import org.jooq.impl.TableImpl;
 
 /**
  * JooqMetaInfo is used to store JOOQ generated classes meta information
@@ -13,6 +14,7 @@ public class JooqMetaInfo {
     private Class<?> recordClass;
     private Class<?> daoClass;
     private String tableName;
+    private TableImpl tableImpl; 
     
     public JooqMetaInfo() {
     }
@@ -39,6 +41,16 @@ public class JooqMetaInfo {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public TableImpl getTableImpl() {
+        return this.tableImpl;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public void setTableImpl(TableImpl tableImpl) {
+        this.tableImpl = tableImpl;
     }
     
     public Record getBlankRecordObject() {
