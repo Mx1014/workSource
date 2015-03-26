@@ -52,7 +52,7 @@ CREATE TABLE `eh_content_shard_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `eh_servers` (`id`, `address_uri`, `server_type`, `status`, `config_tag`, `description`) 
-    VALUES(1, 'jdbc:mysql://ehcore:ehcore@127.0.0.1:3306/ehcore?characterEncoding=UTF-8', 0, 1, 'default', 'default DB');
+    VALUES(1, 'jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8', 0, 1, 'default', 'default DB');
 
 DROP TABLE IF EXISTS `eh_configurations`;
 CREATE TABLE `eh_configurations` (
