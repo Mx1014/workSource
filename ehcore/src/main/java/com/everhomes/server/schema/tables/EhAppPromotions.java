@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAppPromotions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord> {
 
-	private static final long serialVersionUID = -637408128;
+	private static final long serialVersionUID = 1026919345;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_app_promotions</code>
@@ -29,7 +29,7 @@ public class EhAppPromotions extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_app_promotions.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_app_promotions.name</code>.
@@ -107,7 +107,7 @@ public class EhAppPromotions extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Integer> getIdentity() {
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> getIdentity() {
 		return com.everhomes.server.schema.Keys.IDENTITY_EH_APP_PROMOTIONS;
 	}
 

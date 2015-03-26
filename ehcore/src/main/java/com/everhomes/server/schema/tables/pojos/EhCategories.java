@@ -11,28 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = 9741355;
+	private static final long serialVersionUID = -1361766207;
 
-	private java.lang.Integer  id;
-	private java.lang.Integer  parentId;
-	private java.lang.Integer  linkId;
+	private java.lang.Long     id;
+	private java.lang.Long     parentId;
+	private java.lang.Long     linkId;
 	private java.lang.String   name;
 	private java.lang.String   path;
 	private java.lang.Integer  defaultOrder;
-	private java.lang.Integer  status;
+	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 
 	public EhCategories() {}
 
 	public EhCategories(
-		java.lang.Integer  id,
-		java.lang.Integer  parentId,
-		java.lang.Integer  linkId,
+		java.lang.Long     id,
+		java.lang.Long     parentId,
+		java.lang.Long     linkId,
 		java.lang.String   name,
 		java.lang.String   path,
 		java.lang.Integer  defaultOrder,
-		java.lang.Integer  status,
+		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime
 	) {
@@ -47,27 +47,27 @@ public class EhCategories implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 	}
 
-	public java.lang.Integer getId() {
+	public java.lang.Long getId() {
 		return this.id;
 	}
 
-	public void setId(java.lang.Integer id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 
-	public java.lang.Integer getParentId() {
+	public java.lang.Long getParentId() {
 		return this.parentId;
 	}
 
-	public void setParentId(java.lang.Integer parentId) {
+	public void setParentId(java.lang.Long parentId) {
 		this.parentId = parentId;
 	}
 
-	public java.lang.Integer getLinkId() {
+	public java.lang.Long getLinkId() {
 		return this.linkId;
 	}
 
-	public void setLinkId(java.lang.Integer linkId) {
+	public void setLinkId(java.lang.Long linkId) {
 		this.linkId = linkId;
 	}
 
@@ -95,11 +95,11 @@ public class EhCategories implements java.io.Serializable {
 		this.defaultOrder = defaultOrder;
 	}
 
-	public java.lang.Integer getStatus() {
+	public java.lang.Byte getStatus() {
 		return this.status;
 	}
 
-	public void setStatus(java.lang.Integer status) {
+	public void setStatus(java.lang.Byte status) {
 		this.status = status;
 	}
 

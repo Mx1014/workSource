@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord> {
 
-	private static final long serialVersionUID = 2075538157;
+	private static final long serialVersionUID = -130300318;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_scoped_configurations</code>
@@ -29,7 +29,7 @@ public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhome
 	/**
 	 * The column <code>ehcore.eh_scoped_configurations.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_scoped_configurations.namespace_id</code>.
@@ -157,7 +157,7 @@ public class EhScopedConfigurations extends org.jooq.impl.TableImpl<com.everhome
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Integer> getIdentity() {
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> getIdentity() {
 		return com.everhomes.server.schema.Keys.IDENTITY_EH_SCOPED_CONFIGURATIONS;
 	}
 

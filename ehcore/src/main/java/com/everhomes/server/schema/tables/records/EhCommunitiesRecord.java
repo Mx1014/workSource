@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -541986392;
+	private static final long serialVersionUID = 729102868;
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.id</code>. id of the record
@@ -30,15 +30,15 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Setter for <code>ehcore.eh_communities.city_id</code>. city id in region table
 	 */
-	public void setCityId(java.lang.Integer value) {
+	public void setCityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.city_id</code>. city id in region table
 	 */
-	public java.lang.Integer getCityId() {
-		return (java.lang.Integer) getValue(1);
+	public java.lang.Long getCityId() {
+		return (java.lang.Long) getValue(1);
 	}
 
 	/**
@@ -58,15 +58,15 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Setter for <code>ehcore.eh_communities.area_id</code>. area id in region table
 	 */
-	public void setAreaId(java.lang.Integer value) {
+	public void setAreaId(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.area_id</code>. area id in region table
 	 */
-	public java.lang.Integer getAreaId() {
-		return (java.lang.Integer) getValue(3);
+	public java.lang.Long getAreaId() {
+		return (java.lang.Long) getValue(3);
 	}
 
 	/**
@@ -361,7 +361,7 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhCommunitiesRecord
 	 */
-	public EhCommunitiesRecord(java.lang.Long id, java.lang.Integer cityId, java.lang.String cityName, java.lang.Integer areaId, java.lang.String areaName, java.lang.String name, java.lang.String aliasName, java.lang.String address, java.lang.String zipcode, java.lang.String description, java.lang.String detailDescription, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhCommunitiesRecord(java.lang.Long id, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String name, java.lang.String aliasName, java.lang.String address, java.lang.String zipcode, java.lang.String description, java.lang.String detailDescription, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES);
 
 		setValue(0, id);

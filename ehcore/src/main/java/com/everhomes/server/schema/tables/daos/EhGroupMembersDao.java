@@ -92,7 +92,7 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	/**
 	 * Fetch records that have <code>member_status IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberStatus(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByMemberStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_STATUS, values);
 	}
 

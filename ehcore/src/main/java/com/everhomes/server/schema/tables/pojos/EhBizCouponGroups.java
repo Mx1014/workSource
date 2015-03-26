@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBizCouponGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1748734058;
+	private static final long serialVersionUID = -649310556;
 
 	private java.lang.Long     id;
 	private java.lang.Long     businessId;
@@ -21,7 +21,7 @@ public class EhBizCouponGroups implements java.io.Serializable {
 	private java.lang.String   tag;
 	private java.lang.Integer  rank;
 	private java.lang.String   linkUrl;
-	private java.lang.Integer  status;
+	private java.lang.Byte     status;
 	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp expireTime;
 	private java.sql.Timestamp createTime;
@@ -37,7 +37,7 @@ public class EhBizCouponGroups implements java.io.Serializable {
 		java.lang.String   tag,
 		java.lang.Integer  rank,
 		java.lang.String   linkUrl,
-		java.lang.Integer  status,
+		java.lang.Byte     status,
 		java.sql.Timestamp startTime,
 		java.sql.Timestamp expireTime,
 		java.sql.Timestamp createTime
@@ -120,11 +120,11 @@ public class EhBizCouponGroups implements java.io.Serializable {
 		this.linkUrl = linkUrl;
 	}
 
-	public java.lang.Integer getStatus() {
+	public java.lang.Byte getStatus() {
 		return this.status;
 	}
 
-	public void setStatus(java.lang.Integer status) {
+	public void setStatus(java.lang.Byte status) {
 		this.status = status;
 	}
 

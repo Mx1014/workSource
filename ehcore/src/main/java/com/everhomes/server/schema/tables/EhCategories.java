@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCategoriesRecord> {
 
-	private static final long serialVersionUID = 504954540;
+	private static final long serialVersionUID = 491701196;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_categories</code>
@@ -29,17 +29,17 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_categories.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_categories.parent_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Integer> PARENT_ID = createField("parent_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Long> PARENT_ID = createField("parent_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_categories.link_id</code>. point to the linked category (similar to soft link in file system)
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Integer> LINK_ID = createField("link_id", org.jooq.impl.SQLDataType.INTEGER, this, "point to the linked category (similar to soft link in file system)");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Long> LINK_ID = createField("link_id", org.jooq.impl.SQLDataType.BIGINT, this, "point to the linked category (similar to soft link in file system)");
 
 	/**
 	 * The column <code>ehcore.eh_categories.name</code>.
@@ -59,7 +59,7 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_categories.status</code>. 0: disabled, 1: waiting for confirmation, 2: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Integer> STATUS = createField("status", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: disabled, 1: waiting for confirmation, 2: active");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: disabled, 1: waiting for confirmation, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_categories.create_time</code>.

@@ -11,9 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhSearchKeywords implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1112118885;
+	private static final long serialVersionUID = 259466069;
 
-	private java.lang.Integer  id;
+	private java.lang.Long     id;
 	private java.lang.String   scope;
 	private java.lang.Long     scopeId;
 	private java.lang.String   keyword;
@@ -26,7 +26,7 @@ public class EhSearchKeywords implements java.io.Serializable {
 	public EhSearchKeywords() {}
 
 	public EhSearchKeywords(
-		java.lang.Integer  id,
+		java.lang.Long     id,
 		java.lang.String   scope,
 		java.lang.Long     scopeId,
 		java.lang.String   keyword,
@@ -47,11 +47,11 @@ public class EhSearchKeywords implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.lang.Integer getId() {
+	public java.lang.Long getId() {
 		return this.id;
 	}
 
-	public void setId(java.lang.Integer id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 

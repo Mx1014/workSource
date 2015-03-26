@@ -87,7 +87,7 @@ public class RegionProviderImpl implements RegionProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
         
-        dao.deleteById((int)regionId);
+        dao.deleteById(regionId);
     }
 
     @Cacheable(value="Region", key="#regionId")
@@ -95,7 +95,7 @@ public class RegionProviderImpl implements RegionProvider {
     public Region findRegionById(long regionId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        return ConvertHelper.convert(dao.findById((int)regionId), Region.class);
+        return ConvertHelper.convert(dao.findById(regionId), Region.class);
     }
 
     @Cacheable(value = "listRegion")
@@ -151,7 +151,7 @@ public class RegionProviderImpl implements RegionProvider {
         Condition condition = null;
         
         if(parentRegionId != null)
-            condition = Tables.EH_REGIONS.PARENT_ID.eq((int)parentRegionId.longValue());
+            condition = Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue());
         else
             condition = Tables.EH_REGIONS.PARENT_ID.isNull();
             
@@ -210,7 +210,7 @@ public class RegionProviderImpl implements RegionProvider {
         Condition condition = Tables.EH_REGIONS.PATH.like(pathLike);
         
         if(parentRegionId != null)
-            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq((int)parentRegionId.longValue()));
+            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
         else
             condition = condition.and(Tables.EH_REGIONS.PARENT_ID.isNull());
             

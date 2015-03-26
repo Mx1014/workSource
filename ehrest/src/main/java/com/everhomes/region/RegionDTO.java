@@ -4,7 +4,7 @@ package com.everhomes.region;
 import com.everhomes.util.StringHelper;
 
 public class RegionDTO {
-    private Integer id;
+    private Long id;
     private Integer parentId;
     private String  name;
     private String  path;
@@ -17,11 +17,11 @@ public class RegionDTO {
     public RegionDTO() {
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

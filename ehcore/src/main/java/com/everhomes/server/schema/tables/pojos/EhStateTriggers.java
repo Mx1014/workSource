@@ -11,9 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhStateTriggers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1413759609;
+	private static final long serialVersionUID = -406875983;
 
-	private java.lang.Integer  id;
+	private java.lang.Long     id;
 	private java.lang.String   objectType;
 	private java.lang.Long     objectId;
 	private java.lang.Integer  triggerState;
@@ -25,7 +25,7 @@ public class EhStateTriggers implements java.io.Serializable {
 	public EhStateTriggers() {}
 
 	public EhStateTriggers(
-		java.lang.Integer  id,
+		java.lang.Long     id,
 		java.lang.String   objectType,
 		java.lang.Long     objectId,
 		java.lang.Integer  triggerState,
@@ -44,11 +44,11 @@ public class EhStateTriggers implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.lang.Integer getId() {
+	public java.lang.Long getId() {
 		return this.id;
 	}
 
-	public void setId(java.lang.Integer id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 

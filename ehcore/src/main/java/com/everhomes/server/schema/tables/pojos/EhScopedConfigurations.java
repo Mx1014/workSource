@@ -11,9 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhScopedConfigurations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -665797802;
+	private static final long serialVersionUID = 1302706054;
 
-	private java.lang.Integer id;
+	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
 	private java.lang.Long    appId;
 	private java.lang.String  scopeType;
@@ -38,7 +38,7 @@ public class EhScopedConfigurations implements java.io.Serializable {
 	public EhScopedConfigurations() {}
 
 	public EhScopedConfigurations(
-		java.lang.Integer id,
+		java.lang.Long    id,
 		java.lang.Integer namespaceId,
 		java.lang.Long    appId,
 		java.lang.String  scopeType,
@@ -83,11 +83,11 @@ public class EhScopedConfigurations implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
-	public java.lang.Integer getId() {
+	public java.lang.Long getId() {
 		return this.id;
 	}
 
-	public void setId(java.lang.Integer id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 

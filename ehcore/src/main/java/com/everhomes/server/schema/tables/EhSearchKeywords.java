@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhSearchKeywords extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord> {
 
-	private static final long serialVersionUID = 2014434113;
+	private static final long serialVersionUID = 1839382634;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_search_keywords</code>
@@ -29,7 +29,7 @@ public class EhSearchKeywords extends org.jooq.impl.TableImpl<com.everhomes.serv
 	/**
 	 * The column <code>ehcore.eh_search_keywords.id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_search_keywords.scope</code>.
@@ -97,7 +97,7 @@ public class EhSearchKeywords extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Integer> getIdentity() {
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Long> getIdentity() {
 		return com.everhomes.server.schema.Keys.IDENTITY_EH_SEARCH_KEYWORDS;
 	}
 

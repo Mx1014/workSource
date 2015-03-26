@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1028272746;
+	private static final long serialVersionUID = 616708878;
 
 	private java.lang.Long     id;
-	private java.lang.Integer  cityId;
+	private java.lang.Long     cityId;
 	private java.lang.String   cityName;
-	private java.lang.Integer  areaId;
+	private java.lang.Long     areaId;
 	private java.lang.String   areaName;
 	private java.lang.String   name;
 	private java.lang.String   aliasName;
@@ -41,9 +41,9 @@ public class EhCommunities implements java.io.Serializable {
 
 	public EhCommunities(
 		java.lang.Long     id,
-		java.lang.Integer  cityId,
+		java.lang.Long     cityId,
 		java.lang.String   cityName,
-		java.lang.Integer  areaId,
+		java.lang.Long     areaId,
 		java.lang.String   areaName,
 		java.lang.String   name,
 		java.lang.String   aliasName,
@@ -97,11 +97,11 @@ public class EhCommunities implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Integer getCityId() {
+	public java.lang.Long getCityId() {
 		return this.cityId;
 	}
 
-	public void setCityId(java.lang.Integer cityId) {
+	public void setCityId(java.lang.Long cityId) {
 		this.cityId = cityId;
 	}
 
@@ -113,11 +113,11 @@ public class EhCommunities implements java.io.Serializable {
 		this.cityName = cityName;
 	}
 
-	public java.lang.Integer getAreaId() {
+	public java.lang.Long getAreaId() {
 		return this.areaId;
 	}
 
-	public void setAreaId(java.lang.Integer areaId) {
+	public void setAreaId(java.lang.Long areaId) {
 		this.areaId = areaId;
 	}
 

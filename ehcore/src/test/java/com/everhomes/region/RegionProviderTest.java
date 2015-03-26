@@ -32,7 +32,7 @@ public class RegionProviderTest  extends TestCase {
     @Autowired
     RegionProvider regionProvider;
     
-    List<Integer> newRecordIds = new ArrayList<Integer>();
+    List<Long> newRecordIds = new ArrayList<Long>();
     
     @Configuration
     @ComponentScan(basePackages = {
@@ -117,7 +117,7 @@ public class RegionProviderTest  extends TestCase {
     
     @After
     public void tearDown() {
-        for(Integer id : this.newRecordIds) {
+        for(Long id : this.newRecordIds) {
             this.regionProvider.deleteRegionById(id);
         }
     }
