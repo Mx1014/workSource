@@ -2,6 +2,7 @@
 package com.everhomes.discover.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,8 @@ import com.everhomes.controller.RequireAuthentication;
 public class ApiDiscoverHtmlController extends ControllerBase {
     @RequestMapping("/api/**")
     @RequireAuthentication(false)
-    public String apiDiscover(HttpServletRequest request, Model model) {
+    public String apiDiscover(HttpServletRequest request, HttpServletResponse response, Model model) {
+        response.addHeader("Content-Type", "text/html; charset=utf-8");
         String uri = request.getRequestURI().toString();
         if(uri.startsWith("/api"))
             uri = uri.substring(4);
