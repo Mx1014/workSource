@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.mock.env.MockPropertySource;
 
+import com.everhomes.atomikos.AtomikosHelper;
+
 /**
  * 
  * Provides mocked property environment for integration tests
@@ -14,6 +16,7 @@ import org.springframework.mock.env.MockPropertySource;
  */
 public class PropertyInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext applicationContext) {
+         AtomikosHelper.fixup();
          applicationContext.getEnvironment().getPropertySources().addFirst(
            new MockPropertySource()
             .withProperty("redis.bus.host", "redis-server")

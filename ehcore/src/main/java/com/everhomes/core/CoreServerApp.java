@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.everhomes.atomikos.AtomikosHelper;
+
 /**
  * Spring boot main class. Its class name need to be packaged to let Spring boot bootstrap process
  * be aware of.
@@ -23,6 +25,8 @@ import org.springframework.context.annotation.ComponentScan;
 })
 public class CoreServerApp {
     public static void main(String[] args) {
+        AtomikosHelper.fixup();
+        
         SpringApplication app = new SpringApplication(CoreServerApp.class);
         app.setShowBanner(false);
         app.setWebEnvironment(true);

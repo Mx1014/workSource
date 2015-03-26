@@ -55,6 +55,7 @@ public class JooqDiscover {
                 org.jooq.impl.TableImpl table = (org.jooq.impl.TableImpl)method.invoke(instance);
                 
                 meta.setRecordClass(recordClz);
+                meta.setTableImpl(table);
                 meta.setTableName(table.getName());
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException 
                     | SecurityException | IllegalArgumentException | InvocationTargetException e) {
