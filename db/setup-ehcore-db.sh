@@ -1,6 +1,22 @@
 # setup-ehcore-db.sh -- deploys database configuration.
 # set -x
 
+DEVELOPER=0
+PASSWORD=
+
+while getopts "h?p:d" opt; do
+    case "$opt" in
+    h|\?)
+    	printf "Usage:\n\tsetup-ehcore-db.sh [-d] [-p <DB root password>]\n"
+        exit 0
+        ;;
+    p)  PASSWORD=$OPTARG
+        ;;
+    d)  DEVELOPER=1
+        ;;
+    esac
+done
+
 if [ ! -f ehcore-database.sql ]; then
     printf "Error: Unable to find ehcore-database.sql\n"
     exit 2
@@ -30,7 +46,7 @@ handle_error() {
 }
 
 echo "Creating Database ehcore."
-mysql --user=root --password=$1 < ehcore-database.sql > /dev/null 2>/dev/null
+mysql --user=root --password=$PASSWORD < ehcore-database.sql > /dev/null 2>/dev/null
 handle_error ehcore-database.sql
 
 mysql --user=ehcore --password=ehcore ehcore < ehcore-platform-schema.sql
@@ -46,8 +62,18 @@ if [ $? -ne 0 ]; then
 fi
   
 echo "Initializing Database ehcore."
-mysql --user=root --password=$1 < ehcore-init-data.sql
+mysql --user=root --password=$PASSWORD < ehcore-init-data.sql
 if [ $? -ne 0 ]; then
   printf "Error: Cannot execute ehcore-server-schema.sql\n"
   exit 7
 fi
+
+if [ $DEVELOPER == "1" ]; then
+	echo "Initializing developer setup."
+	mysql --user=ehcore --password=ehcore ehcore < ehcore-developer-init.sql
+	if [ $? -ne 0 ]; then
+	  printf "Error: Cannot execute ehcore-developer-init.sql\n"
+	  exit 7
+	fi
+fi
+	
