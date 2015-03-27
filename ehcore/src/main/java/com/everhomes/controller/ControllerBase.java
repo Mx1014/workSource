@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,6 +30,7 @@ import com.everhomes.util.StringHelper;
  */
 @RequireAuthentication(true)
 public class ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerBase.class);
     
     private static Map<String, RestMethod> s_restMethodMap = new HashMap<String, RestMethod>();  
     private static List<RestMethod> s_restMethodList = new ArrayList<RestMethod>();
@@ -40,7 +43,8 @@ public class ControllerBase {
     }
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleIOException(Exception ex) { 
+    public ResponseEntity<String> handleIOException(Exception ex) {
+        LOGGER.error("REST process exception", ex);
         
         RestResponse restResponse;
         if(ex instanceof RuntimeErrorException) {

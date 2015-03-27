@@ -52,7 +52,7 @@
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehutil</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
