@@ -163,6 +163,11 @@
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
+            <artifactId>ehmessaging</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.everhomes</groupId>
             <artifactId>ehrest</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
