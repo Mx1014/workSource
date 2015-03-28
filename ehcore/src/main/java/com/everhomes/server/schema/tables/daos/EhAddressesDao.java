@@ -55,6 +55,20 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
+	 * Fetch records that have <code>city_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.CITY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>zipcode IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByZipcode(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.ZIPCODE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>address IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAddress(java.lang.String... values) {
@@ -87,6 +101,20 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAppartmentName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APPARTMENT_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.CREATOR_UID, values);
 	}
 
 	/**

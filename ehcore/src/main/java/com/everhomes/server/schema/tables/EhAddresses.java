@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = 1158297590;
+	private static final long serialVersionUID = 1630556689;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -32,19 +32,29 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_addresses.community_id</code>.
+	 * The column <code>ehcore.eh_addresses.community_id</code>. NULL: means it is an independent street address, otherwise, it is an appartment address
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "NULL: means it is an independent street address, otherwise, it is an appartment address");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.city_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.zipcode</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> ZIPCODE = createField("zipcode", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.address</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.address_alias</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> ADDRESS_ALIAS = createField("address_alias", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> ADDRESS_ALIAS = createField("address_alias", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.building_name</code>.
@@ -60,6 +70,16 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_addresses.appartment_name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> APPARTMENT_NAME = createField("appartment_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.status</code>. 0: inactive, 1: confirming, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.creator_uid</code>. uid of the user who has suggested address, NULL if it is system created
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "uid of the user who has suggested address, NULL if it is system created");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.create_time</code>.

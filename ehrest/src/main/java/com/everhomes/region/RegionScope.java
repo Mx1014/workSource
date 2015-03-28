@@ -2,7 +2,7 @@
 package com.everhomes.region;
 
 public enum RegionScope {
-    COUNTRY((byte)0), PROVINCE((byte)1), CITY((byte)2), AREA((byte)3);
+    COUNTRY((byte)0), PROVINCE((byte)1), CITY((byte)2), AREA((byte)3), NEIGHBORHOOD((byte)4);
     
     private byte code;
     
@@ -30,6 +30,9 @@ public enum RegionScope {
             
         case 3 :
             return AREA;
+            
+        case 4 :
+            return NEIGHBORHOOD;
             
         default :
             assert(false);

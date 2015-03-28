@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -885160934;
+	private static final long serialVersionUID = 1028278306;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -64,12 +64,12 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_communities.address</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.zipcode</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> ZIPCODE = createField("zipcode", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> ZIPCODE = createField("zipcode", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.description</code>.

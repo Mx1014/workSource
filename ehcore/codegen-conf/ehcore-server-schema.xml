@@ -32,7 +32,7 @@
         eh_borders | eh_categories | eh_state_triggers | eh_search_keywords | eh_app_promotions |
         eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks 
         eh_audit_logs | eh_user_blacklist | eh_user_favorates | eh_user_profiles |  
-        eh_regions | eh_communities | 
+        eh_regions | eh_communities | eh_community_geopoints |
         eh_community_profiles | eh_addresses | eh_address_claims | eh_address_claim_stats | 
         eh_family_followers | eh_followed_families | eh_banners | eh_banner_profiles | eh_banner_clicks | 
         eh_banner_orders | eh_binary_resources | eh_rtxt_resources | 

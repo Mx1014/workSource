@@ -11,15 +11,19 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 198512075;
+	private static final long serialVersionUID = 2076191307;
 
 	private java.lang.Long     id;
 	private java.lang.Long     communityId;
+	private java.lang.Long     cityId;
+	private java.lang.String   zipcode;
 	private java.lang.String   address;
 	private java.lang.String   addressAlias;
 	private java.lang.String   buildingName;
 	private java.lang.String   buildingAliasName;
 	private java.lang.String   appartmentName;
+	private java.lang.Byte     status;
+	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 	private java.lang.Long     integralTag1;
@@ -38,11 +42,15 @@ public class EhAddresses implements java.io.Serializable {
 	public EhAddresses(
 		java.lang.Long     id,
 		java.lang.Long     communityId,
+		java.lang.Long     cityId,
+		java.lang.String   zipcode,
 		java.lang.String   address,
 		java.lang.String   addressAlias,
 		java.lang.String   buildingName,
 		java.lang.String   buildingAliasName,
 		java.lang.String   appartmentName,
+		java.lang.Byte     status,
+		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
 		java.lang.Long     integralTag1,
@@ -58,11 +66,15 @@ public class EhAddresses implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.communityId = communityId;
+		this.cityId = cityId;
+		this.zipcode = zipcode;
 		this.address = address;
 		this.addressAlias = addressAlias;
 		this.buildingName = buildingName;
 		this.buildingAliasName = buildingAliasName;
 		this.appartmentName = appartmentName;
+		this.status = status;
+		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
 		this.integralTag1 = integralTag1;
@@ -91,6 +103,22 @@ public class EhAddresses implements java.io.Serializable {
 
 	public void setCommunityId(java.lang.Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public java.lang.Long getCityId() {
+		return this.cityId;
+	}
+
+	public void setCityId(java.lang.Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public java.lang.String getZipcode() {
+		return this.zipcode;
+	}
+
+	public void setZipcode(java.lang.String zipcode) {
+		this.zipcode = zipcode;
 	}
 
 	public java.lang.String getAddress() {
@@ -131,6 +159,22 @@ public class EhAddresses implements java.io.Serializable {
 
 	public void setAppartmentName(java.lang.String appartmentName) {
 		this.appartmentName = appartmentName;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

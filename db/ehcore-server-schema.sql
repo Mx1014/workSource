@@ -441,11 +441,12 @@ CREATE TABLE `eh_groups` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `region_id` BIGINT COMMENT 'group region information, it is usually city id in eh_regions table',
+    `region_scope` TINYINT COMMENT 'define the group visibiliy region',
+    `region_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
     `member_count` BIGINT NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `region_id`, `discriminator`),
+    UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
@@ -543,7 +544,7 @@ CREATE TABLE `eh_regions` (
 	`name` VARCHAR(64),
 	`path` VARCHAR(128) COMMENT 'path from the root',
 	`level` INTEGER NOT NULL DEFAULT 0,
-    `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area',
+    `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area, 4: community neighborhood',
 	`iso_code` VARCHAR(32) COMMENT 'international standard code for the region if exists',
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
@@ -562,7 +563,7 @@ CREATE TABLE `eh_regions` (
 #
 DROP TABLE IF EXISTS `eh_communities`;
 CREATE TABLE `eh_communities`(
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
     `city_id` BIGINT NOT NULL COMMENT 'city id in region table',
     `city_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `area_id` BIGINT NOT NULL COMMENT 'area id in region table',
@@ -570,7 +571,7 @@ CREATE TABLE `eh_communities`(
     `name` VARCHAR(64),
     `alias_name` VARCHAR(64),
     `address` VARCHAR(128),
-    `zipcode` VARCHAR(64),
+    `zipcode` VARCHAR(16),
     `description` TEXT,
     `detail_description` TEXT,
     `create_time` DATETIME,
@@ -599,6 +600,23 @@ CREATE TABLE `eh_communities`(
     INDEX `i_eh_community_itag2`(`integral_tag2`),
     INDEX `i_eh_community_stag1`(`string_tag1`),
     INDEX `i_eh_community_stag2`(`string_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+#
+DROP TABLE IF EXISTS `eh_community_geopoints`;
+CREATE TABLE `eh_community_geopoints` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT,
+	`description` VARCHAR(256),
+	`longitude` DOUBLE,
+	`latitude` DOUBLE,
+	`geohash` VARCHAR(32),
+	
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_comm_description`(`description`),
+	INDEX `i_eh_comm_geopoints`(`geohash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -643,12 +661,19 @@ CREATE TABLE `eh_community_profiles` (
 DROP TABLE IF EXISTS `eh_addresses`;
 CREATE TABLE `eh_addresses` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `community_id` BIGINT,
+    `community_id` BIGINT COMMENT 'NULL: means it is an independent street address, otherwise, it is an appartment address',
+    `city_id` BIGINT,
+    `zipcode` VARCHAR(16),
     `address` VARCHAR(128),
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(32),
     `address_alias` VARCHAR(128),
     `building_name` VARCHAR(128),
     `building_alias_name` VARCHAR(128),
     `appartment_name` VARCHAR(128),
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: confirming, 2: active',
+    `creator_uid` BIGINT COMMENT 'uid of the user who has suggested address, NULL if it is system created',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
@@ -664,7 +689,10 @@ CREATE TABLE `eh_addresses` (
     `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
+    INDEX `i_eh_addr_city`(`city_id`),
+    INDEX `i_eh_addr_zipcode`(`zipcode`),
     INDEX `i_eh_addr_address`(`address`),
+    INDEX `i_eh_addr_geohash`(`geohash`),
     INDEX `i_eh_addr_address_alias`(`address_alias`),
     INDEX `i_eh_addr_building_apt_name`(`building_name`, `appartment_name`),
     INDEX `i_eh_addr_building_alias_apt_name`(`building_alias_name`, `appartment_name`),
@@ -694,6 +722,7 @@ CREATE TABLE `eh_address_claim_stats` (
 
 #
 # member of eh_address partition group
+# address claim also serves as the family entity for user
 #
 DROP TABLE IF EXISTS `eh_address_claims`;
 CREATE TABLE `eh_address_claims` (
@@ -703,6 +732,7 @@ CREATE TABLE `eh_address_claims` (
     `entity_type` VARCHAR(32) NOT NULL,
     `entity_id` BIGINT NOT NULL,
     `initiator_uid` BIGINT NOT NULL,
+    `claim_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: family resident, 1: commercial',
     `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: unclaimed, 1: claiming, 2: claimed',
     `operator_uid` BIGINT,
     `process_code` TINYINT,
@@ -727,6 +757,7 @@ CREATE TABLE `eh_address_claims` (
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_addr_claim_address_id`(`address_id`) REFERENCES `eh_addresses`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_addr_claim_target_entity`(`entity_type`, `entity_id`),
+    INDEX `i_eh_addr_claim_addr_claim_type`(`namespace_id`, `address_id`, `claim_type`),
     INDEX `i_eh_addr_claim_initiator_uid`(`initiator_uid`),
     INDEX `i_eh_addr_claim_operator_uid`(`operator_uid`),
     INDEX `i_eh_addr_claim_create_time`(`create_time`),
@@ -736,12 +767,6 @@ CREATE TABLE `eh_address_claims` (
     INDEX `i_eh_addr_claim_stag1`(`string_tag1`),
     INDEX `i_eh_addr_claim_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# Member of eh_groups partition group, inherited from eh_groups
-# pseudo table, its records can be distinguished by descriminator field in eh_groups table  
-#
-DROP TABLE IF EXISTS `eh_families`;
 
 #
 # member of eh_groups(eh_families) partition group
