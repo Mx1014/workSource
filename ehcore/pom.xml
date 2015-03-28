@@ -166,6 +166,11 @@
             <artifactId>ehrest</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+         <dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehcore-persist</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehplatform</artifactId>
@@ -243,42 +248,4 @@
             </plugin>
         </plugins>
     </build>
-    
-    <profiles>
-        <profile>
-            <id>code-gen</id>
-            <activation>
-                <property>
-                    <name>codegen</name>
-                </property>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                       <groupId>org.apache.maven.plugins</groupId>
-                       <artifactId>maven-antrun-plugin</artifactId>
-                       <version>1.3</version>
-                       <executions>
-                           <execution>
-                               <id>generate-schema-objects</id>
-                               <phase>generate-sources</phase>
-                               <goals>
-                                   <goal>run</goal>
-                               </goals>
-                               <configuration>
-                                  <tasks>
-                                        <property name="compile_classpath" refid="maven.compile.classpath" />
-                                        <java classpath="${compile_classpath}:${project.basedir}:./" classname="org.jooq.util.GenerationTool">
-                                            <arg value="/codegen-conf/ehcore-server-schema.xml"/>
-                                        </java>
-                                  </tasks>
-                               </configuration>
-                           </execution>
-                       </executions>
-                   </plugin>
-               </plugins>
-           </build>
-       </profile>
-    </profiles>
 </project>

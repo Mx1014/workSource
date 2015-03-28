@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = 1630556689;
+	private static final long serialVersionUID = -1104899693;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -50,6 +50,21 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_addresses.address</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.longitude</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> LONGITUDE = createField("longitude", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.latitude</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> LATITUDE = createField("latitude", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.geohash</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> GEOHASH = createField("geohash", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.address_alias</code>.

@@ -83,6 +83,13 @@ public class EhAddressClaimsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
+	 * Fetch records that have <code>claim_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressClaims> fetchByClaimType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS.CLAIM_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>claim_status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressClaims> fetchByClaimStatus(java.lang.Byte... values) {

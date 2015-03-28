@@ -11,13 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2076191307;
+	private static final long serialVersionUID = 1849531107;
 
 	private java.lang.Long     id;
 	private java.lang.Long     communityId;
 	private java.lang.Long     cityId;
 	private java.lang.String   zipcode;
 	private java.lang.String   address;
+	private java.lang.Double   longitude;
+	private java.lang.Double   latitude;
+	private java.lang.String   geohash;
 	private java.lang.String   addressAlias;
 	private java.lang.String   buildingName;
 	private java.lang.String   buildingAliasName;
@@ -45,6 +48,9 @@ public class EhAddresses implements java.io.Serializable {
 		java.lang.Long     cityId,
 		java.lang.String   zipcode,
 		java.lang.String   address,
+		java.lang.Double   longitude,
+		java.lang.Double   latitude,
+		java.lang.String   geohash,
 		java.lang.String   addressAlias,
 		java.lang.String   buildingName,
 		java.lang.String   buildingAliasName,
@@ -69,6 +75,9 @@ public class EhAddresses implements java.io.Serializable {
 		this.cityId = cityId;
 		this.zipcode = zipcode;
 		this.address = address;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.geohash = geohash;
 		this.addressAlias = addressAlias;
 		this.buildingName = buildingName;
 		this.buildingAliasName = buildingAliasName;
@@ -127,6 +136,30 @@ public class EhAddresses implements java.io.Serializable {
 
 	public void setAddress(java.lang.String address) {
 		this.address = address;
+	}
+
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public java.lang.String getGeohash() {
+		return this.geohash;
+	}
+
+	public void setGeohash(java.lang.String geohash) {
+		this.geohash = geohash;
 	}
 
 	public java.lang.String getAddressAlias() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaims implements java.io.Serializable {
 
-	private static final long serialVersionUID = -508278758;
+	private static final long serialVersionUID = -1803022164;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -19,6 +19,7 @@ public class EhAddressClaims implements java.io.Serializable {
 	private java.lang.String   entityType;
 	private java.lang.Long     entityId;
 	private java.lang.Long     initiatorUid;
+	private java.lang.Byte     claimType;
 	private java.lang.Byte     claimStatus;
 	private java.lang.Long     operatorUid;
 	private java.lang.Byte     processCode;
@@ -48,6 +49,7 @@ public class EhAddressClaims implements java.io.Serializable {
 		java.lang.String   entityType,
 		java.lang.Long     entityId,
 		java.lang.Long     initiatorUid,
+		java.lang.Byte     claimType,
 		java.lang.Byte     claimStatus,
 		java.lang.Long     operatorUid,
 		java.lang.Byte     processCode,
@@ -74,6 +76,7 @@ public class EhAddressClaims implements java.io.Serializable {
 		this.entityType = entityType;
 		this.entityId = entityId;
 		this.initiatorUid = initiatorUid;
+		this.claimType = claimType;
 		this.claimStatus = claimStatus;
 		this.operatorUid = operatorUid;
 		this.processCode = processCode;
@@ -141,6 +144,14 @@ public class EhAddressClaims implements java.io.Serializable {
 
 	public void setInitiatorUid(java.lang.Long initiatorUid) {
 		this.initiatorUid = initiatorUid;
+	}
+
+	public java.lang.Byte getClaimType() {
+		return this.claimType;
+	}
+
+	public void setClaimType(java.lang.Byte claimType) {
+		this.claimType = claimType;
 	}
 
 	public java.lang.Byte getClaimStatus() {

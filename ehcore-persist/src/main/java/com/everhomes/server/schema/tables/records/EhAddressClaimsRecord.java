@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> {
 
-	private static final long serialVersionUID = 1167148523;
+	private static final long serialVersionUID = 776593674;
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.id</code>. id of the record
@@ -98,269 +98,283 @@ public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial
+	 */
+	public void setClaimType(java.lang.Byte value) {
+		setValue(6, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial
+	 */
+	public java.lang.Byte getClaimType() {
+		return (java.lang.Byte) getValue(6);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed
 	 */
 	public void setClaimStatus(java.lang.Byte value) {
-		setValue(6, value);
+		setValue(7, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed
 	 */
 	public java.lang.Byte getClaimStatus() {
-		return (java.lang.Byte) getValue(6);
+		return (java.lang.Byte) getValue(7);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.operator_uid</code>.
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(7, value);
+		setValue(8, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.operator_uid</code>.
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(7);
+		return (java.lang.Long) getValue(8);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.process_code</code>.
 	 */
 	public void setProcessCode(java.lang.Byte value) {
-		setValue(8, value);
+		setValue(9, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.process_code</code>.
 	 */
 	public java.lang.Byte getProcessCode() {
-		return (java.lang.Byte) getValue(8);
+		return (java.lang.Byte) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.process_details</code>.
 	 */
 	public void setProcessDetails(java.lang.String value) {
-		setValue(9, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.process_details</code>.
 	 */
 	public java.lang.String getProcessDetails() {
-		return (java.lang.String) getValue(9);
+		return (java.lang.String) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.proof_resource_id</code>.
 	 */
 	public void setProofResourceId(java.lang.Long value) {
-		setValue(10, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.proof_resource_id</code>.
 	 */
 	public java.lang.Long getProofResourceId() {
-		return (java.lang.Long) getValue(10);
+		return (java.lang.Long) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.proof_resource_url</code>.
 	 */
 	public void setProofResourceUrl(java.lang.String value) {
-		setValue(11, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.proof_resource_url</code>.
 	 */
 	public java.lang.String getProofResourceUrl() {
-		return (java.lang.String) getValue(11);
+		return (java.lang.String) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(12);
+		return (java.sql.Timestamp) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.process_time</code>.
 	 */
 	public void setProcessTime(java.sql.Timestamp value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.process_time</code>.
 	 */
 	public java.sql.Timestamp getProcessTime() {
-		return (java.sql.Timestamp) getValue(13);
+		return (java.sql.Timestamp) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.delete_time</code>. mark-deletion policy, historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.delete_time</code>. mark-deletion policy, historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(14);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(15);
+		return (java.lang.Long) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(16);
+		return (java.lang.Long) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(17);
+		return (java.lang.Long) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(20);
+		return (java.lang.String) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(21);
+		return (java.lang.String) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(22);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(23);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_address_claims.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	// -------------------------------------------------------------------------
@@ -389,7 +403,7 @@ public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	/**
 	 * Create a detached, initialised EhAddressClaimsRecord
 	 */
-	public EhAddressClaimsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long addressId, java.lang.String entityType, java.lang.Long entityId, java.lang.Long initiatorUid, java.lang.Byte claimStatus, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.Long proofResourceId, java.lang.String proofResourceUrl, java.sql.Timestamp createTime, java.sql.Timestamp processTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhAddressClaimsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long addressId, java.lang.String entityType, java.lang.Long entityId, java.lang.Long initiatorUid, java.lang.Byte claimType, java.lang.Byte claimStatus, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.Long proofResourceId, java.lang.String proofResourceUrl, java.sql.Timestamp createTime, java.sql.Timestamp processTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS);
 
 		setValue(0, id);
@@ -398,24 +412,25 @@ public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 		setValue(3, entityType);
 		setValue(4, entityId);
 		setValue(5, initiatorUid);
-		setValue(6, claimStatus);
-		setValue(7, operatorUid);
-		setValue(8, processCode);
-		setValue(9, processDetails);
-		setValue(10, proofResourceId);
-		setValue(11, proofResourceUrl);
-		setValue(12, createTime);
-		setValue(13, processTime);
-		setValue(14, deleteTime);
-		setValue(15, integralTag1);
-		setValue(16, integralTag2);
-		setValue(17, integralTag3);
-		setValue(18, integralTag4);
-		setValue(19, integralTag5);
-		setValue(20, stringTag1);
-		setValue(21, stringTag2);
-		setValue(22, stringTag3);
-		setValue(23, stringTag4);
-		setValue(24, stringTag5);
+		setValue(6, claimType);
+		setValue(7, claimStatus);
+		setValue(8, operatorUid);
+		setValue(9, processCode);
+		setValue(10, processDetails);
+		setValue(11, proofResourceId);
+		setValue(12, proofResourceUrl);
+		setValue(13, createTime);
+		setValue(14, processTime);
+		setValue(15, deleteTime);
+		setValue(16, integralTag1);
+		setValue(17, integralTag2);
+		setValue(18, integralTag3);
+		setValue(19, integralTag4);
+		setValue(20, integralTag5);
+		setValue(21, stringTag1);
+		setValue(22, stringTag2);
+		setValue(23, stringTag3);
+		setValue(24, stringTag4);
+		setValue(25, stringTag5);
 	}
 }

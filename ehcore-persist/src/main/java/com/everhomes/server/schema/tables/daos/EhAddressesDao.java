@@ -76,6 +76,27 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.LATITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>geohash IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByGeohash(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.GEOHASH, values);
+	}
+
+	/**
 	 * Fetch records that have <code>address_alias IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAddressAlias(java.lang.String... values) {

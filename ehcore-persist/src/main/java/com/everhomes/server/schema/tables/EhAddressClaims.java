@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> {
 
-	private static final long serialVersionUID = -49774764;
+	private static final long serialVersionUID = 2115586401;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_address_claims</code>
@@ -55,6 +55,11 @@ public class EhAddressClaims extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_address_claims.initiator_uid</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.Long> INITIATOR_UID = createField("initiator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, java.lang.Byte> CLAIM_TYPE = createField("claim_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: family resident, 1: commercial");
 
 	/**
 	 * The column <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed
