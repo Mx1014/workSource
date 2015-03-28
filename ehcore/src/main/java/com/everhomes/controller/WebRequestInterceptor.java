@@ -26,6 +26,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceProvider;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 

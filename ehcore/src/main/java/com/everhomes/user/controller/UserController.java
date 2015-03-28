@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.app.App;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.controller.RequireAuthentication;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;

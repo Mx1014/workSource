@@ -17,7 +17,7 @@ import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.category.ListCategoryCommand;
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.controller.RequireAuthentication;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;

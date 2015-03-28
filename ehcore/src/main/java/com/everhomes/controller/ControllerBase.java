@@ -20,6 +20,7 @@ import com.everhomes.discover.RestMethod;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * 

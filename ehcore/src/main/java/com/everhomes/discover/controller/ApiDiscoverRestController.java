@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.controller.RequireAuthentication;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.rest.RestResponse;
 

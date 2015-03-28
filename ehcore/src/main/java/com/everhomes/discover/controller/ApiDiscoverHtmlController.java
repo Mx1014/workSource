@@ -9,7 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.controller.RequireAuthentication;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * 

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.controller.RequireAuthentication;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.region.ListRegionCommand;
 import com.everhomes.region.Region;
@@ -25,6 +24,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * Region REST API controller
