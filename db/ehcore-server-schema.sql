@@ -422,13 +422,14 @@ CREATE TABLE `eh_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `name` VARCHAR(128) NOT NULL,
+    `display_name` VARCHAR(64),
     `avatar` VARCHAR(256),
     `description` TEXT,
     `creator_uid` BIGINT NOT NULL,
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
-    `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner',
+    `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner, 2: invite only',
     `discriminator` VARCHAR(32),
     
     `integral_tag1` BIGINT,
@@ -503,7 +504,7 @@ CREATE TABLE `eh_group_members` (
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
     `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
   	`member_nick_name` VARCHAR(32) COMMENT 'member nick name within the group',
-    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     `operator_uid` BIGINT COMMENT 'redundant auditing info',
     `approve_time` DATETIME COMMENT 'redundant auditing info',
@@ -722,7 +723,8 @@ CREATE TABLE `eh_address_claim_stats` (
 
 #
 # member of eh_address partition group
-# address claim also serves as the family entity for user
+# For user/family application, after the claim has been authorized, 
+# its entity_type/entity_id points to the family(eh_groups) entity
 #
 DROP TABLE IF EXISTS `eh_address_claims`;
 CREATE TABLE `eh_address_claims` (
@@ -732,8 +734,8 @@ CREATE TABLE `eh_address_claims` (
     `entity_type` VARCHAR(32) NOT NULL,
     `entity_id` BIGINT NOT NULL,
     `initiator_uid` BIGINT NOT NULL,
-    `claim_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: family resident, 1: commercial',
-    `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: unclaimed, 1: claiming, 2: claimed',
+    `claim_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: family resident, 1: commercial entity',
+    `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: unclaimed, 1: claiming, 2: claimed, 3: rejected',
     `operator_uid` BIGINT,
     `process_code` TINYINT,
     `process_details` TEXT,

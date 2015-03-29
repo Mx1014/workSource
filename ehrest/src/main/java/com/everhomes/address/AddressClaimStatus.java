@@ -1,11 +1,11 @@
 // @formatter:off
 package com.everhomes.address;
 
-public enum AddressAdminStatus {
-    INACTIVE((byte)0), CONFIRMING((byte)1),ACTIVE((byte)2);
+public enum AddressClaimStatus {
+    UNCLAIMED((byte)0), CLAIMING((byte)1), CLAIMED((byte)2), REJECTED((byte)3);
     
     private byte code;
-    private AddressAdminStatus(byte code) {
+    private AddressClaimStatus(byte code) {
         this.code = code;
     }
     
@@ -13,19 +13,22 @@ public enum AddressAdminStatus {
         return this.code;
     }
     
-    public static AddressAdminStatus fromCode(Byte code) {
+    public static AddressClaimStatus fromCode(Byte code) {
         if(code == null)
             return null;
         
         switch(code.byteValue()) {
-        case 0 :
-            return INACTIVE;
+        case 0:
+            return UNCLAIMED;
             
-        case 1 :
-            return CONFIRMING;
+        case 1:
+            return CLAIMING;
             
-        case 2 :
-            return ACTIVE;
+        case 2:
+            return CLAIMED;
+            
+        case 3:
+            return REJECTED;
             
         default :
             assert(false);

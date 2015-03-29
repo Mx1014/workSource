@@ -1,11 +1,12 @@
 // @formatter:off
 package com.everhomes.address;
 
-public enum AddressAdminStatus {
-    INACTIVE((byte)0), CONFIRMING((byte)1),ACTIVE((byte)2);
+public enum AddressClaimType {
+    FAMILY_RESIDENT((byte)0), COMMERCIAL_ENTITY((byte)1);
     
     private byte code;
-    private AddressAdminStatus(byte code) {
+    
+    private AddressClaimType(byte code) {
         this.code = code;
     }
     
@@ -13,25 +14,22 @@ public enum AddressAdminStatus {
         return this.code;
     }
     
-    public static AddressAdminStatus fromCode(Byte code) {
+    public static AddressClaimType fromCode(Byte code) {
         if(code == null)
             return null;
         
         switch(code.byteValue()) {
         case 0 :
-            return INACTIVE;
+            return FAMILY_RESIDENT;
             
         case 1 :
-            return CONFIRMING;
-            
-        case 2 :
-            return ACTIVE;
+            return COMMERCIAL_ENTITY;
             
         default :
             assert(false);
             break;
         }
-        
-        return null;
+                    
+        return null;           
     }
 }

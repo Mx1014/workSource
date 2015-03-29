@@ -50,8 +50,8 @@ public class RegionProviderTest  extends TestCase {
         Region region = new Region();
         region.setName("China");
         region.setPath("China");
-        region.setScopeEnum(RegionScope.COUNTRY);
-        region.setStatusEnum(RegionAdminStatus.ACTIVE);
+        region.setScopeCode(RegionScope.COUNTRY.getCode());
+        region.setStatus(RegionAdminStatus.ACTIVE.getCode());
         region.setLevel(0);
         this.regionProvider.createRegion(region);
         this.newRecordIds.add(region.getId());
@@ -60,8 +60,8 @@ public class RegionProviderTest  extends TestCase {
         region2.setParentId(region.getParentId());
         region2.setName("Beijing");
         region2.setPath("China/Beijing");
-        region2.setScopeEnum(RegionScope.CITY);
-        region2.setStatusEnum(RegionAdminStatus.ACTIVE);
+        region2.setScopeCode(RegionScope.CITY.getCode());
+        region2.setStatus(RegionAdminStatus.ACTIVE.getCode());
         region2.setLevel(1);
         this.regionProvider.createRegion(region2);
         this.newRecordIds.add(region2.getId());
@@ -70,8 +70,8 @@ public class RegionProviderTest  extends TestCase {
         region2.setParentId(region.getParentId());
         region2.setName("Shanghai");
         region2.setPath("China/Shanghai");
-        region2.setScopeEnum(RegionScope.CITY);
-        region2.setStatusEnum(RegionAdminStatus.ACTIVE);
+        region2.setScopeCode(RegionScope.CITY.getCode());
+        region2.setStatus(RegionAdminStatus.ACTIVE.getCode());
         region2.setLevel(1);
         this.regionProvider.createRegion(region2);
         this.newRecordIds.add(region2.getId());
@@ -80,8 +80,8 @@ public class RegionProviderTest  extends TestCase {
         region2.setParentId(region.getParentId());
         region2.setName("Hubei");
         region2.setPath("China/Hubei");
-        region2.setScopeEnum(RegionScope.PROVINCE);
-        region2.setStatusEnum(RegionAdminStatus.ACTIVE);
+        region2.setScopeCode(RegionScope.PROVINCE.getCode());
+        region2.setStatus(RegionAdminStatus.ACTIVE.getCode());
         region2.setLevel(1);
         this.regionProvider.createRegion(region2);
         this.newRecordIds.add(region2.getId());
@@ -90,8 +90,8 @@ public class RegionProviderTest  extends TestCase {
         region3.setParentId(region2.getParentId());
         region3.setName("Wuhan");
         region3.setPath("China/Hubei/Wuhan");
-        region3.setScopeEnum(RegionScope.CITY);
-        region3.setStatusEnum(RegionAdminStatus.ACTIVE);
+        region3.setScopeCode(RegionScope.CITY.getCode());
+        region3.setStatus(RegionAdminStatus.ACTIVE.getCode());
         region3.setLevel(2);
         this.regionProvider.createRegion(region3);
         this.newRecordIds.add(region3.getId());
