@@ -16,8 +16,10 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAddressClaimsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
+import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.pojos.EhAddressClaims;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -130,7 +132,8 @@ public class AddressProviderImpl implements AddressProvider {
     @Override
     public void deleteAddressClaimById(long id) {
         AddressClaim claim = findAddressClaimById(id);
-        deleteAddressClaim(claim);
+        if(claim != null)
+            deleteAddressClaim(claim);
     }
 
     @Cacheable(value="AddressClaim", key="#id")
@@ -142,6 +145,66 @@ public class AddressProviderImpl implements AddressProvider {
             (DSLContext context, Object reducingContext) -> {
                 EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
                 result[0] = ConvertHelper.convert(dao.findById(id), AddressClaim.class);
+            
+                if(result[0] != null) {
+                    return false;
+                }
+                
+                return true;
+            });
+        
+        return result[0];
+    }
+
+    @Override
+    public void createCommunity(Community community) {
+        long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
+        
+        community.setId(id);
+        community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));
+        EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
+        dao.insert(community);
+    }
+
+    @Caching(evict = { @CacheEvict(value="Community", key="#community.id") } )
+    @Override
+    public void updateCommunity(Community community) {
+        assert(community.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, community.getId()));
+        EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
+        dao.update(community);
+    }
+
+    @Caching(evict = { @CacheEvict(value="Community", key="#community.id") } )
+    @Override
+    public void deleteCommunity(Community community) {
+        assert(community.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, community.getId()));
+        EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
+        dao.deleteById(community.getId());
+    }
+
+    @Caching(evict = { @CacheEvict(value="Community", key="#id") } )
+    @Override
+    public void deleteCommunityById(long id) {
+        Community community = findCommunityById(id);
+        if(community != null)
+            deleteCommunity(community);
+    }
+
+    @Cacheable(value="Community", key="#id")
+    @Override
+    public Community findCommunityById(long id) {
+        final Community[] result = new Community[1];
+
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
+            (DSLContext context, Object reducingContext) -> {
+                EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
+                result[0] = ConvertHelper.convert(dao.findById(id), Community.class);
             
                 if(result[0] != null) {
                     return false;

@@ -575,6 +575,9 @@ CREATE TABLE `eh_communities`(
     `zipcode` VARCHAR(16),
     `description` TEXT,
     `detail_description` TEXT,
+    `creator_uid` BIGINT COMMENT 'user who suggested the creation',
+    `operator_uid` BIGINT COMMENT 'operator uid of last operation',
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
     

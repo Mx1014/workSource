@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> implements org.jooq.Record11<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 565830016;
+	private static final long serialVersionUID = -1942673704;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.id</code>. id of the record
@@ -112,14 +112,14 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
+	 * Setter for <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
 	public void setMemberStatus(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
+	 * Getter for <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
 	public java.lang.Byte getMemberStatus() {
 		return (java.lang.Byte) getValue(7);

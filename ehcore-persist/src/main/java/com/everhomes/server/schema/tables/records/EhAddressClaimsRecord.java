@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> {
 
-	private static final long serialVersionUID = 776593674;
+	private static final long serialVersionUID = -513239710;
 
 	/**
 	 * Setter for <code>ehcore.eh_address_claims.id</code>. id of the record
@@ -98,28 +98,28 @@ public class EhAddressClaimsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial
+	 * Setter for <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial entity
 	 */
 	public void setClaimType(java.lang.Byte value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial
+	 * Getter for <code>ehcore.eh_address_claims.claim_type</code>. 0: family resident, 1: commercial entity
 	 */
 	public java.lang.Byte getClaimType() {
 		return (java.lang.Byte) getValue(6);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed
+	 * Setter for <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed, 3: rejected
 	 */
 	public void setClaimStatus(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed
+	 * Getter for <code>ehcore.eh_address_claims.claim_status</code>. 0: unclaimed, 1: claiming, 2: claimed, 3: rejected
 	 */
 	public java.lang.Byte getClaimStatus() {
 		return (java.lang.Byte) getValue(7);

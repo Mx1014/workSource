@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 616708878;
+	private static final long serialVersionUID = 1117916258;
 
 	private java.lang.Long     id;
 	private java.lang.Long     cityId;
@@ -24,6 +24,9 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.String   zipcode;
 	private java.lang.String   description;
 	private java.lang.String   detailDescription;
+	private java.lang.Long     creatorUid;
+	private java.lang.Long     operatorUid;
+	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 	private java.lang.Long     integralTag1;
@@ -51,6 +54,9 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.String   zipcode,
 		java.lang.String   description,
 		java.lang.String   detailDescription,
+		java.lang.Long     creatorUid,
+		java.lang.Long     operatorUid,
+		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
 		java.lang.Long     integralTag1,
@@ -75,6 +81,9 @@ public class EhCommunities implements java.io.Serializable {
 		this.zipcode = zipcode;
 		this.description = description;
 		this.detailDescription = detailDescription;
+		this.creatorUid = creatorUid;
+		this.operatorUid = operatorUid;
+		this.status = status;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
 		this.integralTag1 = integralTag1;
@@ -175,6 +184,30 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setDetailDescription(java.lang.String detailDescription) {
 		this.detailDescription = detailDescription;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

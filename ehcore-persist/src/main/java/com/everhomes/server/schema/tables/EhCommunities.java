@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = 89041791;
+	private static final long serialVersionUID = -343572666;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -80,6 +80,21 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_communities.detail_description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> DETAIL_DESCRIPTION = createField("detail_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.creator_uid</code>. user who suggested the creation
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "user who suggested the creation");
+
+	/**
+	 * The column <code>ehcore.eh_communities.operator_uid</code>. operator uid of last operation
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "operator uid of last operation");
+
+	/**
+	 * The column <code>ehcore.eh_communities.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForConfirmation, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_communities.create_time</code>.
