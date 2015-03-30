@@ -44,9 +44,6 @@ public class RegionController extends ControllerBase {
     @RequestMapping("list")
     @RestReturn(value=RegionDTO.class, collection=true)
     public RestResponse list(@Valid ListRegionCommand cmd) {
-        if(LOGGER.isTraceEnabled())
-            LOGGER.trace("API request /region/list: " + cmd.toString());
-
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
@@ -65,9 +62,6 @@ public class RegionController extends ControllerBase {
     @RequestMapping("listChildren")
     @RestReturn(value=RegionDTO.class, collection=true)
     public RestResponse listChildren(@Valid ListRegionCommand cmd) {
-        if(LOGGER.isTraceEnabled())
-            LOGGER.trace("API request /region/listChildren: " + cmd.toString());
-
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
@@ -87,9 +81,6 @@ public class RegionController extends ControllerBase {
     @RequestMapping("listDescendants")
     @RestReturn(value=RegionDTO.class, collection=true)
     public RestResponse listDescendants(@Valid ListRegionCommand cmd) {
-        if(LOGGER.isTraceEnabled())
-            LOGGER.trace("API request /region/listDescendants: " + cmd.toString());
-
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));

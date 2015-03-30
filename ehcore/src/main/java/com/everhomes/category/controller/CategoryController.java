@@ -43,9 +43,6 @@ public class CategoryController extends ControllerBase {
     @RequestMapping("listChildren")
     @RestReturn(value=CategoryDTO.class, collection=true)
     public RestResponse listChildren(@Valid ListCategoryCommand cmd) {
-        if(LOGGER.isTraceEnabled())
-            LOGGER.trace("API request /category/listChildren: " + cmd.toString());
-
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
@@ -64,9 +61,6 @@ public class CategoryController extends ControllerBase {
     @RequestMapping("listDescendants")
     @RestReturn(value=CategoryDTO.class, collection=true)
     public RestResponse listDescendants(@Valid ListCategoryCommand cmd) {
-        if(LOGGER.isTraceEnabled())
-            LOGGER.trace("API request /region/listDescendants: " + cmd.toString());
-
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
