@@ -38,6 +38,8 @@ import com.everhomes.bus.CoreBusReceiver;
 public class AppConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
     
+    public static int DEFAULT_PAGINATION_PAGE_SIZE = 20;
+    
     //
     // TODO : currently only support single Redis server, will take care of sharding later
     // 

@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.util.Tuple;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },
@@ -29,6 +30,9 @@ public class AddressTest extends TestCase {
     
     @Autowired
     private AddressProvider addressProvider;
+    
+    @Autowired
+    private AddressService addressService;
     
     private List<Community> communityCleanupList = new ArrayList<>();
     private List<CommunityGeoPoint> communityGeopointsCleanupList = new ArrayList<>();
@@ -86,12 +90,25 @@ public class AddressTest extends TestCase {
     }
     
     @Test
-    public void test() {
+    public void testGeoPoints() {
         List<CommunityGeoPoint> points = addressProvider.listCommunitGeoPoints(
             this.communityCleanupList.get(0).getId());
  
         for(CommunityGeoPoint p : points) {
             System.out.println(p.toString());
+        }
+    }
+    
+    @Test
+    public void testFindNearbyCommuunities() {
+        ListNearbyCommunityCommand cmd = new ListNearbyCommunityCommand();
+        cmd.setCityId(1L);
+        cmd.setLongitude(1.0);
+        cmd.setLatigtue(1.0);
+        Tuple<Integer, List<CommunityDTO>> communityList = this.addressService.listNearbyCommunities(cmd);
+        
+        for(CommunityDTO c : communityList.second()) {
+            System.out.println(c.toString());
         }
     }
 }

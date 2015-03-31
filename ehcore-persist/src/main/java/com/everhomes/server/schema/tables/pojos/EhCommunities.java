@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1117916258;
+	private static final long serialVersionUID = 81203818;
 
 	private java.lang.Long     id;
 	private java.lang.Long     cityId;
@@ -24,6 +24,13 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.String   zipcode;
 	private java.lang.String   description;
 	private java.lang.String   detailDescription;
+	private java.lang.String   aptSegment1;
+	private java.lang.String   aptSegment2;
+	private java.lang.String   aptSegment3;
+	private java.lang.String   aptSeg1Sample;
+	private java.lang.String   aptSeg2Sample;
+	private java.lang.String   aptSeg3Sample;
+	private java.lang.Integer  aptCount;
 	private java.lang.Long     creatorUid;
 	private java.lang.Long     operatorUid;
 	private java.lang.Byte     status;
@@ -54,6 +61,13 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.String   zipcode,
 		java.lang.String   description,
 		java.lang.String   detailDescription,
+		java.lang.String   aptSegment1,
+		java.lang.String   aptSegment2,
+		java.lang.String   aptSegment3,
+		java.lang.String   aptSeg1Sample,
+		java.lang.String   aptSeg2Sample,
+		java.lang.String   aptSeg3Sample,
+		java.lang.Integer  aptCount,
 		java.lang.Long     creatorUid,
 		java.lang.Long     operatorUid,
 		java.lang.Byte     status,
@@ -81,6 +95,13 @@ public class EhCommunities implements java.io.Serializable {
 		this.zipcode = zipcode;
 		this.description = description;
 		this.detailDescription = detailDescription;
+		this.aptSegment1 = aptSegment1;
+		this.aptSegment2 = aptSegment2;
+		this.aptSegment3 = aptSegment3;
+		this.aptSeg1Sample = aptSeg1Sample;
+		this.aptSeg2Sample = aptSeg2Sample;
+		this.aptSeg3Sample = aptSeg3Sample;
+		this.aptCount = aptCount;
 		this.creatorUid = creatorUid;
 		this.operatorUid = operatorUid;
 		this.status = status;
@@ -184,6 +205,62 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setDetailDescription(java.lang.String detailDescription) {
 		this.detailDescription = detailDescription;
+	}
+
+	public java.lang.String getAptSegment1() {
+		return this.aptSegment1;
+	}
+
+	public void setAptSegment1(java.lang.String aptSegment1) {
+		this.aptSegment1 = aptSegment1;
+	}
+
+	public java.lang.String getAptSegment2() {
+		return this.aptSegment2;
+	}
+
+	public void setAptSegment2(java.lang.String aptSegment2) {
+		this.aptSegment2 = aptSegment2;
+	}
+
+	public java.lang.String getAptSegment3() {
+		return this.aptSegment3;
+	}
+
+	public void setAptSegment3(java.lang.String aptSegment3) {
+		this.aptSegment3 = aptSegment3;
+	}
+
+	public java.lang.String getAptSeg1Sample() {
+		return this.aptSeg1Sample;
+	}
+
+	public void setAptSeg1Sample(java.lang.String aptSeg1Sample) {
+		this.aptSeg1Sample = aptSeg1Sample;
+	}
+
+	public java.lang.String getAptSeg2Sample() {
+		return this.aptSeg2Sample;
+	}
+
+	public void setAptSeg2Sample(java.lang.String aptSeg2Sample) {
+		this.aptSeg2Sample = aptSeg2Sample;
+	}
+
+	public java.lang.String getAptSeg3Sample() {
+		return this.aptSeg3Sample;
+	}
+
+	public void setAptSeg3Sample(java.lang.String aptSeg3Sample) {
+		this.aptSeg3Sample = aptSeg3Sample;
+	}
+
+	public java.lang.Integer getAptCount() {
+		return this.aptCount;
+	}
+
+	public void setAptCount(java.lang.Integer aptCount) {
+		this.aptCount = aptCount;
 	}
 
 	public java.lang.Long getCreatorUid() {

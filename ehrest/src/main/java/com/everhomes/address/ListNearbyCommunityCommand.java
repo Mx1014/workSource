@@ -7,8 +7,9 @@ public class ListNearbyCommunityCommand {
     Long cityId;
     Double longitude;
     Double latigtue;
-    Long offset;
-    Integer pageSize;
+    
+    // start from 1, page size is configurable at server side
+    Long pageOffset;
     
     public ListNearbyCommunityCommand() {
     }
@@ -37,20 +38,12 @@ public class ListNearbyCommunityCommand {
         this.latigtue = latigtue;
     }
 
-    public Long getOffset() {
-        return offset;
+    public Long getPageOffset() {
+        return pageOffset;
     }
 
-    public void setOffset(Long offset) {
-        this.offset = offset;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
+    public void setOffset(Long pageOffset) {
+        this.pageOffset = pageOffset;
     }
     
     @Override

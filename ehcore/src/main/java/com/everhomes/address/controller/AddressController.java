@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.address.AddressService;
 import com.everhomes.address.CommunityDTO;
+import com.everhomes.address.ListCommunityByKeywordCommand;
 import com.everhomes.address.ListNearbyCommunityCommand;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.Tuple;
 
 @RestController
 @RequestMapping("/address")
@@ -28,7 +30,22 @@ public class AddressController extends ControllerBase {
     @RequestMapping("listNearbyCommunities")
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse list(@Valid ListNearbyCommunityCommand cmd) {
-        List<CommunityDTO> results = this.addressService.listNearbyCommunities(cmd);
-        return new RestResponse(results);
+        Tuple<Integer, List<CommunityDTO>> results = this.addressService.listNearbyCommunities(cmd);
+        RestResponse response =  new RestResponse(results.second());
+
+        response.setErrorCode(results.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("listCommunitiesByKeyword")
+    @RestReturn(value=CommunityDTO.class, collection=true)
+    public RestResponse listCommunitiesByKeyword(@Valid ListCommunityByKeywordCommand cmd) {
+        Tuple<Integer, List<CommunityDTO>> results = this.addressService.listCommunitiesByKeyword(cmd);
+        RestResponse response = new RestResponse(results.second());
+        
+        response.setErrorCode(results.first());
+        response.setErrorDescription("OK");
+        return response;
     }
 }
