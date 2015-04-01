@@ -20,11 +20,14 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
+import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
@@ -50,6 +53,8 @@ public class CategoryProviderImpl implements CategoryProvider {
         query.execute();
         
         category.setId(query.getReturnedRecord().getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }
 
     @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
@@ -62,6 +67,8 @@ public class CategoryProviderImpl implements CategoryProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         dao.update(ConvertHelper.convert(category, EhCategories.class));
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, category.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
@@ -73,6 +80,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         
         dao.deleteById(category.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, category.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="Category", key="#id"),
@@ -84,6 +92,8 @@ public class CategoryProviderImpl implements CategoryProvider {
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         
         dao.deleteById(id);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, id);
     }
 
     @Cacheable(value="Category", key="#id")

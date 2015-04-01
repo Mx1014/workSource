@@ -4,14 +4,22 @@ package com.everhomes.address;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -21,13 +29,30 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
 @Component
-public class AddressServiceImpl implements AddressService {
+public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddressServiceImpl.class);
     
     @Autowired
     private DbProvider dbProvider;
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private LocalBus localBus;
+ 
+    @PostConstruct
+    public void setup() {
+        localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhCommunities.class, null), this);
+        localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhCommunities.class, null), this);
+    }
+    
+    public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
+        LOGGER.debug("Receive change notification on subject: " + subject);
+        
+        // TODO monitor change notifications for cache invalidation
+        return Action.none;
+    }
     
     @Override
     public Tuple<Integer, List<CommunityDTO>> listNearbyCommunities(ListNearbyCommunityCommand cmd) {
@@ -61,8 +86,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     /**
-     *  Pagination used in this method has a big performance impact on partitioned database
-     *  This method will be used for gathering performance data 
+     *  TODO: Pagination across partitions needs to be pre-fetched and cached
      */
     @Override
     public Tuple<Integer, List<CommunityDTO>> listCommunitiesByKeyword(ListCommunityByKeywordCommand cmd) {

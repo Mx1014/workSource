@@ -20,10 +20,13 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRegionsDao;
+import com.everhomes.server.schema.tables.pojos.EhCategories;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.records.EhRegionsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -57,6 +60,8 @@ public class RegionProviderImpl implements RegionProvider {
         query.execute();
         
         region.setId(query.getReturnedRecord().getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhRegions.class, null);
     }
 
     @Override
@@ -70,7 +75,9 @@ public class RegionProviderImpl implements RegionProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
         dao.update(ConvertHelper.convert(region, EhRegions.class));
-    }
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
+   }
 
     @Caching(evict = { @CacheEvict(value="Region", key="region.id"),
             @CacheEvict(value="listRegion"),
@@ -82,6 +89,7 @@ public class RegionProviderImpl implements RegionProvider {
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
         
         dao.deleteById(region.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
     }
     
     @Caching(evict = { @CacheEvict(value="Region", key="#regionId"),
@@ -94,6 +102,7 @@ public class RegionProviderImpl implements RegionProvider {
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
         
         dao.deleteById(regionId);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, regionId);
     }
 
     @Cacheable(value="Region", key="#regionId")

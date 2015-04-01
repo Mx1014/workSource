@@ -17,9 +17,12 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqDiscover;
 import com.everhomes.jooq.JooqMetaInfo;
+import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.util.ConvertHelper;
 
 /**
@@ -55,6 +58,8 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
             
             item.setOwnerEntityPojoClass(entityPojoClz);
             item.setItemPojoClass(entityProfileItemPojoClz);
+            
+            DaoHelper.publishDaoAction(DaoAction.CREATE, entityPojoClz, null);
         } catch (InstantiationException | IllegalAccessException e) {
             LOGGER.error("Unexpected exception",e);
             throw new RuntimeException("Unexpected exception when constructing DAO instance for POJO " + entityProfileItemPojoClz);
@@ -79,6 +84,7 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
             dao.setConfiguration(context.configuration());
             
             dao.update(ConvertHelper.convert(item, item.getItemPojoClass()));
+            DaoHelper.publishDaoAction(DaoAction.MODIFY, item.getItemPojoClass(), item.getId());
         } catch (InstantiationException | IllegalAccessException e) {
             LOGGER.error("Unexpected exception",e);
             throw new RuntimeException("Unexpected exception when constructing DAO instance for POJO " + item.getItemPojoClass());
@@ -102,6 +108,7 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
             DAOImpl dao = (DAOImpl)meta.getDaoClass().newInstance();
             dao.setConfiguration(context.configuration());
             dao.deleteById(item.getId());
+            DaoHelper.publishDaoAction(DaoAction.MODIFY, item.getItemPojoClass(), item.getId());
         } catch (InstantiationException | IllegalAccessException e) {
             LOGGER.error("Unexpected exception",e);
             throw new RuntimeException("Unexpected exception when constructing DAO instance for POJO " + item.getItemPojoClass());

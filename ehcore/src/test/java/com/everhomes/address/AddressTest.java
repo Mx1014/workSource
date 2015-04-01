@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,19 @@ public class AddressTest extends TestCase {
         addressProvider.createCommunity(community);
         communityCleanupList.add(community);
         
+        for(int i = 1; i < 100; i++) {
+            Community c = new Community();
+            c.setAddress("Fake address " + i);
+            c.setAreaName("Fake area " + i);
+            c.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+            c.setName("Fake " + i);
+            c.setCityId(1L);
+            c.setAreaId(1L);
+            
+            addressProvider.createCommunity(c);
+            communityCleanupList.add(c);
+        }
+        
         CommunityGeoPoint geoPoint1 = new CommunityGeoPoint();
         geoPoint1.setCommunityId(community.getId());
         geoPoint1.setDescription("Archor North");
@@ -89,7 +103,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testGeoPoints() {
         List<CommunityGeoPoint> points = addressProvider.listCommunitGeoPoints(
             this.communityCleanupList.get(0).getId());
@@ -99,7 +113,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testFindNearbyCommuunities() {
         ListNearbyCommunityCommand cmd = new ListNearbyCommunityCommand();
         cmd.setCityId(1L);
@@ -109,6 +123,24 @@ public class AddressTest extends TestCase {
         
         for(CommunityDTO c : communityList.second()) {
             System.out.println(c.toString());
+        }
+    }
+    
+    @Test
+    public void testDbBackedPagination() {
+        
+        ListCommunityByKeywordCommand cmd = new ListCommunityByKeywordCommand();
+        cmd.setKeyword("Fake");
+        
+        Tuple<Integer, List<CommunityDTO>> results;
+        
+        for(int page = 1; page <= 5; page++) {
+            System.out.println("List community in page " + page);
+            cmd.setPageOffset((long)page);
+            results = addressService.listCommunitiesByKeyword(cmd);
+            for(CommunityDTO c : results.second()) {
+                System.out.println("Community: " + c.toString());
+            }
         }
     }
 }

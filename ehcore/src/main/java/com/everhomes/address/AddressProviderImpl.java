@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,6 +15,8 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
@@ -31,6 +35,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddressProviderImpl.class);
     
     @Autowired
     private DbProvider dbProvider;
@@ -51,6 +56,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id));
         EhAddressesDao dao = new EhAddressesDao(context.configuration());
         dao.insert(address);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null);
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id") } )
@@ -61,6 +68,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, address.getId()));
         EhAddressesDao dao = new EhAddressesDao(context.configuration());
         dao.update(address);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddresses.class, address.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id") } )
@@ -71,6 +80,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, address.getId()));
         EhAddressesDao dao = new EhAddressesDao(context.configuration());
         dao.deleteById(address.getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddresses.class, address.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#id") } )
@@ -79,6 +90,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id));
         EhAddressesDao dao = new EhAddressesDao(context.configuration());
         dao.deleteById(id);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddresses.class, id);
     }
 
     @Cacheable(value="Address", key="#id")
@@ -103,6 +116,8 @@ public class AddressProviderImpl implements AddressProvider {
         
         claim.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.insert(claim);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddressClaims.class, null);
     }
 
     @Caching(evict = { @CacheEvict(value="AddressClaim", key="#claim.id") } )
@@ -115,6 +130,8 @@ public class AddressProviderImpl implements AddressProvider {
                 AccessSpec.readWriteWith(EhAddresses.class, claim.getAddressId()));
         EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
         dao.update(claim);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressClaims.class, claim.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="AddressClaim", key="#claim.id") } )
@@ -127,6 +144,8 @@ public class AddressProviderImpl implements AddressProvider {
                 AccessSpec.readWriteWith(EhAddresses.class, claim.getAddressId()));
         EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
         dao.deleteById(claim.getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressClaims.class, claim.getId());
     }
 
     /**
@@ -171,6 +190,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));
         EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
         dao.insert(community);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCommunities.class, null);
     }
 
     @Caching(evict = { @CacheEvict(value="Community", key="#community.id") } )
@@ -181,6 +202,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, community.getId()));
         EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
         dao.update(community);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunities.class, community.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="Community", key="#community.id") } )
@@ -191,6 +214,8 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, community.getId()));
         EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
         dao.deleteById(community.getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunities.class, community.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="Community", key="#id") } )
@@ -251,6 +276,8 @@ public class AddressProviderImpl implements AddressProvider {
         EhCommunityGeopointsDao dao = new EhCommunityGeopointsDao(context.configuration());
         
         dao.insert(geoPoint);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCommunityGeopoints.class, null);
     }
 
     @Caching(evict = { @CacheEvict(value="CommunityGeoPoints", key="#geoPoint.id"),
@@ -264,6 +291,7 @@ public class AddressProviderImpl implements AddressProvider {
         EhCommunityGeopointsDao dao = new EhCommunityGeopointsDao(context.configuration());
         
         dao.update(geoPoint);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityGeopoints.class, geoPoint.getId());
     }
 
     @Caching(evict = { @CacheEvict(value="CommunityGeoPoints", key="#geoPoint.id"),
@@ -277,6 +305,7 @@ public class AddressProviderImpl implements AddressProvider {
         EhCommunityGeopointsDao dao = new EhCommunityGeopointsDao(context.configuration());
         
         dao.deleteById(geoPoint.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityGeopoints.class, geoPoint.getId());
     }
     
     @Cacheable(value="CommunityGeoPoints", key="#id")
