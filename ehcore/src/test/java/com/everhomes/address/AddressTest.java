@@ -126,7 +126,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testDbBackedPagination() {
         
         ListCommunityByKeywordCommand cmd = new ListCommunityByKeywordCommand();
@@ -142,5 +142,55 @@ public class AddressTest extends TestCase {
                 System.out.println("Community: " + c.toString());
             }
         }
+    }
+    
+    @Test
+    public void testListBuilding() {
+        Address addr = new Address();
+        addr.setCityId(1L);
+        addr.setCommunityId(1L);
+        addr.setBuildingName("Building 1");
+        addr.setBuildingName("Building 1 alias");
+        addr.setAppartmentName("APT 1");
+        this.addressProvider.createAddress(addr);
+        
+        Address addr2 = new Address();
+        addr2.setCityId(1L);
+        addr2.setCommunityId(1L);
+        addr2.setBuildingName("Building 1");
+        addr2.setBuildingName("Building 1 alias");
+        addr2.setAppartmentName("APT 2");
+        this.addressProvider.createAddress(addr2);
+        
+        Address addr3 = new Address();
+        addr3.setCityId(1L);
+        addr3.setCommunityId(1L);
+        addr3.setBuildingName("Building 2");
+        addr3.setBuildingName("Building 2 alias");
+        addr3.setAppartmentName("APT 1");
+        this.addressProvider.createAddress(addr3);
+        
+        Address addr4 = new Address();
+        addr4.setCityId(1L);
+        addr4.setCommunityId(1L);
+        addr4.setBuildingName("Building 2");
+        addr4.setBuildingName("Building 2 alias");
+        addr4.setAppartmentName("APT 2");
+        this.addressProvider.createAddress(addr4);
+        
+        ListBuildingByKeywordCommand cmd = new ListBuildingByKeywordCommand();
+        cmd.setCommunitId(1L);
+        cmd.setKeyword("Building");
+        Tuple<Integer, List<BuildingDTO>> results = this.addressService.listBuildingsByKeyword(cmd);
+        
+        System.out.println("List building results: ");
+        for(BuildingDTO b : results.second()) {
+            System.out.println(b.toString());
+        }
+        
+        this.addressProvider.deleteAddress(addr4);
+        this.addressProvider.deleteAddress(addr3);
+        this.addressProvider.deleteAddress(addr2);
+        this.addressProvider.deleteAddress(addr);
     }
 }

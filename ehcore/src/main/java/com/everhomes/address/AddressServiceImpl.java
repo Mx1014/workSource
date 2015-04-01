@@ -22,6 +22,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
@@ -48,8 +49,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
-        LOGGER.debug("Receive change notification on subject: " + subject);
-        
         // TODO monitor change notifications for cache invalidation
         return Action.none;
     }
@@ -157,5 +156,65 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
         
         return new Tuple<>(ErrorCodes.SUCCESS, results);
+    }
+
+    @Override
+    public Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(ListBuildingByKeywordCommand cmd) {
+        if(cmd.getCommunitId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId or keyword parameter");
+        
+        List<BuildingDTO> results = new ArrayList<BuildingDTO>();
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                    String likeVal = cmd.getKeyword() + "%";
+                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+                        .from(Tables.EH_ADDRESSES)
+                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunitId())
+                        .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))        
+                        .fetch().map((r) -> {
+                            BuildingDTO building = new BuildingDTO();
+                            building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+                            building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+                            results.add(building);
+                            return null;
+                        });
+                    
+                return true;
+            });
+        
+        return new Tuple<Integer, List<BuildingDTO>>(ErrorCodes.SUCCESS, results);
+    }
+
+    @Override
+    public Tuple<Integer, List<String>> listAppartmentsByKeyword(ListAppartmentByKeywordCommand cmd) {
+        if(cmd.getCommunitId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty() ||
+             cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId, buildingName or keyword parameter");
+        
+        List<String> results = new ArrayList<>();
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+                        .from(Tables.EH_ADDRESSES)
+                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunitId())
+                        .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
+                        .and(Tables.EH_ADDRESSES.APPARTMENT_NAME.like(cmd.getKeyword() + "%"))
+                        .fetch().map((r) -> {
+                            results.add(r.getValue(Tables.EH_ADDRESSES.APPARTMENT_NAME));
+                            return null;
+                        });
+                    
+                return true;
+            });
+        
+        return new Tuple<Integer, List<String>>(ErrorCodes.SUCCESS, results);
     }
 }
