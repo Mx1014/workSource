@@ -10,13 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.SuggestCommunityCommand;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.BuildingDTO;
 import com.everhomes.address.CommunityDTO;
+import com.everhomes.address.CommunitySummaryDTO;
 import com.everhomes.address.ListAppartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.address.ListCommunityByKeywordCommand;
 import com.everhomes.address.ListNearbyCommunityCommand;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -29,10 +32,33 @@ public class AddressController extends ControllerBase {
     
     @Autowired
     private AddressService addressService;
+
+    @RequestMapping("suggestCommunity")
+    @RestReturn(value=CommunitySummaryDTO.class)
+    public RestResponse addCommunity(@Valid SuggestCommunityCommand cmd) {
+        CommunitySummaryDTO result = this.addressService.addCommunity(cmd);
+        RestResponse response =  new RestResponse(result);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("listSuggestedCommunities")
+    @RestReturn(value=CommunitySummaryDTO.class, collection=true)
+    public RestResponse listSuggestedCommunities() {
+        CommunitySummaryDTO result = this.addressService.addCommunity(cmd);
+        RestResponse response =  new RestResponse(result);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     
     @RequestMapping("listNearbyCommunities")
     @RestReturn(value=CommunityDTO.class, collection=true)
-    public RestResponse list(@Valid ListNearbyCommunityCommand cmd) {
+    public RestResponse listNearbyCommunities(@Valid ListNearbyCommunityCommand cmd) {
         Tuple<Integer, List<CommunityDTO>> results = this.addressService.listNearbyCommunities(cmd);
         RestResponse response =  new RestResponse(results.second());
 

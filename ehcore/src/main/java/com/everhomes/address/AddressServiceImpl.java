@@ -6,11 +6,13 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
@@ -21,9 +23,12 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -41,7 +46,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private LocalBus localBus;
- 
+    
+    @Autowired
+    private AddressProvider addressProvider;
+    
+    @Autowired
+    private RegionProvider regionProvider;
+    
     @PostConstruct
     public void setup() {
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhCommunities.class, null), this);
@@ -51,6 +62,74 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
         // TODO monitor change notifications for cache invalidation
         return Action.none;
+    }
+    
+    @Override
+    public CommunitySummaryDTO suggestCommunity(SuggestCommunityCommand cmd) {
+        if(cmd.getCityId() == null || cmd.getAreaId() == null || cmd.getName() == null || cmd.getName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid parameter, cityId, areaId and name should not be null or empty");
+        
+        Region city = this.regionProvider.findRegionById(cmd.getCityId());
+        if(city == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid cityId parameter, could not find the city");
+        
+        Region area = this.regionProvider.findRegionById(cmd.getAreaId());
+        if(area == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid areaId parameter, could not find the ");
+        
+        Community community = new Community();
+        community.setCityId(cmd.getCityId());
+        community.setCityName(city.getName());
+        community.setAreaId(cmd.getAreaId());
+        community.setAreaName(area.getName());
+        community.setName(cmd.getName());
+        community.setAddress(cmd.getAddress());
+        
+        UserContext user = UserContext.current();
+        community.setCreatorUid(user.getUser().getId());
+        community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
+
+        this.dbProvider.execute((TransactionStatus status) ->  {
+            this.addressProvider.createCommunity(community);
+            if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
+                CommunityGeoPoint point = new CommunityGeoPoint();
+                point.setCommunityId(community.getId());
+                point.setDescription("central");
+                point.setLatitude(cmd.getLatitude());
+                point.setLongitude(cmd.getLongitude());
+                String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
+                point.setGeohash(geoHash);
+                this.addressProvider.createCommunityGeoPoint(point);
+            }
+            return null;
+        });
+        
+        return ConvertHelper.convert(community, CommunitySummaryDTO.class);
+    }
+    
+    @Override
+    public Tuple<Integer, List<CommunitySummaryDTO>> listSuggestedCommunities() {
+        final List<CommunitySummaryDTO> results = new ArrayList<>();
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                Long uid = UserContext.current().getUser().getId();
+                context.selectCount().from(Tables.EH_COMMUNITIES)
+                    .where(Tables.EH_COMMUNITIES.CREATOR_UID.eq(uid))
+                    .fetch().map((r) -> {
+                        results.add(ConvertHelper.convert(r, CommunitySummaryDTO.class));
+                        return null;
+                    });
+                
+                return true;
+            });
+
+        
+        return new Tuple<Integer, List<CommunitySummaryDTO>>(ErrorCodes.SUCCESS, results);
     }
     
     @Override
