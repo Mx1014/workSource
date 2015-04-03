@@ -36,7 +36,7 @@ public class AddressController extends ControllerBase {
     @RequestMapping("suggestCommunity")
     @RestReturn(value=CommunitySummaryDTO.class)
     public RestResponse addCommunity(@Valid SuggestCommunityCommand cmd) {
-        CommunitySummaryDTO result = this.addressService.addCommunity(cmd);
+        CommunitySummaryDTO result = this.addressService.suggestCommunity(cmd);
         RestResponse response =  new RestResponse(result);
 
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -47,14 +47,13 @@ public class AddressController extends ControllerBase {
     @RequestMapping("listSuggestedCommunities")
     @RestReturn(value=CommunitySummaryDTO.class, collection=true)
     public RestResponse listSuggestedCommunities() {
-        CommunitySummaryDTO result = this.addressService.addCommunity(cmd);
-        RestResponse response =  new RestResponse(result);
+        Tuple<Integer, List<CommunitySummaryDTO>> result = this.addressService.listSuggestedCommunities();
+        RestResponse response =  new RestResponse(result.second());
 
-        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorCode(result.first());
         response.setErrorDescription("OK");
         return response;
     }
-    
     
     @RequestMapping("listNearbyCommunities")
     @RestReturn(value=CommunityDTO.class, collection=true)
