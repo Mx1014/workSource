@@ -492,8 +492,9 @@ CREATE TABLE `eh_group_profiles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_groups partition group
-# secondary resource objects
+# key table of its own partition group
+# The reason for it to have its own partition group is that there is potential for group to
+# have large amount of members
 #
 DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (

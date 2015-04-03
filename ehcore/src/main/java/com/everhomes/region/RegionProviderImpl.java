@@ -26,7 +26,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRegionsDao;
-import com.everhomes.server.schema.tables.pojos.EhCategories;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.records.EhRegionsRecord;
 import com.everhomes.util.ConvertHelper;

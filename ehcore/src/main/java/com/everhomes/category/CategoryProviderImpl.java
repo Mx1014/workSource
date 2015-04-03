@@ -27,7 +27,6 @@ import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.records.EhCategoriesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
