@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.family;
 
+import java.util.List;
+
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberLocator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
@@ -59,6 +62,27 @@ public class FamilyProviderImpl implements FamilyProvider {
     
     @Autowired
     private AddressProvider addressProvider;
+
+    @Override
+    public Family findFamilyByAddressId(long addressId) {
+        final Family[] result = new Family[1];
+        dbProvider.mapReduce(AccessSpec.readWriteWith(EhGroups.class), result, 
+        (DSLContext context, Object reducingContext) -> {
+            result[0] = context.select().from(Tables.EH_GROUPS)
+                .where(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(addressId))
+                .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                .fetchOne().map((r) -> {
+                    return ConvertHelper.convert(r, Family.class);
+                });
+            
+            if(result[0] != null)
+                return false;
+            
+            return true;
+        });
+        
+        return result[0];
+    }
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -145,23 +169,42 @@ public class FamilyProviderImpl implements FamilyProvider {
                 "Unable to save into database, SQL exception or storage full?");
     }
     
-    private Family findFamilyByAddressId(long addressId) {
-        final Family[] result = new Family[1];
-        dbProvider.mapReduce(AccessSpec.readWriteWith(EhGroups.class), result, 
-        (DSLContext context, Object reducingContext) -> {
-            result[0] = context.select().from(Tables.EH_GROUPS)
-                .where(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(addressId))
-                .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
-                .fetchOne().map((r) -> {
-                    return ConvertHelper.convert(r, Family.class);
-                });
+    @Override
+    public void leaveFamilyAtAddress(Address address, UserGroup userGroup) {
+        this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
+            Family family = findFamilyByAddressId(address.getId());
             
-            if(result[0] != null)
-                return false;
+            GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+               EhUsers.class.getSimpleName(), userGroup.getOwnerUid());
+            assert(m != null);
+            if(m != null) {
+                family.setMemberCount(family.getMemberCount() - 1);
+                this.groupProvider.deleteGroupMember(m);
+                
+                if(family.getMemberCount() == 0) {
+                    this.groupProvider.deleteGroup(family);
+                } else {
+                    if(m.getMemberRole() == Role.ResourceCreator) {
+                        // reassign resource creator to other member
+                        GroupMember newCreator = pickOneMemberToPromote(family);
+                        newCreator.setMemberRole(Role.ResourceCreator);
+                        this.groupProvider.updateGroupMember(newCreator);
+                        
+                        family.setCreatorUid(newCreator.getMemberId());
+                    }
+                    this.groupProvider.updateGroup(family);
+                }
+            }
             
-            return true;
+            this.userProvider.deleteUserGroup(userGroup);
+            return null;
         });
+    }
+    
+    private GroupMember pickOneMemberToPromote(Family family) {
+        GroupMemberLocator locator = new GroupMemberLocator(family.getId());
         
-        return result[0];
+        List<GroupMember> members = this.groupProvider.listGroupMembers(locator, Integer.MAX_VALUE);
+        return members.get(0);
     }
 }

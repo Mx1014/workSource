@@ -3,6 +3,7 @@ package com.everhomes.address;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -27,6 +28,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -34,6 +36,8 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -66,6 +70,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
    
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private UserProvider userProvide;
     
     @PostConstruct
     public void setup() {
@@ -332,7 +339,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     public void disclaimAddress(DisclaimAddressCommand cmd) {
-        // ???
+        Address address = this.addressProvider.findAddressById(cmd.getAddressId());
+        if(address == null)
+            return;
+        
+        long uid = UserContext.current().getUser().getId();
+        List<UserGroup> userGroups = this.userProvide.listUserGroups(uid, GroupDiscriminator.FAMILY.getCode());
+        userGroups = userGroups.stream().filter((userGroup)-> {
+            return userGroup.getGroupId() == cmd.getAddressId();
+        }).collect(Collectors.toList());
+        
+        if(userGroups.size() > 0) {
+            this.familyProvider.leaveFamilyAtAddress(address, userGroups.get(0));
+        }
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
