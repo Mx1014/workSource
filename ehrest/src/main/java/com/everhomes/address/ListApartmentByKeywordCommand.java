@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
-public class ListAppartmentByKeywordCommand {
+public class ListApartmentByKeywordCommand {
     @NotNull
     private Long communitId;
 
@@ -15,7 +15,7 @@ public class ListAppartmentByKeywordCommand {
     @NotNull
     private String keyword;
 
-    public ListAppartmentByKeywordCommand() {
+    public ListApartmentByKeywordCommand() {
     }
 
     public Long getCommunitId() {

@@ -105,7 +105,7 @@ public class AddressTest extends TestCase {
     
     @Ignore @Test
     public void testGeoPoints() {
-        List<CommunityGeoPoint> points = addressProvider.listCommunitGeoPoints(
+        List<CommunityGeoPoint> points = addressProvider.listCommunityGeoPoints(
             this.communityCleanupList.get(0).getId());
  
         for(CommunityGeoPoint p : points) {

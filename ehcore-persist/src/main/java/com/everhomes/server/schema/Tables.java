@@ -29,16 +29,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAddresses EH_ADDRESSES = com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES;
 
 	/**
-	 * The table ehcore.eh_address_claims
-	 */
-	public static final com.everhomes.server.schema.tables.EhAddressClaims EH_ADDRESS_CLAIMS = com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS;
-
-	/**
-	 * The table ehcore.eh_address_claim_stats
-	 */
-	public static final com.everhomes.server.schema.tables.EhAddressClaimStats EH_ADDRESS_CLAIM_STATS = com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS;
-
-	/**
 	 * The table ehcore.eh_app_promotions
 	 */
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;

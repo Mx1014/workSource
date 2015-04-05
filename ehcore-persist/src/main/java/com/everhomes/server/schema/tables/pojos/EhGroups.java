@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -241219779;
+	private static final long serialVersionUID = 294935611;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -25,6 +25,10 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.Byte     privateFlag;
 	private java.lang.Integer  joinPolicy;
 	private java.lang.String   discriminator;
+	private java.lang.Byte     regionScope;
+	private java.lang.Long     regionScopeId;
+	private java.lang.String   leafRegionPath;
+	private java.lang.Long     memberCount;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -35,9 +39,6 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.Byte     regionScope;
-	private java.lang.Long     regionScopeId;
-	private java.lang.Long     memberCount;
 
 	public EhGroups() {}
 
@@ -54,6 +55,10 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.Byte     privateFlag,
 		java.lang.Integer  joinPolicy,
 		java.lang.String   discriminator,
+		java.lang.Byte     regionScope,
+		java.lang.Long     regionScopeId,
+		java.lang.String   leafRegionPath,
+		java.lang.Long     memberCount,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -63,10 +68,7 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5,
-		java.lang.Byte     regionScope,
-		java.lang.Long     regionScopeId,
-		java.lang.Long     memberCount
+		java.lang.String   stringTag5
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -80,6 +82,10 @@ public class EhGroups implements java.io.Serializable {
 		this.privateFlag = privateFlag;
 		this.joinPolicy = joinPolicy;
 		this.discriminator = discriminator;
+		this.regionScope = regionScope;
+		this.regionScopeId = regionScopeId;
+		this.leafRegionPath = leafRegionPath;
+		this.memberCount = memberCount;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -90,9 +96,6 @@ public class EhGroups implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.regionScope = regionScope;
-		this.regionScopeId = regionScopeId;
-		this.memberCount = memberCount;
 	}
 
 	public java.lang.Long getId() {
@@ -191,6 +194,38 @@ public class EhGroups implements java.io.Serializable {
 		this.discriminator = discriminator;
 	}
 
+	public java.lang.Byte getRegionScope() {
+		return this.regionScope;
+	}
+
+	public void setRegionScope(java.lang.Byte regionScope) {
+		this.regionScope = regionScope;
+	}
+
+	public java.lang.Long getRegionScopeId() {
+		return this.regionScopeId;
+	}
+
+	public void setRegionScopeId(java.lang.Long regionScopeId) {
+		this.regionScopeId = regionScopeId;
+	}
+
+	public java.lang.String getLeafRegionPath() {
+		return this.leafRegionPath;
+	}
+
+	public void setLeafRegionPath(java.lang.String leafRegionPath) {
+		this.leafRegionPath = leafRegionPath;
+	}
+
+	public java.lang.Long getMemberCount() {
+		return this.memberCount;
+	}
+
+	public void setMemberCount(java.lang.Long memberCount) {
+		this.memberCount = memberCount;
+	}
+
 	public java.lang.Long getIntegralTag1() {
 		return this.integralTag1;
 	}
@@ -269,29 +304,5 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
-	}
-
-	public java.lang.Byte getRegionScope() {
-		return this.regionScope;
-	}
-
-	public void setRegionScope(java.lang.Byte regionScope) {
-		this.regionScope = regionScope;
-	}
-
-	public java.lang.Long getRegionScopeId() {
-		return this.regionScopeId;
-	}
-
-	public void setRegionScopeId(java.lang.Long regionScopeId) {
-		this.regionScopeId = regionScopeId;
-	}
-
-	public java.lang.Long getMemberCount() {
-		return this.memberCount;
-	}
-
-	public void setMemberCount(java.lang.Long memberCount) {
-		this.memberCount = memberCount;
 	}
 }

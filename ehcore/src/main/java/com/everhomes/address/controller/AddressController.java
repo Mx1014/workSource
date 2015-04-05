@@ -10,12 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.ClaimAddressCommand;
+import com.everhomes.address.ClaimedAddressInfo;
+import com.everhomes.address.DisclaimAddressCommand;
 import com.everhomes.address.SuggestCommunityCommand;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.BuildingDTO;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.address.CommunitySummaryDTO;
-import com.everhomes.address.ListAppartmentByKeywordCommand;
+import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.address.ListCommunityByKeywordCommand;
 import com.everhomes.address.ListNearbyCommunityCommand;
@@ -90,11 +93,33 @@ public class AddressController extends ControllerBase {
     
     @RequestMapping("listAppartmentsByKeyword")
     @RestReturn(value=String.class, collection=true)
-    public RestResponse listAppartmentsByKeyword(@Valid ListAppartmentByKeywordCommand cmd) {
-        Tuple<Integer, List<String>> results = this.addressService.listAppartmentsByKeyword(cmd);
+    public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+        Tuple<Integer, List<String>> results = this.addressService.listApartmentsByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
         
         response.setErrorCode(results.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("claimAddress")
+    @RestReturn(value=ClaimedAddressInfo.class)
+    public RestResponse claimAddress(@Valid ClaimAddressCommand cmd) {
+        ClaimedAddressInfo info = this.addressService.claimAddress(cmd);
+        RestResponse response = new RestResponse(info);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("disclaimAddress")
+    @RestReturn(value=String.class)
+    public RestResponse disclaimAddress(@Valid DisclaimAddressCommand cmd) {
+        this.addressService.disclaimAddress(cmd);
+        RestResponse response = new RestResponse(null);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }

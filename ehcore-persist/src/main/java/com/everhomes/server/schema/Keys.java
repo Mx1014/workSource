@@ -36,8 +36,6 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_UUID = UniqueKeys0.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_UUID;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_USER = UniqueKeys0.KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_USER;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord> KEY_EH_ADDRESSES_PRIMARY = UniqueKeys0.KEY_EH_ADDRESSES_PRIMARY;
-	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> KEY_EH_ADDRESS_CLAIMS_PRIMARY = UniqueKeys0.KEY_EH_ADDRESS_CLAIMS_PRIMARY;
-	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressClaimStatsRecord> KEY_EH_ADDRESS_CLAIM_STATS_PRIMARY = UniqueKeys0.KEY_EH_ADDRESS_CLAIM_STATS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord> KEY_EH_APP_PROMOTIONS_PRIMARY = UniqueKeys0.KEY_EH_APP_PROMOTIONS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannersRecord> KEY_EH_BANNERS_PRIMARY = UniqueKeys0.KEY_EH_BANNERS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannerClicksRecord> KEY_EH_BANNER_CLICKS_PRIMARY = UniqueKeys0.KEY_EH_BANNER_CLICKS_PRIMARY;
@@ -103,8 +101,6 @@ public class Keys {
 	// FOREIGN KEY definitions
 	// -------------------------------------------------------------------------
 
-	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, com.everhomes.server.schema.tables.records.EhAddressesRecord> EH_ADDRESS_CLAIMS_IBFK_1 = ForeignKeys0.EH_ADDRESS_CLAIMS_IBFK_1;
-	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAddressClaimStatsRecord, com.everhomes.server.schema.tables.records.EhAddressesRecord> EH_ADDRESS_CLAIM_STATS_IBFK_1 = ForeignKeys0.EH_ADDRESS_CLAIM_STATS_IBFK_1;
 
 	// -------------------------------------------------------------------------
 	// [#1459] distribute members to avoid static initialisers > 64kb
@@ -127,8 +123,6 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_UUID = createUniqueKey(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER, com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.UUID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> KEY_EH_ACTIVITY_ROSTER_U_EH_ACT_ROSTER_USER = createUniqueKey(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER, com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ACTIVITY_ID, com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.UID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord> KEY_EH_ADDRESSES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES, com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.ID);
-		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord> KEY_EH_ADDRESS_CLAIMS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS, com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS.ID);
-		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressClaimStatsRecord> KEY_EH_ADDRESS_CLAIM_STATS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS, com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord> KEY_EH_APP_PROMOTIONS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS, com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannersRecord> KEY_EH_BANNERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS, com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBannerClicksRecord> KEY_EH_BANNER_CLICKS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhBannerClicks.EH_BANNER_CLICKS, com.everhomes.server.schema.tables.EhBannerClicks.EH_BANNER_CLICKS.ID);
@@ -189,10 +183,5 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN = createUniqueKey(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.OWNER_UID, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES, com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES.ID);
-	}
-
-	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {
-		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAddressClaimsRecord, com.everhomes.server.schema.tables.records.EhAddressesRecord> EH_ADDRESS_CLAIMS_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_PRIMARY, com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS, com.everhomes.server.schema.tables.EhAddressClaims.EH_ADDRESS_CLAIMS.ADDRESS_ID);
-		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAddressClaimStatsRecord, com.everhomes.server.schema.tables.records.EhAddressesRecord> EH_ADDRESS_CLAIM_STATS_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_PRIMARY, com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS, com.everhomes.server.schema.tables.EhAddressClaimStats.EH_ADDRESS_CLAIM_STATS.ADDRESS_ID);
 	}
 }

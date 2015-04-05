@@ -104,6 +104,13 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.CREATOR_UID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>operator_uid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByOperatorUid(java.lang.Long... values) {
@@ -111,9 +118,100 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>process_code IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByProcessCode(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.PROCESS_CODE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>process_details IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByProcessDetails(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.PROCESS_DETAILS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>proof_resource_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByProofResourceUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL, values);
+	}
+
+	/**
 	 * Fetch records that have <code>approve_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByApproveTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.APPROVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.STRING_TAG5, values);
 	}
 }

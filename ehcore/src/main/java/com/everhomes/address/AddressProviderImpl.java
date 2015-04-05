@@ -14,6 +14,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -21,11 +22,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAddressClaimsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddressClaims;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
@@ -60,7 +59,8 @@ public class AddressProviderImpl implements AddressProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null);
     }
 
-    @Caching(evict = { @CacheEvict(value="Address", key="#address.id") } )
+    @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),
+            @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.appartmentName}") })
     @Override
     public void updateAddress(Address address) {
         assert(address.getId() != null);
@@ -72,7 +72,8 @@ public class AddressProviderImpl implements AddressProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddresses.class, address.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Address", key="#address.id") } )
+    @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),
+            @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.appartmentName}") })
     @Override
     public void deleteAddress(Address address) {
         assert(address.getId() != null);
@@ -84,14 +85,13 @@ public class AddressProviderImpl implements AddressProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddresses.class, address.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Address", key="#id") } )
     @Override
     public void deleteAddressById(long id) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id));
-        EhAddressesDao dao = new EhAddressesDao(context.configuration());
-        dao.deleteById(id);
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddresses.class, id);
+        // work around limitation posted by Spring proxy based injection
+        AddressProvider self = PlatformContext.getComponent(AddressProvider.class);
+        Address address = self.findAddressById(id);
+        if(address != null)
+            self.deleteAddress(address);
     }
 
     @Cacheable(value="Address", key="#id")
@@ -101,85 +101,31 @@ public class AddressProviderImpl implements AddressProvider {
         EhAddressesDao dao = new EhAddressesDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Address.class);
     }
-
+    
+    @Cacheable(value="Apartment", key="{#communityId, #buildingName, #apartmentName}")
     @Override
-    public void createAddressClaim(AddressClaim claim) {
-        assert(claim.getAddressId() != null);
+    public Address findApartmentAddress(long communityId, String buildingName, String apartmentName) {
+        final Address[] result = new Address[1];
         
-        long id = this.sequnceProvider.getNextSequence(
-            NameMapper.getSequenceDomainFromTablePojo(EhAddressClaims.class));
-        claim.setId(id);
-        
-        DSLContext context = this.dbProvider.getDslContext(
-            AccessSpec.readWriteWith(EhAddresses.class, claim.getAddressId()));
-        EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
-        
-        claim.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dao.insert(claim);
-        
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddressClaims.class, null);
-    }
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+               (DSLContext context, Object reducingContext) -> {
 
-    @Caching(evict = { @CacheEvict(value="AddressClaim", key="#claim.id") } )
-    @Override
-    public void updateAddressClaim(AddressClaim claim) {
-        assert(claim.getId() != null);
-        assert(claim.getAddressId() != null);
-        
-        DSLContext context = this.dbProvider.getDslContext(
-                AccessSpec.readWriteWith(EhAddresses.class, claim.getAddressId()));
-        EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
-        dao.update(claim);
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressClaims.class, claim.getId());
-    }
-
-    @Caching(evict = { @CacheEvict(value="AddressClaim", key="#claim.id") } )
-    @Override
-    public void deleteAddressClaim(AddressClaim claim) {
-        assert(claim.getId() != null);
-        assert(claim.getAddressId() != null);
-        
-        DSLContext context = this.dbProvider.getDslContext(
-                AccessSpec.readWriteWith(EhAddresses.class, claim.getAddressId()));
-        EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
-        dao.deleteById(claim.getId());
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressClaims.class, claim.getId());
-    }
-
-    /**
-     * Avoid using this method, Spring proxy mode cause caching to be skipped for methods calls
-     * within the same class
-     */
-    @Caching(evict = { @CacheEvict(value="AddressClaim", key="#id") } )
-    @Override
-    public void deleteAddressClaimById(long id) {
-        AddressClaim claim = findAddressClaimById(id);
-        if(claim != null)
-            deleteAddressClaim(claim);
-    }
-
-    @Cacheable(value="AddressClaim", key="#id")
-    @Override
-    public AddressClaim findAddressClaimById(long id) {
-        final AddressClaim[] result = new AddressClaim[1];
-
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), result, 
-            (DSLContext context, Object reducingContext) -> {
-                EhAddressClaimsDao dao = new EhAddressClaimsDao(context.configuration());
-                result[0] = ConvertHelper.convert(dao.findById(id), AddressClaim.class);
+            result[0] = context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+                .and(Tables.EH_ADDRESSES.APPARTMENT_NAME.eq(apartmentName))
+                .fetchOne().map((r) -> {
+                   return ConvertHelper.convert(r, Address.class); 
+                });
+            if(result[0] != null)
+                return false;
             
-                if(result[0] != null) {
-                    return false;
-                }
-                
-                return true;
-            });
+            return true;
+        });
         
         return result[0];
     }
-
+     
     @Override
     public void createCommunity(Community community) {
         long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
@@ -218,12 +164,13 @@ public class AddressProviderImpl implements AddressProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunities.class, community.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Community", key="#id") } )
     @Override
     public void deleteCommunityById(long id) {
-        Community community = findCommunityById(id);
+        AddressProvider self = PlatformContext.getComponent(AddressProvider.class);
+        
+        Community community = self.findCommunityById(id);
         if(community != null)
-            deleteCommunity(community);
+            self.deleteCommunity(community);
     }
 
     @Cacheable(value="Community", key="#id")
@@ -248,7 +195,7 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Cacheable(value="CommunityGeoList", key="#id")
     @Override
-    public List<CommunityGeoPoint> listCommunitGeoPoints(long id) {
+    public List<CommunityGeoPoint> listCommunityGeoPoints(long id) {
         List<CommunityGeoPoint> l = new ArrayList<>();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));

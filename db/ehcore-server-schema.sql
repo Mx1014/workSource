@@ -333,8 +333,12 @@ CREATE TABLE `eh_user_groups` (
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
     `group_discriminator` VARCHAR(32) COMMENT 'redendant info for quickly distinguishing associated group', 
     `group_id` BIGINT,
+    `region_scope` TINYINT COMMENT 'redundant group info to help region-based group user search',
+    `region_scope_id` BIGINT COMMENT 'redundant group info to help region-based group user search',
+    `leaf_region_path` VARCHAR(128) COMMENT 'redundant group info to help region-based group user search',
+    
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'default to ResourceUser role', 
-    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance, 3: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     
     PRIMARY KEY (`id`),
@@ -432,6 +436,12 @@ CREATE TABLE `eh_groups` (
     `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner, 2: invite only',
     `discriminator` VARCHAR(32),
     
+    `region_scope` TINYINT COMMENT 'define the group visibiliy region',
+    `region_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
+    `leaf_region_path` VARCHAR(128) COMMENT 'leaf region path if the group is aassociated with a managed region',
+    
+    `member_count` BIGINT NOT NULL DEFAULT 0,
+    
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
     `integral_tag3` BIGINT,
@@ -442,13 +452,11 @@ CREATE TABLE `eh_groups` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `region_scope` TINYINT COMMENT 'define the group visibiliy region',
-    `region_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
-    `member_count` BIGINT NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
+    INDEX `i_eh_group_leaf_region_path`(`leaf_region_path`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
     INDEX `i_eh_group_itag1`(`integral_tag1`),
@@ -507,15 +515,34 @@ CREATE TABLE `eh_group_members` (
   	`member_nick_name` VARCHAR(32) COMMENT 'member nick name within the group',
     `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
+    `creator_uid` BIGINT COMMENT 'record creator user id',
     `operator_uid` BIGINT COMMENT 'redundant auditing info',
+    `process_code` TINYINT,
+    `process_details` TEXT,
+    `proof_resource_url` VARCHAR(128),
     `approve_time` DATETIME COMMENT 'redundant auditing info',
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_grp_member` (`group_id`, `member_type`, `member_id`),
     INDEX `i_eh_grp_member_group_id` (`group_id`),
     INDEX `i_eh_grp_member_member` (`member_type`, `member_id`),
     INDEX `i_eh_grp_member_create_time` (`create_time`),
-    INDEX `i_eh_grp_member_approve_time` (`approve_time`)
+    INDEX `i_eh_grp_member_approve_time` (`approve_time`),
+    INDEX `i_eh_gprof_itag1`(`integral_tag1`),
+    INDEX `i_eh_gprof_itag2`(`integral_tag2`),
+    INDEX `i_eh_gprof_stag1`(`string_tag1`),
+    INDEX `i_eh_gprof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -714,71 +741,6 @@ CREATE TABLE `eh_addresses` (
     INDEX `i_eh_addr_itag2`(`integral_tag2`),
     INDEX `i_eh_addr_stag1`(`string_tag1`),
     INDEX `i_eh_addr_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of eh_address partition group
-#
-DROP TABLE IF EXISTS `eh_address_claim_stats`;
-CREATE TABLE `eh_address_claim_stats` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-	`namespace_id` INTEGER,
-	`address_id` BIGINT NOT NULL,
-	`claimed_count` INTEGER NOT NULL DEFAULT 0,
-	`claiming_count` INTEGER NOT NULL DEFAULT 0,
-	
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_eh_addr_claim_stats_addr_id`(`address_id`) REFERENCES `eh_addresses`(`id`) ON DELETE CASCADE,
-	INDEX `i_eh_addr_claim_ns_id`(`namespace_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of eh_address partition group
-# For user/family application, after the claim has been authorized, 
-# its entity_type/entity_id points to the family(eh_groups) entity
-#
-DROP TABLE IF EXISTS `eh_address_claims`;
-CREATE TABLE `eh_address_claims` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `namespace_id` INTEGER,
-    `address_id` BIGINT NOT NULL,
-    `entity_type` VARCHAR(32) NOT NULL,
-    `entity_id` BIGINT NOT NULL,
-    `initiator_uid` BIGINT NOT NULL,
-    `claim_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: family resident, 1: commercial entity',
-    `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: unclaimed, 1: claiming, 2: claimed, 3: rejected',
-    `operator_uid` BIGINT,
-    `process_code` TINYINT,
-    `process_details` TEXT,
-    `proof_resource_id` BIGINT,
-    `proof_resource_url` VARCHAR(512),
-    `create_time` DATETIME,
-    `process_time` DATETIME,
-    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be useful',
-    
-    `integral_tag1` BIGINT,
-    `integral_tag2` BIGINT,
-    `integral_tag3` BIGINT,
-    `integral_tag4` BIGINT,
-    `integral_tag5` BIGINT,
-    `string_tag1` VARCHAR(128),
-    `string_tag2` VARCHAR(128),
-    `string_tag3` VARCHAR(128),
-    `string_tag4` VARCHAR(128),
-    `string_tag5` VARCHAR(128),
-    
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_eh_addr_claim_address_id`(`address_id`) REFERENCES `eh_addresses`(`id`) ON DELETE CASCADE,
-    INDEX `i_eh_addr_claim_target_entity`(`entity_type`, `entity_id`),
-    INDEX `i_eh_addr_claim_addr_claim_type`(`namespace_id`, `address_id`, `claim_type`),
-    INDEX `i_eh_addr_claim_initiator_uid`(`initiator_uid`),
-    INDEX `i_eh_addr_claim_operator_uid`(`operator_uid`),
-    INDEX `i_eh_addr_claim_create_time`(`create_time`),
-    INDEX `i_eh_addr_claim_process_time`(`process_time`),
-    INDEX `i_eh_addr_claim_itag1`(`integral_tag1`),
-    INDEX `i_eh_addr_claim_itag2`(`integral_tag2`),
-    INDEX `i_eh_addr_claim_stag1`(`string_tag1`),
-    INDEX `i_eh_addr_claim_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #

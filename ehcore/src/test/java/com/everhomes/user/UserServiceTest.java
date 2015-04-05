@@ -26,7 +26,7 @@ import com.everhomes.util.Version;
 public class UserServiceTest {
     
     @Autowired
-    private UserServiceProvider userProvider;
+    private UserProvider userProvider;
     
     @Autowired
     private UserService userService;

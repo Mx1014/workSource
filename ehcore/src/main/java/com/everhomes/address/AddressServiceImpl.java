@@ -18,11 +18,16 @@ import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
+import com.everhomes.core.CoordinationLocks;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.server.schema.Tables;
@@ -52,6 +57,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private RegionProvider regionProvider;
+    
+    @Autowired
+    private FamilyProvider familyProvider;
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+   
+    @Autowired
+    private GroupProvider groupProvider;
     
     @PostConstruct
     public void setup() {
@@ -269,8 +283,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
 
     @Override
-    public Tuple<Integer, List<String>> listAppartmentsByKeyword(ListAppartmentByKeywordCommand cmd) {
-        if(cmd.getCommunitId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty() ||
+    public Tuple<Integer, List<String>> listApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
+        if(cmd.getCommunitId() == null || cmd.getKeyword() == null ||
              cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or keyword parameter");
@@ -295,5 +309,75 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             });
         
         return new Tuple<Integer, List<String>>(ErrorCodes.SUCCESS, results);
+    }
+    
+    @Override
+    public ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd) {
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()
+            || cmd.getAppartmentName() == null || cmd.getAppartmentName().isEmpty()) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId, buildingName or appartmentName parameter");
+        }
+        
+        if(cmd.getReplacedAddressId() == null) {
+            return processNewAddressClaim(cmd);
+        } else {
+            ClaimedAddressInfo info = processNewAddressClaim(cmd);
+            
+            DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
+            disclaimCmd.setAddressId(cmd.getReplacedAddressId());
+            disclaimAddress(disclaimCmd);
+            return info;
+        }
+    }
+    
+    public void disclaimAddress(DisclaimAddressCommand cmd) {
+        // ???
+    }
+   
+    private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
+        Address address = this.getOrCreateAddress(cmd);
+        Family family = this.familyProvider.getOrCreatefamily(address);
+        
+        ClaimedAddressInfo info = new ClaimedAddressInfo();
+        info.setAddressId(address.getId());
+        info.setFullAddress(address.getAddress());
+        info.setUserCount((int)family.getMemberCount().longValue());
+        
+        return info;
+    }
+    
+    private Address getOrCreateAddress(ClaimAddressCommand cmd) {
+        Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+                cmd.getBuildingName(), cmd.getAppartmentName());
+        
+        Community community = this.addressProvider.findCommunityById(cmd.getCommunityId());
+        if(community == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId");
+        
+        if(address == null) {
+            // optimize with double-lock pattern 
+            Tuple<Address, Boolean> result = this.coordinationProvider
+                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
+                         
+                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+                                 cmd.getBuildingName(), cmd.getAppartmentName());
+                if(addr == null) {
+                     addr = new Address();
+                     addr.setCityId(community.getCityId());
+                     addr.setCommunityId(cmd.getCommunityId());
+                     addr.setBuildingName(cmd.getBuildingName());
+                     addr.setAppartmentName(cmd.getAppartmentName());
+                     addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+                     this.addressProvider.createAddress(addr);
+                }
+                return addr;
+             });
+             
+             address = result.first();
+         }
+         
+         return address;
     }
 }

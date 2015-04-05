@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 1222895589;
+	private static final long serialVersionUID = 1614795456;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -72,14 +72,84 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "remove-deletion policy, user directly managed data");
 
 	/**
+	 * The column <code>ehcore.eh_group_members.creator_uid</code>. record creator user id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "record creator user id");
+
+	/**
 	 * The column <code>ehcore.eh_group_members.operator_uid</code>. redundant auditing info
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "redundant auditing info");
 
 	/**
+	 * The column <code>ehcore.eh_group_members.process_code</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> PROCESS_CODE = createField("process_code", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.process_details</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROCESS_DETAILS = createField("process_details", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.proof_resource_url</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROOF_RESOURCE_URL = createField("proof_resource_url", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> APPROVE_TIME = createField("approve_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "redundant auditing info");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG1 = createField("integral_tag1", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG2 = createField("integral_tag2", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG3 = createField("integral_tag3", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG4 = createField("integral_tag4", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG5 = createField("integral_tag5", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG1 = createField("string_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG2 = createField("string_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG3 = createField("string_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG4 = createField("string_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_group_members</code> table reference

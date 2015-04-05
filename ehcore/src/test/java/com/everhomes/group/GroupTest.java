@@ -32,7 +32,7 @@ public class GroupTest {
     private DbProvider dbProvider;
     
     @Autowired
-    private GroupServiceProvider groupProvider;
+    private GroupProvider groupProvider;
 
     @Configuration
     @ComponentScan(basePackages = {

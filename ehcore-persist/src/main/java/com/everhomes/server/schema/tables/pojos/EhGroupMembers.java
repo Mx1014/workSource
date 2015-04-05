@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1724794083;
+	private static final long serialVersionUID = -2026113827;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
@@ -22,8 +22,22 @@ public class EhGroupMembers implements java.io.Serializable {
 	private java.lang.String   memberNickName;
 	private java.lang.Byte     memberStatus;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     creatorUid;
 	private java.lang.Long     operatorUid;
+	private java.lang.Byte     processCode;
+	private java.lang.String   processDetails;
+	private java.lang.String   proofResourceUrl;
 	private java.sql.Timestamp approveTime;
+	private java.lang.Long     integralTag1;
+	private java.lang.Long     integralTag2;
+	private java.lang.Long     integralTag3;
+	private java.lang.Long     integralTag4;
+	private java.lang.Long     integralTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
 
 	public EhGroupMembers() {}
 
@@ -37,8 +51,22 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   memberNickName,
 		java.lang.Byte     memberStatus,
 		java.sql.Timestamp createTime,
+		java.lang.Long     creatorUid,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp approveTime
+		java.lang.Byte     processCode,
+		java.lang.String   processDetails,
+		java.lang.String   proofResourceUrl,
+		java.sql.Timestamp approveTime,
+		java.lang.Long     integralTag1,
+		java.lang.Long     integralTag2,
+		java.lang.Long     integralTag3,
+		java.lang.Long     integralTag4,
+		java.lang.Long     integralTag5,
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5
 	) {
 		this.id = id;
 		this.groupId = groupId;
@@ -49,8 +77,22 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.memberNickName = memberNickName;
 		this.memberStatus = memberStatus;
 		this.createTime = createTime;
+		this.creatorUid = creatorUid;
 		this.operatorUid = operatorUid;
+		this.processCode = processCode;
+		this.processDetails = processDetails;
+		this.proofResourceUrl = proofResourceUrl;
 		this.approveTime = approveTime;
+		this.integralTag1 = integralTag1;
+		this.integralTag2 = integralTag2;
+		this.integralTag3 = integralTag3;
+		this.integralTag4 = integralTag4;
+		this.integralTag5 = integralTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
 	}
 
 	public java.lang.Long getId() {
@@ -125,6 +167,14 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
 	public java.lang.Long getOperatorUid() {
 		return this.operatorUid;
 	}
@@ -133,11 +183,115 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 	}
 
+	public java.lang.Byte getProcessCode() {
+		return this.processCode;
+	}
+
+	public void setProcessCode(java.lang.Byte processCode) {
+		this.processCode = processCode;
+	}
+
+	public java.lang.String getProcessDetails() {
+		return this.processDetails;
+	}
+
+	public void setProcessDetails(java.lang.String processDetails) {
+		this.processDetails = processDetails;
+	}
+
+	public java.lang.String getProofResourceUrl() {
+		return this.proofResourceUrl;
+	}
+
+	public void setProofResourceUrl(java.lang.String proofResourceUrl) {
+		this.proofResourceUrl = proofResourceUrl;
+	}
+
 	public java.sql.Timestamp getApproveTime() {
 		return this.approveTime;
 	}
 
 	public void setApproveTime(java.sql.Timestamp approveTime) {
 		this.approveTime = approveTime;
+	}
+
+	public java.lang.Long getIntegralTag1() {
+		return this.integralTag1;
+	}
+
+	public void setIntegralTag1(java.lang.Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+
+	public java.lang.Long getIntegralTag2() {
+		return this.integralTag2;
+	}
+
+	public void setIntegralTag2(java.lang.Long integralTag2) {
+		this.integralTag2 = integralTag2;
+	}
+
+	public java.lang.Long getIntegralTag3() {
+		return this.integralTag3;
+	}
+
+	public void setIntegralTag3(java.lang.Long integralTag3) {
+		this.integralTag3 = integralTag3;
+	}
+
+	public java.lang.Long getIntegralTag4() {
+		return this.integralTag4;
+	}
+
+	public void setIntegralTag4(java.lang.Long integralTag4) {
+		this.integralTag4 = integralTag4;
+	}
+
+	public java.lang.Long getIntegralTag5() {
+		return this.integralTag5;
+	}
+
+	public void setIntegralTag5(java.lang.Long integralTag5) {
+		this.integralTag5 = integralTag5;
+	}
+
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
+	}
+
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
+	}
+
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
+	}
+
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
+	}
+
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
+	}
+
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
 	}
 }

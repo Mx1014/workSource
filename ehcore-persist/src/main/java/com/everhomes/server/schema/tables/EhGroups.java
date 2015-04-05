@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 823513173;
+	private static final long serialVersionUID = 75434618;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -87,6 +87,26 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> DISCRIMINATOR = createField("discriminator", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_groups.region_scope</code>. define the group visibiliy region
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> REGION_SCOPE = createField("region_scope", org.jooq.impl.SQLDataType.TINYINT, this, "define the group visibiliy region");
+
+	/**
+	 * The column <code>ehcore.eh_groups.region_scope_id</code>. region information, could be an id in eh_regions table or an id in eh_communities
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> REGION_SCOPE_ID = createField("region_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "region information, could be an id in eh_regions table or an id in eh_communities");
+
+	/**
+	 * The column <code>ehcore.eh_groups.leaf_region_path</code>. leaf region path if the group is aassociated with a managed region
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> LEAF_REGION_PATH = createField("leaf_region_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "leaf region path if the group is aassociated with a managed region");
+
+	/**
+	 * The column <code>ehcore.eh_groups.member_count</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> MEMBER_COUNT = createField("member_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_groups.integral_tag1</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> INTEGRAL_TAG1 = createField("integral_tag1", org.jooq.impl.SQLDataType.BIGINT, this, "");
@@ -135,21 +155,6 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_groups.region_scope</code>. define the group visibiliy region
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> REGION_SCOPE = createField("region_scope", org.jooq.impl.SQLDataType.TINYINT, this, "define the group visibiliy region");
-
-	/**
-	 * The column <code>ehcore.eh_groups.region_scope_id</code>. region information, could be an id in eh_regions table or an id in eh_communities
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> REGION_SCOPE_ID = createField("region_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "region information, could be an id in eh_regions table or an id in eh_communities");
-
-	/**
-	 * The column <code>ehcore.eh_groups.member_count</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> MEMBER_COUNT = createField("member_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_groups</code> table reference

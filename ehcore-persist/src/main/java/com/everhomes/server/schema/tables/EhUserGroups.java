@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> {
 
-	private static final long serialVersionUID = -152195657;
+	private static final long serialVersionUID = -1396006401;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_groups</code>
@@ -47,14 +47,29 @@ public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_user_groups.region_scope</code>. redundant group info to help region-based group user search
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Byte> REGION_SCOPE = createField("region_scope", org.jooq.impl.SQLDataType.TINYINT, this, "redundant group info to help region-based group user search");
+
+	/**
+	 * The column <code>ehcore.eh_user_groups.region_scope_id</code>. redundant group info to help region-based group user search
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> REGION_SCOPE_ID = createField("region_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "redundant group info to help region-based group user search");
+
+	/**
+	 * The column <code>ehcore.eh_user_groups.leaf_region_path</code>. redundant group info to help region-based group user search
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.String> LEAF_REGION_PATH = createField("leaf_region_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "redundant group info to help region-based group user search");
+
+	/**
 	 * The column <code>ehcore.eh_user_groups.member_role</code>. default to ResourceUser role
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> MEMBER_ROLE = createField("member_role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "default to ResourceUser role");
 
 	/**
-	 * The column <code>ehcore.eh_user_groups.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
+	 * The column <code>ehcore.eh_user_groups.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance, 3: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Byte> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: active");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Byte> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: waitingForAcceptance, 3: active");
 
 	/**
 	 * The column <code>ehcore.eh_user_groups.create_time</code>. remove-deletion policy, user directly managed data

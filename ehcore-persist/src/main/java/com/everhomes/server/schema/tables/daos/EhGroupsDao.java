@@ -125,6 +125,34 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
+	 * Fetch records that have <code>region_scope IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionScope(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_SCOPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>region_scope_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_SCOPE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>leaf_region_path IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByLeafRegionPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.LEAF_REGION_PATH, values);
+	}
+
+	/**
+	 * Fetch records that have <code>member_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByMemberCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.MEMBER_COUNT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByIntegralTag1(java.lang.Long... values) {
@@ -192,26 +220,5 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG5, values);
-	}
-
-	/**
-	 * Fetch records that have <code>region_scope IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionScope(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_SCOPE, values);
-	}
-
-	/**
-	 * Fetch records that have <code>region_scope_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionScopeId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_SCOPE_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>member_count IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByMemberCount(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.MEMBER_COUNT, values);
 	}
 }
