@@ -22,6 +22,8 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqDiscover;
 import com.everhomes.jooq.JooqMetaInfo;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.util.ConvertHelper;
 
 /**
@@ -40,6 +42,9 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
     @Autowired
     private CacheProvider cacheProvider;
     
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void createProfileItem(Class<?> entityPojoClz, long entityId, 
             Class<?> entityProfileItemPojoClz, EntityProfileItem item) {
@@ -52,6 +57,10 @@ public class EntityProfileProviderImpl implements EntityProfileProvider {
         
         try {
             DAOImpl dao = (DAOImpl)meta.getDaoClass().newInstance();
+            
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(entityProfileItemPojoClz));
+            item.setId(id);
+            
             dao.setConfiguration(context.configuration());
             dao.insert(ConvertHelper.convert(item, entityProfileItemPojoClz));
             

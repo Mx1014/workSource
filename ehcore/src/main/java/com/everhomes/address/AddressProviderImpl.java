@@ -29,6 +29,7 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -132,6 +133,7 @@ public class AddressProviderImpl implements AddressProvider {
         
         community.setId(id);
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        community.setCreatorUid(UserContext.current().getUser().getId());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));
         EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());

@@ -105,7 +105,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     f.setAddressId(address.getId());
                     f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
                     f.setCreatorUid(uid);
-                    f.setMemberCount(1L);
+                    f.setMemberCount(0L);   // initialize it to 0
                     f.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
                     f.setRegionScopeId(address.getCommunityId());
                     f.setLeafRegionPath(region.getPath());
@@ -144,9 +144,6 @@ public class FamilyProviderImpl implements FamilyProvider {
                 m.setCreatorUid(uid);
                 this.groupProvider.createGroupMember(m);
                 
-                family.setMemberCount(family.getMemberCount() + 1);
-                this.groupProvider.updateGroup(family);
-                
                 UserGroup userGroup = new UserGroup();
                 userGroup.setOwnerUid(uid);
                 userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
@@ -178,8 +175,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                EhUsers.class.getSimpleName(), userGroup.getOwnerUid());
             assert(m != null);
             if(m != null) {
-                family.setMemberCount(family.getMemberCount() - 1);
                 this.groupProvider.deleteGroupMember(m);
+                
+                // retrieve family info after membership changes
+                family = findFamilyByAddressId(address.getId());
                 
                 if(family.getMemberCount() == 0) {
                     this.groupProvider.deleteGroup(family);
