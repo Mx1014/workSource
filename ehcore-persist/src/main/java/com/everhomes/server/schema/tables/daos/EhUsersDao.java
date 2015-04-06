@@ -69,10 +69,122 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>avatar IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByAvatar(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.AVATAR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status_line IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByStatusLine(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.STATUS_LINE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>points IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPoints(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.POINTS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>level IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByLevel(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.LEVEL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>gender IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByGender(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.GENDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>birthday IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByBirthday(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.BIRTHDAY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>address_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByAddressId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.ADDRESS_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>address IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByAddress(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.ADDRESS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>home_town IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByHomeTown(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.HOME_TOWN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>home_town_path IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByHomeTownPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.HOME_TOWN_PATH, values);
+	}
+
+	/**
+	 * Fetch records that have <code>occupation_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByOccupationId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.OCCUPATION_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>company IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByCompany(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.COMPANY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>school IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySchool(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SCHOOL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>locale IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByLocale(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.LOCALE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>invite_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByInviteType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.INVITE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>invitor_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByInvitorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.INVITOR_UID, values);
 	}
 
 	/**
@@ -87,6 +199,20 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.DELETE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>last_login_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByLastLoginTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.LAST_LOGIN_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>last_login_ip IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByLastLoginIp(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.LAST_LOGIN_IP, values);
 	}
 
 	/**

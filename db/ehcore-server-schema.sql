@@ -279,11 +279,48 @@ CREATE TABLE `eh_users` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `account_name` VARCHAR(64) NOT NULL,
     `nick_name` VARCHAR(32),
+    `avatar` VARCHAR(128),
+    `status_line` VARCHAR(128) COMMENT 'status line to express who you are',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
+    `points` INTEGER NOT NULL DEFAULT 0 COMMENT 'points',
+    `level` TINYINT NOT NULL DEFAULT 1,
+    
+    #
+    # for gender/age based matching
+    #
+    `gender` TINYINT NOT NULL DEFAULT 0 COMMENT '0: undisclosured, 1: male, 2: female',
+    `birthday` DATE,
+    
+    #
+    # for current residency matching
+    #
+    `address_id` BIGINT COMMENT 'current address id',
+    `address` VARCHAR(128) COMMENT 'redundant current address description',
+    
+    #
+    # for home town based matching
+    #
+    `home_town` BIGINT COMMENT 'region id',
+    `home_town_path` VARCHAR(128) COMMENT 'redundant region path for recursive matching',
+
+    #
+    # for work/school based matching
+    #
+    `occupation_id` BIGINT COMMENT 'id in category table',
+    `company` VARCHAR(128),
+    `school` VARCHAR(128),
+    
+    `locale` VARCHAR(16) COMMENT 'zh_CN, en_US etc',
+    
+    `invite_type` TINYINT COMMENT '1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: photo contact',
+    `invitor_uid` BIGINT,
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. may be valuable for user to restore account',
-    `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
+    `last_login_time` DATETIME,
+    `last_login_ip` VARCHAR(16),
 
+    `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
+    
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_user_account_name`(`account_name`),
     INDEX `i_eh_user_create_time`(`create_time`)

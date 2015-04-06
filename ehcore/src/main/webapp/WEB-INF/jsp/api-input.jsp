@@ -32,10 +32,17 @@
         <td><input style="width:99%;" name="${p.paramName}"/></td>
     </tr>
 </c:forEach>
+
+		<tr>
+		    <td>Response</td><td>${restMethod.returnTemplate}</td>
+		</tr>
+
 <tr>
 <td colspan="2" align="center"><input type="submit" value="Submit"></td>
 </tr>
 </table>
+
+
 </form>
 
 </td></tr>
