@@ -312,13 +312,14 @@ CREATE TABLE `eh_users` (
     
     `locale` VARCHAR(16) COMMENT 'zh_CN, en_US etc',
     
-    `invite_type` TINYINT COMMENT '1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: photo contact',
+    `invite_type` TINYINT COMMENT '1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact',
     `invitor_uid` BIGINT,
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. may be valuable for user to restore account',
     `last_login_time` DATETIME,
     `last_login_ip` VARCHAR(16),
 
+    `salt` VARCHAR(64),
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
     
     PRIMARY KEY (`id`),
@@ -382,6 +383,41 @@ CREATE TABLE `eh_user_groups` (
     UNIQUE `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
     INDEX `i_eh_usr_grp_owner`(`owner_uid`),
     INDEX `i_eh_usr_grp_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_users partition
+#
+DROP TABLE IF EXISTS `eh_user_invitations`;
+CREATE TABLE `eh_user_invitations` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+	`invite_code` VARCHAR(128),
+	`invite_type` TINYINT COMMENT '1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact',
+	`expiration` DATETIME COMMENT 'expiration time of the invitation',
+	`target_entity_type` VARCHAR(32),
+	`target_entity_id` BIGINT,
+	`max_invite_count` INTEGER NOT NULL DEFAULT 1,
+	`current_invite_count` INTEGER NOT NULL DEFAULT 0,
+	`status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
+	
+    `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_invite_code`(`invite_code`),
+    INDEX `u_eh_invite_expiration`(`expiration`),
+    INDEX `u_eh_invite_code_status`(`invite_code`, `status`),
+    INDEX `u_eh_invite_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_user_invitation_roster`;
+CREATE TABLE `eh_user_invitation_roster` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `invite_id` BIGINT COMMENT 'owner invitation record id',
+    `name` VARCHAR(64),
+    `contact` VARCHAR(64),
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_invite_roster_invite_id`(`invite_id`) REFERENCES `eh_user_invitations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #

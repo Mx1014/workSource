@@ -49,7 +49,7 @@ public class UserServiceTest {
     public void testUserCRUD() {
         User user = new User();
         user.setAccountName("lucy");
-        user.setStatus((byte)UserStatus.active.ordinal());
+        user.setStatus((byte)UserStatus.ACTIVE.ordinal());
         
         this.userProvider.createUser(user);
         System.out.println("user id : " + user.getId());
@@ -57,19 +57,48 @@ public class UserServiceTest {
     
     @Ignore @Test
     public void testUserIdentifierCRUD() {
+/*        
         UserIdentifier identifier = new UserIdentifier();
         identifier.setOwnerUid(1L);
-        identifier.setIdentifierType((byte)IdentifierType.mobile.ordinal());
+        identifier.setIdentifierType((byte)IdentifierType.MOBILE.ordinal());
         identifier.setIdentifierToken("14083076807");
         
         this.userProvider.createIdentifier(identifier);
         
         identifier = new UserIdentifier();
         identifier.setOwnerUid(1L);
-        identifier.setIdentifierType((byte)IdentifierType.email.ordinal());
+        identifier.setIdentifierType((byte)IdentifierType.EMAIL.ordinal());
         identifier.setIdentifierToken("kelveny@gmail.com");
         
         this.userProvider.createIdentifier(identifier);
+ */
+        UserIdentifier identifier = new UserIdentifier();
+        identifier.setOwnerUid(1L);
+        identifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+        identifier.setIdentifierToken("1234");
+        identifier.setClaimStatus(IdentifierClaimStatus.CLAIMING.getCode());
+        
+        this.userProvider.createIdentifier(identifier);
+        
+        UserIdentifier foundIdentifier = this.userProvider.findClaimingIdentifierByToken("1234");
+        if(foundIdentifier != null) {
+            System.out.println("identifer: " + foundIdentifier.toString());
+        }
+        
+        foundIdentifier = this.userProvider.findClaimingIdentifierByToken("1234");
+        if(foundIdentifier != null) {
+            System.out.println("identifer: " + foundIdentifier.toString());
+        }        
+        
+        identifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+        this.userProvider.updateIdentifier(identifier);
+
+        foundIdentifier = this.userProvider.findClaimingIdentifierByToken("1234");
+        if(foundIdentifier != null) {
+            System.out.println("identifer: " + foundIdentifier.toString());
+        }
+        
+        this.userProvider.deleteIdentifier(identifier);
     }
     
     @Ignore @Test
@@ -103,7 +132,7 @@ public class UserServiceTest {
     
     @Ignore @Test
     public void testSignupToken() {
-        SignupToken token = new SignupToken(100, IdentifierType.mobile, "140812345567");
+        SignupToken token = new SignupToken(100, IdentifierType.MOBILE, "140812345567");
         
         String tokenString = token.getTokenString();
         
@@ -115,16 +144,22 @@ public class UserServiceTest {
     
     @Ignore @Test
     public void testSignup() {
-        SignupToken token = this.userService.signup(IdentifierType.mobile, "14081234567");
+        SignupCommand cmd = new SignupCommand();
+        cmd.setType("mobile");
+        cmd.setToken("14081234567");
+        SignupToken token = this.userService.signup(cmd);
         System.out.println("Signup token: " + token.getTokenString());
     }
     
     @Ignore @Test
     public void testVerifyAndLogon() {
-        SignupToken token = SignupToken.fromTokenString("eyJ1c2VySWQiOjEsImlkZW50aWZpZXJUeXBlIjoibW9iaWxlIiwiaWRlbnRpZmllclRva2VuIjoiMTQwODEyMzQ1NjcifQ");
-        UserLogin login = this.userService.verifyAndLogon(token, "414846", "virtual device");
+        VerifyAndLogonCommand cmd = new VerifyAndLogonCommand();
+        cmd.setSignupToken("eyJ1c2VySWQiOjEsImlkZW50aWZpZXJUeXBlIjoibW9iaWxlIiwiaWRlbnRpZmllclRva2VuIjoiMTQwODEyMzQ1NjcifQ");
+        cmd.setVerificationCode("414846");
+        cmd.setDeviceIdentifier("virtual device");
+        UserLogin login = this.userService.verifyAndLogon(cmd);
         
-        LoginToken loginToken = new LoginToken(token.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+        LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
         System.out.println("Login token: " + loginToken.getTokenString());
     }
     

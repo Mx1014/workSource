@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = 2104921517;
+	private static final long serialVersionUID = -60416516;
 
 	/**
 	 * Setter for <code>ehcore.eh_users.id</code>. id of the record
@@ -266,14 +266,14 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: photo contact
+	 * Setter for <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact
 	 */
 	public void setInviteType(java.lang.Byte value) {
 		setValue(18, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: photo contact
+	 * Getter for <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact
 	 */
 	public java.lang.Byte getInviteType() {
 		return (java.lang.Byte) getValue(18);
@@ -350,17 +350,31 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_users.salt</code>.
+	 */
+	public void setSalt(java.lang.String value) {
+		setValue(24, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.salt</code>.
+	 */
+	public java.lang.String getSalt() {
+		return (java.lang.String) getValue(24);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
 	 */
 	public void setPasswordHash(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
 	 */
 	public java.lang.String getPasswordHash() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	// -------------------------------------------------------------------------
@@ -389,7 +403,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	/**
 	 * Create a detached, initialised EhUsersRecord
 	 */
-	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.Long occupationId, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String passwordHash) {
+	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.Long occupationId, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String salt, java.lang.String passwordHash) {
 		super(com.everhomes.server.schema.tables.EhUsers.EH_USERS);
 
 		setValue(0, id);
@@ -416,6 +430,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 		setValue(21, deleteTime);
 		setValue(22, lastLoginTime);
 		setValue(23, lastLoginIp);
-		setValue(24, passwordHash);
+		setValue(24, salt);
+		setValue(25, passwordHash);
 	}
 }

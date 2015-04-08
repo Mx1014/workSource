@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = 2140837578;
+	private static final long serialVersionUID = 431941193;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -117,9 +117,9 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> LOCALE = createField("locale", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "zh_CN, en_US etc");
 
 	/**
-	 * The column <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: photo contact
+	 * The column <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> INVITE_TYPE = createField("invite_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: photo contact");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> INVITE_TYPE = createField("invite_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact");
 
 	/**
 	 * The column <code>ehcore.eh_users.invitor_uid</code>.
@@ -145,6 +145,11 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_users.last_login_ip</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> LAST_LOGIN_IP = createField("last_login_ip", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.salt</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> SALT = createField("salt", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together

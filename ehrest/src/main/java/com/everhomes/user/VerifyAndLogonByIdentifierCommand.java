@@ -1,38 +1,37 @@
-// @formatter:off
 package com.everhomes.user;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
-public class LogonCommand {
+public class VerifyAndLogonByIdentifierCommand {
     @NotNull
     private String userIdentifier;
     
     @NotNull
-    private String password;
+    private String verificationCode;
     
     private String deviceIdentifier;
     
     private Integer namespaceId;
-    
-    public LogonCommand() {
+
+    public VerifyAndLogonByIdentifierCommand() {
     }
 
     public String getUserIdentifier() {
         return userIdentifier;
     }
 
-    public void setUserIdentifier(String userIdentifier) {
-        this.userIdentifier = userIdentifier;
+    public void setUserIdentifier(String signupIdentifier) {
+        this.userIdentifier = signupIdentifier;
     }
 
-    public String getPassword() {
-        return password;
+    public String getVerificationCode() {
+        return verificationCode;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
     }
 
     public String getDeviceIdentifier() {
@@ -42,15 +41,15 @@ public class LogonCommand {
     public void setDeviceIdentifier(String deviceIdentifier) {
         this.deviceIdentifier = deviceIdentifier;
     }
-    
+  
     public Integer getNamespaceId() {
-        return this.namespaceId;
+        return namespaceId;
     }
-    
+
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
-
+    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

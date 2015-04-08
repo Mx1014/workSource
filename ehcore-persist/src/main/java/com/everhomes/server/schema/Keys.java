@@ -95,12 +95,16 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_U_EH_USR_GRP_OWNER_GROUP = UniqueKeys0.KEY_EH_USER_GROUPS_U_EH_USR_GRP_OWNER_GROUP;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_PRIMARY = UniqueKeys0.KEY_EH_USER_IDENTIFIERS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN = UniqueKeys0.KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_PRIMARY = UniqueKeys0.KEY_EH_USER_INVITATIONS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_U_EH_INVITE_CODE = UniqueKeys0.KEY_EH_USER_INVITATIONS_U_EH_INVITE_CODE;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord> KEY_EH_USER_INVITATION_ROSTER_PRIMARY = UniqueKeys0.KEY_EH_USER_INVITATION_ROSTER_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = UniqueKeys0.KEY_EH_USER_PROFILES_PRIMARY;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
 	// -------------------------------------------------------------------------
 
+	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord, com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> EH_USER_INVITATION_ROSTER_IBFK_1 = ForeignKeys0.EH_USER_INVITATION_ROSTER_IBFK_1;
 
 	// -------------------------------------------------------------------------
 	// [#1459] distribute members to avoid static initialisers > 64kb
@@ -182,6 +186,13 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> KEY_EH_USER_GROUPS_U_EH_USR_GRP_OWNER_GROUP = createUniqueKey(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.OWNER_UID, com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.GROUP_ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserIdentifiersRecord> KEY_EH_USER_IDENTIFIERS_U_EH_USER_IDF_OWNER_TYPE_TOKEN = createUniqueKey(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.OWNER_UID, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE, com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS, com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_U_EH_INVITE_CODE = createUniqueKey(com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS, com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS.INVITE_CODE);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord> KEY_EH_USER_INVITATION_ROSTER_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES, com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES.ID);
+	}
+
+	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {
+		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord, com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> EH_USER_INVITATION_ROSTER_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_USER_INVITATIONS_PRIMARY, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER.INVITE_ID);
 	}
 }

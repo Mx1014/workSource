@@ -2,13 +2,22 @@
 package com.everhomes.user;
 
 public enum IdentifierType {
-    mobile, email;
+    MOBILE((byte)0), EMAIL((byte)1);
+    
+    private byte code;
+    private IdentifierType(byte code) {
+        this.code = code;
+    }
+    
+    public byte getCode() {
+        return this.code;
+    }
     
     public static IdentifierType fromString(String val) {
         if(val.equalsIgnoreCase("mobile"))
-            return mobile;
+            return MOBILE;
         else if(val.equalsIgnoreCase("email"))
-            return email;
+            return EMAIL;
         
         throw new RuntimeException("Invalid IdentifierType " + val);
     }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1043764997;
+	private static final long serialVersionUID = -776650343;
 
 	private java.lang.Long     id;
 	private java.lang.String   accountName;
@@ -37,6 +37,7 @@ public class EhUsers implements java.io.Serializable {
 	private java.sql.Timestamp deleteTime;
 	private java.sql.Timestamp lastLoginTime;
 	private java.lang.String   lastLoginIp;
+	private java.lang.String   salt;
 	private java.lang.String   passwordHash;
 
 	public EhUsers() {}
@@ -66,6 +67,7 @@ public class EhUsers implements java.io.Serializable {
 		java.sql.Timestamp deleteTime,
 		java.sql.Timestamp lastLoginTime,
 		java.lang.String   lastLoginIp,
+		java.lang.String   salt,
 		java.lang.String   passwordHash
 	) {
 		this.id = id;
@@ -92,6 +94,7 @@ public class EhUsers implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 		this.lastLoginTime = lastLoginTime;
 		this.lastLoginIp = lastLoginIp;
+		this.salt = salt;
 		this.passwordHash = passwordHash;
 	}
 
@@ -285,6 +288,14 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setLastLoginIp(java.lang.String lastLoginIp) {
 		this.lastLoginIp = lastLoginIp;
+	}
+
+	public java.lang.String getSalt() {
+		return this.salt;
+	}
+
+	public void setSalt(java.lang.String salt) {
+		this.salt = salt;
 	}
 
 	public java.lang.String getPasswordHash() {

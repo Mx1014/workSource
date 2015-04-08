@@ -216,6 +216,13 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>salt IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySalt(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SALT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>password_hash IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPasswordHash(java.lang.String... values) {

@@ -3,6 +3,8 @@ package com.everhomes.user;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 public class VerifyAndLogonCommand {
     @NotNull
     private String signupToken;
@@ -11,6 +13,8 @@ public class VerifyAndLogonCommand {
     private String verificationCode;
     
     private String deviceIdentifier;
+    
+    private Integer namespaceId;
     
     public VerifyAndLogonCommand() {
     }
@@ -37,5 +41,18 @@ public class VerifyAndLogonCommand {
 
     public void setDeviceIdentifier(String deviceIdentifier) {
         this.deviceIdentifier = deviceIdentifier;
+    }
+    
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

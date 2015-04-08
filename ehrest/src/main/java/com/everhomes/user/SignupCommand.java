@@ -12,6 +12,10 @@ public class SignupCommand {
     @NotNull
     String token;
     
+    String invitationCode;
+    
+    Integer ifExistsThenOverride;
+    
     public SignupCommand() {
     }
 
@@ -29,5 +33,21 @@ public class SignupCommand {
 
     public void setToken(String token) {
         this.token = token;
+    }
+    
+    public String getInvitationCode() {
+        return this.invitationCode;
+    }
+    
+    public void setInvitationCode(String code) {
+        this.invitationCode = code;
+    }
+    
+    public Integer getIfExistsThenOverride() {
+        return this.ifExistsThenOverride;
+    }
+    
+    public void setIfExistsThenOverride(Integer ifExistsThenOverride) {
+        this.ifExistsThenOverride = ifExistsThenOverride;
     }
 }

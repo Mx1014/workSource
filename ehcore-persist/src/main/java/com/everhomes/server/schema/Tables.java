@@ -224,6 +224,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserIdentifiers EH_USER_IDENTIFIERS = com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
 
 	/**
+	 * The table ehcore.eh_user_invitations
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserInvitations EH_USER_INVITATIONS = com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS;
+
+	/**
+	 * The table ehcore.eh_user_invitation_roster
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserInvitationRoster EH_USER_INVITATION_ROSTER = com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER;
+
+	/**
 	 * The table ehcore.eh_user_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserProfiles EH_USER_PROFILES = com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES;

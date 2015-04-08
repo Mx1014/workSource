@@ -4,6 +4,7 @@ package com.everhomes.user;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 public class LogonCommandResponse {
     private long uid;
@@ -51,5 +52,10 @@ public class LogonCommandResponse {
     
     public void setAccessPoints(List<String> accessPoints) {
         this.accessPoints = accessPoints;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
