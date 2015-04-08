@@ -21,4 +21,21 @@ public enum IdentifierType {
         
         throw new RuntimeException("Invalid IdentifierType " + val);
     }
+    
+    public static IdentifierType fromCode(Byte code) {
+        if(code == null)
+            return null;
+        
+        switch(code.byteValue()) {
+        case 0 :
+            return MOBILE;
+        case 1 :
+            return EMAIL;
+            
+        default :
+            break;
+        }
+        
+        return null;
+    }
 }

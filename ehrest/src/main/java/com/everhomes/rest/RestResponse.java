@@ -19,6 +19,8 @@ public class RestResponse extends RestResponseBase {
     
     public RestResponse() {
         version = RestVersion.current().toString();
+        
+        this.errorCode = 200;   // HTTP success code by default
     }
     
     public RestResponse(String errorScope, int errorCode, String errorDescription) {
@@ -28,6 +30,8 @@ public class RestResponse extends RestResponseBase {
     public RestResponse(Object responseObject) {
         super();
         this.responseObject = responseObject;
+        
+        this.errorCode = 200;   // HTTP success code by default
     }
 
     public Object getResponseObject() {

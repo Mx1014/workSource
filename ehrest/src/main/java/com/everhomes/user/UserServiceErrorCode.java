@@ -16,4 +16,7 @@ public interface UserServiceErrorCode {
     static final int ERROR_MISSING_MESSAGE_CHANNEL = 10009;
     static final int ERROR_ACCOUNT_NOT_ACTIVATED = 10010;
     static final int ERROR_IDENTIFIER_ALREADY_CLAIMED = 10011;
+    static final int ERROR_ACCOUNT_NAME_ALREADY_EXISTS = 10012;
+    static final int ERROR_ACCOUNT_PASSWORD_NOT_SET = 10013;
+    
 }
