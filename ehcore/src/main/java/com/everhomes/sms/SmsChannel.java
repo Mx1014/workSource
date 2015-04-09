@@ -43,14 +43,14 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
-public class SMSChannel {
-	private static final Logger logger = LoggerFactory.getLogger(SMSChannel.class);
+public class SmsChannel {
+	private static final Logger logger = LoggerFactory.getLogger(SmsChannel.class);
 	private final HttpClientBuilder builder;
 	private RequestConfig config = null;
 
 	private final Map<String, String> headers;
 
-	public SMSChannel(boolean isSecure) {
+	public SmsChannel(boolean isSecure) {
 		headers = new HashMap<>();
 		if (isSecure) {
 			builder = HttpClients.custom().setConnectionManager(createConnectionManager());
@@ -93,22 +93,22 @@ public class SMSChannel {
 		}
 	}
 
-	public SMSChannel setTimeout(int time) {
+	public SmsChannel setTimeout(int time) {
 		config = RequestConfig.custom().setConnectTimeout(time).setSocketTimeout(time).build();
 		return this;
 	}
 
-	public SMSChannel addHeaders(Map<String, String> headers) {
+	public SmsChannel addHeaders(Map<String, String> headers) {
 		this.headers.putAll(headers);
 		return this;
 	}
 
-	public SMSChannel addHeader(String key, String value) {
+	public SmsChannel addHeader(String key, String value) {
 		headers.put(key, value);
 		return this;
 	}
 
-	public SMSChannel basicAuth(String username, String password) {
+	public SmsChannel basicAuth(String username, String password) {
 		String value = Base64.encode(String.format("%s:%s", username, password).getBytes(Charset.forName("utf-8")));
 		headers.put("Authorization", String.format("Basic %s", value));
 		return this;

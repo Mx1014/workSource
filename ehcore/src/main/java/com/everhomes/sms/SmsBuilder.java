@@ -3,9 +3,9 @@ package com.everhomes.sms;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SMSBuilder {
-	private final static SMSBuilder builder = new SMSBuilder();
-	private final Map<Boolean, SMSChannel> cache;
+public class SmsBuilder {
+	private final static SmsBuilder builder = new SmsBuilder();
+	private final Map<Boolean, SmsChannel> cache;
 
 	public enum HttpMethod {
 		POST("POST"), PATCH("PATCH"), GET("GET"), DELETE("DELETE");
@@ -20,17 +20,17 @@ public class SMSBuilder {
 		}
 	}
 
-	private SMSBuilder() {
+	private SmsBuilder() {
 		cache = new ConcurrentHashMap<>();
-		cache.put(true, new SMSChannel(true));
-		cache.put(false, new SMSChannel(false));
+		cache.put(true, new SmsChannel(true));
+		cache.put(false, new SmsChannel(false));
 	}
 
-	public SMSChannel getChannel(boolean isSecure) {
+	public SmsChannel getChannel(boolean isSecure) {
 		return cache.get(isSecure);
 	}
 
-	public static SMSChannel create(boolean isSecure) {
+	public static SmsChannel create(boolean isSecure) {
 		return builder.getChannel(isSecure);
 	}
 
