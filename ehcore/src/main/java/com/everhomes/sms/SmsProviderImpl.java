@@ -89,9 +89,7 @@ public class SmsProviderImpl extends AbstractSmsProvider {
 		Future<?> f = taskQueue.submit(() -> {
 			getProvider().sendSms(
 					phoneNumber,
-					// replace special character
-					SmsHepler.getEncodingString(text).replace(" ", "%20")
-							.replace("=", "%3D"));
+					text);
 			LOGGER.info("send sms message ok.endTime={}",
 					System.currentTimeMillis());
 			return null;

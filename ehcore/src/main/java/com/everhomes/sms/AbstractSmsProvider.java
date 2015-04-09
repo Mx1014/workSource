@@ -34,7 +34,7 @@ public abstract class AbstractSmsProvider implements SmsProvider {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_GENERAL_EXCEPTION, "message is empty");
 		}
-		return text.replace(" ", "%20").replace("=", "%3D");
+		return SmsHepler.getEncodingString(text).replace(" ", "%20").replace("=", "%3D");
 	}
 
 	protected abstract void doSend(String phoneNumber, String text);
