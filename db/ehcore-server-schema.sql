@@ -1416,4 +1416,33 @@ CREATE TABLE `eh_biz_coupon`(
     INDEX `i_eh_biz_coupon_create_time`(`create_time`)    
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_client_packages`;
+CREATE TABLE `eh_client_packages`(
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+	`name` VARCHAR(64),
+	`version_code` BIGINT,
+	`package_edition` TINYINT NOT NULL DEFAULT 1 COMMENT '1: user edition, 2: business edition, 3: community edition', 
+	`device_platform` TINYINT NOT NULL DEFAULT 1 COMMENT '1: andriod, 2: ios',
+	`distribution_channel` INTEGER NOT NULL DEFAULT 1 COMMENT '1: official site',
+	`tag` VARCHAR(128),
+	`json_params` TEXT,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
+	`creator_uid` BIGINT,
+    `create_time` DATETIME,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_client_package_files`;
+CREATE TABLE `eh_client_package_files`(
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+	`package_id` BIGINT,
+	`file_location` VARCHAR(256),
+	`file_name` VARCHAR(128),
+	`file_size` BIGINT,
+	`file_md5` VARCHAR(64),
+	
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_cpkg_file_package`(`package_id`) REFERENCES `eh_client_packages`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET foreign_key_checks = 1;

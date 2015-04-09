@@ -20,6 +20,8 @@ public class Keys {
 
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> IDENTITY_EH_APP_PROMOTIONS = Identities0.IDENTITY_EH_APP_PROMOTIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = Identities0.IDENTITY_EH_BORDERS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhClientPackagesRecord, java.lang.Long> IDENTITY_EH_CLIENT_PACKAGES = Identities0.IDENTITY_EH_CLIENT_PACKAGES;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord, java.lang.Long> IDENTITY_EH_CLIENT_PACKAGE_FILES = Identities0.IDENTITY_EH_CLIENT_PACKAGE_FILES;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> IDENTITY_EH_REGIONS = Identities0.IDENTITY_EH_REGIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> IDENTITY_EH_SCOPED_CONFIGURATIONS = Identities0.IDENTITY_EH_SCOPED_CONFIGURATIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Long> IDENTITY_EH_SEARCH_KEYWORDS = Identities0.IDENTITY_EH_SEARCH_KEYWORDS;
@@ -51,6 +53,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBusinessProfilesRecord> KEY_EH_BUSINESS_PROFILES_PRIMARY = UniqueKeys0.KEY_EH_BUSINESS_PROFILES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord> KEY_EH_CATEGORIES_PRIMARY = UniqueKeys0.KEY_EH_CATEGORIES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord> KEY_EH_CATEGORIES_U_EH_CATEGORY_NAME = UniqueKeys0.KEY_EH_CATEGORIES_U_EH_CATEGORY_NAME;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhClientPackagesRecord> KEY_EH_CLIENT_PACKAGES_PRIMARY = UniqueKeys0.KEY_EH_CLIENT_PACKAGES_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord> KEY_EH_CLIENT_PACKAGE_FILES_PRIMARY = UniqueKeys0.KEY_EH_CLIENT_PACKAGE_FILES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> KEY_EH_COMMUNITIES_PRIMARY = UniqueKeys0.KEY_EH_COMMUNITIES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunityGeopointsRecord> KEY_EH_COMMUNITY_GEOPOINTS_PRIMARY = UniqueKeys0.KEY_EH_COMMUNITY_GEOPOINTS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunityProfilesRecord> KEY_EH_COMMUNITY_PROFILES_PRIMARY = UniqueKeys0.KEY_EH_COMMUNITY_PROFILES_PRIMARY;
@@ -104,6 +108,7 @@ public class Keys {
 	// FOREIGN KEY definitions
 	// -------------------------------------------------------------------------
 
+	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord, com.everhomes.server.schema.tables.records.EhClientPackagesRecord> EH_CLIENT_PACKAGE_FILES_IBFK_1 = ForeignKeys0.EH_CLIENT_PACKAGE_FILES_IBFK_1;
 	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord, com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> EH_USER_INVITATION_ROSTER_IBFK_1 = ForeignKeys0.EH_USER_INVITATION_ROSTER_IBFK_1;
 
 	// -------------------------------------------------------------------------
@@ -113,6 +118,8 @@ public class Keys {
 	private static class Identities0 extends org.jooq.impl.AbstractKeys {
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> IDENTITY_EH_APP_PROMOTIONS = createIdentity(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS, com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = createIdentity(com.everhomes.server.schema.tables.EhBorders.EH_BORDERS, com.everhomes.server.schema.tables.EhBorders.EH_BORDERS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhClientPackagesRecord, java.lang.Long> IDENTITY_EH_CLIENT_PACKAGES = createIdentity(com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES, com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord, java.lang.Long> IDENTITY_EH_CLIENT_PACKAGE_FILES = createIdentity(com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES, com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Long> IDENTITY_EH_REGIONS = createIdentity(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS, com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord, java.lang.Long> IDENTITY_EH_SCOPED_CONFIGURATIONS = createIdentity(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS, com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord, java.lang.Long> IDENTITY_EH_SEARCH_KEYWORDS = createIdentity(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.ID);
@@ -142,6 +149,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhBusinessProfilesRecord> KEY_EH_BUSINESS_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES, com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord> KEY_EH_CATEGORIES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES, com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord> KEY_EH_CATEGORIES_U_EH_CATEGORY_NAME = createUniqueKey(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES, com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.PARENT_ID, com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.NAME);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhClientPackagesRecord> KEY_EH_CLIENT_PACKAGES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES, com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord> KEY_EH_CLIENT_PACKAGE_FILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES, com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> KEY_EH_COMMUNITIES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES, com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunityGeopointsRecord> KEY_EH_COMMUNITY_GEOPOINTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS, com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunityProfilesRecord> KEY_EH_COMMUNITY_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES, com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES.ID);
@@ -193,6 +202,7 @@ public class Keys {
 	}
 
 	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {
+		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord, com.everhomes.server.schema.tables.records.EhClientPackagesRecord> EH_CLIENT_PACKAGE_FILES_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_CLIENT_PACKAGES_PRIMARY, com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES, com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES.PACKAGE_ID);
 		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord, com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> EH_USER_INVITATION_ROSTER_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_USER_INVITATIONS_PRIMARY, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER.INVITE_ID);
 	}
 }

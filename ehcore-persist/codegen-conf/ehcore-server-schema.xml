@@ -41,7 +41,8 @@
         eh_events | eh_event_roster | eh_event_ticket_groups | eh_event_tickets |
         eh_event_profiles | eh_activities | eh_activity_roster | eh_polls |
         eh_poll_items | eh_poll_votes | eh_business | eh_business_profiles | 
-        eh_biz_coupon_groups | eh_biz_coupon
+        eh_biz_coupon_groups | eh_biz_coupon |
+        eh_client_package_files | eh_client_packages
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
