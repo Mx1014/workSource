@@ -3,7 +3,7 @@
 #
 logging.path: ./
 logging.file: ehcore.log
-logging.level: DEBUG
+logging.level.: DEBUG
 
 #spring.view.prefix: /WEB-INF/jsp/
 #spring.view.suffix: .jsp
@@ -81,7 +81,7 @@ db:
     driver: com.mysql.jdbc.Driver
     master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8
     conn:
-        pool: 128
+        pool: 8
     tx:
         timeout: 600
         
