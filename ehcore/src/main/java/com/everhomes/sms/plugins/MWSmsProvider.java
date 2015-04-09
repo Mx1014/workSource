@@ -12,8 +12,8 @@ import com.everhomes.cache.CacheProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.sms.AbstractSmsProvider;
-import com.everhomes.sms.SMSBuilder;
-import com.everhomes.sms.SMSChannel;
+import com.everhomes.sms.SmsBuilder;
+import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -36,10 +36,11 @@ public class MWSmsProvider extends AbstractSmsProvider {
 
 	public MWSmsProvider(DbProvider dbProvider, CacheProvider cacheProvider) {
 		super(dbProvider, cacheProvider);
-		this.host = "61.145.229.29";// cacheProvider.getCacheAccessor(MW_SMS_PREFIX).get("host");
-		this.username = "J02300";// cacheProvider.getCacheAccessor(MW_SMS_PREFIX).get("username");
-		this.password = "223651";// cacheProvider.getCacheAccessor(MW_SMS_PREFIX).get("password");
-		this.port = 9003;// NumberUtils.toInt(cacheProvider.getCacheAccessor(MW_SMS_PREFIX).get("port"));
+		//get from cache or db,current for test
+		this.host = "61.145.229.29";
+		this.username = "J02300";
+		this.password = "223651";
+		this.port = 9003;
 
 	}
 
@@ -95,11 +96,11 @@ public class MWSmsProvider extends AbstractSmsProvider {
 	}
 
 	private void createAndSend(String[] phoneNumbers, String text) {
-		SMSChannel channel = SMSBuilder.create(false);
+		SmsChannel channel = SmsBuilder.create(false);
 		String uri = String.format("http://%s:%d%s", host, port,
 				createUrl((String[]) phoneNumbers, text));
 		String result = channel.sendMessage(uri,
-				SMSBuilder.HttpMethod.GET.val(), null, null).getMessage();
+				SmsBuilder.HttpMethod.GET.val(), null, null).getMessage();
 		parserResult(result);
 	}
 

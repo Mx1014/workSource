@@ -6,13 +6,13 @@ import java.util.Map;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.sms.AbstractSmsProvider;
-import com.everhomes.sms.SMSBuilder;
-import com.everhomes.sms.SMSChannel;
+import com.everhomes.sms.SmsBuilder;
+import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
 
 @SmsHandler(value = "LSM")
 public class LsmSmsProvider extends AbstractSmsProvider {
-	private final SMSChannel channel;
+	private final SmsChannel channel;
 
 	private final String hostAddress;
 
@@ -20,7 +20,7 @@ public class LsmSmsProvider extends AbstractSmsProvider {
 		super(dbProvider, cacheProvider);
 		String username = "";// query from db or cache
 		String password = "";// query from db or cache
-		channel = SMSBuilder.create(false).addHeader("Accept-Encoding", "gzip");
+		channel = SmsBuilder.create(false).addHeader("Accept-Encoding", "gzip");
 		channel.basicAuth(username, password).setTimeout(30000);
 		hostAddress = "";// query db
 	}
@@ -41,7 +41,7 @@ public class LsmSmsProvider extends AbstractSmsProvider {
 		Map<String, String> body = new HashMap<>();
 		body.put("mobile", phoneNumber);
 		body.put("message", text);
-		String rsp = channel.sendMessage(hostAddress, SMSBuilder.HttpMethod.POST.val(), body, null).getMessage();
+		String rsp = channel.sendMessage(hostAddress, SmsBuilder.HttpMethod.POST.val(), body, null).getMessage();
 		LOGGER.info("send message success.Return message msg={}", rsp);
 	}
 
