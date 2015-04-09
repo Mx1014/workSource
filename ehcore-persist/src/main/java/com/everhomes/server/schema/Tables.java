@@ -89,6 +89,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCategories EH_CATEGORIES = com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES;
 
 	/**
+	 * The table ehcore.eh_client_packages
+	 */
+	public static final com.everhomes.server.schema.tables.EhClientPackages EH_CLIENT_PACKAGES = com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES;
+
+	/**
+	 * The table ehcore.eh_client_package_files
+	 */
+	public static final com.everhomes.server.schema.tables.EhClientPackageFiles EH_CLIENT_PACKAGE_FILES = com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES;
+
+	/**
 	 * The table ehcore.eh_communities
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunities EH_COMMUNITIES = com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES;
