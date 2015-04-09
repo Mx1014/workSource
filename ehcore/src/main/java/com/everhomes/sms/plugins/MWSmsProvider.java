@@ -88,10 +88,10 @@ public class MWSmsProvider extends AbstractSmsProvider {
 		int index = MAX_LIMIT;
 		for (; index < phoneNumbers.length; index += MAX_LIMIT) {
 			createAndSend((String[]) ArrayUtils.subarray(phoneNumbers,
-					index - 100, index), text);
+					index - MAX_LIMIT, index), text);
 		}
 		// send last one
-		createAndSend((String[]) ArrayUtils.subarray(phoneNumbers, index - 100,
+		createAndSend((String[]) ArrayUtils.subarray(phoneNumbers, index - MAX_LIMIT,
 				phoneNumbers.length), text);
 	}
 
