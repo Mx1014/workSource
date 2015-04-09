@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -60416516;
+	private static final long serialVersionUID = -1760198074;
 
 	/**
 	 * Setter for <code>ehcore.eh_users.id</code>. id of the record
@@ -182,199 +182,213 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_users.community_id</code>. if current family has been setup, it is the community id from address
+	 */
+	public void setCommunityId(java.lang.Long value) {
+		setValue(12, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_users.community_id</code>. if current family has been setup, it is the community id from address
+	 */
+	public java.lang.Long getCommunityId() {
+		return (java.lang.Long) getValue(12);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_users.home_town</code>. region id
 	 */
 	public void setHomeTown(java.lang.Long value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.home_town</code>. region id
 	 */
 	public java.lang.Long getHomeTown() {
-		return (java.lang.Long) getValue(12);
+		return (java.lang.Long) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.home_town_path</code>. redundant region path for recursive matching
 	 */
 	public void setHomeTownPath(java.lang.String value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.home_town_path</code>. redundant region path for recursive matching
 	 */
 	public java.lang.String getHomeTownPath() {
-		return (java.lang.String) getValue(13);
+		return (java.lang.String) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.occupation_id</code>. id in category table
 	 */
 	public void setOccupationId(java.lang.Long value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.occupation_id</code>. id in category table
 	 */
 	public java.lang.Long getOccupationId() {
-		return (java.lang.Long) getValue(14);
+		return (java.lang.Long) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.company</code>.
 	 */
 	public void setCompany(java.lang.String value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.company</code>.
 	 */
 	public java.lang.String getCompany() {
-		return (java.lang.String) getValue(15);
+		return (java.lang.String) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.school</code>.
 	 */
 	public void setSchool(java.lang.String value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.school</code>.
 	 */
 	public java.lang.String getSchool() {
-		return (java.lang.String) getValue(16);
+		return (java.lang.String) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.locale</code>. zh_CN, en_US etc
 	 */
 	public void setLocale(java.lang.String value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.locale</code>. zh_CN, en_US etc
 	 */
 	public java.lang.String getLocale() {
-		return (java.lang.String) getValue(17);
+		return (java.lang.String) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact
 	 */
 	public void setInviteType(java.lang.Byte value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact
 	 */
 	public java.lang.Byte getInviteType() {
-		return (java.lang.Byte) getValue(18);
+		return (java.lang.Byte) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.invitor_uid</code>.
 	 */
 	public void setInvitorUid(java.lang.Long value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.invitor_uid</code>.
 	 */
 	public java.lang.Long getInvitorUid() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(20);
+		return (java.sql.Timestamp) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.delete_time</code>. mark-deletion policy. may be valuable for user to restore account
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.delete_time</code>. mark-deletion policy. may be valuable for user to restore account
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(21);
+		return (java.sql.Timestamp) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.last_login_time</code>.
 	 */
 	public void setLastLoginTime(java.sql.Timestamp value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.last_login_time</code>.
 	 */
 	public java.sql.Timestamp getLastLoginTime() {
-		return (java.sql.Timestamp) getValue(22);
+		return (java.sql.Timestamp) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.last_login_ip</code>.
 	 */
 	public void setLastLoginIp(java.lang.String value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.last_login_ip</code>.
 	 */
 	public java.lang.String getLastLoginIp() {
-		return (java.lang.String) getValue(23);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.salt</code>.
 	 */
 	public void setSalt(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.salt</code>.
 	 */
 	public java.lang.String getSalt() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
 	 */
 	public void setPasswordHash(java.lang.String value) {
-		setValue(25, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
 	 */
 	public java.lang.String getPasswordHash() {
-		return (java.lang.String) getValue(25);
+		return (java.lang.String) getValue(26);
 	}
 
 	// -------------------------------------------------------------------------
@@ -403,7 +417,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	/**
 	 * Create a detached, initialised EhUsersRecord
 	 */
-	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.Long occupationId, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String salt, java.lang.String passwordHash) {
+	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long communityId, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.Long occupationId, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String salt, java.lang.String passwordHash) {
 		super(com.everhomes.server.schema.tables.EhUsers.EH_USERS);
 
 		setValue(0, id);
@@ -418,19 +432,20 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 		setValue(9, birthday);
 		setValue(10, addressId);
 		setValue(11, address);
-		setValue(12, homeTown);
-		setValue(13, homeTownPath);
-		setValue(14, occupationId);
-		setValue(15, company);
-		setValue(16, school);
-		setValue(17, locale);
-		setValue(18, inviteType);
-		setValue(19, invitorUid);
-		setValue(20, createTime);
-		setValue(21, deleteTime);
-		setValue(22, lastLoginTime);
-		setValue(23, lastLoginIp);
-		setValue(24, salt);
-		setValue(25, passwordHash);
+		setValue(12, communityId);
+		setValue(13, homeTown);
+		setValue(14, homeTownPath);
+		setValue(15, occupationId);
+		setValue(16, company);
+		setValue(17, school);
+		setValue(18, locale);
+		setValue(19, inviteType);
+		setValue(20, invitorUid);
+		setValue(21, createTime);
+		setValue(22, deleteTime);
+		setValue(23, lastLoginTime);
+		setValue(24, lastLoginIp);
+		setValue(25, salt);
+		setValue(26, passwordHash);
 	}
 }

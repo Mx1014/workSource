@@ -292,10 +292,12 @@ CREATE TABLE `eh_users` (
     `birthday` DATE,
     
     #
-    # for current residency matching
+    # for current residency matching (corresponding to current family)
     #
     `address_id` BIGINT COMMENT 'current address id',
     `address` VARCHAR(128) COMMENT 'redundant current address description',
+    
+    `community_id` BIGINT COMMENT 'if current family has been setup, it is the community id from address',
     
     #
     # for home town based matching

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = 431941193;
+	private static final long serialVersionUID = -744807103;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -85,6 +85,11 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_users.address</code>. redundant current address description
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "redundant current address description");
+
+	/**
+	 * The column <code>ehcore.eh_users.community_id</code>. if current family has been setup, it is the community id from address
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "if current family has been setup, it is the community id from address");
 
 	/**
 	 * The column <code>ehcore.eh_users.home_town</code>. region id

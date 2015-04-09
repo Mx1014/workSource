@@ -5,17 +5,23 @@ import java.util.List;
 import com.everhomes.util.StringHelper;
 
 public class UserInfo {
-    private Long     id;
-    private String   accountName;
-    private String   nickName;
-    private String   avatar;
-    private String   statusLine;
-    private Byte     gender;
-    private String   birthday;
-    private Long     homeTown;
-    private String   company;
-    private String   school;
-    private Long     occupation;
+    private Long id;
+    private String accountName;
+    private String nickName;
+    private String avatar;
+    private String statusLine;
+    private Byte gender;
+    private String birthday;
+    private Long homeTown;
+    private String hometownName;
+    private String company;
+    private String school;
+    private Long occupation;
+    private String occupationName;
+    private Long communityId;
+    private String communityName;
+    private Long addressId;
+    private String address;
     private List<String> phones;
     private List<String> emails;
     
@@ -108,6 +114,54 @@ public class UserInfo {
 
     public void setOccupation(Long occupation) {
         this.occupation = occupation;
+    }
+    
+    public String getHometownName() {
+        return hometownName;
+    }
+
+    public void setHometownName(String hometownName) {
+        this.hometownName = hometownName;
+    }
+
+    public String getOccupationName() {
+        return occupationName;
+    }
+
+    public void setOccupationName(String occupationName) {
+        this.occupationName = occupationName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public List<String> getPhones() {
