@@ -1,7 +1,7 @@
 package com.everhomes.sms;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SmsBuilder {
 	private final static SmsBuilder builder = new SmsBuilder();
@@ -21,7 +21,7 @@ public class SmsBuilder {
 	}
 
 	private SmsBuilder() {
-		cache = new ConcurrentHashMap<>();
+		cache = new HashMap<>();
 		cache.put(true, new SmsChannel(true));
 		cache.put(false, new SmsChannel(false));
 	}
