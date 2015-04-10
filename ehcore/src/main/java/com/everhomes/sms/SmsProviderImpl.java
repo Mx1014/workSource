@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -24,9 +23,10 @@ import com.everhomes.util.RuntimeErrorException;
  * @author Kelven Yang
  *
  */
-@Primary
 @Component("smsProvider")
 public class SmsProviderImpl extends AbstractSmsProvider {
+
+    private static final String VCODE_SEND_TYPE = "VCODE_SEND_TYPE";
 
     @Autowired(required = true)
     private TaskQueue taskQueue;
@@ -39,16 +39,12 @@ public class SmsProviderImpl extends AbstractSmsProvider {
 
     @Autowired
     public void setProviders(Map<String, SmsProvider> props) {
-        props.forEach((key, val) -> {
-            if (key.equals("smsProvider"))
-                return;
-            providers.put(key, val);
-        });
+        this.providers=props;
     }
 
     private SmsProvider getProvider() {
         // find name from db
-        String providerName = configurationProvider.getValue("VCODE_SEND_TYPE", "6");
+        String providerName = configurationProvider.getValue(VCODE_SEND_TYPE, "6");
         SmsProvider provider = providers.get(providerName);
         if (provider == null) {
             LOGGER.error("cannot find relate provider.providerName={}", providerName);
