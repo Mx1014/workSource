@@ -16,6 +16,8 @@
 
 		<jooq.version>3.4.1</jooq.version>
 		<tomcat.version>8.0.8</tomcat.version>
+		<java.source.version>1.8</java.source.version>
+		<java.target.version>1.8</java.target.version>
 
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
