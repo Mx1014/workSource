@@ -1,5 +1,7 @@
 package com.everhomes.sms.plugins;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -10,14 +12,11 @@ import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.cache.CacheProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
 import com.everhomes.sms.AbstractSmsProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
-import com.everhomes.sms.SmsHandler;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -26,10 +25,13 @@ import com.everhomes.util.RuntimeErrorException;
  * @author elians
  *
  */
-@Component
-@SmsHandler(value = "MW")
+@Component("6")
 public class MWSmsProvider extends AbstractSmsProvider {
 
+    private static final String MW_PORT = "MW_PORT";
+    private static final String MW_PASSWORD = "MW_PASSWORD";
+    private static final String MW_USER_ID = "MW_USER_ID";
+    private static final String MW_HOST = "MW_HOST";
     // max limit size for MW
     private static final int MAX_LIMIT = 100;
     @Autowired
@@ -40,12 +42,12 @@ public class MWSmsProvider extends AbstractSmsProvider {
     private String password;
     private int port;
 
+    @PostConstruct
     public void init() {
-        // get from cache or db,current for test
-        this.host = configurationProvider.getValue("", "");
-        this.username = configurationProvider.getValue("", "");
-        this.password = configurationProvider.getValue("", "");
-        this.port = configurationProvider.getIntValue("", 9003);
+        this.host = configurationProvider.getValue(MW_HOST, "");
+        this.username = configurationProvider.getValue(MW_USER_ID, "");
+        this.password = configurationProvider.getValue(MW_PASSWORD, "");
+        this.port = configurationProvider.getIntValue(MW_PORT, 9003);
 
     }
 
@@ -90,6 +92,7 @@ public class MWSmsProvider extends AbstractSmsProvider {
             return;
         }
         int index = MAX_LIMIT;
+        if(phoneNumbers.length>MAX_LIMIT)
         for (; index < phoneNumbers.length; index += MAX_LIMIT) {
             createAndSend((String[]) ArrayUtils.subarray(phoneNumbers, index - MAX_LIMIT, index), text);
         }

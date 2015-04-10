@@ -12,11 +12,13 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.sms.AbstractSmsProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
-import com.everhomes.sms.SmsHandler;
 
-@Component
-@SmsHandler(value = "LSM")
+@Component("4")
 public class LsmSmsProvider extends AbstractSmsProvider {
+    private static final String LSM_ACCOUNT_STR = "CONFIG_SMS_VCODE_LUOSIMAO_ACCOUNT";
+
+    private static final String LSM_HOST = "CONFIG_SMS_VCODE_LUOSIMAO_API_ADDRESS";
+
     private SmsChannel channel;
 
     private String hostAddress;
@@ -26,11 +28,11 @@ public class LsmSmsProvider extends AbstractSmsProvider {
 
     @PostConstruct
     public void init() {
-        String username = configurationProvider.getValue("", "");
-        String password = configurationProvider.getValue("", "");
+        String account = configurationProvider.getValue(LSM_ACCOUNT_STR, "");
+        String[] arr = account.split(":");
         channel = SmsBuilder.create(false).addHeader("Accept-Encoding", "gzip");
-        channel.basicAuth(username, password).setTimeout(30000);
-        hostAddress = configurationProvider.getValue("", "");// query db
+        channel.basicAuth(arr[0], arr[1]).setTimeout(30000);
+        hostAddress = configurationProvider.getValue(LSM_HOST, "");
     }
 
     @Override

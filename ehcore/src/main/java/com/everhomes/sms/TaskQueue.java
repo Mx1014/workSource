@@ -5,6 +5,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,10 +20,12 @@ import org.springframework.stereotype.Component;
 public class TaskQueue {
     private ExecutorService service;
 
+    @PostConstruct
     public void init() {
         service = Executors.newFixedThreadPool(2);
     }
 
+    @PreDestroy
     public void destroy() {
         if (service != null)
             service.shutdown();

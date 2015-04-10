@@ -15,6 +15,8 @@ public class SmsHepler {
             try {
                 if (text.equals(new String(text.getBytes(encode), encode))) {
                     LOGGER.info("current text encoding is {}", encode);
+                    if (encode.equals("GB2312") || encode.equals("UTF-8"))
+                        return text;
                     return new String(text.getBytes(encode), "UTF-8");
                 }
             } catch (Exception e) {

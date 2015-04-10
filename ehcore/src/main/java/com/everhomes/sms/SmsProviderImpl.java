@@ -1,16 +1,13 @@
 //@format
 package com.everhomes.sms;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -27,7 +24,8 @@ import com.everhomes.util.RuntimeErrorException;
  * @author Kelven Yang
  *
  */
-@Component
+@Primary
+@Component("smsProvider")
 public class SmsProviderImpl extends AbstractSmsProvider {
 
     @Autowired(required = true)
@@ -37,26 +35,21 @@ public class SmsProviderImpl extends AbstractSmsProvider {
     private ConfigurationProvider configurationProvider;
 
     @Autowired
-    private List<SmsProvider> providers;
+    private Map<String, SmsProvider> providers;
 
-    private Map<String, SmsProvider> smsProviderCache;
-
-    @PostConstruct
-    public void init() {
-        smsProviderCache = new HashMap<>();
-        providers.forEach(provider -> {
-            SmsHandler smsHandler = provider.getClass().getAnnotation(SmsHandler.class);
-            if (smsHandler == null)
+    @Autowired
+    public void setProviders(Map<String, SmsProvider> props) {
+        props.forEach((key, val) -> {
+            if (key.equals("smsProvider"))
                 return;
-            smsProviderCache.put(smsHandler.value(), provider);
+            providers.put(key, val);
         });
-
     }
 
     private SmsProvider getProvider() {
         // find name from db
-        String providerName = configurationProvider.getValue("sms.channel", "MW");
-        SmsProvider provider = smsProviderCache.get(providerName);
+        String providerName = configurationProvider.getValue("VCODE_SEND_TYPE", "6");
+        SmsProvider provider = providers.get(providerName);
         if (provider == null) {
             LOGGER.error("cannot find relate provider.providerName={}", providerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
