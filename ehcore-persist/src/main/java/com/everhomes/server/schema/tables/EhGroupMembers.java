@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 1614795456;
+	private static final long serialVersionUID = -1089923535;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -100,6 +100,11 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> APPROVE_TIME = createField("approve_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "redundant auditing info");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.requestor_comment</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> REQUESTOR_COMMENT = createField("requestor_comment", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.integral_tag1</code>.

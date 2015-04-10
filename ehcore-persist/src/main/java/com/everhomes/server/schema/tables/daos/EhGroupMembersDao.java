@@ -146,6 +146,13 @@ public class EhGroupMembersDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>requestor_comment IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByRequestorComment(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.REQUESTOR_COMMENT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupMembers> fetchByIntegralTag1(java.lang.Long... values) {

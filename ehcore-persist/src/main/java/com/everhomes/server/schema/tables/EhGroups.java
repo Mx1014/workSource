@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 75434618;
+	private static final long serialVersionUID = 219204421;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -100,6 +100,11 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.leaf_region_path</code>. leaf region path if the group is aassociated with a managed region
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> LEAF_REGION_PATH = createField("leaf_region_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "leaf region path if the group is aassociated with a managed region");
+
+	/**
+	 * The column <code>ehcore.eh_groups.status</code>. 0: inactive, 1: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: active");
 
 	/**
 	 * The column <code>ehcore.eh_groups.member_count</code>.

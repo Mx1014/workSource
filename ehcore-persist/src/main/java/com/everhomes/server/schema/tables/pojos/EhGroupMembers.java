@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2026113827;
+	private static final long serialVersionUID = -252052469;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
@@ -28,6 +28,7 @@ public class EhGroupMembers implements java.io.Serializable {
 	private java.lang.String   processDetails;
 	private java.lang.String   proofResourceUrl;
 	private java.sql.Timestamp approveTime;
+	private java.lang.String   requestorComment;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -57,6 +58,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   processDetails,
 		java.lang.String   proofResourceUrl,
 		java.sql.Timestamp approveTime,
+		java.lang.String   requestorComment,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -83,6 +85,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.processDetails = processDetails;
 		this.proofResourceUrl = proofResourceUrl;
 		this.approveTime = approveTime;
+		this.requestorComment = requestorComment;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -213,6 +216,14 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setApproveTime(java.sql.Timestamp approveTime) {
 		this.approveTime = approveTime;
+	}
+
+	public java.lang.String getRequestorComment() {
+		return this.requestorComment;
+	}
+
+	public void setRequestorComment(java.lang.String requestorComment) {
+		this.requestorComment = requestorComment;
 	}
 
 	public java.lang.Long getIntegralTag1() {

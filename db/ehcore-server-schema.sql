@@ -515,6 +515,7 @@ CREATE TABLE `eh_groups` (
     `region_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
     `leaf_region_path` VARCHAR(128) COMMENT 'leaf region path if the group is aassociated with a managed region',
     
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
     `member_count` BIGINT NOT NULL DEFAULT 0,
     
     `integral_tag1` BIGINT,
@@ -596,6 +597,7 @@ CREATE TABLE `eh_group_members` (
     `process_details` TEXT,
     `proof_resource_url` VARCHAR(128),
     `approve_time` DATETIME COMMENT 'redundant auditing info',
+    `requestor_comment` TEXT,
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
