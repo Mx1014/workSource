@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -33,6 +34,9 @@ public class SmsProviderImpl extends AbstractSmsProvider {
     private TaskQueue taskQueue;
 
     @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    @Autowired
     private List<SmsProvider> providers;
 
     private Map<String, SmsProvider> smsProviderCache;
@@ -41,14 +45,17 @@ public class SmsProviderImpl extends AbstractSmsProvider {
     public void init() {
         smsProviderCache = new HashMap<>();
         providers.forEach(provider -> {
-            smsProviderCache.put(provider.getClass().getAnnotation(SmsHandler.class).value(), provider);
+            SmsHandler smsHandler = provider.getClass().getAnnotation(SmsHandler.class);
+            if (smsHandler == null)
+                return;
+            smsProviderCache.put(smsHandler.value(), provider);
         });
 
     }
 
     private SmsProvider getProvider() {
         // find name from db
-        String providerName = "MW";
+        String providerName = configurationProvider.getValue("sms.channel", "MW");
         SmsProvider provider = smsProviderCache.get(providerName);
         if (provider == null) {
             LOGGER.error("cannot find relate provider.providerName={}", providerName);
