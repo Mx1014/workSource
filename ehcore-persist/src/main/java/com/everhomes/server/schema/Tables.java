@@ -144,11 +144,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhFamilyFollowers EH_FAMILY_FOLLOWERS = com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS;
 
 	/**
-	 * The table ehcore.eh_followed_families
-	 */
-	public static final com.everhomes.server.schema.tables.EhFollowedFamilies EH_FOLLOWED_FAMILIES = com.everhomes.server.schema.tables.EhFollowedFamilies.EH_FOLLOWED_FAMILIES;
-
-	/**
 	 * The table ehcore.eh_groups
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroups EH_GROUPS = com.everhomes.server.schema.tables.EhGroups.EH_GROUPS;
@@ -157,6 +152,11 @@ public class Tables {
 	 * The table ehcore.eh_group_members
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroupMembers EH_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS;
+
+	/**
+	 * The table ehcore.eh_group_op_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhGroupOpRequests EH_GROUP_OP_REQUESTS = com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS;
 
 	/**
 	 * The table ehcore.eh_group_profiles
@@ -222,6 +222,11 @@ public class Tables {
 	 * The table ehcore.eh_user_blacklist
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserBlacklist EH_USER_BLACKLIST = com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST;
+
+	/**
+	 * The table ehcore.eh_user_followed_families
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserFollowedFamilies EH_USER_FOLLOWED_FAMILIES = com.everhomes.server.schema.tables.EhUserFollowedFamilies.EH_USER_FOLLOWED_FAMILIES;
 
 	/**
 	 * The table ehcore.eh_user_groups

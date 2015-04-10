@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.Group;
+package com.everhomes.group;
 
 public enum GroupPrivacy {
 

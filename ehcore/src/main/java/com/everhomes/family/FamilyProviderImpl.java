@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.Group.GroupMemberAdminStatus;
-import com.everhomes.Group.GroupPrivacy;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -21,7 +19,9 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberAdminStatus;
 import com.everhomes.group.GroupMemberLocator;
+import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
@@ -108,7 +108,6 @@ public class FamilyProviderImpl implements FamilyProvider {
                     f.setMemberCount(0L);   // initialize it to 0
                     f.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
                     f.setRegionScopeId(address.getCommunityId());
-                    f.setLeafRegionPath(region.getPath());
                     
                     this.groupProvider.createGroup(f);
                     
@@ -127,7 +126,6 @@ public class FamilyProviderImpl implements FamilyProvider {
                     userGroup.setGroupId(f.getId());
                     userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
                     userGroup.setRegionScopeId(community.getId());
-                    userGroup.setLeafRegionPath(region.getPath());
                     userGroup.setMemberRole(Role.ResourceCreator);
                     userGroup.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
                     this.userProvider.createUserGroup(userGroup);
@@ -150,7 +148,6 @@ public class FamilyProviderImpl implements FamilyProvider {
                 userGroup.setGroupId(family.getId());
                 userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
                 userGroup.setRegionScopeId(community.getId());
-                userGroup.setLeafRegionPath(region.getPath());
                 userGroup.setMemberRole(Role.ResourceUser);
                 userGroup.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
                 this.userProvider.createUserGroup(userGroup);

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserGroupsRecord> {
 
-	private static final long serialVersionUID = -1396006401;
+	private static final long serialVersionUID = 922711835;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_groups</code>
@@ -55,11 +55,6 @@ public class EhUserGroups extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_user_groups.region_scope_id</code>. redundant group info to help region-based group user search
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.Long> REGION_SCOPE_ID = createField("region_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "redundant group info to help region-based group user search");
-
-	/**
-	 * The column <code>ehcore.eh_user_groups.leaf_region_path</code>. redundant group info to help region-based group user search
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserGroupsRecord, java.lang.String> LEAF_REGION_PATH = createField("leaf_region_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "redundant group info to help region-based group user search");
 
 	/**
 	 * The column <code>ehcore.eh_user_groups.member_role</code>. default to ResourceUser role

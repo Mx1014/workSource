@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 1646826832;
+	private static final long serialVersionUID = 52407240;
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.id</code>. id of the record
@@ -210,17 +210,17 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_groups.leaf_region_path</code>. leaf region path if the group is aassociated with a managed region
+	 * Setter for <code>ehcore.eh_groups.category_id</code>. group category
 	 */
-	public void setLeafRegionPath(java.lang.String value) {
+	public void setCategoryId(java.lang.Long value) {
 		setValue(14, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_groups.leaf_region_path</code>. leaf region path if the group is aassociated with a managed region
+	 * Getter for <code>ehcore.eh_groups.category_id</code>. group category
 	 */
-	public java.lang.String getLeafRegionPath() {
-		return (java.lang.String) getValue(14);
+	public java.lang.Long getCategoryId() {
+		return (java.lang.Long) getValue(14);
 	}
 
 	/**
@@ -417,7 +417,7 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	/**
 	 * Create a detached, initialised EhGroupsRecord
 	 */
-	public EhGroupsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte regionScope, java.lang.Long regionScopeId, java.lang.String leafRegionPath, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhGroupsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte regionScope, java.lang.Long regionScopeId, java.lang.Long categoryId, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS);
 
 		setValue(0, id);
@@ -434,7 +434,7 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 		setValue(11, discriminator);
 		setValue(12, regionScope);
 		setValue(13, regionScopeId);
-		setValue(14, leafRegionPath);
+		setValue(14, categoryId);
 		setValue(15, status);
 		setValue(16, memberCount);
 		setValue(17, integralTag1);

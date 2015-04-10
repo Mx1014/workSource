@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -988299110;
+	private static final long serialVersionUID = -1475495368;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -19,7 +19,6 @@ public class EhUserGroups implements java.io.Serializable {
 	private java.lang.Long     groupId;
 	private java.lang.Byte     regionScope;
 	private java.lang.Long     regionScopeId;
-	private java.lang.String   leafRegionPath;
 	private java.lang.Long     memberRole;
 	private java.lang.Byte     memberStatus;
 	private java.sql.Timestamp createTime;
@@ -33,7 +32,6 @@ public class EhUserGroups implements java.io.Serializable {
 		java.lang.Long     groupId,
 		java.lang.Byte     regionScope,
 		java.lang.Long     regionScopeId,
-		java.lang.String   leafRegionPath,
 		java.lang.Long     memberRole,
 		java.lang.Byte     memberStatus,
 		java.sql.Timestamp createTime
@@ -44,7 +42,6 @@ public class EhUserGroups implements java.io.Serializable {
 		this.groupId = groupId;
 		this.regionScope = regionScope;
 		this.regionScopeId = regionScopeId;
-		this.leafRegionPath = leafRegionPath;
 		this.memberRole = memberRole;
 		this.memberStatus = memberStatus;
 		this.createTime = createTime;
@@ -96,14 +93,6 @@ public class EhUserGroups implements java.io.Serializable {
 
 	public void setRegionScopeId(java.lang.Long regionScopeId) {
 		this.regionScopeId = regionScopeId;
-	}
-
-	public java.lang.String getLeafRegionPath() {
-		return this.leafRegionPath;
-	}
-
-	public void setLeafRegionPath(java.lang.String leafRegionPath) {
-		this.leafRegionPath = leafRegionPath;
 	}
 
 	public java.lang.Long getMemberRole() {

@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.Group;
+package com.everhomes.group;
 
 public enum GroupMemberAdminStatus {
     INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2), ACTIVE((byte)3);

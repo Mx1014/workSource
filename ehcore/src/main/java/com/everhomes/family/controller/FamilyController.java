@@ -16,22 +16,11 @@ import com.everhomes.family.ListNearbyNeighborUserCommand;
 import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserInfo;
 
 @RestController
 @RequestMapping("/family")
 public class FamilyController extends ControllerBase {
-    
-    @RequestMapping("findFamilyById")
-    @RestReturn(value=FamilyDTO.class)
-    public RestResponse findFamilyById(
-        @RequestParam(value = "familyId", required = true) Long familyId) {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     
     @RequestMapping("findFamilyByKeyword")
     @RestReturn(value=FamilyDTO.class)
@@ -76,6 +65,78 @@ public class FamilyController extends ControllerBase {
     public RestResponse leave(
         @RequestParam(value = "familyId", required = true) Long familyId) {
     
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("follow")
+    @RestReturn(value=String.class)
+    public RestResponse follow(
+        @RequestParam(value = "familyId", required = true) Long familyId,
+        @RequestParam(value = "aliasName", required = false) String aliasName) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("unfollow")
+    @RestReturn(value=String.class)
+    public RestResponse follow(
+        @RequestParam(value = "familyId", required = true) Long familyId) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("listFollowedFamilies")
+    @RestReturn(value=FamilyDTO.class, collection=true)
+    public RestResponse listFollowedFamilies() {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("setFollowedFamilyAlias")
+    @RestReturn(value=String.class)
+    public RestResponse setFollowedFamilyAlias(@RequestParam(value = "familyId", required = true) Long familyId,
+            @RequestParam(value = "aliasName", required = true) String aliasName) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("listFollowers")
+    @RestReturn(value=UserInfo.class, collection=true)
+    public RestResponse listFollowers(@RequestParam(value = "familyId", required = true) Long familyId,
+            @RequestParam(value = "pageOffset", required = false) Long pageOffset) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("get")
+    @RestReturn(value=FamilyDTO.class)
+    public RestResponse get(
+        @RequestParam(value = "familyId", required = true) Long familyId) {
+        
         // ???
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

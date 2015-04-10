@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -588438846;
+	private static final long serialVersionUID = -122996661;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -60,9 +60,9 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhEventTickets.EH_EVENT_TICKETS,
 			com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS,
 			com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS,
-			com.everhomes.server.schema.tables.EhFollowedFamilies.EH_FOLLOWED_FAMILIES,
 			com.everhomes.server.schema.tables.EhGroups.EH_GROUPS,
 			com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS,
+			com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS,
 			com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
@@ -76,6 +76,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES,
 			com.everhomes.server.schema.tables.EhUsers.EH_USERS,
 			com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST,
+			com.everhomes.server.schema.tables.EhUserFollowedFamilies.EH_USER_FOLLOWED_FAMILIES,
 			com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS,
 			com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS,
 			com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS,

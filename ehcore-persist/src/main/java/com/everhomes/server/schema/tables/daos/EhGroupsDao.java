@@ -139,10 +139,10 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
-	 * Fetch records that have <code>leaf_region_path IN (values)</code>
+	 * Fetch records that have <code>category_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByLeafRegionPath(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.LEAF_REGION_PATH, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCategoryId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CATEGORY_ID, values);
 	}
 
 	/**

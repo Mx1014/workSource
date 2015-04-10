@@ -375,7 +375,6 @@ CREATE TABLE `eh_user_groups` (
     `group_id` BIGINT,
     `region_scope` TINYINT COMMENT 'redundant group info to help region-based group user search',
     `region_scope_id` BIGINT COMMENT 'redundant group info to help region-based group user search',
-    `leaf_region_path` VARCHAR(128) COMMENT 'redundant group info to help region-based group user search',
     
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'default to ResourceUser role', 
     `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance, 3: active',
@@ -385,6 +384,25 @@ CREATE TABLE `eh_user_groups` (
     UNIQUE `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
     INDEX `i_eh_usr_grp_owner`(`owner_uid`),
     INDEX `i_eh_usr_grp_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_users partition group
+# secondary resource objects (after eh_users)
+#
+DROP TABLE IF EXISTS `eh_user_followed_families`;
+CREATE TABLE `eh_user_followed_families`(
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL,
+    `followed_family` BIGINT NOT NULL,
+    `alias_name` VARCHAR(64),
+    
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `i_eh_usr_ffmy_followed`(`owner_uid`, `followed_family`),
+    INDEX `i_eh_usr_ffmy_owner`(`owner_uid`),
+    INDEX `i_eh_usr_ffmy_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -513,7 +531,8 @@ CREATE TABLE `eh_groups` (
     
     `region_scope` TINYINT COMMENT 'define the group visibiliy region',
     `region_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
-    `leaf_region_path` VARCHAR(128) COMMENT 'leaf region path if the group is aassociated with a managed region',
+    
+    `category_id` BIGINT COMMENT 'group category',
     
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
     `member_count` BIGINT NOT NULL DEFAULT 0,
@@ -532,7 +551,6 @@ CREATE TABLE `eh_groups` (
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
-    INDEX `i_eh_group_leaf_region_path`(`leaf_region_path`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
     INDEX `i_eh_group_itag1`(`integral_tag1`),
@@ -620,6 +638,29 @@ CREATE TABLE `eh_group_members` (
     INDEX `i_eh_gprof_itag2`(`integral_tag2`),
     INDEX `i_eh_gprof_stag1`(`string_tag1`),
     INDEX `i_eh_gprof_stag2`(`string_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_groups partition group
+#
+DROP TABLE IF EXISTS `eh_group_op_requests`;
+CREATE TABLE `eh_group_op_requests` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `group_id` BIGINT,
+    `reqestor_uid` BIGINT,
+    `requestor_comment` TEXT,
+    `operation_type` TINYINT COMMENT '1: request for admin role, 2: invite to become admin',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: requesting, 1: accepted, 2: rejected',
+    `operator_uid` BIGINT,
+    `process_message` TEXT,
+    `create_time` DATETIME,
+    `process_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_grp_op_group`(`group_id`),
+    INDEX `i_eh_grp_op_requestor`(`reqestor_uid`),
+    INDEX `i_eh_grp_op_create_time`(`create_time`),
+    INDEX `i_eh_grp_op_process_time`(`process_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -828,33 +869,13 @@ DROP TABLE IF EXISTS `eh_family_followers`;
 CREATE TABLE `eh_family_followers` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_family` BIGINT NOT NULL,
-    `follower_family` BIGINT NOT NULL,
-    `alias_name` VARCHAR(64),
+    `follower_uid` BIGINT NOT NULL,
     `create_time` DATETIME COMMENT 'remove-deletion, user directly managed data',
     
     PRIMARY KEY (`id`),
-    UNIQUE `i_fm_follower_follower`(`owner_family`, `follower_family`),
+    UNIQUE `i_fm_follower_follower`(`owner_family`, `follower_uid`),
     INDEX `i_eh_fm_follower_owner`(`owner_family`),
     INDEX `i_eh_fm_follower_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of eh_groups(eh_families) partition group
-# secondary resource objects (after eh_families)
-#
-DROP TABLE IF EXISTS `eh_followed_families`;
-CREATE TABLE `eh_followed_families`(
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_family` BIGINT NOT NULL,
-    `followed_family` BIGINT NOT NULL,
-    `alias_name` VARCHAR(64),
-    
-    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
-    
-    PRIMARY KEY (`id`),
-    UNIQUE `i_eh_fm_followed_followed`(`owner_family`, `followed_family`),
-    INDEX `i_eh_fm_followed_owner`(`owner_family`),
-    INDEX `i_eh_fm_followed_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #

@@ -83,13 +83,6 @@ public class EhUserGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>leaf_region_path IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByLeafRegionPath(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.LEAF_REGION_PATH, values);
-	}
-
-	/**
 	 * Fetch records that have <code>member_role IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByMemberRole(java.lang.Long... values) {
