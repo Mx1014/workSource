@@ -16,8 +16,8 @@ import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
 
 @Component("Lsm")
-public class LsmSmsProvider implements SmsHandler {
-    protected final static Logger LOGGER = LoggerFactory.getLogger(LsmSmsProvider.class);
+public class LsmSmsHandler implements SmsHandler {
+    protected final static Logger LOGGER = LoggerFactory.getLogger(LsmSmsHandler.class);
     
     private static final String LSM_ACCOUNT_STR = "lsm.account";
 

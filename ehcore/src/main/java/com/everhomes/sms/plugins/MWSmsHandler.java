@@ -28,8 +28,8 @@ import com.everhomes.util.RuntimeErrorException;
  *
  */
 @Component("MW")
-public class MWSmsProvider implements SmsHandler {
-    protected final static Logger LOGGER = LoggerFactory.getLogger(MWSmsProvider.class);
+public class MWSmsHandler implements SmsHandler {
+    protected final static Logger LOGGER = LoggerFactory.getLogger(MWSmsHandler.class);
 
     private static final String MW_PORT = "mw.port";
     private static final String MW_PASSWORD = "mw.password";

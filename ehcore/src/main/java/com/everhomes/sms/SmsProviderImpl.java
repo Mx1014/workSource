@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.sms.plugins.LsmSmsProvider;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -43,11 +42,6 @@ public class SmsProviderImpl implements SmsProvider {
     @Autowired
     private Map<String, SmsHandler> handlers;
 
-    @PostConstruct
-    private void setup() {
-        
-    }
-    
     private SmsHandler getHandler() {
         // find name from db
         String handlerName = configurationProvider.getValue(VCODE_SEND_TYPE, "WM");
