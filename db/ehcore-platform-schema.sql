@@ -109,13 +109,6 @@ CREATE TABLE `eh_forums` (
     `owner_id` BIGINT,
     `name` VARCHAR(64) NOT NULL,
     `description` TEXT,
-    `encoded_meta` TEXT COMMENT 'json encoded meta information about the forum',
-    `encode_version` INT NOT NULL DEFAULT 1 COMMENT 'message meta encode version',
-    `tag1` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag2` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag3` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag4` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag5` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
     `post_count` BIGINT NOT NULL DEFAULT 0,
     `modify_seq` BIGINT NOT NULL,
     `update_time` DATETIME NOT NULL,
@@ -127,11 +120,6 @@ CREATE TABLE `eh_forums` (
     INDEX `i_eh_frm_owner`(`owner_type`, `owner_id`),
     INDEX `i_eh_frm_post_count` (`post_count`),
     INDEX `i_eh_frm_modify_seq` (`modify_seq`),
-    INDEX `i_eh_frm_tag1`(`tag1`),
-    INDEX `i_eh_frm_tag2`(`tag2`),
-    INDEX `i_eh_frm_tag3`(`tag3`),
-    INDEX `i_eh_frm_tag4`(`tag4`),
-    INDEX `i_eh_frm_tag5`(`tag5`),
     INDEX `i_eh_frm_update_time` (`update_time`),
     INDEX `i_eh_frm_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -139,35 +127,54 @@ CREATE TABLE `eh_forums` (
 DROP TABLE IF EXISTS `eh_forum_posts`;
 CREATE TABLE `eh_forum_posts` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
     `forum_id` BIGINT NOT NULL COMMENT 'forum that it belongs',
     `parent_post_id` BIGINT COMMENT 'replied post id',
+    `creator_uid` BIGINT NOT NULL COMMENT 'post creator uid',
+    
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(64),
+    `source_geo_id` BIGINT,
+    
+    `category_id` BIGINT,
+    `category_path` VARCHAR(128),
+    
     `modify_seq` BIGINT NOT NULL,
     `child_count` BIGINT NOT NULL DEFAULT 0,
+    `forward_count` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
-    `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
-    `encoded_meta` TEXT COMMENT 'json encoded meta information about the post',
-    `encode_version` INT NOT NULL DEFAULT 1 COMMENT 'message meta encode version',
-    `tag1` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag2` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag3` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag4` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `tag5` VARCHAR(32) COMMENT 'used by upper layer application to build higher level post orgination',
-    `content_type` VARCHAR(32) COMMENT 'MIME compatible content type',
-    `content_text` TEXT COMMENT 'post content text',
-    `creator_uid` BIGINT NOT NULL COMMENT 'post creator uid',
+
+    `subject` VARCHAR(512),
+    `content_type` INTEGER,
+    `content` TEXT COMMENT 'post content text',
+    
+    `embedded_obj_id` BIGINT,
+    `embedded_obj_json` TEXT COMMENT 'json encoded embedded object',
+    `embedded_obj_version` INT NOT NULL DEFAULT 1 COMMENT 'encode version',
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    
     `update_time` DATETIME NOT NULL,
     `create_time` DATETIME NOT NULL,
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_post_seqs`(`modify_seq`),
-    INDEX `i_eh_post_child_count`(`child_count`),
-    INDEX `i_eh_post_like_count`(`like_count`),
-    INDEX `i_eh_post_tag1`(`tag1`),
-    INDEX `i_eh_post_tag2`(`tag2`),
-    INDEX `i_eh_post_tag3`(`tag3`),
-    INDEX `i_eh_post_tag4`(`tag4`),
-    INDEX `i_eh_post_tag5`(`tag5`),
+    INDEX `i_eh_post_geohash`(`geohash`),
     INDEX `i_eh_post_creator`(`creator_uid`),
+    INDEX `i_eh_post_itag1`(`integral_tag1`),
+    INDEX `i_eh_post_itag2`(`integral_tag2`),
+    INDEX `i_eh_post_stag1`(`string_tag1`),
+    INDEX `i_eh_post_stag2`(`string_tag2`),
     INDEX `i_eh_post_update_time`(`update_time`),
     INDEX `i_eh_post_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -184,29 +191,6 @@ CREATE TABLE `eh_forum_attachments` (
     `create_time` DATETIME NOT NULL,
     PRIMARY KEY (`id`),
     INDEX `i_eh_frmatt_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `likes`;
-CREATE TABLE `eh_likes` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `target_type` VARCHAR(32) NOT NULL,
-    `target_id` BIGINT,
-    `uid` BIGINT NOT NULL,
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0 - used by creator to show attention, 1 - like',
-    `seq_snapshot` BIGINT NOT NULL COMMENT 'xxx_snapshot fields are used to take a snapshot of changes in sequence/counters',
-    `count1_snapshot` BIGINT,
-    `count2_snapshot` BIGINT,
-    `count3_snapshot` BIGINT,
-    `count4_snapshot` BIGINT,
-    `count5_snapshot` BIGINT,
-    `update_time` DATETIME NOT NULL,
-    `create_time` DATETIME NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE `u_eh_likes_unique` (`target_type`, `target_id`, `uid`),
-    INDEX `i_eh_likes_target` (`target_type`, `target_id`),
-    INDEX `i_eh_likes_uid` (`uid`),
-    INDEX `i_eh_likes_update_time` (`update_time`),
-    INDEX `i_eh_likes_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `eh_acls`;

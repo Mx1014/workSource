@@ -5,12 +5,17 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.sms.plugins.LsmSmsProvider;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -23,43 +28,45 @@ import com.everhomes.util.RuntimeErrorException;
  * @author Kelven Yang
  *
  */
-@Component("smsProvider")
-public class SmsProviderImpl extends AbstractSmsProvider {
+@Component
+public class SmsProviderImpl implements SmsProvider {
+    protected final static Logger LOGGER = LoggerFactory.getLogger(SmsProviderImpl.class);
 
-    private static final String VCODE_SEND_TYPE = "VCODE_SEND_TYPE";
+    private static final String VCODE_SEND_TYPE = "sms.handler.type";
 
-    @Autowired(required = true)
+    @Autowired
     private TaskQueue taskQueue;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Autowired
-    private Map<String, SmsProvider> providers;
+    private Map<String, SmsHandler> handlers;
 
-    @Autowired
-    public void setProviders(Map<String, SmsProvider> props) {
-        this.providers=props;
+    @PostConstruct
+    private void setup() {
+        
     }
-
-    private SmsProvider getProvider() {
+    
+    private SmsHandler getHandler() {
         // find name from db
-        String providerName = configurationProvider.getValue(VCODE_SEND_TYPE, "6");
-        SmsProvider provider = providers.get(providerName);
-        if (provider == null) {
-            LOGGER.error("cannot find relate provider.providerName={}", providerName);
+        String handlerName = configurationProvider.getValue(VCODE_SEND_TYPE, "WM");
+        SmsHandler handler = handlers.get(handlerName);
+        if (handler == null) {
+            LOGGER.error("cannot find relate provider.providerName={}", handlerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "can not find relate sms provider.provider=" + providerName);
+                    "can not find relate sms provider.provider=" + handlerName);
         }
-        return provider;
+        return handler;
     }
 
-    @Override
     protected void doSend(String phoneNumber, String text) {
         LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text), phoneNumber,
                 System.currentTimeMillis());
+        String escapedText = convert(text);
+       
         Future<?> f = taskQueue.submit(() -> {
-            getProvider().sendSms(phoneNumber, text);
+            getHandler().doSend(phoneNumber, escapedText);
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
@@ -72,12 +79,12 @@ public class SmsProviderImpl extends AbstractSmsProvider {
         }
     }
 
-    @Override
     protected void doSend(String[] phoneNumbers, String text) {
         LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text),
                 StringUtils.join(phoneNumbers, ","), System.currentTimeMillis());
+        String escapedText = convert(text);
         Future<?> f = taskQueue.submit(() -> {
-            getProvider().sendSms(phoneNumbers, SmsHepler.getEncodingString(text));
+            getHandler().doSend(phoneNumbers, SmsHepler.getEncodingString(escapedText));
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
@@ -88,5 +95,23 @@ public class SmsProviderImpl extends AbstractSmsProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     e.getMessage());
         }
+    }
+    
+    private static String convert(String text) {
+        if (StringUtils.isEmpty(text)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "message is empty");
+        }
+        return SmsHepler.getEncodingString(text).replace(" ", "%20").replace("=", "%3D");
+    }
+
+    @Override
+    public void sendSms(String phoneNumber, String text) {
+        this.doSend(phoneNumber, text);
+    }
+
+    @Override
+    public void sendSms(String[] phoneNumbers, String text) throws Exception {
+        this.doSend(phoneNumbers, text);
     }
 }

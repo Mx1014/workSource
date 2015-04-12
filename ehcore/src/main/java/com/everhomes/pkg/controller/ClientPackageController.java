@@ -15,7 +15,7 @@ import com.everhomes.rest.RestResponse;
 
 @RestController
 @RequestMapping("/pkg")
-public class ClientPackageController  extends ControllerBase {
+public class ClientPackageController extends ControllerBase {
 
     @RequestMapping("add")
     @RestReturn(value=String.class)

@@ -9,14 +9,16 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.sms.AbstractSmsProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
+import com.everhomes.sms.SmsHandler;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -25,13 +27,14 @@ import com.everhomes.util.RuntimeErrorException;
  * @author elians
  *
  */
-@Component("6")
-public class MWSmsProvider extends AbstractSmsProvider {
+@Component("MW")
+public class MWSmsProvider implements SmsHandler {
+    protected final static Logger LOGGER = LoggerFactory.getLogger(MWSmsProvider.class);
 
-    private static final String MW_PORT = "MW_PORT";
-    private static final String MW_PASSWORD = "MW_PASSWORD";
-    private static final String MW_USER_ID = "MW_USER_ID";
-    private static final String MW_HOST = "MW_HOST";
+    private static final String MW_PORT = "mw.port";
+    private static final String MW_PASSWORD = "mw.password";
+    private static final String MW_USER_ID = "mw.user";
+    private static final String MW_HOST = "mw.host";
     // max limit size for MW
     private static final int MAX_LIMIT = 100;
     @Autowired

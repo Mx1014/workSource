@@ -5,19 +5,23 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.sms.AbstractSmsProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
+import com.everhomes.sms.SmsHandler;
 
-@Component("4")
-public class LsmSmsProvider extends AbstractSmsProvider {
-    private static final String LSM_ACCOUNT_STR = "CONFIG_SMS_VCODE_LUOSIMAO_ACCOUNT";
+@Component("Lsm")
+public class LsmSmsProvider implements SmsHandler {
+    protected final static Logger LOGGER = LoggerFactory.getLogger(LsmSmsProvider.class);
+    
+    private static final String LSM_ACCOUNT_STR = "lsm.account";
 
-    private static final String LSM_HOST = "CONFIG_SMS_VCODE_LUOSIMAO_API_ADDRESS";
+    private static final String LSM_HOST = "lsm.address";
 
     private SmsChannel channel;
 
@@ -28,7 +32,7 @@ public class LsmSmsProvider extends AbstractSmsProvider {
 
     @PostConstruct
     public void init() {
-        String account = configurationProvider.getValue(LSM_ACCOUNT_STR, "");
+        String account = configurationProvider.getValue(LSM_ACCOUNT_STR, "user:password");
         String[] arr = account.split(":");
         channel = SmsBuilder.create(false).addHeader("Accept-Encoding", "gzip");
         channel.basicAuth(arr[0], arr[1]).setTimeout(30000);
@@ -54,5 +58,4 @@ public class LsmSmsProvider extends AbstractSmsProvider {
         String rsp = channel.sendMessage(hostAddress, SmsBuilder.HttpMethod.POST.val(), body, null).getMessage();
         LOGGER.info("send message success.Return message msg={}", rsp);
     }
-
 }
