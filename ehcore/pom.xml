@@ -175,29 +175,9 @@
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
-			<artifactId>ehmessaging</artifactId>
+			<artifactId>ehforum</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.everhomes</groupId>
-			<artifactId>ehrest</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.everhomes</groupId>
-			<artifactId>ehcore-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.everhomes</groupId>
-			<artifactId>ehcore-persist</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehmessaging</artifactId>
