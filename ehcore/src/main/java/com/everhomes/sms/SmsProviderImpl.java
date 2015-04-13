@@ -49,7 +49,7 @@ public class SmsProviderImpl implements SmsProvider {
         if (handler == null) {
             LOGGER.error("cannot find relate provider.providerName={}", handlerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "can not find relate sms provider.provider=" + handlerName);
+                    "can not find relate sms handler.handler=" + handlerName);
         }
         return handler;
     }
