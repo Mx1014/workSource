@@ -1,8 +1,10 @@
+// @formatter:off
 package com.everhomes.activity;
 
+import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.util.StringHelper;
 
-public class ActivityPostCommand {
+public class ActivityPostCommand extends NewTopicCommand {
     private Long startTime;
     private Long stopTime;
     private String location;
@@ -10,11 +12,6 @@ public class ActivityPostCommand {
     private Integer confirmFlag;
     private Double longitude;
     private Double Latitude;
-    
-    private Long forumId;
-    private String subject;
-    private String content;
-    private Integer visibleFlag;
     
     public ActivityPostCommand() {
     }
@@ -75,38 +72,6 @@ public class ActivityPostCommand {
         Latitude = latitude;
     }
 
-    public Long getForumId() {
-        return forumId;
-    }
-
-    public void setForumId(Long forumId) {
-        this.forumId = forumId;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Integer getVisibleFlag() {
-        return visibleFlag;
-    }
-
-    public void setVisibleFlag(Integer visibleFlag) {
-        this.visibleFlag = visibleFlag;
-    }
-    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

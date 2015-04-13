@@ -1,15 +1,13 @@
-// @formatter:off
 package com.everhomes.fleamarket;
 
-import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.util.StringHelper;
 
-public class FleaMarketPostCommand extends NewTopicCommand {
+public class FleaMarketItemDTO {
     private Integer barterFlag;
     private String price;
     private Integer closeFlag;
-
-    public FleaMarketPostCommand() {
+    
+    public FleaMarketItemDTO() {
     }
 
     public Integer getBarterFlag() {

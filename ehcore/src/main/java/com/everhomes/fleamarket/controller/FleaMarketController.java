@@ -2,6 +2,7 @@ package com.everhomes.fleamarket.controller;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,21 +10,29 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.fleamarket.FleaMarketPostCommand;
+import com.everhomes.fleamarket.FleaMarketService;
+import com.everhomes.forum.Post;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.rest.RestResponse;
 
 @RestController
 @RequestMapping("/fleamarket")
 public class FleaMarketController extends ControllerBase {
+    
+    @Autowired
+    private FleaMarketService fleaMarketService;
+    
     @RequestMapping("post")
     @RestReturn(value=PostDTO.class)
     public RestResponse post(@Valid FleaMarketPostCommand cmd) {
+        Post post = fleaMarketService.postItemToForum(cmd);
         
-        // ???
-        RestResponse response = new RestResponse();
+        // TODO Post to PostDTO convertion
+        PostDTO postDto = new PostDTO();
+        
+        RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-
 }
