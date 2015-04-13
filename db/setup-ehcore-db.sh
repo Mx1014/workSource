@@ -62,6 +62,12 @@ if [ $? -ne 0 ]; then
 fi
   
 echo "Initializing Database ehcore."
+mysql --user=root --password=$PASSWORD < ehcore-system-init.sql
+if [ $? -ne 0 ]; then
+  printf "Error: Cannot execute ehcore-system-init.sql\n"
+  exit 7
+fi
+
 mysql --user=root --password=$PASSWORD < ehcore-init-data.sql
 if [ $? -ne 0 ]; then
   printf "Error: Cannot execute ehcore-server-schema.sql\n"

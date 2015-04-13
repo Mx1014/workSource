@@ -3,6 +3,7 @@ package com.everhomes.fleamarket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.AclProvider;
 import com.everhomes.app.AppConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
@@ -13,10 +14,14 @@ import com.everhomes.util.StringHelper;
 public class FleaMarketServiceImpl implements FleaMarketService {
     
     @Autowired
+    private AclProvider aclProvider;
+    
+    @Autowired
     private ForumProvider forumProvider;
 
     @Override
     public Post postItemToForum(FleaMarketPostCommand cmd) {
+        
         Post post = new Post();
         post.setForumId(cmd.getForumId());
         post.setAppId(AppConstants.APPID_FLEAMARKET);

@@ -61,8 +61,6 @@ CREATE TABLE `eh_configurations` (
     UNIQUE `u_eh_conf_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('db.init.timestamp', UTC_TIMESTAMP(), 'Database seeding timestamp');
-
 DROP TABLE IF EXISTS `eh_messages`;
 CREATE TABLE `eh_messages` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -222,13 +220,6 @@ CREATE TABLE `eh_acl_privileges` (
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_acl_priv_app_id_name`(`app_id`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, 'All');
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(2, 0, 'Visible');
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(3, 0, 'Read');
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(4, 0, 'Create');
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(5, 0, 'Write');
-INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(6, 0, 'Delete');
 
 DROP TABLE IF EXISTS `eh_acl_roles`;
 CREATE TABLE `eh_acl_roles` (
@@ -239,15 +230,6 @@ CREATE TABLE `eh_acl_roles` (
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_acl_role_app_id_name`(`app_id`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-ALTER TABLE `eh_acl_roles` AUTO_INCREMENT = 4096;
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(1, 0, 'Anonymous');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(2, 0, 'SystemAdmin');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(3, 0, 'AuthenticatedUser');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(4, 0, 'ResourceCreator');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(5, 0, 'ResourceAdmin');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(6, 0, 'ResourceOperator');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(7, 0, 'ResourceUser');
-INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(8, 0, 'SystemExtension');
 
 DROP TABLE IF EXISTS `eh_acl_role_assignments`;
 CREATE TABLE `eh_acl_role_assignments` (
@@ -282,9 +264,6 @@ CREATE TABLE `eh_apps` (
     UNIQUE `u_eh_app_reg_name`(`name`),
     INDEX `i_eh_app_reg_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-ALTER TABLE `eh_apps` AUTO_INCREMENT = 4096;
-INSERT INTO `eh_apps`(`id`, `name`) VALUES(1, 'Messaging');
-INSERT INTO `eh_apps`(`id`, `name`) VALUES(2, 'Forum');
 
 DROP TABLE IF EXISTS `eh_sequences`;
 CREATE TABLE `eh_sequences` (
