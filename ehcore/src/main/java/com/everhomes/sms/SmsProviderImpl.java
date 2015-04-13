@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class SmsProviderImpl implements SmsProvider {
         String handlerName = configurationProvider.getValue(VCODE_SEND_TYPE, "WM");
         SmsHandler handler = handlers.get(handlerName);
         if (handler == null) {
-            LOGGER.error("cannot find relate provider.providerName={}", handlerName);
+            LOGGER.error("cannot find relate handler.handler={}", handlerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "can not find relate sms handler.handler=" + handlerName);
         }
