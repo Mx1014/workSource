@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRegionsRecord> {
 
-	private static final long serialVersionUID = 1745091829;
+	private static final long serialVersionUID = 980932439;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_regions</code>
@@ -52,9 +52,9 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Integer> LEVEL = createField("level", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area, 4: community neighborhood
+	 * The column <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area, 4: neighborhood (community)
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT, this, "0 : country, 1: state/province, 2: city, 3: area, 4: community neighborhood");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT, this, "0 : country, 1: state/province, 2: city, 3: area, 4: neighborhood (community)");
 
 	/**
 	 * The column <code>ehcore.eh_regions.iso_code</code>. international standard code for the region if exists

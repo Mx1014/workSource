@@ -90,20 +90,6 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
-	 * Fetch records that have <code>create_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCreateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CREATE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>delete_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByDeleteTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.DELETE_TIME, values);
-	}
-
-	/**
 	 * Fetch records that have <code>private_flag IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByPrivateFlag(java.lang.Byte... values) {
@@ -125,17 +111,17 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
-	 * Fetch records that have <code>region_scope IN (values)</code>
+	 * Fetch records that have <code>visibility_scope IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionScope(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_SCOPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByVisibilityScope(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.VISIBILITY_SCOPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>region_scope_id IN (values)</code>
+	 * Fetch records that have <code>visibility_scope_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByRegionScopeId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.REGION_SCOPE_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByVisibilityScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.VISIBILITY_SCOPE_ID, values);
 	}
 
 	/**
@@ -227,5 +213,19 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.STRING_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CREATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>delete_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByDeleteTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.DELETE_TIME, values);
 	}
 }

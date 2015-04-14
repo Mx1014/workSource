@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.activity;
 
 import com.everhomes.util.StringHelper;

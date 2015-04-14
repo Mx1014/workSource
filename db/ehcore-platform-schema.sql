@@ -133,7 +133,9 @@ CREATE TABLE `eh_forum_posts` (
     `longitude` DOUBLE,
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
-    `source_geo_id` BIGINT,
+    
+    `visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
+    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
     
     `category_id` BIGINT,
     `category_path` VARCHAR(128),
@@ -175,6 +177,18 @@ CREATE TABLE `eh_forum_posts` (
     INDEX `i_eh_post_stag2`(`string_tag2`),
     INDEX `i_eh_post_update_time`(`update_time`),
     INDEX `i_eh_post_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_forum_visible_scopes`;
+CREATE TABLE `eh_forum_visible_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner post id',
+    `scope_code` TINYINT,
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `eh_forum_attachments`;

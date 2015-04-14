@@ -523,15 +523,12 @@ CREATE TABLE `eh_groups` (
     `avatar` VARCHAR(256),
     `description` TEXT,
     `creator_uid` BIGINT NOT NULL,
-    `create_time` DATETIME NOT NULL,
-    `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
     `join_policy` INTEGER NOT NULL DEFAULT 0 COMMENT '0: free join(public group), 1: should be approved by operator/owner, 2: invite only',
     `discriminator` VARCHAR(32),
     
-    `region_scope` TINYINT COMMENT 'define the group visibiliy region',
-    `region_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
-    
+    `visibility_scope` TINYINT COMMENT 'define the group visibiliy region',
+    `visibility_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
     `category_id` BIGINT COMMENT 'group category',
     
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
@@ -548,6 +545,9 @@ CREATE TABLE `eh_groups` (
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
     
+    `create_time` DATETIME NOT NULL,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
+    
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
@@ -557,6 +557,21 @@ CREATE TABLE `eh_groups` (
     INDEX `i_eh_group_itag2`(`integral_tag2`),
     INDEX `i_eh_group_stag1`(`string_tag1`),
     INDEX `i_eh_group_stag2`(`string_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_groups partition group
+#
+DROP TABLE IF EXISTS `eh_group_visible_scopes`;
+CREATE TABLE `eh_group_visible_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner group id',
+    `scope_code` TINYINT,
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_grp_scope_owner`(`owner_id`) REFERENCES `eh_groups`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_grp_scope_target`(`scope_code`, `scope_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -691,7 +706,7 @@ CREATE TABLE `eh_regions` (
 	`name` VARCHAR(64),
 	`path` VARCHAR(128) COMMENT 'path from the root',
 	`level` INTEGER NOT NULL DEFAULT 0,
-    `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area, 4: community neighborhood',
+    `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area, 4: neighborhood (community)',
 	`iso_code` VARCHAR(32) COMMENT 'international standard code for the region if exists',
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',

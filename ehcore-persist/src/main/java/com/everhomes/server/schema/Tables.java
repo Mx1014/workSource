@@ -164,6 +164,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhGroupProfiles EH_GROUP_PROFILES = com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES;
 
 	/**
+	 * The table ehcore.eh_group_visible_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhGroupVisibleScopes EH_GROUP_VISIBLE_SCOPES = com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES;
+
+	/**
 	 * The table ehcore.eh_polls
 	 */
 	public static final com.everhomes.server.schema.tables.EhPolls EH_POLLS = com.everhomes.server.schema.tables.EhPolls.EH_POLLS;

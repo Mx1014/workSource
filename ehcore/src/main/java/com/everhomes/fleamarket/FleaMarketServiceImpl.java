@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.fleamarket;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
-import com.everhomes.forum.PostCustomField;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -42,11 +42,9 @@ public class FleaMarketServiceImpl implements FleaMarketService {
         
         post.setEmbeddedObjJson(StringHelper.toJsonString(item));
         post.setEmbeddedObjVersion(1);
-        
-        Long visibleScope = null;
-        if(cmd.getVisibleRegionScope() != null)
-            visibleScope = (long)cmd.getVisibleRegionScope().byteValue();
-        PostCustomField.VISIBLE_SCOPE.setIntegralValue(post, visibleScope);
+       
+        post.setVisibilityScope(cmd.getVisibilityScope());
+        post.setVisibilityScopeId(cmd.getVisibilityScopeId());
         this.forumProvider.createPost(post);
         
         // TODO
