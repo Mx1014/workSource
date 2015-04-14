@@ -1,27 +1,21 @@
-package com.everhomes.poll.controller;
-
-import javax.validation.Valid;
+package com.everhomes.bulletin;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.poll.PollDTO;
-import com.everhomes.poll.PollPostCommand;
-import com.everhomes.poll.PollShowResultCommand;
-import com.everhomes.poll.PollShowResultResponse;
-import com.everhomes.poll.PollVoteCommand;
 import com.everhomes.rest.RestResponse;
 
 @RestController
-@RequestMapping("/poll")
-public class PollController extends ControllerBase {
-
-    @RequestMapping("post")
-    @RestReturn(value=PollDTO.class)
-    public RestResponse signup(@Valid PollPostCommand cmd) {
+@RequestMapping("/bulletin")
+public class BulletinController extends ControllerBase {
+    
+    @RequestMapping("requestAdminRole")
+    @RestReturn(value=String.class)
+    public RestResponse requestAdminRole(@RequestParam(value = "communityId", required = true) Long communityId) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -30,9 +24,9 @@ public class PollController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("vote")
-    @RestReturn(value=PollDTO.class)
-    public RestResponse signup(@Valid PollVoteCommand cmd) {
+    @RequestMapping("resignAdminRole")
+    @RestReturn(value=String.class)
+    public RestResponse reignAdminRole(@RequestParam(value = "communityId", required = true) Long communityId) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -41,9 +35,9 @@ public class PollController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("showResult")
-    @RestReturn(value=PollShowResultResponse.class)
-    public RestResponse showResult(@Valid PollShowResultCommand cmd) {
+    @RequestMapping("getAdminRoleStatus")
+    @RestReturn(value=Byte.class)
+    public RestResponse getAdminRoleStatus(@RequestParam(value = "communityId", required = true) Long communityId) {
         
         // ???
         RestResponse response = new RestResponse();

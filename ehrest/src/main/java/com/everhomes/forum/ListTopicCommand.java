@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.forum;
 
 import com.everhomes.util.StringHelper;

@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.poll;
 
 import javax.validation.constraints.NotNull;

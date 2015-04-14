@@ -17,6 +17,9 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -58,6 +61,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private AddressProvider addressProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
     
     @Autowired
     private RegionProvider regionProvider;
@@ -114,7 +120,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
 
         this.dbProvider.execute((TransactionStatus status) ->  {
-            this.addressProvider.createCommunity(community);
+            this.communityProvider.createCommunity(community);
             if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
                 CommunityGeoPoint point = new CommunityGeoPoint();
                 point.setCommunityId(community.getId());
@@ -123,7 +129,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 point.setLongitude(cmd.getLongitude());
                 String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
                 point.setGeohash(geoHash);
-                this.addressProvider.createCommunityGeoPoint(point);
+                this.communityProvider.createCommunityGeoPoint(point);
             }
             return null;
         });
@@ -370,7 +376,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
                 cmd.getBuildingName(), cmd.getAppartmentName());
         
-        Community community = this.addressProvider.findCommunityById(cmd.getCommunityId());
+        Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         if(community == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId");

@@ -1,4 +1,4 @@
-package com.everhomes.course.controller;
+package com.everhomes.coupon;
 
 import javax.validation.Valid;
 
@@ -7,18 +7,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.course.CourseDTO;
-import com.everhomes.course.CoursePostCommand;
+import com.everhomes.coupon.CouponDTO;
+import com.everhomes.coupon.CouponPostCommand;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
 @RestController
-@RequestMapping("/course")
-public class CourseController extends ControllerBase {
-
+@RequestMapping("/coupon")
+public class CouponController extends ControllerBase {
+    
     @RequestMapping("post")
-    @RestReturn(value=CourseDTO.class)
-    public RestResponse post(@Valid CoursePostCommand cmd) {
+    @RestReturn(value=CouponDTO.class)
+    public RestResponse post(@Valid CouponPostCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -26,4 +26,5 @@ public class CourseController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
 }

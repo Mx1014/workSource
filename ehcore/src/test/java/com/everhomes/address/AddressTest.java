@@ -21,6 +21,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.util.Tuple;
 
@@ -34,6 +37,9 @@ public class AddressTest extends TestCase {
     
     @Autowired
     private AddressService addressService;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
     
     private List<Community> communityCleanupList = new ArrayList<>();
     private List<CommunityGeoPoint> communityGeopointsCleanupList = new ArrayList<>();
@@ -59,7 +65,7 @@ public class AddressTest extends TestCase {
         community.setCityId(1L);
         community.setAreaId(1L);
         
-        addressProvider.createCommunity(community);
+        communityProvider.createCommunity(community);
         communityCleanupList.add(community);
         
         for(int i = 1; i < 100; i++) {
@@ -71,7 +77,7 @@ public class AddressTest extends TestCase {
             c.setCityId(1L);
             c.setAreaId(1L);
             
-            addressProvider.createCommunity(c);
+            communityProvider.createCommunity(c);
             communityCleanupList.add(c);
         }
         
@@ -80,7 +86,7 @@ public class AddressTest extends TestCase {
         geoPoint1.setDescription("Archor North");
         geoPoint1.setLatitude(0.0);
         geoPoint1.setLongitude(0.0);
-        addressProvider.createCommunityGeoPoint(geoPoint1);
+        communityProvider.createCommunityGeoPoint(geoPoint1);
         this.communityGeopointsCleanupList.add(geoPoint1);
         
         CommunityGeoPoint geoPoint2 = new CommunityGeoPoint();
@@ -88,24 +94,24 @@ public class AddressTest extends TestCase {
         geoPoint2.setDescription("Archor South");
         geoPoint2.setLatitude(1.0);
         geoPoint2.setLongitude(1.0);
-        addressProvider.createCommunityGeoPoint(geoPoint2);
+        communityProvider.createCommunityGeoPoint(geoPoint2);
         this.communityGeopointsCleanupList.add(geoPoint2);
     }
     
     @After
     public void teardown() {
         for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
-            addressProvider.deleteCommunityGeoPoint(p);
+            communityProvider.deleteCommunityGeoPoint(p);
         }
         
         for(Community c : this.communityCleanupList) {
-            addressProvider.deleteCommunity(c);
+            communityProvider.deleteCommunity(c);
         }
     }
     
     @Ignore @Test
     public void testGeoPoints() {
-        List<CommunityGeoPoint> points = addressProvider.listCommunityGeoPoints(
+        List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(
             this.communityCleanupList.get(0).getId());
  
         for(CommunityGeoPoint p : points) {

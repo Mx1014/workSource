@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.fleamarket;
 
 import com.everhomes.util.StringHelper;

@@ -1,4 +1,4 @@
-package com.everhomes.family.controller;
+package com.everhomes.family;
 
 import javax.validation.Valid;
 

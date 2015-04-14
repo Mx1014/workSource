@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.forum;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 public class NewTopicCommand {
+    @NotNull
     private Long forumId;
     
     private Long categoryId;

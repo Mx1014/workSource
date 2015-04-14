@@ -1,4 +1,4 @@
-package com.everhomes.fleamarket.controller;
+package com.everhomes.fleamarket;
 
 import javax.validation.Valid;
 

@@ -1,24 +1,27 @@
-package com.everhomes.favorite.controller;
+package com.everhomes.poll;
+
+import javax.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.favorite.FavoriteDTO;
+import com.everhomes.poll.PollDTO;
+import com.everhomes.poll.PollPostCommand;
+import com.everhomes.poll.PollShowResultCommand;
+import com.everhomes.poll.PollShowResultResponse;
+import com.everhomes.poll.PollVoteCommand;
 import com.everhomes.rest.RestResponse;
 
 @RestController
-@RequestMapping("/favorite")
-public class FavoriteController extends ControllerBase {
+@RequestMapping("/poll")
+public class PollController extends ControllerBase {
 
-    @RequestMapping("addFavorite")
-    @RestReturn(value=Long.class)
-    public RestResponse addFavorite(
-        @RequestParam(value = "targetType", required = true) String entityType,
-        @RequestParam(value = "targetId", required = true) Long entityId) {
+    @RequestMapping("post")
+    @RestReturn(value=PollDTO.class)
+    public RestResponse signup(@Valid PollPostCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -27,10 +30,9 @@ public class FavoriteController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("removeFavorite")
-    @RestReturn(value=Long.class)
-    public RestResponse removeFavorite(
-        @RequestParam(value = "favoriteId", required = true) Long favoriteId) {
+    @RequestMapping("vote")
+    @RestReturn(value=PollDTO.class)
+    public RestResponse signup(@Valid PollVoteCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -39,10 +41,9 @@ public class FavoriteController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("listFavorites")
-    @RestReturn(value=FavoriteDTO.class, collection=true)
-    public RestResponse removeFavorite(
-        @RequestParam(value = "targetType", required = true) String targetType) {
+    @RequestMapping("showResult")
+    @RestReturn(value=PollShowResultResponse.class)
+    public RestResponse showResult(@Valid PollShowResultCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();

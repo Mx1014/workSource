@@ -1,4 +1,4 @@
-package com.everhomes.category.controller;
+package com.everhomes.category;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.region.controller;
+package com.everhomes.region;
 
 import java.util.List;
 import java.util.stream.Collectors;

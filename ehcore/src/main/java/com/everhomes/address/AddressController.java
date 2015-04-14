@@ -1,4 +1,4 @@
-package com.everhomes.address.controller;
+package com.everhomes.address;
 
 import java.util.List;
 

@@ -1,4 +1,5 @@
-package com.everhomes.activity.controller;
+// @formatter:off
+package com.everhomes.activity;
 
 import javax.validation.Valid;
 

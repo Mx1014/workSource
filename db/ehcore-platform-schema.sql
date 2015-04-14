@@ -282,6 +282,5 @@ CREATE TABLE `eh_namespaces` (
     PRIMARY KEY (`id`),
     UNIQUE `u_ns_name`(`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 
 SET foreign_key_checks = 1;

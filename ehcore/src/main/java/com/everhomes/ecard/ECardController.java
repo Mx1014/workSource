@@ -1,4 +1,4 @@
-package com.everhomes.ecard.controller;
+package com.everhomes.ecard;
 
 import javax.validation.Valid;
 

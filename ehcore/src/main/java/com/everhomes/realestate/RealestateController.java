@@ -1,4 +1,4 @@
-package com.everhomes.realestate.controller;
+package com.everhomes.realestate;
 
 import javax.validation.Valid;
 

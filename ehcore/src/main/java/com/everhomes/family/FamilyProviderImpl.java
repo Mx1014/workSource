@@ -11,7 +11,8 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.Community;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -62,6 +63,9 @@ public class FamilyProviderImpl implements FamilyProvider {
     
     @Autowired
     private AddressProvider addressProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public Family findFamilyByAddressId(long addressId) {
@@ -87,7 +91,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public Family getOrCreatefamily(Address address)      {
         final Long uid = UserContext.current().getUser().getId();
-        Community community = this.addressProvider.findCommunityById(address.getCommunityId());
+        Community community = this.communityProvider.findCommunityById(address.getCommunityId());
         Region region;
         if(community.getAreaId() != null)
             region = this.regionProvider.findRegionById(community.getAreaId());
