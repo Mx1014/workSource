@@ -5,11 +5,14 @@
 set DB_HOST=127.0.0.1
 set DB_USER=root
 set DB_PASSWORD=
+set DEVELOPER=1
 
 set EHCORE_SQL_FILE=ehcore-database.sql
 set PLATFORM_SQL_FILE=ehcore-platform-schema.sql
 set SERVER_SQL_FILE=ehcore-server-schema.sql
+set EHCORE_SYSTEM_INIT_SQL_FILE=ehcore-system-init.sql
 set EHCORE_INIT_SQL_FILE=ehcore-init-data.sql
+set EHCORE_DEVELOPER_INIT_SQL_FILE=ehcore-developer-init.sql
 set DEFAULT_MY_INI=my.ini
 
 @REM ========================================================================================
@@ -39,10 +42,22 @@ if not exist %PLATFORM_SQL_FILE% (
 if not exist %SERVER_SQL_FILE% (
 	echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%SERVER_SQL_FILE%' is not exists
 	goto end
+) 
+if not %DEVELOPER% == 1 (
+	if not exist %EHCORE_SYSTEM_INIT_SQL_FILE% (
+		echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%EHCORE_SYSTEM_INIT_SQL_FILE%' is not exists
+		goto end
+	)
 )
 if not exist %EHCORE_INIT_SQL_FILE% (
 	echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%EHCORE_INIT_SQL_FILE%' is not exists
 	goto end
+)
+if %DEVELOPER% == 1 (
+	if not exist %EHCORE_DEVELOPER_INIT_SQL_FILE% (
+		echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%EHCORE_DEVELOPER_INIT_SQL_FILE%' is not exists
+		goto end
+	)
 )
 
 if exist %DEFAULT_MY_INI% (
@@ -69,8 +84,18 @@ mysql --defaults-file=%DEFAULT_MY_INI% < %PLATFORM_SQL_FILE%
 echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%SERVER_SQL_FILE%' ...
 mysql --defaults-file=%DEFAULT_MY_INI% < %SERVER_SQL_FILE%
 
+if not %DEVELOPER% == 1 (
+	echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_SYSTEM_INIT_SQL_FILE%' ...
+	mysql --defaults-file=%DEFAULT_MY_INI% < %EHCORE_SYSTEM_INIT_SQL_FILE%
+)
+
 echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_INIT_SQL_FILE%' ...
 mysql --defaults-file=%DEFAULT_MY_INI% < %EHCORE_INIT_SQL_FILE%
+
+if %DEVELOPER% == 1 (
+	echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_DEVELOPER_INIT_SQL_FILE%' ...
+	mysql --defaults-file=%DEFAULT_MY_INI% < %EHCORE_DEVELOPER_INIT_SQL_FILE%
+)
 
 :end
 
