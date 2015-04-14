@@ -511,8 +511,9 @@ CREATE TABLE `eh_user_profiles`(
 #
 # key table of grouping related partition group
 # Usually there is no need for group object to carry information for other applications, therefore there is
-# not an app_id field, we still put some custom fields here, as group table may be inherited(records of subclassed object
-# will be identified by discriminator), these custom fields may be used for such purpose
+# not an app_id field
+#
+# Group custom fields are used by inherited classes
 # 
 DROP TABLE IF EXISTS `eh_groups`;
 CREATE TABLE `eh_groups` (
@@ -609,9 +610,7 @@ CREATE TABLE `eh_group_profiles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of its own partition group
-# The reason for it to have its own partition group is that there is potential for group to
-# have large amount of members
+# member of eh_groups partition group
 #
 DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (
@@ -781,7 +780,7 @@ DROP TABLE IF EXISTS `eh_community_geopoints`;
 CREATE TABLE `eh_community_geopoints` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT,
-	`description` VARCHAR(256),
+	`description` VARCHAR(64),
 	`longitude` DOUBLE,
 	`latitude` DOUBLE,
 	`geohash` VARCHAR(32),
