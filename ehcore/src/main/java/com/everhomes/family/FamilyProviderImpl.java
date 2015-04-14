@@ -110,8 +110,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
                     f.setCreatorUid(uid);
                     f.setMemberCount(0L);   // initialize it to 0
-                    f.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
-                    f.setRegionScopeId(address.getCommunityId());
+                    f.setCommunityId(address.getCommunityId());
                     
                     this.groupProvider.createGroup(f);
                     

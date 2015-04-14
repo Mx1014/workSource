@@ -35,4 +35,16 @@ public class FleaMarketController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    @RequestMapping("update")
+    @RestReturn(value=String.class)
+    public RestResponse post(@Valid FleaMarketUpdateCommand cmd) {
+        
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

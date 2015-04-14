@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.activity;
 
 import java.util.List;

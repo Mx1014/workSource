@@ -75,6 +75,7 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER = UniqueKeys0.KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> KEY_EH_GROUP_OP_REQUESTS_PRIMARY = UniqueKeys0.KEY_EH_GROUP_OP_REQUESTS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupProfilesRecord> KEY_EH_GROUP_PROFILES_PRIMARY = UniqueKeys0.KEY_EH_GROUP_PROFILES_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupVisibleScopesRecord> KEY_EH_GROUP_VISIBLE_SCOPES_PRIMARY = UniqueKeys0.KEY_EH_GROUP_VISIBLE_SCOPES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollsRecord> KEY_EH_POLLS_PRIMARY = UniqueKeys0.KEY_EH_POLLS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollItemsRecord> KEY_EH_POLL_ITEMS_PRIMARY = UniqueKeys0.KEY_EH_POLL_ITEMS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollVotesRecord> KEY_EH_POLL_VOTES_PRIMARY = UniqueKeys0.KEY_EH_POLL_VOTES_PRIMARY;
@@ -110,6 +111,7 @@ public class Keys {
 	// -------------------------------------------------------------------------
 
 	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord, com.everhomes.server.schema.tables.records.EhClientPackagesRecord> EH_CLIENT_PACKAGE_FILES_IBFK_1 = ForeignKeys0.EH_CLIENT_PACKAGE_FILES_IBFK_1;
+	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhGroupVisibleScopesRecord, com.everhomes.server.schema.tables.records.EhGroupsRecord> EH_GROUP_VISIBLE_SCOPES_IBFK_1 = ForeignKeys0.EH_GROUP_VISIBLE_SCOPES_IBFK_1;
 	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord, com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> EH_USER_INVITATION_ROSTER_IBFK_1 = ForeignKeys0.EH_USER_INVITATION_ROSTER_IBFK_1;
 
 	// -------------------------------------------------------------------------
@@ -172,6 +174,7 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER = createUniqueKey(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.GROUP_ID, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_TYPE, com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS.MEMBER_ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> KEY_EH_GROUP_OP_REQUESTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS, com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupProfilesRecord> KEY_EH_GROUP_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES, com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupVisibleScopesRecord> KEY_EH_GROUP_VISIBLE_SCOPES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES, com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollsRecord> KEY_EH_POLLS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhPolls.EH_POLLS, com.everhomes.server.schema.tables.EhPolls.EH_POLLS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollItemsRecord> KEY_EH_POLL_ITEMS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS, com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhPollVotesRecord> KEY_EH_POLL_VOTES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES, com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES.ID);
@@ -205,6 +208,7 @@ public class Keys {
 
 	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {
 		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhClientPackageFilesRecord, com.everhomes.server.schema.tables.records.EhClientPackagesRecord> EH_CLIENT_PACKAGE_FILES_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_CLIENT_PACKAGES_PRIMARY, com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES, com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES.PACKAGE_ID);
+		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhGroupVisibleScopesRecord, com.everhomes.server.schema.tables.records.EhGroupsRecord> EH_GROUP_VISIBLE_SCOPES_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_GROUPS_PRIMARY, com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES, com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES.OWNER_ID);
 		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord, com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> EH_USER_INVITATION_ROSTER_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_USER_INVITATIONS_PRIMARY, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER.INVITE_ID);
 	}
 }

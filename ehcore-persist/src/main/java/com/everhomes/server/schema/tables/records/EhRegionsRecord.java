@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegionsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRegionsRecord> implements org.jooq.Record9<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.Integer, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Byte> {
 
-	private static final long serialVersionUID = 652289430;
+	private static final long serialVersionUID = 149703988;
 
 	/**
 	 * Setter for <code>ehcore.eh_regions.id</code>. id of the record
@@ -84,14 +84,14 @@ public class EhRegionsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everh
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area, 4: community neighborhood
+	 * Setter for <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area, 4: neighborhood (community)
 	 */
 	public void setScopeCode(java.lang.Byte value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area, 4: community neighborhood
+	 * Getter for <code>ehcore.eh_regions.scope_code</code>. 0 : country, 1: state/province, 2: city, 3: area, 4: neighborhood (community)
 	 */
 	public java.lang.Byte getScopeCode() {
 		return (java.lang.Byte) getValue(5);

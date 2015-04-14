@@ -11,9 +11,8 @@ public class NewTopicCommand {
     
     private Long categoryId;
     
-    private Byte visibleRegionScope;
-    private Long visibleRegionId;
-    private Long visibleRegionPath;
+    private Byte visibilityScope;
+    private Long visibilityScopeId;
     
     private String subject;
     private String content;
@@ -42,28 +41,20 @@ public class NewTopicCommand {
         this.categoryId = categoryId;
     }
 
-    public Byte getVisibleRegionScope() {
-        return visibleRegionScope;
+    public Byte getVisibilityScope() {
+        return visibilityScope;
     }
 
-    public void setVisibleRegionScope(Byte visibleRegionScope) {
-        this.visibleRegionScope = visibleRegionScope;
+    public void setVisibilityScope(Byte visibilityScope) {
+        this.visibilityScope = visibilityScope;
     }
 
-    public Long getVisibleRegionId() {
-        return visibleRegionId;
+    public Long getVisibilityScopeId() {
+        return visibilityScopeId;
     }
 
-    public void setVisibleRegionId(Long visibleRegionId) {
-        this.visibleRegionId = visibleRegionId;
-    }
-
-    public Long getVisibleRegionPath() {
-        return visibleRegionPath;
-    }
-
-    public void setVisibleRegionPath(Long visibleRegionPath) {
-        this.visibleRegionPath = visibleRegionPath;
+    public void setVisibilityScopeId(Long visibilityScopeId) {
+        this.visibilityScopeId = visibilityScopeId;
     }
 
     public String getSubject() {
