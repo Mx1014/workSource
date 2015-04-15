@@ -37,6 +37,9 @@ public class ServerWebSocketHandler implements WebSocketHandler {
     @Autowired
     private ClientWebSocketHandler clientWebSocketHandler;
     
+    @Autowired
+    private PusherWebSocketHandler pusherWebSocketHandler;
+    
     @Value("${heartbeat.interval}")
     private long heartbeatInterval;
     private Map<WebSocketSession, SessionStats> sessionStatsMap = new ConcurrentHashMap<>();
