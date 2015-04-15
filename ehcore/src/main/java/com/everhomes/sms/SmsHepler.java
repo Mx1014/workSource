@@ -1,5 +1,6 @@
 package com.everhomes.sms;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,14 @@ public class SmsHepler {
         LOGGER.error("cannot find encode type.text={}", text);
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                 "can not known encode");
+    }
+
+    public static String convert(String text) {
+        if (StringUtils.isEmpty(text)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "message is empty");
+        }
+        return getEncodingString(text).replace(" ", "%20").replace("=", "%3D");
     }
 
 }

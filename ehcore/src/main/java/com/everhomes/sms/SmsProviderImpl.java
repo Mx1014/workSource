@@ -1,10 +1,10 @@
 //@format
 package com.everhomes.sms;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -38,13 +38,20 @@ public class SmsProviderImpl implements SmsProvider {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    private Map<String, SmsHandler> handlers=new HashMap<String, SmsHandler>();
+    
     @Autowired
-    private Map<String, SmsHandler> handlers;
+    public void setHandlers(Map<String,SmsHandler> prop){
+        prop.forEach((name,handler)->{
+            handlers.put(name.toLowerCase(), handler);
+        });
+    }
+    
 
     private SmsHandler getHandler() {
         // find name from db
-        String handlerName = configurationProvider.getValue(VCODE_SEND_TYPE, "WM");
-        SmsHandler handler = handlers.get(handlerName);
+        String handlerName = configurationProvider.getValue(VCODE_SEND_TYPE, "MW");
+        SmsHandler handler = handlers.get(handlerName.toLowerCase());
         if (handler == null) {
             LOGGER.error("cannot find relate handler.handler={}", handlerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -53,11 +60,11 @@ public class SmsProviderImpl implements SmsProvider {
         return handler;
     }
 
-    protected void doSend(String phoneNumber, String text) {
+    private void doSend(String phoneNumber, String text) {
         LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text), phoneNumber,
                 System.currentTimeMillis());
-        String escapedText = convert(text);
-       
+        String escapedText = SmsHepler.convert(text);
+
         Future<?> f = taskQueue.submit(() -> {
             getHandler().doSend(phoneNumber, escapedText);
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
@@ -72,10 +79,10 @@ public class SmsProviderImpl implements SmsProvider {
         }
     }
 
-    protected void doSend(String[] phoneNumbers, String text) {
+    private void doSend(String[] phoneNumbers, String text) {
         LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text),
                 StringUtils.join(phoneNumbers, ","), System.currentTimeMillis());
-        String escapedText = convert(text);
+        String escapedText = SmsHepler.convert(text);
         Future<?> f = taskQueue.submit(() -> {
             getHandler().doSend(phoneNumbers, SmsHepler.getEncodingString(escapedText));
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
@@ -88,14 +95,6 @@ public class SmsProviderImpl implements SmsProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     e.getMessage());
         }
-    }
-    
-    private static String convert(String text) {
-        if (StringUtils.isEmpty(text)) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "message is empty");
-        }
-        return SmsHepler.getEncodingString(text).replace(" ", "%20").replace("=", "%3D");
     }
 
     @Override
