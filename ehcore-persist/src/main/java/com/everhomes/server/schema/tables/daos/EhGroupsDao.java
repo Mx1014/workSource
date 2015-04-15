@@ -132,6 +132,13 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
+	 * Fetch records that have <code>category_path IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCategoryPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CATEGORY_PATH, values);
+	}
+
+	/**
 	 * Fetch records that have <code>status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByStatus(java.lang.Byte... values) {

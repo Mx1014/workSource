@@ -1,30 +1,33 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.util.List;
+
 import com.everhomes.util.StringHelper;
 
 public class GroupDTO {
     private Long id;
+    private Long owningForumId;
     private String name;
     private String avatar;
     private String description;
     private Long creatorUid;
     private String createTime;
     private Byte privateFlag;
-    private Byte displayMode;
     private Integer joinPolicy;
     private Long memberCount;
-    private Long roleForNewPost;
-    private Long roleForDelPost;
     private String tag;
     private Long categoryId;
     private String categoryName;
     
-    // requestor/group relationship
+    //
+    // requestor/group relationship information
+    // 
     private Byte memberOf;
-    private Byte blockFlag;
-    private String nickName;
-    private Long role;
+    private String memberNickName;
+    private Long memberConfigFlag;
+    private List<Long> memberGroupPrivileges;
+    private List<Long> memberForumPrivileges;
     
     public GroupDTO() {
     }
@@ -85,14 +88,6 @@ public class GroupDTO {
         this.privateFlag = privateFlag;
     }
 
-    public Byte getDisplayMode() {
-        return displayMode;
-    }
-
-    public void setDisplayMode(Byte displayMode) {
-        this.displayMode = displayMode;
-    }
-
     public Integer getJoinPolicy() {
         return joinPolicy;
     }
@@ -107,22 +102,6 @@ public class GroupDTO {
 
     public void setMemberCount(Long memberCount) {
         this.memberCount = memberCount;
-    }
-
-    public Long getRoleForNewPost() {
-        return roleForNewPost;
-    }
-
-    public void setRoleForNewPost(Long roleForNewPost) {
-        this.roleForNewPost = roleForNewPost;
-    }
-
-    public Long getRoleForDelPost() {
-        return roleForDelPost;
-    }
-
-    public void setRoleForDelPost(Long roleForDelPost) {
-        this.roleForDelPost = roleForDelPost;
     }
 
     public String getTag() {
@@ -141,30 +120,30 @@ public class GroupDTO {
         this.memberOf = memberOf;
     }
 
-    public Byte getBlockFlag() {
-        return blockFlag;
+    public String getMemberNickName() {
+        return memberNickName;
     }
 
-    public void setBlockFlag(Byte blockFlag) {
-        this.blockFlag = blockFlag;
+    public void setMemberNickName(String memberNickName) {
+        this.memberNickName = memberNickName;
     }
 
-    public String getNickName() {
-        return nickName;
+    public List<Long> getMemberGroupPrivileges() {
+        return memberGroupPrivileges;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    public void setMemberGroupPrivileges(List<Long> memberGroupPrivileges) {
+        this.memberGroupPrivileges = memberGroupPrivileges;
     }
 
-    public Long getRole() {
-        return role;
+    public List<Long> getMemberForumPrivileges() {
+        return memberForumPrivileges;
     }
 
-    public void setRole(Long role) {
-        this.role = role;
+    public void setMemberForumPrivileges(List<Long> memberForumPrivileges) {
+        this.memberForumPrivileges = memberForumPrivileges;
     }
-    
+
     public Long getCategoryId() {
         return categoryId;
     }
@@ -179,6 +158,22 @@ public class GroupDTO {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public Long getOwningForumId() {
+        return owningForumId;
+    }
+
+    public void setOwningForumId(Long owningForumId) {
+        this.owningForumId = owningForumId;
+    }
+
+    public Long getMemberConfigFlag() {
+        return memberConfigFlag;
+    }
+
+    public void setMemberConfigFlag(Long memberConfigFlag) {
+        this.memberConfigFlag = memberConfigFlag;
     }
 
     @Override

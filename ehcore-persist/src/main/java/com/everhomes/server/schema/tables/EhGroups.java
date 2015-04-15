@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = -795962305;
+	private static final long serialVersionUID = 1395536945;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -90,6 +90,11 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.category_id</code>. group category
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.BIGINT, this, "group category");
+
+	/**
+	 * The column <code>ehcore.eh_groups.category_path</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> CATEGORY_PATH = createField("category_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_groups.status</code>. 0: inactive, 1: active

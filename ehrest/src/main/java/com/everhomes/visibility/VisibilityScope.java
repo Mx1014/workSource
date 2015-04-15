@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhome.visibility;
+package com.everhomes.visibility;
 
 public enum VisibilityScope {
     ALL((byte)0), COMMUNITY_ONLY((byte)1), NEARBY_COMMUNITIES((byte)2), 

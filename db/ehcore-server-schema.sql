@@ -330,17 +330,6 @@ CREATE TABLE `eh_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# populate default system user root/password
-#
-INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `password_hash`) VALUES (1, 'root', 'system user', 1, 
-    NOW(), '10:8e70e9c1ebf861202a28ed0020c4db0f4d9a3a3d29fb1c4d:40d84ad3b14b8da5575274136678ca1ab07d114e1d04ef70');
-
-#
-# Reserve first 1000 user ids
-#
-INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES ('EhUsers', 1000);
-
-#
 # member of eh_users partition
 #
 DROP TABLE IF EXISTS `eh_user_identifiers`;
@@ -531,6 +520,7 @@ CREATE TABLE `eh_groups` (
     `visibility_scope` TINYINT COMMENT 'define the group visibiliy region',
     `visibility_scope_id` BIGINT COMMENT 'region information, could be an id in eh_regions table or an id in eh_communities',
     `category_id` BIGINT COMMENT 'group category',
+    `category_path` VARCHAR(128),
     
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
     `member_count` BIGINT NOT NULL DEFAULT 0,

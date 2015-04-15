@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = -92823902;
+	private static final long serialVersionUID = 855954687;
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.id</code>. id of the record
@@ -196,199 +196,213 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_groups.category_path</code>.
+	 */
+	public void setCategoryPath(java.lang.String value) {
+		setValue(13, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_groups.category_path</code>.
+	 */
+	public java.lang.String getCategoryPath() {
+		return (java.lang.String) getValue(13);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_groups.status</code>. 0: inactive, 1: active
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.status</code>. 0: inactive, 1: active
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(13);
+		return (java.lang.Byte) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.member_count</code>.
 	 */
 	public void setMemberCount(java.lang.Long value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.member_count</code>.
 	 */
 	public java.lang.Long getMemberCount() {
-		return (java.lang.Long) getValue(14);
+		return (java.lang.Long) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(15);
+		return (java.lang.Long) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(16);
+		return (java.lang.Long) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(17);
+		return (java.lang.Long) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(20);
+		return (java.lang.String) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(21);
+		return (java.lang.String) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(22);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(23);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(25, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(25);
+		return (java.sql.Timestamp) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(26, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(26);
+		return (java.sql.Timestamp) getValue(27);
 	}
 
 	// -------------------------------------------------------------------------
@@ -417,7 +431,7 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	/**
 	 * Create a detached, initialised EhGroupsRecord
 	 */
-	public EhGroupsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
+	public EhGroupsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS);
 
 		setValue(0, id);
@@ -433,19 +447,20 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 		setValue(10, visibilityScope);
 		setValue(11, visibilityScopeId);
 		setValue(12, categoryId);
-		setValue(13, status);
-		setValue(14, memberCount);
-		setValue(15, integralTag1);
-		setValue(16, integralTag2);
-		setValue(17, integralTag3);
-		setValue(18, integralTag4);
-		setValue(19, integralTag5);
-		setValue(20, stringTag1);
-		setValue(21, stringTag2);
-		setValue(22, stringTag3);
-		setValue(23, stringTag4);
-		setValue(24, stringTag5);
-		setValue(25, createTime);
-		setValue(26, deleteTime);
+		setValue(13, categoryPath);
+		setValue(14, status);
+		setValue(15, memberCount);
+		setValue(16, integralTag1);
+		setValue(17, integralTag2);
+		setValue(18, integralTag3);
+		setValue(19, integralTag4);
+		setValue(20, integralTag5);
+		setValue(21, stringTag1);
+		setValue(22, stringTag2);
+		setValue(23, stringTag3);
+		setValue(24, stringTag4);
+		setValue(25, stringTag5);
+		setValue(26, createTime);
+		setValue(27, deleteTime);
 	}
 }

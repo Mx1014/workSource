@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1990158701;
+	private static final long serialVersionUID = 1484101541;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -26,6 +26,7 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.Byte     visibilityScope;
 	private java.lang.Long     visibilityScopeId;
 	private java.lang.Long     categoryId;
+	private java.lang.String   categoryPath;
 	private java.lang.Byte     status;
 	private java.lang.Long     memberCount;
 	private java.lang.Long     integralTag1;
@@ -57,6 +58,7 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.Byte     visibilityScope,
 		java.lang.Long     visibilityScopeId,
 		java.lang.Long     categoryId,
+		java.lang.String   categoryPath,
 		java.lang.Byte     status,
 		java.lang.Long     memberCount,
 		java.lang.Long     integralTag1,
@@ -85,6 +87,7 @@ public class EhGroups implements java.io.Serializable {
 		this.visibilityScope = visibilityScope;
 		this.visibilityScopeId = visibilityScopeId;
 		this.categoryId = categoryId;
+		this.categoryPath = categoryPath;
 		this.status = status;
 		this.memberCount = memberCount;
 		this.integralTag1 = integralTag1;
@@ -203,6 +206,14 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setCategoryId(java.lang.Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public java.lang.String getCategoryPath() {
+		return this.categoryPath;
+	}
+
+	public void setCategoryPath(java.lang.String categoryPath) {
+		this.categoryPath = categoryPath;
 	}
 
 	public java.lang.Byte getStatus() {

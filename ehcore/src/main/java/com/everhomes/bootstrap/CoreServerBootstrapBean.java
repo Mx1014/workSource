@@ -13,11 +13,13 @@ import org.springframework.stereotype.Component;
 import com.everhomes.acl.Acl;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.acl.PrivilegeConstants;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rpc.server.PingRequestPdu;
 import com.everhomes.rpc.server.PingResponsePdu;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -73,6 +75,89 @@ public class CoreServerBootstrapBean implements ApplicationListener<ApplicationE
             acl.setGrantType((byte)1);
             acl.setCreatorUid(User.ROOT_UID);
             acl.setRoleId(Role.SystemExtension);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            // setup default GROUP resource ACL
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.Create);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.AuthenticatedUser);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.Write);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceCreator);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.Delete);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceCreator);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            // setup default FORUM resource ACL
+            acl = new Acl();
+            acl.setOwnerType(EntityType.FORUM.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.ForumNewTopic);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceUser);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+
+            acl = new Acl();
+            acl.setOwnerType(EntityType.FORUM.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.ForumDeleteTopic);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceCreator);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+
+            acl = new Acl();
+            acl.setOwnerType(EntityType.FORUM.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.ForumDeleteTopic);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType(EntityType.FORUM.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.ForumNewReply);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceUser);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType(EntityType.FORUM.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.ForumDeleteReply);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceCreator);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+
+            acl = new Acl();
+            acl.setOwnerType(EntityType.FORUM.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.ForumDeleteReply);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
         }

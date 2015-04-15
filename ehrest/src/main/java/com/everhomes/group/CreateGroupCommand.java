@@ -7,19 +7,16 @@ public class CreateGroupCommand {
     private String name;
     private String description;
     private String avatar;
-    private Byte regionScope;
-    private Long regionId;
+    private Byte visibilityScope;
+    private Long visibilityScopeId;
     private Byte privateFlag;
-    
-    private Long roleForNewPost;
-    private Long roleForDelPost;
     
     private Long categoryId;
     
     private String tag;
 
     // json of List<RegionDescriptor>
-    private String jsonVisibleRegionDescriptors;
+    private String explicitRegionDescriptorsJson;
     
     public CreateGroupCommand() {
     }
@@ -48,44 +45,12 @@ public class CreateGroupCommand {
         this.avatar = avatar;
     }
 
-    public Byte getRegionScope() {
-        return regionScope;
-    }
-
-    public void setRegionScope(Byte regionScope) {
-        this.regionScope = regionScope;
-    }
-
-    public Long getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(Long regionId) {
-        this.regionId = regionId;
-    }
-
     public Byte getPrivateFlag() {
         return privateFlag;
     }
 
     public void setPrivateFlag(Byte privateFlag) {
         this.privateFlag = privateFlag;
-    }
-
-    public Long getRoleForNewPost() {
-        return roleForNewPost;
-    }
-
-    public void setRoleForNewPost(Long roleForNewPost) {
-        this.roleForNewPost = roleForNewPost;
-    }
-
-    public Long getRoleForDelPost() {
-        return roleForDelPost;
-    }
-
-    public void setRoleForDelPost(Long roleForDelPost) {
-        this.roleForDelPost = roleForDelPost;
     }
 
     public String getTag() {
@@ -96,20 +61,36 @@ public class CreateGroupCommand {
         this.tag = tag;
     }
     
-    public String getJsonVisibleRegionDescriptors() {
-        return jsonVisibleRegionDescriptors;
-    }
-
-    public void setJsonVisibleRegionDescriptors(String jsonVisibleRegionDescriptors) {
-        this.jsonVisibleRegionDescriptors = jsonVisibleRegionDescriptors;
-    }
-
     public Long getCategoryId() {
         return categoryId;
     }
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+    
+    public Byte getVisibilityScope() {
+        return visibilityScope;
+    }
+
+    public void setVisibilityScope(Byte visibilityScope) {
+        this.visibilityScope = visibilityScope;
+    }
+
+    public Long getVisibilityScopeId() {
+        return visibilityScopeId;
+    }
+
+    public void setVisibilityScopeId(Long visibilityScopeId) {
+        this.visibilityScopeId = visibilityScopeId;
+    }
+
+    public String getExplicitRegionDescriptorsJson() {
+        return explicitRegionDescriptorsJson;
+    }
+
+    public void setExplicitRegionDescriptorsJson(String explicitRegionDescriptorsJson) {
+        this.explicitRegionDescriptorsJson = explicitRegionDescriptorsJson;
     }
 
     @Override
