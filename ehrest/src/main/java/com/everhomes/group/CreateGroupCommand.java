@@ -1,10 +1,14 @@
 // @formatter:off
 package com.everhomes.group;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 public class CreateGroupCommand {
+    @NotNull
     private String name;
+    
     private String description;
     private String avatar;
     private Byte visibilityScope;

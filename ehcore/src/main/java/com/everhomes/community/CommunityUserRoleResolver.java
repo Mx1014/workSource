@@ -24,7 +24,7 @@ public class CommunityUserRoleResolver implements ResourceUserRoleResolver {
     private CommunityProvider communityProvider;
     
     @Override
-    public List<Long> determineRoleInResource(long userId, String resourceType, Long resourceId, Object... args) {
+    public List<Long> determineRoleInResource(long userId, Long ownerId, String resourceType, Long resourceId) {
         User user = this.userProvider.findUserById(userId);
         if(user == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
