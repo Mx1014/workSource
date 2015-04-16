@@ -9,3 +9,4 @@ ehcore/atomikos
 ehrest/target
 hs_err_pid*
 ehborder/.gitignore
+ehcore.log*

@@ -95,6 +95,8 @@ public class AdminController extends ControllerBase {
         border.setConfigTag(cmd.getConfigTag());
         border.setDescription(cmd.getDescription());
         this.borderProvider.createBorder(border);
+        
+        //LOGGER.info("" + borderConnectionProvider.broadcastToAllBorders(0, null));
 
         return new RestResponse(border);
     }
@@ -173,7 +175,12 @@ public class AdminController extends ControllerBase {
         
         long requestId = LocalSequenceGenerator.getNextSequence();
         PingRequestPdu request = new PingRequestPdu();
-        request.setBody("ping border");
+        String bigBody = "";
+        for(int i = 0; i < 500; i++) {
+            bigBody += " ping border ";
+        }
+        //request.setBody("ping border");
+        request.setBody(bigBody);
         BorderConnection connection = borderConnectionProvider.getBorderConnection(id);
         try {
             connection.sendMessage(requestId, request);
