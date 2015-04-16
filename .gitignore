@@ -6,3 +6,9 @@
 ehcore/atomikos
 ehrest/target
 .gitignore
+hs_err_pid*
+ehborder/.gitignore
+ehcore.log*
+cscope.*
+tags
+

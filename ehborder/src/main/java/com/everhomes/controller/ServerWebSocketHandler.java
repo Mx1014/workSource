@@ -21,6 +21,7 @@ import com.everhomes.rpc.PduFrame;
 import com.everhomes.rpc.server.ClientForwardPdu;
 import com.everhomes.rpc.server.PingRequestPdu;
 import com.everhomes.rpc.server.PingResponsePdu;
+import com.everhomes.rpc.server.PusherNotifyPdu;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.NamedHandler;
 import com.everhomes.util.NamedHandlerDispatcher;
@@ -36,6 +37,9 @@ public class ServerWebSocketHandler implements WebSocketHandler {
 
     @Autowired
     private ClientWebSocketHandler clientWebSocketHandler;
+    
+    @Autowired
+    private PusherWebSocketHandler pusherWebSocketHandler;
     
     @Value("${heartbeat.interval}")
     private long heartbeatInterval;
@@ -102,6 +106,12 @@ public class ServerWebSocketHandler implements WebSocketHandler {
         if(LOGGER.isDebugEnabled())
             LOGGER.debug(String.format("Received heartbeat from core server %s, last receive tick on border is %d", 
                 session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
+    }
+    
+    @NamedHandler(value="", byClass=PusherNotifyPdu.class)
+    private void handlePusherNotifyPdu(WebSocketSession session, PduFrame frame) {
+        PusherNotifyPdu pdu = frame.getPayload(PusherNotifyPdu.class);
+        pusherWebSocketHandler.notify(session, pdu);
     }
 
     @Override
