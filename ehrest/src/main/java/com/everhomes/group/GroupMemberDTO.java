@@ -10,6 +10,7 @@ public class GroupMemberDTO {
     private Long memberId;
     private Long memberRole;
     private String avatar;
+    private Byte memberStatus;
     
     public GroupMemberDTO() {
     }
@@ -62,6 +63,14 @@ public class GroupMemberDTO {
         this.avatar = avatar;
     }
     
+    public Byte getMemberStatus() {
+        return memberStatus;
+    }
+
+    public void setMemberStatus(Byte memberStatus) {
+        this.memberStatus = memberStatus;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +20,18 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -125,5 +125,48 @@ public class AddressProviderImpl implements AddressProvider {
         });
         
         return result[0];
+    }
+    
+    @Override
+    public List<Address> queryAddress(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        
+        final List<Address> addresses = new ArrayList<>();
+        
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhAddresses.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ADDRESSES.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
+            query.addLimit(count - addresses.size());
+            
+            query.fetch().map((r) -> {
+                addresses.add(ConvertHelper.convert(r, Address.class));
+                return null;
+            });
+           
+            if(addresses.size() >= count) {
+                locator.setAnchor(addresses.get(addresses.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if(addresses.size() > 0) {
+            locator.setAnchor(addresses.get(addresses.size() - 1).getId());
+        }
+        
+        return addresses;
     }
 }

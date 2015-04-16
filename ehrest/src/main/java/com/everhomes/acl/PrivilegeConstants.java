@@ -14,4 +14,11 @@ public interface PrivilegeConstants {
     public static final long ForumDeleteTopic = 101L;
     public static final long ForumNewReply = 102L;
     public static final long ForumDeleteReply = 103L;
+    
+    // privileges defined by Group module
+    public static final long GroupInviteJoin = 150L;
+    public static final long GroupListMember = 151L;
+    public static final long GroupAdminOps = 152L;
+    public static final long GroupRequestAdminRole = 153L;
+    
 }

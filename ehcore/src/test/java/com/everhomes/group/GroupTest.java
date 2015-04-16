@@ -18,6 +18,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.sharding.ShardingProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -64,7 +65,7 @@ public class GroupTest {
     @Ignore @Test
     public void testGroupMemberIteration() {
         
-        GroupMemberLocator locator = new GroupMemberLocator(3);
+        CrossShardListingLocator locator = new CrossShardListingLocator(3);
         while(true) {
             List<GroupMember> members = this.groupProvider.listGroupMembers(locator, 20);
             

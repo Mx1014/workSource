@@ -21,9 +21,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberAdminStatus;
-import com.everhomes.group.GroupMemberLocator;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -201,7 +201,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     }
     
     private GroupMember pickOneMemberToPromote(Family family) {
-        GroupMemberLocator locator = new GroupMemberLocator(family.getId());
+        CrossShardListingLocator locator = new CrossShardListingLocator(family.getId());
         
         List<GroupMember> members = this.groupProvider.listGroupMembers(locator, Integer.MAX_VALUE);
         return members.get(0);
