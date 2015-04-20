@@ -272,7 +272,7 @@ CREATE TABLE `eh_audit_logs`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of user-related partition group
+# key table of user-related sharding group
 #
 DROP TABLE IF EXISTS `eh_users`;
 CREATE TABLE `eh_users` (
@@ -376,7 +376,7 @@ CREATE TABLE `eh_user_groups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_users partition group
+# member of eh_users sharding group
 # secondary resource objects (after eh_users)
 #
 DROP TABLE IF EXISTS `eh_user_followed_families`;
@@ -430,7 +430,7 @@ CREATE TABLE `eh_user_invitation_roster` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_users partition group
+# member of eh_users sharding group
 #
 DROP TABLE IF EXISTS `eh_user_blacklist`;
 CREATE TABLE `eh_user_blacklist` (
@@ -447,7 +447,7 @@ CREATE TABLE `eh_user_blacklist` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_users partition group
+# member of eh_users sharding group
 #
 DROP TABLE IF EXISTS `eh_user_favorates`;
 CREATE TABLE `eh_user_favorites` (
@@ -464,7 +464,7 @@ CREATE TABLE `eh_user_favorites` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_users partition group
+# member of eh_users sharding group
 #
 DROP TABLE IF EXISTS `eh_user_profiles`;
 CREATE TABLE `eh_user_profiles`(
@@ -498,7 +498,7 @@ CREATE TABLE `eh_user_profiles`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of grouping related partition group
+# key table of grouping related sharding group
 # Usually there is no need for group object to carry information for other applications, therefore there is
 # not an app_id field
 #
@@ -551,7 +551,7 @@ CREATE TABLE `eh_groups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_groups partition group
+# member of eh_groups sharding group
 #
 DROP TABLE IF EXISTS `eh_group_visible_scopes`;
 CREATE TABLE `eh_group_visible_scopes` (
@@ -566,7 +566,7 @@ CREATE TABLE `eh_group_visible_scopes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_groups partition group
+# member of eh_groups sharding group
 #
 DROP TABLES IF EXISTS `eh_group_profiles`;
 CREATE TABLE `eh_group_profiles` (
@@ -600,7 +600,7 @@ CREATE TABLE `eh_group_profiles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_groups partition group
+# member of eh_groups sharding group
 #
 DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (
@@ -645,7 +645,7 @@ CREATE TABLE `eh_group_members` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_groups partition group
+# member of eh_groups sharding group
 #
 DROP TABLE IF EXISTS `eh_group_op_requests`;
 CREATE TABLE `eh_group_op_requests` (
@@ -709,7 +709,7 @@ CREATE TABLE `eh_regions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of the partition group
+# key table of the sharding group
 # shared resource objects, custom fields may not really be needed
 #
 DROP TABLE IF EXISTS `eh_communities`;
@@ -816,7 +816,7 @@ CREATE TABLE `eh_community_profiles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# Key table in address related partition group
+# Key table in address related sharding group
 # shared resources, custom fields may not really be needed
 #
 DROP TABLE IF EXISTS `eh_addresses`;
@@ -866,7 +866,7 @@ CREATE TABLE `eh_addresses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_groups(eh_families) partition group
+# member of eh_groups(eh_families) sharding group
 # secondary resource objects (after eh_families)
 #
 DROP TABLE IF EXISTS `eh_family_followers`;
@@ -883,7 +883,7 @@ CREATE TABLE `eh_family_followers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of the partition group
+# key table of the sharding group
 # first level resource objects
 #
 DROP TABLE IF EXISTS `eh_banners`;
@@ -992,7 +992,7 @@ CREATE TABLE `eh_banner_orders` (
 
 #
 # Resource management
-# key table of binary resource management partition group
+# key table of binary resource management sharding group
 #
 DROP TABLE IF EXISTS `eh_binary_resources`;
 CREATE TABLE `eh_binary_resources` (
@@ -1016,7 +1016,7 @@ CREATE TABLE `eh_binary_resources` (
 
 #
 # Resource management
-# key table of rich text resource management partition group
+# key table of rich text resource management sharding group
 #
 DROP TABLE IF EXISTS `eh_rtxt_resources`;
 CREATE TABLE `eh_rtxt_resources`(
@@ -1043,7 +1043,7 @@ CREATE TABLE `eh_rtxt_resources`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of event partition group
+# key table of event sharding group
 # old event subscription table and other event related profile items will be consolidated
 # in eh_event_profiles table
 #
@@ -1089,7 +1089,7 @@ CREATE TABLE `eh_events`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of event partition group
+# member of event sharding group
 #
 DROP TABLE IF EXISTS `eh_event_roster`;
 CREATE TABLE `eh_event_roster`(
@@ -1113,7 +1113,7 @@ CREATE TABLE `eh_event_roster`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of event partition group
+# member of event sharding group
 #
 DROP TABLE IF EXISTS `eh_event_ticket_groups`;
 CREATE TABLE `eh_event_ticket_groups`(
@@ -1131,7 +1131,7 @@ CREATE TABLE `eh_event_ticket_groups`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of event partition group
+# member of event sharding group
 # secondary resource objects (after eh_events)
 #
 DROP TABLE IF EXISTS `eh_event_tickets`;
@@ -1152,7 +1152,7 @@ CREATE TABLE `eh_event_tickets`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_events partition group
+# member of eh_events sharding group
 # entity profile for eh_events
 #
 DROP TABLE IF EXISTS `eh_event_profiles`;
@@ -1188,7 +1188,7 @@ CREATE TABLE `eh_event_profiles`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of activity partition group
+# key table of activity sharding group
 # first level resource objects
 #
 DROP TABLE IF EXISTS `eh_activities`;
@@ -1234,7 +1234,7 @@ CREATE TABLE `eh_activities` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_activities partition group
+# member of eh_activities sharding group
 # secondary resource objects (after eh_events)
 #
 DROP TABLE IF EXISTS `eh_activity_roster`;
@@ -1263,7 +1263,7 @@ CREATE TABLE `eh_activity_roster`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of polling management partition group
+# key table of polling management sharding group
 # First level resource objects
 #
 DROP TABLE IF EXISTS `eh_polls`;
@@ -1336,7 +1336,7 @@ CREATE TABLE `eh_poll_votes`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of business management partition group
+# key table of business management sharding group
 # First level resource objects
 #
 DROP TABLE IF EXISTS `eh_business`;
@@ -1361,7 +1361,7 @@ CREATE TABLE `eh_business`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_business partition group
+# member of eh_business sharding group
 # entity profile info for eh_business objects
 #
 DROP TABLE IF EXISTS `eh_business_profiles`;
@@ -1396,7 +1396,7 @@ CREATE TABLE `eh_business_profiles`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_business partition group
+# member of eh_business sharding group
 # secondary resource objects (after owner eh_business object)
 #
 DROP TABLE IF EXISTS `eh_biz_coupon_groups`;
@@ -1423,7 +1423,7 @@ CREATE TABLE `eh_biz_coupon_groups`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_business partition group
+# member of eh_business sharding group
 # secondary resource objects (after owner eh_business object)
 #
 DROP TABLE IF EXISTS `eh_biz_coupon`;

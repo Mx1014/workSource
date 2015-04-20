@@ -1,0 +1,35 @@
+package com.everhomes.group;
+
+import java.util.List;
+
+import com.everhomes.util.StringHelper;
+
+public class ListGroupCommandResponse {
+    private Long nextPageAnchor;
+
+    private List<GroupDTO> groups;
+    
+    public ListGroupCommandResponse() {
+    }
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
+    }
+
+    public List<GroupDTO> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<GroupDTO> groups) {
+        this.groups = groups;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
