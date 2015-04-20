@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.Tuple;
 
 @Component
 public class ClientPackageProviderImpl implements ClientPackageProvider {
@@ -67,6 +69,12 @@ public class ClientPackageProviderImpl implements ClientPackageProvider {
     public void deletePackageFileById(long id) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public List<ClientPackage> listClientPackages(Tuple<String, SortOrder>... orderBy) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
