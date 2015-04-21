@@ -2,6 +2,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>  
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>  
@@ -14,7 +15,7 @@
 </td></tr>
 <tr><td>
 
-<form method="POST" action="${restMethod.uri}">
+<form method="POST" action="${restMethod.uri}" enctype="multipart/form-data">
 
 <table border="1" width="100%">
 <c:forEach var="p" items="${restMethod.params}">
@@ -29,7 +30,14 @@
             </c:otherwise>
         </c:choose>
         </td>
-        <td><input style="width:99%;" name="${p.paramName}"/></td>
+        <c:choose>
+	        <c:when test="${fn:contains(p.paramName,'attachment')}">
+	        	<td><input style="width:99%;" type="file" name="${p.paramName}" /></td>
+	        </c:when>
+	        <c:otherwise>
+	        	<td><input style="width:99%;" name="${p.paramName}" /></td>
+	        </c:otherwise>
+        </c:choose>
     </tr>
 </c:forEach>
 

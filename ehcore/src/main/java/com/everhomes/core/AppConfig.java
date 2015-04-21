@@ -15,6 +15,7 @@ import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
@@ -91,6 +92,12 @@ public class AppConfig {
         return factory;
     }
     
+    /* 
+     * According to the test: when try to upload a file, the parameter 'MultipartFile[]' will be empty 
+     * if bean 'multipartResolver' is configured as bellow. So fail to upload the file and the reason is unclear yet. 
+     * The file can be uploaded successfully after the below bean 'multipartResolver' is commented.
+     * But it is not sure whether other module will be affected without the bean 'multipartResolver'.
+     * By liangqishi 20150417
     @Bean
     CommonsMultipartResolver multipartResolver() {
         CommonsMultipartResolver resolver = new CommonsMultipartResolver();
@@ -99,4 +106,5 @@ public class AppConfig {
         
         return resolver;
     }
+    */
 }

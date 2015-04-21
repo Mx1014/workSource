@@ -1,9 +1,23 @@
 package com.everhomes.pkg;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.everhomes.address.CommunitySummaryDTO;
 import com.everhomes.address.SuggestCommunityCommand;
@@ -11,23 +25,25 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.pkg.AddClientPackageCommand;
+import com.everhomes.region.RegionController;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.RequireAuthentication;
 
 @RestController
 @RequestMapping("/pkg")
 public class ClientPackageController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientPackageController.class);
 
-    @RequestMapping("add")
-    @RestReturn(value=String.class)
-    public RestResponse addPackage(@Valid AddClientPackageCommand cmd) {
-        
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-/*    
+//    @RequestMapping("add")
+//    @RestReturn(value=String.class)
+//    public RestResponse addPackage(@Valid AddClientPackageCommand cmd) {
+//        
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+   
     @RequestMapping("list")
     @RestReturn(value=ClientPackageFileDTO.class, collection=true)
     public RestResponse listPackageFiles(@Valid AddClientPackageCommand cmd) {
@@ -37,30 +53,41 @@ public class ClientPackageController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+   
+    @RequestMapping("getUpgradeFileInfo")
+    @RestReturn(value=ClientPackageFileDTO.class, collection=true)
+    public RestResponse getUpgradeFileInfo(@Valid AddClientPackageCommand cmd) {
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
-    @RequestMapping(value="/upload", method = RequestMethod.POST)
-    public void upload(@RequestParam(value = "offset", required = false) Long offset, 
-        @RequestParam(value = "length", required = false) Long length,
+    //@RequestMapping(value="upload", method = RequestMethod.POST)
+    @RequestMapping(value="add", method = RequestMethod.POST)
+    public void addPackage(@Valid AddClientPackageCommand cmd, 
         @RequestParam(value = "attachment") MultipartFile[] files) {
 
-        LOGGER.info("Offset: " + offset + ", legnth: " + length + ", file count: " + files.length);
-        for(MultipartFile file : files) {
-            LOGGER.info("file content type: " + file.getContentType() + ", file content length: " + file.getSize()
-                + ", file name: " + file.getName() + ", orig file name: " + file.getOriginalFilename());
-
-            try {
-
-                file.transferTo(new File("/tmp/" + file.getOriginalFilename()));
-
-            } catch (IllegalStateException e) {
-
-            } catch (IOException e) {
-
-            }
-        }
+//        for(MultipartFile file : files) {
+//            LOGGER.info("file content type: " + file.getContentType() + ", file content length: " + file.getSize()
+//                + ", file name: " + file.getName() + ", orig file name: " + file.getOriginalFilename());
+//
+//            try {
+//
+//                file.transferTo(new File("D:/tmp/" + file.getOriginalFilename()));
+//
+//            } catch (IllegalStateException e) {
+//
+//            } catch (IOException e) {
+//
+//            }
+//        }
+    	System.out.println(files);
     }
 
-    @RequestMapping(value="/download")
+    @RequireAuthentication(false)
+    @RequestMapping(value="download")
     public ModelAndView download(@RequestParam(value="name") String name, 
 
         HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -99,5 +126,4 @@ public class ClientPackageController extends ControllerBase {
 
         return null;
     }
-*/    
 }
