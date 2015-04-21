@@ -1,52 +1,41 @@
 // @formatter:off
 package com.everhomes.pkg;
 
+import java.io.File;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
+import org.jooq.SortField;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.Acl;
-import com.everhomes.acl.AclAccessor;
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.PrivilegeConstants;
-import com.everhomes.acl.ResourceUserRoleResolver;
-import com.everhomes.acl.Role;
-import com.everhomes.address.Address;
-import com.everhomes.address.ClaimAddressCommand;
-import com.everhomes.address.ClaimedAddressInfo;
-import com.everhomes.app.AppConstants;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.family.Family;
-import com.everhomes.forum.Forum;
-import com.everhomes.forum.ForumProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.region.RegionDescriptor;
+import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.FileHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.google.gson.Gson;
+import com.everhomes.util.SortOrder;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.ZipHelper;
 
 @Component
 public class ClientPackageServiceImpl implements ClientPackageService {
-    private Gson gson = new Gson();
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClientPackageServiceImpl.class);
     
     @Autowired
     private ClientPackageProvider clientPackageProvider;
@@ -55,34 +44,231 @@ public class ClientPackageServiceImpl implements ClientPackageService {
     private ConfigurationProvider configurationProvider;
     
     @Autowired
-    private UserProvider userProvider;
-    
-    @Autowired
-    private CategoryProvider categoryProvider;
-    
-    @Autowired
-    private ForumProvider forumProvider;
-    
-    @Autowired
-    private AclProvider aclProvider;
-    
-    @Autowired
     private DbProvider dbProvider;
     
     @Autowired
     private ConfigurationProvider configProvider;
     
+    /** The default path where will store all the package files uploaded */
+    public final static String PKG_STORE_PATH = "pkg.storepath";
+    
+    /** The flag indicate whether the package is uploaded in debug mode */
+    public final static String PKG_DEBUG_FLAG = "pkg.debug";
+    
+    /** The zip file flag, it will be used as part of the zip file path */
+    public final static String ZIP_FILE_FLAG = "zip";
+    
+    /** The uncompressed package file flag, it will be used as part of the file path */
+    public final static String PKG_FILE_FLAG = "files";
+    
+    @SuppressWarnings("all") 
     @Override
-    public long addPackage(AddClientPackageCommand cmd, MultipartFile[] files) {
+    public List<ClientPackageFileDTO> listClientPackages(Tuple<String, SortOrder>... orderBy) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_CLIENT_PACKAGES, orderBy);
+    	
+    	List<ClientPackageFileDTO> result;
+    	SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CLIENT_PACKAGES);
+    	if(orderByFields != null) {
+            result = selectStep.orderBy(orderByFields).fetch().map(
+                new DefaultRecordMapper(Tables.EH_CLIENT_PACKAGES.recordType(), ClientPackageFileDTO.class)
+            );
+        } else {
+            result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CLIENT_PACKAGES.recordType(), ClientPackageFileDTO.class)
+            );
+        }
+    	
+    	return result;
+    }
+    
+    @SuppressWarnings("all")
+	@Override
+    public ClientPackageFileDTO getUpgradeFileInfo(GetUpgradeFileInfoCommand cmd) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        List<ClientPackageFileDTO> result;
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CLIENT_PACKAGES);
+        Condition condition = null;
+        
+    	String name = cmd.getName();
+        if(name != null && !name.isEmpty()) {
+        	condition = Tables.EH_CLIENT_PACKAGES.NAME.eq(name);
+        }
+        
+        long versionCode = cmd.getVersionCode();
+        if(versionCode > 0) {
+            if(condition != null)
+                condition = condition.and(Tables.EH_CLIENT_PACKAGES.VERSION_CODE.eq(versionCode));
+            else
+                condition = Tables.EH_CLIENT_PACKAGES.VERSION_CODE.eq(versionCode);
+        }
+        
+        byte packageEdition = cmd.getPackageEdition();
+        if(packageEdition > 0) {
+            if(condition != null)
+                condition = condition.and(Tables.EH_CLIENT_PACKAGES.PACKAGE_EDITION.eq(packageEdition));
+            else
+                condition = Tables.EH_CLIENT_PACKAGES.PACKAGE_EDITION.eq(packageEdition);
+        }
+        
+        byte devicePlatform = cmd.getDevicePlatform();
+        if(devicePlatform > 0) {
+            if(condition != null)
+                condition = condition.and(Tables.EH_CLIENT_PACKAGES.DEVICE_PLATFORM.eq(devicePlatform));
+            else
+                condition = Tables.EH_CLIENT_PACKAGES.DEVICE_PLATFORM.eq(devicePlatform);
+        }
+        
+        int distributionChannel = cmd.getDistributionChannel();
+        if(distributionChannel > 0) {
+            if(condition != null)
+                condition = condition.and(Tables.EH_CLIENT_PACKAGES.DISTRIBUTION_CHANNEL.eq(distributionChannel));
+            else
+                condition = Tables.EH_CLIENT_PACKAGES.DISTRIBUTION_CHANNEL.eq(distributionChannel);
+        }
+        
+        String tag = cmd.getTag();
+        if(tag != null && !tag.isEmpty()) {
+            if(condition != null)
+                condition = condition.and(Tables.EH_CLIENT_PACKAGES.TAG.eq(tag));
+            else
+                condition = Tables.EH_CLIENT_PACKAGES.TAG.eq(tag);
+        }
+        
+        if(condition != null) {
+            selectStep.where(condition);
+        }
+        
+        result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CLIENT_PACKAGES.recordType(), ClientPackageFileDTO.class)
+        );
+        
+        if(result == null || result.size() == 0) {
+        	return null;
+        } else {
+        	return result.get(0);
+        }
+    }
+    
+    @Override
+    public ClientPackageFileDTO addPackage(AddClientPackageCommand cmd, MultipartFile[] files) {
     	User creator = UserContext.current().getUser();
         long creatorId = creator.getId();
+        
+        if(files == null || files.length == 0) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid parameter, no file is uploaded");
+        }
+        
+        String storePath = configurationProvider.getValue(PKG_STORE_PATH, "");
+        if(storePath == null || storePath.isEmpty()) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid configuration, the store path is not found");
+        }
         
         ClientPackage pkg = createNewClientPackage(cmd, creatorId);
         clientPackageProvider.createPackage(pkg);
         
-        configurationProvider.getValue("", "/tmp");
+        long pkgId = pkg.getId();
+    	File storeBaseDir = new File(storePath, String.valueOf(pkgId));
+        File zipFile = savePackageFile(storeBaseDir, files);
+        if(zipFile == null) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Failed to save the package file");
+        }
         
-    	return pkg.getId();
+        // The files in zip file need to be edited by developers when it's in debug mode, 
+        // so extract the files after zip file is uploaded
+        boolean isDebug = configurationProvider.getBooleanValue(PKG_DEBUG_FLAG, false);
+        if(isDebug) {
+        	decompressPackageZipFile(zipFile, storeBaseDir);
+        }
+        
+        return ConvertHelper.convert(pkg, ClientPackageFileDTO.class);
+    }
+    
+    @Override
+    public File preparePackageFile(long pkgId) {
+    	ClientPackage pkg = clientPackageProvider.findClientPackageById(pkgId);
+    	if(pkg == null) {
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid parameter, the package is not found for id " + pkgId);
+    	}
+        
+        String storePath = configurationProvider.getValue(PKG_STORE_PATH, "");
+        if(storePath == null || storePath.isEmpty()) {
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid configuration, the store path is not found");
+        }
+    	
+    	File storeBaseDir = new File(storePath, String.valueOf(pkgId));
+    	
+        boolean isDebug = configurationProvider.getBooleanValue(PKG_DEBUG_FLAG, false);
+    	File zipFileDir = new File(storeBaseDir, ZIP_FILE_FLAG);
+        File zipFile = null;
+        
+        if(isDebug) {
+        	// The package file may be edited by developers when it's in debug mode, 
+            // so compress the package file before downloaded.
+        	if(zipFileDir.exists()) {
+        		File[] childFiles = zipFileDir.listFiles();
+        		for(File childFile : childFiles) {
+        			FileHelper.deleteFile(childFile);
+        		}
+        	}
+        	zipFile = decompressPackageZipFile(storeBaseDir);
+        } else {
+        	// When it's not in debug mode, find the first zip file directly
+        	if(zipFileDir.exists()) {
+        		File[] childFiles = zipFileDir.listFiles();
+        		for(File childFile : childFiles) {
+        			String fileName = childFile.getName();
+        			if(fileName.equalsIgnoreCase(ZIP_FILE_FLAG)) {
+        				zipFile = childFile;
+        				break;
+        			}
+        		}
+        	}
+        }
+        
+        return zipFile;
+    }
+    
+    /**
+     * Save the package file to disk, the path format: <sotrePath>/<pkgId>/<originalPackageName>
+     * @param storeBaseDir The base directory of storing package file
+     * @param files The package file object
+     * @return zip file if saved successfully, null otherwise
+     */
+    private File savePackageFile(File storeBaseDir, MultipartFile[] files) {
+        File zipFileDir = new File(storeBaseDir, ZIP_FILE_FLAG);
+        
+        String zipFileName = files[0].getOriginalFilename();
+        File zipFile = new File(zipFileDir, zipFileName);
+        
+        try {
+        	if(FileHelper.copyFile(files[0].getInputStream(), zipFile)) {
+            	return zipFile;
+            } 
+        } catch(Exception e) {
+        	LOGGER.error("Failed to save package file, storeBaseDir=" + storeBaseDir + ", file=" + files[0].getOriginalFilename(), e);
+        }
+        
+        return null;
+    }
+    
+    private void decompressPackageZipFile(File zipFile, File storeBaseDir) {
+    	File pkgFileDir = new File(storeBaseDir, PKG_FILE_FLAG);
+    	ZipHelper.decompress(zipFile.getAbsolutePath(), pkgFileDir.getAbsolutePath());
+    }
+    
+    private File decompressPackageZipFile(File storeBaseDir) {
+    	File pkgFileDir = new File(storeBaseDir, PKG_FILE_FLAG);
+    	File zipFile = new File(storeBaseDir, pkgFileDir.getName()+".zip");
+    	ZipHelper.compress(zipFile.getAbsolutePath(), pkgFileDir.getAbsolutePath());
+    	
+    	return zipFile;
     }
     
     private ClientPackage createNewClientPackage(AddClientPackageCommand cmd, long creatorId) {
@@ -101,415 +287,5 @@ public class ClientPackageServiceImpl implements ClientPackageService {
         
         return pkg;
     }
-    
-//    @Override
-//    public GroupDTO createGroup(CreateGroupCommand cmd) {
-//        User user = UserContext.current().getUser();
-//        long uid = user.getId();
-//        
-//        return this.dbProvider.execute((status) -> {
-//            Group group = new Group();
-//            group.setCreatorUid(uid);
-//            group.setName(cmd.getName());
-//            group.setAvatar(cmd.getAvatar());
-//            group.setDescription(cmd.getDescription());
-//            group.setDiscriminator(GroupDiscriminator.GROUP.getCode());
-//            
-//            if(cmd.getCategoryId() != null) {
-//                Category category = this.categoryProvider.findCategoryById(cmd.getCategoryId());
-//                if(category == null)
-//                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-//                            ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid category");
-//                
-//                group.setCategoryId(cmd.getCategoryId());
-//                group.setCategoryPath(category.getPath());
-//            }
-//            
-//            byte privateFlag = 0;
-//            if(cmd.getPrivateFlag() != null)
-//                privateFlag = cmd.getPrivateFlag().byteValue();
-//            group.setPrivateFlag(privateFlag);
-//            
-//            // join policy is not exposed current in API, derive it from its visibility flag
-//            if(privateFlag != 0) {
-//                group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
-//                
-//                Acl acl = new Acl();
-//                acl.setOwnerType(EntityType.GROUP.getCode());
-//                acl.setPrivilegeId(PrivilegeConstants.Visible);
-//                acl.setGrantType((byte)1);
-//                acl.setCreatorUid(User.ROOT_UID);
-//                acl.setRoleId(Role.ResourceUser);
-//                acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//                this.aclProvider.createAcl(acl);
-//            } else {
-//                Acl acl = new Acl();
-//                acl.setOwnerType(EntityType.GROUP.getCode());
-//                acl.setPrivilegeId(PrivilegeConstants.Visible);
-//                acl.setGrantType((byte)1);
-//                acl.setCreatorUid(User.ROOT_UID);
-//                acl.setRoleId(Role.AuthenticatedUser);
-//                acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//                this.aclProvider.createAcl(acl);
-//            }
-//            
-//            if(cmd.getTag() != null)
-//                group.setTag(cmd.getTag());
-//           
-//            group.setStatus(GroupAdminStatus.ACTIVE.getCode());
-//            this.groupProvider.createGroup(group);
-//    
-//            // create the group owned forum and save it
-//            Forum forum = createGroupForum(group);
-//            group.setOwningForumId(forum.getId());
-//            this.groupProvider.updateGroup(group);
-//            
-//            GroupMember member = new GroupMember();
-//            member.setGroupId(group.getId());
-//            member.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//            member.setCreatorUid(uid);
-//            member.setMemberType(EntityType.USER.getCode());
-//            member.setMemberId(uid);
-//            member.setMemberNickName(user.getAvatar());
-//            member.setMemberRole(Role.ResourceCreator);
-//            member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-//            this.groupProvider.createGroupMember(member);
-//            
-//            if(cmd.getExplicitRegionDescriptorsJson() != null) {
-//                RegionDescriptor[] regionDescriptors = gson.fromJson(cmd.getExplicitRegionDescriptorsJson(),
-//                        RegionDescriptor[].class);
-//                
-//                if(regionDescriptors != null && regionDescriptors.length > 0) {
-//                    for(RegionDescriptor regionDescriptor: regionDescriptors) {
-//                        GroupVisibilityScope scope = new GroupVisibilityScope();
-//                        scope.setOwnerId(group.getId());
-//                        scope.setScopeCode(regionDescriptor.getRegionScope());
-//                        scope.setScopeId(regionDescriptor.getRegionId());
-//                        
-//                        this.groupProvider.createGroupVisibleScope(scope);
-//                    }
-//                }
-//            }
-//            
-//            return toGroupDTO(group);
-//        });
-//    }
-//    
-//    @Override
-//    public GroupDTO updateGroup(UpdateGroupCommand cmd) {
-//        if(cmd.getGroupId() == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Invalid parameter, groupId could not be empty");
-//        
-//        User user = UserContext.current().getUser();
-//        long groupId = cmd.getGroupId().longValue();
-//        checkGroupPrivilege(user.getId(), groupId, PrivilegeConstants.Write);
-//        
-//        Group group = this.groupProvider.findGroupById(groupId);
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Invalid parameter, could not find the group object");
-//        
-//        if(cmd.getAvatar() != null)
-//            group.setAvatar(cmd.getAvatar());
-//        
-//        if(cmd.getDescription() != null)
-//            group.setDescription(cmd.getDescription());
-//        
-//        if(cmd.getName() != null)
-//            group.setName(cmd.getName());
-//        
-//        if(cmd.getTag() != null)
-//            group.setTag(cmd.getTag());
-//        
-//        if(cmd.getVisibilityScope() != null)
-//            group.setVisibilityScope(cmd.getVisibilityScope());
-//        if(cmd.getVisibilityScopeId() != null)
-//            group.setVisibilityScopeId(cmd.getVisibilityScopeId());
-//        
-//        if(cmd.getCategoryId() != null) {
-//            group.setCategoryId(cmd.getCategoryId());
-//            
-//            Category category = this.categoryProvider.findCategoryById(cmd.getCategoryId());
-//            if(category != null)
-//                group.setCategoryPath(category.getPath());
-//        }
-//        
-//        this.groupProvider.updateGroup(group);
-//        return this.toGroupDTO(group);
-//    }
-//    
-//    @Override
-//    public GroupDTO getGroup(long groupId) {
-//        User user = UserContext.current().getUser();
-//        checkGroupPrivilege(user.getId(), groupId, PrivilegeConstants.Visible);
-//        
-//        Group group = this.groupProvider.findGroupById(groupId);
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Invalid group id parameter, could not find the group");
-//        
-//        return this.toGroupDTO(group);
-//    }
-//    
-//    @Override
-//    public void joinGroup(long groupId) {
-//        User user = UserContext.current().getUser();
-//        
-//        Group group = this.groupProvider.findGroupById(groupId);
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Unable to find the group");
-//
-//        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
-//        if(member == null) {
-//            member = new GroupMember();
-//            member.setCreatorUid(user.getId());
-//            member.setGroupId(groupId);
-//            member.setMemberType(EntityType.USER.getCode());
-//            member.setMemberId(user.getId());
-//            member.setMemberRole(Role.ResourceUser);
-//            member.setMemberNickName(user.getNickName());
-//            member.setMemberAvatar(user.getAvatar());
-//            
-//            if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
-//                member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-//            } else {
-//                member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-//                
-//                // TODO we need to send out a notification message
-//            }
-//            this.groupProvider.createGroupMember(member);
-//        } else {
-//            if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE) {
-//                member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-//                member.setMemberNickName(user.getNickName());
-//                member.setMemberAvatar(user.getAvatar());
-//                
-//                this.groupProvider.updateGroupMember(member);
-//                
-//                // TODO send out notification message
-//            }
-//        }
-//    }
-//    
-//    @Override
-//    public void inviteToJoinGroup(long groupId, long userId) {
-//        User user = UserContext.current().getUser();
-//        
-//        Group group = this.groupProvider.findGroupById(groupId);
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Unable to find the group");
-//        
-//        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), userId);
-//        if(member != null) {
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//                 "Target user is either already in the group or in the joining process");
-//        }
-//        
-//        checkGroupPrivilege(user.getId(), groupId, PrivilegeConstants.GroupInviteJoin);
-//        member = new GroupMember();
-//        member.setCreatorUid(user.getId());
-//        member.setGroupId(groupId);
-//        member.setMemberType(EntityType.USER.getCode());
-//        member.setMemberId(userId);
-//        member.setMemberRole(Role.ResourceUser);
-//        member.setMemberStatus(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
-//        this.groupProvider.createGroupMember(member);
-//        
-//        // TODO send invitation message
-//    }
-//    
-//    @Override
-//    public void leaveGroup(long groupId) {
-//        User user = UserContext.current().getUser();
-//        
-//        Group group = this.groupProvider.findGroupById(groupId);
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Unable to find the group");
-//
-//        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
-//        if(member != null) {
-//            this.groupProvider.deleteGroupMember(member);
-//        }
-//    }
-//    
-//    @Override
-//    public ListMemberCommandResponse listMembersInRole(ListMemberInRoleCommand cmd) {
-//        User user = UserContext.current().getUser();
-//        
-//        if(cmd.getGroupId() == null || cmd.getRoleId() == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "groupId or roleId paramter can not be null or empty");
-//        
-//        Group group = this.groupProvider.findGroupById(cmd.getGroupId().longValue());
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Unable to find the group");
-//        
-//        checkGroupPrivilege(user.getId(), cmd.getGroupId(), PrivilegeConstants.GroupListMember);
-//        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-//        CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
-//        locator.setAnchor(cmd.getPageAnchor());
-//        
-//        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
-//            (loc, query) -> {
-//                query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.eq(cmd.getRoleId())
-//                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode())));
-//                
-//                return query;
-//            });
-//        
-//        Long nextPageAnchor = null;
-//        if(members.size() > pageSize) {
-//            members.remove(members.size() - 1);
-//            nextPageAnchor = members.get(members.size() -1).getId();
-//        }
-//
-//        List<GroupMemberDTO> memberDtos = members.stream()
-//                .map((r) -> { return ConvertHelper.convert(r, GroupMemberDTO.class);})
-//                .collect(Collectors.toList());
-//        return new ListMemberCommandResponse(nextPageAnchor, memberDtos); 
-//    }
-//    
-//    public ListMemberCommandResponse listMembersInStatus(ListMemberInStatusCommand cmd) {
-//        User user = UserContext.current().getUser();
-//        
-//        if(cmd.getGroupId() == null || cmd.getStatus() == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "groupId or status paramter can not be null or empty");
-//        
-//        Group group = this.groupProvider.findGroupById(cmd.getGroupId().longValue());
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Unable to find the group");
-//        
-//        checkGroupPrivilege(user.getId(), cmd.getGroupId(), PrivilegeConstants.GroupListMember);
-//        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-//        CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
-//        locator.setAnchor(cmd.getPageAnchor());
-//        
-//        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
-//            (loc,query) -> {
-//                query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
-//                return query;
-//            });
-//        
-//        Long nextPageAnchor = null;
-//        if(members.size() > pageSize) {
-//            members.remove(members.size() - 1);
-//            nextPageAnchor = members.get(members.size() -1).getId();
-//        }
-//
-//        List<GroupMemberDTO> memberDtos = members.stream()
-//                .map((r) -> { return ConvertHelper.convert(r, GroupMemberDTO.class);})
-//                .collect(Collectors.toList());
-//        return new ListMemberCommandResponse(nextPageAnchor, memberDtos); 
-//    }
-//    
-//    @Override
-//    public void requestToBeAdmin(long groupId) {
-//        User user = UserContext.current().getUser();
-//        
-//        Group group = this.groupProvider.findGroupById(groupId);
-//        if(group == null)
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "Unable to find the group");
-//
-//        checkGroupPrivilege(user.getId(), groupId, PrivilegeConstants.GroupRequestAdminRole);
-//        
-//        GroupOpRequest request = this.groupProvider.findGroupOpRequestByRequestor(groupId, user.getId());
-//        if(request == null) {
-//            request = new GroupOpRequest();
-//            request.setGroupId(groupId);
-//            request.setReqestorUid(user.getId());
-//            request.setOperationType(GroupOpType.REQUEST_ADMIN_ROLE.getCode());
-//            request.setStatus(GroupOpRequestStatus.REQUESTING.getCode());
-//            this.groupProvider.createGroupOpRequest(request);
-//        }
-//    }
-//    
-//    private void checkGroupPrivilege(long uid, long groupId, long privilege) {
-//        ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.GROUP.getCode());
-//        List<Long> roles = resolver.determineRoleInResource(uid, groupId, EntityType.GROUP.getCode(), groupId);
-//        if(!this.aclProvider.checkAccess(EntityType.GROUP.getCode(), groupId, EntityType.USER.getCode(), uid, privilege, 
-//                roles))
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
-//                    "Insufficient privilege");
-//    }
-//    
-//    private Forum createGroupForum(Group group) {
-//        Forum forum = new Forum();
-//        forum.setOwnerType(EntityType.GROUP.getCode());
-//        forum.setOwnerId(group.getId());
-//        forum.setAppId(AppConstants.APPID_FORUM);
-//        forum.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-//        forum.setName(EntityType.GROUP.getCode() + "-" + group.getId());
-//        
-//        this.forumProvider.createForum(forum);
-//        return forum;
-//    }
-//    
-//    private GroupDTO toGroupDTO(Group group) {
-//        GroupDTO groupDto = new GroupDTO();
-//        
-//        groupDto.setId(group.getId());
-//        groupDto.setOwningForumId(group.getOwningForumId());
-//        groupDto.setAvatar(group.getAvatar());
-//        groupDto.setCategoryId(group.getCategoryId());
-//        if(group.getCategoryId() != null) {
-//            Category category = this.categoryProvider.findCategoryById(group.getCategoryId());
-//            if(category != null)
-//                groupDto.setCategoryName(category.getName());
-//        }
-//        groupDto.setCreateTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), 
-//            group.getCreateTime().getTime()));
-//        groupDto.setCreatorUid(group.getCreatorUid());
-//        groupDto.setJoinPolicy(group.getJoinPolicy());
-//        groupDto.setDescription(group.getDescription());
-//        groupDto.setMemberCount(group.getMemberCount());
-//        groupDto.setName(group.getName());
-//        groupDto.setPrivateFlag(group.getPrivateFlag());
-//        groupDto.setTag(group.getTag());
-//        
-//        memberInfoToGroupDTO(UserContext.current().getUser().getId(), groupDto, group);
-//        return groupDto;
-//    }
-//    
-//    private void memberInfoToGroupDTO(long uid, GroupDTO groupDto, Group group) {
-//        //
-//        // compute member role ourselves instead of using GroupUserRoleResolver,
-//        // it is more efficient to do in this way due to the reason that
-//        // we need to tell whether or not the user is a member of the group
-//        //
-//        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(group.getId(), 
-//            EntityType.USER.getCode(), uid);
-//
-//        List<Long> userInRoles = new ArrayList<>();
-//        userInRoles.add(Role.AuthenticatedUser);
-//        if(member != null) {
-//            groupDto.setMemberOf((byte)1);
-//            groupDto.setMemberNickName(member.getMemberNickName());
-//            groupDto.setMemberConfigFlag(member.getMemberConfigFlag());
-//            
-//            if(member.getMemberRole().longValue() == Role.ResourceAdmin || 
-//                    member.getMemberRole().longValue() == Role.ResourceOperator ||
-//                    member.getMemberRole().longValue() == Role.ResourceCreator) {
-//                if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.ACTIVE)
-//                    userInRoles.add(Role.ResourceUser);
-//            }
-//            
-//            AclAccessor groupPrivileges = this.aclProvider.getAccessor(
-//                    EntityType.GROUP.getCode(), group.getId(), userInRoles);
-//            groupDto.setMemberGroupPrivileges(groupPrivileges.getGrantPrivileges());
-//            
-//            AclAccessor forumPrivileges = this.aclProvider.getAccessor(
-//                    EntityType.FORUM.getCode(), group.getOwningForumId(), userInRoles);
-//            groupDto.setMemberForumPrivileges(forumPrivileges.getGrantPrivileges());
-//        } else {
-//            groupDto.setMemberOf((byte)0);
-//        }
-//    }
+
 }
