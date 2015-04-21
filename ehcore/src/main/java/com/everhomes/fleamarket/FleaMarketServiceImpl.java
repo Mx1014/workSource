@@ -56,7 +56,7 @@ public class FleaMarketServiceImpl implements FleaMarketService {
     public void updateItem(FleaMarketUpdateCommand cmd) {
         this.forumService.checkForumModifyItemPrivilege(cmd.getForumId(), cmd.getTopicId());
         
-        Post post = this.forumProvider.getPostById(cmd.getTopicId());
+        Post post = this.forumProvider.findPostById(cmd.getTopicId());
         if(post.getAppId() == null || post.getAppId().longValue() != AppConstants.APPID_FLEAMARKET)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "It is not a flea market item");

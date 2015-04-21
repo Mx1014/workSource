@@ -668,6 +668,126 @@ CREATE TABLE `eh_group_op_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
+# key table for forum sharding group
+#
+DROP TABLE IF EXISTS `eh_forums`;
+CREATE TABLE `eh_forums` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+    `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
+    `owner_type` VARCHAR(32) NOT NULL,
+    `owner_id` BIGINT,
+    `name` VARCHAR(64) NOT NULL,
+    `description` TEXT,
+    `post_count` BIGINT NOT NULL DEFAULT 0,
+    `modify_seq` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL,
+    `create_time` DATETIME NOT NULL,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_frm_owner_name`(`owner_type`, `owner_id`, `name`),
+    INDEX `i_eh_frm_namespace`(`namespace_id`),
+    INDEX `i_eh_frm_owner`(`owner_type`, `owner_id`),
+    INDEX `i_eh_frm_post_count` (`post_count`),
+    INDEX `i_eh_frm_modify_seq` (`modify_seq`),
+    INDEX `i_eh_frm_update_time` (`update_time`),
+    INDEX `i_eh_frm_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# key table of forum post sharding group
+# forum posts form its own sharding group, due to nature of timely content
+#
+DROP TABLE IF EXISTS `eh_forum_posts`;
+CREATE TABLE `eh_forum_posts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
+    `forum_id` BIGINT NOT NULL COMMENT 'forum that it belongs',
+    `parent_post_id` BIGINT COMMENT 'replied post id',
+    `creator_uid` BIGINT NOT NULL COMMENT 'post creator uid',
+    
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(64),
+    
+    `visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
+    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
+    
+    `category_id` BIGINT,
+    `category_path` VARCHAR(128),
+    
+    `modify_seq` BIGINT NOT NULL,
+    `child_count` BIGINT NOT NULL DEFAULT 0,
+    `forward_count` BIGINT NOT NULL DEFAULT 0,
+    `like_count` BIGINT NOT NULL DEFAULT 0,
+
+    `subject` VARCHAR(512),
+    `content_type` INTEGER,
+    `content` TEXT COMMENT 'post content text',
+    
+    `embedded_obj_id` BIGINT,
+    `embedded_obj_json` TEXT COMMENT 'json encoded embedded object',
+    `embedded_obj_version` INT NOT NULL DEFAULT 1 COMMENT 'encode version',
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    
+    `update_time` DATETIME NOT NULL,
+    `create_time` DATETIME NOT NULL,
+    
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_post_seqs`(`modify_seq`),
+    INDEX `i_eh_post_geohash`(`geohash`),
+    INDEX `i_eh_post_creator`(`creator_uid`),
+    INDEX `i_eh_post_itag1`(`integral_tag1`),
+    INDEX `i_eh_post_itag2`(`integral_tag2`),
+    INDEX `i_eh_post_stag1`(`string_tag1`),
+    INDEX `i_eh_post_stag2`(`string_tag2`),
+    INDEX `i_eh_post_update_time`(`update_time`),
+    INDEX `i_eh_post_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of forum post sharding group
+#
+DROP TABLE IF EXISTS `eh_forum_visible_scopes`;
+CREATE TABLE `eh_forum_visible_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner post id',
+    `scope_code` TINYINT,
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of forum post sharding group
+#
+DROP TABLE IF EXISTS `eh_forum_attachments`;
+CREATE TABLE `eh_forum_attachments` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `post_id` BIGINT NOT NULL,
+    `store_type` VARCHAR(32) COMMENT 'content store type',
+    `store_uri` VARCHAR(32) COMMENT 'identify the store instance',
+    `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+    `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+    `creator_uid` BIGINT NOT NULL,
+    `create_time` DATETIME NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_frmatt_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
 # member of global partition
 #
 DROP TABLE IF EXISTS `eh_borders`;

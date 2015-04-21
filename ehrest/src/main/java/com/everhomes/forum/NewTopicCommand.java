@@ -14,7 +14,10 @@ public class NewTopicCommand {
     private Byte visibilityScope;
     private Long visibilityScopeId;
     
+    @NotNull
     private String subject;
+    
+    @NotNull
     private String content;
     
     // json encoded List<String> 

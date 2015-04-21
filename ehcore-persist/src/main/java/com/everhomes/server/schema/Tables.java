@@ -144,6 +144,26 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhFamilyFollowers EH_FAMILY_FOLLOWERS = com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS;
 
 	/**
+	 * The table ehcore.eh_forums
+	 */
+	public static final com.everhomes.server.schema.tables.EhForums EH_FORUMS = com.everhomes.server.schema.tables.EhForums.EH_FORUMS;
+
+	/**
+	 * The table ehcore.eh_forum_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhForumAttachments EH_FORUM_ATTACHMENTS = com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS;
+
+	/**
+	 * The table ehcore.eh_forum_posts
+	 */
+	public static final com.everhomes.server.schema.tables.EhForumPosts EH_FORUM_POSTS = com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS;
+
+	/**
+	 * The table ehcore.eh_forum_visible_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhForumVisibleScopes EH_FORUM_VISIBLE_SCOPES = com.everhomes.server.schema.tables.EhForumVisibleScopes.EH_FORUM_VISIBLE_SCOPES;
+
+	/**
 	 * The table ehcore.eh_groups
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroups EH_GROUPS = com.everhomes.server.schema.tables.EhGroups.EH_GROUPS;
