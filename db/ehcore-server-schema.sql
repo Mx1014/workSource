@@ -46,6 +46,25 @@ SET foreign_key_checks = 0;
 
 use ehcore;
 
+DROP TABLE IF EXISTS `eh_devices`;
+
+#
+# member of global partition
+#
+CREATE TABLE `eh_devices` (
+  	`id` BIGINT NOT NULL AUTO_INCREMENT,
+  	`device_id` VARCHAR(128) NOT NULL,
+  	`platform` VARCHAR(32) NOT NULL,
+  	`product` VARCHAR(32) NULL,
+  	`brand` VARCHAR(32) NULL,
+  	`device_model` VARCHAR(32) NULL,
+  	`system_version` VARCHAR(32) NULL,
+  	`meta` VARCHAR(256) NULL,
+  
+  	PRIMARY KEY (`id`),
+    UNIQUE `u_eh_dev_id`(`device_id`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 #
 # member of global parition
 # shared among namespaces, no application module specific information

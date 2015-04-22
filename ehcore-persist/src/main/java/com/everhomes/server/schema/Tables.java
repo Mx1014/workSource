@@ -119,6 +119,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
 
 	/**
+	 * The table ehcore.eh_devices
+	 */
+	public static final com.everhomes.server.schema.tables.EhDevices EH_DEVICES = com.everhomes.server.schema.tables.EhDevices.EH_DEVICES;
+
+	/**
 	 * The table ehcore.eh_events
 	 */
 	public static final com.everhomes.server.schema.tables.EhEvents EH_EVENTS = com.everhomes.server.schema.tables.EhEvents.EH_EVENTS;
