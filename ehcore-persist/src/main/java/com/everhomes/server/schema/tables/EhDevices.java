@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDevices extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDevicesRecord> {
 
-	private static final long serialVersionUID = -436464002;
+	private static final long serialVersionUID = -1777416782;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_devices</code>
@@ -65,6 +65,11 @@ public class EhDevices extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_devices.meta</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDevicesRecord, java.lang.String> META = createField("meta", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_devices.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDevicesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_devices</code> table reference

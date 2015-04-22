@@ -11,28 +11,30 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDevices implements java.io.Serializable {
 
-	private static final long serialVersionUID = 814181806;
+	private static final long serialVersionUID = 1248998668;
 
-	private java.lang.Long   id;
-	private java.lang.String deviceId;
-	private java.lang.String platform;
-	private java.lang.String product;
-	private java.lang.String brand;
-	private java.lang.String deviceModel;
-	private java.lang.String systemVersion;
-	private java.lang.String meta;
+	private java.lang.Long     id;
+	private java.lang.String   deviceId;
+	private java.lang.String   platform;
+	private java.lang.String   product;
+	private java.lang.String   brand;
+	private java.lang.String   deviceModel;
+	private java.lang.String   systemVersion;
+	private java.lang.String   meta;
+	private java.sql.Timestamp createTime;
 
 	public EhDevices() {}
 
 	public EhDevices(
-		java.lang.Long   id,
-		java.lang.String deviceId,
-		java.lang.String platform,
-		java.lang.String product,
-		java.lang.String brand,
-		java.lang.String deviceModel,
-		java.lang.String systemVersion,
-		java.lang.String meta
+		java.lang.Long     id,
+		java.lang.String   deviceId,
+		java.lang.String   platform,
+		java.lang.String   product,
+		java.lang.String   brand,
+		java.lang.String   deviceModel,
+		java.lang.String   systemVersion,
+		java.lang.String   meta,
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.deviceId = deviceId;
@@ -42,6 +44,7 @@ public class EhDevices implements java.io.Serializable {
 		this.deviceModel = deviceModel;
 		this.systemVersion = systemVersion;
 		this.meta = meta;
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +109,13 @@ public class EhDevices implements java.io.Serializable {
 
 	public void setMeta(java.lang.String meta) {
 		this.meta = meta;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }

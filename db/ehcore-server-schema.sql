@@ -60,10 +60,25 @@ CREATE TABLE `eh_devices` (
   	`device_model` VARCHAR(32) NULL,
   	`system_version` VARCHAR(32) NULL,
   	`meta` VARCHAR(256) NULL,
+  	`create_time` DATETIME,
   
   	PRIMARY KEY (`id`),
-    UNIQUE `u_eh_dev_id`(`device_id`)
-)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    UNIQUE `u_eh_dev_id`(`device_id`),
+    INDEX `u_eh_dev_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global partition
+#
+CREATE TABLE `ehcore`.`eh_certs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(32) NOT NULL,
+  `cert_type` INT NOT NULL,
+  `data` BLOB NOT NULL,
+  
+  PRIMARY KEY (`id`),
+  UNIQUE `u_eh_certs_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 #
 # member of global parition

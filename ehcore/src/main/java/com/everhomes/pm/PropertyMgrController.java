@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.pkg.ClientPackageFileDTO;
 import com.everhomes.rest.RestResponse;
 
 @RestController
 @RequestMapping("/pm")
-public class PropertyMgrController {
+public class PropertyMgrController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrController.class);
     
 	@Autowired
