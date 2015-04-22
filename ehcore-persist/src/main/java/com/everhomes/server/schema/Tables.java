@@ -34,6 +34,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
 
 	/**
+	 * The table ehcore.eh_audit_logs
+	 */
+	public static final com.everhomes.server.schema.tables.EhAuditLogs EH_AUDIT_LOGS = com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS;
+
+	/**
 	 * The table ehcore.eh_banners
 	 */
 	public static final com.everhomes.server.schema.tables.EhBanners EH_BANNERS = com.everhomes.server.schema.tables.EhBanners.EH_BANNERS;
@@ -144,6 +149,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhFamilyFollowers EH_FAMILY_FOLLOWERS = com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS;
 
 	/**
+	 * The table ehcore.eh_feedbacks
+	 */
+	public static final com.everhomes.server.schema.tables.EhFeedbacks EH_FEEDBACKS = com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS;
+
+	/**
 	 * The table ehcore.eh_forums
 	 */
 	public static final com.everhomes.server.schema.tables.EhForums EH_FORUMS = com.everhomes.server.schema.tables.EhForums.EH_FORUMS;
@@ -187,6 +197,11 @@ public class Tables {
 	 * The table ehcore.eh_group_visible_scopes
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroupVisibleScopes EH_GROUP_VISIBLE_SCOPES = com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES;
+
+	/**
+	 * The table ehcore.eh_locale_strings
+	 */
+	public static final com.everhomes.server.schema.tables.EhLocaleStrings EH_LOCALE_STRINGS = com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS;
 
 	/**
 	 * The table ehcore.eh_polls

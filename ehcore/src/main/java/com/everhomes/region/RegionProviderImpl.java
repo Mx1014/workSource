@@ -64,7 +64,7 @@ public class RegionProviderImpl implements RegionProvider {
     }
 
     @Override
-    @Caching(evict = { @CacheEvict(value="Region", key="region.id"),
+    @Caching(evict = { @CacheEvict(value="Region", key="#region.id"),
             @CacheEvict(value="listRegion"),
             @CacheEvict(value="listChildRegion"),
             @CacheEvict(value="listDescendantRegion")})
@@ -73,12 +73,12 @@ public class RegionProviderImpl implements RegionProvider {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        dao.update(ConvertHelper.convert(region, EhRegions.class));
+        dao.update(region);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
    }
 
-    @Caching(evict = { @CacheEvict(value="Region", key="region.id"),
+    @Caching(evict = { @CacheEvict(value="Region", key="#region.id"),
             @CacheEvict(value="listRegion"),
             @CacheEvict(value="listChildRegion"),
             @CacheEvict(value="listDescendantRegion")})

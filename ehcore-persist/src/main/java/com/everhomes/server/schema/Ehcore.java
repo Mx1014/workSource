@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1589272791;
+	private static final long serialVersionUID = -724728497;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -38,6 +38,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER,
 			com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES,
 			com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS,
+			com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS,
 			com.everhomes.server.schema.tables.EhBanners.EH_BANNERS,
 			com.everhomes.server.schema.tables.EhBannerClicks.EH_BANNER_CLICKS,
 			com.everhomes.server.schema.tables.EhBannerOrders.EH_BANNER_ORDERS,
@@ -60,6 +61,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhEventTickets.EH_EVENT_TICKETS,
 			com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS,
 			com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS,
+			com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS,
 			com.everhomes.server.schema.tables.EhForums.EH_FORUMS,
 			com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS,
 			com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS,
@@ -69,6 +71,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS,
 			com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES,
 			com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES,
+			com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
 			com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES,

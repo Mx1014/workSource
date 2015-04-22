@@ -2,7 +2,6 @@ package com.everhomes.pkg;
 
 import java.util.List;
 
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
@@ -20,9 +19,6 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
-import com.everhomes.region.Region;
-import com.everhomes.region.RegionAdminStatus;
-import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhClientPackagesDao;
 import com.everhomes.server.schema.tables.pojos.EhClientPackages;

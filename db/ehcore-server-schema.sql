@@ -51,6 +51,18 @@ use ehcore;
 # shared among namespaces, no application module specific information
 #
 DROP TABLE IF EXISTS `eh_categories`;
+CREATE TABLE `eh_locale_strings`(
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `scope` VARCHAR(64),
+    `code` INTEGER,
+    `locale` VARCHAR(16),
+    `text` VARCHAR(256),
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ 
+DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
     `id` BIGINT NOT NULL,
     `parent_id` BIGINT,

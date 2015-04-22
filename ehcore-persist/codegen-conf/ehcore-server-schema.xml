@@ -33,8 +33,8 @@
         eh_groups | eh_group_members | eh_group_profiles | eh_group_op_requests | eh_group_visible_scopes |
         eh_forums | eh_forum_posts | eh_forum_attachments | eh_forum_visible_scopes | 
         eh_borders | eh_categories | eh_state_triggers | eh_search_keywords | eh_app_promotions |
-        eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks 
-        eh_audit_logs |   
+        eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks | 
+        eh_audit_logs | eh_locale_strings |
         eh_regions | eh_communities | eh_community_geopoints |
         eh_community_profiles | eh_addresses | 
         eh_family_followers | eh_banners | eh_banner_profiles | eh_banner_clicks | 
