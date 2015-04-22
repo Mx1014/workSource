@@ -102,4 +102,11 @@ public class EhDevicesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDevices> fetchByMeta(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDevices.EH_DEVICES.META, values);
 	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDevices> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDevices.EH_DEVICES.CREATE_TIME, values);
+	}
 }

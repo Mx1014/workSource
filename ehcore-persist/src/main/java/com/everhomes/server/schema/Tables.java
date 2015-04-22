@@ -94,6 +94,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCategories EH_CATEGORIES = com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES;
 
 	/**
+	 * The table ehcore.eh_certs
+	 */
+	public static final com.everhomes.server.schema.tables.EhCerts EH_CERTS = com.everhomes.server.schema.tables.EhCerts.EH_CERTS;
+
+	/**
 	 * The table ehcore.eh_client_packages
 	 */
 	public static final com.everhomes.server.schema.tables.EhClientPackages EH_CLIENT_PACKAGES = com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES;
