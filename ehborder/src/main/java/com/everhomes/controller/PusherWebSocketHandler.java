@@ -1,6 +1,7 @@
 package com.everhomes.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.everhomes.message.HandshakeMessage;
+import com.everhomes.message.PusherMessageResp;
 import com.everhomes.rpc.PduFrame;
 import com.everhomes.rpc.server.PusherNotifyPdu;
 import com.everhomes.util.SignatureHelper;
@@ -174,9 +176,8 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     }
     
     // Client is responsible for sending ping message for managing connection.
-    // No using heartbeat, but use ping and pong.
-    @Override
-    protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
+    // use simple heartbeat to support for javascript
+    private void heartbeat(WebSocketSession session) {
         DeviceNode dev = session2deviceMap.get(session);
         if(dev != null) {
             dev.item.setLastPingTime(System.currentTimeMillis());
@@ -188,13 +189,16 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             }
             LOGGER.info("Receiving ping from client, session: " + session.getId());
         }
-        
-        super.handlePongMessage(session, message);
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         LOGGER.info("Received client message. session: " + session.getId() + ", message: " + message.getPayload());
+        if (message.getPayload().equals("Ping")) {
+            heartbeat(session);
+            return;
+        }
+        
         PduFrame frame = PduFrame.fromJson((String)message.getPayload());
         if(frame == null) {
             LOGGER.error("Unrecognized client message: " + message.getPayload());
@@ -238,6 +242,44 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             }
             this.session2deviceMap.put(session, devNode);
             LOGGER.info("added deviceId: " + dev.getDeviceId());
+        } else if(frame.getName().equals("REQUEST")) {
+            DeviceNode devNode = this.session2deviceMap.get(session);
+            if(devNode == null) {
+                LOGGER.error("Session not exists");
+                return;
+            }
+            DeviceInfo dev = devNode.item;
+            if(dev == null || !dev.isValid()) {
+                LOGGER.error("Devices not exists");
+                return;
+            }
+            Long anchor = frame.getPayload(Long.class);
+            
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("deviceId", dev.getDeviceId());
+            params.put("anchor", anchor.toString());
+           
+            restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                    PusherMessageResp resp = new PusherMessageResp();
+                    resp.setName("MESSAGES");
+                    resp.setContent(result.getBody());
+                    PduFrame pdu = new PduFrame();
+                    pdu.setPayload(resp);
+                    try {
+                        session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+                    } catch (IOException e) {
+                        LOGGER.error("Session send error: " + e.getMessage());
+                    }
+                    
+                }
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error("restCall failed: " + ex.getMessage());
+                }
+            });
+            
         } else {
             //Normal message
             LOGGER.error("frame name: " + frame.getName());
@@ -282,20 +324,22 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         future.addCallback(responseCallback);
     }
     
-    public void notify(WebSocketSession serverSession, PusherNotifyPdu pdu) {
-        //TODO
-        LOGGER.info("Got notify: " + pdu.getMessageId());
+    public void notify(WebSocketSession serverSession, PusherNotifyPdu pduServer) {
+        LOGGER.info("Got notify: " + pduServer.getMessageId());
         
-        //TODO use restCall to get all messages and devices, and send notify to device.
         session2deviceMap.forEach((session, devNode)-> {
             DeviceInfo dev = devNode.item;
             if(dev.isValid()) {
-                TextMessage msg = new TextMessage("notify from server hear :)");
+                PusherMessageResp resp = new PusherMessageResp();
+                resp.setName("NOTIFY");
+                resp.setContent("notify from server :)");
+                PduFrame pdu = new PduFrame();
+                pdu.setPayload(resp);
                 try {
-                    session.sendMessage(msg);
-                } catch (Exception e) {
-                    LOGGER.error("Send message to device: " + dev.getDeviceId() + " failed ");
-                }
+                      session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+                } catch (IOException e) {
+                      LOGGER.error("Notify server error: " + e.getMessage());
+                     }
             }
         });
         

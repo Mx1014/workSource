@@ -12,3 +12,4 @@ ehcore.log*
 cscope.*
 tags
 
+build.sh

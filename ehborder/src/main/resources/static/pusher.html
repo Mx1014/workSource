@@ -20,10 +20,11 @@ function newHandshake(device) {
     return obj;
 }
 
-function newPdu(msg) {
+function newPdu(msg, name) {
     var obj = {}
     obj.version = "ver_0.00";
-    obj.name = "HANDSHAKE";
+    //obj.name = "HANDSHAKE";
+    obj.name = name;
     obj.requestId = 1;
     obj.appId = 1;
     obj.payload = msg;
@@ -49,15 +50,38 @@ function testWebSocket() {
         onError(evt) 
     }; 
 }  
+
+heartbeat_interval = null;
 function onOpen(evt) {
     writeToScreen("CONNECTED"); 
-    doSend("my-browser-device");
+    doSend("123456");
+
+    if (heartbeat_interval == null) {
+        //missed_heartbeats = 0;
+        heartbeat_interval = setInterval(function() {
+            try {
+                //missed_heartbeats++;
+                //if (missed_heartbeats >= 3)
+                //    throw new Error("Too many missed heartbeats.");
+                websocket.send("Ping");
+            } catch(e) {
+                clearInterval(heartbeat_interval);
+                heartbeat_interval = null;
+                console.warn("Closing connection. Reason: " + e.message);
+                ws.close();
+            }
+        }, 5000);
+    }
 }  
 function onClose(evt) { 
     writeToScreen("DISCONNECTED"); 
 }  
 function onMessage(evt) { 
     writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + ' </span> '); 
+    var obj = JSON.parse(evt.data);
+    if(obj.name == "NOTIFY") {
+        requestMessages();
+    }
     //websocket.close();
 }  
 function onError(evt) { 
@@ -66,7 +90,7 @@ function onError(evt) {
 function doSend(message) { 
     writeToScreen("SENT: " + message);
     handshake = newHandshake(message);
-    pdu = newPdu(JSON.stringify(handshake));
+    pdu = newPdu(JSON.stringify(handshake), "HANDSHAKE");
     websocket.send(JSON.stringify(pdu));
 } 
 function writeToScreen(message) { 
@@ -75,6 +99,10 @@ function writeToScreen(message) {
     pre.innerHTML = message;
     output.appendChild(pre);
 } 
+function requestMessages() {
+    pdu = newPdu("0", "REQUEST");
+    websocket.send(JSON.stringify(pdu));
+}
 window.addEventListener("load", init, false);  
 </script>
 
@@ -84,5 +112,6 @@ window.addEventListener("load", init, false);
 
 <div id="output">
 </div>
+<input type="button" id="request" value="request" onclick="requestMessages();"/>
 </body>
 </html>
