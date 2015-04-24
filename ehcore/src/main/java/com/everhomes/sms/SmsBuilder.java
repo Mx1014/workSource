@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SmsBuilder {
-    private final static SmsBuilder builder = new SmsBuilder();
     private final Map<Boolean, SmsChannel> cache;
 
     public enum HttpMethod {
@@ -31,7 +30,7 @@ public class SmsBuilder {
     }
 
     public static SmsChannel create(boolean isSecure) {
-        return builder.getChannel(isSecure);
+        return  new SmsBuilder().getChannel(isSecure);
     }
 
 }
