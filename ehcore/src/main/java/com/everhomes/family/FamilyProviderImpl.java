@@ -1,12 +1,14 @@
 // @formatter:off
 package com.everhomes.family;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -29,6 +31,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.UserContext;
@@ -205,5 +208,43 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         List<GroupMember> members = this.groupProvider.listGroupMembers(locator, Integer.MAX_VALUE);
         return members.get(0);
+    }
+
+    @Override
+    public Tuple<Integer, List<FamilyDTO>> findFamilByKeyword(String keyword) {
+    	if(StringUtils.isEmpty(keyword))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid keyword parameter");
+        List<FamilyDTO> results = new ArrayList<FamilyDTO>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                    String likeVal = keyword + "%";
+                    context.selectDistinct(Tables.EH_ADDRESSES.ID, Tables.EH_ADDRESSES.ADDRESS, Tables.EH_ADDRESSES.COMMUNITY_ID,
+                        Tables.EH_ADDRESSES.CITY_ID,Tables.EH_COMMUNITIES.NAME,Tables.EH_REGIONS.NAME)
+                        .from(Tables.EH_ADDRESSES)
+                        .leftOuterJoin(Tables.EH_COMMUNITIES)
+                        .on(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(Tables.EH_COMMUNITIES.ID))
+                        .leftOuterJoin(Tables.EH_REGIONS)
+                        .on(Tables.EH_ADDRESSES.CITY_ID.equal(Tables.EH_REGIONS.ID))
+                        .where((Tables.EH_ADDRESSES.ADDRESS.like(likeVal)
+                            .or(Tables.EH_ADDRESSES.ADDRESS_ALIAS.like(likeVal)))
+                            .and(Tables.EH_REGIONS.SCOPE_CODE.eq(RegionScope.CITY.getCode())))
+                        .fetch().map((r) -> {
+                            FamilyDTO family = new FamilyDTO();
+                            family.setId(r.getValue(Tables.EH_ADDRESSES.ID));
+                            family.setAddress(r.getValue(Tables.EH_ADDRESSES.ADDRESS));
+                            family.setCommunityId(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_ID));
+                            family.setCommunityName(r.getValue(Tables.EH_COMMUNITIES.NAME));
+                            family.setCityId(r.getValue(Tables.EH_ADDRESSES.CITY_ID));
+                            family.setCityName(r.getValue(Tables.EH_REGIONS.NAME));
+                            results.add(family);
+                            return null;
+                        });
+                    
+                return true;
+            });
+        
+        return new Tuple<Integer, List<FamilyDTO>>(ErrorCodes.SUCCESS, results);
     }
 }

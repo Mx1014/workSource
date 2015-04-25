@@ -1,7 +1,12 @@
 package com.everhomes.family;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,18 +22,23 @@ import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserInfo;
+import com.everhomes.util.Tuple;
 
 @RestController
 @RequestMapping("/family")
 public class FamilyController extends ControllerBase {
     
+	private static final Logger LOGGER = LoggerFactory.getLogger(FamilyController.class);
+	
+	@Autowired
+    private FamilyProvider familyProvider;
+	
     @RequestMapping("findFamilyByKeyword")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse findFamilyByKeyword(
         @RequestParam(value = "keyword", required = true) String keyword) {
-        
-        // ???
-        RestResponse response = new RestResponse();
+    	Tuple<Integer, List<FamilyDTO>> result = familyProvider.findFamilByKeyword(keyword);
+    	RestResponse response = new RestResponse(result.second());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
