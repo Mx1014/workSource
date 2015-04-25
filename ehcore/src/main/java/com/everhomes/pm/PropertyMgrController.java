@@ -25,42 +25,6 @@ public class PropertyMgrController extends ControllerBase {
 	PropertyMgrService propertyMgrService;
 	
 	/**
-	 * 发消息给单个人（在论坛里私信）
-	 */
-	@RequestMapping("sendMsgToUser")
-    @RestReturn(value=Long.class)
-    public RestResponse sendMsgToUser() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 发消息给单个业主（给业主留言）
-	 */
-	@RequestMapping("sendMsgToPropertyOwner")
-    @RestReturn(value=Long.class)
-    public RestResponse sendMsgToPropertyOwner() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 发消息给物业成员
-	 */
-	@RequestMapping("sendMsgToPropertyMember")
-    @RestReturn(value=Long.class)
-    public RestResponse sendMsgToPropertyMember() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
 	 * 发消息给物业组（含所有成员）
 	 */
 	@RequestMapping("sendMsgToPropertyGroup")
@@ -109,129 +73,9 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
-	 * 查询周边社区帖列表（含帖的阅读数）
-	 */
-    @RequestMapping("listCommunityTopics")
-    @RestReturn(value=Long.class)
-    public RestResponse listCommunityTopics() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询周边社区单个帖详情（含帖的阅读数）
-	 */
-    @RequestMapping("getCommunityTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse getCommunityTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 发帖到周边社区
-	 */
-    @RequestMapping("newCommunityTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse newCommunityTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 删除周边社区帖（根据权限可删除别人的、可批量删除）
-	 */
-    @RequestMapping("deleteCommunityTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse deleteCommunityTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 评论周边社区帖
-	 */
-    @RequestMapping("newCommunityComment")
-    @RestReturn(value=Long.class)
-    public RestResponse newCommunityComment() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 删除周边社区帖评论（根据权限可删除别人的、可批量删除）
-	 */
-    @RequestMapping("deleteCommunityComment")
-    @RestReturn(value=Long.class)
-    public RestResponse deleteCommunityComment() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 对周边社区帖点赞
-	 */
-    @RequestMapping("likeCommunityTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse likeCommunityTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 对周边社区帖取消点赞
-	 */
-    @RequestMapping("cancelLikeCommunityTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse cancelLikeCommunityTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询社区公告帖列表（含帖的阅读数）
-	 */
-    @RequestMapping("listCommunityBulletinTopics")
-    @RestReturn(value=Long.class)
-    public RestResponse listCommunityBulletinTopics() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询单个社区公告帖详情（含帖的阅读数）
-	 */
-    @RequestMapping("getCommunityBulletinTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse getCommunityBulletinTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
 	 * 发社区公告（只有物业人员可以发）
 	 */
-    @RequestMapping("newCommunityBulletinTopic")
+    @RequestMapping("newBulletinTopic")
     @RestReturn(value=Long.class)
     public RestResponse newCommunityBulletinTopic() {
         RestResponse response = new RestResponse();
@@ -243,59 +87,9 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * 删除社区公告帖（可批量删除）
 	 */
-    @RequestMapping("deleteCommunityBulletinTopic")
+    @RequestMapping("deleteBulletinTopic")
     @RestReturn(value=Long.class)
     public RestResponse deleteCommunityBulletinTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-    
-    // 物业维修
-	/**
-	 * 查询物业维修帖列表（含帖的阅读数）
-	 */
-    @RequestMapping("listCommunityRepairTopics")
-    @RestReturn(value=Long.class)
-    public RestResponse listCommunityRepairTopics() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询单个物业维修帖详情（含帖的阅读数）
-	 */
-    @RequestMapping("getCommunityRepairTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse getCommunityRepairTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 发物业维修帖
-	 */
-    @RequestMapping("newCommunityRepairTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse newCommunityRepairTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 删除物业维修帖（可批量删除）
-	 */
-    @RequestMapping("deleteCommunityRepairTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse deleteCommunityRepairTopic() {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -305,7 +99,7 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * 设置物业维修帖状态：未处理、处理中、已处理、其它（可批量设置）
 	 */
-    @RequestMapping("setCommunityRepairTopicStatus")
+    @RequestMapping("setRepairTopicStatus")
     @RestReturn(value=Long.class)
     public RestResponse setCommunityRepairTopicStatus() {
         RestResponse response = new RestResponse();
@@ -317,7 +111,7 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * 把物业维修帖指派给处理人员（可批量指派）
 	 */
-    @RequestMapping("assignCommunityRepairTopics")
+    @RequestMapping("assignRepairTopics")
     @RestReturn(value=Long.class)
     public RestResponse assignCommunityRepairTopics() {
         RestResponse response = new RestResponse();
@@ -329,7 +123,7 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * 根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它
 	 */
-    @RequestMapping("getCommunityRepairTopicStatistics")
+    @RequestMapping("getRepairTopicStatistics")
     @RestReturn(value=Long.class)
     public RestResponse getCommunityRepairTopicStatistics() {
         RestResponse response = new RestResponse();
@@ -337,62 +131,11 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-	
     
-    // 物业求助
-	/**
-	 * 查询物业求助帖列表（含帖的阅读数）
-	 */
-    @RequestMapping("listCommunityHelpdeskTopics")
-    @RestReturn(value=Long.class)
-    public RestResponse listCommunityHelpdeskTopics() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询单个物业求助帖详情（含帖的阅读数）
-	 */
-    @RequestMapping("getCommunityHelpdeskTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse getCommunityHelpdeskTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 发物业求助帖
-	 */
-    @RequestMapping("newCommunityHelpdeskTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse newCommunityHelpdeskTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 删除物业求助帖（可批量删除）
-	 */
-    @RequestMapping("deleteCommunityHelpdeskTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse deleteCommunityHelpdeskTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
 	/**
 	 * 设置物业求助帖状态：未处理、处理中、已处理、其它（可批量设置）
 	 */
-    @RequestMapping("setCommunityHelpdeskTopicStatus")
+    @RequestMapping("setHelpdeskTopicStatus")
     @RestReturn(value=Long.class)
     public RestResponse setCommunityHelpdeskTopicStatus() {
         RestResponse response = new RestResponse();
@@ -404,7 +147,7 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * 把物业求助帖指派给处理人员（可批量指派）
 	 */
-    @RequestMapping("assignCommunityHelpdeskTopics")
+    @RequestMapping("assignHelpdeskTopics")
     @RestReturn(value=Long.class)
     public RestResponse assignCommunityHelpdeskTopics() {
         RestResponse response = new RestResponse();
@@ -416,7 +159,7 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * 根据时间和状态获取物业求助帖统计信息：未处理、处理中、已处理、其它
 	 */
-    @RequestMapping("getCommunityHelpdeskTopicStatistics")
+    @RequestMapping("getHelpdeskTopicStatistics")
     @RestReturn(value=Long.class)
     public RestResponse getCommunityHelpdeskTopicStatistics() {
         RestResponse response = new RestResponse();
@@ -424,58 +167,7 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-	
     
-    // 物业建议
-	/**
-	 * 查询物业建议帖列表（含帖的阅读数）
-	 */
-    @RequestMapping("listCommunitySuggestionTopics")
-    @RestReturn(value=Long.class)
-    public RestResponse listCommunitySuggestionTopics() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询单个物业建议帖详情（含帖的阅读数）
-	 */
-    @RequestMapping("getCommunitySuggestionTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse getCommunitySuggestionTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 发物业建议帖
-	 */
-    @RequestMapping("newCommunitySuggestionTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse newCommunitySuggestionTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 删除物业建议帖（可批量删除）
-	 */
-    @RequestMapping("deleteCommunitySuggestionTopic")
-    @RestReturn(value=Long.class)
-    public RestResponse deleteCommunitySuggestionTopic() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
 	/**
 	 * 设置物业建议帖状态：未处理、处理中、已处理、其它（可批量设置）
 	 */
@@ -596,66 +288,6 @@ public class PropertyMgrController extends ControllerBase {
         return response;
     }
 	
-	/**
-	 * 列出公寓里的住户列表
-	 */
-    @RequestMapping("listApartmentMemebers")
-    @RestReturn(value=Long.class)
-    public RestResponse listApartmentMemebers() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 删除公寓里的住户（可批量）
-	 */
-    @RequestMapping("deleteApartmentMemeber")
-    @RestReturn(value=Long.class)
-    public RestResponse deleteApartmentMemeber() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 查询公寓入住申请列表
-	 */
-    @RequestMapping("listApartmentClaims")
-    @RestReturn(value=Long.class)
-    public RestResponse listApartmentClaims() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 通过公寓入住申请
-	 */
-    @RequestMapping("approveApartmentClaims")
-    @RestReturn(value=Long.class)
-    public RestResponse approveApartmentClaims() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * 拒绝公寓入住申请
-	 */
-    @RequestMapping("rejectApartmentClaims")
-    @RestReturn(value=Long.class)
-    public RestResponse rejectApartmentClaims() {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
     /**
      * 上传业主信息excel文件（用户名、手机号、门牌号）
      */

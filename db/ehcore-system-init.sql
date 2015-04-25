@@ -29,6 +29,7 @@ INSERT INTO `eh_acl_roles`(`id`, `app_id`, `name`) VALUES(8, 0, 'SystemExtension
 
 ALTER TABLE `eh_apps` AUTO_INCREMENT = 4096;
 
+
 ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 
 #
