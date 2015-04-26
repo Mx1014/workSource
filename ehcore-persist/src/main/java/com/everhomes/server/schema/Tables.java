@@ -299,6 +299,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserInvitationRoster EH_USER_INVITATION_ROSTER = com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER;
 
 	/**
+	 * The table ehcore.eh_user_likes
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserLikes EH_USER_LIKES = com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES;
+
+	/**
 	 * The table ehcore.eh_user_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserProfiles EH_USER_PROFILES = com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES;

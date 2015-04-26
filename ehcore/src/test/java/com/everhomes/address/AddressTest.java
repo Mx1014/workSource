@@ -157,7 +157,7 @@ public class AddressTest extends TestCase {
         addr.setCommunityId(1L);
         addr.setBuildingName("Building 1");
         addr.setBuildingName("Building 1 alias");
-        addr.setAppartmentName("APT 1");
+        addr.setApartmentName("APT 1");
         this.addressProvider.createAddress(addr);
         
         Address addr2 = new Address();
@@ -165,7 +165,7 @@ public class AddressTest extends TestCase {
         addr2.setCommunityId(1L);
         addr2.setBuildingName("Building 1");
         addr2.setBuildingName("Building 1 alias");
-        addr2.setAppartmentName("APT 2");
+        addr2.setApartmentName("APT 2");
         this.addressProvider.createAddress(addr2);
         
         Address addr3 = new Address();
@@ -173,7 +173,7 @@ public class AddressTest extends TestCase {
         addr3.setCommunityId(1L);
         addr3.setBuildingName("Building 2");
         addr3.setBuildingName("Building 2 alias");
-        addr3.setAppartmentName("APT 1");
+        addr3.setApartmentName("APT 1");
         this.addressProvider.createAddress(addr3);
         
         Address addr4 = new Address();
@@ -181,7 +181,7 @@ public class AddressTest extends TestCase {
         addr4.setCommunityId(1L);
         addr4.setBuildingName("Building 2");
         addr4.setBuildingName("Building 2 alias");
-        addr4.setAppartmentName("APT 2");
+        addr4.setApartmentName("APT 2");
         this.addressProvider.createAddress(addr4);
         
         ListBuildingByKeywordCommand cmd = new ListBuildingByKeywordCommand();

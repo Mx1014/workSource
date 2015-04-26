@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = -1104899693;
+	private static final long serialVersionUID = 2035953838;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -82,9 +82,14 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> BUILDING_ALIAS_NAME = createField("building_alias_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_addresses.appartment_name</code>.
+	 * The column <code>ehcore.eh_addresses.apartment_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> APPARTMENT_NAME = createField("appartment_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> APARTMENT_NAME = createField("apartment_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.apartment_floor</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> APARTMENT_FLOOR = createField("apartment_floor", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.status</code>. 0: inactive, 1: confirming, 2: active

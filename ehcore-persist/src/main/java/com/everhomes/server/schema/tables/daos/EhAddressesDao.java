@@ -118,10 +118,17 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>appartment_name IN (values)</code>
+	 * Fetch records that have <code>apartment_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAppartmentName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APPARTMENT_NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByApartmentName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APARTMENT_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apartment_floor IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByApartmentFloor(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APARTMENT_FLOOR, values);
 	}
 
 	/**

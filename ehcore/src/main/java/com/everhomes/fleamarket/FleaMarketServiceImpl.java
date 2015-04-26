@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.app.AppConstants;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -40,8 +41,8 @@ public class FleaMarketServiceImpl implements FleaMarketService {
         item.setCloseFlag(cmd.getCloseFlag());
         item.setPrice(cmd.getPrice());
         
-        post.setEmbeddedObjJson(StringHelper.toJsonString(item));
-        post.setEmbeddedObjVersion(1);
+        post.setEmbeddedType(EntityType.FLEAMARKET.getCode());
+        post.setEmbeddedJson(StringHelper.toJsonString(item));
        
         post.setVisibilityScope(cmd.getVisibilityScope());
         post.setVisibilityScopeId(cmd.getVisibilityScopeId());
@@ -61,7 +62,7 @@ public class FleaMarketServiceImpl implements FleaMarketService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "It is not a flea market item");
 
-        FleaMarketItemDTO fleaItem = (FleaMarketItemDTO)StringHelper.fromJsonString(post.getEmbeddedObjJson(), 
+        FleaMarketItemDTO fleaItem = (FleaMarketItemDTO)StringHelper.fromJsonString(post.getEmbeddedJson(), 
                 FleaMarketItemDTO.class);
         
         if(fleaItem != null) {
@@ -74,7 +75,7 @@ public class FleaMarketServiceImpl implements FleaMarketService {
             if(cmd.getPrice() != null)
                 fleaItem.setPrice(cmd.getPrice());
             
-            post.setEmbeddedObjJson(StringHelper.toJsonString(fleaItem));
+            post.setEmbeddedJson(StringHelper.toJsonString(fleaItem));
         }
         
         this.forumProvider.updatePost(post);

@@ -153,6 +153,13 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>dislike_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByDislikeCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.DISLIKE_COUNT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>subject IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchBySubject(java.lang.String... values) {
@@ -174,24 +181,31 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>embedded_obj_id IN (values)</code>
+	 * Fetch records that have <code>embedded_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedObjId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_OBJ_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>embedded_obj_json IN (values)</code>
+	 * Fetch records that have <code>embedded_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedObjJson(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_OBJ_JSON, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>embedded_obj_version IN (values)</code>
+	 * Fetch records that have <code>embedded_json IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedObjVersion(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_OBJ_VERSION, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedJson(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_JSON, values);
+	}
+
+	/**
+	 * Fetch records that have <code>embedded_version IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedVersion(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_VERSION, values);
 	}
 
 	/**

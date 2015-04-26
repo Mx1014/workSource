@@ -16,7 +16,7 @@ public class ClaimAddressCommand {
     private String buildingName;
     
     @NotNull
-    private String appartmentName;
+    private String apartmentName;
 
     public ClaimAddressCommand() {
     }
@@ -45,12 +45,12 @@ public class ClaimAddressCommand {
         this.buildingName = buildingName;
     }
 
-    public String getAppartmentName() {
-        return appartmentName;
+    public String getApartmentName() {
+        return apartmentName;
     }
 
-    public void setAppartmentName(String appartmentName) {
-        this.appartmentName = appartmentName;
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
     
     @Override

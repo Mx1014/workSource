@@ -312,9 +312,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunitId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
-                        .and(Tables.EH_ADDRESSES.APPARTMENT_NAME.like(cmd.getKeyword() + "%"))
+                        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(cmd.getKeyword() + "%"))
                         .fetch().map((r) -> {
-                            results.add(r.getValue(Tables.EH_ADDRESSES.APPARTMENT_NAME));
+                            results.add(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
                             return null;
                         });
                     
@@ -327,7 +327,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     @Override
     public ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()
-            || cmd.getAppartmentName() == null || cmd.getAppartmentName().isEmpty()) {
+            || cmd.getApartmentName() == null || cmd.getApartmentName().isEmpty()) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or appartmentName parameter");
         }
@@ -374,7 +374,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
         Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
-                cmd.getBuildingName(), cmd.getAppartmentName());
+                cmd.getBuildingName(), cmd.getApartmentName());
         
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         if(community == null)
@@ -387,13 +387,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                      .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
                          
                 Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
-                                 cmd.getBuildingName(), cmd.getAppartmentName());
+                                 cmd.getBuildingName(), cmd.getApartmentName());
                 if(addr == null) {
                      addr = new Address();
                      addr.setCityId(community.getCityId());
                      addr.setCommunityId(cmd.getCommunityId());
                      addr.setBuildingName(cmd.getBuildingName());
-                     addr.setAppartmentName(cmd.getAppartmentName());
+                     addr.setApartmentName(cmd.getApartmentName());
                      addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
                      this.addressProvider.createAddress(addr);
                 }

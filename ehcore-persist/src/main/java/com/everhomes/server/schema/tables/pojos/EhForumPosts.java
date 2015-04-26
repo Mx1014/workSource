@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1734325899;
+	private static final long serialVersionUID = -148994531;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -29,12 +29,14 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Long     childCount;
 	private java.lang.Long     forwardCount;
 	private java.lang.Long     likeCount;
+	private java.lang.Long     dislikeCount;
 	private java.lang.String   subject;
 	private java.lang.Integer  contentType;
 	private java.lang.String   content;
-	private java.lang.Long     embeddedObjId;
-	private java.lang.String   embeddedObjJson;
-	private java.lang.Integer  embeddedObjVersion;
+	private java.lang.String   embeddedType;
+	private java.lang.Long     embeddedId;
+	private java.lang.String   embeddedJson;
+	private java.lang.Integer  embeddedVersion;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -67,12 +69,14 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Long     childCount,
 		java.lang.Long     forwardCount,
 		java.lang.Long     likeCount,
+		java.lang.Long     dislikeCount,
 		java.lang.String   subject,
 		java.lang.Integer  contentType,
 		java.lang.String   content,
-		java.lang.Long     embeddedObjId,
-		java.lang.String   embeddedObjJson,
-		java.lang.Integer  embeddedObjVersion,
+		java.lang.String   embeddedType,
+		java.lang.Long     embeddedId,
+		java.lang.String   embeddedJson,
+		java.lang.Integer  embeddedVersion,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -102,12 +106,14 @@ public class EhForumPosts implements java.io.Serializable {
 		this.childCount = childCount;
 		this.forwardCount = forwardCount;
 		this.likeCount = likeCount;
+		this.dislikeCount = dislikeCount;
 		this.subject = subject;
 		this.contentType = contentType;
 		this.content = content;
-		this.embeddedObjId = embeddedObjId;
-		this.embeddedObjJson = embeddedObjJson;
-		this.embeddedObjVersion = embeddedObjVersion;
+		this.embeddedType = embeddedType;
+		this.embeddedId = embeddedId;
+		this.embeddedJson = embeddedJson;
+		this.embeddedVersion = embeddedVersion;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -250,6 +256,14 @@ public class EhForumPosts implements java.io.Serializable {
 		this.likeCount = likeCount;
 	}
 
+	public java.lang.Long getDislikeCount() {
+		return this.dislikeCount;
+	}
+
+	public void setDislikeCount(java.lang.Long dislikeCount) {
+		this.dislikeCount = dislikeCount;
+	}
+
 	public java.lang.String getSubject() {
 		return this.subject;
 	}
@@ -274,28 +288,36 @@ public class EhForumPosts implements java.io.Serializable {
 		this.content = content;
 	}
 
-	public java.lang.Long getEmbeddedObjId() {
-		return this.embeddedObjId;
+	public java.lang.String getEmbeddedType() {
+		return this.embeddedType;
 	}
 
-	public void setEmbeddedObjId(java.lang.Long embeddedObjId) {
-		this.embeddedObjId = embeddedObjId;
+	public void setEmbeddedType(java.lang.String embeddedType) {
+		this.embeddedType = embeddedType;
 	}
 
-	public java.lang.String getEmbeddedObjJson() {
-		return this.embeddedObjJson;
+	public java.lang.Long getEmbeddedId() {
+		return this.embeddedId;
 	}
 
-	public void setEmbeddedObjJson(java.lang.String embeddedObjJson) {
-		this.embeddedObjJson = embeddedObjJson;
+	public void setEmbeddedId(java.lang.Long embeddedId) {
+		this.embeddedId = embeddedId;
 	}
 
-	public java.lang.Integer getEmbeddedObjVersion() {
-		return this.embeddedObjVersion;
+	public java.lang.String getEmbeddedJson() {
+		return this.embeddedJson;
 	}
 
-	public void setEmbeddedObjVersion(java.lang.Integer embeddedObjVersion) {
-		this.embeddedObjVersion = embeddedObjVersion;
+	public void setEmbeddedJson(java.lang.String embeddedJson) {
+		this.embeddedJson = embeddedJson;
+	}
+
+	public java.lang.Integer getEmbeddedVersion() {
+		return this.embeddedVersion;
+	}
+
+	public void setEmbeddedVersion(java.lang.Integer embeddedVersion) {
+		this.embeddedVersion = embeddedVersion;
 	}
 
 	public java.lang.Long getIntegralTag1() {

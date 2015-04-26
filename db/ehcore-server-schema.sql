@@ -510,6 +510,24 @@ CREATE TABLE `eh_user_favorites` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
+# member of eh_user sharding group
+#
+DROP TABLE IF EXISTS `eh_user_likes`;
+CREATE TABLE `eh_user_likes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT,
+    `like_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: dislike, 1: like',
+    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
+
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_usr_like_target`(`owner_uid`, `target_type`, `target_id`),
+    INDEX `i_eh_usr_like_owner`(`owner_uid`),
+    INDEX `i_eh_usr_like_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
 # member of eh_users sharding group
 #
 DROP TABLE IF EXISTS `eh_user_profiles`;
@@ -766,14 +784,16 @@ CREATE TABLE `eh_forum_posts` (
     `child_count` BIGINT NOT NULL DEFAULT 0,
     `forward_count` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
+    `dislike_count` BIGINT NOT NULL DEFAULT 0,
 
     `subject` VARCHAR(512),
-    `content_type` INTEGER,
-    `content` TEXT COMMENT 'post content text',
-    
-    `embedded_obj_id` BIGINT,
-    `embedded_obj_json` TEXT COMMENT 'json encoded embedded object',
-    `embedded_obj_version` INT NOT NULL DEFAULT 1 COMMENT 'encode version',
+    `content_type` INTEGER NOT NULL DEFAULT 0 COMMENT '0: text, 1: single picture, 2: audio clip, 3: video clip',
+    `content` TEXT COMMENT 'content data, depends on value of content_type',
+ 
+    `embedded_type` VARCHAR(32),
+    `embedded_id` BIGINT,
+    `embedded_json` TEXT,
+    `embedded_version` INTEGER NOT NULL DEFAULT 1,
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
@@ -998,7 +1018,8 @@ CREATE TABLE `eh_addresses` (
     `address_alias` VARCHAR(128),
     `building_name` VARCHAR(128),
     `building_alias_name` VARCHAR(128),
-    `appartment_name` VARCHAR(128),
+    `apartment_name` VARCHAR(128),
+    `apartment_floor` VARCHAR(16),
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: confirming, 2: active',
     `creator_uid` BIGINT COMMENT 'uid of the user who has suggested address, NULL if it is system created',
     `create_time` DATETIME,
@@ -1017,14 +1038,15 @@ CREATE TABLE `eh_addresses` (
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_addr_city`(`city_id`),
+    INDEX `i_eh_addr_community`(`community_id`),
     INDEX `i_eh_addr_zipcode`(`zipcode`),
     INDEX `i_eh_addr_address`(`address`),
     INDEX `i_eh_addr_geohash`(`geohash`),
     INDEX `i_eh_addr_address_alias`(`address_alias`),
-    INDEX `i_eh_addr_building_apt_name`(`building_name`, `appartment_name`),
-    INDEX `i_eh_addr_building_alias_apt_name`(`building_alias_name`, `appartment_name`),
-    INDEX `i_eh_addr_create_name`(`create_time`),
-    INDEX `i_eh_addr_delete_name`(`delete_time`),
+    INDEX `i_eh_addr_building_apt_name`(`building_name`, `apartment_name`),
+    INDEX `i_eh_addr_building_alias_apt_name`(`building_alias_name`, `apartment_name`),
+    INDEX `i_eh_addr_create_time`(`create_time`),
+    INDEX `i_eh_addr_delete_time`(`delete_time`),
     INDEX `i_eh_addr_itag1`(`integral_tag1`),
     INDEX `i_eh_addr_itag2`(`integral_tag2`),
     INDEX `i_eh_addr_stag1`(`string_tag1`),

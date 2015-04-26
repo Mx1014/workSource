@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1849531107;
+	private static final long serialVersionUID = -1343877287;
 
 	private java.lang.Long     id;
 	private java.lang.Long     communityId;
@@ -24,7 +24,8 @@ public class EhAddresses implements java.io.Serializable {
 	private java.lang.String   addressAlias;
 	private java.lang.String   buildingName;
 	private java.lang.String   buildingAliasName;
-	private java.lang.String   appartmentName;
+	private java.lang.String   apartmentName;
+	private java.lang.String   apartmentFloor;
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
@@ -54,7 +55,8 @@ public class EhAddresses implements java.io.Serializable {
 		java.lang.String   addressAlias,
 		java.lang.String   buildingName,
 		java.lang.String   buildingAliasName,
-		java.lang.String   appartmentName,
+		java.lang.String   apartmentName,
+		java.lang.String   apartmentFloor,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
@@ -81,7 +83,8 @@ public class EhAddresses implements java.io.Serializable {
 		this.addressAlias = addressAlias;
 		this.buildingName = buildingName;
 		this.buildingAliasName = buildingAliasName;
-		this.appartmentName = appartmentName;
+		this.apartmentName = apartmentName;
+		this.apartmentFloor = apartmentFloor;
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
@@ -186,12 +189,20 @@ public class EhAddresses implements java.io.Serializable {
 		this.buildingAliasName = buildingAliasName;
 	}
 
-	public java.lang.String getAppartmentName() {
-		return this.appartmentName;
+	public java.lang.String getApartmentName() {
+		return this.apartmentName;
 	}
 
-	public void setAppartmentName(java.lang.String appartmentName) {
-		this.appartmentName = appartmentName;
+	public void setApartmentName(java.lang.String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public java.lang.String getApartmentFloor() {
+		return this.apartmentFloor;
+	}
+
+	public void setApartmentFloor(java.lang.String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
 	}
 
 	public java.lang.Byte getStatus() {

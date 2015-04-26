@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 1665202284;
+	private static final long serialVersionUID = 775045835;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -107,34 +107,44 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> LIKE_COUNT = createField("like_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_forum_posts.dislike_count</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> DISLIKE_COUNT = createField("dislike_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_forum_posts.subject</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> SUBJECT = createField("subject", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.content_type</code>.
+	 * The column <code>ehcore.eh_forum_posts.content_type</code>. 0: text, 1: single picture, 2: audio clip, 3: video clip
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Integer> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Integer> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: text, 1: single picture, 2: audio clip, 3: video clip");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.content</code>. post content text
+	 * The column <code>ehcore.eh_forum_posts.content</code>. content data, depends on value of content_type
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "post content text");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "content data, depends on value of content_type");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.embedded_obj_id</code>.
+	 * The column <code>ehcore.eh_forum_posts.embedded_type</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> EMBEDDED_OBJ_ID = createField("embedded_obj_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_TYPE = createField("embedded_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.embedded_obj_json</code>. json encoded embedded object
+	 * The column <code>ehcore.eh_forum_posts.embedded_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_OBJ_JSON = createField("embedded_obj_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "json encoded embedded object");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> EMBEDDED_ID = createField("embedded_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.embedded_obj_version</code>. encode version
+	 * The column <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Integer> EMBEDDED_OBJ_VERSION = createField("embedded_obj_version", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "encode version");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.embedded_version</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Integer> EMBEDDED_VERSION = createField("embedded_version", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.integral_tag1</code>.

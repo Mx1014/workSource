@@ -122,6 +122,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_PRIMARY = UniqueKeys0.KEY_EH_USER_INVITATIONS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_U_EH_INVITE_CODE = UniqueKeys0.KEY_EH_USER_INVITATIONS_U_EH_INVITE_CODE;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord> KEY_EH_USER_INVITATION_ROSTER_PRIMARY = UniqueKeys0.KEY_EH_USER_INVITATION_ROSTER_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_PRIMARY = UniqueKeys0.KEY_EH_USER_LIKES_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_U_EH_USR_LIKE_TARGET = UniqueKeys0.KEY_EH_USER_LIKES_U_EH_USR_LIKE_TARGET;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = UniqueKeys0.KEY_EH_USER_PROFILES_PRIMARY;
 
 	// -------------------------------------------------------------------------
@@ -240,6 +242,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS, com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationsRecord> KEY_EH_USER_INVITATIONS_U_EH_INVITE_CODE = createUniqueKey(com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS, com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS.INVITE_CODE);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserInvitationRosterRecord> KEY_EH_USER_INVITATION_ROSTER_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER, com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_U_EH_USR_LIKE_TARGET = createUniqueKey(com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.OWNER_UID, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.TARGET_TYPE, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.TARGET_ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES, com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES.ID);
 	}
 

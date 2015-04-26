@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = -312992300;
+	private static final long serialVersionUID = 1589131280;
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.id</code>. id of the record
@@ -168,213 +168,227 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_addresses.appartment_name</code>.
+	 * Setter for <code>ehcore.eh_addresses.apartment_name</code>.
 	 */
-	public void setAppartmentName(java.lang.String value) {
+	public void setApartmentName(java.lang.String value) {
 		setValue(11, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_addresses.appartment_name</code>.
+	 * Getter for <code>ehcore.eh_addresses.apartment_name</code>.
 	 */
-	public java.lang.String getAppartmentName() {
+	public java.lang.String getApartmentName() {
 		return (java.lang.String) getValue(11);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.apartment_floor</code>.
+	 */
+	public void setApartmentFloor(java.lang.String value) {
+		setValue(12, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.apartment_floor</code>.
+	 */
+	public java.lang.String getApartmentFloor() {
+		return (java.lang.String) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.status</code>. 0: inactive, 1: confirming, 2: active
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.status</code>. 0: inactive, 1: confirming, 2: active
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(12);
+		return (java.lang.Byte) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.creator_uid</code>. uid of the user who has suggested address, NULL if it is system created
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.creator_uid</code>. uid of the user who has suggested address, NULL if it is system created
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(13);
+		return (java.lang.Long) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(14);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(15);
+		return (java.sql.Timestamp) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(16);
+		return (java.lang.Long) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(17);
+		return (java.lang.Long) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(21);
+		return (java.lang.String) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(22);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(23);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(25, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_addresses.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(25);
+		return (java.lang.String) getValue(26);
 	}
 
 	// -------------------------------------------------------------------------
@@ -403,7 +417,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	/**
 	 * Create a detached, initialised EhAddressesRecord
 	 */
-	public EhAddressesRecord(java.lang.Long id, java.lang.Long communityId, java.lang.Long cityId, java.lang.String zipcode, java.lang.String address, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String appartmentName, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhAddressesRecord(java.lang.Long id, java.lang.Long communityId, java.lang.Long cityId, java.lang.String zipcode, java.lang.String address, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String apartmentName, java.lang.String apartmentFloor, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES);
 
 		setValue(0, id);
@@ -417,20 +431,21 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		setValue(8, addressAlias);
 		setValue(9, buildingName);
 		setValue(10, buildingAliasName);
-		setValue(11, appartmentName);
-		setValue(12, status);
-		setValue(13, creatorUid);
-		setValue(14, createTime);
-		setValue(15, deleteTime);
-		setValue(16, integralTag1);
-		setValue(17, integralTag2);
-		setValue(18, integralTag3);
-		setValue(19, integralTag4);
-		setValue(20, integralTag5);
-		setValue(21, stringTag1);
-		setValue(22, stringTag2);
-		setValue(23, stringTag3);
-		setValue(24, stringTag4);
-		setValue(25, stringTag5);
+		setValue(11, apartmentName);
+		setValue(12, apartmentFloor);
+		setValue(13, status);
+		setValue(14, creatorUid);
+		setValue(15, createTime);
+		setValue(16, deleteTime);
+		setValue(17, integralTag1);
+		setValue(18, integralTag2);
+		setValue(19, integralTag3);
+		setValue(20, integralTag4);
+		setValue(21, integralTag5);
+		setValue(22, stringTag1);
+		setValue(23, stringTag2);
+		setValue(24, stringTag3);
+		setValue(25, stringTag4);
+		setValue(26, stringTag5);
 	}
 }

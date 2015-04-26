@@ -114,7 +114,7 @@ public class AddressProviderImpl implements AddressProvider {
             result[0] = context.select().from(Tables.EH_ADDRESSES)
                 .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
-                .and(Tables.EH_ADDRESSES.APPARTMENT_NAME.eq(apartmentName))
+                .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
                 .fetchOne().map((r) -> {
                    return ConvertHelper.convert(r, Address.class); 
                 });
