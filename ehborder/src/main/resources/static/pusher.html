@@ -54,7 +54,7 @@ function testWebSocket() {
 heartbeat_interval = null;
 function onOpen(evt) {
     writeToScreen("CONNECTED"); 
-    doSend("123456");
+    doSend(document.getElementById("deviceId").value);
 
     if (heartbeat_interval == null) {
         //missed_heartbeats = 0;
