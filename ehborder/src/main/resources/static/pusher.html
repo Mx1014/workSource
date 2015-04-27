@@ -103,13 +103,14 @@ function requestMessages() {
     pdu = newPdu("0", "REQUEST");
     websocket.send(JSON.stringify(pdu));
 }
-window.addEventListener("load", init, false);  
+//window.addEventListener("load", init, false);  
 </script>
 
 <h2>
     WebSocket Test
 </h2>
-
+<input type="text" id="deviceId" value="" placeholder="Device Id"/>
+<input type="button" id="start" value="Start" onclick="init();"/>
 <div id="output">
 </div>
 <input type="button" id="request" value="request" onclick="requestMessages();"/>
