@@ -1,21 +1,33 @@
 // @formatter:off
-package com.everhomes.user;
+package com.everhomes.messaging;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
 import com.google.gson.Gson;
 
-public class MessageData {
+public class MessageDTO {
     private Long appId;
+    private Long senderUid;
+    
+    @NotNull
     private List<MessageChannel> channels;
     private Map<String, String> meta;
+    
     private String body;
+
+    // used for sender to tag on a message
+    private String senderTag;
+    
+    // used to indicate the message store(anchor) position in message responses
+    private Long storeSequence;
 
     private static Gson gson = new Gson();
     
-    public MessageData() {
+    public MessageDTO() {
     }
 
     public Long getAppId() {
@@ -24,6 +36,14 @@ public class MessageData {
 
     public void setAppId(Long appId) {
         this.appId = appId;
+    }
+    
+    public Long getSenderUid() {
+        return senderUid;
+    }
+
+    public void setSenderUid(Long senderUid) {
+        this.senderUid = senderUid;
     }
 
     public List<MessageChannel> getChannels() {
@@ -59,11 +79,27 @@ public class MessageData {
         this.body = body;
     }
     
+    public String getSenderTag() {
+        return senderTag;
+    }
+
+    public void setSenderTag(String senderTag) {
+        this.senderTag = senderTag;
+    }
+
+    public Long getStoreSequence() {
+        return storeSequence;
+    }
+
+    public void setStoreSequence(Long storeSequence) {
+        this.storeSequence = storeSequence;
+    }
+
     public String toJson() {
         return gson.toJson(this);
     }
     
-    public static MessageData fromJson(String json) {
-        return gson.fromJson(json, MessageData.class);
+    public static MessageDTO fromJson(String json) {
+        return gson.fromJson(json, MessageDTO.class);
     }
 }

@@ -6,6 +6,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -14,7 +17,7 @@ public class MessageDataTest extends TestCase {
 
     @Test
     public void testSerialization() {
-        MessageData msg = new MessageData();
+        MessageDTO msg = new MessageDTO();
         msg.setAppId(1L);
         msg.setBody("Test body");
         msg.setChannels(new MessageChannel("user", "1"), new MessageChannel("user", "2"));
@@ -27,7 +30,7 @@ public class MessageDataTest extends TestCase {
         String json = msg.toJson();
         System.out.println("json: " + json);
         
-        MessageData msg2 = MessageData.fromJson(json);
+        MessageDTO msg2 = MessageDTO.fromJson(json);
         
         Assert.assertTrue(msg2.getChannels() != null);
         Assert.assertTrue(msg2.getMeta() != null);
