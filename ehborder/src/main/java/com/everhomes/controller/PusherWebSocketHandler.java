@@ -229,30 +229,53 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             dev.setDeviceType(pdu.getDeviceType());
             dev.setMeta(pdu.getMeta());
             
-            //Remove it from pending session
-            this.pendingSession.remove(session);
-            dev.setValid(true);
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("deviceId", pdu.getDeviceId());
+            params.put("platform", "android");
+            params.put("product", "");
+            params.put("brand", "");
+            params.put("deviceModel", "");
+            params.put("systemVersion", "");
+            params.put("meta", "{}");
+            restCall("pusher/registDevice", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                  //Remove it from pending session
+                    pendingSession.remove(session);
+                    dev.setValid(true);
+                    
+                    //Added to sessionMap
+                    device2sessionMap.put(dev.getDeviceId(), session);
+                    
+                    DeviceNode devNode = new DeviceNode(null, dev);
+                    synchronized(this) {
+                        devNode.node = timeoutList.addLastWithNode(dev);
+                        }
+                    session2deviceMap.put(session, devNode);
+                    LOGGER.info("added deviceId: " + dev.getDeviceId());
+                }
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error("restCall failed: " + ex.getMessage() + " closing session");
+                  //Remove it from pending session
+                    pendingSession.remove(session);
+                    dev.setValid(false);
+                    
+                    try {
+                        session.close();
+                    } catch (IOException e) {
+                        LOGGER.info("close session error: " + session.getId());
+                    }
+                }
+            });
             
-            //Added to sessionMap
-            this.device2sessionMap.put(dev.getDeviceId(), session);
-            
-            DeviceNode devNode = new DeviceNode(null, dev);
-            synchronized(this) {
-                devNode.node = timeoutList.addLastWithNode(dev);
-            }
-            this.session2deviceMap.put(session, devNode);
-            LOGGER.info("added deviceId: " + dev.getDeviceId());
         } else if(frame.getName().equals("REQUEST")) {
             DeviceNode devNode = this.session2deviceMap.get(session);
-            if(devNode == null) {
+            if(devNode == null || (!devNode.item.isValid())) {
                 LOGGER.error("Session not exists");
                 return;
             }
             DeviceInfo dev = devNode.item;
-            if(dev == null || !dev.isValid()) {
-                LOGGER.error("Devices not exists");
-                return;
-            }
             Long anchor = frame.getPayload(Long.class);
             
             Map<String, String> params = new HashMap<String, String>();
