@@ -74,8 +74,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse join(
         @RequestParam(value = "familyId", required = true) Long familyId) {
-    
-        // ???
+    	familyProvider.joinFamily(familyId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

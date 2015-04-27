@@ -275,6 +275,16 @@ public class FamilyProviderImpl implements FamilyProvider {
     		m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
     		m.setMemberType(EhUsers.class.getSimpleName());
     		this.groupProvider.createGroupMember(m);
+    		
+    		 UserGroup userGroup = new UserGroup();
+             userGroup.setOwnerUid(userId);
+             userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+             userGroup.setGroupId(familyId);
+             userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
+             userGroup.setRegionScopeId(familyId);
+             userGroup.setMemberRole(Role.ResourceUser);
+             userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+             this.userProvider.createUserGroup(userGroup);
     		return null;
     	});
     }
