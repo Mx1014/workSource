@@ -114,9 +114,19 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunities EH_COMMUNITIES = com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES;
 
 	/**
+	 * The table ehcore.eh_community_address_mappings
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityAddressMappings EH_COMMUNITY_ADDRESS_MAPPINGS = com.everhomes.server.schema.tables.EhCommunityAddressMappings.EH_COMMUNITY_ADDRESS_MAPPINGS;
+
+	/**
 	 * The table ehcore.eh_community_geopoints
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunityGeopoints EH_COMMUNITY_GEOPOINTS = com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS;
+
+	/**
+	 * The table ehcore.eh_community_pm_members
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityPmMembers EH_COMMUNITY_PM_MEMBERS = com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS;
 
 	/**
 	 * The table ehcore.eh_community_profiles

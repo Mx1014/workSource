@@ -968,7 +968,6 @@ CREATE TABLE `eh_community_geopoints` (
 
 #
 # member of eh_communities partition
-# information of community forum, admin group will be managed in community profile 
 #
 DROP TABLE IF EXISTS `eh_community_profiles`;
 CREATE TABLE `eh_community_profiles` (
@@ -1000,6 +999,63 @@ CREATE TABLE `eh_community_profiles` (
     INDEX `i_eh_cprof_stag1`(`string_tag1`),
     INDEX `i_eh_cprof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_members`;
+CREATE TABLE `eh_community_pm_members` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
+    `pm_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
+	`contact_name` VARCHAR(64),
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+	`contact_description` TEXT,
+	
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_cpm_owner`(`owner_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
+	INDEX `i_eh_cpm_group`(`pm_group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information about property name mapping
+#
+DROP TABLE IF EXISTS `eh_community_address_mappings`;
+CREATE TABLE `eh_community_address_mappings` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'community id',
+    `address_id` BIGINT NOT NULL COMMENT 'address id',
+    
+    `name` VARCHAR(128) COMMENT 'building name used in PM management',
+    
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information about property owner info
+#
+DROP TABLE IF EXISTS `eh_community_address_owners`;
+CREATE TABLE `eh_community_address_owners` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'community id',
+    `address_id` BIGINT NOT NULL COMMENT 'address id',
+    
+	`contact_name` VARCHAR(64),
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+	`contact_tag` VARCHAR(32), 
+	`contact_description` TEXT,
+	
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_cowner_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # Key table in address related sharding group
