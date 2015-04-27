@@ -11,23 +11,22 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1364995324;
+	private static final long serialVersionUID = 776470504;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     appid;
 	private java.lang.String   name;
-	private java.lang.String   description;
-	private java.lang.Byte     bannerType;
+	private java.lang.String   posterPath;
 	private java.lang.String   vendorTag;
-	private java.lang.Byte     flowType;
-	private java.lang.String   flowData;
+	private java.sql.Timestamp listingStartTime;
+	private java.sql.Timestamp listingEndTime;
+	private java.lang.String   resourceType;
 	private java.lang.Long     resourceId;
 	private java.lang.String   resourceUrl;
 	private java.lang.Byte     status;
-	private java.lang.Long     groupId;
-	private java.lang.Long     forumId;
 	private java.lang.Integer  order;
+	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 
@@ -38,17 +37,16 @@ public class EhBanners implements java.io.Serializable {
 		java.lang.Integer  namespaceId,
 		java.lang.Long     appid,
 		java.lang.String   name,
-		java.lang.String   description,
-		java.lang.Byte     bannerType,
+		java.lang.String   posterPath,
 		java.lang.String   vendorTag,
-		java.lang.Byte     flowType,
-		java.lang.String   flowData,
+		java.sql.Timestamp listingStartTime,
+		java.sql.Timestamp listingEndTime,
+		java.lang.String   resourceType,
 		java.lang.Long     resourceId,
 		java.lang.String   resourceUrl,
 		java.lang.Byte     status,
-		java.lang.Long     groupId,
-		java.lang.Long     forumId,
 		java.lang.Integer  order,
+		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime
 	) {
@@ -56,17 +54,16 @@ public class EhBanners implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.appid = appid;
 		this.name = name;
-		this.description = description;
-		this.bannerType = bannerType;
+		this.posterPath = posterPath;
 		this.vendorTag = vendorTag;
-		this.flowType = flowType;
-		this.flowData = flowData;
+		this.listingStartTime = listingStartTime;
+		this.listingEndTime = listingEndTime;
+		this.resourceType = resourceType;
 		this.resourceId = resourceId;
 		this.resourceUrl = resourceUrl;
 		this.status = status;
-		this.groupId = groupId;
-		this.forumId = forumId;
 		this.order = order;
+		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
 	}
@@ -103,20 +100,12 @@ public class EhBanners implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public java.lang.String getDescription() {
-		return this.description;
+	public java.lang.String getPosterPath() {
+		return this.posterPath;
 	}
 
-	public void setDescription(java.lang.String description) {
-		this.description = description;
-	}
-
-	public java.lang.Byte getBannerType() {
-		return this.bannerType;
-	}
-
-	public void setBannerType(java.lang.Byte bannerType) {
-		this.bannerType = bannerType;
+	public void setPosterPath(java.lang.String posterPath) {
+		this.posterPath = posterPath;
 	}
 
 	public java.lang.String getVendorTag() {
@@ -127,20 +116,28 @@ public class EhBanners implements java.io.Serializable {
 		this.vendorTag = vendorTag;
 	}
 
-	public java.lang.Byte getFlowType() {
-		return this.flowType;
+	public java.sql.Timestamp getListingStartTime() {
+		return this.listingStartTime;
 	}
 
-	public void setFlowType(java.lang.Byte flowType) {
-		this.flowType = flowType;
+	public void setListingStartTime(java.sql.Timestamp listingStartTime) {
+		this.listingStartTime = listingStartTime;
 	}
 
-	public java.lang.String getFlowData() {
-		return this.flowData;
+	public java.sql.Timestamp getListingEndTime() {
+		return this.listingEndTime;
 	}
 
-	public void setFlowData(java.lang.String flowData) {
-		this.flowData = flowData;
+	public void setListingEndTime(java.sql.Timestamp listingEndTime) {
+		this.listingEndTime = listingEndTime;
+	}
+
+	public java.lang.String getResourceType() {
+		return this.resourceType;
+	}
+
+	public void setResourceType(java.lang.String resourceType) {
+		this.resourceType = resourceType;
 	}
 
 	public java.lang.Long getResourceId() {
@@ -167,28 +164,20 @@ public class EhBanners implements java.io.Serializable {
 		this.status = status;
 	}
 
-	public java.lang.Long getGroupId() {
-		return this.groupId;
-	}
-
-	public void setGroupId(java.lang.Long groupId) {
-		this.groupId = groupId;
-	}
-
-	public java.lang.Long getForumId() {
-		return this.forumId;
-	}
-
-	public void setForumId(java.lang.Long forumId) {
-		this.forumId = forumId;
-	}
-
 	public java.lang.Integer getOrder() {
 		return this.order;
 	}
 
 	public void setOrder(java.lang.Integer order) {
 		this.order = order;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

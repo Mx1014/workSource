@@ -102,4 +102,11 @@ public class EhCommunityPmMembersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers> fetchByContactDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.CONTACT_DESCRIPTION, values);
 	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.STATUS, values);
+	}
 }
