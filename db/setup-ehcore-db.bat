@@ -94,7 +94,7 @@ mysql --defaults-file=%DEFAULT_MY_INI% < %EHCORE_INIT_SQL_FILE%
 
 if %DEVELOPER% == 1 (
 	echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_DEVELOPER_INIT_SQL_FILE%' ...
-	mysql --defaults-file=%DEFAULT_MY_INI% < %EHCORE_DEVELOPER_INIT_SQL_FILE%
+	mysql --defaults-file=%DEFAULT_MY_INI% ehcore < %EHCORE_DEVELOPER_INIT_SQL_FILE%
 )
 
 :end
