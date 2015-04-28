@@ -43,6 +43,7 @@ public class LogonCommand {
         this.deviceIdentifier = deviceIdentifier;
     }
     
+    
     public Integer getNamespaceId() {
         return this.namespaceId;
     }
