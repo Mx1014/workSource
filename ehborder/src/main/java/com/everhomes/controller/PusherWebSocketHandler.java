@@ -21,7 +21,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -77,9 +76,9 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         DeviceNode dev = this.session2deviceMap.remove(session);
         if (dev != null) {
             //Set flag to invalid and remove it later
-            dev.item.setValid(false);
-            if(!dev.item.getDeviceId().isEmpty()) {
-                this.device2sessionMap.remove(dev.item.getDeviceId());    
+            dev.Item().setValid(false);
+            if(!dev.Item().getDeviceId().isEmpty()) {
+                this.device2sessionMap.remove(dev.Item().getDeviceId());    
             }
             
          synchronized(this) {
@@ -180,12 +179,12 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     private void heartbeat(WebSocketSession session) {
         DeviceNode dev = session2deviceMap.get(session);
         if(dev != null) {
-            dev.item.setLastPingTime(System.currentTimeMillis());
+            dev.Item().setLastPingTime(System.currentTimeMillis());
             
             //Move the item to last   
             synchronized(this) {
                 timeoutList.removeWithNode(dev.node);
-                dev.node = timeoutList.addLastWithNode(dev.item);
+                dev.node = timeoutList.addLastWithNode(dev.Item());
             }
             LOGGER.info("Receiving ping from client, session: " + session.getId());
         }
@@ -245,7 +244,14 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     dev.setValid(true);
                     
                     //Added to sessionMap
-                    device2sessionMap.put(dev.getDeviceId(), session);
+                    WebSocketSession oldSession = device2sessionMap.put(dev.getDeviceId(), session);
+                    if(oldSession != null) {
+                        try {
+                            oldSession.close();
+                        } catch (IOException e) {
+                            LOGGER.info("Cannot close session: " + oldSession.getId());
+                            }
+                        }
                     
                     DeviceNode devNode = new DeviceNode(null, dev);
                     synchronized(this) {
@@ -271,11 +277,11 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             
         } else if(frame.getName().equals("REQUEST")) {
             DeviceNode devNode = this.session2deviceMap.get(session);
-            if(devNode == null || (!devNode.item.isValid())) {
+            if(devNode == null || (!devNode.Item().isValid())) {
                 LOGGER.error("Session not exists");
                 return;
             }
-            DeviceInfo dev = devNode.item;
+            DeviceInfo dev = devNode.Item();
             Long anchor = frame.getPayload(Long.class);
             
             Map<String, String> params = new HashMap<String, String>();
@@ -350,31 +356,64 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     public void notify(WebSocketSession serverSession, PusherNotifyPdu pduServer) {
         LOGGER.info("Got notify: " + pduServer.getMessageId());
         
-        session2deviceMap.forEach((session, devNode)-> {
-            DeviceInfo dev = devNode.item;
-            if(dev.isValid()) {
-                PusherMessageResp resp = new PusherMessageResp();
-                resp.setName("NOTIFY");
-                resp.setContent("notify from server :)");
-                PduFrame pdu = new PduFrame();
-                pdu.setPayload(resp);
-                try {
-                      session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
-                } catch (IOException e) {
-                      LOGGER.error("Notify server error: " + e.getMessage());
-                     }
+//        session2deviceMap.forEach((session, devNode)-> {
+//            DeviceInfo dev = devNode.item;
+//            if(dev.isValid()) {
+//                PusherMessageResp resp = new PusherMessageResp();
+//                resp.setName("NOTIFY");
+//                resp.setContent("notify from server :)");
+//                PduFrame pdu = new PduFrame();
+//                pdu.setPayload(resp);
+//                try {
+//                      session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+//                } catch (IOException e) {
+//                      LOGGER.error("Notify server error: " + e.getMessage());
+//                     }
+//            }
+//        });
+        
+        //TODO 推送策略控制 ?
+        if(pduServer.getMessageType().equals("UNICAST")) {
+            String deviceId = pduServer.getDeviceId();
+            WebSocketSession clientSession = device2sessionMap.get(deviceId);
+            if (clientSession == null) {
+                LOGGER.warn("unicast deviceId: " + deviceId + " not found");
+                return;
             }
-        });
+            DeviceNode devNode = session2deviceMap.get(clientSession);
+            if(devNode == null || !devNode.Item().isValid()) {
+                LOGGER.warn("Got session but deviceId: " + deviceId + " not found");
+                return;
+            }
+            PusherMessageResp resp = new PusherMessageResp();
+            resp.setName("NOTIFY");
+            resp.setContent("notify from server :)");
+            PduFrame pdu = new PduFrame();
+            pdu.setPayload(resp);
+            try {
+                  clientSession.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+            } catch (IOException e) {
+                    LOGGER.error("Notify server error: " + e.getMessage());
+               }
+        }
+        
+        pduServer.getNotification();
         
     }
     
     private static class DeviceNode {
         public CustomLinkedList.Node<DeviceInfo> node;
-        public DeviceInfo item;
+        private DeviceInfo nochanged_item;
+        
+        public DeviceInfo Item() {
+            return this.nochanged_item;
+        }
         
         public DeviceNode(CustomLinkedList.Node<DeviceInfo> n, DeviceInfo i) {
             this.node = n;
-            this.item = i;
+            
+            //The this.node.item will be changed somewhere, so hear the one will never be changed
+            this.nochanged_item = i;
         }
     }
     

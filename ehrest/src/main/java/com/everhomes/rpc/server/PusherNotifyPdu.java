@@ -6,12 +6,34 @@ import com.everhomes.util.Name;
 public class PusherNotifyPdu {
     private long messageId;
     private String messageType;
+    private String deviceId;
     private String platform;
     private String audience;
     private String notification;
     
+//    public enum MessageType {
+//        UNICAST("UNICAST"),
+//        MULTICAST("MULTICAST");
+//        private final String text;
+//        
+//        private MessageType(final String text){
+//            this.text = text;
+//        }
+//        
+//        @Override
+//        public String toString() {
+//            return text;
+//        }
+//    }
+    
     public long getMessageId() {
         return messageId;
+    }
+    public String getDeviceId() {
+        return deviceId;
+    }
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
     public void setMessageId(long messageId) {
         this.messageId = messageId;
