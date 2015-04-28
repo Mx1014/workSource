@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord> implements org.jooq.Record8<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.Byte> {
 
-	private static final long serialVersionUID = 1685767760;
+	private static final long serialVersionUID = 2038406134;
 
 	/**
 	 * Setter for <code>ehcore.eh_community_pm_tasks.id</code>. id of the record
@@ -56,16 +56,16 @@ public class EhCommunityPmTasksRecord extends org.jooq.impl.UpdatableRecordImpl<
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_community_pm_tasks.entity</code>. target topic id if target_type is a topic
+	 * Setter for <code>ehcore.eh_community_pm_tasks.entity_id</code>. target topic id if target_type is a topic
 	 */
-	public void setEntity(java.lang.Long value) {
+	public void setEntityId(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_community_pm_tasks.entity</code>. target topic id if target_type is a topic
+	 * Getter for <code>ehcore.eh_community_pm_tasks.entity_id</code>. target topic id if target_type is a topic
 	 */
-	public java.lang.Long getEntity() {
+	public java.lang.Long getEntityId() {
 		return (java.lang.Long) getValue(3);
 	}
 
@@ -186,7 +186,7 @@ public class EhCommunityPmTasksRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field4() {
-		return com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.ENTITY;
+		return com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.ENTITY_ID;
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class EhCommunityPmTasksRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public java.lang.Long value4() {
-		return getEntity();
+		return getEntityId();
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class EhCommunityPmTasksRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public EhCommunityPmTasksRecord value4(java.lang.Long value) {
-		setEntity(value);
+		setEntityId(value);
 		return this;
 	}
 
@@ -379,13 +379,13 @@ public class EhCommunityPmTasksRecord extends org.jooq.impl.UpdatableRecordImpl<
 	/**
 	 * Create a detached, initialised EhCommunityPmTasksRecord
 	 */
-	public EhCommunityPmTasksRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String entityType, java.lang.Long entity, java.lang.String targetType, java.lang.Long targetId, java.lang.String taskType, java.lang.Byte taskStatus) {
+	public EhCommunityPmTasksRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String entityType, java.lang.Long entityId, java.lang.String targetType, java.lang.Long targetId, java.lang.String taskType, java.lang.Byte taskStatus) {
 		super(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS);
 
 		setValue(0, id);
 		setValue(1, ownerId);
 		setValue(2, entityType);
-		setValue(3, entity);
+		setValue(3, entityId);
 		setValue(4, targetType);
 		setValue(5, targetId);
 		setValue(6, taskType);

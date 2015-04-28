@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord> {
 
-	private static final long serialVersionUID = 1238245293;
+	private static final long serialVersionUID = -237900361;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_tasks</code>
@@ -42,9 +42,9 @@ public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.String> ENTITY_TYPE = createField("entity_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_community_pm_tasks.entity</code>. target topic id if target_type is a topic
+	 * The column <code>ehcore.eh_community_pm_tasks.entity_id</code>. target topic id if target_type is a topic
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> ENTITY = createField("entity", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "target topic id if target_type is a topic");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> ENTITY_ID = createField("entity_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "target topic id if target_type is a topic");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_tasks.target_type</code>.

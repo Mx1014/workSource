@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1110113177;
+	private static final long serialVersionUID = 833261539;
 
 	private java.lang.Long   id;
 	private java.lang.Long   ownerId;
 	private java.lang.String entityType;
-	private java.lang.Long   entity;
+	private java.lang.Long   entityId;
 	private java.lang.String targetType;
 	private java.lang.Long   targetId;
 	private java.lang.String taskType;
@@ -28,7 +28,7 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 		java.lang.Long   id,
 		java.lang.Long   ownerId,
 		java.lang.String entityType,
-		java.lang.Long   entity,
+		java.lang.Long   entityId,
 		java.lang.String targetType,
 		java.lang.Long   targetId,
 		java.lang.String taskType,
@@ -37,7 +37,7 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 		this.id = id;
 		this.ownerId = ownerId;
 		this.entityType = entityType;
-		this.entity = entity;
+		this.entityId = entityId;
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.taskType = taskType;
@@ -68,12 +68,12 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 		this.entityType = entityType;
 	}
 
-	public java.lang.Long getEntity() {
-		return this.entity;
+	public java.lang.Long getEntityId() {
+		return this.entityId;
 	}
 
-	public void setEntity(java.lang.Long entity) {
-		this.entity = entity;
+	public void setEntityId(java.lang.Long entityId) {
+		this.entityId = entityId;
 	}
 
 	public java.lang.String getTargetType() {

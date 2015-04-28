@@ -1031,7 +1031,7 @@ CREATE TABLE `eh_community_pm_tasks` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`entity_type` VARCHAR(32),
-    `entity` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
+    `entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
 	`target_type` VARCHAR(32),
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `task_type` VARCHAR(32) COMMENT 'task type assigned by pm',
@@ -1055,6 +1055,69 @@ CREATE TABLE `eh_community_address_mappings` (
     
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_bills`;
+CREATE TABLE `eh_community_pm_bills` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`entity_type` VARCHAR(32),
+    `entity_id` BIGINT NOT NULL COMMENT 'target address id if target_type is a address',
+	`name` VARCHAR(128) COMMENT 'the tile of bill',
+	`date_str` VARCHAR(128) COMMENT 'the date string in bill',
+	`total_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill',
+	`description` TEXT,
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	`notify_count` INT COMMENT 'how many times of notification is sent for the bill',
+    `notify_time` DATETIME COMMENT 'the last time of notification for the bill',
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_bill_items`;
+CREATE TABLE `eh_community_pm_bill_items` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `bill_id` BIGINT NOT NULL,
+	`item_name` VARCHAR(128) COMMENT 'the tile of bill item',
+	`start_count` DECIMAL(10,2) COMMENT 'the start count of bill item for the specific month',
+	`end_count` DECIMAL(10,2) COMMENT 'the end count of bill item for the specific month',
+	`use_count` DECIMAL(10,2) COMMENT 'the count of bill item which end_count substract start_count',
+	`price` DECIMAL(10,2),
+	`total_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill item',
+	`description` TEXT,
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_contacts`;
+CREATE TABLE `eh_community_pm_contacts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`contact_name` VARCHAR(64),
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+	`contact_description` TEXT,
+    `address_id` BIGINT NOT NULL COMMENT 'address id',
+    `address` VARCHAR(128),
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
