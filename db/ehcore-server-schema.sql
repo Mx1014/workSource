@@ -1030,8 +1030,10 @@ DROP TABLE IF EXISTS `eh_community_pm_tasks`;
 CREATE TABLE `eh_community_pm_tasks` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`entity_type` VARCHAR(32),
+    `entity` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
 	`target_type` VARCHAR(32),
-    `target_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
+    `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `task_type` VARCHAR(32) COMMENT 'task type assigned by pm',
     `task_status` TINYINT NOT NULL,
 	

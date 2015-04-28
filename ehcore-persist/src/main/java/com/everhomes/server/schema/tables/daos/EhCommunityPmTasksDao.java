@@ -55,6 +55,20 @@ public class EhCommunityPmTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
+	 * Fetch records that have <code>entity_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByEntityType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>entity IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByEntity(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.ENTITY, values);
+	}
+
+	/**
 	 * Fetch records that have <code>target_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByTargetType(java.lang.String... values) {
