@@ -1015,10 +1015,28 @@ CREATE TABLE `eh_community_pm_members` (
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
 	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
 	`contact_description` TEXT,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
 	
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cpm_owner`(`owner_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
 	INDEX `i_eh_cpm_group`(`pm_group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_tasks`;
+CREATE TABLE `eh_community_pm_tasks` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`target_type` VARCHAR(32),
+    `target_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
+    `task_type` VARCHAR(32) COMMENT 'task type assigned by pm',
+    `task_status` TINYINT NOT NULL,
+	
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_cpm_owner`(`owner_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -1130,29 +1148,51 @@ CREATE TABLE `eh_family_followers` (
 # key table of the sharding group
 # first level resource objects
 #
+# DROP TABLE IF EXISTS `eh_banners`;
+# CREATE TABLE `eh_banners` (
+#     `id` BIGINT NOT NULL COMMENT 'id of the record',
+#     `namespace_id` INTEGER,
+#     `appId` BIGINT,
+#     `name` VARCHAR(128),
+#     `description` TEXT,
+#     `banner_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: advertisement, 2: backend',
+#     `vendor_tag` VARCHAR(64),
+#     `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
+#     `flow_data` TEXT,
+#     `resource_id` BIGINT,
+#     `resource_url` VARCHAR(512), 
+#     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
+#     `group_id` BIGINT COMMENT 'point to the group created for the banner',
+#     `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
+#     `order` INTEGER NOT NULL DEFAULT 0,
+#     `create_time` DATETIME,
+#     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
+#     
+#     PRIMARY KEY (`id`),
+#     INDEX `i_eh_banner_create_time`(`create_time`),
+#     INDEX `i_eh_banner_delete_time`(`delete_time`)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `appId` BIGINT,
     `name` VARCHAR(128),
-    `description` TEXT,
-    `banner_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: advertisement, 2: backend',
+    `poster_path` VARCHAR(128),
     `vendor_tag` VARCHAR(64),
-    `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
-    `flow_data` TEXT,
+	`listing_start_time` DATETIME,
+	`listing_end_time` DATETIME,
+	`resource_type` VARCHAR(32),
     `resource_id` BIGINT,
     `resource_url` VARCHAR(512), 
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
-    `group_id` BIGINT COMMENT 'point to the group created for the banner',
-    `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
     `order` INTEGER NOT NULL DEFAULT 0,
+    `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_banner_create_time`(`create_time`),
-    INDEX `i_eh_banner_delete_time`(`delete_time`)
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #

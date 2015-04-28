@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord> {
 
-	private static final long serialVersionUID = -913144164;
+	private static final long serialVersionUID = 441630629;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_members</code>
@@ -70,6 +70,11 @@ public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_community_pm_members.contact_description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.String> CONTACT_DESCRIPTION = createField("contact_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_community_pm_members.status</code>. 0: inactive, 1: confirming, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
 
 	/**
 	 * Create a <code>ehcore.eh_community_pm_members</code> table reference

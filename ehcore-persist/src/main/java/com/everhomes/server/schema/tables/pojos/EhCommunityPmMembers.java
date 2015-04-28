@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1404102142;
+	private static final long serialVersionUID = -381580900;
 
 	private java.lang.Long   id;
 	private java.lang.Long   ownerId;
@@ -22,6 +22,7 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 	private java.lang.Byte   contactType;
 	private java.lang.String contactToken;
 	private java.lang.String contactDescription;
+	private java.lang.Byte   status;
 
 	public EhCommunityPmMembers() {}
 
@@ -34,7 +35,8 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 		java.lang.String contactName,
 		java.lang.Byte   contactType,
 		java.lang.String contactToken,
-		java.lang.String contactDescription
+		java.lang.String contactDescription,
+		java.lang.Byte   status
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -45,6 +47,7 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 		this.contactType = contactType;
 		this.contactToken = contactToken;
 		this.contactDescription = contactDescription;
+		this.status = status;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 
 	public void setContactDescription(java.lang.String contactDescription) {
 		this.contactDescription = contactDescription;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
 	}
 }
