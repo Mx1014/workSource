@@ -88,6 +88,8 @@ public class SmsProviderImpl implements SmsProvider {
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
+
+/*        
         try {
             f.get();
         } catch (InterruptedException | ExecutionException e) {
@@ -95,6 +97,7 @@ public class SmsProviderImpl implements SmsProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     e.getMessage());
         }
+*/        
     }
 
     @Override

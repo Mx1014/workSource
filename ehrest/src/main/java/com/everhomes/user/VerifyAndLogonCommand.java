@@ -12,6 +12,9 @@ public class VerifyAndLogonCommand {
     @NotNull
     private String verificationCode;
     
+    @NotNull
+    private String initialPassword;
+    
     private String deviceIdentifier;
     
     private Integer namespaceId;
@@ -49,6 +52,14 @@ public class VerifyAndLogonCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+    
+    public String getInitialPassword() {
+        return initialPassword;
+    }
+
+    public void setInitialPassword(String initialPassword) {
+        this.initialPassword = initialPassword;
     }
 
     @Override

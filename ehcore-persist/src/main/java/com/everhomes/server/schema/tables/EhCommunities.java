@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -336690964;
+	private static final long serialVersionUID = -419186217;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -80,36 +80,6 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_communities.detail_description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> DETAIL_DESCRIPTION = createField("detail_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_communities.apt_segment1</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEGMENT1 = createField("apt_segment1", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_communities.apt_segment2</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEGMENT2 = createField("apt_segment2", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_communities.apt_segment3</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEGMENT3 = createField("apt_segment3", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_communities.apt_seg1_sample</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEG1_SAMPLE = createField("apt_seg1_sample", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_communities.apt_seg2_sample</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEG2_SAMPLE = createField("apt_seg2_sample", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_communities.apt_seg3_sample</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEG3_SAMPLE = createField("apt_seg3_sample", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.apt_count</code>.

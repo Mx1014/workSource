@@ -5,8 +5,8 @@
 <jdbc>
     <driver>com.mysql.jdbc.Driver</driver>
     <url>jdbc:mysql://localhost:3306/ehcore</url>
-    <user>root</user>
-    <password>Pbgpwd#123</password>
+    <user>ehcore</user>
+    <password>ehcore</password>
 </jdbc>
 
 <generator>
