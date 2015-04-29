@@ -69,6 +69,13 @@ public class EhCommunityPmBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
+	 * Fetch records that have <code>address IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmBills> fetchByAddress(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS.ADDRESS, values);
+	}
+
+	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmBills> fetchByName(java.lang.String... values) {

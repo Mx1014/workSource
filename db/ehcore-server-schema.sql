@@ -1067,6 +1067,7 @@ CREATE TABLE `eh_community_pm_bills` (
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`entity_type` VARCHAR(32),
     `entity_id` BIGINT NOT NULL COMMENT 'target address id if target_type is a address',
+    `address` VARCHAR(128),
 	`name` VARCHAR(128) COMMENT 'the tile of bill',
 	`date_str` VARCHAR(128) COMMENT 'the date string in bill',
 	`total_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill',

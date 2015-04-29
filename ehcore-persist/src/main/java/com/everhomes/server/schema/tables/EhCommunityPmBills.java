@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord> {
 
-	private static final long serialVersionUID = 1850721105;
+	private static final long serialVersionUID = -893620199;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_bills</code>
@@ -45,6 +45,11 @@ public class EhCommunityPmBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_community_pm_bills.entity_id</code>. target address id if target_type is a address
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord, java.lang.Long> ENTITY_ID = createField("entity_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "target address id if target_type is a address");
+
+	/**
+	 * The column <code>ehcore.eh_community_pm_bills.address</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_bills.name</code>. the tile of bill

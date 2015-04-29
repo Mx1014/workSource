@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -441549357;
+	private static final long serialVersionUID = 1054102543;
 
 	private java.lang.Long       id;
 	private java.lang.Long       communityId;
 	private java.lang.String     entityType;
 	private java.lang.Long       entityId;
+	private java.lang.String     address;
 	private java.lang.String     name;
 	private java.lang.String     dateStr;
 	private java.math.BigDecimal totalAmount;
@@ -33,6 +34,7 @@ public class EhCommunityPmBills implements java.io.Serializable {
 		java.lang.Long       communityId,
 		java.lang.String     entityType,
 		java.lang.Long       entityId,
+		java.lang.String     address,
 		java.lang.String     name,
 		java.lang.String     dateStr,
 		java.math.BigDecimal totalAmount,
@@ -46,6 +48,7 @@ public class EhCommunityPmBills implements java.io.Serializable {
 		this.communityId = communityId;
 		this.entityType = entityType;
 		this.entityId = entityId;
+		this.address = address;
 		this.name = name;
 		this.dateStr = dateStr;
 		this.totalAmount = totalAmount;
@@ -86,6 +89,14 @@ public class EhCommunityPmBills implements java.io.Serializable {
 
 	public void setEntityId(java.lang.Long entityId) {
 		this.entityId = entityId;
+	}
+
+	public java.lang.String getAddress() {
+		return this.address;
+	}
+
+	public void setAddress(java.lang.String address) {
+		this.address = address;
 	}
 
 	public java.lang.String getName() {
