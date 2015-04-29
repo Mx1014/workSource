@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord> implements org.jooq.Record10<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Byte> {
 
-	private static final long serialVersionUID = -367634938;
+	private static final long serialVersionUID = 1880291472;
 
 	/**
 	 * Setter for <code>ehcore.eh_community_pm_members.id</code>. id of the record
@@ -28,16 +28,16 @@ public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImp
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_community_pm_members.owner_id</code>. owner community id
+	 * Setter for <code>ehcore.eh_community_pm_members.community_id</code>. owner community id
 	 */
-	public void setOwnerId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_community_pm_members.owner_id</code>. owner community id
+	 * Getter for <code>ehcore.eh_community_pm_members.community_id</code>. owner community id
 	 */
-	public java.lang.Long getOwnerId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -198,7 +198,7 @@ public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImp
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field2() {
-		return com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.OWNER_ID;
+		return com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID;
 	}
 
 	/**
@@ -278,7 +278,7 @@ public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImp
 	 */
 	@Override
 	public java.lang.Long value2() {
-		return getOwnerId();
+		return getCommunityId();
 	}
 
 	/**
@@ -359,7 +359,7 @@ public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImp
 	 */
 	@Override
 	public EhCommunityPmMembersRecord value2(java.lang.Long value) {
-		setOwnerId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -457,11 +457,11 @@ public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImp
 	/**
 	 * Create a detached, initialised EhCommunityPmMembersRecord
 	 */
-	public EhCommunityPmMembersRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String targetType, java.lang.Long targetId, java.lang.String pmGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status) {
+	public EhCommunityPmMembersRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String targetType, java.lang.Long targetId, java.lang.String pmGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status) {
 		super(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS);
 
 		setValue(0, id);
-		setValue(1, ownerId);
+		setValue(1, communityId);
 		setValue(2, targetType);
 		setValue(3, targetId);
 		setValue(4, pmGroup);

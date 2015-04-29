@@ -11,16 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmContacts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 952042576;
+	private static final long serialVersionUID = -387951528;
 
 	private java.lang.Long     id;
-	private java.lang.Long     ownerId;
+	private java.lang.Long     communityId;
 	private java.lang.String   contactName;
 	private java.lang.Byte     contactType;
 	private java.lang.String   contactToken;
-	private java.lang.String   contactDescription;
-	private java.lang.Long     addressId;
-	private java.lang.String   address;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 
@@ -28,24 +25,18 @@ public class EhCommunityPmContacts implements java.io.Serializable {
 
 	public EhCommunityPmContacts(
 		java.lang.Long     id,
-		java.lang.Long     ownerId,
+		java.lang.Long     communityId,
 		java.lang.String   contactName,
 		java.lang.Byte     contactType,
 		java.lang.String   contactToken,
-		java.lang.String   contactDescription,
-		java.lang.Long     addressId,
-		java.lang.String   address,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
-		this.ownerId = ownerId;
+		this.communityId = communityId;
 		this.contactName = contactName;
 		this.contactType = contactType;
 		this.contactToken = contactToken;
-		this.contactDescription = contactDescription;
-		this.addressId = addressId;
-		this.address = address;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 	}
@@ -58,12 +49,12 @@ public class EhCommunityPmContacts implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public java.lang.String getContactName() {
@@ -88,30 +79,6 @@ public class EhCommunityPmContacts implements java.io.Serializable {
 
 	public void setContactToken(java.lang.String contactToken) {
 		this.contactToken = contactToken;
-	}
-
-	public java.lang.String getContactDescription() {
-		return this.contactDescription;
-	}
-
-	public void setContactDescription(java.lang.String contactDescription) {
-		this.contactDescription = contactDescription;
-	}
-
-	public java.lang.Long getAddressId() {
-		return this.addressId;
-	}
-
-	public void setAddressId(java.lang.Long addressId) {
-		this.addressId = addressId;
-	}
-
-	public java.lang.String getAddress() {
-		return this.address;
-	}
-
-	public void setAddress(java.lang.String address) {
-		this.address = address;
 	}
 
 	public java.lang.Long getCreatorUid() {

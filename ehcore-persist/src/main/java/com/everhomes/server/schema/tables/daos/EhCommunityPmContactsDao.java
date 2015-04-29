@@ -48,10 +48,10 @@ public class EhCommunityPmContactsDao extends org.jooq.impl.DAOImpl<com.everhome
 	}
 
 	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
+	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS.OWNER_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS.COMMUNITY_ID, values);
 	}
 
 	/**
@@ -73,27 +73,6 @@ public class EhCommunityPmContactsDao extends org.jooq.impl.DAOImpl<com.everhome
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts> fetchByContactToken(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS.CONTACT_TOKEN, values);
-	}
-
-	/**
-	 * Fetch records that have <code>contact_description IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts> fetchByContactDescription(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS.CONTACT_DESCRIPTION, values);
-	}
-
-	/**
-	 * Fetch records that have <code>address_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts> fetchByAddressId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS.ADDRESS_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>address IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts> fetchByAddress(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS.ADDRESS, values);
 	}
 
 	/**

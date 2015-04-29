@@ -1007,7 +1007,7 @@ CREATE TABLE `eh_community_profiles` (
 DROP TABLE IF EXISTS `eh_community_pm_members`;
 CREATE TABLE `eh_community_pm_members` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
     `target_type` VARCHAR(32),
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `pm_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
@@ -1018,7 +1018,7 @@ CREATE TABLE `eh_community_pm_members` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
 	
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cpm_owner`(`owner_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
+	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
 	INDEX `i_eh_cpm_group`(`pm_group`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1029,7 +1029,7 @@ CREATE TABLE `eh_community_pm_members` (
 DROP TABLE IF EXISTS `eh_community_pm_tasks`;
 CREATE TABLE `eh_community_pm_tasks` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`entity_type` VARCHAR(32),
     `entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
 	`target_type` VARCHAR(32),
@@ -1038,7 +1038,7 @@ CREATE TABLE `eh_community_pm_tasks` (
     `task_status` TINYINT NOT NULL,
 	
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cpm_owner`(`owner_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -1064,7 +1064,7 @@ CREATE TABLE `eh_community_address_mappings` (
 DROP TABLE IF EXISTS `eh_community_pm_bills`;
 CREATE TABLE `eh_community_pm_bills` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`entity_type` VARCHAR(32),
     `entity_id` BIGINT NOT NULL COMMENT 'target address id if target_type is a address',
 	`name` VARCHAR(128) COMMENT 'the tile of bill',
@@ -1104,16 +1104,33 @@ CREATE TABLE `eh_community_pm_bill_items` (
 # member of eh_communities partition
 # information of community 
 #
-DROP TABLE IF EXISTS `eh_community_pm_contacts`;
+DROP TABLE IF EXISTS `eh_community_pm_owners`;
 CREATE TABLE `eh_community_pm_contacts` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`contact_name` VARCHAR(64),
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
 	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
 	`contact_description` TEXT,
     `address_id` BIGINT NOT NULL COMMENT 'address id',
     `address` VARCHAR(128),
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_contacts`;
+CREATE TABLE `eh_community_pm_contacts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`contact_name` VARCHAR(64),
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
     `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
     `create_time` DATETIME,
 	

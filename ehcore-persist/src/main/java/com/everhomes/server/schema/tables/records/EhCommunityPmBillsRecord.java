@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord> implements org.jooq.Record12<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.math.BigDecimal, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Integer, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1370759114;
+	private static final long serialVersionUID = -1612327316;
 
 	/**
 	 * Setter for <code>ehcore.eh_community_pm_bills.id</code>. id of the record
@@ -28,16 +28,16 @@ public class EhCommunityPmBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_community_pm_bills.owner_id</code>. owner community id
+	 * Setter for <code>ehcore.eh_community_pm_bills.community_id</code>. owner community id
 	 */
-	public void setOwnerId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_community_pm_bills.owner_id</code>. owner community id
+	 * Getter for <code>ehcore.eh_community_pm_bills.community_id</code>. owner community id
 	 */
-	public java.lang.Long getOwnerId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -226,7 +226,7 @@ public class EhCommunityPmBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field2() {
-		return com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS.OWNER_ID;
+		return com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID;
 	}
 
 	/**
@@ -322,7 +322,7 @@ public class EhCommunityPmBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public java.lang.Long value2() {
-		return getOwnerId();
+		return getCommunityId();
 	}
 
 	/**
@@ -419,7 +419,7 @@ public class EhCommunityPmBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public EhCommunityPmBillsRecord value2(java.lang.Long value) {
-		setOwnerId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -535,11 +535,11 @@ public class EhCommunityPmBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	/**
 	 * Create a detached, initialised EhCommunityPmBillsRecord
 	 */
-	public EhCommunityPmBillsRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String entityType, java.lang.Long entityId, java.lang.String name, java.lang.String dateStr, java.math.BigDecimal totalAmount, java.lang.String description, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Integer notifyCount, java.sql.Timestamp notifyTime) {
+	public EhCommunityPmBillsRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String entityType, java.lang.Long entityId, java.lang.String name, java.lang.String dateStr, java.math.BigDecimal totalAmount, java.lang.String description, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Integer notifyCount, java.sql.Timestamp notifyTime) {
 		super(com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS);
 
 		setValue(0, id);
-		setValue(1, ownerId);
+		setValue(1, communityId);
 		setValue(2, entityType);
 		setValue(3, entityId);
 		setValue(4, name);

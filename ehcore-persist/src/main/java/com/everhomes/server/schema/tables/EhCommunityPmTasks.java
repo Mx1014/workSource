@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord> {
 
-	private static final long serialVersionUID = -237900361;
+	private static final long serialVersionUID = 1020536917;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_tasks</code>
@@ -32,9 +32,9 @@ public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_community_pm_tasks.owner_id</code>. owner community id
+	 * The column <code>ehcore.eh_community_pm_tasks.community_id</code>. owner community id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_tasks.entity_type</code>.

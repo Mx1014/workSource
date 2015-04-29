@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmContacts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord> {
 
-	private static final long serialVersionUID = -1363810236;
+	private static final long serialVersionUID = -1136796069;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_contacts</code>
@@ -32,9 +32,9 @@ public class EhCommunityPmContacts extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_community_pm_contacts.owner_id</code>. owner community id
+	 * The column <code>ehcore.eh_community_pm_contacts.community_id</code>. owner community id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_contacts.contact_name</code>.
@@ -50,21 +50,6 @@ public class EhCommunityPmContacts extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_community_pm_contacts.contact_token</code>. phone number or email address
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.String> CONTACT_TOKEN = createField("contact_token", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "phone number or email address");
-
-	/**
-	 * The column <code>ehcore.eh_community_pm_contacts.contact_description</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.String> CONTACT_DESCRIPTION = createField("contact_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_community_pm_contacts.address_id</code>. address id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "address id");
-
-	/**
-	 * The column <code>ehcore.eh_community_pm_contacts.address</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_contacts.creator_uid</code>. uid of the user who has the bill

@@ -48,10 +48,10 @@ public class EhCommunityPmTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
+	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.OWNER_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID, values);
 	}
 
 	/**

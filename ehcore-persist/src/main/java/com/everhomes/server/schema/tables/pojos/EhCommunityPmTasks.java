@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 833261539;
+	private static final long serialVersionUID = 1716940319;
 
 	private java.lang.Long   id;
-	private java.lang.Long   ownerId;
+	private java.lang.Long   communityId;
 	private java.lang.String entityType;
 	private java.lang.Long   entityId;
 	private java.lang.String targetType;
@@ -26,7 +26,7 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 
 	public EhCommunityPmTasks(
 		java.lang.Long   id,
-		java.lang.Long   ownerId,
+		java.lang.Long   communityId,
 		java.lang.String entityType,
 		java.lang.Long   entityId,
 		java.lang.String targetType,
@@ -35,7 +35,7 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 		java.lang.Byte   taskStatus
 	) {
 		this.id = id;
-		this.ownerId = ownerId;
+		this.communityId = communityId;
 		this.entityType = entityType;
 		this.entityId = entityId;
 		this.targetType = targetType;
@@ -52,12 +52,12 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public java.lang.String getEntityType() {
