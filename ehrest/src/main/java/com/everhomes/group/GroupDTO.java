@@ -5,6 +5,28 @@ import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id: group id</li>
+ * <li>owningForumId</li>
+ * <li>name</li>
+ * <li>avatar</li>
+ * <li>description</li>
+ * <li>creatorUid</li>
+ * <li>createTime</li>
+ * <li>privateFlag</li>
+ * <li>joinPolicy</li>
+ * <li>memberCount</li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * </ul>
+ */
 public class GroupDTO {
     private Long id;
     private Long owningForumId;

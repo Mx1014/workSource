@@ -1,6 +1,14 @@
 // @formatter:off
 package com.everhomes.visibility;
 
+/**
+ * <ul>
+ * <li>ALL</li>
+ * <li>1: COMMUNITY_ONLY</li>
+ * <li>1: COMMUNITY_ONLY</li>
+ * </ul>
+ *
+ */
 public enum VisibilityScope {
     ALL((byte)0), COMMUNITY_ONLY((byte)1), NEARBY_COMMUNITIES((byte)2), 
     CITY_ONLY((byte)3), EXPLICIT_CONFIGURED((byte)4); 
