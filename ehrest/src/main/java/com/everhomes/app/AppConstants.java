@@ -21,6 +21,7 @@ public interface AppConstants {
     public static final long APPID_REGION = 16;
     public static final long APPID_USER = 17;
     public static final long APPID_PUSH = 18;
+    public static final long APPID_PM = 19;             // Property management
     
     public static final int PAGINATION_DEFAULT_SIZE = 20;
     public static final int PAGINATION_MAX_SIZE = 2000;

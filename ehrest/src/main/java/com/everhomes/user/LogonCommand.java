@@ -4,7 +4,16 @@ package com.everhomes.user;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 登录
+ * @author elians
+ *<ul>
+ *<li>userIdentifier:用户标识，目前手机号和邮箱支持</li>
+ *<li>password:密码</li>
+ *<li>deviceIdentifier:设备标识</li>
+ *<li>namespaceId:名字空间，目前默认为0</li>
+ *</ul>
+ */
 public class LogonCommand {
     @NotNull
     private String userIdentifier;

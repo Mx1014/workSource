@@ -5,7 +5,16 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
+/**
+ * 登录成功后的响应
+ * @author elians
+ *<ul>
+ *<li>uid:用户ID</li>
+ *<li>loginToken:登录成功令牌</li>
+ *<li>contentServer:内容服务器</li>
+ *<li>accessPoints:消息服务其</li>
+ *</ul>
+ */
 public class LogonCommandResponse {
     private long uid;
     private String loginToken;

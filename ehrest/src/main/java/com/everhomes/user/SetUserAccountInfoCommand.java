@@ -4,6 +4,14 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * 设置账户信息
+ * @author elians
+ *<ul>
+ *<li>accountName:帐号名</li>
+ *<li>password:密码</li>
+ *</ul>
+ */
 public class SetUserAccountInfoCommand {
     
     @NotNull

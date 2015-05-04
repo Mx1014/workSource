@@ -6,17 +6,19 @@ import javax.validation.constraints.NotNull;
  * 获取邀请码
  * 
  * @author elians
+ * <ul>
+ * <li>inviteType:邀请类型.支持类型1.SMS,2.wechat,3.friend_circle,4.weibo,5.phone</li>
+ * <li>targetEntityType:实体类型</li>
+ * <li>targetEntityId:实体ID</li>
+ * </ul>
  *
  */
 public class CreateInvitationCommand {
 
-    /** 邀请类型 **/
     @NotNull
     private String inviteType;
-    /** 实体类型 **/
     @NotNull
     private String targetEntityType;
-    /** 实体id **/
     @NotNull
     private Long targetEntityId;
 
