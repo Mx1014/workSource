@@ -8,6 +8,9 @@ import com.everhomes.util.StringHelper;
  * <li>id：group成员ID</li>
  * <li>groupId：group ID</li>
  * <li>memberType：成员类型，参考{@link com.everhomes.entity.EntityType}</li>
+ * <li>memberRole：成员在group内的角色</li>
+ * <li>avatar：成员在group内的头像</li>
+ * <li>memberStatus：成员在group内的状态，参考{@link com.everhomes.group.GroupMemberStatus}</li>
  * </ul>
  */
 public class GroupMemberDTO {

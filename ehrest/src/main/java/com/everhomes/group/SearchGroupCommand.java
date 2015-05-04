@@ -3,6 +3,16 @@ package com.everhomes.group;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ * <li>familyId: 请求人所在的家庭ID</li>
+ * <li>longitude: 请求人所有位置的经度</li> 
+ * <li>latitude: 请求人所有位置的纬度</li> 
+ * <li>searchCondition: 搜索条件</li> 
+ * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
 public class SearchGroupCommand {
     private Long familyId;
     private Double longitude;
