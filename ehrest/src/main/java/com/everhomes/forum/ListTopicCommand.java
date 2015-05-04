@@ -3,6 +3,16 @@ package com.everhomes.forum;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>forumId: 论坛ID</li>
+ * <li>contentCategory: 内容类型</li>
+ * <li>actionCategory: 动作类型</li>
+ * <li>visibleScope: 可见性</li>
+ * <li>pageOffset: 偏移量</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
 public class ListTopicCommand {
     private Long forumId;
     private Long contentCategory;

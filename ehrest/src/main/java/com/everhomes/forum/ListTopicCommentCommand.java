@@ -3,6 +3,14 @@ package com.everhomes.forum;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>forumId: 论坛ID</li>
+ * <li>topicId: 帖子ID</li>
+ * <li>pageOffset: 偏移量</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
 public class ListTopicCommentCommand {
     private Long forumId;
     private Long topicId;
