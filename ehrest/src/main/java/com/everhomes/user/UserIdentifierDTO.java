@@ -1,7 +1,16 @@
 package com.everhomes.user;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 用户标识
+ * @author elians
+ *<ul>
+ *<li>id:标识ID</li>
+ *<li>identifierType:标识类型</li>
+ *<li>identifierToken:标识,手机号或者邮箱</li>
+ *<li>claimStatus:状态</li>
+ *</ul>
+ */
 public class UserIdentifierDTO {
     private java.lang.Long     id;
     private java.lang.Byte     identifierType;

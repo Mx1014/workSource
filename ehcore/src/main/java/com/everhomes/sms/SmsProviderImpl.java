@@ -70,13 +70,13 @@ public class SmsProviderImpl implements SmsProvider {
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
-        try {
-            f.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("send sms message error", e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    e.getMessage());
-        }
+//        try {
+//            f.get();
+//        } catch (InterruptedException | ExecutionException e) {
+//            LOGGER.error("send sms message error", e);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                    e.getMessage());
+//        }
     }
 
     private void doSend(String[] phoneNumbers, String text) {
@@ -88,16 +88,13 @@ public class SmsProviderImpl implements SmsProvider {
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
-
-/*        
-        try {
-            f.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("send sms message error", e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    e.getMessage());
-        }
-*/        
+//        try {
+//            f.get();
+//        } catch (InterruptedException | ExecutionException e) {
+//            LOGGER.error("send sms message error", e);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                    e.getMessage());
+//        }
     }
 
     @Override

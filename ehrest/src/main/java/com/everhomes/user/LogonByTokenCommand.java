@@ -4,7 +4,11 @@ package com.everhomes.user;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 通过令牌登录
+ * @author elians
+ *loginToken:登录令牌
+ */
 public class LogonByTokenCommand {
     @NotNull
     private String loginToken;

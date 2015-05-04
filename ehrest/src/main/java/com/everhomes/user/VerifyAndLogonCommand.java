@@ -4,7 +4,17 @@ package com.everhomes.user;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>signupToken:注册临时令牌</li>
+ *<li>verificationCode:验证码</li>
+ *<li>initialPassword:初始化密码</li>
+ *<li>deviceIdentifier:设备标识</li>
+ *<li>namespaceId:名字空间</li>
+ *</ul>
+ */
 public class VerifyAndLogonCommand {
     @NotNull
     private String signupToken;

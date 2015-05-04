@@ -2,7 +2,14 @@
 package com.everhomes.user;
 
 import javax.validation.constraints.NotNull;
-
+/**
+ * 设置密码
+ * @author elians
+ *<ul>
+ *<li>oldPassword:旧密码</li>
+ *<li>newPassword:新密码</li>
+ *</ul>
+ */
 public class SetPasswordCommand {
     private String oldPassword;
     

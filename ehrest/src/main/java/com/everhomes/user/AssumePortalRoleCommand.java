@@ -4,7 +4,12 @@ package com.everhomes.user;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 设置权限
+ * @author elians
+ * roleId:角色ID
+ *
+ */
 public class AssumePortalRoleCommand {
     
     @NotNull

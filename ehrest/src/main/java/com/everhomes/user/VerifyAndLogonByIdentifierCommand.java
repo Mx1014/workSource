@@ -4,6 +4,17 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * 通过标识验证并且登录
+ * @author elians
+ *<ul>
+ *<li>userIdentifier:用户标识</li>
+ *<li>verificationCode:验证码</li>
+ *<li>initialPassword:初始化密码</li>
+ *<li>deviceIdentifier:设备标识</li>
+ *<li>namespaceId:名字空间</li>
+ *</ul>
+ */
 public class VerifyAndLogonByIdentifierCommand {
     @NotNull
     private String userIdentifier;
