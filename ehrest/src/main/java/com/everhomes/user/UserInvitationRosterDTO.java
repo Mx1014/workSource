@@ -1,6 +1,6 @@
 package com.everhomes.user;
 /**
- * 邀请用户
+ * 邀请用户记录
  * @author elians
  *<ul>
  *<li>id:id标识</li>
