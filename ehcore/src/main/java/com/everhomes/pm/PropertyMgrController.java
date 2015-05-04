@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.pkg.ClientPackageFileDTO;
 import com.everhomes.rest.RestResponse;
 
 @RestController
@@ -25,12 +26,12 @@ public class PropertyMgrController extends ControllerBase {
 	PropertyMgrService propertyMgrService;
 	
 	/**
+	 * <b>URL: /group/listPMGroupMembers</b>
      * 查询物业成员列表
      */
     @RequestMapping("listPMGroupMembers")
-    @RestReturn(value=Long.class)
-    public RestResponse listPropertyMembers( 
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    @RestReturn(value=ListPropMemberCommandResponse.class, collection=true)
+    public RestResponse listPropertyMembers(@Valid ListPropMemberCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -39,6 +40,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/addPropertyMemberByPhone</b>
      * 通过手机添加物业成员
      */
     @RequestMapping("addPMGroupMemberByPhone")
@@ -55,6 +57,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/deletePMGroupMember</b>
      * 删除物业成员
      */
     @RequestMapping("deletePMGroupMember")
@@ -70,12 +73,12 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/listApartmentMappings</b>
      * 列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）
      */
     @RequestMapping("listPMAddressMapping")
-    @RestReturn(value=Long.class)
-    public RestResponse listApartmentMappings(
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
+    public RestResponse listApartmentMappings(@Valid ListPropAddressMappingCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -84,12 +87,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/importPMAddressMapping</b>
      * 导入左邻系统和物业自有系统的门牌号映射
      */
     @RequestMapping("importPMAddressMapping")
     @RestReturn(value=String.class)
     public RestResponse importPMAddressMapping(
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    	@Valid ListPropAddressMappingCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -98,12 +102,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/getPMAddressMapping</b>
      * 列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）
      */
     @RequestMapping("getPMAddressMapping")
-    @RestReturn(value=Long.class)
+    @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
     public RestResponse getPMAddressMapping(
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    		@Valid ListPropAddressMappingCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -112,13 +117,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/updatePMAddressMapping</b>
      * 修改公寓门牌号映射表
      */
     @RequestMapping("updatePMAddressMapping")
     @RestReturn(value=String.class)
     public RestResponse updatePMAddressMapping(
-    	@RequestParam(value = "communityId", required = true) Long communityId,
-    	@RequestParam(value = "updatePropAddressMappingCommand", required = true) UpdatePropAddressMappingCommand updatePropAddressMappingCommand) {
+    	@Valid UpdatePropAddressMappingCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -127,6 +132,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/importPMPropertyOwnerInfo</b>
      * 导入业主信息表
      */
     @RequestMapping(value="importPMPropertyOwnerInfo", method = RequestMethod.POST)
@@ -142,12 +148,12 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/getPMPropertyOwnerInfo</b>
      * 列出业主信息表
      */
     @RequestMapping("getPMPropertyOwnerInfo")
-    @RestReturn(value=Long.class)
-    public RestResponse getPMPropertyOwnerInfo(
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    @RestReturn(value=ListPropOwnerCommandResponse.class, collection=true)
+    public RestResponse getPMPropertyOwnerInfo(@Valid ListPropOwnerCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -156,12 +162,12 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/updatePMPropertyOwnerInfo</b>
      * 修改业主信息表
      */
     @RequestMapping("updatePMPropertyOwnerInfo")
     @RestReturn(value=String.class)
     public RestResponse updatePMPropertyOwnerInfo(
-    	@RequestParam(value = "communityId", required = true) Long communityId,
     	@RequestParam(value = "updatePropOwnerCommand", required = true) UpdatePropOwnerCommand updatePropOwnerCommand) {
     	
         RestResponse response = new RestResponse();
@@ -171,6 +177,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/deletePMPropertyOwnerInfo</b>
      * 删除业主信息
      */
     @RequestMapping("deletePMPropertyOwnerInfo")
@@ -186,6 +193,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/setApartmentStatus</b>
      * 设置公寓状态：自住/出租/空闲/装修/待售/其它
      */
     @RequestMapping("setAddressPMStatus")
@@ -201,6 +209,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/getApartmentStatistics</b>
      * 小区公寓统计信息：公寓统计（总数、入住公寓数量、入住用户数量、自住/出租/空闲/装修/待售/其它等数量）
      */
     @RequestMapping("getApartmentStatistics")
@@ -215,6 +224,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/assignPMTopics</b>
      * 把物业维修帖指派给处理人员（可批量指派）
      */
     @RequestMapping("assignPMTopics")
@@ -227,6 +237,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/setPMTopicStatus</b>
      * 设置物业维修帖状态：未处理、处理中、已处理、其它（可批量设置）
      */
     @RequestMapping("setPMTopicStatus")
@@ -239,6 +250,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /group/getPMTopicStatistics</b>
      * 根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它
      */
     @RequestMapping("getPMTopicStatistics")
@@ -251,6 +263,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/sendMsgToPMGroup</b>
 	 * 发消息给物业组（含所有成员）
 	 */
 	@RequestMapping("sendMsgToPMGroup")
@@ -265,6 +278,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/sendNoticeToCommunity</b>
 	 * 发通知给整个小区业主（是左邻用户则发消息、不是左邻用户则发短信）
 	 */
 	@RequestMapping("sendNoticeToCommunity")
@@ -279,6 +293,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/sendNoticeToFloor</b>
 	 * 发通知给整层楼业主（是左邻用户则发消息、不是左邻用户则发短信）
 	 */
 	@RequestMapping("sendNoticeToFloor")
@@ -294,6 +309,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/sendNoticeToFamily</b>
 	 * 发通知给指定门牌号（是左邻用户则发消息、不是左邻用户则发短信）
 	 */
 	@RequestMapping("sendNoticeToAddress")
@@ -310,6 +326,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
     /**
+     * <b>URL: /group/uploadPropertyBills</b>
      * 上传缴费账单excel文件
      */
     @RequestMapping(value="uploadPropertyBills", method = RequestMethod.POST)
@@ -324,12 +341,13 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/getPropertyBill</b>
 	 * 查询缴费账单详情
 	 */
     @RequestMapping("getPropertyBill")
-    @RestReturn(value=Long.class)
+    @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
     public RestResponse getPropertyBill(
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    	@Valid ListPropBillCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -338,13 +356,12 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/listPropertyBillByMonth</b>
 	 * 列出指定月份的缴费账单
 	 */
     @RequestMapping("listPropertyBillByMonth")
-    @RestReturn(value=Long.class)
-    public RestResponse listPropertyBillByMonth(
-    	@RequestParam(value = "communityId", required = true) Long communityId,
-    	@RequestParam(value = "dateStr", required = true) String dateStr) {
+    @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
+    public RestResponse listPropertyBillByMonth(@Valid ListPropBillCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -353,14 +370,13 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/listPropertyBillByTimeRange</b>
 	 * 列出指定时间范围的缴费账单
 	 */
     @RequestMapping("listPropertyBillByTimeRange")
-    @RestReturn(value=Long.class)
+    @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
     public RestResponse listPropertyBillByTimeRange(
-		@RequestParam(value = "communityId", required = true) Long communityId,
-		@RequestParam(value = "startMonth", required = true) Long startMonth,
-		@RequestParam(value = "endMonth", required = true) Long endMonth) {
+    	@Valid ListPropBillCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -369,6 +385,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/deletePropertyBillByMonth</b>
 	 * 删除指定月份的缴费账单
 	 */
     @RequestMapping("deletePropertyBillByMonth")
@@ -384,6 +401,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/deletePropertyBill</b>
 	 * 删除缴费账单（可批量删除）
 	 */
     @RequestMapping("deletePropertyBill")
@@ -399,6 +417,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/sendPropertyBillsByMonth</b>
 	 * 批量发指定月份的缴费账单
 	 */
     @RequestMapping("sendPropertyBillsByMonth")
@@ -414,6 +433,7 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/sendPropertyBill</b>
 	 * 发指定的单个缴费账单
 	 */
     @RequestMapping("sendPropertyBill")
@@ -429,12 +449,12 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/listInvitedUsers</b>
 	 * 查询邀请加入左邻的用户列表
 	 */
     @RequestMapping("listInvitedUsers")
-    @RestReturn(value=Long.class)
-    public RestResponse listInvitedUsers(
-    	@RequestParam(value = "communityId", required = true) Long communityId) {
+    @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
+    public RestResponse listInvitedUsers(@Valid ListPropInvitedUserCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -443,14 +463,13 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
+	 * <b>URL: /group/searchInvitedUsers</b>
 	 * 搜索邀请加入左邻的用户
 	 */
     @RequestMapping("searchInvitedUsers")
-    @RestReturn(value=Long.class)
+    @RestReturn(value=ListPropInvitedUserCommand.class, collection=true)
     public RestResponse searchInvitedUsers(
-		@RequestParam(value = "communityId", required = true) Long communityId,
-    	@RequestParam(value = "userType", required = true) Integer userType,
-    	@RequestParam(value = "userToken", required = true) String userToken) {
+    	@Valid ListPropInvitedUserCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

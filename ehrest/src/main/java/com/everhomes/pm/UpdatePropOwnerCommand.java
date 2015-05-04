@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -18,54 +20,56 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdatePropOwnerCommand {
     @NotNull
-    private java.lang.Long     id;
-	private java.lang.Long     communityId;
-	private java.lang.String   contactName;
-	private java.lang.Byte     contactType;
-	private java.lang.String   contactToken;
-	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
+    private Long     id;
+	private Long     communityId;
+	private String   contactName;
+	private Byte     contactType;
+	private String   contactToken;
+	private Long     creatorUid;
+	private Timestamp createTime;
 	
-	public java.lang.Long getId() {
+	public UpdatePropOwnerCommand() {
+	}
+	public Long getId() {
 		return id;
 	}
-	public void setId(java.lang.Long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-	public java.lang.Long getCommunityId() {
+	public Long getCommunityId() {
 		return communityId;
 	}
-	public void setCommunityId(java.lang.Long communityId) {
+	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	public java.lang.String getContactName() {
+	public String getContactName() {
 		return contactName;
 	}
-	public void setContactName(java.lang.String contactName) {
+	public void setContactName(String contactName) {
 		this.contactName = contactName;
 	}
-	public java.lang.Byte getContactType() {
+	public Byte getContactType() {
 		return contactType;
 	}
-	public void setContactType(java.lang.Byte contactType) {
+	public void setContactType(Byte contactType) {
 		this.contactType = contactType;
 	}
-	public java.lang.String getContactToken() {
+	public String getContactToken() {
 		return contactToken;
 	}
-	public void setContactToken(java.lang.String contactToken) {
+	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
 	}
-	public java.lang.Long getCreatorUid() {
+	public Long getCreatorUid() {
 		return creatorUid;
 	}
-	public void setCreatorUid(java.lang.Long creatorUid) {
+	public void setCreatorUid(Long creatorUid) {
 		this.creatorUid = creatorUid;
 	}
-	public java.sql.Timestamp getCreateTime() {
+	public Timestamp getCreateTime() {
 		return createTime;
 	}
-	public void setCreateTime(java.sql.Timestamp createTime) {
+	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
 	

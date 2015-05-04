@@ -15,40 +15,42 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdatePropAddressMappingCommand {
     @NotNull
-	private java.lang.Long   id;
-	private java.lang.Long   communityId;
-	private java.lang.Long   addressId;
-	private java.lang.String name;
+	private Long   id;
+	private Long   communityId;
+	private Long   addressId;
+	private String name;
 	
-	public java.lang.Long getId() {
+	public UpdatePropAddressMappingCommand() {
+	}
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(java.lang.Long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public java.lang.Long getCommunityId() {
+	public Long getCommunityId() {
 		return communityId;
 	}
 
-	public void setCommunityId(java.lang.Long communityId) {
+	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
 
-	public java.lang.Long getAddressId() {
+	public Long getAddressId() {
 		return addressId;
 	}
 
-	public void setAddressId(java.lang.Long addressId) {
+	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
 
-	public java.lang.String getName() {
+	public String getName() {
 		return name;
 	}
 
-	public void setName(java.lang.String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 

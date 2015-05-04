@@ -20,94 +20,74 @@ import com.everhomes.util.StringHelper;
  */
 public class CreatePropMemberCommand {
     @NotNull
-    private String name;
-    private String description;
-    private String avatar;
-    private Byte visibilityScope;
-    private Long visibilityScopeId;
-    private Byte privateFlag;
-    private Long categoryId;
-    private String tag;
-
-    // json of List<RegionDescriptor>
-    private String explicitRegionDescriptorsJson;
-    
-    public CreatePropMemberCommand() {
+    private Long   communityId;
+	private String targetType;
+	private Long   targetId;
+	private String pmGroup;
+	private String contactName;
+	private Byte   contactType;
+	private String contactToken;
+	private String contactDescription;
+	private Byte   status;
+	public CreatePropMemberCommand() {
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public Byte getPrivateFlag() {
-        return privateFlag;
-    }
-
-    public void setPrivateFlag(Byte privateFlag) {
-        this.privateFlag = privateFlag;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-    
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-    
-    public Byte getVisibilityScope() {
-        return visibilityScope;
-    }
-
-    public void setVisibilityScope(Byte visibilityScope) {
-        this.visibilityScope = visibilityScope;
-    }
-
-    public Long getVisibilityScopeId() {
-        return visibilityScopeId;
-    }
-
-    public void setVisibilityScopeId(Long visibilityScopeId) {
-        this.visibilityScopeId = visibilityScopeId;
-    }
-
-    public String getExplicitRegionDescriptorsJson() {
-        return explicitRegionDescriptorsJson;
-    }
-
-    public void setExplicitRegionDescriptorsJson(String explicitRegionDescriptorsJson) {
-        this.explicitRegionDescriptorsJson = explicitRegionDescriptorsJson;
-    }
-
-    @Override
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+	public String getTargetType() {
+		return targetType;
+	}
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+	public Long getTargetId() {
+		return targetId;
+	}
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+	public String getPmGroup() {
+		return pmGroup;
+	}
+	public void setPmGroup(String pmGroup) {
+		this.pmGroup = pmGroup;
+	}
+	public String getContactName() {
+		return contactName;
+	}
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+	public Byte getContactType() {
+		return contactType;
+	}
+	public void setContactType(Byte contactType) {
+		this.contactType = contactType;
+	}
+	public String getContactToken() {
+		return contactToken;
+	}
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
+	}
+	public String getContactDescription() {
+		return contactDescription;
+	}
+	public void setContactDescription(String contactDescription) {
+		this.contactDescription = contactDescription;
+	}
+	public Byte getStatus() {
+		return status;
+	}
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+	
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

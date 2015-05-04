@@ -21,76 +21,77 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdatePropMemberCommand {
     @NotNull
-    private java.lang.Long   id;
-    private java.lang.Long   communityId;
-	private java.lang.String targetType;
-	private java.lang.Long   targetId;
-	private java.lang.String pmGroup;
-	private java.lang.String contactName;
-	private java.lang.Byte   contactType;
-	private java.lang.String contactToken;
-	private java.lang.String contactDescription;
-	private java.lang.Byte   status;
+    private Long   id;
+    private Long   communityId;
+	private String targetType;
+	private Long   targetId;
+	private String pmGroup;
+	private String contactName;
+	private Byte   contactType;
+	private String contactToken;
+	private String contactDescription;
+	private Byte   status;
 	
-	
-	public java.lang.Long getId() {
+	public UpdatePropMemberCommand() {
+	}
+	public Long getId() {
 		return id;
 	}
-	public void setId(java.lang.Long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-	public java.lang.Long getCommunityId() {
+	public Long getCommunityId() {
 		return communityId;
 	}
-	public void setCommunityId(java.lang.Long communityId) {
+	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	public java.lang.String getTargetType() {
+	public String getTargetType() {
 		return targetType;
 	}
-	public void setTargetType(java.lang.String targetType) {
+	public void setTargetType(String targetType) {
 		this.targetType = targetType;
 	}
-	public java.lang.Long getTargetId() {
+	public Long getTargetId() {
 		return targetId;
 	}
-	public void setTargetId(java.lang.Long targetId) {
+	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
 	}
-	public java.lang.String getPmGroup() {
+	public String getPmGroup() {
 		return pmGroup;
 	}
-	public void setPmGroup(java.lang.String pmGroup) {
+	public void setPmGroup(String pmGroup) {
 		this.pmGroup = pmGroup;
 	}
-	public java.lang.String getContactName() {
+	public String getContactName() {
 		return contactName;
 	}
-	public void setContactName(java.lang.String contactName) {
+	public void setContactName(String contactName) {
 		this.contactName = contactName;
 	}
-	public java.lang.Byte getContactType() {
+	public Byte getContactType() {
 		return contactType;
 	}
-	public void setContactType(java.lang.Byte contactType) {
+	public void setContactType(Byte contactType) {
 		this.contactType = contactType;
 	}
-	public java.lang.String getContactToken() {
+	public String getContactToken() {
 		return contactToken;
 	}
-	public void setContactToken(java.lang.String contactToken) {
+	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
 	}
-	public java.lang.String getContactDescription() {
+	public String getContactDescription() {
 		return contactDescription;
 	}
-	public void setContactDescription(java.lang.String contactDescription) {
+	public void setContactDescription(String contactDescription) {
 		this.contactDescription = contactDescription;
 	}
-	public java.lang.Byte getStatus() {
+	public Byte getStatus() {
 		return status;
 	}
-	public void setStatus(java.lang.Byte status) {
+	public void setStatus(Byte status) {
 		this.status = status;
 	}
 
