@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
@@ -16,7 +15,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 
-@Component("EhCommunities")
 public class PropertyMgrUserRoleResolver implements ResourceUserRoleResolver {
 
     @Autowired
