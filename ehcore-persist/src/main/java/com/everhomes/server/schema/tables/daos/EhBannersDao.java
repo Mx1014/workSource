@@ -69,17 +69,10 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>description IN (values)</code>
+	 * Fetch records that have <code>poster_path IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByDescription(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.DESCRIPTION, values);
-	}
-
-	/**
-	 * Fetch records that have <code>banner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByBannerType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.BANNER_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByPosterPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.POSTER_PATH, values);
 	}
 
 	/**
@@ -90,17 +83,24 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>flow_type IN (values)</code>
+	 * Fetch records that have <code>listing_start_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByFlowType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.FLOW_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByListingStartTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.LISTING_START_TIME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>flow_data IN (values)</code>
+	 * Fetch records that have <code>listing_end_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByFlowData(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.FLOW_DATA, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByListingEndTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.LISTING_END_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>resource_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByResourceType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.RESOURCE_TYPE, values);
 	}
 
 	/**
@@ -125,24 +125,17 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>group_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByGroupId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.GROUP_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>forum_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByForumId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.FORUM_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>order IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByOrder(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ORDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.CREATOR_UID, values);
 	}
 
 	/**

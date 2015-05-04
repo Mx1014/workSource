@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -1146590280;
+	private static final long serialVersionUID = 1606060534;
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.id</code>. id of the record
@@ -168,311 +168,227 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_communities.apt_segment1</code>.
-	 */
-	public void setAptSegment1(java.lang.String value) {
-		setValue(11, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.apt_segment1</code>.
-	 */
-	public java.lang.String getAptSegment1() {
-		return (java.lang.String) getValue(11);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_communities.apt_segment2</code>.
-	 */
-	public void setAptSegment2(java.lang.String value) {
-		setValue(12, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.apt_segment2</code>.
-	 */
-	public java.lang.String getAptSegment2() {
-		return (java.lang.String) getValue(12);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_communities.apt_segment3</code>.
-	 */
-	public void setAptSegment3(java.lang.String value) {
-		setValue(13, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.apt_segment3</code>.
-	 */
-	public java.lang.String getAptSegment3() {
-		return (java.lang.String) getValue(13);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_communities.apt_seg1_sample</code>.
-	 */
-	public void setAptSeg1Sample(java.lang.String value) {
-		setValue(14, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.apt_seg1_sample</code>.
-	 */
-	public java.lang.String getAptSeg1Sample() {
-		return (java.lang.String) getValue(14);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_communities.apt_seg2_sample</code>.
-	 */
-	public void setAptSeg2Sample(java.lang.String value) {
-		setValue(15, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.apt_seg2_sample</code>.
-	 */
-	public java.lang.String getAptSeg2Sample() {
-		return (java.lang.String) getValue(15);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_communities.apt_seg3_sample</code>.
-	 */
-	public void setAptSeg3Sample(java.lang.String value) {
-		setValue(16, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.apt_seg3_sample</code>.
-	 */
-	public java.lang.String getAptSeg3Sample() {
-		return (java.lang.String) getValue(16);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_communities.apt_count</code>.
 	 */
 	public void setAptCount(java.lang.Integer value) {
-		setValue(17, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.apt_count</code>.
 	 */
 	public java.lang.Integer getAptCount() {
-		return (java.lang.Integer) getValue(17);
+		return (java.lang.Integer) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.creator_uid</code>. user who suggested the creation
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(18, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.creator_uid</code>. user who suggested the creation
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.operator_uid</code>. operator uid of last operation
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(19, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.operator_uid</code>. operator uid of last operation
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(20, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(20);
+		return (java.lang.Byte) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(21, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(21);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(22, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(22);
+		return (java.sql.Timestamp) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(23, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(23);
+		return (java.lang.Long) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(24, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(24);
+		return (java.lang.Long) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(25, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(25);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(26, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(26);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(27, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(27);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(28, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(28);
+		return (java.lang.String) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(29, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(29);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(30, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(30);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(31, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(31);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(32, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_communities.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(32);
+		return (java.lang.String) getValue(26);
 	}
 
 	// -------------------------------------------------------------------------
@@ -501,7 +417,7 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhCommunitiesRecord
 	 */
-	public EhCommunitiesRecord(java.lang.Long id, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String name, java.lang.String aliasName, java.lang.String address, java.lang.String zipcode, java.lang.String description, java.lang.String detailDescription, java.lang.String aptSegment1, java.lang.String aptSegment2, java.lang.String aptSegment3, java.lang.String aptSeg1Sample, java.lang.String aptSeg2Sample, java.lang.String aptSeg3Sample, java.lang.Integer aptCount, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte status, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhCommunitiesRecord(java.lang.Long id, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String name, java.lang.String aliasName, java.lang.String address, java.lang.String zipcode, java.lang.String description, java.lang.String detailDescription, java.lang.Integer aptCount, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte status, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES);
 
 		setValue(0, id);
@@ -515,27 +431,21 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(8, zipcode);
 		setValue(9, description);
 		setValue(10, detailDescription);
-		setValue(11, aptSegment1);
-		setValue(12, aptSegment2);
-		setValue(13, aptSegment3);
-		setValue(14, aptSeg1Sample);
-		setValue(15, aptSeg2Sample);
-		setValue(16, aptSeg3Sample);
-		setValue(17, aptCount);
-		setValue(18, creatorUid);
-		setValue(19, operatorUid);
-		setValue(20, status);
-		setValue(21, createTime);
-		setValue(22, deleteTime);
-		setValue(23, integralTag1);
-		setValue(24, integralTag2);
-		setValue(25, integralTag3);
-		setValue(26, integralTag4);
-		setValue(27, integralTag5);
-		setValue(28, stringTag1);
-		setValue(29, stringTag2);
-		setValue(30, stringTag3);
-		setValue(31, stringTag4);
-		setValue(32, stringTag5);
+		setValue(11, aptCount);
+		setValue(12, creatorUid);
+		setValue(13, operatorUid);
+		setValue(14, status);
+		setValue(15, createTime);
+		setValue(16, deleteTime);
+		setValue(17, integralTag1);
+		setValue(18, integralTag2);
+		setValue(19, integralTag3);
+		setValue(20, integralTag4);
+		setValue(21, integralTag5);
+		setValue(22, stringTag1);
+		setValue(23, stringTag2);
+		setValue(24, stringTag3);
+		setValue(25, stringTag4);
+		setValue(26, stringTag5);
 	}
 }

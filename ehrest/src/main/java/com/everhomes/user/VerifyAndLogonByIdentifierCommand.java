@@ -11,6 +11,9 @@ public class VerifyAndLogonByIdentifierCommand {
     @NotNull
     private String verificationCode;
     
+    @NotNull
+    private String initialPassword;
+    
     private String deviceIdentifier;
     
     private Integer namespaceId;
@@ -50,6 +53,14 @@ public class VerifyAndLogonByIdentifierCommand {
         this.namespaceId = namespaceId;
     }
     
+    public String getInitialPassword() {
+        return initialPassword;
+    }
+
+    public void setInitialPassword(String initialPassword) {
+        this.initialPassword = initialPassword;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

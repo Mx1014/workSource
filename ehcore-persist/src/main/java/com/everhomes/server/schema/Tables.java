@@ -124,9 +124,29 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityGeopoints EH_COMMUNITY_GEOPOINTS = com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS;
 
 	/**
+	 * The table ehcore.eh_community_pm_bills
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityPmBills EH_COMMUNITY_PM_BILLS = com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS;
+
+	/**
+	 * The table ehcore.eh_community_pm_bill_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityPmBillItems EH_COMMUNITY_PM_BILL_ITEMS = com.everhomes.server.schema.tables.EhCommunityPmBillItems.EH_COMMUNITY_PM_BILL_ITEMS;
+
+	/**
+	 * The table ehcore.eh_community_pm_contacts
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityPmContacts EH_COMMUNITY_PM_CONTACTS = com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS;
+
+	/**
 	 * The table ehcore.eh_community_pm_members
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunityPmMembers EH_COMMUNITY_PM_MEMBERS = com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS;
+
+	/**
+	 * The table ehcore.eh_community_pm_tasks
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityPmTasks EH_COMMUNITY_PM_TASKS = com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS;
 
 	/**
 	 * The table ehcore.eh_community_profiles

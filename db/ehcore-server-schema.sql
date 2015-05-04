@@ -911,12 +911,6 @@ CREATE TABLE `eh_communities`(
     `zipcode` VARCHAR(16),
     `description` TEXT,
     `detail_description` TEXT,
-    `apt_segment1` VARCHAR(64),
-    `apt_segment2` VARCHAR(64),
-    `apt_segment3` VARCHAR(64),
-    `apt_seg1_sample` VARCHAR(64),
-    `apt_seg2_sample` VARCHAR(64),
-    `apt_seg3_sample` VARCHAR(64),
     `apt_count` INTEGER,
     `creator_uid` BIGINT COMMENT 'user who suggested the creation',
     `operator_uid` BIGINT COMMENT 'operator uid of last operation',
@@ -1007,7 +1001,7 @@ CREATE TABLE `eh_community_profiles` (
 DROP TABLE IF EXISTS `eh_community_pm_members`;
 CREATE TABLE `eh_community_pm_members` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
     `target_type` VARCHAR(32),
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `pm_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
@@ -1015,10 +1009,30 @@ CREATE TABLE `eh_community_pm_members` (
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
 	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
 	`contact_description` TEXT,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
 	
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cpm_owner`(`owner_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
+	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
 	INDEX `i_eh_cpm_group`(`pm_group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_tasks`;
+CREATE TABLE `eh_community_pm_tasks` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`entity_type` VARCHAR(32),
+    `entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
+	`target_type` VARCHAR(32),
+    `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
+    `task_type` VARCHAR(32) COMMENT 'task type assigned by pm',
+    `task_status` TINYINT NOT NULL,
+	
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -1035,6 +1049,87 @@ CREATE TABLE `eh_community_address_mappings` (
     
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_bills`;
+CREATE TABLE `eh_community_pm_bills` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`entity_type` VARCHAR(32),
+    `entity_id` BIGINT NOT NULL COMMENT 'target address id if target_type is a address',
+    `address` VARCHAR(128),
+	`name` VARCHAR(128) COMMENT 'the tile of bill',
+	`date_str` VARCHAR(128) COMMENT 'the date string in bill',
+	`total_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill',
+	`description` TEXT,
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	`notify_count` INT COMMENT 'how many times of notification is sent for the bill',
+    `notify_time` DATETIME COMMENT 'the last time of notification for the bill',
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_bill_items`;
+CREATE TABLE `eh_community_pm_bill_items` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `bill_id` BIGINT NOT NULL,
+	`item_name` VARCHAR(128) COMMENT 'the tile of bill item',
+	`start_count` DECIMAL(10,2) COMMENT 'the start count of bill item for the specific month',
+	`end_count` DECIMAL(10,2) COMMENT 'the end count of bill item for the specific month',
+	`use_count` DECIMAL(10,2) COMMENT 'the count of bill item which end_count substract start_count',
+	`price` DECIMAL(10,2),
+	`total_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill item',
+	`description` TEXT,
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_owners`;
+CREATE TABLE `eh_community_pm_contacts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`contact_name` VARCHAR(64),
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+	`contact_description` TEXT,
+    `address_id` BIGINT NOT NULL COMMENT 'address id',
+    `address` VARCHAR(128),
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of eh_communities partition
+# information of community 
+#
+DROP TABLE IF EXISTS `eh_community_pm_contacts`;
+CREATE TABLE `eh_community_pm_contacts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+	`contact_name` VARCHAR(64),
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+    `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
@@ -1130,29 +1225,51 @@ CREATE TABLE `eh_family_followers` (
 # key table of the sharding group
 # first level resource objects
 #
+# DROP TABLE IF EXISTS `eh_banners`;
+# CREATE TABLE `eh_banners` (
+#     `id` BIGINT NOT NULL COMMENT 'id of the record',
+#     `namespace_id` INTEGER,
+#     `appId` BIGINT,
+#     `name` VARCHAR(128),
+#     `description` TEXT,
+#     `banner_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: advertisement, 2: backend',
+#     `vendor_tag` VARCHAR(64),
+#     `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
+#     `flow_data` TEXT,
+#     `resource_id` BIGINT,
+#     `resource_url` VARCHAR(512), 
+#     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
+#     `group_id` BIGINT COMMENT 'point to the group created for the banner',
+#     `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
+#     `order` INTEGER NOT NULL DEFAULT 0,
+#     `create_time` DATETIME,
+#     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
+#     
+#     PRIMARY KEY (`id`),
+#     INDEX `i_eh_banner_create_time`(`create_time`),
+#     INDEX `i_eh_banner_delete_time`(`delete_time`)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `appId` BIGINT,
     `name` VARCHAR(128),
-    `description` TEXT,
-    `banner_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: advertisement, 2: backend',
+    `poster_path` VARCHAR(128),
     `vendor_tag` VARCHAR(64),
-    `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
-    `flow_data` TEXT,
+	`listing_start_time` DATETIME,
+	`listing_end_time` DATETIME,
+	`resource_type` VARCHAR(32),
     `resource_id` BIGINT,
     `resource_url` VARCHAR(512), 
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
-    `group_id` BIGINT COMMENT 'point to the group created for the banner',
-    `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
     `order` INTEGER NOT NULL DEFAULT 0,
+    `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_banner_create_time`(`create_time`),
-    INDEX `i_eh_banner_delete_time`(`delete_time`)
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #

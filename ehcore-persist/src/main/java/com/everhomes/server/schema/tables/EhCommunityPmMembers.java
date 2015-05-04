@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord> {
 
-	private static final long serialVersionUID = -913144164;
+	private static final long serialVersionUID = 171474371;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_members</code>
@@ -32,9 +32,9 @@ public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_community_pm_members.owner_id</code>. owner community id
+	 * The column <code>ehcore.eh_community_pm_members.community_id</code>. owner community id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_members.target_type</code>.
@@ -70,6 +70,11 @@ public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_community_pm_members.contact_description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.String> CONTACT_DESCRIPTION = createField("contact_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_community_pm_members.status</code>. 0: inactive, 1: confirming, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
 
 	/**
 	 * Create a <code>ehcore.eh_community_pm_members</code> table reference

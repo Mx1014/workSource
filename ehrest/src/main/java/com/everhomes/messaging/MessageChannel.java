@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.user;
+package com.everhomes.messaging;
 
 public class MessageChannel {
     private String channelType;

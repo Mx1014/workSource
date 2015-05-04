@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1404102142;
+	private static final long serialVersionUID = 551710468;
 
 	private java.lang.Long   id;
-	private java.lang.Long   ownerId;
+	private java.lang.Long   communityId;
 	private java.lang.String targetType;
 	private java.lang.Long   targetId;
 	private java.lang.String pmGroup;
@@ -22,22 +22,24 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 	private java.lang.Byte   contactType;
 	private java.lang.String contactToken;
 	private java.lang.String contactDescription;
+	private java.lang.Byte   status;
 
 	public EhCommunityPmMembers() {}
 
 	public EhCommunityPmMembers(
 		java.lang.Long   id,
-		java.lang.Long   ownerId,
+		java.lang.Long   communityId,
 		java.lang.String targetType,
 		java.lang.Long   targetId,
 		java.lang.String pmGroup,
 		java.lang.String contactName,
 		java.lang.Byte   contactType,
 		java.lang.String contactToken,
-		java.lang.String contactDescription
+		java.lang.String contactDescription,
+		java.lang.Byte   status
 	) {
 		this.id = id;
-		this.ownerId = ownerId;
+		this.communityId = communityId;
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.pmGroup = pmGroup;
@@ -45,6 +47,7 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 		this.contactType = contactType;
 		this.contactToken = contactToken;
 		this.contactDescription = contactDescription;
+		this.status = status;
 	}
 
 	public java.lang.Long getId() {
@@ -55,12 +58,12 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public java.lang.String getTargetType() {
@@ -117,5 +120,13 @@ public class EhCommunityPmMembers implements java.io.Serializable {
 
 	public void setContactDescription(java.lang.String contactDescription) {
 		this.contactDescription = contactDescription;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
 	}
 }

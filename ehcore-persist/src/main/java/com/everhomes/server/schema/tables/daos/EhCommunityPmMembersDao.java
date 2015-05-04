@@ -48,10 +48,10 @@ public class EhCommunityPmMembersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
+	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.OWNER_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID, values);
 	}
 
 	/**
@@ -101,5 +101,12 @@ public class EhCommunityPmMembersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers> fetchByContactDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.CONTACT_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS.STATUS, values);
 	}
 }

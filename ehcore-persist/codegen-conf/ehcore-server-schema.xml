@@ -36,14 +36,15 @@
         eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks | 
         eh_audit_logs | eh_locale_strings | eh_devices | eh_certs |
         eh_regions | eh_communities | eh_community_geopoints | eh_community_pm_members | eh_community_address_mappings |
-        eh_community_profiles | eh_addresses | 
+        eh_community_pm_tasks | eh_community_pm_bills | eh_community_pm_bill_items | eh_community_pm_contacts | 
+        eh_community_pm_owners | eh_community_profiles | eh_addresses | 
         eh_family_followers | eh_banners | eh_banner_profiles | eh_banner_clicks | 
         eh_banner_orders | eh_binary_resources | eh_rtxt_resources | 
         eh_events | eh_event_roster | eh_event_ticket_groups | eh_event_tickets |
         eh_event_profiles | eh_activities | eh_activity_roster | eh_polls |
         eh_poll_items | eh_poll_votes | eh_business | eh_business_profiles | 
         eh_biz_coupon_groups | eh_biz_coupon |
-        eh_client_package_files | eh_client_packages
+        eh_client_package_files | eh_client_packages 
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

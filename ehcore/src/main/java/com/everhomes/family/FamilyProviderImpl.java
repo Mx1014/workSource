@@ -2,6 +2,7 @@
 package com.everhomes.family;
 
 import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -23,6 +24,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberAdminStatus;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -34,10 +36,12 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
@@ -246,5 +250,32 @@ public class FamilyProviderImpl implements FamilyProvider {
             });
         
         return new Tuple<Integer, List<FamilyDTO>>(ErrorCodes.SUCCESS, results);
+    }
+    
+    @Override
+    public void joinFamily(long familyId) {
+    	User user = UserContext.current().getUser();
+    	long userId = user.getId();
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.JOIN_FAMILY.getCode()).enter(()-> {
+    		Family f = findFamilyByAddressId(familyId);
+    		if(f == null)
+    			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    	                    "Invalid familyId parameter");
+    		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EhUsers.class.getSimpleName(), userId);
+    		if(m != null)
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    					"user has joined to the family");
+    		m = new GroupMember();
+    		m.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    		m.setGroupId(familyId);
+    		m.setMemberId(userId);
+    		m.setMemberNickName(user.getNickName());
+    		m.setMemberAvatar(user.getAvatar());
+    		m.setMemberRole(Role.ResourceUser);
+    		m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+    		m.setMemberType(EhUsers.class.getSimpleName());
+    		this.groupProvider.createGroupMember(m);
+    		return null;
+    	});
     }
 }
