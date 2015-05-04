@@ -61,7 +61,6 @@ public class AddressTest extends TestCase {
     @Before
     public void setup() {
         Community community = new Community();
-        community.setId(1L);
         community.setAddress("Fake address");
         community.setAreaName("Fake area");
         community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
@@ -76,7 +75,6 @@ public class AddressTest extends TestCase {
         
         for(int i = 1; i < 5; i++) {
             Community c = new Community();
-            c.setId((long) (1 + i));
             c.setAddress("Fake address " + i);
             c.setAreaName("Fake area " + i);
             c.setStatus(CommunityAdminStatus.ACTIVE.getCode());
@@ -90,7 +88,6 @@ public class AddressTest extends TestCase {
         
         CommunityGeoPoint geoPoint1 = new CommunityGeoPoint();
         geoPoint1.setCommunityId(community.getId());
-        geoPoint1.setId(1L);
         geoPoint1.setDescription("Archor North");
         geoPoint1.setLatitude(0.0);
         geoPoint1.setLongitude(0.0);
@@ -100,7 +97,6 @@ public class AddressTest extends TestCase {
         
         CommunityGeoPoint geoPoint2 = new CommunityGeoPoint();
         geoPoint2.setCommunityId(community.getId());
-        geoPoint2.setId(2L);
         geoPoint2.setDescription("Archor South");
         geoPoint2.setLatitude(1.0);
         geoPoint2.setLongitude(1.0);
@@ -110,13 +106,13 @@ public class AddressTest extends TestCase {
     
     @After
     public void teardown() {
-//        for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
-//            communityProvider.deleteCommunityGeoPoint(p);
-//        }
-//        
-//        for(Community c : this.communityCleanupList) {
-//            communityProvider.deleteCommunity(c);
-//        }
+        for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
+            communityProvider.deleteCommunityGeoPoint(p);
+        }
+        
+        for(Community c : this.communityCleanupList) {
+            communityProvider.deleteCommunity(c);
+        }
     }
     
     @Ignore @Test
@@ -129,12 +125,12 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Ignore @Test
+    @Test
     public void testFindNearbyCommuunities() {
         ListNearbyCommunityCommand cmd = new ListNearbyCommunityCommand();
         cmd.setCityId(1L);
         cmd.setLongitude(116.123);
-        cmd.setLatigtue(23.123);
+        cmd.setLatigtue(24.123);
         Tuple<Integer, List<CommunityDTO>> communityList = this.addressService.listNearbyCommunities(cmd);
         
         for(CommunityDTO c : communityList.second()) {
@@ -276,7 +272,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testClaimAddress(){
         ClaimAddressCommand cmd = new ClaimAddressCommand();
         cmd.setCommunityId(1L);
