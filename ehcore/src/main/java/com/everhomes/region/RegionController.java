@@ -40,6 +40,10 @@ public class RegionController extends ControllerBase {
     @Autowired
     private RegionProvider regionProvider;
     
+    /**
+     * <b>URL: /category/list</b>
+     * 列出指定范围和状态的区域列表（不用填父亲区域ID）
+     */
     @RequireAuthentication(false)
     @RequestMapping("list")
     @RestReturn(value=RegionDTO.class, collection=true)
@@ -58,6 +62,10 @@ public class RegionController extends ControllerBase {
         return new RestResponse(dtoResultList);
     }
     
+    /**
+     * <b>URL: /category/listChildren</b>
+     * 列出指定范围和状态的第一层孩子区域列表（需填父亲区域ID）
+     */
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
     @RestReturn(value=RegionDTO.class, collection=true)
@@ -77,6 +85,10 @@ public class RegionController extends ControllerBase {
         return new RestResponse(dtoResultList);
     }
     
+    /**
+     * <b>URL: /category/listChildren</b>
+     * 列出指定范围和状态的所有层孩子区域列表（可不填父亲区域ID）
+     */
     @RequireAuthentication(false)
     @RequestMapping("listDescendants")
     @RestReturn(value=RegionDTO.class, collection=true)

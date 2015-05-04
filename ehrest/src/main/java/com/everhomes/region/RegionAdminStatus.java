@@ -1,6 +1,14 @@
 // @formatter:off
 package com.everhomes.region;
 
+/**
+ * <ul>
+ * <li>INACTIVE: 无效</li>
+ * <li>ACTIVE: 正常</li>
+ * <li>LOCKED: 锁定</li>
+ * <li>DELETED: 已删除</li>
+ * </ul>
+ */
 public enum RegionAdminStatus {
     INACTIVE((byte)1), ACTIVE((byte)2), LOCKED((byte)3), DELETED((byte)4);
     

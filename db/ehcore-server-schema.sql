@@ -84,7 +84,7 @@ CREATE TABLE `ehcore`.`eh_certs` (
 # member of global parition
 # shared among namespaces, no application module specific information
 #
-DROP TABLE IF EXISTS `eh_categories`;
+DROP TABLE IF EXISTS `eh_locale_strings`;
 CREATE TABLE `eh_locale_strings`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `scope` VARCHAR(64),

@@ -39,6 +39,10 @@ public class CategoryController extends ControllerBase {
     @Autowired
     private CategoryProvider categoryProvider;
     
+    /**
+     * <b>URL: /category/listChildren</b>
+     * 列出指定类型的第一层孩子类型
+     */
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
     @RestReturn(value=CategoryDTO.class, collection=true)
@@ -57,6 +61,10 @@ public class CategoryController extends ControllerBase {
         return new RestResponse(dtoResultList);
     }
     
+    /**
+     * <b>URL: /category/listDescendants</b>
+     * 列出指定类型下的所有孩子类型
+     */
     @RequireAuthentication(false)
     @RequestMapping("listDescendants")
     @RestReturn(value=CategoryDTO.class, collection=true)

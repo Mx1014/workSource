@@ -1,6 +1,15 @@
 // @formatter:off
 package com.everhomes.region;
 
+/**
+ * <ul>
+ * <li>COUNTRY: 国家</li>
+ * <li>PROVINCE: 省份</li>
+ * <li>CITY: 城市</li>
+ * <li>AREA: 区县</li>
+ * <li>NEIGHBORHOOD: 邻居</li>
+ * </ul>
+ */
 public enum RegionScope {
     COUNTRY((byte)0), PROVINCE((byte)1), CITY((byte)2), AREA((byte)3), NEIGHBORHOOD((byte)4);
     

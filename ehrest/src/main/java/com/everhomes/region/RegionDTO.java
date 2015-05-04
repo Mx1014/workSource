@@ -3,6 +3,19 @@ package com.everhomes.region;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id: 区域ID</li>
+ * <li>parentId: 父亲区域的ID</li>
+ * <li>name: 区域名称</li>
+ * <li>path: 区域路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
+ * <li>level</li>
+ * <li>scopeCode: 范围，参考{@link com.everhomes.region.RegionScope}</li>
+ * <li>isoCode: 国际编号</li>
+ * <li>telCode: 区号</li>
+ * <li>status: 状态，参考{@link com.everhomes.region.RegionAdminStatus}</li>
+ * </ul>
+ */
 public class RegionDTO {
     private Long id;
     private Integer parentId;
