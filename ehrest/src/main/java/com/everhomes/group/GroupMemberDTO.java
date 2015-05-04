@@ -3,6 +3,13 @@ package com.everhomes.group;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id：group成员ID</li>
+ * <li>groupId：group ID</li>
+ * <li>memberType：成员类型，参考{@link com.everhomes.entity.EntityType}</li>
+ * </ul>
+ */
 public class GroupMemberDTO {
     private Long id;
     private Long groupId;
