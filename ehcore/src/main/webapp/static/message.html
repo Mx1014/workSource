@@ -80,7 +80,7 @@ function newPdu(msg, name) {
 }
 
 function init() { 
-    //initPusherWebSocket();
+    initPusherWebSocket();
     initClientWebSocket();
 }
 
@@ -126,7 +126,7 @@ function onClose(evt) {
     writeToScreen("DISCONNECTED"); 
 }  
 function onMessage(evt) { 
-    writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + ' </span> '); 
+    writeToScreen('<span style="color: blue;">PUSHER RESPONSE: ' + evt.data + ' </span> '); 
     var obj = JSON.parse(evt.data);
     if(obj.name == "NOTIFY") {
         requestMessages();
@@ -195,7 +195,7 @@ function onClientClose(evt) {
 }
 
 function onClientMessage(evt) {
-    $('#content').append(evt.data + '<br>');
+    $('#content').append("Client message " + evt.data + '<br>');
 }
 
 function onClientError(evt) {
