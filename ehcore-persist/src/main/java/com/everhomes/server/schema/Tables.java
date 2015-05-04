@@ -144,6 +144,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityPmMembers EH_COMMUNITY_PM_MEMBERS = com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS;
 
 	/**
+	 * The table ehcore.eh_community_pm_owners
+	 */
+	public static final com.everhomes.server.schema.tables.EhCommunityPmOwners EH_COMMUNITY_PM_OWNERS = com.everhomes.server.schema.tables.EhCommunityPmOwners.EH_COMMUNITY_PM_OWNERS;
+
+	/**
 	 * The table ehcore.eh_community_pm_tasks
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunityPmTasks EH_COMMUNITY_PM_TASKS = com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS;
