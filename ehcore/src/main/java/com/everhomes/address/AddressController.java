@@ -37,6 +37,7 @@ public class AddressController extends ControllerBase {
     private AddressService addressService;
 
     /**
+     * <b>URL: /address/suggestCommunity</b>
      * 添加小区
      */
     @RequestMapping("suggestCommunity")
@@ -51,6 +52,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/listSuggestedCommunities</b>
      * 查询用户创建的小区
      */
     @RequestMapping("listSuggestedCommunities")
@@ -65,6 +67,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/listNearbyCommunities</b>
      * 根据经纬度查询附近小区
      */
     @RequestMapping("listNearbyCommunities")
@@ -79,6 +82,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/listCommunitiesByKeyword</b>
      * 根据城市Id和关键字查询小区
      */
     @RequestMapping("listCommunitiesByKeyword")
@@ -93,6 +97,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/listBuildingsByKeyword</b>
      * 根据小区Id和关键字查询小区楼栋
      */
     @RequestMapping("listBuildingsByKeyword")
@@ -107,6 +112,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/listAppartmentsByKeyword</b>
      * 根据小区Id、楼栋号和关键字查询门牌
      */
     @RequestMapping("listAppartmentsByKeyword")
@@ -121,6 +127,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/claimAddress</b>
      * 添加地址或修改地址
      */
     @RequestMapping("claimAddress")
@@ -135,6 +142,7 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/disclaimAddress</b>
      * 删除地址
      */
     @RequestMapping("disclaimAddress")

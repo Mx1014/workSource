@@ -34,6 +34,7 @@ public class FamilyController extends ControllerBase {
     private FamilyProvider familyProvider;
 	
 	/**
+	 * <b>URL: /family/findFamilyByKeyword</b>
 	 * 根据关键字查询家庭信息
 	 */
     @RequestMapping("findFamilyByKeyword")
@@ -48,6 +49,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/getOwningFamilyById</b>
      * 根据家庭Id查询用户所在家庭
      */
     @RequestMapping("getOwningFamilyById")
@@ -65,6 +67,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/join</b>
      * 加入家庭
      */
     @RequestMapping("join")
@@ -80,6 +83,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/leave</b>
      * 退出家庭
      */
     @RequestMapping("leave")
@@ -95,6 +99,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/follow</b>
      * 关注家庭
      * @return
      */
@@ -112,6 +117,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/unfollow</b>
      * 取消关注家庭
      * @param familyId
      * @return
@@ -129,6 +135,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/listFollowedFamilies</b>
      * 查询所关注的家庭列表
      * @return
      */
@@ -144,6 +151,7 @@ public class FamilyController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /family/setFollowedFamilyAlias</b>
      * 备注关注的家庭的别名
      */
     @RequestMapping("setFollowedFamilyAlias")
@@ -159,6 +167,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/listFollowers</b>
      * 查询指定家庭Id的关注用户
      */
     @RequestMapping("listFollowers")
@@ -174,6 +183,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/get</b>
      * 根据家庭Id查询家庭信息
      */
     @RequestMapping("get")
@@ -189,6 +199,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/ejectMember</b>
      * 剔除家庭成员
      */
     @RequestMapping("ejectMember")
@@ -206,6 +217,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/approveMember</b>
      * 批准家庭成员加入
      */
     @RequestMapping("approveMember")
@@ -222,6 +234,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/listOwningFamilyMembers</b>
      * 查询用户所在家庭的成员列表
      */
     @RequestMapping("listOwningFamilyMembers")
@@ -236,6 +249,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/listFamilyRequests</b>
      * 查询加入家庭的待处理的申请列表
      */
     @RequestMapping("listFamilyRequests")
@@ -251,6 +265,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/setCurrentFamily</b>
      * 设置当前家庭
      */
     @RequestMapping("setCurrentFamily")
@@ -265,6 +280,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/setPrimaryFamily</b>
      * 设置常用家庭
      */
     @RequestMapping("setPrimaryFamily")
@@ -279,6 +295,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/updateFamilyInfo</b>
      * 更新家庭信息
      */
     @RequestMapping("updateFamilyInfo")
@@ -293,6 +310,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/listNeighborUsers</b>
      * 查询小区邻居列表
      */
     @RequestMapping("listNeighborUsers")
@@ -308,6 +326,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /family/listNearbyNeighborUsers</b>
      * 查询附近同小区邻居
      */
     @RequestMapping("listNearbyNeighborUsers")
