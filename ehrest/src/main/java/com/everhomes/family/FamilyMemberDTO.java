@@ -3,6 +3,16 @@ package com.everhomes.family;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ * <li>id: 家庭与用户的关联Id</li>
+ * <li>familyId: 家庭Id</li>
+ * <li>memberUid: 家庭成员Id</li>
+ * <li>memberName: 家庭成员名称</li>
+ * <li>memberAvatar: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * </ul>
+ */
 public class FamilyMemberDTO {
     private Long id;
     private Long familyId;

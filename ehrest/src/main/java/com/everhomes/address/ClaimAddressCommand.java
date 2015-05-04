@@ -5,6 +5,14 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>replacedAddressId: 地址Id，空则表示新增地址，否则修改地址</li>
+ * <li>communityId: 小区Id</li>
+ * <li>buildingName: 楼栋号</li>
+ * <li>apartmentName: 门牌号</li>
+ * </ul>
+ */
 public class ClaimAddressCommand {
     // null means to claim a new family address, otherwise, it is to replace with the existing one
     private Long replacedAddressId;

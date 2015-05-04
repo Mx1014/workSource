@@ -36,6 +36,9 @@ public class AddressController extends ControllerBase {
     @Autowired
     private AddressService addressService;
 
+    /**
+     * 添加小区
+     */
     @RequestMapping("suggestCommunity")
     @RestReturn(value=CommunitySummaryDTO.class)
     public RestResponse addCommunity(@Valid SuggestCommunityCommand cmd) {
@@ -47,6 +50,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 查询用户创建的小区
+     */
     @RequestMapping("listSuggestedCommunities")
     @RestReturn(value=CommunitySummaryDTO.class, collection=true)
     public RestResponse listSuggestedCommunities() {
@@ -58,6 +64,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 根据经纬度查询附近小区
+     */
     @RequestMapping("listNearbyCommunities")
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse listNearbyCommunities(@Valid ListNearbyCommunityCommand cmd) {
@@ -69,6 +78,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 根据城市Id和关键字查询小区
+     */
     @RequestMapping("listCommunitiesByKeyword")
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse listCommunitiesByKeyword(@Valid ListCommunityByKeywordCommand cmd) {
@@ -80,6 +92,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 根据小区Id和关键字查询小区楼栋
+     */
     @RequestMapping("listBuildingsByKeyword")
     @RestReturn(value=BuildingDTO.class, collection=true)
     public RestResponse listBuildingsByKeyword(@Valid ListBuildingByKeywordCommand cmd) {
@@ -91,6 +106,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 根据小区Id、楼栋号和关键字查询门牌
+     */
     @RequestMapping("listAppartmentsByKeyword")
     @RestReturn(value=String.class, collection=true)
     public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
@@ -102,6 +120,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 添加地址或修改地址
+     */
     @RequestMapping("claimAddress")
     @RestReturn(value=ClaimedAddressInfo.class)
     public RestResponse claimAddress(@Valid ClaimAddressCommand cmd) {
@@ -113,6 +134,9 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 删除地址
+     */
     @RequestMapping("disclaimAddress")
     @RestReturn(value=String.class)
     public RestResponse disclaimAddress(@Valid DisclaimAddressCommand cmd) {

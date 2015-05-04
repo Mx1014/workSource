@@ -1,6 +1,16 @@
 // @formatter:off
 package com.everhomes.family;
 
+/**
+ * <ul>
+ * <li>userId: 邻居用户Id</li>
+ * <li>userName: 邻居用户名称</li>
+ * <li>userAvatar: 邻居用户头像Id</li>
+ * <li>userStatusLine: 待定??</li>
+ * <li>neighborhoodRelation: 邻居关系0-未知、1-同层、2-同楼</li>
+ * <li>distance: 邻居用户与自己的距离</li>
+ * </ul>
+ */
 public class NeighborUserDTO {
     private Long userId;
     private String userName;

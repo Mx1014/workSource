@@ -3,6 +3,13 @@ package com.everhomes.address;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ * <li>cityId: 城市Id</li>
+ * <li>keyword: 查询关键字</li>
+ * <li>pageOffset: 页码</li>
+ * </ul>
+ */
 public class ListCommunityByKeywordCommand {
     private Long cityId;
     

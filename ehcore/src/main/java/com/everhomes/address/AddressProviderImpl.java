@@ -61,7 +61,7 @@ public class AddressProviderImpl implements AddressProvider {
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),
-            @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.appartmentName}") })
+            @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.apartmentName}") })
     @Override
     public void updateAddress(Address address) {
         assert(address.getId() != null);
@@ -74,7 +74,7 @@ public class AddressProviderImpl implements AddressProvider {
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),
-            @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.appartmentName}") })
+            @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.apartmentName}") })
     @Override
     public void deleteAddress(Address address) {
         assert(address.getId() != null);
@@ -111,15 +111,17 @@ public class AddressProviderImpl implements AddressProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                (DSLContext context, Object reducingContext) -> {
 
-            result[0] = context.select().from(Tables.EH_ADDRESSES)
+             List<Address> list = context.select().from(Tables.EH_ADDRESSES)
                 .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
                 .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
-                .fetchOne().map((r) -> {
+                .fetch().map((r) -> {
                    return ConvertHelper.convert(r, Address.class); 
                 });
-            if(result[0] != null)
-                return false;
+             if(list != null && !list.isEmpty()){
+                 result[0] = list.get(0);
+                 return false;
+             }
             
             return true;
         });

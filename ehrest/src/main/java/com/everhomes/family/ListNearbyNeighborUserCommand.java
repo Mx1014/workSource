@@ -1,6 +1,14 @@
 // @formatter:off
 package com.everhomes.family;
 
+/**
+ * <ul>
+ * <li>familyId: 家庭Id</li>
+ * <li>longitude: 地址所在地的经度</li>
+ * <li>latitude: 地址所在地的经度</li>
+ * <li>pageOffset: 页码</li>
+ * </ul>
+ */
 public class ListNearbyNeighborUserCommand {
     private Long familyId;
     private Double longitude;

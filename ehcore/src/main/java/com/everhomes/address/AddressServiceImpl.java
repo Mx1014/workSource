@@ -173,10 +173,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
 
         // TODO, return all communities only to test our REST response for now
+        
+        String geoHash = GeoHashUtils.encode(cmd.getLatigtue(), cmd.getLongitude());
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(geoHash.substring(0, 5));
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
             (DSLContext context, Object reducingContext)-> {
             
-            context.select().from(Tables.EH_COMMUNITIES).fetch().map((r) -> {
+            context.select().from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
+                .fetch().map((r) -> {
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
                 results.add(community);
                 
@@ -189,7 +196,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         
         return new Tuple<>(ErrorCodes.SUCCESS, results);
     }
-
+    
+    private List<Long> getAllCommunityIds(List<CommunityGeoPoint> pointList){
+        if(pointList == null || pointList.isEmpty())
+            return new ArrayList<Long>();
+        List<Long> communityIds= new ArrayList<Long>(pointList.size());
+        for(CommunityGeoPoint c : pointList){
+            communityIds.add(c.getCommunityId());
+        }
+        return communityIds;
+    }
     /**
      *  TODO: Pagination across partitions needs to be pre-fetched and cached
      */

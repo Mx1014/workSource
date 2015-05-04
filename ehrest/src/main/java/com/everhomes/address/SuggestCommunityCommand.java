@@ -5,6 +5,16 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>cityId: 城市Id</li>
+ * <li>areaId: 区域Id</li>
+ * <li>name: 小区名称</li>
+ * <li>address: 小区地址</li>
+ * <li>longitude: 经度</li>
+ * <li>latitude: 纬度</li>
+ * </ul>
+ */
 public class SuggestCommunityCommand {
     @NotNull
     private Long cityId;

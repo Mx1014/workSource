@@ -3,6 +3,11 @@ package com.everhomes.address;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>addressId: 地址Id</li>
+ * </ul>
+ */
 public class DisclaimAddressCommand {
     private Long addressId;
     

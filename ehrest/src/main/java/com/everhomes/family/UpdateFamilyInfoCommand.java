@@ -5,6 +5,16 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>familyId: 家庭Id</li>
+ * <li>familyName: 家庭名称</li>
+ * <li>familyDescription: 家庭描述</li>
+ * <li>familyAvatar: 家庭头像Id</li>
+ * <li>memberNickName: 用户在家庭内的昵称</li>
+ * <li>memberAvatar: 用户在家庭的头像Id</li>
+ * </ul>
+ */
 public class UpdateFamilyInfoCommand {
     @NotNull
     private Long familyId;

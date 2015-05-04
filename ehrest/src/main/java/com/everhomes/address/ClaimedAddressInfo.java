@@ -3,6 +3,14 @@ package com.everhomes.address;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ * <li>addressId: 地址Id</li>
+ * <li>fullAddress: 详细地址</li>
+ * <li>userCount: 家庭成员数</li>
+ * </ul>
+ */
 public class ClaimedAddressInfo {
     private Long addressId;
     
