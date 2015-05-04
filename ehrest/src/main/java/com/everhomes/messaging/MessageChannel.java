@@ -1,6 +1,13 @@
 // @formatter:off
 package com.everhomes.messaging;
 
+/**
+ * <ul>
+ * <li>channelType: 通道类型，目前支持 user/group</li>
+ * <li>channelToken: 通道认证信息 uid/groupId</li>
+ * </ul>
+ *
+ */
 public class MessageChannel {
     private String channelType;
     private String channelToken;
