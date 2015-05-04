@@ -2,10 +2,13 @@
 package com.everhomes.visibility;
 
 /**
+ * <p>可见性范围：</p>
  * <ul>
- * <li>ALL</li>
- * <li>1: COMMUNITY_ONLY</li>
- * <li>1: COMMUNITY_ONLY</li>
+ * <li>ALL: 所有人可见</li>
+ * <li>COMMUNITY_ONLY: 仅本小区可见</li>
+ * <li>NEARBY_COMMUNITIES: 小区周边可见</li>
+ * <li>CITY_ONLY: 同城可见</li>
+ * <li>EXPLICIT_CONFIGURED: 指定区域可见</li>
  * </ul>
  *
  */
