@@ -9,6 +9,18 @@ import javax.validation.constraints.NotNull;
 
 import com.google.gson.Gson;
 
+/**
+ * <ul>
+ * <li>appId: 应用ID</li>
+ * <li>senderUid: 发送者UiD</li>
+ * <li>channels: 通道列表。参考{@link com.everhomes.messaging.MessageChannel}</li>
+ * <li>meta: 额外的消息信息</li>
+ * <li>body: 消息内容</li>
+ * <li>senderTag: 发送者标签</li>
+ * <li>storeSequence: 消息体的位置游标</li>
+ * </ul>
+ *
+ */
 public class MessageDTO {
     private Long appId;
     private Long senderUid;
