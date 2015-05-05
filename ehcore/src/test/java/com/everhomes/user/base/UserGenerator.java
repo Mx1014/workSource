@@ -60,6 +60,8 @@ public class UserGenerator {
     }
 
     protected long createLoginUser(String number, String password) {
+        Assert.assertNotNull(number, "number cannot be empty");
+        Assert.assertNotNull(password, "password cannot be empty");
         this.phone = number;
         this.password = password;
         return testLoginWorkflow();
