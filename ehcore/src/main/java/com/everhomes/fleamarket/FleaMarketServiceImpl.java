@@ -43,9 +43,8 @@ public class FleaMarketServiceImpl implements FleaMarketService {
         
         post.setEmbeddedType(EntityType.FLEAMARKET.getCode());
         post.setEmbeddedJson(StringHelper.toJsonString(item));
-       
-        post.setVisibilityScope(cmd.getVisibilityScope());
-        post.setVisibilityScopeId(cmd.getVisibilityScopeId());
+        
+        post.setVisibleFlag(cmd.getVisibleFlag());
         this.forumProvider.createPost(post);
         
         // TODO
