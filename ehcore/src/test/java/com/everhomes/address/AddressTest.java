@@ -106,13 +106,13 @@ public class AddressTest extends TestCase {
     
     @After
     public void teardown() {
-        for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
-            communityProvider.deleteCommunityGeoPoint(p);
-        }
-        
-        for(Community c : this.communityCleanupList) {
-            communityProvider.deleteCommunity(c);
-        }
+//        for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
+//            communityProvider.deleteCommunityGeoPoint(p);
+//        }
+//        
+//        for(Community c : this.communityCleanupList) {
+//            communityProvider.deleteCommunity(c);
+//        }
     }
     
     @Ignore @Test
@@ -125,7 +125,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testFindNearbyCommuunities() {
         ListNearbyCommunityCommand cmd = new ListNearbyCommunityCommand();
         cmd.setCityId(1L);
@@ -156,7 +156,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Ignore @Test
+    @Test
     public void testListBuilding() {
         Address addr = new Address();
         addr.setId(1L);
@@ -210,7 +210,7 @@ public class AddressTest extends TestCase {
         this.addressProvider.deleteAddress(addr);
     }
     
-    @Test
+    @Ignore @Test
     public void testListlistAppartments(){
         Address addr = new Address();
         addr.setId(1L);
@@ -265,6 +265,7 @@ public class AddressTest extends TestCase {
     
     @Ignore @Test
     public void testListCommunities(){
+
         Tuple<Integer, List<CommunitySummaryDTO>> result = addressService.listSuggestedCommunities();
         List<CommunitySummaryDTO> list = result.second();
         for(CommunitySummaryDTO dto : list){
@@ -272,13 +273,15 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Ignore @Test
+    @Test
     public void testClaimAddress(){
         ClaimAddressCommand cmd = new ClaimAddressCommand();
-        cmd.setCommunityId(1L);
+        cmd.setCommunityId(58L);
         cmd.setBuildingName("Building 1");
         cmd.setApartmentName("apt 1");
-        addressService.claimAddress(cmd);
+        ClaimedAddressInfo addressInfo = addressService.claimAddress(cmd);
+        assertNotNull(addressInfo);
+        System.out.println(addressInfo);
     }
     
     @Ignore @Test
