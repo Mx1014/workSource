@@ -7,7 +7,6 @@ import java.sql.Timestamp;
  * <ul>
  * <li>id: 类型ID</li>
  * <li>parentId: 父类型ID</li>
- * <li>linkId: 链接ID</li>
  * <li>name: 类型名称</li>
  * <li>path: 类型路径</li>
  * <li>defaultOrder: 默认顺序索引</li>
@@ -19,7 +18,6 @@ import java.sql.Timestamp;
 public class CategoryDTO {
     private Long     id;
     private Long     parentId;
-    private Long     linkId;
     private String   name;
     private String   path;
     private Integer  defaultOrder;
@@ -45,14 +43,6 @@ public class CategoryDTO {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
-    }
-
-    public Long getLinkId() {
-        return linkId;
-    }
-
-    public void setLinkId(Long linkId) {
-        this.linkId = linkId;
     }
 
     public String getName() {

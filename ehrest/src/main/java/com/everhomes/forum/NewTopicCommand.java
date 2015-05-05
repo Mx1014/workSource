@@ -9,8 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>forumId: 论坛ID</li>
  * <li>categoryId: 类型ID</li>
- * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
- * <li>visibilityScopeId: 可见性范围类型对应的ID</li>
+ * <li>visibleFlag: 可见性范围类型，{@link com.everhomes.forum.PostVisibleFlag}</li>
  * <li>longitude: 帖子内容涉及到的经度如活动</li>
  * <li>latitude: 帖子内容涉及到的纬度如活动</li>
  * <li>category_id: 帖子类型ID</li>
@@ -28,9 +27,7 @@ public class NewTopicCommand {
     
     private Long categoryId;
     
-    private Byte visibilityScope;
-    
-    private Long visibilityScopeId;
+    private Byte visibleFlag;
     
     private Double longitude;
     
@@ -70,20 +67,12 @@ public class NewTopicCommand {
 		this.categoryId = categoryId;
 	}
 
-	public Byte getVisibilityScope() {
-		return visibilityScope;
+	public Byte getVisibleFlag() {
+		return visibleFlag;
 	}
 
-	public void setVisibilityScope(Byte visibilityScope) {
-		this.visibilityScope = visibilityScope;
-	}
-
-	public Long getVisibilityScopeId() {
-		return visibilityScopeId;
-	}
-
-	public void setVisibilityScopeId(Long visibilityScopeId) {
-		this.visibilityScopeId = visibilityScopeId;
+	public void setVisibleFlag(Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
 	}
 
 	public Double getLongitude() {

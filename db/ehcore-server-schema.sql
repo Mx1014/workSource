@@ -774,8 +774,7 @@ CREATE TABLE `eh_forum_posts` (
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     
-    `visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
-    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
+    `visible_flag` TINYINT COMMENT 'define the visibiliy, 0-ALL, 1-COMMUNITY_ONLY',
     
     `category_id` BIGINT,
     `category_path` VARCHAR(128),

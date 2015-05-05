@@ -48,8 +48,9 @@ public class CategoryController extends ControllerBase {
     @RestReturn(value=CategoryDTO.class, collection=true)
     public RestResponse listChildren(@Valid ListCategoryCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
-        if(cmd.getSortBy() != null)
-            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+        // 暂不向客户端开放排序字段指定 by lqs 20150505
+//        if(cmd.getSortBy() != null)
+//            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(), 
@@ -70,8 +71,9 @@ public class CategoryController extends ControllerBase {
     @RestReturn(value=CategoryDTO.class, collection=true)
     public RestResponse listDescendants(@Valid ListCategoryCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
-        if(cmd.getSortBy() != null)
-            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+        // 暂不向客户端开放排序字段指定 by lqs 20150505
+//        if(cmd.getSortBy() != null)
+//            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listDescendantCategories(cmd.getParentId(), 

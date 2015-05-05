@@ -24,7 +24,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberAdminStatus;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
@@ -36,7 +35,6 @@ import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
@@ -127,7 +125,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     m.setMemberType(EntityType.USER.getCode());
                     m.setMemberId(uid);
                     m.setMemberRole(Role.ResourceCreator);
-                    m.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     m.setCreatorUid(uid);
                     this.groupProvider.createGroupMember(m);
                     
@@ -135,10 +133,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                     userGroup.setOwnerUid(uid);
                     userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     userGroup.setGroupId(f.getId());
-                    userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
+                    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                     userGroup.setRegionScopeId(community.getId());
                     userGroup.setMemberRole(Role.ResourceCreator);
-                    userGroup.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     this.userProvider.createUserGroup(userGroup);
                     
                     return f;
@@ -149,7 +147,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                 m.setMemberType(EntityType.USER.getCode());
                 m.setMemberId(uid);
                 m.setMemberRole(Role.ResourceUser);
-                m.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 m.setCreatorUid(uid);
                 this.groupProvider.createGroupMember(m);
                 
@@ -157,10 +155,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                 userGroup.setOwnerUid(uid);
                 userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
                 userGroup.setGroupId(family.getId());
-                userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
+                userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                 userGroup.setRegionScopeId(community.getId());
                 userGroup.setMemberRole(Role.ResourceUser);
-                userGroup.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 this.userProvider.createUserGroup(userGroup);
             }
             
@@ -281,7 +279,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 		    userGroup.setOwnerUid(userId);
 		    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
 		    userGroup.setGroupId(familyId);
-		    userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
+		    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
 		    userGroup.setRegionScopeId(familyId);
 		    userGroup.setMemberRole(Role.ResourceUser);
 		    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());

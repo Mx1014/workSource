@@ -6,7 +6,7 @@ package com.everhomes.forum;
  * <li>longitude: 请求人所在位置对应的经度</li>
  * <li>latitude: 请求人所在位置对应的纬度</li>
  * <li>conditionJson: 搜索条件</li>
- * <li>globalFlag: 全局标记</li>
+ * <li>globalFlag: 是否全局搜索</li>
  * <li>pageOffset: 偏移量</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>

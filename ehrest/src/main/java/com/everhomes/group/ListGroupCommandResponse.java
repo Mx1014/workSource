@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>nextPageAnchor：分页的锚点，本次开始取的位置</li>
+ * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>groups: group信息，参考{@link com.everhomes.group.GroupDTO}</li>
  * </ul>
  */

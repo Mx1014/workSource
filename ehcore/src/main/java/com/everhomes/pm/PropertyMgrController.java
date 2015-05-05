@@ -27,7 +27,7 @@ public class PropertyMgrController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /group/listPMGroupMembers</b>
-     * 查询物业成员列表
+     * <p>查询物业成员列表</p>
      */
     @RequestMapping("listPMGroupMembers")
     @RestReturn(value=ListPropMemberCommandResponse.class, collection=true)
@@ -41,7 +41,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/addPropertyMemberByPhone</b>
-     * 通过手机添加物业成员
+     * <p>通过手机添加物业成员</p>
      */
     @RequestMapping("addPMGroupMemberByPhone")
     @RestReturn(value=String.class)
@@ -58,7 +58,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/deletePMGroupMember</b>
-     * 删除物业成员
+     * <p>删除物业成员</p>
      */
     @RequestMapping("deletePMGroupMember")
     @RestReturn(value=String.class)
@@ -74,7 +74,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/listApartmentMappings</b>
-     * 列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）
+     * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
      */
     @RequestMapping("listPMAddressMapping")
     @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
@@ -88,7 +88,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/importPMAddressMapping</b>
-     * 导入左邻系统和物业自有系统的门牌号映射
+     * <p>导入左邻系统和物业自有系统的门牌号映射</p>
      */
     @RequestMapping("importPMAddressMapping")
     @RestReturn(value=String.class)
@@ -103,7 +103,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/getPMAddressMapping</b>
-     * 列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）
+     * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
      */
     @RequestMapping("getPMAddressMapping")
     @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
@@ -118,7 +118,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/updatePMAddressMapping</b>
-     * 修改公寓门牌号映射表
+     * <p>修改公寓门牌号映射表</p>
      */
     @RequestMapping("updatePMAddressMapping")
     @RestReturn(value=String.class)
@@ -133,7 +133,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/importPMPropertyOwnerInfo</b>
-     * 导入业主信息表
+     * <p>导入业主信息表</p>
      */
     @RequestMapping(value="importPMPropertyOwnerInfo", method = RequestMethod.POST)
     @RestReturn(value=String.class)
@@ -149,7 +149,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/getPMPropertyOwnerInfo</b>
-     * 列出业主信息表
+     * <p>列出业主信息表</p>
      */
     @RequestMapping("getPMPropertyOwnerInfo")
     @RestReturn(value=ListPropOwnerCommandResponse.class, collection=true)
@@ -163,7 +163,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/updatePMPropertyOwnerInfo</b>
-     * 修改业主信息表
+     * <p>修改业主信息表</p>
      */
     @RequestMapping("updatePMPropertyOwnerInfo")
     @RestReturn(value=String.class)
@@ -178,7 +178,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/deletePMPropertyOwnerInfo</b>
-     * 删除业主信息
+     * <p>删除业主信息</p>
      */
     @RequestMapping("deletePMPropertyOwnerInfo")
     @RestReturn(value=String.class)
@@ -194,7 +194,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/setApartmentStatus</b>
-     * 设置公寓状态：自住/出租/空闲/装修/待售/其它
+     * <p>设置公寓状态：自住/出租/空闲/装修/待售/其它</p>
      */
     @RequestMapping("setAddressPMStatus")
     @RestReturn(value=String.class)
@@ -210,7 +210,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/getApartmentStatistics</b>
-     * 小区公寓统计信息：公寓统计（总数、入住公寓数量、入住用户数量、自住/出租/空闲/装修/待售/其它等数量）
+     * <p>小区公寓统计信息：公寓统计（总数、入住公寓数量、入住用户数量、自住/出租/空闲/装修/待售/其它等数量）</p>
      */
     @RequestMapping("getApartmentStatistics")
     @RestReturn(value=Long.class)
@@ -225,7 +225,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/assignPMTopics</b>
-     * 把物业维修帖指派给处理人员（可批量指派）
+     * <p>把物业维修帖指派给处理人员（可批量指派）</p>
      */
     @RequestMapping("assignPMTopics")
     @RestReturn(value=String.class)
@@ -238,7 +238,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/setPMTopicStatus</b>
-     * 设置物业维修帖状态：未处理、处理中、已处理、其它（可批量设置）
+     * <p>设置物业维修帖状态：未处理、处理中、已处理、其它（可批量设置）</p>
      */
     @RequestMapping("setPMTopicStatus")
     @RestReturn(value=String.class)
@@ -251,7 +251,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /group/getPMTopicStatistics</b>
-     * 根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它
+     * <p>根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它</p>
      */
     @RequestMapping("getPMTopicStatistics")
     @RestReturn(value=Long.class)

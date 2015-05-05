@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>成为group管理员的申请信息
  * <ul>
- * <li>nextPageAnchor：分页的锚点，本次开始取的位置</li>
+ * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>requests: 申请信息，参考{@link com.everhomes.group.GroupOpRequestDTO}</li>
  * </ul>
  */
