@@ -5,15 +5,17 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id: id</li>
  * <li>communityId: 小区id</li>
- * <li>pageOffset: 页码</li>
- * <li>pageSize: 每页大小</li>
+ * <li>addressId: 地址id</li>
+ * <li>name:物业映射地址名称 </li>
  * </ul>
  */
 public class PropAddressMappingDTO {
-    private Long communityId;
-	private Long pageOffset;
-    private Long pageSize;
+	private Long   id;
+	private Long   communityId;
+	private Long   addressId;
+	private String name;
     
     public PropAddressMappingDTO() {
     }
@@ -29,23 +31,38 @@ public class PropAddressMappingDTO {
 	}
 
 
-	public Long getPageOffset() {
-        return pageOffset;
-    }
 
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
-    }
+    public Long getId() {
+		return id;
+	}
 
-    public Long getPageSize() {
-        return pageSize;
-    }
 
-    public void setPageSize(Long pageSize) {
-        this.pageSize = pageSize;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    @Override
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

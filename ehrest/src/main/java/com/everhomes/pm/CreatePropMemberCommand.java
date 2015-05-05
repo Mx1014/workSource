@@ -10,12 +10,12 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区名称</li>
  * <li>targetType：注册用户类型</li>
  * <li>targetId：注册用户对应的userId</li>
- * <li>pmGroup：物业角色类型.MANAGER: 物业管理员,REPAIR: 维修人员,CLEANING: 保洁人员,KEFU: 客服人员</li>
+ * <li>pmGroup：物业角色类型 参考{@link com.everhomes.pm.PmGroup}</li>
  * <li>contactName：未注册成员名称</li>
  * <li>contactType：未注册成员类型：0-手机，1-邮箱</li>
  * <li>contactToken：未注册成员标识</li>
  * <li>contactDescription：描述</li>
- * <li>status：状态</li>
+ * <li>status：状态 参考{@link com.everhomes.pm.PmMemberStatus}</li>
  * </ul>
  */
 public class CreatePropMemberCommand {

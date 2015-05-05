@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: 主键id</li>
  * <li>communityId：小区id</li>
  * <li>addressId：地址id</li>
- * <li>name：物业映射名称</li>
+ * <li>name：物业映射地址名称</li>
  * </ul>
  */
 public class UpdatePropAddressMappingCommand {
