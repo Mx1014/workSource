@@ -1,6 +1,13 @@
 // @formatter:off
 package com.everhomes.category;
 
+/**
+ * <ul>
+ * <li>INACTIVE: 无效的</li>
+ * <li>CONFIRMING: 待审核</li>
+ * <li>ACTIVE: 正常</li>
+ * </ul>
+ */
 public enum CategoryAdminStatus {
     INACTIVE((byte)0), CONFIRMING((byte)1), ACTIVE((byte)2);
     

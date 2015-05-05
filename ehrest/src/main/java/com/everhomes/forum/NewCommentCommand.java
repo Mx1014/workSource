@@ -3,15 +3,22 @@ package com.everhomes.forum;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>forumId: 论坛ID</li>
+ * <li>topicId: 帖子ID</li>
+ * <li>content_type: 帖子内容类型，{@link com.everhomes.forum.PostContentType}</li>
+ * <li>content: 帖子内容</li>
+ * </ul>
+ */
 public class NewCommentCommand {
     private Long forumId;
+    
     private Long topicId;
     
     private String contentType;
-    private String content;
     
-    // json encoded List<String> 
-    private String attachmentListJson;
+    private String content;
     
     public NewCommentCommand() {
     }
@@ -46,14 +53,6 @@ public class NewCommentCommand {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getAttachmentListJson() {
-        return attachmentListJson;
-    }
-
-    public void setAttachmentListJson(String attachmentListJson) {
-        this.attachmentListJson = attachmentListJson;
     }
 
     @Override

@@ -34,7 +34,8 @@ public class FamilyController extends ControllerBase {
     private FamilyProvider familyProvider;
 	
 	/**
-	 * 根据关键字查询家庭信息
+	 * <b>URL: /family/findFamilyByKeyword</b>
+	 * <p>根据关键字查询家庭信息</p>
 	 */
     @RequestMapping("findFamilyByKeyword")
     @RestReturn(value=FamilyDTO.class)
@@ -48,7 +49,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 根据家庭Id查询用户所在家庭
+     * <b>URL: /family/getOwningFamilyById</b>
+     * <p>根据家庭Id查询用户所在家庭</p>
      */
     @RequestMapping("getOwningFamilyById")
     @RestReturn(value=FamilyDTO.class)
@@ -65,14 +67,14 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 加入家庭
+     * <b>URL: /family/join</b>
+     * <p>加入家庭，状态为待审核</p>
      */
     @RequestMapping("join")
     @RestReturn(value=String.class)
     public RestResponse join(
         @RequestParam(value = "familyId", required = true) Long familyId) {
-    
-        // ???
+    	familyProvider.joinFamily(familyId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -80,7 +82,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 退出家庭
+     * <b>URL: /family/leave</b>
+     * <p>退出家庭</p>
      */
     @RequestMapping("leave")
     @RestReturn(value=String.class)
@@ -95,7 +98,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 关注家庭
+     * <b>URL: /family/follow</b>
+     * <p>关注家庭</p>
      * @return
      */
     @RequestMapping("follow")
@@ -112,7 +116,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 取消关注家庭
+     * <b>URL: /family/unfollow</b>
+     * <p>取消关注家庭</p>
      * @param familyId
      * @return
      */
@@ -129,7 +134,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 查询所关注的家庭列表
+     * <b>URL: /family/listFollowedFamilies</b>
+     * <p>查询所关注的家庭列表</p>
      * @return
      */
     @RequestMapping("listFollowedFamilies")
@@ -144,7 +150,8 @@ public class FamilyController extends ControllerBase {
     }
 
     /**
-     * 备注关注的家庭的别名
+     * <b>URL: /family/setFollowedFamilyAlias</b>
+     * <p>备注关注的家庭的别名</p>
      */
     @RequestMapping("setFollowedFamilyAlias")
     @RestReturn(value=String.class)
@@ -159,7 +166,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 查询指定家庭Id的关注用户
+     * <b>URL: /family/listFollowers</b>
+     * <p>查询指定家庭Id的关注用户</p>
      */
     @RequestMapping("listFollowers")
     @RestReturn(value=UserInfo.class, collection=true)
@@ -174,7 +182,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 根据家庭Id查询家庭信息
+     * <b>URL: /family/get</b>
+     * <p>根据家庭Id查询家庭信息</p>
      */
     @RequestMapping("get")
     @RestReturn(value=FamilyDTO.class)
@@ -189,7 +198,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 剔除家庭成员
+     * <b>URL: /family/ejectMember</b>
+     * <p>剔除家庭成员</p>
      */
     @RequestMapping("ejectMember")
     @RestReturn(value=String.class)
@@ -206,7 +216,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 批准家庭成员加入
+     * <b>URL: /family/approveMember</b>
+     * <p>批准家庭成员加入</p>
      */
     @RequestMapping("approveMember")
     @RestReturn(value=String.class)
@@ -222,7 +233,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 查询用户所在家庭的成员列表
+     * <b>URL: /family/listOwningFamilyMembers</b>
+     * <p>查询用户所在家庭的成员列表</p>
      */
     @RequestMapping("listOwningFamilyMembers")
     @RestReturn(value=FamilyMemberDTO.class, collection=true)
@@ -236,7 +248,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 查询加入家庭的待处理的申请列表
+     * <b>URL: /family/listFamilyRequests</b>
+     * <p>查询加入家庭的待处理的申请列表</p>
      */
     @RequestMapping("listFamilyRequests")
     @RestReturn(value=FamilyMembershipRequestDTO.class, collection=true)
@@ -251,7 +264,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 设置当前家庭
+     * <b>URL: /family/setCurrentFamily</b>
+     * <p>设置当前家庭</p>
      */
     @RequestMapping("setCurrentFamily")
     @RestReturn(value=String.class)
@@ -265,7 +279,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 设置常用家庭
+     * <b>URL: /family/setPrimaryFamily</b>
+     * <p>设置常用家庭</p>
      */
     @RequestMapping("setPrimaryFamily")
     @RestReturn(value=String.class)
@@ -279,7 +294,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 更新家庭信息
+     * <b>URL: /family/updateFamilyInfo</b>
+     * <p>更新家庭信息</p>
      */
     @RequestMapping("updateFamilyInfo")
     @RestReturn(value=String.class)
@@ -293,7 +309,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 查询小区邻居列表
+     * <b>URL: /family/listNeighborUsers</b>
+     * <p>查询小区邻居列表</p>
      */
     @RequestMapping("listNeighborUsers")
     @RestReturn(value=NeighborUserDTO.class, collection=true)
@@ -308,7 +325,8 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * 查询附近同小区邻居
+     * <b>URL: /family/listNearbyNeighborUsers</b>
+     * <p>查询附近同小区邻居</p>
      */
     @RequestMapping("listNearbyNeighborUsers")
     @RestReturn(value=NeighborUserDTO.class, collection=true)

@@ -5,6 +5,15 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>searchVisibilityScope: group可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
+ * <li>searchVisibilityScopeId: group可见性范围类型对应的ID</li>
+ * <li>tag: group标签</li> 
+ * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
 public class ListGroupByTagCommand {
     private Byte searchVisibilityScope;
     private Long searchVisibilityScopeId;

@@ -3,6 +3,23 @@ package com.everhomes.group;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <p>成为管理员申请信息</p>
+ * <ul>
+ * <li>id: 申请记录ID</li>
+ * <li>groupId: group id</li>
+ * <li>reqestorUid: 申请人ID</li>
+ * <li>requestorName: 申请人名称</li>
+ * <li>requestorAvatar: 申请人头像</li>
+ * <li>requestorComment: 申请原因</li>
+ * <li>operationType: 操作类型</li>
+ * <li>status: 成为管理员申请的状态，参考{@link com.everhomes.group.GroupOpRequestStatus}</li>
+ * <li>operatorUid: 操作人ID</li>
+ * <li>processMessage: 操作描述</li>
+ * <li>createTime: 记录创建时间</li>
+ * <li>processTime: 申请处理时间</li>
+ * </ul>
+ */
 public class GroupOpRequestDTO {
     private Long id;
     private Long groupId;

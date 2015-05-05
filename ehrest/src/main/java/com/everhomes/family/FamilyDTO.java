@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>cityName: 城市名称</li>
  * <li>areaId: 区域Id（如南山区的Id）</li>
  * <li>areaName: 区域名称</li>
- * <li>membershipStatus: 待定??</li>
+ * <li>membershipStatus: 请求者在家庭的状态， {@link com.everhomes.group.GroupMemberStatus}</li>
  * <li>primaryFlag: 是否为常用家庭 0(非常用),1(常用)</li>
  * <li>adminStatus: 管理员状态0-非管理员，1-管理员</li>
  * </ul>

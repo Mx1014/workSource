@@ -5,6 +5,13 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>groupId: group id</li>
+ * <li>phone: 被邀请人的手机号</li>
+ * <li>invitationText: 邀请内容</li>
+ * </ul>
+ */
 public class InviteToBeAdminCommand {
     @NotNull
     private Long groupId;

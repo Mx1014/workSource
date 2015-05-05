@@ -3,6 +3,13 @@ package com.everhomes.forum;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>forumId: 论坛ID</li>
+ * <li>topicId: 帖子ID</li>
+ * <li>topFlag: 置顶标记</li>
+ * </ul>
+ */
 public class MakeTopCommand {
     private Long forumId;
     private Long topicId;

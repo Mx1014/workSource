@@ -84,7 +84,7 @@ CREATE TABLE `ehcore`.`eh_certs` (
 # member of global parition
 # shared among namespaces, no application module specific information
 #
-DROP TABLE IF EXISTS `eh_categories`;
+DROP TABLE IF EXISTS `eh_locale_strings`;
 CREATE TABLE `eh_locale_strings`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `scope` VARCHAR(64),
@@ -774,8 +774,7 @@ CREATE TABLE `eh_forum_posts` (
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     
-    `visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
-    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
+    `visible_flag` TINYINT COMMENT 'define the visibiliy, 0-ALL, 1-COMMUNITY_ONLY',
     
     `category_id` BIGINT,
     `category_path` VARCHAR(128),
@@ -911,6 +910,12 @@ CREATE TABLE `eh_communities`(
     `zipcode` VARCHAR(16),
     `description` TEXT,
     `detail_description` TEXT,
+    `apt_segment1` VARCHAR(64),
+    `apt_segment2` VARCHAR(64),
+    `apt_segment3` VARCHAR(64),
+    `apt_seg1_sample` VARCHAR(64),
+    `apt_seg2_sample` VARCHAR(64),
+    `apt_seg3_sample` VARCHAR(64),
     `apt_count` INTEGER,
     `creator_uid` BIGINT COMMENT 'user who suggested the creation',
     `operator_uid` BIGINT COMMENT 'operator uid of last operation',
@@ -1100,7 +1105,7 @@ CREATE TABLE `eh_community_pm_bill_items` (
 # information of community 
 #
 DROP TABLE IF EXISTS `eh_community_pm_owners`;
-CREATE TABLE `eh_community_pm_contacts` (
+CREATE TABLE `eh_community_pm_owners` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`contact_name` VARCHAR(64),
