@@ -47,7 +47,7 @@ public class UserGenerator {
 
     private String password;
 
-    // delete data when you wanna todo
+    // delete data if you wanna todo
     protected long ownId;
 
     // delete identifier
@@ -103,7 +103,7 @@ public class UserGenerator {
 
     }
 
-    // clear data if you wan to
+    // clear data if you want to
     protected void clear() {
         DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserIdentifiers.class));
         EhUserIdentifiersDao dao = new EhUserIdentifiersDao(cxt.configuration());
