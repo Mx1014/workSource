@@ -38,7 +38,7 @@ public class AddressController extends ControllerBase {
 
     /**
      * <b>URL: /address/suggestCommunity</b>
-     * 添加小区
+     * <p>添加小区</p>
      */
     @RequestMapping("suggestCommunity")
     @RestReturn(value=CommunitySummaryDTO.class)
@@ -53,7 +53,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listSuggestedCommunities</b>
-     * 查询用户创建的小区
+     * <p>查询用户创建的小区</p>
      */
     @RequestMapping("listSuggestedCommunities")
     @RestReturn(value=CommunitySummaryDTO.class, collection=true)
@@ -68,7 +68,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listNearbyCommunities</b>
-     * 根据经纬度查询附近小区
+     * <p>根据经纬度查询附近小区</p>
      */
     @RequestMapping("listNearbyCommunities")
     @RestReturn(value=CommunityDTO.class, collection=true)
@@ -83,7 +83,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listCommunitiesByKeyword</b>
-     * 根据城市Id和关键字查询小区
+     * <p>根据城市Id和关键字查询小区</p>
      */
     @RequestMapping("listCommunitiesByKeyword")
     @RestReturn(value=CommunityDTO.class, collection=true)
@@ -98,7 +98,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listBuildingsByKeyword</b>
-     * 根据小区Id和关键字查询小区楼栋
+     * <p>根据小区Id和关键字查询小区楼栋</p>
      */
     @RequestMapping("listBuildingsByKeyword")
     @RestReturn(value=BuildingDTO.class, collection=true)
@@ -113,7 +113,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/listAppartmentsByKeyword</b>
-     * 根据小区Id、楼栋号和关键字查询门牌
+     * <p>根据小区Id、楼栋号和关键字查询门牌</p>
      */
     @RequestMapping("listAppartmentsByKeyword")
     @RestReturn(value=String.class, collection=true)
@@ -128,7 +128,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/claimAddress</b>
-     * 添加地址或修改地址
+     * <p>添加地址或修改地址</p>
      */
     @RequestMapping("claimAddress")
     @RestReturn(value=ClaimedAddressInfo.class)
@@ -143,7 +143,7 @@ public class AddressController extends ControllerBase {
     
     /**
      * <b>URL: /address/disclaimAddress</b>
-     * 删除地址
+     * <p>删除地址</p>
      */
     @RequestMapping("disclaimAddress")
     @RestReturn(value=String.class)
