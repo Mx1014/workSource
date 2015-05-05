@@ -3,6 +3,26 @@ package com.everhomes.address;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id: 小区Id</li>
+ * <li>cityId: 城市Id</li>
+ * <li>cityName: 城市名称</li>
+ * <li>areaId: 区域Id</li>
+ * <li>areaName: 区域名称</li>
+ * <li>name: 小区名称</li>
+ * <li>aliasName: 小区别名</li>
+ * <li>address: 小区地址</li>
+ * <li>zipcode: 邮政编码</li>
+ * <li>description: 简略描述</li>
+ * <li>detailDescription: 详细描述</li>
+ * <li>aptCount: 公寓数</li>
+ * <li>creatorUid: 创建者Id</li>
+ * <li>status: 小区状态，参考{@link com.everhomes.address.CommunityAdminStatus}</li>
+ * <li>createTime: 创建时间</li>
+ * <li>deleteTime: 删除时间</li>
+ * </ul>
+ */
 public class CommunityDTO {
     private java.lang.Long     id;
     private java.lang.Long     cityId;

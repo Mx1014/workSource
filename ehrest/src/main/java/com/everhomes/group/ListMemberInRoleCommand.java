@@ -5,6 +5,14 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>groupId: group id</li>
+ * <li>roleId: 成员在group里的角色ID</li>
+ * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
 public class ListMemberInRoleCommand {
     @NotNull
     private Long groupId;

@@ -3,6 +3,12 @@ package com.everhomes.address;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>buildingName: 楼栋名</li>
+ * <li>buildingAliasName: 楼栋别名</li>
+ * </ul>
+ */
 public class BuildingDTO {
     private java.lang.String   buildingName;
     private java.lang.String   buildingAliasName;

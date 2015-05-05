@@ -1,6 +1,14 @@
 // @formatter:off
 package com.everhomes.group;
 
+/**
+ * <p>成为管理员申请的状态</p>
+ * <ul>
+ * <li>REQUESTING: 申请中</li>
+ * <li>ACCEPTED: 已批准</li>
+ * <li>REJECTED: 已拒绝</li>
+ * </ul>
+ */
 public enum GroupOpRequestStatus {
     REQUESTING((byte)0), ACCEPTED((byte)1), REJECTED((byte)2);
     

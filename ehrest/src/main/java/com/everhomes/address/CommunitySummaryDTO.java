@@ -3,6 +3,18 @@ package com.everhomes.address;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ * <li>id: 小区Id</li>
+ * <li>name: 小区名称</li>
+ * <li>cityId: 城市Id</li>
+ * <li>cityName: 城市名称</li>
+ * <li>areaId: 区域Id</li>
+ * <li>areaName: 区域名称</li>
+ * <li>status: 小区状态，参考{@link com.everhomes.address.CommunityAdminStatus}</li>
+ * </ul>
+ */
 public class CommunitySummaryDTO {
     private java.lang.Long     id;
     private java.lang.String   name;

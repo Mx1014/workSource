@@ -21,9 +21,9 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberAdminStatus;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
@@ -35,7 +35,6 @@ import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
@@ -123,10 +122,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                     
                     GroupMember m = new GroupMember();
                     m.setGroupId(f.getId());
-                    m.setMemberType(EhUsers.class.getSimpleName());
+                    m.setMemberType(EntityType.USER.getCode());
                     m.setMemberId(uid);
                     m.setMemberRole(Role.ResourceCreator);
-                    m.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     m.setCreatorUid(uid);
                     this.groupProvider.createGroupMember(m);
                     
@@ -134,10 +133,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                     userGroup.setOwnerUid(uid);
                     userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     userGroup.setGroupId(f.getId());
-                    userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
+                    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                     userGroup.setRegionScopeId(community.getId());
                     userGroup.setMemberRole(Role.ResourceCreator);
-                    userGroup.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     this.userProvider.createUserGroup(userGroup);
                     
                     return f;
@@ -145,10 +144,10 @@ public class FamilyProviderImpl implements FamilyProvider {
             } else {
                 GroupMember m = new GroupMember();
                 m.setGroupId(family.getId());
-                m.setMemberType(EhUsers.class.getSimpleName());
+                m.setMemberType(EntityType.USER.getCode());
                 m.setMemberId(uid);
                 m.setMemberRole(Role.ResourceUser);
-                m.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 m.setCreatorUid(uid);
                 this.groupProvider.createGroupMember(m);
                 
@@ -156,10 +155,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                 userGroup.setOwnerUid(uid);
                 userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
                 userGroup.setGroupId(family.getId());
-                userGroup.setRegionScope(RegionScope.NEIGHBORHOOD.getCode());
+                userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                 userGroup.setRegionScopeId(community.getId());
                 userGroup.setMemberRole(Role.ResourceUser);
-                userGroup.setMemberStatus(GroupMemberAdminStatus.WAITING_FOR_APPROVAL.getCode());
+                userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 this.userProvider.createUserGroup(userGroup);
             }
             
@@ -179,7 +178,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             Family family = findFamilyByAddressId(address.getId());
             
             GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-               EhUsers.class.getSimpleName(), userGroup.getOwnerUid());
+            		EntityType.USER.getCode(), userGroup.getOwnerUid());
             assert(m != null);
             if(m != null) {
                 this.groupProvider.deleteGroupMember(m);
@@ -256,12 +255,12 @@ public class FamilyProviderImpl implements FamilyProvider {
     public void joinFamily(long familyId) {
     	User user = UserContext.current().getUser();
     	long userId = user.getId();
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.JOIN_FAMILY.getCode()).enter(()-> {
+        this.dbProvider.execute((status) -> {
     		Family f = findFamilyByAddressId(familyId);
     		if(f == null)
     			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
     	                    "Invalid familyId parameter");
-    		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EhUsers.class.getSimpleName(), userId);
+    		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), userId);
     		if(m != null)
     			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
     					"user has joined to the family");
@@ -273,8 +272,18 @@ public class FamilyProviderImpl implements FamilyProvider {
     		m.setMemberAvatar(user.getAvatar());
     		m.setMemberRole(Role.ResourceUser);
     		m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-    		m.setMemberType(EhUsers.class.getSimpleName());
+    		m.setMemberType(EntityType.USER.getCode());
     		this.groupProvider.createGroupMember(m);
+    		
+			UserGroup userGroup = new UserGroup();
+		    userGroup.setOwnerUid(userId);
+		    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+		    userGroup.setGroupId(familyId);
+		    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+		    userGroup.setRegionScopeId(familyId);
+		    userGroup.setMemberRole(Role.ResourceUser);
+		    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+		    this.userProvider.createUserGroup(userGroup);
     		return null;
     	});
     }

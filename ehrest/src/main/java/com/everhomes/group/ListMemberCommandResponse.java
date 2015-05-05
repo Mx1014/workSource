@@ -5,6 +5,12 @@ import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
+ * <li>members：group成员信息，参考{@link com.everhomes.group.GroupMemberDTO}</li>
+ * </ul>
+ */
 public class ListMemberCommandResponse {
     private Long nextPageAnchor;
     private List<GroupMemberDTO> members;

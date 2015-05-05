@@ -6,6 +6,13 @@ import java.util.List;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>nextPageAnchor: 下一页游标位置</li>
+ * <li>messages: 消息列表。参考 {@link com.everhomes.messaging.MessageDTO} </li>
+ * </ul>
+ *
+ */
 public class FetchMessageCommandResponse {
     private Long nextPageAnchor;
     List<MessageDTO> messages;

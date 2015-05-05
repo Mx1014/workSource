@@ -3,6 +3,15 @@ package com.everhomes.address;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ * <li>cityId: 城市Id</li>
+ * <li>longitude: 经度</li>
+ * <li>latigtue: 纬度</li>
+ * <li>pageOffset: 页码</li>
+ * </ul>
+ */
 public class ListNearbyCommunityCommand {
     Long cityId;
     Double longitude;

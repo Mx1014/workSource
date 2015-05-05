@@ -3,6 +3,15 @@ package com.everhomes.region;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>parentId: 父亲区域的ID</li>
+ * <li>scope: 范围，参考{@link com.everhomes.region.RegionScope}</li>
+ * <li>status: 状态，参考{@link com.everhomes.region.RegionAdminStatus}</li>
+ * <li>sortBy</li>
+ * <li>sortOrder: 升降排序的方式，{@link com.everhomes.util.SortOrder}</li>
+ * </ul>
+ */
 public class ListRegionCommand {
     private Long parentId;
     private Byte scope;

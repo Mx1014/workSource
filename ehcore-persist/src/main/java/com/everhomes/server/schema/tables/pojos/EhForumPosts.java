@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -148994531;
+	private static final long serialVersionUID = 13472091;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -21,8 +21,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
-	private java.lang.Byte     visibilityScope;
-	private java.lang.Long     visibilityScopeId;
+	private java.lang.Byte     visibleFlag;
 	private java.lang.Long     categoryId;
 	private java.lang.String   categoryPath;
 	private java.lang.Long     modifySeq;
@@ -61,8 +60,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
-		java.lang.Byte     visibilityScope,
-		java.lang.Long     visibilityScopeId,
+		java.lang.Byte     visibleFlag,
 		java.lang.Long     categoryId,
 		java.lang.String   categoryPath,
 		java.lang.Long     modifySeq,
@@ -98,8 +96,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.geohash = geohash;
-		this.visibilityScope = visibilityScope;
-		this.visibilityScopeId = visibilityScopeId;
+		this.visibleFlag = visibleFlag;
 		this.categoryId = categoryId;
 		this.categoryPath = categoryPath;
 		this.modifySeq = modifySeq;
@@ -192,20 +189,12 @@ public class EhForumPosts implements java.io.Serializable {
 		this.geohash = geohash;
 	}
 
-	public java.lang.Byte getVisibilityScope() {
-		return this.visibilityScope;
+	public java.lang.Byte getVisibleFlag() {
+		return this.visibleFlag;
 	}
 
-	public void setVisibilityScope(java.lang.Byte visibilityScope) {
-		this.visibilityScope = visibilityScope;
-	}
-
-	public java.lang.Long getVisibilityScopeId() {
-		return this.visibilityScopeId;
-	}
-
-	public void setVisibilityScopeId(java.lang.Long visibilityScopeId) {
-		this.visibilityScopeId = visibilityScopeId;
+	public void setVisibleFlag(java.lang.Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
 	}
 
 	public java.lang.Long getCategoryId() {

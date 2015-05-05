@@ -3,6 +3,26 @@ package com.everhomes.family;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id: 家庭Id</li>
+ * <li>name: 家庭名称</li>
+ * <li>displayName: 家庭显示名称，用于客户端显示</li>
+ * <li>avatar: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * <li>description: 家庭描述</li>
+ * <li>memberCount: 家庭成员数</li>
+ * <li>address: 家庭所在地址详情</li>
+ * <li>communityId: 小区Id</li>
+ * <li>communityName: 小区名称</li>
+ * <li>cityId: 城市Id</li>
+ * <li>cityName: 城市名称</li>
+ * <li>areaId: 区域Id（如南山区的Id）</li>
+ * <li>areaName: 区域名称</li>
+ * <li>membershipStatus: 请求者在家庭的状态， {@link com.everhomes.group.GroupMemberStatus}</li>
+ * <li>primaryFlag: 是否为常用家庭 0(非常用),1(常用)</li>
+ * <li>adminStatus: 管理员状态0-非管理员，1-管理员</li>
+ * </ul>
+ */
 public class FamilyDTO {
     private Long id;
     private String name;

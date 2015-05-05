@@ -39,13 +39,18 @@ public class CategoryController extends ControllerBase {
     @Autowired
     private CategoryProvider categoryProvider;
     
+    /**
+     * <b>URL: /category/listChildren</b>
+     * 列出指定类型的第一层孩子类型
+     */
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
     @RestReturn(value=CategoryDTO.class, collection=true)
     public RestResponse listChildren(@Valid ListCategoryCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
-        if(cmd.getSortBy() != null)
-            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+        // 暂不向客户端开放排序字段指定 by lqs 20150505
+//        if(cmd.getSortBy() != null)
+//            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(), 
@@ -57,13 +62,18 @@ public class CategoryController extends ControllerBase {
         return new RestResponse(dtoResultList);
     }
     
+    /**
+     * <b>URL: /category/listDescendants</b>
+     * 列出指定类型下的所有孩子类型
+     */
     @RequireAuthentication(false)
     @RequestMapping("listDescendants")
     @RestReturn(value=CategoryDTO.class, collection=true)
     public RestResponse listDescendants(@Valid ListCategoryCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
-        if(cmd.getSortBy() != null)
-            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+        // 暂不向客户端开放排序字段指定 by lqs 20150505
+//        if(cmd.getSortBy() != null)
+//            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listDescendantCategories(cmd.getParentId(), 

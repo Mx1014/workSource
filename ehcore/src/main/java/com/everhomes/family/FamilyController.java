@@ -33,6 +33,10 @@ public class FamilyController extends ControllerBase {
 	@Autowired
     private FamilyProvider familyProvider;
 	
+	/**
+	 * <b>URL: /family/findFamilyByKeyword</b>
+	 * <p>根据关键字查询家庭信息</p>
+	 */
     @RequestMapping("findFamilyByKeyword")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse findFamilyByKeyword(
@@ -44,6 +48,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/getOwningFamilyById</b>
+     * <p>根据家庭Id查询用户所在家庭</p>
+     */
     @RequestMapping("getOwningFamilyById")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse getOwningFamilyById(
@@ -58,18 +66,25 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/join</b>
+     * <p>加入家庭，状态为待审核</p>
+     */
     @RequestMapping("join")
     @RestReturn(value=String.class)
     public RestResponse join(
         @RequestParam(value = "familyId", required = true) Long familyId) {
-    
-        // ???
+    	familyProvider.joinFamily(familyId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
     
+    /**
+     * <b>URL: /family/leave</b>
+     * <p>退出家庭</p>
+     */
     @RequestMapping("leave")
     @RestReturn(value=String.class)
     public RestResponse leave(
@@ -82,6 +97,11 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/follow</b>
+     * <p>关注家庭</p>
+     * @return
+     */
     @RequestMapping("follow")
     @RestReturn(value=String.class)
     public RestResponse follow(
@@ -95,6 +115,12 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/unfollow</b>
+     * <p>取消关注家庭</p>
+     * @param familyId
+     * @return
+     */
     @RequestMapping("unfollow")
     @RestReturn(value=String.class)
     public RestResponse follow(
@@ -107,6 +133,11 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/listFollowedFamilies</b>
+     * <p>查询所关注的家庭列表</p>
+     * @return
+     */
     @RequestMapping("listFollowedFamilies")
     @RestReturn(value=FamilyDTO.class, collection=true)
     public RestResponse listFollowedFamilies() {
@@ -118,6 +149,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /family/setFollowedFamilyAlias</b>
+     * <p>备注关注的家庭的别名</p>
+     */
     @RequestMapping("setFollowedFamilyAlias")
     @RestReturn(value=String.class)
     public RestResponse setFollowedFamilyAlias(@RequestParam(value = "familyId", required = true) Long familyId,
@@ -130,6 +165,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/listFollowers</b>
+     * <p>查询指定家庭Id的关注用户</p>
+     */
     @RequestMapping("listFollowers")
     @RestReturn(value=UserInfo.class, collection=true)
     public RestResponse listFollowers(@RequestParam(value = "familyId", required = true) Long familyId,
@@ -142,6 +181,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/get</b>
+     * <p>根据家庭Id查询家庭信息</p>
+     */
     @RequestMapping("get")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse get(
@@ -154,6 +197,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/ejectMember</b>
+     * <p>剔除家庭成员</p>
+     */
     @RequestMapping("ejectMember")
     @RestReturn(value=String.class)
     public RestResponse ejectMember(
@@ -168,6 +215,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/approveMember</b>
+     * <p>批准家庭成员加入</p>
+     */
     @RequestMapping("approveMember")
     @RestReturn(value=String.class)
     public RestResponse approveMember(
@@ -181,6 +232,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/listOwningFamilyMembers</b>
+     * <p>查询用户所在家庭的成员列表</p>
+     */
     @RequestMapping("listOwningFamilyMembers")
     @RestReturn(value=FamilyMemberDTO.class, collection=true)
     public RestResponse listOwningFamilyMembers(@RequestParam(value = "familyId", required = true) Long familyId) {
@@ -192,6 +247,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/listFamilyRequests</b>
+     * <p>查询加入家庭的待处理的申请列表</p>
+     */
     @RequestMapping("listFamilyRequests")
     @RestReturn(value=FamilyMembershipRequestDTO.class, collection=true)
     public RestResponse listFamilyRequests(@RequestParam(value = "familyId", required = false) Long familyId,
@@ -204,6 +263,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/setCurrentFamily</b>
+     * <p>设置当前家庭</p>
+     */
     @RequestMapping("setCurrentFamily")
     @RestReturn(value=String.class)
     public RestResponse setCurrentFamily(@RequestParam(value = "familyId", required = true) Long familyId) {
@@ -215,6 +278,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/setPrimaryFamily</b>
+     * <p>设置常用家庭</p>
+     */
     @RequestMapping("setPrimaryFamily")
     @RestReturn(value=String.class)
     public RestResponse setPrimaryFamily(@RequestParam(value = "familyId", required = true) Long familyId) {
@@ -226,6 +293,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/updateFamilyInfo</b>
+     * <p>更新家庭信息</p>
+     */
     @RequestMapping("updateFamilyInfo")
     @RestReturn(value=String.class)
     public RestResponse updateFamilyInfo(@Valid UpdateFamilyInfoCommand cmd) {
@@ -237,6 +308,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/listNeighborUsers</b>
+     * <p>查询小区邻居列表</p>
+     */
     @RequestMapping("listNeighborUsers")
     @RestReturn(value=NeighborUserDTO.class, collection=true)
     public RestResponse listNeighborUsers(@RequestParam(value = "familyId", required = false) Long familyId,
@@ -249,6 +324,10 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /family/listNearbyNeighborUsers</b>
+     * <p>查询附近同小区邻居</p>
+     */
     @RequestMapping("listNearbyNeighborUsers")
     @RestReturn(value=NeighborUserDTO.class, collection=true)
     public RestResponse listNearbyNeighborUsers(@Valid ListNearbyNeighborUserCommand cmd) {

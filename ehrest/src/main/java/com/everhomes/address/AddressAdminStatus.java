@@ -1,6 +1,14 @@
 // @formatter:off
 package com.everhomes.address;
 
+/**
+ * <p>地址状态:</p>
+ * <ul>
+ * <li>INACTIVE: 无效 </li>
+ * <li>CONFIRMING: 待审核 </li>
+ * <li>ACTIVE: 正常 </li>
+ * </ul>
+ */
 public enum AddressAdminStatus {
     INACTIVE((byte)0), CONFIRMING((byte)1),ACTIVE((byte)2);
     

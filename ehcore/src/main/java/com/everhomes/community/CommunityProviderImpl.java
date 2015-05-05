@@ -12,14 +12,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.address.BuildingDTO;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.family.FamilyDTO;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.region.RegionScope;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -188,5 +192,26 @@ public class CommunityProviderImpl implements CommunityProvider {
             });
         
         return result[0];
+    }
+
+    @Override
+    public List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(String geoHashStr) {
+        List<CommunityGeoPoint> l = new ArrayList<>();
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                    String likeVal = geoHashStr + "%";
+                    context.select()
+                        .from(Tables.EH_COMMUNITY_GEOPOINTS)
+                        .where(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(likeVal))        
+                        .fetch().map((r) -> {
+                            l.add(ConvertHelper.convert(r, CommunityGeoPoint.class));
+                            return null;
+                        });
+                    
+                return true;
+            });
+        return l;
     }
 }

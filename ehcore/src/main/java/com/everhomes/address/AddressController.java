@@ -36,6 +36,10 @@ public class AddressController extends ControllerBase {
     @Autowired
     private AddressService addressService;
 
+    /**
+     * <b>URL: /address/suggestCommunity</b>
+     * <p>添加小区</p>
+     */
     @RequestMapping("suggestCommunity")
     @RestReturn(value=CommunitySummaryDTO.class)
     public RestResponse addCommunity(@Valid SuggestCommunityCommand cmd) {
@@ -47,6 +51,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/listSuggestedCommunities</b>
+     * <p>查询用户创建的小区</p>
+     */
     @RequestMapping("listSuggestedCommunities")
     @RestReturn(value=CommunitySummaryDTO.class, collection=true)
     public RestResponse listSuggestedCommunities() {
@@ -58,6 +66,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/listNearbyCommunities</b>
+     * <p>根据经纬度查询附近小区</p>
+     */
     @RequestMapping("listNearbyCommunities")
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse listNearbyCommunities(@Valid ListNearbyCommunityCommand cmd) {
@@ -69,6 +81,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/listCommunitiesByKeyword</b>
+     * <p>根据城市Id和关键字查询小区</p>
+     */
     @RequestMapping("listCommunitiesByKeyword")
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse listCommunitiesByKeyword(@Valid ListCommunityByKeywordCommand cmd) {
@@ -80,6 +96,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/listBuildingsByKeyword</b>
+     * <p>根据小区Id和关键字查询小区楼栋</p>
+     */
     @RequestMapping("listBuildingsByKeyword")
     @RestReturn(value=BuildingDTO.class, collection=true)
     public RestResponse listBuildingsByKeyword(@Valid ListBuildingByKeywordCommand cmd) {
@@ -91,6 +111,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/listAppartmentsByKeyword</b>
+     * <p>根据小区Id、楼栋号和关键字查询门牌</p>
+     */
     @RequestMapping("listAppartmentsByKeyword")
     @RestReturn(value=String.class, collection=true)
     public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
@@ -102,6 +126,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/claimAddress</b>
+     * <p>添加地址或修改地址</p>
+     */
     @RequestMapping("claimAddress")
     @RestReturn(value=ClaimedAddressInfo.class)
     public RestResponse claimAddress(@Valid ClaimAddressCommand cmd) {
@@ -113,6 +141,10 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/disclaimAddress</b>
+     * <p>删除地址</p>
+     */
     @RequestMapping("disclaimAddress")
     @RestReturn(value=String.class)
     public RestResponse disclaimAddress(@Valid DisclaimAddressCommand cmd) {

@@ -5,6 +5,18 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>groupId：group id</li>
+ * <li>name：group名称</li>
+ * <li>description：group描述</li>
+ * <li>avatar：group头像ID，图片上传到ContentServer得到的ID</li>
+ * <li>visibilityScope：group可见性类型，参考{@link com.everhomes.visibility.VisibilityScope}</li>
+ * <li>visibilityScopeId：根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
+ * <li>categoryId：group类型ID</li>
+ * <li>tag：标签，用于搜索</li>
+ * </ul>
+ */
 public class UpdateGroupCommand {
     @NotNull
     private Long groupId;

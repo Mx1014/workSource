@@ -3,6 +3,16 @@ package com.everhomes.user;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>namespaceId: 命名空间</li>
+ * <li>appId: 应用ID</li>
+ * <li>anchor: 消息游标</li>
+ * <li>count: 获取消息的数量</li>
+ * <li>removeOld: 是否删除旧的消息</li>
+ * </ul>
+ *
+ */
 public class FetchPastToRecentMessageCommand {
     private Integer namespaceId;
     private Long appId;

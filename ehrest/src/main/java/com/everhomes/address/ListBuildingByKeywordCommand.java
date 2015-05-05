@@ -5,6 +5,12 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>communitId: 小区Id</li>
+ * <li>keyword: 查询关键字</li>
+ * </ul>
+ */
 public class ListBuildingByKeywordCommand {
     @NotNull
     private Long communitId;

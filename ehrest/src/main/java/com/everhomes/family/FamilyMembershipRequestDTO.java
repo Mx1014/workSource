@@ -3,6 +3,20 @@ package com.everhomes.family;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id: 用户申请加入家庭的申请Id</li>
+ * <li>familyId: 家庭Id</li>
+ * <li>familyName: 家庭名称</li>
+ * <li>familyAvatar: 家庭头像Id</li>
+ * <li>address: 家庭详细地址</li>
+ * <li>requestorUid: 申请加入家庭的用户Id</li>
+ * <li>requestorName: 申请加入家庭的用户名称</li>
+ * <li>requestorAvatar: 申请加入家庭的用户头像Id</li>
+ * <li>requestingTime: 申请时间</li>
+ * <li>requestorComment: 申请加入原因</li>
+ * </ul>
+ */
 public class FamilyMembershipRequestDTO {
     Long id;
     Long familyId;
