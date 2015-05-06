@@ -1875,7 +1875,7 @@ CREATE TABLE `eh_user_contacts`(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS  `eh_user_installed_apps`;
-CREATE TABLE `eh_user_ins_apps`(
+CREATE TABLE `eh_user_installed_apps`(
       `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
       `uid` BIGINT(20) NOT NULL DEFAULT '0',
       `app_name` VARCHAR(1024) DEFAULT '',

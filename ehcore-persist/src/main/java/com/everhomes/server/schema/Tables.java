@@ -339,6 +339,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserIdentifiers EH_USER_IDENTIFIERS = com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
 
 	/**
+	 * The table ehcore.eh_user_installed_apps
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserInstalledApps EH_USER_INSTALLED_APPS = com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS;
+
+	/**
 	 * The table ehcore.eh_user_invitations
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserInvitations EH_USER_INVITATIONS = com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS;
