@@ -3,7 +3,7 @@
 #
 logging.path: ./
 logging.file: ehcore.log
-logging.level.: DEBUG
+logging.level.: INFO
 
 #spring.view.prefix: /WEB-INF/jsp/
 #spring.view.suffix: .jsp
@@ -84,4 +84,20 @@ db:
         pool: 8
     tx:
         timeout: 600
+        
+#
+# for API code generation
+#
+serialization.serializable: EvhJsonSerializable
+serialization.helper: EvhJsonSerializationHelper
+
+objc.header.ext: .h
+objc.source.ext: .m
+objc.response.base: EvhRestResponseBase
+
+class.name.prefix: Evh
+
+source.jars: /Users/kelveny/archive/ehng/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
+source.excludes: com.everhomes.rpc.*
+destination.dir: /Users/kelveny/archive/ehng-ios/API-objects/
         

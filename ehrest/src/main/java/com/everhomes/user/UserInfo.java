@@ -2,6 +2,7 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * 
@@ -46,7 +47,11 @@ public class UserInfo {
     private String communityName;
     private Long addressId;
     private String address;
+    
+    @ItemType(String.class)
     private List<String> phones;
+    
+    @ItemType(String.class)
     private List<String> emails;
     
     public UserInfo() {

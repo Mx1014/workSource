@@ -3,6 +3,8 @@ package com.everhomes.activity;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,10 +18,26 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserServiceImpl;
+import com.everhomes.util.RequireAuthentication;
 
 @RestController
 @RequestMapping("/activity")
 public class ActivityController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivityController.class);
+
+    @RequireAuthentication(false)
+    @RequestMapping("sample")
+    @RestReturn(value=String.class)
+    public RestResponse sample(@Valid SampleCommand cmd) {
+        LOGGER.info("Cmd: {}", cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     @RequestMapping("post")
     @RestReturn(value=ActivityDTO.class)
     public RestResponse signup(@Valid ActivityPostCommand cmd) {

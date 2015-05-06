@@ -2,12 +2,15 @@
 package com.everhomes.admin;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,13 +23,17 @@ import com.everhomes.border.AddBorderCommand;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderDTO;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.border.UpdateBorderCommand;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.codegen.GeneratorContext;
+import com.everhomes.codegen.ObjectiveCGenerator;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
@@ -43,6 +50,8 @@ import com.everhomes.user.LoginToken;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ReflectionHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -76,9 +85,96 @@ public class AdminController extends ControllerBase {
     
     @Autowired
     private UserService userService;
+    
+    @Value("#{T(java.util.Arrays).asList('${source.jars}')}")
+    private List<String> jars;
+    
+    @Value("#{T(java.util.Arrays).asList('${source.excludes}')}")
+    private List<String> excludes;
+    
+    @Value("${destination.dir}")
+    private String destinationDir;
+    
+    @Value("${class.name.prefix}")
+    private String classNamePrefix;
+    
+    @Value("${serialization.serializable}")
+    private String serializable;
 
+    @Value("${serialization.helper}")
+    private String serializationHelper;
+
+    @Value("${objc.header.ext}")
+    private String headerFileExtention;
+    
+    @Value("${objc.source.ext}")
+    private String sourceFileExtention;
+
+    @Value("${objc.response.base}")
+    private String restResponseBase;    
+    
+    @RequestMapping("codegen")
+    @RestReturn(String.class)
+    public RestResponse codegen(@RequestParam(value="language", required=true) String language) {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+        
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+        
+        if(!language.equalsIgnoreCase("objc"))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Only objc (objective C) is currently supported");
+
+        GeneratorContext context = new GeneratorContext();
+        context.setClassNamePrefix(this.classNamePrefix);
+        context.setDestinationDir(this.destinationDir);
+        context.setHeaderFileExtention(this.headerFileExtention);
+        context.setSerializable(this.serializable);
+        context.setSerializationHelper(this.serializationHelper);
+        context.setSourceFileExtention(this.sourceFileExtention);
+        context.setRestResponseBase(restResponseBase);
+        
+        ObjectiveCGenerator generator = new ObjectiveCGenerator();
+        // generator.generatePojos(BorderDTO.class, context);
+
+        // generate REST POJO objects
+        jars.stream().forEach((jar)-> {
+            try {
+                Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(jar);
+                
+                for(Class<?> clz: classes) {
+                    if(!shouldExclude(clz)) {
+                        generator.generatePojos(clz, context);
+                    } else {
+                        LOGGER.info("Skip {} since it matches exclusion configuration", clz.getName());
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("Unable to open {}", jar, e);
+            }
+        });
+
+        // generator controller API response objects
+        List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+        for(RestMethod restMethod: apiMethods)
+            generator.generateControllerPojos(restMethod, context);
+        
+        return new RestResponse("OK");
+    }
+    
+    private boolean shouldExclude(Class<?> clz) {
+        if(excludes != null) {
+            for(String excludeExpr : excludes) {
+                if(clz.getName().matches(excludeExpr))
+                    return true;
+            }
+        }
+        return false;
+    }
+    
     @RequestMapping("addBorder")
-    @RestReturn(Border.class)
+    @RestReturn(BorderDTO.class)
     public RestResponse addBorder(@Valid AddBorderCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -98,11 +194,11 @@ public class AdminController extends ControllerBase {
         
         //LOGGER.info("" + borderConnectionProvider.broadcastToAllBorders(0, null));
 
-        return new RestResponse(border);
+        return new RestResponse(ConvertHelper.convert(border, BorderDTO.class));
     }
     
     @RequestMapping("updateBorder")
-    @RestReturn(Border.class)
+    @RestReturn(BorderDTO.class)
     public RestResponse updateBorder(@Valid UpdateBorderCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -130,11 +226,11 @@ public class AdminController extends ControllerBase {
             border.setStatus(cmd.getStatus());
         }
         this.borderProvider.updateBorder(border);
-        return new RestResponse(border);   
+        return new RestResponse(ConvertHelper.convert(border, BorderDTO.class));   
     }
     
     @RequestMapping("removeBorder")
-    @RestReturn(Border.class)
+    @RestReturn(BorderDTO.class)
     public RestResponse updateBorder(@RequestParam(value="id", required=true) int id) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -147,11 +243,11 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id parameter value");
 
         this.borderProvider.deleteBorderById(id);
-        return new RestResponse(border);   
+        return new RestResponse(ConvertHelper.convert(border, BorderDTO.class));   
     }
     
     @RequestMapping("listBorder")
-    @RestReturn(value=Border.class, collection=true)
+    @RestReturn(value=BorderDTO.class, collection=true)
     public RestResponse listBorder() {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Visible, null)) {
@@ -160,7 +256,7 @@ public class AdminController extends ControllerBase {
         }
         
         List<Border> borders = this.borderProvider.listAllBorders();
-        return new RestResponse(borders);
+        return new RestResponse(borders.stream().map((r) -> {return ConvertHelper.convert(r, BorderDTO.class);}).collect(Collectors.toList()));
     }
     
     @RequestMapping("pingBorder")

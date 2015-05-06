@@ -3,6 +3,7 @@ package com.everhomes.group;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -48,7 +49,11 @@ public class GroupDTO {
     private Byte memberOf;
     private String memberNickName;
     private Long memberConfigFlag;
+    
+    @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
+    
+    @ItemType(Long.class)
     private List<Long> memberForumPrivileges;
     
     public GroupDTO() {

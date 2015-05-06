@@ -3,6 +3,7 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.util.StringHelper;
 
@@ -15,6 +16,8 @@ import com.everhomes.util.StringHelper;
  */
 public class FetchMessageCommandResponse {
     private Long nextPageAnchor;
+    
+    @ItemType(MessageDTO.class)
     List<MessageDTO> messages;
     
     public FetchMessageCommandResponse() {

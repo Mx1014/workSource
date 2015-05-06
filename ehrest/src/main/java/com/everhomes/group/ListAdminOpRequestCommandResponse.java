@@ -3,6 +3,7 @@ package com.everhomes.group;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListAdminOpRequestCommandResponse {
     private Long nextPageAnchor;
+    
+    @ItemType(GroupOpRequestDTO.class)
     private List<GroupOpRequestDTO> requests;
     
     public ListAdminOpRequestCommandResponse() {
