@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.hibernate.loader.custom.Return;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.region.Region;
@@ -38,6 +40,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
@@ -145,7 +148,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 (DSLContext context, Object reducingContext)-> {
                     
                 Long uid = UserContext.current().getUser().getId();
-                context.selectCount().from(Tables.EH_COMMUNITIES)
+                context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.CREATOR_UID.eq(uid))
                     .fetch().map((r) -> {
                         results.add(ConvertHelper.convert(r, CommunitySummaryDTO.class));
@@ -364,11 +367,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         Address address = this.addressProvider.findAddressById(cmd.getAddressId());
         if(address == null)
             return;
-        
+
         long uid = UserContext.current().getUser().getId();
         List<UserGroup> userGroups = this.userProvide.listUserGroups(uid, GroupDiscriminator.FAMILY.getCode());
         userGroups = userGroups.stream().filter((userGroup)-> {
-            return userGroup.getGroupId() == cmd.getAddressId();
+            Group group = this.groupProvider.findGroupById(userGroup.getGroupId());
+            if(group != null){
+                return group.getIntegralTag1().longValue() == cmd.getAddressId().longValue();
+            }
+            return false;
         }).collect(Collectors.toList());
         
         if(userGroups.size() > 0) {
@@ -420,5 +427,33 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
          }
          
          return address;
+    }
+
+    @Override
+    public Tuple<Integer, List<Address>> listAddressByCommunityId(ListAddressCommand cmd) {
+        if(cmd == null || cmd.getCommunityId() == 0)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId parameter");
+            
+        final List<Address> results = new ArrayList<>();
+        final long pageSize = this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+        long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+            (DSLContext context, Object reducingContext)-> {
+                
+                context.select().from(Tables.EH_ADDRESSES)
+                    .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()))
+                    .limit((int)pageSize).offset((int)offset)
+                    .fetch().map((r) -> {
+                        results.add(ConvertHelper.convert(r, Address.class)); 
+                        return null;
+                });
+                
+            return true;
+        });
+        
+        return new Tuple<>(ErrorCodes.SUCCESS, results);
     }
 }

@@ -106,13 +106,13 @@ public class AddressTest extends TestCase {
     
     @After
     public void teardown() {
-//        for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
-//            communityProvider.deleteCommunityGeoPoint(p);
-//        }
-//        
-//        for(Community c : this.communityCleanupList) {
-//            communityProvider.deleteCommunity(c);
-//        }
+        for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
+            communityProvider.deleteCommunityGeoPoint(p);
+        }
+        
+        for(Community c : this.communityCleanupList) {
+            communityProvider.deleteCommunity(c);
+        }
     }
     
     @Ignore @Test
@@ -213,7 +213,6 @@ public class AddressTest extends TestCase {
     @Ignore @Test
     public void testListlistAppartments(){
         Address addr = new Address();
-        addr.setId(1L);
         addr.setCityId(1L);
         addr.setCommunityId(1L);
         addr.setBuildingName("Building 1");
@@ -222,7 +221,6 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr);
         
         Address addr2 = new Address();
-        addr2.setId(2L);
         addr2.setCityId(1L);
         addr2.setCommunityId(1L);
         addr2.setBuildingName("Building 1");
@@ -231,7 +229,6 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr2);
         
         Address addr3 = new Address();
-        addr3.setId(3L);
         addr3.setCityId(1L);
         addr3.setCommunityId(1L);
         addr3.setBuildingName("Building 2");
@@ -240,7 +237,6 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr3);
         
         Address addr4 = new Address();
-        addr4.setId(4L);
         addr4.setCityId(1L);
         addr4.setCommunityId(1L);
         addr4.setBuildingName("Building 2");
@@ -273,12 +269,13 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testClaimAddress(){
         ClaimAddressCommand cmd = new ClaimAddressCommand();
-        cmd.setCommunityId(58L);
+        cmd.setCommunityId(56L);
+        cmd.setReplacedAddressId(15L);
         cmd.setBuildingName("Building 1");
-        cmd.setApartmentName("apt 1");
+        cmd.setApartmentName("APT 2");
         ClaimedAddressInfo addressInfo = addressService.claimAddress(cmd);
         assertNotNull(addressInfo);
         System.out.println(addressInfo);
@@ -287,7 +284,18 @@ public class AddressTest extends TestCase {
     @Ignore @Test
     public void testDisclaimAddress(){
         DisclaimAddressCommand cmd = new DisclaimAddressCommand();
-        cmd.setAddressId(1L);
+        cmd.setAddressId(16L);
         addressService.disclaimAddress(cmd);
     }
+    
+    @Test
+    public void testListAddressByCommunity(){
+        ListAddressCommand cmd = new ListAddressCommand();
+        cmd.setCommunityId(56L);
+        Tuple<Integer, List<Address>> results = addressService.listAddressByCommunityId(cmd);
+        for(Address address : results.second()){
+            System.out.println(address);
+        }
+    }
+    
 }
