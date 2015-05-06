@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPropBillCommandResponse {
 	private Long nextPageAnchor;
+	
+	@ItemType(PropBillDTO.class)
     private List<PropBillDTO> bills;
     
     public ListPropBillCommandResponse() {
