@@ -1849,7 +1849,7 @@ CREATE TABLE `eh_user_locations`(
     `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
     `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',   
     PRIMARY KEY  (`id`)
-)ENGINE=INNO DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS  `eh_user_behaviors`;
 CREATE TABLE `eh_user_behaviors`(
@@ -1874,7 +1874,7 @@ CREATE TABLE `eh_user_contacts`(
       PRIMARY KEY  (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS  `eh_user_ins_apps`;
+DROP TABLE IF EXISTS  `eh_user_installed_apps`;
 CREATE TABLE `eh_user_ins_apps`(
       `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
       `uid` BIGINT(20) NOT NULL DEFAULT '0',
