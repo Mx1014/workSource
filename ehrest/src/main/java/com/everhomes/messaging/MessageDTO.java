@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.google.gson.Gson;
 
 /**
@@ -25,8 +26,11 @@ public class MessageDTO {
     private Long appId;
     private Long senderUid;
     
+    @ItemType(MessageChannel.class)
     @NotNull
     private List<MessageChannel> channels;
+    
+    @ItemType(String.class)
     private Map<String, String> meta;
     
     private String body;
