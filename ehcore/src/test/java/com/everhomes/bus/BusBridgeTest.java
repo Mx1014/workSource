@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,8 @@ public class BusBridgeTest  extends TestCase {
     @EnableAutoConfiguration(exclude={
             DataSourceAutoConfiguration.class, 
             HibernateJpaAutoConfiguration.class,
-        })
+            FreeMarkerAutoConfiguration.class
+       })
     static class ContextConfiguration {
         @Bean
         public TaskScheduler taskScheduler () {
