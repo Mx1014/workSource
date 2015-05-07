@@ -10,6 +10,14 @@
 	<name>ehcore</name>
 	<url>http://www.everhomes.com</url>
 
+    <distributionManagement>
+        <repository>
+          <id>everhomes.repo</id>
+          <name>Internal Repository</name>
+          <url>http://mvn-mirror.lab.everhomes.com:8081/artifactory/libs-snapshot-local</url>
+        </repository>
+    </distributionManagement>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<start-class>com.everhomes.core.CoreServerApp</start-class>
@@ -267,7 +275,30 @@
 		        <configuration>
 		          <additionalparam>-Xdoclint:none</additionalparam>
 		        </configuration>
-            </plugin>			
+	            <executions>
+	                <execution>
+	                    <id>attach-javadocs</id>
+	                    <phase>deploy</phase>
+	                    <goals>
+	                        <goal>jar</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+            </plugin>
+            <!-- explicitly define maven-deploy-plugin after other to force exec order -->
+            <plugin>
+	            <artifactId>maven-deploy-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>deploy</id>
+	                    <phase>deploy</phase>
+	                    <goals>
+	                        <goal>deploy</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+            </plugin>            
+            			
             <plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
