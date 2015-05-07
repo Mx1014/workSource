@@ -43,11 +43,9 @@ if not exist %SERVER_SQL_FILE% (
 	echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%SERVER_SQL_FILE%' is not exists
 	goto end
 ) 
-if not %DEVELOPER% == 1 (
-	if not exist %EHCORE_SYSTEM_INIT_SQL_FILE% (
-		echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%EHCORE_SYSTEM_INIT_SQL_FILE%' is not exists
-		goto end
-	)
+if not exist %EHCORE_SYSTEM_INIT_SQL_FILE% (
+	echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%EHCORE_SYSTEM_INIT_SQL_FILE%' is not exists
+	goto end
 )
 if not exist %EHCORE_INIT_SQL_FILE% (
 	echo [ERROR] %date:~0,10% %time:~0,22% Sql file '%EHCORE_INIT_SQL_FILE%' is not exists
@@ -92,10 +90,8 @@ if not %DEVELOPER% == 1 (
 echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_INIT_SQL_FILE%' ...
 mysql --defaults-file=%DEFAULT_MY_INI% < %EHCORE_INIT_SQL_FILE%
 
-if %DEVELOPER% == 1 (
-	echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_DEVELOPER_INIT_SQL_FILE%' ...
-	mysql --defaults-file=%DEFAULT_MY_INI% ehcore < %EHCORE_DEVELOPER_INIT_SQL_FILE%
-)
+echo [INFO] %date:~0,10% %time:~0,22% Start to execute sql '%EHCORE_DEVELOPER_INIT_SQL_FILE%' ...
+mysql --defaults-file=%DEFAULT_MY_INI% ehcore < %EHCORE_DEVELOPER_INIT_SQL_FILE%
 
 :end
 
