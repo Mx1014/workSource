@@ -291,11 +291,12 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
-                    PusherMessageResp resp = new PusherMessageResp();
-                    resp.setName("MESSAGES");
-                    resp.setContent(result.getBody());
+                    //PusherMessageResp resp = new PusherMessageResp();
+                    //resp.setName("MESSAGES");
+                    //resp.setContent(result.getBody());
                     PduFrame pdu = new PduFrame();
-                    pdu.setPayload(resp);
+                    pdu.setName("MESSAGES");
+                    pdu.setPayLoadForString(result.getBody());
                     try {
                         session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
                     } catch (IOException e) {
@@ -386,7 +387,6 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
             PusherMessageResp resp = new PusherMessageResp();
-            resp.setName("NOTIFY");
             resp.setContent("notify from server :)");
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);

@@ -1,5 +1,8 @@
 package com.everhomes.message;
 
+import com.everhomes.util.Name;
+
+@Name("NOTIFY")
 public class PusherMessageResp {
     private String name;
     private String content;
