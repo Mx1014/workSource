@@ -91,6 +91,11 @@ public class PduFrame {
         return this;
     }
     
+    public PduFrame setPayLoadForString(String payload) {
+        this.payload = payload;
+        return this;
+    }
+    
     public static PduFrame fromJson(String json) {
         return gson.fromJson(json, PduFrame.class);
     }
