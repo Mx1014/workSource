@@ -35,8 +35,8 @@ ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 #
 # populate default system user root/password
 #
-INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `password_hash`) VALUES (1, 'root', 'system user', 1, 
-    NOW(), '10:8e70e9c1ebf861202a28ed0020c4db0f4d9a3a3d29fb1c4d:40d84ad3b14b8da5575274136678ca1ab07d114e1d04ef70');
+INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (1, 'root', 'system user', 1, 
+    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');
 
 #
 # Reserve IDs

@@ -62,6 +62,8 @@ messaging.routing.block.size: 1000
 forum.postbox.size: 1000
 forum.flush.interval: 3000
 
+javadoc.root: file:///Users/kelveny/archive/ehng/ehcore/target/site/apidocs/
+
 #
 # Redis configuration
 #
@@ -98,6 +100,6 @@ objc.response.base: EvhRestResponseBase
 class.name.prefix: Evh
 
 source.jars: /Users/kelveny/archive/ehng/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
-source.excludes: com.everhomes.rpc.*
+source.excludes: com.everhomes.rpc.*, com.everhomes.rest.*
 destination.dir: /Users/kelveny/archive/ehng-ios/API-objects/
         

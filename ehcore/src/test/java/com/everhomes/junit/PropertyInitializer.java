@@ -34,6 +34,17 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("db.master", "jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore")
             .withProperty("db.conn.pool", 128)
             .withProperty("db.tx.timeout", 600)
+            .withProperty("serialization.serializable", "EvhJsonSerializable")
+            .withProperty("serialization.helper", "EvhJsonSerializationHelper")
+            .withProperty("objc.header.ext", ".h")
+            .withProperty("objc.source.ext", ".m")
+            .withProperty("objc.response.base", "EvhRestResponseBase")
+            .withProperty("class.name.prefix", "Evh")
+            .withProperty("source.jars", "")
+            .withProperty("source.excludes", "com.everhomes.rpc.*")
+            .withProperty("destination.dir", "/")
+            .withProperty("javadoc.root", "/")
+            .withProperty("spring.freemarker.check-template-location", false)
             .withProperty("db.driver", "com.mysql.jdbc.Driver"));
     }
 }
