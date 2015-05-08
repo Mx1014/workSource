@@ -44,7 +44,9 @@
 		<tr>
 		    <td>Response</td><td>${restMethod.returnTemplate}</td>
 		</tr>
-
+        <tr>
+            <td>Java Doc</td><td><a href="${javadocRoot}${restMethod.javadocUrl}">Check out Java doc</a></td>
+        </tr>
 <tr>
 <td colspan="2" align="center"><input type="submit" value="Submit"></td>
 </tr>

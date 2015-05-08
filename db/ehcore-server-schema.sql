@@ -1838,4 +1838,77 @@ CREATE TABLE `eh_client_package_files`(
     FOREIGN KEY `fk_eh_cpkg_file_package`(`package_id`) REFERENCES `eh_client_packages`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_user_locations`;
+CREATE TABLE `eh_user_locations`(
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+    `uid` BIGINT(20) NOT NULL DEFAULT '0',
+    `longitude` DOUBLE DEFAULT NULL,
+    `latitude` DOUBLE DEFAULT NULL,
+    `geohash` VARCHAR(128) DEFAULT '',
+    `create_time` DATETIME DEFAULT NULL,
+    `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+    `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',   
+    PRIMARY KEY  (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS  `eh_user_behaviors`;
+CREATE TABLE `eh_user_behaviors`(
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+    `uid` BIGINT(20) NOT NULL DEFAULT '0',
+    `content_type` TINYINT(4) NOT NULL DEFAULT '0',
+    `content` TEXT,
+    `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+    `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+    `create_time` DATETIME DEFAULT NULL,
+     PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS  `eh_user_contacts`;
+CREATE TABLE `eh_user_contacts`(
+      `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+      `uid` BIGINT(20) NOT NULL DEFAULT '0',
+      `contact_id` BIGINT(20) NOT NULL DEFAULT '0',
+      `contact_phone` VARCHAR(32) DEFAULT '',
+      `contact_name` VARCHAR(128) DEFAULT '',
+      `create_time` DATETIME DEFAULT NULL,
+      PRIMARY KEY  (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS  `eh_user_installed_apps`;
+CREATE TABLE `eh_user_installed_apps`(
+      `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+      `uid` BIGINT(20) NOT NULL DEFAULT '0',
+      `app_name` VARCHAR(1024) DEFAULT '',
+      `app_version` VARCHAR(128) DEFAULT '',
+      `app_size` VARCHAR(128) DEFAULT '',
+      `app_installed_time` VARCHAR(128) DEFAULT '',
+      `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+      `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+      `create_time` DATETIME DEFAULT NULL,
+      PRIMARY KEY  (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_user_activities`;
+CREATE TABLE if NOT exists `eh_user_activities` (
+      `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+      `uid` BIGINT(20) NOT NULL DEFAULT '0',
+      `activity_type` TINYINT(4) NOT NULL DEFAULT '0',
+      `app_version_code` BIGINT(20) NOT NULL DEFAULT '0',
+      `app_version_name` VARCHAR(128) DEFAULT '',
+      `channel_id` BIGINT(20) NOT NULL DEFAULT '0',
+      `imei_number` VARCHAR(128) DEFAULT '',
+      `device_type` VARCHAR(512) DEFAULT '',
+      `os_info` VARCHAR(512) DEFAULT '',
+      `os_type` TINYINT(4) NOT NULL DEFAULT '0',
+      `mkt_data_version` BIGINT(20) NOT NULL DEFAULT '0',
+      `report_config_version` BIGINT(20) NOT NULL DEFAULT '0',
+      `internal_ip` VARCHAR(128) DEFAULT '',
+      `external_ip` VARCHAR(128) DEFAULT '',
+      `user_agent` VARCHAR(1024) DEFAULT '',
+      `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+      `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
+      `create_time` DATETIME DEFAULT NULL,
+      PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET foreign_key_checks = 1;

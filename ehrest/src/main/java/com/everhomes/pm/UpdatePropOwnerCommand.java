@@ -26,7 +26,7 @@ public class UpdatePropOwnerCommand {
 	private Byte     contactType;
 	private String   contactToken;
 	private Long     creatorUid;
-	private Timestamp createTime;
+	private String createTime;
 	
 	public UpdatePropOwnerCommand() {
 	}
@@ -66,10 +66,10 @@ public class UpdatePropOwnerCommand {
 	public void setCreatorUid(Long creatorUid) {
 		this.creatorUid = creatorUid;
 	}
-	public Timestamp getCreateTime() {
+	public String getCreateTime() {
 		return createTime;
 	}
-	public void setCreateTime(Timestamp createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
 	

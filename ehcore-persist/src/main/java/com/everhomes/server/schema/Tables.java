@@ -304,9 +304,24 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUsers EH_USERS = com.everhomes.server.schema.tables.EhUsers.EH_USERS;
 
 	/**
+	 * The table ehcore.eh_user_activities
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserActivities EH_USER_ACTIVITIES = com.everhomes.server.schema.tables.EhUserActivities.EH_USER_ACTIVITIES;
+
+	/**
+	 * The table ehcore.eh_user_behaviors
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserBehaviors EH_USER_BEHAVIORS = com.everhomes.server.schema.tables.EhUserBehaviors.EH_USER_BEHAVIORS;
+
+	/**
 	 * The table ehcore.eh_user_blacklist
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserBlacklist EH_USER_BLACKLIST = com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST;
+
+	/**
+	 * The table ehcore.eh_user_contacts
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserContacts EH_USER_CONTACTS = com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS;
 
 	/**
 	 * The table ehcore.eh_user_followed_families
@@ -324,6 +339,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserIdentifiers EH_USER_IDENTIFIERS = com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
 
 	/**
+	 * The table ehcore.eh_user_installed_apps
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserInstalledApps EH_USER_INSTALLED_APPS = com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS;
+
+	/**
 	 * The table ehcore.eh_user_invitations
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserInvitations EH_USER_INVITATIONS = com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS;
@@ -337,6 +357,11 @@ public class Tables {
 	 * The table ehcore.eh_user_likes
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserLikes EH_USER_LIKES = com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES;
+
+	/**
+	 * The table ehcore.eh_user_locations
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserLocations EH_USER_LOCATIONS = com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS;
 
 	/**
 	 * The table ehcore.eh_user_profiles

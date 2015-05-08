@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -54,6 +55,7 @@ public class AddressTest extends TestCase {
     @EnableAutoConfiguration(exclude={
             DataSourceAutoConfiguration.class, 
             HibernateJpaAutoConfiguration.class,
+            FreeMarkerAutoConfiguration.class
         })
     static class ContextConfiguration {
     }
@@ -125,7 +127,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Test
+    @Ignore @Test
     public void testFindNearbyCommuunities() {
         ListNearbyCommunityCommand cmd = new ListNearbyCommunityCommand();
         cmd.setCityId(1L);
@@ -156,7 +158,7 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Ignore @Test
+    @Test
     public void testListBuilding() {
         Address addr = new Address();
         addr.setId(1L);
@@ -210,10 +212,9 @@ public class AddressTest extends TestCase {
         this.addressProvider.deleteAddress(addr);
     }
     
-    @Test
+    @Ignore @Test
     public void testListlistAppartments(){
         Address addr = new Address();
-        addr.setId(1L);
         addr.setCityId(1L);
         addr.setCommunityId(1L);
         addr.setBuildingName("Building 1");
@@ -222,7 +223,6 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr);
         
         Address addr2 = new Address();
-        addr2.setId(2L);
         addr2.setCityId(1L);
         addr2.setCommunityId(1L);
         addr2.setBuildingName("Building 1");
@@ -231,7 +231,6 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr2);
         
         Address addr3 = new Address();
-        addr3.setId(3L);
         addr3.setCityId(1L);
         addr3.setCommunityId(1L);
         addr3.setBuildingName("Building 2");
@@ -240,7 +239,6 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr3);
         
         Address addr4 = new Address();
-        addr4.setId(4L);
         addr4.setCityId(1L);
         addr4.setCommunityId(1L);
         addr4.setBuildingName("Building 2");
@@ -265,6 +263,7 @@ public class AddressTest extends TestCase {
     
     @Ignore @Test
     public void testListCommunities(){
+
         Tuple<Integer, List<CommunitySummaryDTO>> result = addressService.listSuggestedCommunities();
         List<CommunitySummaryDTO> list = result.second();
         for(CommunitySummaryDTO dto : list){
@@ -275,16 +274,30 @@ public class AddressTest extends TestCase {
     @Ignore @Test
     public void testClaimAddress(){
         ClaimAddressCommand cmd = new ClaimAddressCommand();
-        cmd.setCommunityId(1L);
+        cmd.setCommunityId(56L);
+        cmd.setReplacedAddressId(15L);
         cmd.setBuildingName("Building 1");
-        cmd.setApartmentName("apt 1");
-        addressService.claimAddress(cmd);
+        cmd.setApartmentName("APT 2");
+        ClaimedAddressInfo addressInfo = addressService.claimAddress(cmd);
+        assertNotNull(addressInfo);
+        System.out.println(addressInfo);
     }
     
     @Ignore @Test
     public void testDisclaimAddress(){
         DisclaimAddressCommand cmd = new DisclaimAddressCommand();
-        cmd.setAddressId(1L);
+        cmd.setAddressId(16L);
         addressService.disclaimAddress(cmd);
     }
+    
+    @Test
+    public void testListAddressByCommunity(){
+        ListAddressCommand cmd = new ListAddressCommand();
+        cmd.setCommunityId(56L);
+        Tuple<Integer, List<Address>> results = addressService.listAddressByCommunityId(cmd);
+        for(Address address : results.second()){
+            System.out.println(address);
+        }
+    }
+    
 }

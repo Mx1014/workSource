@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1850693777;
+	private static final long serialVersionUID = -748901567;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -92,13 +92,18 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY,
 			com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES,
 			com.everhomes.server.schema.tables.EhUsers.EH_USERS,
+			com.everhomes.server.schema.tables.EhUserActivities.EH_USER_ACTIVITIES,
+			com.everhomes.server.schema.tables.EhUserBehaviors.EH_USER_BEHAVIORS,
 			com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST,
+			com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS,
 			com.everhomes.server.schema.tables.EhUserFollowedFamilies.EH_USER_FOLLOWED_FAMILIES,
 			com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS,
 			com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS,
+			com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS,
 			com.everhomes.server.schema.tables.EhUserInvitations.EH_USER_INVITATIONS,
 			com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER,
 			com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES,
+			com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS,
 			com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES);
 	}
 }

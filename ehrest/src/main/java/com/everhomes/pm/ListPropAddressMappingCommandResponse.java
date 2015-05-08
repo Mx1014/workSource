@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,6 +14,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPropAddressMappingCommandResponse {
     private Long nextPageAnchor;
+    
+    @ItemType(PropAddressMappingDTO.class)
     private List<PropAddressMappingDTO> mappings;
     
     public ListPropAddressMappingCommandResponse() {

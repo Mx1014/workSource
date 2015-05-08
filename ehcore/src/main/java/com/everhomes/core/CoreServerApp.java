@@ -3,6 +3,7 @@ package com.everhomes.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -21,7 +22,8 @@ import com.everhomes.atomikos.AtomikosHelper;
 @ComponentScan(value={"com.everhomes"})
 @EnableAutoConfiguration(exclude={
     DataSourceAutoConfiguration.class, 
-    HibernateJpaAutoConfiguration.class
+    HibernateJpaAutoConfiguration.class,
+    FreeMarkerAutoConfiguration.class
 })
 public class CoreServerApp {
     public static void main(String[] args) {

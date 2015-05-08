@@ -78,15 +78,17 @@ public class FamilyProviderImpl implements FamilyProvider {
         final Family[] result = new Family[1];
         dbProvider.mapReduce(AccessSpec.readWriteWith(EhGroups.class), result, 
         (DSLContext context, Object reducingContext) -> {
-            result[0] = context.select().from(Tables.EH_GROUPS)
-                .where(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(addressId))
-                .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
-                .fetchOne().map((r) -> {
-                    return ConvertHelper.convert(r, Family.class);
-                });
-            
-            if(result[0] != null)
-                return false;
+            List<Family> list = context.select().from(Tables.EH_GROUPS)
+                    .where(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(addressId))
+                    .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                    .fetch().map((r) -> {
+                        return ConvertHelper.convert(r, Family.class);
+                    });
+                
+                if(list != null && !list.isEmpty()){
+                    result[0] = list.get(0);
+                    return false;
+                }
             
             return true;
         });
@@ -110,6 +112,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(family == null) {
                 family = this.dbProvider.execute((TransactionStatus status) -> {
                     Family f = new Family();
+                    f.setName(community.getName() + address.getBuildingName() + address.getApartmentName());
                     f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
                     f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     f.setAddressId(address.getId());

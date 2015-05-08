@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,6 +14,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPropMemberCommandResponse {
     private Long nextPageAnchor;
+    
+    @ItemType(PropertyMemberDTO.class)
     private List<PropertyMemberDTO> members;
     
     public ListPropMemberCommandResponse() {

@@ -2,8 +2,33 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>id:用户id</li>
+ *<li>accountName:用户名</li>
+ *<li>nickName:用户昵称</li>
+ *<li>avatar:用户头像</li>
+ *<li>statusLine:用户状态</li>
+ *<li>gender:用户性别.0代表未知，1为男性，2为女性</li>
+ *<li>birthday:用户生日</li>
+ *<li>homeTown:家乡id</li>
+ *<li>hometownName:名字</li>
+ *<li>company:公司</li>
+ *<li>school:学校</li>
+ *<li>occupation:职业</li>
+ *<li>occupationName:职业名称</li>
+ *<li>communityId:小区ID</li>
+ *<li>communityName:小区名</li>
+ *<li>addressId:地址id</li>
+ *<li>address:地址</li>
+ *<li>phones:手机</li>
+ *<li>emails:邮箱</li>
+ *</ul>
+ **/
 public class UserInfo {
     private Long id;
     private String accountName;
@@ -22,7 +47,11 @@ public class UserInfo {
     private String communityName;
     private Long addressId;
     private String address;
+    
+    @ItemType(String.class)
     private List<String> phones;
+    
+    @ItemType(String.class)
     private List<String> emails;
     
     public UserInfo() {
