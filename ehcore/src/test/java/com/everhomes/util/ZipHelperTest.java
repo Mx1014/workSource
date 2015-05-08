@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -18,9 +17,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.junit.PropertyInitializer;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.Version;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },

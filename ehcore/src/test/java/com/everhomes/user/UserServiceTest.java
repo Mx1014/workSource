@@ -168,5 +168,12 @@ public class UserServiceTest {
         LoginToken token = LoginToken.fromTokenString("eyJ1c2VySWQiOjEsImxvZ2luSWQiOjEsImxvZ2luSW5zdGFuY2VOdW1iZXIiOi0xMzY5Njg0ODEzfQ");
         this.userService.logonByToken(token);
     }
+    
+    @Test
+    public void testPasswordHash() {
+        String salt = EncryptionUtils.createRandomSalt();
+        String hash = EncryptionUtils.hashPassword(String.format("%s%s","password",salt));
+        System.out.println("Salt:" + salt + ", hash:" + hash);
+    }
 }
 
