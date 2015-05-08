@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -54,11 +55,12 @@ public class AddressTest extends TestCase {
     @EnableAutoConfiguration(exclude={
             DataSourceAutoConfiguration.class, 
             HibernateJpaAutoConfiguration.class,
+            FreeMarkerAutoConfiguration.class
         })
     static class ContextConfiguration {
     }
     
-    @Before
+    //@Before
     public void setup() {
         Community community = new Community();
         community.setAddress("Fake address");
@@ -104,7 +106,7 @@ public class AddressTest extends TestCase {
         this.communityGeopointsCleanupList.add(geoPoint2);
     }
     
-    @After
+    //@After
     public void teardown() {
         for(CommunityGeoPoint p : this.communityGeopointsCleanupList) {
             communityProvider.deleteCommunityGeoPoint(p);
@@ -195,7 +197,7 @@ public class AddressTest extends TestCase {
         this.addressProvider.createAddress(addr4);
         
         ListBuildingByKeywordCommand cmd = new ListBuildingByKeywordCommand();
-        cmd.setCommunitId(1L);
+        cmd.setCommunityId(1L);
         cmd.setKeyword("Building");
         Tuple<Integer, List<BuildingDTO>> results = this.addressService.listBuildingsByKeyword(cmd);
         
@@ -269,13 +271,13 @@ public class AddressTest extends TestCase {
         }
     }
     
-    @Ignore @Test
+    @Test
     public void testClaimAddress(){
         ClaimAddressCommand cmd = new ClaimAddressCommand();
         cmd.setCommunityId(56L);
-        cmd.setReplacedAddressId(15L);
+        //cmd.setReplacedAddressId(15L);
         cmd.setBuildingName("Building 1");
-        cmd.setApartmentName("APT 2");
+        cmd.setApartmentName("APT 3");
         ClaimedAddressInfo addressInfo = addressService.claimAddress(cmd);
         assertNotNull(addressInfo);
         System.out.println(addressInfo);

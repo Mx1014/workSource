@@ -7,13 +7,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communitId: 小区Id</li>
+ * <li>communityId: 小区Id</li>
  * <li>keyword: 查询关键字</li>
  * </ul>
  */
 public class ListBuildingByKeywordCommand {
     @NotNull
-    private Long communitId;
+    private Long communityId;
     
     @NotNull
     private String keyword;
@@ -21,12 +21,12 @@ public class ListBuildingByKeywordCommand {
     public ListBuildingByKeywordCommand() {
     }
 
-    public Long getCommunitId() {
-        return communitId;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setCommunitId(Long communitId) {
-        this.communitId = communitId;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getKeyword() {
