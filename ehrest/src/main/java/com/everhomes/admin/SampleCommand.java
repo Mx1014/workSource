@@ -1,4 +1,4 @@
-package com.everhomes.activity;
+package com.everhomes.admin;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class SampleCommand {
     @ItemType(String.class)
     private Map<String, String> mapValues;
     
-    private SampleEnum sampleEnum;
+    private Byte sampleEnum;
     
     public SampleCommand() {
     }
@@ -45,11 +45,11 @@ public class SampleCommand {
         this.listValues = listValues;
     }
     
-    public SampleEnum getSampleEnum() {
+    public Byte getSampleEnum() {
         return sampleEnum;
     }
 
-    public void setSampleEnum(SampleEnum sampleEnum) {
+    public void setSampleEnum(Byte sampleEnum) {
         this.sampleEnum = sampleEnum;
     }
 
