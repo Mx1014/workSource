@@ -37,8 +37,8 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("listPMGroupMembers")
     @RestReturn(value=ListPropMemberCommandResponse.class, collection=true)
     public RestResponse listPropertyMembers(@Valid ListPropMemberCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+    	ListPropMemberCommandResponse commandResponse = propertyMgrService.listCommunityPmMembers(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
