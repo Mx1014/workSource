@@ -1,5 +1,7 @@
 package com.everhomes.admin;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,9 @@ public class SampleCommand {
     private Map<String, String> mapValues;
     
     private Byte sampleEnum;
+    
+    private Date javaDate = new Date();
+    private Timestamp sqlTimestamp = new Timestamp(new Date().getTime());
     
     public SampleCommand() {
     }
@@ -59,6 +64,22 @@ public class SampleCommand {
 
     public void setMapValues(Map<String, String> mapValues) {
         this.mapValues = mapValues;
+    }
+    
+    public Date getJavaDate() {
+        return javaDate;
+    }
+
+    public void setJavaDate(Date javaDate) {
+        this.javaDate = javaDate;
+    }
+
+    public Timestamp getSqlTimestamp() {
+        return sqlTimestamp;
+    }
+
+    public void setSqlTimestamp(Timestamp sqlTimestamp) {
+        this.sqlTimestamp = sqlTimestamp;
     }
 
     @Override
