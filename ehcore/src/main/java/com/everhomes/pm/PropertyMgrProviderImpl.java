@@ -23,14 +23,17 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.group.GroupOpRequest;
 import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCommunityAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmBillsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmMembersDao;
+import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunityAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmBills;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
@@ -88,13 +91,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropMember(CommunityPmMember communityPmMember) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCommunityPmMembersRecord record = ConvertHelper.convert(communityPmMember, EhCommunityPmMembersRecord.class);
-        InsertQuery<EhCommunityPmMembersRecord> query = context.insertQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
-        query.setRecord(record);
-        query.setReturning(Tables.EH_COMMUNITY_PM_MEMBERS.ID);
-        query.execute();
-        
-        communityPmMember.setId(query.getReturnedRecord().getId());
+       EhCommunityPmMembersDao dao = new EhCommunityPmMembersDao(context.configuration());
+        dao.insert(communityPmMember);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmMembers.class, null);
     }
@@ -144,45 +142,28 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Cacheable(value = "listCommunityPmMembers")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, Long userId,String contactToken, Tuple<String, SortOrder>... orderBy) {
+    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, Long userId, String contactToken,int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_COMMUNITY_PM_MEMBERS, orderBy);
-        List<CommunityPmMember> result;
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_COMMUNITY_PM_MEMBERS);
-        Condition condition = null;
+        List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
+        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
         if(communityId != null)
-            condition = Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId);
-        
+           query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
         if(userId != null) {
-            if(condition != null)
-                condition = condition.and(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
-            else
-                condition = Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId);
+            query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
         }
-        
+       
         if(contactToken != null) {
-            if(condition != null)
-                condition = condition.and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
-            else
-                condition = Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken);
+        	query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
         }
         
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
-                new DefaultRecordMapper(Tables.EH_COMMUNITY_PM_MEMBERS.recordType(), CommunityPmMember.class)
-            );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_COMMUNITY_PM_MEMBERS.recordType(), CommunityPmMember.class)
-            );
-        }
-        
+      
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
+        query.addLimit(count);
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
+            return null;
+        });
         return result;
     }
     

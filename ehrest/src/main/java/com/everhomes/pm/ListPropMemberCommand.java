@@ -12,8 +12,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPropMemberCommand {
     private Long communityId;
-	private Long pageOffset;
-    private Long pageSize;
+	private Integer pageOffset;
+    private Integer pageSize;
     
     public ListPropMemberCommand() {
     }
@@ -29,19 +29,19 @@ public class ListPropMemberCommand {
 	}
 
 
-	public Long getPageOffset() {
+	public Integer getPageOffset() {
         return pageOffset;
     }
 
-    public void setPageOffset(Long pageOffset) {
+    public void setPageOffset(Integer pageOffset) {
         this.pageOffset = pageOffset;
     }
 
-    public Long getPageSize() {
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Long pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 
