@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.hibernate.loader.custom.Return;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,8 +169,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, need at least one valid value in one of these parameters: latitude, longitude, cityId");
         
-        if(cmd.getLatigtue() != null && cmd.getLongitude() == null || 
-                cmd.getLatigtue() == null && cmd.getLongitude() != null)
+        if(cmd.getLatigtue() == null || cmd.getLongitude() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
 
@@ -285,7 +283,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(ListBuildingByKeywordCommand cmd) {
-        if(cmd.getCommunitId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty())
+        if(cmd.getCommunityId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId or keyword parameter");
         
@@ -297,7 +295,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     String likeVal = cmd.getKeyword() + "%";
                     context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
                         .from(Tables.EH_ADDRESSES)
-                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunitId())
+                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))        
                         .fetch().map((r) -> {
@@ -326,7 +324,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
-                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+                    context.selectDistinct(Tables.EH_ADDRESSES.APARTMENT_NAME)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunitId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())

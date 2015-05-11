@@ -1,4 +1,4 @@
-package com.everhomes.activity;
+package com.everhomes.admin;
 
 public enum SampleEnum {
     ALL((byte)0), FIRST((byte)1), SECOND((byte)2);

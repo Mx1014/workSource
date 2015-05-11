@@ -3,6 +3,8 @@ package com.everhomes.user.base;
 import static org.junit.Assert.fail;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -78,10 +80,18 @@ public class LoginAuthTestCase extends TestCase {
      * @param phone 手机号
      * @param password 密码
      */
-    protected void logon(String phone, String password) {
+    protected User logon(String phone, String password) {
     	UserLogin login = userService.logon(0, phone, password, null);
         Assert.assertNotNull(login);
         Assert.assertTrue(login.getLoginId() > 0);
+        
+        UserContext context = UserContext.current();
+        context.setLogin(login);
+        User user = this.userProvider.findUserById(login.getUserId());
+        Assert.assertNotNull(user);
+        context.setUser(user);
+        
+        return user;
     }
     
     /**
@@ -149,11 +159,19 @@ public class LoginAuthTestCase extends TestCase {
      * 根据指定手机号删除用户
      * @param phone 手机号
      */
-    protected void deletePhoneUser(String phone) {
+    protected List<Long> deletePhoneUser(String phone) {
+    	List<Long> userIdList = new ArrayList<Long>();
+    	
     	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(phone);
+    	long userId = 0L;
     	while(userIdentifier != null) {
-    		userProvider.deleteUser(userIdentifier.getOwnerUid());
+    		userId = userIdentifier.getOwnerUid();
+    		userIdList.add(userId);
+    		userProvider.deleteUser(userId);
+    		userProvider.deleteIdentifier(userIdentifier);
     		userIdentifier = userProvider.findClaimedIdentifierByToken(phone);
     	}
+    	
+    	return userIdList;
     }
 }

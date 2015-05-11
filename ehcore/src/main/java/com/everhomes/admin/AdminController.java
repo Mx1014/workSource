@@ -1,7 +1,12 @@
 // @formatter:off
 package com.everhomes.admin;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,9 +54,11 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.LoginToken;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserLoginDTO;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ReflectionHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -112,6 +119,45 @@ public class AdminController extends ControllerBase {
 
     @Value("${objc.response.base}")
     private String restResponseBase;    
+    
+    @RequireAuthentication(false)
+    @RequestMapping("sample")
+    @RestReturn(value=SampleObject.class, collection=true)
+    public RestResponse sample(@Valid SampleCommand cmd) {
+        LOGGER.info("Cmd: {}", cmd);
+        
+        List<SampleObject> responseList = new ArrayList<>();
+        SampleObject obj = new SampleObject();
+        obj.setByteValue((byte)1);
+        obj.setIntValue(2);
+        obj.setLongValue(3L);
+        obj.setFloatValue(4.0f);
+        obj.setDblValue(5.0);
+        obj.setJavaDate(new Date());
+        obj.setSqlTimestamp(new Timestamp(new Date().getTime()));
+        
+        List<SampleEmbedded> embeddedList = new ArrayList<>();
+        SampleEmbedded embedded = new SampleEmbedded();
+        embedded.setName("emmbeded name1");
+        embedded.setValue("embedded value1");
+        embeddedList.add(embedded);
+        embedded = new SampleEmbedded();
+        embedded.setName("emmbeded name2");
+        embedded.setValue("embedded value2");
+        embeddedList.add(embedded);
+        obj.setEmbeddedList(embeddedList);
+        
+        Map<String, String> embeddedMap = new HashMap<>();
+        embeddedMap.put("map name1", "map value1");
+        embeddedMap.put("map name2", "map value2");
+        obj.setEmbeddedMap(embeddedMap);
+        responseList.add(obj);
+        
+        RestResponse response = new RestResponse(responseList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     @RequestMapping("codegen")
     @RestReturn(String.class)
@@ -307,7 +353,7 @@ public class AdminController extends ControllerBase {
     }
     
     @RequestMapping("addPersistServer")
-    @RestReturn(Server.class)
+    @RestReturn(ServerDTO.class)
     public RestResponse addPersistServer(@Valid AddPersistServerCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -329,11 +375,11 @@ public class AdminController extends ControllerBase {
         
         this.shardingProvider.createServer(server);
 
-        return new RestResponse(server);
+        return new RestResponse(ConvertHelper.convert(server, ServerDTO.class));
     }
     
     @RequestMapping("updatePersistServer")
-    @RestReturn(Server.class)
+    @RestReturn(ServerDTO.class)
     public RestResponse updatePersistServer(@Valid UpdatePersistServerCommand cmd) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -361,11 +407,11 @@ public class AdminController extends ControllerBase {
             server.setDescription(cmd.getDescription());
         
         this.shardingProvider.updateServer(server);
-        return new RestResponse(server);   
+        return new RestResponse(ConvertHelper.convert(server, ServerDTO.class));   
     }
     
     @RequestMapping("listPersistServer")
-    @RestReturn(value=Server.class, collection=true)
+    @RestReturn(value=ServerDTO.class, collection=true)
     public RestResponse listPersitServers() {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Visible, null)) {
@@ -374,11 +420,11 @@ public class AdminController extends ControllerBase {
         }
         
         List<Server> servers = this.shardingProvider.listAllServers();
-        return new RestResponse(servers);
+        return new RestResponse(servers.stream().map((r)-> {return ConvertHelper.convert(r, ServerDTO.class); }).collect(Collectors.toList()));
     }
     
     @RequestMapping("addNamespace")
-    @RestReturn(Namespace.class)
+    @RestReturn(NamespaceDTO.class)
     public RestResponse addNamespace(@RequestParam(value="name", required=true) String name) {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Write, null)) {
@@ -389,11 +435,11 @@ public class AdminController extends ControllerBase {
         ns.setName(name);
         this.nsProvider.createNamespace(ns);
         
-        return new RestResponse(ns);
+        return new RestResponse(ConvertHelper.convert(ns, NamespaceDTO.class));
     }
     
     @RequestMapping("updateNamespace")
-    @RestReturn(Namespace.class)
+    @RestReturn(NamespaceDTO.class)
     public RestResponse updateNamespace(
             @RequestParam(value="id", required=true) int id, 
             @RequestParam(value="name", required=true) String name) {
@@ -409,11 +455,11 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id parameter");
         ns.setName(name);
         this.nsProvider.updateNamespace(ns);
-        return new RestResponse(ns);   
+        return new RestResponse(ConvertHelper.convert(ns, NamespaceDTO.class));   
     }
     
     @RequestMapping("listNamespace")
-    @RestReturn(value=Namespace.class, collection=true)
+    @RestReturn(value=NamespaceDTO.class, collection=true)
     public RestResponse listNamespaces() {
         if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
             UserContext.current().getUser().getId(), Privilege.Visible, null)) {
@@ -422,11 +468,11 @@ public class AdminController extends ControllerBase {
         }
         
         List<Namespace> namespaces = this.nsProvider.listNamespaces();
-        return new RestResponse(namespaces);
+        return new RestResponse(namespaces.stream().map((r)-> { return ConvertHelper.convert(r, NamespaceDTO.class); }).collect(Collectors.toList()));
     }
     
     @RequestMapping("registerLogin")
-    @RestReturn(value=UserLogin.class)
+    @RestReturn(value=UserLoginDTO.class)
     public RestResponse registerLogin(
         @RequestParam(value="borderId", required=true) int borderId, 
         @RequestParam(value="loginToken", required=true) String loginToken) {
@@ -443,11 +489,11 @@ public class AdminController extends ControllerBase {
         if(login == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid login token");
             
-        return new RestResponse(login);
+        return new RestResponse(login.toDto());
     }
     
     @RequestMapping("unregisterLogin")
-    @RestReturn(value=UserLogin.class)
+    @RestReturn(value=UserLoginDTO.class)
     public RestResponse unregisterLogin(
         @RequestParam(value="borderId", required=true) int borderId, 
         @RequestParam(value="loginToken", required=true) String loginToken) {
@@ -464,11 +510,11 @@ public class AdminController extends ControllerBase {
         if(login == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid login token");
             
-        return new RestResponse(login);
+        return new RestResponse(login.toDto());
     }
     
     @RequestMapping("listLogin")
-    @RestReturn(value=UserLogin.class, collection=true)
+    @RestReturn(value=UserLoginDTO.class, collection=true)
     public RestResponse listLogin(
         @RequestParam(value="uid", required=true) long uid) {
     
@@ -478,6 +524,6 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
         }
         List<UserLogin> logins = this.userService.listUserLogins(uid);
-        return new RestResponse(logins);
+        return new RestResponse(logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList()));
     }
 }

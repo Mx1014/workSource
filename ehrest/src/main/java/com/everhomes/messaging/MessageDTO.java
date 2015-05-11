@@ -16,6 +16,7 @@ import com.google.gson.Gson;
  * <li>senderUid: 发送者UiD</li>
  * <li>channels: 通道列表。参考{@link com.everhomes.messaging.MessageChannel}</li>
  * <li>meta: 额外的消息信息</li>
+ * <li>metaAppId: 消息模块的发送相关的应用ID</li>
  * <li>body: 消息内容</li>
  * <li>senderTag: 发送者标签</li>
  * <li>storeSequence: 消息体的位置游标</li>
@@ -32,6 +33,8 @@ public class MessageDTO {
     
     @ItemType(String.class)
     private Map<String, String> meta;
+    
+    private long metaAppId;
     
     private String body;
 
@@ -77,6 +80,14 @@ public class MessageDTO {
             for(MessageChannel channel : channelArray)
                 this.channels.add(channel);
         }
+    }
+
+    public long getMetaAppId() {
+        return metaAppId;
+    }
+
+    public void setMetaAppId(long metaAppId) {
+        this.metaAppId = metaAppId;
     }
 
     public Map<String, String> getMeta() {

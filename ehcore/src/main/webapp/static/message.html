@@ -30,12 +30,13 @@ function createMessage(senderUid, channels, body, senderTag) {
     obj.appId = 0;
     obj.body = body;
     obj.senderTag = senderTag;
+    obj.metaAppId = 0;
     obj.channels = channels;
     obj.storeSequence = 0;
     return obj;
 }
 function sendMessage(uid, body) {
-    var msg = createMessage(uid, [{"channelType":"user", "channelToken":"1"}], body, "testMessage");
+    var msg = createMessage(uid, [{"channelType":"user", "channelToken":"10008"}], body, "testMessage");
     var cmd = createMessageCommand(JSON.stringify(msg));
 
     $.post("/user/sendMessage", cmd, function() {
@@ -53,7 +54,7 @@ function sendMessage(uid, body) {
 }
 
 $("#send").click(function (){
-        sendMessage(1, $("#message").val());
+        sendMessage(1003, $("#message").val());
 });
 
 var wsUriPusher = "ws://127.0.0.1:9090/pusher";

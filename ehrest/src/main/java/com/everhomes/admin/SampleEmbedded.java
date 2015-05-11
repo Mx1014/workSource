@@ -1,4 +1,4 @@
-package com.everhomes.activity;
+package com.everhomes.admin;
 
 import com.everhomes.util.StringHelper;
 
