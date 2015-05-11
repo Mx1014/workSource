@@ -17,6 +17,7 @@ public class DeviceMessages {
     
     @ItemType(DeviceMessage.class)
     private List<DeviceMessage> messages;
+    
     private Long anchor;
     
     public DeviceMessages() {
