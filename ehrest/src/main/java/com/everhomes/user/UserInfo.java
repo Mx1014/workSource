@@ -4,30 +4,34 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
 /**
  * 
  * @author elians
- *<ul>
- *<li>id:用户id</li>
- *<li>accountName:用户名</li>
- *<li>nickName:用户昵称</li>
- *<li>avatar:用户头像</li>
- *<li>statusLine:用户状态</li>
- *<li>gender:用户性别.0代表未知，1为男性，2为女性</li>
- *<li>birthday:用户生日</li>
- *<li>homeTown:家乡id</li>
- *<li>hometownName:名字</li>
- *<li>company:公司</li>
- *<li>school:学校</li>
- *<li>occupation:职业</li>
- *<li>occupationName:职业名称</li>
- *<li>communityId:小区ID</li>
- *<li>communityName:小区名</li>
- *<li>addressId:地址id</li>
- *<li>address:地址</li>
- *<li>phones:手机</li>
- *<li>emails:邮箱</li>
- *</ul>
+ *         <ul>
+ *         <li>id:用户id</li>
+ *         <li>accountName:用户名</li>
+ *         <li>nickName:用户昵称</li>
+ *         <li>avatar:用户头像</li>
+ *         <li>statusLine:用户状态</li>
+ *         <li>gender:用户性别.0代表未知，1为男性，2为女性</li>
+ *         <li>birthday:用户生日</li>
+ *         <li>homeTown:家乡id</li>
+ *         <li>hometownName:名字</li>
+ *         <li>company:公司</li>
+ *         <li>school:学校</li>
+ *         <li>occupation:职业</li>
+ *         <li>occupationName:职业名称</li>
+ *         <li>communityId:小区ID</li>
+ *         <li>communityName:小区名</li>
+ *         <li>addressId:地址id</li>
+ *         <li>address:地址</li>
+ *         <li>phones:手机</li>
+ *         <li>emails:邮箱</li>
+ *         <li>regionId:城市ID</li>
+ *         <li>regionName:城市名</li>
+ *         <li>regionPath:城市路径</li>
+ *         </ul>
  **/
 public class UserInfo {
     private Long id;
@@ -47,13 +51,16 @@ public class UserInfo {
     private String communityName;
     private Long addressId;
     private String address;
-    
+    private Long regionId;
+    private String regionName;
+    private String regionPath;
+
     @ItemType(String.class)
     private List<String> phones;
-    
+
     @ItemType(String.class)
     private List<String> emails;
-    
+
     public UserInfo() {
     }
 
@@ -136,7 +143,7 @@ public class UserInfo {
     public void setSchool(String school) {
         this.school = school;
     }
-    
+
     public Long getOccupation() {
         return occupation;
     }
@@ -144,7 +151,7 @@ public class UserInfo {
     public void setOccupation(Long occupation) {
         this.occupation = occupation;
     }
-    
+
     public String getHometownName() {
         return hometownName;
     }
@@ -208,7 +215,31 @@ public class UserInfo {
     public void setEmails(List<String> emails) {
         this.emails = emails;
     }
-    
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public String getRegionPath() {
+        return regionPath;
+    }
+
+    public void setRegionPath(String regionPath) {
+        this.regionPath = regionPath;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

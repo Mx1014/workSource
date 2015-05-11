@@ -22,6 +22,7 @@ import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserInfo;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 
 @RestController
@@ -71,12 +72,12 @@ public class FamilyController extends ControllerBase {
      * <p>根据地址Id查询家庭信息</p>
      */
     @RequestMapping("findFamilyByAddressId")
-    @RestReturn(value=Family.class)
+    @RestReturn(value=FamilyDTO.class)
     public RestResponse findFamilyByAddressId(
         @Valid FindFamilyByAddressIdCommand cmd) {
         
         Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
-        RestResponse response = new RestResponse(family);
+        RestResponse response = new RestResponse(ConvertHelper.convert(family, FamilyDTO.class));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

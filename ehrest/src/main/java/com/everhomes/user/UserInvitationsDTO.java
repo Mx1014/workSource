@@ -1,5 +1,10 @@
 package com.everhomes.user;
 
+/**
+ * 
+ * @author elians
+ *
+ */
 public class UserInvitationsDTO {
     private java.lang.Long id;
     private java.lang.Long ownerUid;

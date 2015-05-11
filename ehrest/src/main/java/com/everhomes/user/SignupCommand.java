@@ -9,7 +9,6 @@ import javax.validation.constraints.Pattern;
  *<ul>
  *<li>type:标识类型,email或者mobile</li>
  *<li>token:手机号或者邮箱</li>
- *<li>invitationCode:邀请码</li>
  *<li>ifExistsThenOverride:如果identifier已经存在是否进行覆盖</li>
  *<ul>
  */
@@ -21,7 +20,6 @@ public class SignupCommand {
     @NotNull
     String token;
     
-    String invitationCode;
     
     Integer ifExistsThenOverride;
     
@@ -42,14 +40,6 @@ public class SignupCommand {
 
     public void setToken(String token) {
         this.token = token;
-    }
-    
-    public String getInvitationCode() {
-        return this.invitationCode;
-    }
-    
-    public void setInvitationCode(String code) {
-        this.invitationCode = code;
     }
     
     public Integer getIfExistsThenOverride() {

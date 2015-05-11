@@ -3,6 +3,8 @@ package com.everhomes.messaging;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * <ul>
  * <li>messages: 设备信息里表，参考{@link com.everhomes.messaging.DeviceMessage}</li>
@@ -12,7 +14,10 @@ import java.util.List;
  *
  */
 public class DeviceMessages {
+    
+    @ItemType(DeviceMessage.class)
     private List<DeviceMessage> messages;
+    
     private Long anchor;
     
     public DeviceMessages() {

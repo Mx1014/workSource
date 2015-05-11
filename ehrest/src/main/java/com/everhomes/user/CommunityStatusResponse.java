@@ -7,11 +7,24 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * @author elians contacts:{@link Contact}
+ * @author elians
+ *         <ul>
+ *         <li>userCount:用户数</li>
+ *         <li>contacts:{@link Contact}</li>
+ *         </ul>
  */
-public class SyncUserContactCommand {
-    @ItemType(Contact.class)
+public class CommunityStatusResponse {
+    private Integer userCount;
+    @ItemType(String.class)
     private List<Contact> contacts;
+
+    public Integer getUserCount() {
+        return userCount;
+    }
+
+    public void setUserCount(Integer userCount) {
+        this.userCount = userCount;
+    }
 
     public List<Contact> getContacts() {
         return contacts;
@@ -25,4 +38,5 @@ public class SyncUserContactCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

@@ -1,7 +1,12 @@
 // @formatter:off
 package com.everhomes.admin;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,6 +58,7 @@ import com.everhomes.user.UserLoginDTO;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ReflectionHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -113,6 +119,45 @@ public class AdminController extends ControllerBase {
 
     @Value("${objc.response.base}")
     private String restResponseBase;    
+    
+    @RequireAuthentication(false)
+    @RequestMapping("sample")
+    @RestReturn(value=SampleObject.class, collection=true)
+    public RestResponse sample(@Valid SampleCommand cmd) {
+        LOGGER.info("Cmd: {}", cmd);
+        
+        List<SampleObject> responseList = new ArrayList<>();
+        SampleObject obj = new SampleObject();
+        obj.setByteValue((byte)1);
+        obj.setIntValue(2);
+        obj.setLongValue(3L);
+        obj.setFloatValue(4.0f);
+        obj.setDblValue(5.0);
+        obj.setJavaDate(new Date());
+        obj.setSqlTimestamp(new Timestamp(new Date().getTime()));
+        
+        List<SampleEmbedded> embeddedList = new ArrayList<>();
+        SampleEmbedded embedded = new SampleEmbedded();
+        embedded.setName("emmbeded name1");
+        embedded.setValue("embedded value1");
+        embeddedList.add(embedded);
+        embedded = new SampleEmbedded();
+        embedded.setName("emmbeded name2");
+        embedded.setValue("embedded value2");
+        embeddedList.add(embedded);
+        obj.setEmbeddedList(embeddedList);
+        
+        Map<String, String> embeddedMap = new HashMap<>();
+        embeddedMap.put("map name1", "map value1");
+        embeddedMap.put("map name2", "map value2");
+        obj.setEmbeddedMap(embeddedMap);
+        responseList.add(obj);
+        
+        RestResponse response = new RestResponse(responseList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     @RequestMapping("codegen")
     @RestReturn(String.class)
