@@ -246,7 +246,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     
                     String likeVal = cmd.getKeyword() + "%";
                     context.selectDistinct(Tables.EH_GROUPS.ID, Tables.EH_ADDRESSES.ADDRESS, Tables.EH_ADDRESSES.COMMUNITY_ID,
-                        Tables.EH_ADDRESSES.CITY_ID,Tables.EH_COMMUNITIES.NAME,Tables.EH_REGIONS.NAME)
+                        Tables.EH_ADDRESSES.CITY_ID,Tables.EH_COMMUNITIES.NAME,Tables.EH_COMMUNITIES.CITY_NAME)
                         .from(Tables.EH_GROUPS)
                         .leftOuterJoin(Tables.EH_ADDRESSES)
                         .on(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(Tables.EH_ADDRESSES.ID))
@@ -263,7 +263,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                             family.setCommunityId(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_ID));
                             family.setCommunityName(r.getValue(Tables.EH_COMMUNITIES.NAME));
                             family.setCityId(r.getValue(Tables.EH_ADDRESSES.CITY_ID));
-                            family.setCityName(r.getValue(Tables.EH_REGIONS.NAME));
+                            family.setCityName(r.getValue(Tables.EH_COMMUNITIES.CITY_NAME));
                             results.add(family);
                             return null;
                         });
