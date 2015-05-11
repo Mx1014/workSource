@@ -40,8 +40,8 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("findFamilyByKeyword")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse findFamilyByKeyword(
-        @RequestParam(value = "keyword", required = true) String keyword) {
-    	Tuple<Integer, List<FamilyDTO>> results = familyProvider.findFamilByKeyword(keyword);
+        @Valid ListFamilyByKeywordCommand cmd) {
+    	Tuple<Integer, List<FamilyDTO>> results = familyProvider.findFamilByKeyword(cmd);
     	RestResponse response = new RestResponse(results.second());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -55,11 +55,11 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("getOwningFamilyById")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse getOwningFamilyById(
-        @RequestParam(value = "familyId", required = true) Long familyId) {
+        @Valid GetOwningFamilyByIdCommand cmd) {
         
         // familyId should be one of the families that user is currently in relation with
         
-        FamilyDTO family = familyProvider.getOwningFamilyById(familyId);
+        FamilyDTO family = familyProvider.getOwningFamilyById(cmd);
         RestResponse response = new RestResponse(family);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -73,9 +73,9 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("findFamilyByAddressId")
     @RestReturn(value=Family.class)
     public RestResponse findFamilyByAddressId(
-        @RequestParam(value = "addressId", required = true) Long addressId) {
+        @Valid FindFamilyByAddressIdCommand cmd) {
         
-        Family family = familyProvider.findFamilyByAddressId(addressId);
+        Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
         RestResponse response = new RestResponse(family);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -83,7 +83,7 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /family/getOwningFamilyById</b>
+     * <b>URL: /family/getUserOwningFamilies</b>
      * <p>查询用户加入的家庭</p>
      */
     @RequestMapping("getUserOwningFamilies")
@@ -104,8 +104,8 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("join")
     @RestReturn(value=String.class)
     public RestResponse join(
-        @RequestParam(value = "familyId", required = true) Long familyId) {
-    	familyProvider.joinFamily(familyId);
+        @Valid JoinFamilyCommand cmd) {
+    	familyProvider.joinFamily(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -119,9 +119,9 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("leave")
     @RestReturn(value=String.class)
     public RestResponse leave(
-        @RequestParam(value = "familyId", required = true) Long familyId) {
+        @Valid LeaveFamilyCommand cmd) {
     
-        familyProvider.leave(familyId);
+        familyProvider.leave(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -135,9 +135,9 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("get")
     @RestReturn(value=FamilyDTO.class)
     public RestResponse get(
-        @RequestParam(value = "familyId", required = true) Long familyId) {
+        @Valid GetFamilyCommand cmd) {
         
-        FamilyDTO family = this.familyProvider.getFamilyById(familyId);
+        FamilyDTO family = this.familyProvider.getFamilyById(cmd);
         RestResponse response = new RestResponse(family);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -151,11 +151,9 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("ejectMember")
     @RestReturn(value=String.class)
     public RestResponse ejectMember(
-        @RequestParam(value = "familyId", required = true) Long familyId,
-        @RequestParam(value = "memberUid", required = true) Long memberUid,
-        @RequestParam(value = "reason", required = false) String reason) {
+        @Valid EjectMemberCommand cmd) {
     
-        this.familyProvider.ejectMember(familyId,memberUid,reason);
+        this.familyProvider.ejectMember(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -170,11 +168,10 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("approveMember")
     @RestReturn(value=String.class)
     public RestResponse approveMember(
-        @RequestParam(value = "familyId", required = true) Long familyId,
-        @RequestParam(value = "memberUid", required = true) Long memberUid) {
+        @Valid ApproveMemberCommand cmd) {
     
         //
-        this.familyProvider.approveMember(familyId, memberUid);
+        this.familyProvider.approveMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -187,9 +184,9 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("listOwningFamilyMembers")
     @RestReturn(value=FamilyMemberDTO.class, collection=true)
-    public RestResponse listOwningFamilyMembers(@RequestParam(value = "familyId", required = true) Long familyId) {
+    public RestResponse listOwningFamilyMembers(@Valid ListOwningFamilyMembersCommand cmd) {
             
-        List<FamilyMemberDTO> results = this.familyProvider.listOwningFamilyMembers(familyId);
+        List<FamilyMemberDTO> results = this.familyProvider.listOwningFamilyMembers(cmd);
         RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -202,10 +199,9 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("listFamilyRequests")
     @RestReturn(value=FamilyMembershipRequestDTO.class, collection=true)
-    public RestResponse listFamilyRequests(@RequestParam(value = "familyId", required = false) Long familyId,
-            @RequestParam(value = "pageOffset", required = false) Long pageOffset) {
+    public RestResponse listFamilyRequests(@Valid ListFamilyRequestsCommand cmd) {
         
-        List<FamilyMembershipRequestDTO> results = this.familyProvider.listFamilyRequests(familyId,pageOffset);
+        List<FamilyMembershipRequestDTO> results = this.familyProvider.listFamilyRequests(cmd);
         RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -218,9 +214,9 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("setCurrentFamily")
     @RestReturn(value=String.class)
-    public RestResponse setCurrentFamily(@RequestParam(value = "familyId", required = true) Long familyId) {
+    public RestResponse setCurrentFamily(@Valid SetCurrentFamilyCommand cmd) {
         
-        this.familyProvider.setCurrentFamily(familyId);
+        this.familyProvider.setCurrentFamily(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -233,7 +229,7 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("setPrimaryFamily")
     @RestReturn(value=String.class)
-    public RestResponse setPrimaryFamily(@RequestParam(value = "familyId", required = true) Long familyId) {
+    public RestResponse setPrimaryFamily(@Valid SetPrimaryFamilyCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -263,10 +259,9 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("listNeighborUsers")
     @RestReturn(value=NeighborUserDTO.class, collection=true)
-    public RestResponse listNeighborUsers(@RequestParam(value = "familyId", required = false) Long familyId,
-            @RequestParam(value = "pageOffset", required = false) Long pageOffset) {
+    public RestResponse listNeighborUsers(@Valid ListNeighborUsersCommand cmd) {
         
-        List<NeighborUserDTO> results = this.familyProvider.listNeighborUsers(familyId,pageOffset);
+        List<NeighborUserDTO> results = this.familyProvider.listNeighborUsers(cmd);
         RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -295,9 +290,7 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("follow")
     @RestReturn(value=String.class)
-    public RestResponse follow(
-        @RequestParam(value = "familyId", required = true) Long familyId,
-        @RequestParam(value = "aliasName", required = false) String aliasName) {
+    public RestResponse follow(@Valid FollowFamilyCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -314,8 +307,7 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("unfollow")
     @RestReturn(value=String.class)
-    public RestResponse unfollow(
-        @RequestParam(value = "familyId", required = true) Long familyId) {
+    public RestResponse unfollow(@Valid UnFollowFamilyCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -346,8 +338,7 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("setFollowedFamilyAlias")
     @RestReturn(value=String.class)
-    public RestResponse setFollowedFamilyAlias(@RequestParam(value = "familyId", required = true) Long familyId,
-            @RequestParam(value = "aliasName", required = true) String aliasName) {
+    public RestResponse setFollowedFamilyAlias(@Valid SetFollowedFamilyAliasCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -362,8 +353,7 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("listFollowers")
     @RestReturn(value=UserInfo.class, collection=true)
-    public RestResponse listFollowers(@RequestParam(value = "familyId", required = true) Long familyId,
-            @RequestParam(value = "pageOffset", required = false) Long pageOffset) {
+    public RestResponse listFollowers(@Valid ListFollowersCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();

@@ -6,7 +6,7 @@ package com.everhomes.family;
  * <li>familyId: 家庭Id</li>
  * <li>longitude: 用户当前经度</li>
  * <li>latitude: 用户当前经度</li>
- * <li>pageOffset: 页码</li>
+ * <li>pageOffset: 页码（可选）</li>
  * </ul>
  */
 public class ListNearbyNeighborUserCommand {
