@@ -24,7 +24,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
-
 /**
  * Category REST API controller
  * 
@@ -38,50 +37,64 @@ public class CategoryController extends ControllerBase {
 
     @Autowired
     private CategoryProvider categoryProvider;
-    
+
     /**
-     * <b>URL: /category/listChildren</b>
-     * 列出指定类型的第一层孩子类型
+     * <b>URL: /category/listChildren</b> 列出指定类型的第一层孩子类型
      */
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
-    @RestReturn(value=CategoryDTO.class, collection=true)
+    @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listChildren(@Valid ListCategoryCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
         // 暂不向客户端开放排序字段指定 by lqs 20150505
-//        if(cmd.getSortBy() != null)
-//            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
-        
+        // if(cmd.getSortBy() != null)
+        // orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(),
+        // SortOrder.fromCode(cmd.getSortOrder()));
+
         @SuppressWarnings("unchecked")
-        List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(), 
-            CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
-        
-        List<CategoryDTO> dtoResultList = entityResultList.stream()
-                .map(r->{ return ConvertHelper.convert(r, CategoryDTO.class); })
-                .collect(Collectors.toList());
+        List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(),
+                CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
+
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
         return new RestResponse(dtoResultList);
     }
-    
+
     /**
-     * <b>URL: /category/listDescendants</b>
-     * 列出指定类型下的所有孩子类型
+     * <b>URL: /category/listDescendants</b> 列出指定类型下的所有孩子类型
      */
     @RequireAuthentication(false)
     @RequestMapping("listDescendants")
-    @RestReturn(value=CategoryDTO.class, collection=true)
+    @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listDescendants(@Valid ListCategoryCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
         // 暂不向客户端开放排序字段指定 by lqs 20150505
-//        if(cmd.getSortBy() != null)
-//            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
-        
+        // if(cmd.getSortBy() != null)
+        // orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(),
+        // SortOrder.fromCode(cmd.getSortOrder()));
+
         @SuppressWarnings("unchecked")
-        List<Category> entityResultList = this.categoryProvider.listDescendantCategories(cmd.getParentId(), 
-            CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
-        
-        List<CategoryDTO> dtoResultList = entityResultList.stream()
-                .map(r->{ return ConvertHelper.convert(r, CategoryDTO.class); })
-                .collect(Collectors.toList());
+        List<Category> entityResultList = this.categoryProvider.listDescendantCategories(cmd.getParentId(),
+                CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
+
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
         return new RestResponse(dtoResultList);
+    }
+
+    /**
+     * <b>URL: /category/listRoot</b> 列出所有的大类
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listRoot")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listRoot() {
+        List<Category> categories = this.categoryProvider.listRootCategories();
+        List<CategoryDTO> convertCategories = categories.stream().map(item -> {
+            return ConvertHelper.convert(item, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        return new RestResponse(convertCategories);
     }
 }
