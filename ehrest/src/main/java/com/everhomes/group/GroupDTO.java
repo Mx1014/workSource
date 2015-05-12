@@ -8,24 +8,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 组ID</li>
+ * <li>id: group ID</li>
  * <li>owningForumId: 拥有的论坛ID</li>
- * <li>name: 组名称</li>
- * <li>avatar: 组头像ID</li>
- * <li>description: 组描述</li>
- * <li>creatorUid: 组创建者ID</li>
- * <li>createTime: 组创建时间</li>
- * <li>privateFlag: 组公有、私有标记，0-公有、1-私有</li>
+ * <li>name: group名称</li>
+ * <li>avatar: group头像ID</li>
+ * <li>description: group描述</li>
+ * <li>creatorUid: group创建者ID</li>
+ * <li>createTime: group创建时间</li>
+ * <li>privateFlag: group公有、私有标记，0-公有、1-私有</li>
  * <li>joinPolicy: 加入策略，参考{@link com.everhomes.group.GroupJoinPolicy}</li>
- * <li>memberCount: 组成员数</li>
- * <li>tag: 组标签</li>
- * <li>categoryId: 组类别ID</li>
- * <li>categoryName: 组类别名称</li>
- * <li>memberOf: 是否是组成员，1-是、0-否</li>
- * <li>memberNickName: 组成员在组内的昵称，是组成员时字段才有效</li>
- * <li>memberConfigFlag: 组成员自定义标识：是否屏蔽（暂不用），是组成员时字段才有效</li>
- * <li>memberGroupPrivileges: 组成员的权限列表，是组成员时字段才有效</li>
- * <li>memberForumPrivileges: 组成员的论坛权限列表，是组成员时字段才有效</li>
+ * <li>memberCount: group成员数</li>
+ * <li>tag: group标签</li>
+ * <li>categoryId: group类别ID</li>
+ * <li>categoryName: group类别名称</li>
+ * <li>memberOf: 是否是group成员，1-是(成员状态为待审核时也置为1)、0-否</li>
+ * <li>memberStatus: group成员状态，{@link com.everhomes.group.GroupMemberStatus}</li>
+ * <li>memberNickName: group成员在group内的昵称，是group成员时字段才有效</li>
+ * <li>memberConfigFlag: group成员自定义标识：是否屏蔽（暂不用），是group成员时字段才有效</li>
+ * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效</li>
+ * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效</li>
  * </ul>
  */
 public class GroupDTO {
@@ -47,6 +48,7 @@ public class GroupDTO {
     // requestor/group relationship information
     // 
     private Byte memberOf;
+    private Byte memberStatus;
     private String memberNickName;
     private Long memberConfigFlag;
     
@@ -147,7 +149,15 @@ public class GroupDTO {
         this.memberOf = memberOf;
     }
 
-    public String getMemberNickName() {
+    public Byte getMemberStatus() {
+		return memberStatus;
+	}
+
+	public void setMemberStatus(Byte memberStatus) {
+		this.memberStatus = memberStatus;
+	}
+
+	public String getMemberNickName() {
         return memberNickName;
     }
 
