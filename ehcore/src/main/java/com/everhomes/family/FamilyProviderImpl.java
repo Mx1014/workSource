@@ -304,7 +304,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 		    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
 		    userGroup.setGroupId(familyId);
 		    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-		    userGroup.setRegionScopeId(familyId);
+		    userGroup.setRegionScopeId(f.getIntegralTag2());
 		    userGroup.setMemberRole(Role.ResourceUser);
 		    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		    this.userProvider.createUserGroup(userGroup);
@@ -405,6 +405,15 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(group == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter");
+        
+        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(cmd.getFamilyId(), 
+                EntityType.USER.getCode(), userId);
+        if(member == null){
+            LOGGER.error("User not join in family.userId=" + userId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "User not join in family.");
+        }
+        
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
         list = list.stream().filter((userGroup) ->{
@@ -472,7 +481,11 @@ public class FamilyProviderImpl implements FamilyProvider {
             return userGroup.getGroupId() == group.getId();
             
         }).collect(Collectors.toList());
-        
+        if(list == null || list.size() == 0){
+            LOGGER.error("Invalid memberUid parameter,user not in family.memberUid=" + cmd.getMemberUid());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid memberUid parameter,user not in family.");
+        }
         leaveFamilyAtAddress(address, list.get(0));
         
     }
@@ -490,7 +503,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(member == null){
             LOGGER.error("Invalid memberUid parameter,user not apply join in family.memberUid=" + cmd.getMemberUid());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid memberUid parameter,can not eject youself");
+                    "Invalid memberUid parameter,user not apply join in family.");
         }
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
             
@@ -540,14 +553,15 @@ public class FamilyProviderImpl implements FamilyProvider {
         List<GroupMember> groupMemberList = this.groupProvider.queryGroupMembers(locator, Integer.MAX_VALUE, null);
         List<FamilyMemberDTO> results = new ArrayList<FamilyMemberDTO>();
         groupMemberList.stream().forEach((groupMember) -> {
-            FamilyMemberDTO f = new FamilyMemberDTO();
-            f.setFamilyId(groupMember.getGroupId());
-            f.setId(groupMember.getId());
-            f.setMemberUid(groupMember.getMemberId());
-            f.setMemberName(groupMember.getMemberNickName());
-            f.setMemberAvatar(groupMember.getMemberAvatar());
-            results.add(f);
-
+            if(groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
+                FamilyMemberDTO f = new FamilyMemberDTO();
+                f.setFamilyId(groupMember.getGroupId());
+                f.setId(groupMember.getId());
+                f.setMemberUid(groupMember.getMemberId());
+                f.setMemberName(groupMember.getMemberNickName());
+                f.setMemberAvatar(groupMember.getMemberAvatar());
+                results.add(f);
+            }
         });
         return results;
     }
@@ -634,7 +648,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         Long pageOffset = cmd.getPageOffset();
         if(pageOffset == null){
             LOGGER.warn("Invalid pageOffset parameter,pageOffset=" + pageOffset);
-            pageOffset = 0L;
+            pageOffset = 1L;
         }
         
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(cmd.getFamilyId(), 
@@ -708,12 +722,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
-                    context.select(Tables.EH_ADDRESSES.ID).from(Tables.EH_ADDRESSES)
-                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                    context.select(Tables.EH_GROUPS.INTEGRAL_TAG1).from(Tables.EH_GROUPS)
+                        .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
                             //排除自己
-                            if(r.getValue(Tables.EH_ADDRESSES.ID) != user.getAddressId())
-                                addresIds.add(r.getValue(Tables.EH_ADDRESSES.ID));
+                            if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != user.getAddressId())
+                                addresIds.add(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
                             
                             return null;
                         });
@@ -738,6 +752,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             n.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
                             n.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
                             userDetailList.add(n);
+                            
+                            //userDetailList.add(ConvertHelper.convert(r, NeighborUserDetailDTO.class));
                             return null;
                         });
                         
@@ -779,7 +795,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         }
         int currentPage = (int) pageOffset;
         if(pageOffset <= totalPage){
-            sortNeighborUser(results);
+            //sortNeighborUser(results);
             int endIndex = Math.min(results.size(), currentPage*pageSize);
             results = results.subList((currentPage-1)*pageSize,endIndex);
         }
