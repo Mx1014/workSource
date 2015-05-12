@@ -248,7 +248,7 @@ public class AddressTest extends TestCase {
         
         ListApartmentByKeywordCommand cmd = new ListApartmentByKeywordCommand();
         cmd.setKeyword("APT");
-        cmd.setCommunitId(1L);
+        cmd.setCommunityId(1L);
         cmd.setBuildingName("Building 1");
         Tuple<Integer, List<String>> results = this.addressService.listApartmentsByKeyword(cmd);
         for(String apt : results.second()){

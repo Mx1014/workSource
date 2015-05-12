@@ -314,7 +314,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<String>> listApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
-        if(cmd.getCommunitId() == null || cmd.getKeyword() == null ||
+        if(cmd.getCommunityId() == null || cmd.getKeyword() == null ||
              cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or keyword parameter");
@@ -326,7 +326,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     
                     context.selectDistinct(Tables.EH_ADDRESSES.APARTMENT_NAME)
                         .from(Tables.EH_ADDRESSES)
-                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunitId())
+                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(cmd.getKeyword() + "%"))

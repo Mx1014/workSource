@@ -1,6 +1,12 @@
 // @formatter:off
 package com.everhomes.group;
 
+/**
+ * <ul>group公有和私用标记
+ * <li>PUBLIC: 公有，应用于兴趣圈</li>
+ * <li>PRIVATE: 私有，应用于私有邻居圈</li>
+ * </ul>
+ */
 public enum GroupPrivacy {
 
     PUBLIC((byte)0), PRIVATE((byte)1);

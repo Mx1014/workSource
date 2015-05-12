@@ -284,84 +284,87 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /family/follow</b>
-     * <p>关注家庭</p>
-     * @return
-     */
-    @RequestMapping("follow")
-    @RestReturn(value=String.class)
-    public RestResponse follow(@Valid FollowFamilyCommand cmd) {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     
-    /**
-     * <b>URL: /family/unfollow</b>
-     * <p>取消关注家庭</p>
-     * @param familyId
-     * @return
-     */
-    @RequestMapping("unfollow")
-    @RestReturn(value=String.class)
-    public RestResponse unfollow(@Valid UnFollowFamilyCommand cmd) {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /family/listFollowedFamilies</b>
-     * <p>查询所关注的家庭列表</p>
-     * @return
-     */
-    @RequestMapping("listFollowedFamilies")
-    @RestReturn(value=FamilyDTO.class, collection=true)
-    public RestResponse listFollowedFamilies() {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /family/setFollowedFamilyAlias</b>
-     * <p>备注关注的家庭的别名</p>
-     */
-    @RequestMapping("setFollowedFamilyAlias")
-    @RestReturn(value=String.class)
-    public RestResponse setFollowedFamilyAlias(@Valid SetFollowedFamilyAliasCommand cmd) {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /family/listFollowers</b>
-     * <p>查询指定家庭Id的关注用户</p>
-     */
-    @RequestMapping("listFollowers")
-    @RestReturn(value=UserInfo.class, collection=true)
-    public RestResponse listFollowers(@Valid ListFollowersCommand cmd) {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /family/follow</b>
+//     * <p>关注家庭</p>
+//     * @return
+//     */
+//    
+//    @RequestMapping("follow")
+//    @RestReturn(value=String.class)
+//    public RestResponse follow(@Valid FollowFamilyCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
+//    
+//    /**
+//     * <b>URL: /family/unfollow</b>
+//     * <p>取消关注家庭</p>
+//     * @param familyId
+//     * @return
+//     */
+//    @RequestMapping("unfollow")
+//    @RestReturn(value=String.class)
+//    public RestResponse unfollow(@Valid UnFollowFamilyCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
+//    /**
+//     * <b>URL: /family/listFollowedFamilies</b>
+//     * <p>查询所关注的家庭列表</p>
+//     * @return
+//     */
+//    @RequestMapping("listFollowedFamilies")
+//    @RestReturn(value=FamilyDTO.class, collection=true)
+//    public RestResponse listFollowedFamilies() {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /family/setFollowedFamilyAlias</b>
+//     * <p>备注关注的家庭的别名</p>
+//     */
+//    @RequestMapping("setFollowedFamilyAlias")
+//    @RestReturn(value=String.class)
+//    public RestResponse setFollowedFamilyAlias(@Valid SetFollowedFamilyAliasCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
+//    /**
+//     * <b>URL: /family/listFollowers</b>
+//     * <p>查询指定家庭Id的关注用户</p>
+//     */
+//    @RequestMapping("listFollowers")
+//    @RestReturn(value=UserInfo.class, collection=true)
+//    public RestResponse listFollowers(@Valid ListFollowersCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     
 }

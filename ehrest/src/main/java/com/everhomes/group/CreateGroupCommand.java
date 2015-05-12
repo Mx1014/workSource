@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>avatar：group头像ID，图片上传到ContentServer得到的ID</li>
  * <li>visibilityScope：group可见性类型，参考{@link com.everhomes.visibility.VisibilityScope}</li>
  * <li>visibilityScopeId：根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
- * <li>privateFlag：公私有标志，公有group可查询、私有group不可查询</li>
+ * <li>privateFlag：公私有标志，兴趣圈为公有、私有邻居圈为私有，{@link com.everhomes.group.GroupPrivacy}</li>
  * <li>categoryId：group类型ID</li>
  * <li>tag：标签，用于搜索</li>
  * <li>explicitRegionDescriptorsJson：暂不使用</li>

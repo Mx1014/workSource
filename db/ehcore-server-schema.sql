@@ -1005,9 +1005,9 @@ CREATE TABLE `eh_community_profiles` (
 #
 DROP TABLE IF EXISTS `eh_community_pm_members`;
 CREATE TABLE `eh_community_pm_members` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
-    `target_type` VARCHAR(32),
+    `target_type` VARCHAR(32) COMMENT 'untrack, user',
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `pm_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
 	`contact_name` VARCHAR(64),
@@ -1027,7 +1027,7 @@ CREATE TABLE `eh_community_pm_members` (
 #
 DROP TABLE IF EXISTS `eh_community_pm_tasks`;
 CREATE TABLE `eh_community_pm_tasks` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`entity_type` VARCHAR(32),
     `entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
@@ -1046,7 +1046,7 @@ CREATE TABLE `eh_community_pm_tasks` (
 #
 DROP TABLE IF EXISTS `eh_community_address_mappings`;
 CREATE TABLE `eh_community_address_mappings` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'community id',
     `address_id` BIGINT NOT NULL COMMENT 'address id',
     
@@ -1062,7 +1062,7 @@ CREATE TABLE `eh_community_address_mappings` (
 #
 DROP TABLE IF EXISTS `eh_community_pm_bills`;
 CREATE TABLE `eh_community_pm_bills` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`entity_type` VARCHAR(32),
     `entity_id` BIGINT NOT NULL COMMENT 'target address id if target_type is a address',
@@ -1085,7 +1085,7 @@ CREATE TABLE `eh_community_pm_bills` (
 #
 DROP TABLE IF EXISTS `eh_community_pm_bill_items`;
 CREATE TABLE `eh_community_pm_bill_items` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `bill_id` BIGINT NOT NULL,
 	`item_name` VARCHAR(128) COMMENT 'the tile of bill item',
 	`start_count` DECIMAL(10,2) COMMENT 'the start count of bill item for the specific month',
@@ -1106,7 +1106,7 @@ CREATE TABLE `eh_community_pm_bill_items` (
 #
 DROP TABLE IF EXISTS `eh_community_pm_owners`;
 CREATE TABLE `eh_community_pm_owners` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`contact_name` VARCHAR(64),
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
@@ -1126,7 +1126,7 @@ CREATE TABLE `eh_community_pm_owners` (
 #
 DROP TABLE IF EXISTS `eh_community_pm_contacts`;
 CREATE TABLE `eh_community_pm_contacts` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'owner community id',
 	`contact_name` VARCHAR(64),
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
@@ -1143,7 +1143,7 @@ CREATE TABLE `eh_community_pm_contacts` (
 #
 DROP TABLE IF EXISTS `eh_community_address_owners`;
 CREATE TABLE `eh_community_address_owners` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL COMMENT 'community id',
     `address_id` BIGINT NOT NULL COMMENT 'address id',
     
