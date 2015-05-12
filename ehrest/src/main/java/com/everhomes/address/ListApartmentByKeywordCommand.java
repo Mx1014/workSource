@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListApartmentByKeywordCommand {
     @NotNull
-    private Long communitId;
+    private Long communityId;
 
     @NotNull
     private String buildingName;
@@ -25,12 +25,12 @@ public class ListApartmentByKeywordCommand {
     public ListApartmentByKeywordCommand() {
     }
 
-    public Long getCommunitId() {
-        return communitId;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setCommunitId(Long communitId) {
-        this.communitId = communitId;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getBuildingName() {

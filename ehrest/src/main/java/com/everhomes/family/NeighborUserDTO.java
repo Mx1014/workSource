@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.family;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>userId: 邻居用户Id</li>
@@ -68,5 +70,10 @@ public class NeighborUserDTO {
 
     public void setDistance(Double distance) {
         this.distance = distance;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
