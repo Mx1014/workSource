@@ -88,6 +88,14 @@ db:
         timeout: 600
         
 #
+# ElasticSearch configuration
+#
+elastic:
+    nodes:
+        hosts: 127.0.0.1
+        ports: 9300
+        
+#
 # for API code generation
 #
 serialization.serializable: EvhJsonSerializable

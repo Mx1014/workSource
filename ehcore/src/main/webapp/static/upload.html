@@ -1,0 +1,35 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>
+    Message test
+</title>
+<script src="/static/jquery-2.1.3.min.js"></script>
+<script src="/static/jquery-ui.js"></script>
+<script src="jquery.fileupload.js"></script>
+<script src="jquery.lazyload.min.js"></script>
+<script src="/static/jquery.cookie.js"></script>
+</head>
+
+<body>
+<form action="" method="POST"> 
+<label class="desc" title="图片">图片<span class="req">*</span> </label>
+<div class="input">
+<a id="originImage" href="#" alt="原图" target="_blank">
+<img id="headerImg" class="lazy" data-original=""/>
+</a>
+<input id="fileupload" type="file" name="upload_file" data-url="http://127.0.0.1:5000/upload/image" multiple>
+<script>
+$('#fileupload').fileupload({
+    dataType: 'text',
+    done: function (e, data) {
+        var obj = JSON.parse(data.result);
+        $("#originImage").attr("href", "http://127.0.0.1:5000/image/" + obj.response);
+        $("#headerImg").attr("data-original", "http://127.0.0.1:5000/image/" + obj.response + "/150_150");
+        $("img.lazy").lazyload();
+    }
+});
+</script>
+</form>
+</body>
+</html>
