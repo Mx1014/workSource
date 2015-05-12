@@ -195,4 +195,14 @@ public class CategoryProviderImpl implements CategoryProvider {
         
         return result;
     }
+
+    @Override
+    public List<Category> listRootCategories() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+        List<Category> categories=new ArrayList<Category>();
+        context.select().from(Tables.EH_CATEGORIES).where(Tables.EH_CATEGORIES.PARENT_ID.isNull()).fetch().forEach(categroy->{
+            categories.add(ConvertHelper.convert(categroy, Category.class));
+        });;
+        return categories;
+    }
 }
