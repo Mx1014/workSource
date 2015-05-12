@@ -299,5 +299,4 @@ public class AddressTest extends TestCase {
             System.out.println(address);
         }
     }
-    
 }
