@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.jooq.DSLContext;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -26,8 +27,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.acl.Acl;
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
+import com.everhomes.acl.PrivilegeConstants;
+import com.everhomes.acl.Role;
+import com.everhomes.acl.RoleAssignment;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -61,6 +69,9 @@ public class LoginAuthTestCase extends TestCase {
     
     @Autowired
     protected UserProvider userProvider;
+    
+    @Autowired
+    protected AclProvider aclProvider;
 
     @Autowired
     UserService userService;
@@ -73,6 +84,13 @@ public class LoginAuthTestCase extends TestCase {
             HibernateJpaAutoConfiguration.class, 
             })
     static class ContextConfiguration {
+    }
+    
+    @Before
+    protected void setUp() throws Exception {
+    	super.setUp();
+    	
+    	createAcl();
     }
     
     /**
@@ -107,7 +125,7 @@ public class LoginAuthTestCase extends TestCase {
      * @param phone 手机号
      * @param password 密码
      */
-    protected void createPhoneUser(String phone, String password) {
+    protected long createPhoneUser(String phone, String password) {
     	User user = new User();
     	String salt=EncryptionUtils.createRandomSalt();
         user.setSalt(salt);
@@ -115,7 +133,7 @@ public class LoginAuthTestCase extends TestCase {
     	byte userStatus = UserStatus.ACTIVE.getCode();
         user.setStatus(userStatus);
         
-        createPhoneUser(phone, user);
+        return createPhoneUser(phone, user);
     }
     
     /**
@@ -123,11 +141,11 @@ public class LoginAuthTestCase extends TestCase {
      * @param phone 手机号
      * @param user 用户其它信息（至少要含密码）
      */
-    protected void createPhoneUser(String phone, User user) {
+    protected long createPhoneUser(String phone, User user) {
         byte identifierType = IdentifierType.MOBILE.getCode();
-    	UserIdentifier identifier = this.dbProvider.execute((TransactionStatus status) -> {
+    	//UserIdentifier identifier = this.dbProvider.execute((TransactionStatus status) -> {
 	    	userProvider.createUser(user);
-	        long userId = user.getId();
+	    	long userId = user.getId();
 	        Assert.assertTrue("User id should be greater than 0, userId=" + userId, userId > 0);
 	        User dbUser = userProvider.findUserById(userId);
 	        Assert.assertNotNull("The user should be found in db, userId=" + userId, dbUser);
@@ -145,14 +163,16 @@ public class LoginAuthTestCase extends TestCase {
 	        newIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        userProvider.createIdentifier(newIdentifier);
 	        
-	        return newIdentifier;
-    	});
-        long userIdentifierId = identifier.getId();
+//	        return newIdentifier;
+//    	});
+        long userIdentifierId = newIdentifier.getId();
         Assert.assertTrue("User identifier id should be greater than 0, userIdentifierId=" + userIdentifierId, userIdentifierId > 0);
         UserIdentifier dbIdentifier = userProvider.findIdentifierById(userIdentifierId);
         Assert.assertNotNull("The user identifier should be found in db, userIdentifierId=" + userIdentifierId, dbIdentifier);
         Assert.assertEquals(phone, dbIdentifier.getIdentifierToken());
         //Assert.assertEquals(Byte.valueOf(identifierType), dbIdentifier.getClaimStatus());
+        
+        return newIdentifier.getOwnerUid();
     }
     
     /**
@@ -173,5 +193,165 @@ public class LoginAuthTestCase extends TestCase {
     	}
     	
     	return userIdList;
+    }
+    
+    protected void createAcl() {
+        Acl acl = new Acl();
+        acl.setOwnerType("system");
+        acl.setPrivilegeId(Privilege.All);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.SystemAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType("extension");
+        acl.setPrivilegeId(Privilege.Visible);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.SystemExtension);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        // setup default GROUP resource ACL
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.Create);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.AuthenticatedUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.Write);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceCreator);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.Delete);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceCreator);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        // everyone in the group can invite friends to join the group
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupInviteJoin);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        // Only admin can approve group member request
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupApproveMember);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        // Only admin can reject group member request
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupRejectMember);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        // Only admin can revoke group member
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupRevokeMember);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupListMember);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        // setup default FORUM resource ACL
+        acl = new Acl();
+        acl.setOwnerType(EntityType.FORUM.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.ForumNewTopic);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+
+        acl = new Acl();
+        acl.setOwnerType(EntityType.FORUM.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.ForumDeleteTopic);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceCreator);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+
+        acl = new Acl();
+        acl.setOwnerType(EntityType.FORUM.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.ForumDeleteTopic);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.FORUM.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.ForumNewReply);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.FORUM.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.ForumDeleteReply);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceCreator);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+
+        acl = new Acl();
+        acl.setOwnerType(EntityType.FORUM.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.ForumDeleteReply);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        createAcl(acl);
+    }
+    
+    protected void createAcl(Acl acl) {
+    	try {
+            this.aclProvider.createAcl(acl);
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
 }

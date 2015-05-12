@@ -8,22 +8,23 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId: group id</li>
- * <li>adminStatus: 成为管理员申请的状态，为null时则不分状态查询，参考{@link com.everhomes.group.GroupOpRequestStatus}</li>
+ * <li>memberStatus: 成为group成员的状态，为null时则同时查询WAITING_FOR_APPROVAL, WAITING_FOR_ACCEPTANCE两种状态，
+ * 		参考{@link com.everhomes.group.GroupMemberStatus}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListAdminOpRequestCommand {
+public class ListGroupMemberRequestCommand {
     @NotNull
     private Long groupId;
 
-    private Byte adminStatus;
+    private Byte memberStatus;
     
     private Long pageAnchor;
     
     private Integer pageSize;
     
-    public ListAdminOpRequestCommand() {
+    public ListGroupMemberRequestCommand() {
     }
 
     public Long getGroupId() {
@@ -34,15 +35,15 @@ public class ListAdminOpRequestCommand {
         this.groupId = groupId;
     }
 
-    public Byte getAdminStatus() {
-        return adminStatus;
-    }
+    public Byte getMemberStatus() {
+		return memberStatus;
+	}
 
-    public void setAdminStatus(Byte adminStatus) {
-        this.adminStatus = adminStatus;
-    }
+	public void setMemberStatus(Byte memberStatus) {
+		this.memberStatus = memberStatus;
+	}
 
-    public Long getPageAnchor() {
+	public Long getPageAnchor() {
         return pageAnchor;
     }
 
