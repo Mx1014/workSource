@@ -18,14 +18,14 @@
 <a id="originImage" href="#" alt="原图" target="_blank">
 <img id="headerImg" class="lazy" data-original=""/>
 </a>
-<input id="fileupload" type="file" name="upload_file" data-url="http://127.0.0.1:5000/upload/image" multiple>
+<input id="fileupload" type="file" name="upload_file" data-url="http://10.1.1.90:5000/upload/image" multiple>
 <script>
 $('#fileupload').fileupload({
     dataType: 'text',
     done: function (e, data) {
         var obj = JSON.parse(data.result);
-        $("#originImage").attr("href", "http://127.0.0.1:5000/image/" + obj.response);
-        $("#headerImg").attr("data-original", "http://127.0.0.1:5000/image/" + obj.response + "/150_150");
+        $("#originImage").attr("href", "http://10.1.1.90:5000/image/" + obj.response);
+        $("#headerImg").attr("data-original", "http://10.1.1.90:5000/image/" + obj.response + "/150_150");
         $("img.lazy").lazyload();
     }
 });

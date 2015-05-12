@@ -22,11 +22,17 @@ public class TransportClientFactoryImpl implements TransportClientFactory {
     @Value("${elastic.nodes.ports}")
     String nodePorts;
     
-    Client client;
+    Client client = null;
     
     @PostConstruct
     public void setup() {
-        client = setupClient();
+        try {
+            client = setupClient();    
+        }
+        catch(Exception e) {
+            LOGGER.error("Cannot setup search client. " + e.getMessage());
+        }
+        
     }
     
     private InetSocketTransportAddress toAddress(String address) {
