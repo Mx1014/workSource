@@ -3,6 +3,19 @@ package com.everhomes.user;
 /**
  * 
  * @author elians
+ * <ul>
+ * <li>id:邀请码ID</li>
+ * <li>ownerUid:邀请码拥有者</li>
+ * <li>inviteCode:邀请码</li>
+ * <li>inviteType:邀请类型</li>
+ * <li>expiration:超时时间</li>
+ * <li>targetEntityType:实体类型</li>
+ * <li>targetEntityId:实体ID</li>
+ * <li>maxInviteCount:最大邀请数</li>
+ * <li>currentInviteCount：当前邀请数</li>
+ * <li>status：状态</li>
+ * <li>createTime:创建时间</li>
+ * </ul>
  *
  */
 public class UserInvitationsDTO {

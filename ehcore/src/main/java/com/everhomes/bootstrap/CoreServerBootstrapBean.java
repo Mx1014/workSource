@@ -106,6 +106,55 @@ public class CoreServerBootstrapBean implements ApplicationListener<ApplicationE
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
             
+            // everyone in the group can invite friends to join the group
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupInviteJoin);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceUser);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            // Only admin can approve group member request
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupApproveMember);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            // Only admin can reject group member request
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupRejectMember);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            // Only admin can revoke group member
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupRevokeMember);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupListMember);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceUser);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
             // setup default FORUM resource ACL
             acl = new Acl();
             acl.setOwnerType(EntityType.FORUM.getCode());
