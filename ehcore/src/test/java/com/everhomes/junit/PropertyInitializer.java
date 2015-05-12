@@ -45,6 +45,8 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("destination.dir", "/")
             .withProperty("javadoc.root", "/")
             .withProperty("spring.freemarker.check-template-location", false)
-            .withProperty("db.driver", "com.mysql.jdbc.Driver"));
+            .withProperty("db.driver", "com.mysql.jdbc.Driver")
+            .withProperty("elastic.nodes.hosts", "10.1.1.218")
+            .withProperty("elastic.nodes.ports", "9300"));
     }
 }
