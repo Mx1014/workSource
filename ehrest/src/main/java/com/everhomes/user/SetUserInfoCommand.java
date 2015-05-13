@@ -28,7 +28,6 @@ public class SetUserInfoCommand {
     private String company;
     private String school;
     private Long occupation;
-    private String occupationName;
 
     public SetUserInfoCommand() {
     }
@@ -103,14 +102,6 @@ public class SetUserInfoCommand {
 
     public void setOccupation(Long occupation) {
         this.occupation = occupation;
-    }
-
-    public String getOccupationName() {
-        return occupationName;
-    }
-
-    public void setOccupationName(String occupationName) {
-        this.occupationName = occupationName;
     }
 
     @Override
