@@ -12,15 +12,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.address.BuildingDTO;
+import com.everhomes.address.CommunityAdminStatus;
+import com.everhomes.address.CommunityDTO;
+import com.everhomes.address.ListAllCommunitesCommand;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.family.FamilyDTO;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.region.RegionScope;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -32,6 +35,9 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class CommunityProviderImpl implements CommunityProvider {
@@ -43,6 +49,9 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Autowired
     private ShardingProvider shardingProvider;
+    
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     
     @Override
     public void createCommunity(Community community) {
@@ -213,5 +222,72 @@ public class CommunityProviderImpl implements CommunityProvider {
                 return true;
             });
         return l;
+    }
+    
+    @Override
+    public List<Community> listAllCommunities(ListAllCommunitesCommand cmd) {
+        if(cmd.getPageOffset() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid page offset parameter");
+            
+        final List<Community> results = new ArrayList<>();
+        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        
+        long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+        Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
+        if(offset > 0) {
+            final List<Long> countsInShards = new ArrayList<>();
+            this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+                    (DSLContext context, Object reducingContext)-> {
+                        
+                    Long count = context.selectCount().from(Tables.EH_COMMUNITIES)
+                            .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+                            .fetchOne(0, Long.class);
+                    
+                    countsInShards.add(count);
+                    return true;
+                });
+            
+            targetShard = PaginationHelper.offsetFallsAt(countsInShards, offset);
+        }
+        if(targetShard.first() < 0)
+            return results;
+
+        final int[] currentShard = new int[1];
+        currentShard[0] = 0;
+        final Tuple<Integer, Long> fallingShard = targetShard;
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), currentShard, 
+            (DSLContext context, Object reducingContext)-> {
+                int[] current = (int[])reducingContext;
+                if(current[0] < fallingShard.first()) {
+                    current[0] += 1;
+                    return true;
+                }
+                
+                long off = 0;
+                if(current[0] == fallingShard.first())
+                    off = fallingShard.second();
+                
+                context.select().from(Tables.EH_COMMUNITIES)
+                    .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+                    .limit((int)pageSize).offset((int)off)
+                    .fetch().map((r) -> {
+                        Community community = ConvertHelper.convert(r, Community.class);
+                        if(results.size() <= pageSize + 1)
+                            results.add(community);
+                        return null;
+                });
+                
+            return true;
+        });
+        
+        if(results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            return results;
+        }
+        
+        return results;
     }
 }

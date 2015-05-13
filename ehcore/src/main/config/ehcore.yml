@@ -92,7 +92,7 @@ db:
 #
 elastic:
     nodes:
-        hosts: 127.0.0.1
+        hosts: 10.1.1.218
         ports: 9300
         
 #

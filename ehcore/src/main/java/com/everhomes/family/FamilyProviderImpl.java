@@ -7,15 +7,18 @@ import java.util.Comparator;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -89,6 +92,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    @Cacheable(value="Family", key="#addressId")
     @Override
     public Family findFamilyByAddressId(long addressId) {
         final Family[] result = new Family[1];
@@ -344,39 +348,34 @@ public class FamilyProviderImpl implements FamilyProvider {
             return null;
         List<FamilyDTO> familyList = new ArrayList<FamilyDTO>();
         
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-                (DSLContext context, Object reducingContext)-> {
-                    
-                    context.select(Tables.EH_GROUPS.ID,Tables.EH_GROUPS.NAME,Tables.EH_GROUPS.AVATAR,Tables.EH_GROUPS.CREATOR_UID,
-                            Tables.EH_GROUPS.DISPLAY_NAME,Tables.EH_GROUPS.MEMBER_COUNT,Tables.EH_COMMUNITIES.CITY_ID,
-                            Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAME,Tables.EH_COMMUNITIES.CITY_NAME)
-                        .from(Tables.EH_GROUPS)
-                        .leftOuterJoin(Tables.EH_COMMUNITIES)
-                        .on(Tables.EH_GROUPS.INTEGRAL_TAG2.equal(Tables.EH_COMMUNITIES.ID))
-                        .where(Tables.EH_GROUPS.ID.in(familyIds))
-                        .fetch().map((r) -> {
-                            FamilyDTO family = new FamilyDTO();
-                            family.setId(r.getValue(Tables.EH_GROUPS.ID));
-                            family.setName(r.getValue(Tables.EH_GROUPS.NAME));
-                            family.setCommunityId(r.getValue(Tables.EH_COMMUNITIES.ID));
-                            family.setCommunityName(r.getValue(Tables.EH_COMMUNITIES.NAME));
-                            family.setCityId(r.getValue(Tables.EH_COMMUNITIES.CITY_ID));
-                            family.setCityName(r.getValue(Tables.EH_COMMUNITIES.CITY_NAME));
-                            family.setMemberCount(r.getValue(Tables.EH_GROUPS.MEMBER_COUNT));
-                            family.setAvatar(r.getValue(Tables.EH_GROUPS.AVATAR));
-                            if(r.getValue(Tables.EH_GROUPS.CREATOR_UID) == userId)
-                                family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
-                            
-                            GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-                                    EntityType.USER.getCode(), userId);
-                            if(member != null)
-                                family.setMembershipStatus(member.getMemberStatus());
-                            familyList.add(family);
-                            return null;
-                        });
-                    
-                return true;
-            });
+        for(Long familyId : familyIds){
+            Group group = this.groupProvider.findGroupById(familyId);
+            
+            if(group != null){
+//                FamilyDTO family = new FamilyDTO();
+//                family.setId(group.getId());
+//                family.setName(group.getName());
+//                family.setMemberCount(group.getMemberCount());
+//                family.setAvatar(group.getAvatar());
+                FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
+                long communityId = group.getIntegralTag2();
+                Community community = this.communityProvider.findCommunityById(communityId);
+                if(community != null){
+                    family.setCommunityId(communityId);
+                    family.setCommunityName(community.getName());
+                    family.setCityId(community.getCityId());
+                    family.setCityName(community.getCityName());
+                }
+                if(group.getCreatorUid() == userId)
+                    family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+                
+                GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+                        EntityType.USER.getCode(), userId);
+                if(member != null)
+                    family.setMembershipStatus(member.getMemberStatus());
+                familyList.add(family);
+            }
+        }
         
         return familyList;
     }
@@ -427,38 +426,27 @@ public class FamilyProviderImpl implements FamilyProvider {
 
     @Override
     public FamilyDTO getFamilyById(GetFamilyCommand cmd) {
-        
-        final FamilyDTO[] result = new FamilyDTO[1];
+
         long familyId = cmd.getFamilyId();
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-                (DSLContext context, Object reducingContext)-> {
-                    
-                    context.select(Tables.EH_GROUPS.ID,Tables.EH_GROUPS.NAME,Tables.EH_GROUPS.AVATAR,Tables.EH_GROUPS.CREATOR_UID,
-                            Tables.EH_GROUPS.DISPLAY_NAME,Tables.EH_GROUPS.MEMBER_COUNT,Tables.EH_COMMUNITIES.CITY_ID,
-                            Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAME,Tables.EH_COMMUNITIES.CITY_NAME)
-                        .from(Tables.EH_GROUPS)
-                        .leftOuterJoin(Tables.EH_COMMUNITIES)
-                        .on(Tables.EH_GROUPS.INTEGRAL_TAG2.equal(Tables.EH_COMMUNITIES.ID))
-                        .where(Tables.EH_GROUPS.ID.eq(familyId))
-                        .fetch().map((r) -> {
-                            FamilyDTO family = new FamilyDTO();
-                            family.setId(r.getValue(Tables.EH_GROUPS.ID));
-                            family.setName(r.getValue(Tables.EH_GROUPS.NAME));
-                            family.setCommunityId(r.getValue(Tables.EH_COMMUNITIES.ID));
-                            family.setCommunityName(r.getValue(Tables.EH_COMMUNITIES.NAME));
-                            family.setCityId(r.getValue(Tables.EH_COMMUNITIES.CITY_ID));
-                            family.setCityName(r.getValue(Tables.EH_COMMUNITIES.CITY_NAME));
-                            family.setMemberCount(r.getValue(Tables.EH_GROUPS.MEMBER_COUNT));
-                            family.setAvatar(r.getValue(Tables.EH_GROUPS.AVATAR));
-                            
-                            result[0] = family;
-                            return null;
-                        });
-                    
-                return true;
-            });
+        if(familyId == 0)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid familyId parameter");
         
-        return result[0];
+        Group group = this.groupProvider.findGroupById(familyId);
+        FamilyDTO family = null;
+        if(group != null){
+            family = ConvertHelper.convert(group,FamilyDTO.class);
+            long communityId = group.getIntegralTag2();
+            Community community = this.communityProvider.findCommunityById(communityId);
+            if(community != null){
+                family.setCommunityId(communityId);
+                family.setCommunityName(community.getName());
+                family.setCityId(community.getCityId());
+                family.setCityName(community.getCityName());
+            }
+        }
+            
+        return family;
     }
 
     @Override
@@ -733,29 +721,35 @@ public class FamilyProviderImpl implements FamilyProvider {
                         });
                     
                     if(addresIds.size() > 0){
-                        context.select(Tables.EH_USERS.ID,Tables.EH_USERS.STATUS_LINE,Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME
-                                ,Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR,Tables.EH_ADDRESSES.APARTMENT_FLOOR,Tables.EH_ADDRESSES.BUILDING_NAME)
-                        .from(Tables.EH_GROUP_MEMBERS)
-                        .leftOuterJoin(Tables.EH_GROUPS).on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
-                        .leftOuterJoin(Tables.EH_ADDRESSES).on(Tables.EH_GROUPS.INTEGRAL_TAG1.eq(Tables.EH_ADDRESSES.ID))
-                        .leftOuterJoin(Tables.EH_USERS).on(Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(Tables.EH_USERS.ID))
-                        .where(Tables.EH_ADDRESSES.ID.in(addresIds))
-                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
-                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()))
-                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_ID.notEqual(user.getId()))
-                        .fetch().map( (r) ->{
-                            NeighborUserDetailDTO n = new NeighborUserDetailDTO();
-                            n.setUserId(r.getValue(Tables.EH_USERS.ID));
-                            n.setUserStatusLine(r.getValue(Tables.EH_USERS.STATUS_LINE));
-                            n.setUserName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
-                            n.setUserAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
-                            n.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
-                            n.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
-                            userDetailList.add(n);
+                        
+                        for(long addressId : addresIds){
+                            Address address = this.addressProvider.findAddressById(addressId);
                             
-                            //userDetailList.add(ConvertHelper.convert(r, NeighborUserDetailDTO.class));
-                            return null;
-                        });
+                            Family f = findFamilyByAddressId(addressId);
+                            if(f != null && address != null){
+                                
+                                List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
+                                if(members != null && !members.isEmpty()){
+                                    for(GroupMember m : members){
+                                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
+                                                && m.getMemberType().equals(EntityType.USER.getCode())){
+                                            
+                                            NeighborUserDetailDTO n = new NeighborUserDetailDTO();
+                                            User u = this.userProvider.findUserById(m.getMemberId());
+                                            n.setUserId(u.getId());
+                                            n.setUserName(m.getMemberNickName());
+                                            n.setUserAvatar(m.getMemberAvatar());
+                                            n.setUserStatusLine(u.getStatusLine());
+                                            n.setBuildingName(address.getBuildingName());
+                                            n.setApartmentFloor(address.getApartmentFloor());
+                                            userDetailList.add(n);
+                                        }
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
                         
                     }
                    
@@ -765,7 +759,9 @@ public class FamilyProviderImpl implements FamilyProvider {
         return processNeighborUserInfo(userDetailList,myaddress,pageOffset);
     }
 
-    private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,Address myaddress,long pageOffset) {
+    private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,
+            Address myaddress,long pageOffset) {
+        
         if(userDetailList == null || userDetailList.isEmpty())
             return null;
 
@@ -832,7 +828,6 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                    
                     context.select(Tables.EH_USER_GROUPS.OWNER_UID).from(Tables.EH_USER_GROUPS)
                         .where(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
                         .and(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
