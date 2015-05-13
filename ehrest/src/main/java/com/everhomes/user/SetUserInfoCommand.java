@@ -1,32 +1,35 @@
 package com.everhomes.user;
 
 import com.everhomes.util.StringHelper;
+
 /**
  * 跟新用户信息
+ * 
  * @author elians
- *<ul>
- *<li>nickName:昵称</li>
- *<li>avatar:头像</li>
- *<li>statusLine:状态</li>
- *<li>gender:性别</li>
- *<li>birthday:生日</li>
- *<li>homeTown:家乡</li>
- *<li>company:公司</li>
- *<li>school:学校</li>
- *<li>occupation:职业</li>
- *</ul>
+ *         <ul>
+ *         <li>nickName:昵称</li>
+ *         <li>avatar:头像</li>
+ *         <li>statusLine:状态</li>
+ *         <li>gender:性别</li>
+ *         <li>birthday:生日</li>
+ *         <li>homeTown:家乡</li>
+ *         <li>company:公司</li>
+ *         <li>school:学校</li>
+ *         <li>occupation:职业</li>
+ *         </ul>
  */
 public class SetUserInfoCommand {
-    private String   nickName;
-    private String   avatar;
-    private String   statusLine;
-    private Byte     gender;
-    private String   birthday;
-    private Long    homeTown;
-    private String   company;
-    private String   school;
-    private Long     occupation;
-    
+    private String nickName;
+    private String avatar;
+    private String statusLine;
+    private Byte gender;
+    private String birthday;
+    private Long homeTown;
+    private String company;
+    private String school;
+    private Long occupation;
+    private String occupationName;
+
     public SetUserInfoCommand() {
     }
 
@@ -93,13 +96,21 @@ public class SetUserInfoCommand {
     public void setSchool(String school) {
         this.school = school;
     }
-    
+
     public Long getOccupation() {
         return occupation;
     }
 
     public void setOccupation(Long occupation) {
         this.occupation = occupation;
+    }
+
+    public String getOccupationName() {
+        return occupationName;
+    }
+
+    public void setOccupationName(String occupationName) {
+        this.occupationName = occupationName;
     }
 
     @Override
