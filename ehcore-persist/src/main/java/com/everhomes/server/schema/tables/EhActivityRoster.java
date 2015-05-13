@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> {
 
-	private static final long serialVersionUID = -1232236840;
+	private static final long serialVersionUID = 423061194;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activity_roster</code>
@@ -62,14 +62,14 @@ public class EhActivityRoster extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Integer> CHILD_COUNT = createField("child_count", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_activity_roster.signup_flag</code>.
+	 * The column <code>ehcore.eh_activity_roster.checkin_flag</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> SIGNUP_FLAG = createField("signup_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Byte> CHECKIN_FLAG = createField("checkin_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_activity_roster.signup_uid</code>.
+	 * The column <code>ehcore.eh_activity_roster.checkin_uid</code>. id of checkin user
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> SIGNUP_UID = createField("signup_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivityRosterRecord, java.lang.Long> CHECKIN_UID = createField("checkin_uid", org.jooq.impl.SQLDataType.BIGINT, this, "id of checkin user");
 
 	/**
 	 * The column <code>ehcore.eh_activity_roster.confirm_flag</code>.

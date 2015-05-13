@@ -97,17 +97,17 @@ public class EhActivityRosterDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>signup_flag IN (values)</code>
+	 * Fetch records that have <code>checkin_flag IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchBySignupFlag(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.SIGNUP_FLAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByCheckinFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CHECKIN_FLAG, values);
 	}
 
 	/**
-	 * Fetch records that have <code>signup_uid IN (values)</code>
+	 * Fetch records that have <code>checkin_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchBySignupUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.SIGNUP_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivityRoster> fetchByCheckinUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CHECKIN_UID, values);
 	}
 
 	/**

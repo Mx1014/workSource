@@ -1,7 +1,14 @@
 // @formatter:off
 package com.everhomes.user;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -14,8 +21,21 @@ public class SendMessageCommand {
     private Long appId;
     private Integer deliveryOption;
     
+    private Long senderUid;
+    
+    @ItemType(MessageChannel.class)
     @NotNull
-    private String messageJson;
+    private List<MessageChannel> channels;
+    
+    @ItemType(String.class)
+    private Map<String, String> meta;
+    
+    private long metaAppId;
+    
+    private String body;
+
+    // used for sender to tag on a message
+    private String senderTag;
     
     public SendMessageCommand() {
     }
@@ -36,11 +56,56 @@ public class SendMessageCommand {
         this.deliveryOption = deliveryOption;
     }
 
-    public String getMessageJson() {
-        return messageJson;
+    public Long getSenderUid() {
+        return senderUid;
     }
 
-    public void setMessageJson(String messageJson) {
-        this.messageJson = messageJson;
+    public void setSenderUid(Long senderUid) {
+        this.senderUid = senderUid;
+    }
+
+    public List<MessageChannel> getChannels() {
+        return channels;
+    }
+
+    public void setChannels(List<MessageChannel> channels) {
+        this.channels = channels;
+    }
+
+    public Map<String, String> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, String> meta) {
+        this.meta = meta;
+    }
+
+    public long getMetaAppId() {
+        return metaAppId;
+    }
+
+    public void setMetaAppId(long metaAppId) {
+        this.metaAppId = metaAppId;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public String getSenderTag() {
+        return senderTag;
+    }
+
+    public void setSenderTag(String senderTag) {
+        this.senderTag = senderTag;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
