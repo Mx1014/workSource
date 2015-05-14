@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -417,6 +418,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                      addr.setCommunityId(cmd.getCommunityId());
                      addr.setBuildingName(cmd.getBuildingName());
                      addr.setApartmentName(cmd.getApartmentName());
+                     addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
                      addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
                      this.addressProvider.createAddress(addr);
                 }
@@ -457,5 +459,25 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return new Tuple<>(ErrorCodes.SUCCESS, results);
     }
 
+    private String joinAddrStr(String buildingName, String apartName){
+        boolean isFirst = true;
+        StringBuilder strBuilder = new StringBuilder();
+        if (!StringUtils.isEmpty(buildingName)){
+             if (!isFirst){
+                 strBuilder.append("-");
+            }
+            strBuilder.append(buildingName);
+            isFirst = false;
+        }
+
+        if (!StringUtils.isEmpty(apartName)){
+            if (!isFirst){
+                strBuilder.append("-");
+           }
+           strBuilder.append(buildingName);
+           isFirst = false;
+        }
+        return strBuilder.toString();
+    }
 
 }

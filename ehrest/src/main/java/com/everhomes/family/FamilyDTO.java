@@ -21,6 +21,12 @@ import com.everhomes.util.StringHelper;
  * <li>membershipStatus: 请求者在家庭的状态， {@link com.everhomes.group.GroupMemberStatus}</li>
  * <li>primaryFlag: 是否为常用家庭 0(非常用),1(常用)</li>
  * <li>adminStatus: 管理员状态0-非管理员，1-管理员</li>
+ * <li>memberUid: 用户Id</li>
+ * <li>memberNickName: 用户在家庭中的昵称</li>
+ * <li>memberAvatar: 用户在家庭中的头像</li>
+ * <li>addressId: 用户在家庭中的头像</li>
+ * <li>buildingName: 家庭地址楼栋号</li>
+ * <li>apartmentName: 家庭地址门牌号</li>
  * </ul>
  */
 public class FamilyDTO {
@@ -42,6 +48,14 @@ public class FamilyDTO {
     private Byte membershipStatus;  // membership relationship with requestor
     private Byte primaryFlag;
     private Byte adminStatus;
+    
+    private Long memberUid;
+    private String memberNickName;
+    private String memberAvatar;
+    
+    private Long addressId;
+    private String buildingName;
+    private String apartmentName;
  
     public FamilyDTO () {
     }
@@ -174,6 +188,54 @@ public class FamilyDTO {
         this.primaryFlag = primaryFlag;
     }
     
+    public String getMemberNickName() {
+        return memberNickName;
+    }
+
+    public void setMemberNickName(String memberNickName) {
+        this.memberNickName = memberNickName;
+    }
+
+    public String getMemberAvatar() {
+        return memberAvatar;
+    }
+
+    public void setMemberAvatar(String memberAvatar) {
+        this.memberAvatar = memberAvatar;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getMemberUid() {
+        return memberUid;
+    }
+
+    public void setMemberUid(Long memberUid) {
+        this.memberUid = memberUid;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

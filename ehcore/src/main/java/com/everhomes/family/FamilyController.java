@@ -77,12 +77,9 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=FamilyDTO.class)
     public RestResponse findFamilyByAddressId(
         @Valid FindFamilyByAddressIdCommand cmd) {
-        if(cmd.getAddressId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid addressId parameter.");
-        }
-        Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
-        RestResponse response = new RestResponse(ConvertHelper.convert(family, FamilyDTO.class));
+        
+        FamilyDTO familyDTO = familyProvider.findFamilyByAddressId(cmd);
+        RestResponse response = new RestResponse(familyDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

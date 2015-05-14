@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -133,7 +134,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(family == null) {
                 family = this.dbProvider.execute((TransactionStatus status) -> {
                     Family f = new Family();
-                    f.setName(address.getApartmentName());
+                    f.setName(address.getAddress());
                     f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
                     f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     f.setAddressId(address.getId());
@@ -210,7 +211,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                 this.groupProvider.deleteGroupMember(m);
                 
                 // retrieve family info after membership changes
-                family = findFamilyByAddressId(address.getId());
+                FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+                family = self.findFamilyByAddressId(address.getId());
                 
                 if(family.getMemberCount() == 0) {
                     this.groupProvider.deleteGroup(family);
@@ -325,7 +327,8 @@ public class FamilyProviderImpl implements FamilyProvider {
     public FamilyDTO getOwningFamilyById(GetOwningFamilyByIdCommand cmd) {
         User user = UserContext.current().getUser();
         Long addressId = user.getAddressId();
-        Family f = findFamilyByAddressId(addressId);
+        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+        Family f = self.findFamilyByAddressId(addressId);
         if(f == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                        "Invalid addressId parameter");
@@ -352,12 +355,9 @@ public class FamilyProviderImpl implements FamilyProvider {
             Group group = this.groupProvider.findGroupById(familyId);
             
             if(group != null){
-//                FamilyDTO family = new FamilyDTO();
-//                family.setId(group.getId());
-//                family.setName(group.getName());
-//                family.setMemberCount(group.getMemberCount());
-//                family.setAvatar(group.getAvatar());
+
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
+                family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
                 Community community = this.communityProvider.findCommunityById(communityId);
                 if(community != null){
@@ -373,6 +373,12 @@ public class FamilyProviderImpl implements FamilyProvider {
                         EntityType.USER.getCode(), userId);
                 if(member != null)
                     family.setMembershipStatus(member.getMemberStatus());
+                
+                Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+                if(address != null){
+                    family.setBuildingName(address.getBuildingName());
+                    family.setApartmentName(address.getApartmentName());
+                }
                 familyList.add(family);
             }
         }
@@ -414,13 +420,14 @@ public class FamilyProviderImpl implements FamilyProvider {
         }
         
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
-        List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
-        list = list.stream().filter((userGroup) ->{
-            return userGroup.getGroupId() == group.getId();
-            
-        }).collect(Collectors.toList());
-        
-        leaveFamilyAtAddress(address, list.get(0));
+
+        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, group.getId());
+        if(userGroup == null){
+            LOGGER.error("User not in user group.userId=" + userId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "User not in user group.");
+        }
+        leaveFamilyAtAddress(address, userGroup);
         
     }
 
@@ -436,6 +443,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         FamilyDTO family = null;
         if(group != null){
             family = ConvertHelper.convert(group,FamilyDTO.class);
+            family.setAddressId(group.getIntegralTag1());
             long communityId = group.getIntegralTag2();
             Community community = this.communityProvider.findCommunityById(communityId);
             if(community != null){
@@ -464,17 +472,15 @@ public class FamilyProviderImpl implements FamilyProvider {
         Group group = this.groupProvider.findGroupById(cmd.getFamilyId());
         
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
-        List<UserGroup> list = this.userProvider.listUserGroups(cmd.getMemberUid(), GroupDiscriminator.FAMILY.getCode());
-        list = list.stream().filter((userGroup) ->{
-            return userGroup.getGroupId() == group.getId();
-            
-        }).collect(Collectors.toList());
-        if(list == null || list.size() == 0){
-            LOGGER.error("Invalid memberUid parameter,user not in family.memberUid=" + cmd.getMemberUid());
+        
+        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, group.getId());
+        if(userGroup == null){
+            LOGGER.error("User not in user group.userId=" + userId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid memberUid parameter,user not in family.");
+                    "User not in user group.");
         }
-        leaveFamilyAtAddress(address, list.get(0));
+        
+        leaveFamilyAtAddress(address, userGroup);
         
     }
 
@@ -695,7 +701,8 @@ public class FamilyProviderImpl implements FamilyProvider {
         }
         Long familyId = cmd.getFamilyId();
         Long pageOffset = cmd.getPageOffset();
-        Family family = findFamilyByAddressId(user.getAddressId());
+        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+        Family family = self.findFamilyByAddressId(user.getAddressId());
         if(family == null || family.getId() != familyId){
             LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + familyId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -724,8 +731,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                         
                         for(long addressId : addresIds){
                             Address address = this.addressProvider.findAddressById(addressId);
-                            
-                            Family f = findFamilyByAddressId(addressId);
+                            Family f = self.findFamilyByAddressId(addressId);
                             if(f != null && address != null){
                                 
                                 List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
@@ -814,8 +820,8 @@ public class FamilyProviderImpl implements FamilyProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "User has not address.");
         }
-        
-        Family family = findFamilyByAddressId(user.getAddressId());
+        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+        Family family = self.findFamilyByAddressId(user.getAddressId());
         if(family == null || (cmd.getFamilyId() != null && family.getId() != cmd.getFamilyId())){
             LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + cmd.getFamilyId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -911,5 +917,36 @@ public class FamilyProviderImpl implements FamilyProvider {
                 return 0;
             }
         });
+    }
+
+    @Override
+    public FamilyDTO findFamilyByAddressId(FindFamilyByAddressIdCommand cmd) {
+        if(cmd.getAddressId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid addressId parameter.");
+        }
+        User user = UserContext.current().getUser();
+        if(user.getAddressId() == null || user.getAddressId().longValue() != cmd.getAddressId().longValue())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid addressId parameter.");
+        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+        Family family = self.findFamilyByAddressId(cmd.getAddressId());
+        if(family == null)
+            return null;
+        
+        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
+        //familyDTO.setAddressId(cmd.getAddressId());
+        if(family.getCreatorUid() == user.getId())
+            familyDTO.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+        
+        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+                EntityType.USER.getCode(), user.getId());
+        if(m != null){
+            familyDTO.setMemberUid(m.getMemberId());
+            familyDTO.setMemberNickName(m.getMemberNickName());
+            familyDTO.setMemberAvatar(m.getMemberAvatar());
+            familyDTO.setMembershipStatus(m.getMemberStatus());
+        }
+        return familyDTO;
     }
 }
