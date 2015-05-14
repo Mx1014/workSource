@@ -97,10 +97,17 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>visible_flag IN (values)</code>
+	 * Fetch records that have <code>visibility_scope IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByVisibleFlag(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.VISIBLE_FLAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByVisibilityScope(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.VISIBILITY_SCOPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>visibility_scope_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByVisibilityScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.VISIBILITY_SCOPE_ID, values);
 	}
 
 	/**
