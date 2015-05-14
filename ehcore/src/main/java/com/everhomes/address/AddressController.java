@@ -118,7 +118,7 @@ public class AddressController extends ControllerBase {
     @RequestMapping("listAppartmentsByKeyword")
     @RestReturn(value=String.class, collection=true)
     public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
-        Tuple<Integer, List<String>> results = this.addressService.listApartmentsByKeyword(cmd);
+        Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
         
         response.setErrorCode(results.first());

@@ -250,8 +250,8 @@ public class AddressTest extends TestCase {
         cmd.setKeyword("APT");
         cmd.setCommunityId(1L);
         cmd.setBuildingName("Building 1");
-        Tuple<Integer, List<String>> results = this.addressService.listApartmentsByKeyword(cmd);
-        for(String apt : results.second()){
+        Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
+        for(ApartmentDTO apt : results.second()){
             System.out.println(apt);
         }
         

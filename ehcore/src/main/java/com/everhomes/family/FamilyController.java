@@ -22,7 +22,9 @@ import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserInfo;
+import com.everhomes.user.UserServiceErrorCode;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
 @RestController
@@ -75,7 +77,10 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=FamilyDTO.class)
     public RestResponse findFamilyByAddressId(
         @Valid FindFamilyByAddressIdCommand cmd) {
-        
+        if(cmd.getAddressId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid addressId parameter.");
+        }
         Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
         RestResponse response = new RestResponse(ConvertHelper.convert(family, FamilyDTO.class));
         response.setErrorCode(ErrorCodes.SUCCESS);

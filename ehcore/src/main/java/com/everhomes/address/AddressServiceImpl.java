@@ -313,13 +313,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
 
     @Override
-    public Tuple<Integer, List<String>> listApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
+    public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getKeyword() == null ||
              cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or keyword parameter");
         
-        List<String> results = new ArrayList<>();
+        List<ApartmentDTO> results = new ArrayList<>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
@@ -331,14 +331,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(cmd.getKeyword() + "%"))
                         .fetch().map((r) -> {
-                            results.add(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+                            ApartmentDTO apartment = new ApartmentDTO();
+                            apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+                            results.add(apartment);
                             return null;
                         });
                     
                 return true;
             });
         
-        return new Tuple<Integer, List<String>>(ErrorCodes.SUCCESS, results);
+        return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
     
     @Override
