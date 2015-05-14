@@ -29,7 +29,7 @@ public class PropertyPortalRoleResolver implements PortalRoleResolver {
         }
         
         // The user should have at lease one role in property management
-        List<PmMember> members = propertyMgrProvider.findPmMemberByTargetTypeAndId(PmTargetType.USER.getCode(), user.getId());
+        List<CommunityPmMember> members = propertyMgrProvider.findPmMemberByTargetTypeAndId(PmTargetType.USER.getCode(), user.getId());
         if(members == null || members.size() == 0) {
         	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
                     "Access denied");

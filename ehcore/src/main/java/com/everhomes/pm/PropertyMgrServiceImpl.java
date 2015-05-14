@@ -16,12 +16,18 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.region.RegionDTO;
-import com.everhomes.rest.RestResponse;
+import com.everhomes.core.AppConfig;
+import com.everhomes.entity.EntityType;
+import com.everhomes.forum.Post;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
@@ -40,6 +46,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private AddressService addressService;
+    
+    @Autowired
+    private SmsProvider smsProvider;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
     
     @Override
     public void createPropMember(CreatePropMemberCommand cmd) {
@@ -211,5 +224,85 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                  .collect(Collectors.toList()));
     	
         return commandResponse;
+    }
+    
+    @Override
+    public void assignPMTopics(AssginPmTopicCommand cmd) {
+        if(cmd.getTopicIds() == null || cmd.getTopicIds().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid topicIds paramter.");
+        if(cmd.getStatus() == PmTaskStatus.TREATED.getCode())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid status paramter.");
+        if(cmd.getCommunityId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId paramter.");
+        long communityId = cmd.getCommunityId();
+        List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
+                EntityType.USER.getCode(), cmd.getUserId());
+        
+        if(pmMemberList == null || pmMemberList.isEmpty()){
+            LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid userId paramter,user is not the community pm member.");
+        }
+        
+        for(Long topicId : cmd.getTopicIds()){
+            List<CommunityPmTasks> pmTaskList = this.propertyMgrProvider.findPmTaskEntityIdAndTargetId(communityId, topicId, 
+                    EntityType.TOPIC.getCode(), cmd.getUserId(),EntityType.USER.getCode(),cmd.getStatus());
+            if(pmTaskList != null && !pmTaskList.isEmpty()){
+                LOGGER.error("Pm taks is exists.");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                        "Task is exists.");
+            }
+            CommunityPmTasks task = new CommunityPmTasks();
+            task.setCommunityId(communityId);
+            task.setEntityId(topicId);
+            task.setEntityType(EntityType.TOPIC.getCode());
+            task.setTargetId(cmd.getUserId());
+            task.setTaskType(EntityType.USER.getCode());
+            task.setTaskStatus(cmd.getStatus());
+            this.propertyMgrProvider.createPmTask(task);
+            //自动回复
+            
+            //发送短信
+            Post topic = new Post();
+            sendMSMToUser(topic,cmd.getUserId(),cmd.getStatus());
+        }
+    }
+
+    private void sendMSMToUser(Post topic, Long userId, Byte status) {
+        //??短信模板
+        String content = "";
+        List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
+        userList.parallelStream().filter((u) -> {
+            if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
+                return false;
+            return true;
+        });
+        String cellPhone = userList.get(0).getIdentifierToken();
+        this.smsProvider.sendSms(cellPhone, content);
+        
+    }
+
+    @Override
+    public ListPropInvitedUserCommandResponse listInvitedUsers(ListPropInvitedUserCommand cmd) {
+        Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+        if(community == null){
+            LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId paramter,community is not found.");
+        }
+        
+        //??权限控制
+        Long pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        
+        Long pageSize = cmd.getPageSize() == null ? this.configProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize(); 
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        
+        List<PropInvitedUserDTO> userDTOs = this.propertyMgrProvider.listInvitedUsers(cmd.getCommunityId(),
+                cmd.getContactToken(),offset,pageSize);
+        return new ListPropInvitedUserCommandResponse(0L,userDTOs);
     }
 }

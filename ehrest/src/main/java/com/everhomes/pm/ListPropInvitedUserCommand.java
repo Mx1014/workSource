@@ -6,15 +6,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>communityId: 小区id</li>
- * <li>contactType: 业主类型</li>
- * <li>contactToken: 业主标示</li>
+ * <li>contactToken: 用户名或邀请人手机号</li>
  * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListPropInvitedUserCommand {
     private Long communityId;
-    private Byte contactType;
     private String contactToken;
    
     private Long pageOffset;
@@ -22,38 +20,20 @@ public class ListPropInvitedUserCommand {
     
     public ListPropInvitedUserCommand() {
     }
-
   
     public Long getCommunityId() {
 		return communityId;
 	}
 
-
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-
-	public Byte getContactType() {
-		return contactType;
-	}
-
-
-	public void setContactType(Byte contactType) {
-		this.contactType = contactType;
-	}
-
 
 	public String getContactToken() {
 		return contactToken;
 	}
 
-
-	public void setContactToken(String contactToken) {
-		this.contactToken = contactToken;
-	}
-
-
-	public Long getPageOffset() {
+    public Long getPageOffset() {
         return pageOffset;
     }
 
@@ -67,6 +47,10 @@ public class ListPropInvitedUserCommand {
 
     public void setPageSize(Long pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
     }
 
     @Override
