@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord> implements org.jooq.Record10<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Byte> {
 
-	private static final long serialVersionUID = 1880291472;
+	private static final long serialVersionUID = 1608325616;
 
 	/**
 	 * Setter for <code>ehcore.eh_community_pm_members.id</code>. id of the record
@@ -42,14 +42,14 @@ public class EhCommunityPmMembersRecord extends org.jooq.impl.UpdatableRecordImp
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_community_pm_members.target_type</code>.
+	 * Setter for <code>ehcore.eh_community_pm_members.target_type</code>. untrack, user
 	 */
 	public void setTargetType(java.lang.String value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_community_pm_members.target_type</code>.
+	 * Getter for <code>ehcore.eh_community_pm_members.target_type</code>. untrack, user
 	 */
 	public java.lang.String getTargetType() {
 		return (java.lang.String) getValue(2);

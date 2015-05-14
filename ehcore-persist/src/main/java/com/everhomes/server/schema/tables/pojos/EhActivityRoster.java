@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRoster implements java.io.Serializable {
 
-	private static final long serialVersionUID = 97834849;
+	private static final long serialVersionUID = -794036983;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -20,8 +20,8 @@ public class EhActivityRoster implements java.io.Serializable {
 	private java.lang.Long     familyId;
 	private java.lang.Integer  adultCount;
 	private java.lang.Integer  childCount;
-	private java.lang.Byte     signupFlag;
-	private java.lang.Long     signupUid;
+	private java.lang.Byte     checkinFlag;
+	private java.lang.Long     checkinUid;
 	private java.lang.Long     confirmFlag;
 	private java.lang.Long     confirmUid;
 	private java.lang.Long     confirmFamilyId;
@@ -40,8 +40,8 @@ public class EhActivityRoster implements java.io.Serializable {
 		java.lang.Long     familyId,
 		java.lang.Integer  adultCount,
 		java.lang.Integer  childCount,
-		java.lang.Byte     signupFlag,
-		java.lang.Long     signupUid,
+		java.lang.Byte     checkinFlag,
+		java.lang.Long     checkinUid,
 		java.lang.Long     confirmFlag,
 		java.lang.Long     confirmUid,
 		java.lang.Long     confirmFamilyId,
@@ -57,8 +57,8 @@ public class EhActivityRoster implements java.io.Serializable {
 		this.familyId = familyId;
 		this.adultCount = adultCount;
 		this.childCount = childCount;
-		this.signupFlag = signupFlag;
-		this.signupUid = signupUid;
+		this.checkinFlag = checkinFlag;
+		this.checkinUid = checkinUid;
 		this.confirmFlag = confirmFlag;
 		this.confirmUid = confirmUid;
 		this.confirmFamilyId = confirmFamilyId;
@@ -124,20 +124,20 @@ public class EhActivityRoster implements java.io.Serializable {
 		this.childCount = childCount;
 	}
 
-	public java.lang.Byte getSignupFlag() {
-		return this.signupFlag;
+	public java.lang.Byte getCheckinFlag() {
+		return this.checkinFlag;
 	}
 
-	public void setSignupFlag(java.lang.Byte signupFlag) {
-		this.signupFlag = signupFlag;
+	public void setCheckinFlag(java.lang.Byte checkinFlag) {
+		this.checkinFlag = checkinFlag;
 	}
 
-	public java.lang.Long getSignupUid() {
-		return this.signupUid;
+	public java.lang.Long getCheckinUid() {
+		return this.checkinUid;
 	}
 
-	public void setSignupUid(java.lang.Long signupUid) {
-		this.signupUid = signupUid;
+	public void setCheckinUid(java.lang.Long checkinUid) {
+		this.checkinUid = checkinUid;
 	}
 
 	public java.lang.Long getConfirmFlag() {
