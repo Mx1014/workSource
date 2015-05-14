@@ -8,13 +8,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId: group id</li>
- * <li>memberStatus: 成为group成员的状态，为null时则同时查询WAITING_FOR_APPROVAL, WAITING_FOR_ACCEPTANCE两种状态，
- * 		参考{@link com.everhomes.group.GroupMemberStatus}</li>
+ * <li>memberStatus: group成员的状态；为null时则同时查询WAITING_FOR_APPROVAL, WAITING_FOR_ACCEPTANCE两种状态，
+ * 		否则查指定状态的待处理列表；其中需要为管理员才能查WAITING_FOR_APPROVAL状态的待处理列表；
+ *      参考{@link com.everhomes.group.GroupMemberStatus}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListGroupMemberRequestCommand {
+public class ListUserRelatedGroupActionsCommand {
     @NotNull
     private Long groupId;
 
@@ -24,7 +25,7 @@ public class ListGroupMemberRequestCommand {
     
     private Integer pageSize;
     
-    public ListGroupMemberRequestCommand() {
+    public ListUserRelatedGroupActionsCommand() {
     }
 
     public Long getGroupId() {

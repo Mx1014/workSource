@@ -90,7 +90,7 @@ CREATE TABLE `eh_locale_strings`(
     `scope` VARCHAR(64),
     `code` INTEGER,
     `locale` VARCHAR(16),
-    `text` VARCHAR(256),
+    `text` TEXT,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
@@ -604,7 +604,6 @@ CREATE TABLE `eh_groups` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
@@ -774,7 +773,8 @@ CREATE TABLE `eh_forum_posts` (
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     
-    `visible_flag` TINYINT COMMENT 'define the visibiliy, 0-ALL, 1-COMMUNITY_ONLY',
+	`visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
+    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
     
     `category_id` BIGINT,
     `category_path` VARCHAR(128),

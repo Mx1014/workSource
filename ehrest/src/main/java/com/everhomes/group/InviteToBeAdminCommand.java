@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId: group id</li>
- * <li>phone: 被邀请人的手机号</li>
+ * <li>userId: 被邀请人的用户ID</li>
  * <li>invitationText: 邀请内容</li>
  * </ul>
  */
@@ -17,7 +17,7 @@ public class InviteToBeAdminCommand {
     private Long groupId;
     
     @NotNull
-    private String phone;
+    private long userId;
     
     private String invitationText;
     
@@ -32,12 +32,12 @@ public class InviteToBeAdminCommand {
         this.groupId = groupId;
     }
 
-    public String getPhone() {
-        return phone;
+    public long getUserId() {
+        return userId;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     public String getInvitationText() {

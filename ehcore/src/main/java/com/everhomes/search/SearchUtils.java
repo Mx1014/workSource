@@ -7,8 +7,8 @@ public class SearchUtils {
     public static final String GROUPINDEXNAME = "everhomesv3";
     public static final String GROUPINDEXTYPE = "group";
     
-    public static final String NCINDEXNAME = "everhomesv3";
-    public static final String NCINDEXTYPE = "nc";
+    public static final String COMMUNITYINDEXNAME = "everhomesv3";
+    public static final String COMMUNITYINDEXTYPE = "community";
     
     public static Long getLongField(Object o) {
         Long v = -1l;

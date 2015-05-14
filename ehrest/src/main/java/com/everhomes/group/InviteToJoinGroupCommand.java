@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>groupId：group id</li>
  * <li>userId: 被邀请加入group的用户ID</li>
+ * <li>invitationText: 邀请用户时填写的说明文本</li>
  * </ul>
  */
 public class InviteToJoinGroupCommand {
@@ -16,6 +17,8 @@ public class InviteToJoinGroupCommand {
     private Long groupId;
     
     private Long userId;
+    
+    private String invitationText;
 
     public InviteToJoinGroupCommand() {
     }
@@ -36,7 +39,15 @@ public class InviteToJoinGroupCommand {
 		this.userId = userId;
 	}
 
-	@Override
+	public String getInvitationText() {
+        return invitationText;
+    }
+
+    public void setInvitationText(String invitationText) {
+        this.invitationText = invitationText;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
