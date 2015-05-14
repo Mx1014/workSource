@@ -2,6 +2,9 @@
 package com.everhomes.pm;
 
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,18 +14,19 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class SetPmTopicStatusCommand {
-    private long topicId;
+    @ItemType(Long.class)
+    private List<Long> topicIds;
     private Byte status;
     
     public SetPmTopicStatusCommand() {
     }
-    
-    public long getTopicId() {
-        return topicId;
+
+    public List<Long> getTopicIds() {
+        return topicIds;
     }
 
-    public void setTopicId(long topicId) {
-        this.topicId = topicId;
+    public void setTopicIds(List<Long> topicIds) {
+        this.topicIds = topicIds;
     }
 
     public Byte getStatus() {

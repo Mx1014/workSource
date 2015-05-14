@@ -43,10 +43,10 @@ public class PropertyMgrUserRoleResolver implements ResourceUserRoleResolver {
         	roles.add(Role.AuthenticatedUser);
         }
 
-        List<PmMember> members = propertyMgrProvider.findPmMemberByCommunityAndTarget(resourceId, 
+        List<CommunityPmMember> members = propertyMgrProvider.findPmMemberByCommunityAndTarget(resourceId, 
         		PmTargetType.USER.getCode(), user.getId());
         if(members != null && members.size() > 0) {
-        	for(PmMember member : members) {
+        	for(CommunityPmMember member : members) {
         		String group = member.getPmGroup();
         		PmGroup pmGroup = PmGroup.fromCode(group);
         		switch(pmGroup) {

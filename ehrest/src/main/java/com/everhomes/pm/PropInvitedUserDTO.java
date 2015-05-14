@@ -7,124 +7,95 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: id</li>
- * <li>ownerUid: 邀请者id</li>
- * <li>inviteCode: 邀请码</li>
+ * <li>userId: 被邀请人Id</li>
+ * <li>userName: 被邀请人名称</li>
  * <li>inviteType: 邀请类型</li>
- * <li>expiration: 描述</li>
- * <li>targetEntityType: 目标实体类型</li>
- * <li>targetEntityId: 目标实体id</li>
- * <li>maxInviteCount: 最大邀请数量</li>
- * <li>currentInviteCount: 已邀请数量</li>
- * <li>status: 状态</li>
- * <li>createTime: 创建时间</li>
+ * <li>contactType: 联系类型</li>
+ * <li>contactToken: 联系类型对应的联系方式，phone or email</li>
+ * <li>registerTime: 被邀请人注册时间</li>
+ * <li>invitorId: 邀请人Id</li>
+ * <li>invitorName: 邀请人名称</li>
  * </ul>
  */
 public class PropInvitedUserDTO {
-	private Long id;
-    private Long ownerUid;
-    private String inviteCode;
+    
+    private Long userId;
+    private String userName;
     private Byte inviteType;
-    private Timestamp expiration;
-    private String targetEntityType;
-    private Long targetEntityId;
-    private Integer maxInviteCount;
-    private Integer currentInviteCount;
-    private Byte status;
-    private Timestamp createTime;
+    private Byte contactType;
+    private String contactToken;
+    private Timestamp registerTime;
+    private Long invitorId;
+    private String invitorName;
     
     public PropInvitedUserDTO() {
     }
     
-    public Long getId() {
-		return id;
-	}
+	public Long getUserId() {
+        return userId;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public Long getOwnerUid() {
-		return ownerUid;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	public void setOwnerUid(Long ownerUid) {
-		this.ownerUid = ownerUid;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public String getInviteCode() {
-		return inviteCode;
-	}
+    public Timestamp getRegisterTime() {
+        return registerTime;
+    }
 
-	public void setInviteCode(String inviteCode) {
-		this.inviteCode = inviteCode;
-	}
+    public void setRegisterTime(Timestamp registerTime) {
+        this.registerTime = registerTime;
+    }
 
-	public Byte getInviteType() {
-		return inviteType;
-	}
+    public Long getInvitorId() {
+        return invitorId;
+    }
 
-	public void setInviteType(Byte inviteType) {
-		this.inviteType = inviteType;
-	}
+    public void setInvitorId(Long invitorId) {
+        this.invitorId = invitorId;
+    }
 
-	public Timestamp getExpiration() {
-		return expiration;
-	}
+    public String getInvitorName() {
+        return invitorName;
+    }
 
-	public void setExpiration(Timestamp expiration) {
-		this.expiration = expiration;
-	}
+    public void setInvitorName(String invitorName) {
+        this.invitorName = invitorName;
+    }
 
-	public String getTargetEntityType() {
-		return targetEntityType;
-	}
+    public Byte getInviteType() {
+        return inviteType;
+    }
 
-	public void setTargetEntityType(String targetEntityType) {
-		this.targetEntityType = targetEntityType;
-	}
+    public void setInviteType(Byte inviteType) {
+        this.inviteType = inviteType;
+    }
 
-	public Long getTargetEntityId() {
-		return targetEntityId;
-	}
+    public Byte getContactType() {
+        return contactType;
+    }
 
-	public void setTargetEntityId(Long targetEntityId) {
-		this.targetEntityId = targetEntityId;
-	}
+    public void setContactType(Byte contactType) {
+        this.contactType = contactType;
+    }
 
-	public Integer getMaxInviteCount() {
-		return maxInviteCount;
-	}
+    public String getContactToken() {
+        return contactToken;
+    }
 
-	public void setMaxInviteCount(Integer maxInviteCount) {
-		this.maxInviteCount = maxInviteCount;
-	}
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
 
-	public Integer getCurrentInviteCount() {
-		return currentInviteCount;
-	}
-
-	public void setCurrentInviteCount(Integer currentInviteCount) {
-		this.currentInviteCount = currentInviteCount;
-	}
-
-	public Byte getStatus() {
-		return status;
-	}
-
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
