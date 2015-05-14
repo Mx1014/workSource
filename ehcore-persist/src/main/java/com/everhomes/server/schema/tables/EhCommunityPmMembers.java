@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord> {
 
-	private static final long serialVersionUID = 171474371;
+	private static final long serialVersionUID = -196143958;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_members</code>
@@ -37,9 +37,9 @@ public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner community id");
 
 	/**
-	 * The column <code>ehcore.eh_community_pm_members.target_type</code>.
+	 * The column <code>ehcore.eh_community_pm_members.target_type</code>. untrack, user
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.String> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.String> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "untrack, user");
 
 	/**
 	 * The column <code>ehcore.eh_community_pm_members.target_id</code>. target user id if target_type is a user
@@ -96,6 +96,14 @@ public class EhCommunityPmMembers extends org.jooq.impl.TableImpl<com.everhomes.
 
 	private EhCommunityPmMembers(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord, java.lang.Long> getIdentity() {
+		return com.everhomes.server.schema.Keys.IDENTITY_EH_COMMUNITY_PM_MEMBERS;
 	}
 
 	/**

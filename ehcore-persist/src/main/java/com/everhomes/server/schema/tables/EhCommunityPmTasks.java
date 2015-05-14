@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord> {
 
-	private static final long serialVersionUID = 1020536917;
+	private static final long serialVersionUID = 1663905776;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_tasks</code>
@@ -86,6 +86,14 @@ public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.se
 
 	private EhCommunityPmTasks(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> getIdentity() {
+		return com.everhomes.server.schema.Keys.IDENTITY_EH_COMMUNITY_PM_TASKS;
 	}
 
 	/**
