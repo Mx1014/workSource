@@ -19,8 +19,8 @@ public class ListPropOwnerCommand {
     private String contactToken;
     private String address;
     
-	private Long pageOffset;
-    private Long pageSize;
+    private Integer pageOffset;
+    private Integer pageSize;
     
     public ListPropOwnerCommand() {
     }
@@ -66,24 +66,27 @@ public class ListPropOwnerCommand {
 		this.contactToken = contactToken;
 	}
 
+	public Integer getPageOffset() {
+		return pageOffset;
+	}
 
-	public Long getPageOffset() {
-        return pageOffset;
-    }
 
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
-    }
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
+	}
 
-    public Long getPageSize() {
-        return pageSize;
-    }
 
-    public void setPageSize(Long pageSize) {
-        this.pageSize = pageSize;
-    }
+	public Integer getPageSize() {
+		return pageSize;
+	}
 
-    @Override
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

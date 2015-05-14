@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -52,8 +54,8 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("addPMGroupMemberByPhone")
     @RestReturn(value=String.class)
     public RestResponse addPropertyMemberByPhone(@Valid CreatePropMemberCommand cmd) {
-    	CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
-    	propertyMgrProvider.createPropMember(communityPmMember);
+    	
+    	propertyMgrService.createPropMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -68,7 +70,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("deletePMGroupMember")
     @RestReturn(value=String.class)
     public RestResponse deletePropertyMember(@Valid DeletePropMemberCommand cmd) {
-    	propertyMgrProvider.deletePropMember(cmd.getMemberId());
+    	propertyMgrService.deletePropMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -82,8 +84,8 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("listPMAddressMapping")
     @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
     public RestResponse listApartmentMappings(@Valid ListPropAddressMappingCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+    	ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.ListAddressMappings(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -97,7 +99,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("importPMAddressMapping")
     @RestReturn(value=String.class)
     public RestResponse importPMAddressMapping(@Valid PropCommunityIdCommand cmd) {
-    	
+    	propertyMgrService.improtCommunityAddressMapping(cmd.getCommunityId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -112,8 +114,8 @@ public class PropertyMgrController extends ControllerBase {
     @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
     public RestResponse getPMAddressMapping(
     		@Valid ListPropAddressMappingCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+    	ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.ListAddressMappings(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -159,9 +161,9 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("getPMPropertyOwnerInfo")
     @RestReturn(value=ListPropOwnerCommandResponse.class, collection=true)
-    public RestResponse getPMPropertyOwnerInfo(@Valid ListPropOwnerCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+    public RestResponse listPMPropertyOwnerInfo(@Valid ListPropOwnerCommand cmd) {
+    	ListPropOwnerCommandResponse commandResponse = propertyMgrService.listPMPropertyOwnerInfo(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -353,10 +355,10 @@ public class PropertyMgrController extends ControllerBase {
 	 */
     @RequestMapping("getPropertyBill")
     @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
-    public RestResponse getPropertyBill(
+    public RestResponse listPropertyBill(
     	@Valid ListPropBillCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+    	ListPropBillCommandResponse commandResponse = propertyMgrService.listPropertyBill(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

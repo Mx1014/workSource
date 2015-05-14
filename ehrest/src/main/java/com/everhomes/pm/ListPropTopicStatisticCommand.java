@@ -19,8 +19,8 @@ public class ListPropTopicStatisticCommand {
 	private String startStrTime;
 	private String endStrTime;
     
-	private Long pageOffset;
-    private Long pageSize;
+	private Integer pageOffset;
+    private Integer pageSize;
     
     public ListPropTopicStatisticCommand() {
     }
@@ -48,16 +48,16 @@ public class ListPropTopicStatisticCommand {
 	public void setEndStrTime(String endStrTime) {
 		this.endStrTime = endStrTime;
 	}
-	public Long getPageOffset() {
+	public Integer getPageOffset() {
 		return pageOffset;
 	}
-	public void setPageOffset(Long pageOffset) {
+	public void setPageOffset(Integer pageOffset) {
 		this.pageOffset = pageOffset;
 	}
-	public Long getPageSize() {
+	public Integer getPageSize() {
 		return pageSize;
 	}
-	public void setPageSize(Long pageSize) {
+	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
 	@Override

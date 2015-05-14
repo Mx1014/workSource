@@ -41,6 +41,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
@@ -438,8 +439,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId parameter");
             
         final List<Address> results = new ArrayList<>();
-        final long pageSize = this.configurationProvider.getIntValue("pagination.page.size", 
-                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
