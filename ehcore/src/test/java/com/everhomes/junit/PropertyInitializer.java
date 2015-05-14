@@ -32,7 +32,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("forum.postbox.size", 10)
             .withProperty("forum.flush.interval", 3000)
             .withProperty("db.master", "jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore")
-            .withProperty("db.conn.pool", 128)
+            .withProperty("db.conn.pool", 8)
             .withProperty("db.tx.timeout", 600)
             .withProperty("serialization.serializable", "EvhJsonSerializable")
             .withProperty("serialization.helper", "EvhJsonSerializationHelper")
@@ -46,7 +46,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("javadoc.root", "/")
             .withProperty("spring.freemarker.check-template-location", false)
             .withProperty("db.driver", "com.mysql.jdbc.Driver")
-            .withProperty("elastic.nodes.hosts", "10.1.1.218")
+            .withProperty("elastic.nodes.hosts", "elasticsearch")
             .withProperty("elastic.nodes.ports", "9300"));
     }
 }

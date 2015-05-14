@@ -20,10 +20,12 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,5 +166,20 @@ public abstract class AbstractElasticSearch {
             tokens.add(tok.getTerm());
         }
         return tokens;
+    }
+    
+    protected List<Long> getIds(SearchResponse rsp) {
+        List<Long> results = new ArrayList<Long>();
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            try {
+                results.add(Long.parseLong(sd.getId()));
+            }
+            catch(Exception ex) {
+                LOGGER.info("getTopicIds error " + ex.getMessage());
+            }
+        }
+        
+        return results;
     }
 }
