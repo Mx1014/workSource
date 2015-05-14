@@ -108,9 +108,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	//权限控制
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), null, null, cmd.getPageOffset(),pageSize);
+    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), cmd.getUserId(), null, cmd.getPageOffset(),pageSize);
     	commandResponse.setMembers( entityResultList.stream()
-                 .map(r->{ return ConvertHelper.convert(r, PropertyMemberDTO.class); })
+                 .map(r->{ 
+                	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
+                	 dto.setCommunityName(community.getName());
+                	 return dto; })
                  .collect(Collectors.toList()));
     	
         return commandResponse;
