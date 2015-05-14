@@ -16,12 +16,13 @@ public interface PrivilegeConstants {
     public static final long ForumDeleteReply = 103L;
     
     // privileges defined by Group module
-    public static final long GroupInviteJoin = 150L;
     public static final long GroupListMember = 151L;
     public static final long GroupAdminOps = 152L;
-    public static final long GroupRequestAdminRole = 153L;
+    public static final long GroupInviteJoin = 153L;
     public static final long GroupApproveMember = 154L;
     public static final long GroupRejectMember = 155L;
     public static final long GroupRevokeMember = 156L;
+    public static final long GroupRequestAdminRole = 157L;
+    public static final long GroupInviteAdminRole = 158L;
     
 }

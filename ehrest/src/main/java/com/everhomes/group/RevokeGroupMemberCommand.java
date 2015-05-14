@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>groupId：group id</li>
  * <li>userId: 被踢出group的用户ID</li>
+ * <li>revokeText: 踢出用户时填写的说明文本</li>
  * </ul>
  */
 public class RevokeGroupMemberCommand {
@@ -16,6 +17,8 @@ public class RevokeGroupMemberCommand {
     private Long groupId;
     
     private Long userId;
+    
+    private String revokeText;
 
     public RevokeGroupMemberCommand() {
     }
@@ -36,7 +39,15 @@ public class RevokeGroupMemberCommand {
 		this.userId = userId;
 	}
 
-	@Override
+	public String getRevokeText() {
+        return revokeText;
+    }
+
+    public void setRevokeText(String revokeText) {
+        this.revokeText = revokeText;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
