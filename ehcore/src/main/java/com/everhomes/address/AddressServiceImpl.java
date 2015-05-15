@@ -285,10 +285,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(ListBuildingByKeywordCommand cmd) {
-        if(cmd.getCommunityId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty())
+        if(cmd.getCommunityId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId or keyword parameter");
         
+        if(cmd.getKeyword() == null)
+            cmd.setKeyword("");;
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
@@ -316,11 +318,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
-        if(cmd.getCommunityId() == null || cmd.getKeyword() == null ||
-             cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or keyword parameter");
-        
+        if(cmd.getKeyword() == null)
+            cmd.setKeyword("");
         List<ApartmentDTO> results = new ArrayList<>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
@@ -398,6 +400,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
+        long startTime = System.currentTimeMillis();
         Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
                 cmd.getBuildingName(), cmd.getApartmentName());
         
@@ -407,27 +410,43 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId");
         
         if(address == null) {
+            //全局锁导致入库超时，暂时去掉
             // optimize with double-lock pattern 
-            Tuple<Address, Boolean> result = this.coordinationProvider
-                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
-                         
-                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
-                                 cmd.getBuildingName(), cmd.getApartmentName());
-                if(addr == null) {
-                     addr = new Address();
-                     addr.setCityId(community.getCityId());
-                     addr.setCommunityId(cmd.getCommunityId());
-                     addr.setBuildingName(cmd.getBuildingName());
-                     addr.setApartmentName(cmd.getApartmentName());
-                     addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
-                     addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
-                     this.addressProvider.createAddress(addr);
-                }
-                return addr;
-             });
-             
-             address = result.first();
+//            Tuple<Address, Boolean> result = this.coordinationProvider
+//                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
+//                         
+//                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+//                                 cmd.getBuildingName(), cmd.getApartmentName());
+//                if(addr == null) {
+//                     addr = new Address();
+//                     addr.setCityId(community.getCityId());
+//                     addr.setCommunityId(cmd.getCommunityId());
+//                     addr.setBuildingName(cmd.getBuildingName());
+//                     addr.setApartmentName(cmd.getApartmentName());
+//                     addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+//                     addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+//                     this.addressProvider.createAddress(addr);
+//                }
+//                return addr;
+//             });
+//             
+//             address = result.first();
+            Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+                    cmd.getBuildingName(), cmd.getApartmentName());
+            if(addr == null) {
+                addr = new Address();
+                addr.setCityId(community.getCityId());
+                addr.setCommunityId(cmd.getCommunityId());
+                addr.setBuildingName(cmd.getBuildingName());
+                addr.setApartmentName(cmd.getApartmentName());
+                addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+                addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+                this.addressProvider.createAddress(addr);
+            }
+            address = addr;
          }
+         long endTime = System.currentTimeMillis();
+         LOGGER.info("Get or create address,elapse=" + (endTime - startTime));
          
          return address;
     }
