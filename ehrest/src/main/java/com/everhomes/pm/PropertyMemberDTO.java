@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 主键id</li>
- * <li>communityId: 小区名称</li>
+ * <li>communityId: 小区id</li>
+ * <li>communityName: 小区名称</li>
  * <li>targetType：注册用户类型</li>
  * <li>targetId：注册用户对应的userId</li>
  * <li>pmGroup：物业角色类型 参考{@link com.everhomes.pm.PmGroup}</li>
@@ -20,6 +21,7 @@ import com.everhomes.util.StringHelper;
 public class PropertyMemberDTO {
 	private Long   id;
 	private Long   communityId;
+	private String communityName;
 	private String targetType;
 	private Long   targetId;
 	private String pmGroup;
@@ -48,6 +50,15 @@ public class PropertyMemberDTO {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
 	}
 
 	public String getTargetType() {

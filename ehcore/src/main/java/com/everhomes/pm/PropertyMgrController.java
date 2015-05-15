@@ -14,12 +14,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.address.ApartmentDTO;
+import com.everhomes.address.BuildingDTO;
+import com.everhomes.address.ListApartmentByKeywordCommand;
+import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 
 @RestController
 @RequestMapping("/pm")
@@ -63,14 +68,44 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /pm/approvePropertyMember</b>
+     * <p>批准物业成员</p>
+     * @return 批准的结果
+     */
+    @RequestMapping("approvePropertyMember")
+    @RestReturn(value=String.class)
+    public RestResponse approvePropertyMember(@Valid CommunityPropMemberCommand cmd) {
+    	propertyMgrService.approvePropMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/ejectMember</b>
+     * <p>拒绝物业成员</p>
+     * @return 拒绝的结果
+     */
+    @RequestMapping("rejectPropertyMember")
+    @RestReturn(value=String.class)
+    public RestResponse rejectPropertyMember(@Valid CommunityPropMemberCommand cmd) {
+    	propertyMgrService.rejectPropMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /pm/deletePMGroupMember</b>
      * <p>删除物业成员</p>
      * @return 删除的结果
      */
     @RequestMapping("deletePMGroupMember")
     @RestReturn(value=String.class)
-    public RestResponse deletePropertyMember(@Valid DeletePropMemberCommand cmd) {
-    	propertyMgrService.deletePropMember(cmd);
+    public RestResponse ejectPropertyMember(@Valid DeletePropMemberCommand cmd) {
+    	propertyMgrService.ejectPropMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -478,6 +513,81 @@ public class PropertyMgrController extends ControllerBase {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/approvePropFamilyMember</b>
+     * <p>批准家庭成员</p>
+     * @return 批准的结果
+     */
+    @RequestMapping("approvePropFamilyMember")
+    @RestReturn(value=String.class)
+    public RestResponse approvePropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
+    	propertyMgrService.approvePropFamilyMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/ejectPropFamilyMember</b>
+     * <p>拒绝家庭成员</p>
+     * @return 拒绝的结果
+     */
+    @RequestMapping("rejectPropFamilyMember")
+    @RestReturn(value=String.class)
+    public RestResponse rejectPropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
+    	propertyMgrService.rejectPropFamilyMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/ejectPropFamilyMember</b>
+     * <p>踢出家庭成员</p>
+     * @return 踢出的结果
+     */
+    @RequestMapping("ejectPropFamilyMember")
+    @RestReturn(value=String.class)
+    public RestResponse ejectPropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
+    	propertyMgrService.ejectPropFamilyMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/listPropBuildingsByKeyword</b>
+     * <p>根据小区Id和关键字查询小区楼栋(物业)</p>
+     */
+    @RequestMapping("listPropBuildingsByKeyword")
+    @RestReturn(value=BuildingDTO.class, collection=true)
+    public RestResponse listPropBuildingsByKeyword(@Valid ListBuildingByKeywordCommand cmd) {
+        Tuple<Integer, List<BuildingDTO>> results = propertyMgrService.listPropBuildingsByKeyword(cmd);
+        RestResponse response = new RestResponse(results.second());
+        
+        response.setErrorCode(results.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/listPropAppartmentsByKeyword</b>
+     * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
+     */
+    @RequestMapping("listPropAppartmentsByKeyword")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse listPropApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+        Tuple<Integer, List<ApartmentDTO>> results = propertyMgrService.listPropApartmentsByKeyword(cmd);
+        RestResponse response = new RestResponse(results.second());
+        
+        response.setErrorCode(results.first());
         response.setErrorDescription("OK");
         return response;
     }

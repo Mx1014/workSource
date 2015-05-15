@@ -11,13 +11,22 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressService;
+import com.everhomes.address.ApartmentDTO;
+import com.everhomes.address.BuildingDTO;
 import com.everhomes.address.ListAddressCommand;
+import com.everhomes.address.ListApartmentByKeywordCommand;
+import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.core.AppConfig;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.ApproveMemberCommand;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyDTO;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.GetFamilyCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -53,6 +62,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Autowired
     private UserProvider userProvider;
     
+    @Autowired
+    private FamilyProvider familyProvider;
+    
     
     @Override
     public void createPropMember(CreatePropMemberCommand cmd) {
@@ -73,24 +85,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	propertyMgrProvider.createPropMember(communityPmMember);
     }
     
-    @Override
-	public void deletePropMember(DeletePropMemberCommand cmd) {
-    	User user  = UserContext.current().getUser();
-    	if(cmd.getCommunityId() == null){
-    		LOGGER.error("propterty communityId paramter can not be null or empty");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "propterty communityId paramter can not be null or empty");
-    	}
-    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-    	if(community == null){
-    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                     "Unable to find the community.");
-    	}
-    	//权限控制
-    	propertyMgrProvider.deletePropMember(cmd.getMemberId());
-	}
-
+    
     @Override
     public ListPropMemberCommandResponse listCommunityPmMembers(ListPropMemberCommand cmd) {
     	ListPropMemberCommandResponse commandResponse = new ListPropMemberCommandResponse();
@@ -108,9 +103,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	//权限控制
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), null, null, cmd.getPageOffset(),pageSize);
+    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), cmd.getUserId(), null, cmd.getPageOffset(),pageSize);
     	commandResponse.setMembers( entityResultList.stream()
-                 .map(r->{ return ConvertHelper.convert(r, PropertyMemberDTO.class); })
+                 .map(r->{ 
+                	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
+                	 dto.setCommunityName(community.getName());
+                	 return dto; })
                  .collect(Collectors.toList()));
     	
         return commandResponse;
@@ -304,5 +302,233 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         List<PropInvitedUserDTO> userDTOs = this.propertyMgrProvider.listInvitedUsers(cmd.getCommunityId(),
                 cmd.getContactToken(),offset,pageSize);
         return new ListPropInvitedUserCommandResponse(0L,userDTOs);
+    }
+
+	@Override
+	public void approvePropMember(CommunityPropMemberCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	CommunityPmMember communityPmMember = propertyMgrProvider.findPropMemberById(cmd.getMemberId());
+    	if(communityPmMember == null || communityPmMember.getStatus() != PmMemberStatus.CONFIRMING.getCode())
+    	{
+    		LOGGER.error("Unable to find the property member or the property member status is not confirming.communityId=" + cmd.getCommunityId() +",memberId=" + cmd.getMemberId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the community.");
+    	}
+    	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
+    	propertyMgrProvider.updatePropMember(communityPmMember);
+		
+    	//发通知 : 物业成员如果是注册用户发通知，如果不是 发短信。
+    	long userId = communityPmMember.getTargetId();
+    	if(userId != 0)
+    	{
+    		
+    	}
+	}
+
+	@Override
+	public void rejectPropMember(CommunityPropMemberCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	CommunityPmMember communityPmMember = propertyMgrProvider.findPropMemberById(cmd.getMemberId());
+    	if(communityPmMember == null || communityPmMember.getStatus() != PmMemberStatus.CONFIRMING.getCode())
+    	{
+    		LOGGER.error("Unable to find the property member or the property member status is not confirming.communityId=" + cmd.getCommunityId() +",memberId=" + cmd.getMemberId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the community.");
+    	}
+    	long userId = communityPmMember.getTargetId();
+    	propertyMgrProvider.deletePropMember(communityPmMember);
+    	
+    	//发通知 : 物业成员如果是注册用户发通知，如果不是 发短信。
+    	if(userId != 0)
+    	{
+    		
+    	}
+	}
+	
+	@Override
+	public void ejectPropMember(DeletePropMemberCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	CommunityPmMember communityPmMember = propertyMgrProvider.findPropMemberById(cmd.getMemberId());
+    	if(communityPmMember == null)
+    	{
+    		LOGGER.error("Unable to find the property member.communityId=" + cmd.getCommunityId() +",memberId=" + cmd.getMemberId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the community.");
+    	}
+    	long userId = communityPmMember.getTargetId();
+    	propertyMgrProvider.deletePropMember(communityPmMember);
+    	
+    	//发通知 : 物业成员如果是注册用户发通知，如果不是 发短信。
+    	if(userId != 0)
+    	{
+    		
+    	}
+    	
+	}
+	
+	@Override
+	public void approvePropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	GetFamilyCommand command = new GetFamilyCommand();
+    	command.setFamilyId(cmd.getFamilyId());
+    	FamilyDTO family = familyProvider.getFamilyById(command);
+    	if(family == null ||family.getCommunityId() != cmd.getCommunityId())
+    	{
+    		LOGGER.error("family is not existed or family is not belong to the community.communityId=" + cmd.getCommunityId()+",familyId=" + cmd.getFamilyId());
+   		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the community.");
+    	}
+    	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
+    	familyCmd.setFamilyId(cmd.getFamilyId());
+    	familyCmd.setMemberUid(cmd.getUserId());
+    	familyProvider.approveMember(familyCmd);
+		
+	}
+	
+	@Override
+	public void rejectPropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	GetFamilyCommand command = new GetFamilyCommand();
+    	command.setFamilyId(cmd.getFamilyId());
+    	FamilyDTO family = familyProvider.getFamilyById(command);
+    	if(family == null ||family.getCommunityId() != cmd.getCommunityId())
+    	{
+    		LOGGER.error("family is not existed or family is not belong to the community.communityId=" + cmd.getCommunityId()+",familyId=" + cmd.getFamilyId());
+   		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the community.");
+    	}
+    	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
+    	familyCmd.setFamilyId(cmd.getFamilyId());
+    	familyCmd.setMemberUid(cmd.getUserId());
+    	familyProvider.approveMember(familyCmd);
+		
+	}
+    
+    @Override
+    public void ejectPropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	GetFamilyCommand command = new GetFamilyCommand();
+    	command.setFamilyId(cmd.getFamilyId());
+    	FamilyDTO family = familyProvider.getFamilyById(command);
+    	if(family == null ||family.getCommunityId() != cmd.getCommunityId())
+    	{
+    		LOGGER.error("family is not existed or family is not belong to the community.communityId=" + cmd.getCommunityId()+",familyId=" + cmd.getFamilyId());
+   		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the community.");
+    	}
+    	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
+    	familyCmd.setFamilyId(cmd.getFamilyId());
+    	familyCmd.setMemberUid(cmd.getUserId());
+    	familyProvider.approveMember(familyCmd);
+    }
+    
+    @Override
+    public Tuple<Integer, List<BuildingDTO>> listPropBuildingsByKeyword(ListBuildingByKeywordCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	
+    	return addressService.listBuildingsByKeyword(cmd);
+    }
+    
+    @Override
+    public Tuple<Integer, List<ApartmentDTO>> listPropApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	
+    	return addressService.listApartmentsByKeyword(cmd);
     }
 }
