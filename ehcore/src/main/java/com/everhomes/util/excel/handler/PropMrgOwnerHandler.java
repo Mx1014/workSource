@@ -1,0 +1,108 @@
+package com.everhomes.util.excel.handler;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+
+
+
+
+
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+
+
+
+
+
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.pm.CommunityPmOwner;
+import com.everhomes.pm.PropertyMgrController;
+import com.everhomes.user.IdentifierType;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.MySheetContentsHandler;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.SAXHandlerEventUserModel;
+
+public class PropMrgOwnerHandler
+{
+	/** 日志 */
+	 private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrController.class);
+	
+	public static ArrayList processorExcel(File file)
+	{
+		ArrayList resultList = new ArrayList();
+		MySheetContentsHandler sheetContenthandler=new MySheetContentsHandler();
+		SAXHandlerEventUserModel userModel=new SAXHandlerEventUserModel(sheetContenthandler);
+		try
+		{
+			userModel.processASheets(file,0);
+			resultList=sheetContenthandler.getResultList();
+		} catch (Exception e)
+		{
+			LOGGER.error("failed to processor the file ", e);
+		}
+		return resultList;
+	}
+	
+	public static List<CommunityPmOwner> processorPropMgrContact(long userId, long communityId,ArrayList resultList) {
+		List<CommunityPmOwner> contactList = new ArrayList<CommunityPmOwner>();
+		if(resultList != null && resultList.size() > 0)
+		{
+			int row = resultList.size();
+			
+			if(resultList != null && resultList.size() > 0)
+			{
+			
+				for (int rowIndex = 1; rowIndex < row ; rowIndex++) {
+						
+						RowResult result = (RowResult)resultList.get(rowIndex);
+						CommunityPmOwner owner = new CommunityPmOwner();
+						owner.setAddress(RowResult.trimString(result.getD()));
+						owner.setContactName(RowResult.trimString(result.getA()));
+						owner.setContactDescription(RowResult.trimString(result.getE()));
+						owner.setContactToken(RowResult.trimString(result.getC()));
+						owner.setContactType(processtype(RowResult.trimString(result.getB())));
+						owner.setCreatorUid(userId);
+						owner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						owner.setCommunityId(communityId);
+						
+						contactList.add(owner);
+				}
+			}
+			
+		}
+		else
+		{
+			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "excel data format is not correct");
+		}
+		return contactList;
+	}
+
+	private static Byte processtype(String typeName) {
+		if(typeName != null && typeName.equals(IdentifierType.EMAIL))
+		{
+			return IdentifierType.EMAIL.getCode();
+		}
+		else
+		{
+			return IdentifierType.MOBILE.getCode();
+		}
+		
+	}
+
+}

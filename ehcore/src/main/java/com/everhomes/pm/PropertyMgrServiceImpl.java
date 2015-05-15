@@ -417,9 +417,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制--admin角色
-    	GetFamilyCommand command = new GetFamilyCommand();
-    	command.setFamilyId(cmd.getFamilyId());
-    	FamilyDTO family = familyProvider.getFamilyById(command);
+    	FamilyDTO family = familyProvider.getFamilyById(cmd.getFamilyId());
     	if(family == null ||family.getCommunityId() != cmd.getCommunityId())
     	{
     		LOGGER.error("family is not existed or family is not belong to the community.communityId=" + cmd.getCommunityId()+",familyId=" + cmd.getFamilyId());
@@ -429,7 +427,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
     	familyCmd.setFamilyId(cmd.getFamilyId());
     	familyCmd.setMemberUid(cmd.getUserId());
-    	familyProvider.approveMember(familyCmd);
+    	familyProvider.approveMember(cmd.getFamilyId(),cmd.getUserId());
 		
 	}
 	
@@ -448,19 +446,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制--admin角色
-    	GetFamilyCommand command = new GetFamilyCommand();
-    	command.setFamilyId(cmd.getFamilyId());
-    	FamilyDTO family = familyProvider.getFamilyById(command);
+    	FamilyDTO family = familyProvider.getFamilyById(cmd.getFamilyId());
     	if(family == null ||family.getCommunityId() != cmd.getCommunityId())
     	{
     		LOGGER.error("family is not existed or family is not belong to the community.communityId=" + cmd.getCommunityId()+",familyId=" + cmd.getFamilyId());
    		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Unable to find the community.");
     	}
-    	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
-    	familyCmd.setFamilyId(cmd.getFamilyId());
-    	familyCmd.setMemberUid(cmd.getUserId());
-    	familyProvider.approveMember(familyCmd);
+    	
+    	String reason = "";
+    	Byte operatorRole = 0;
+    	familyProvider.rejectMember(cmd.getFamilyId(), cmd.getUserId(), reason, operatorRole);
 		
 	}
     
@@ -479,19 +475,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制--admin角色
-    	GetFamilyCommand command = new GetFamilyCommand();
-    	command.setFamilyId(cmd.getFamilyId());
-    	FamilyDTO family = familyProvider.getFamilyById(command);
+    	FamilyDTO family = familyProvider.getFamilyById(cmd.getFamilyId());
     	if(family == null ||family.getCommunityId() != cmd.getCommunityId())
     	{
     		LOGGER.error("family is not existed or family is not belong to the community.communityId=" + cmd.getCommunityId()+",familyId=" + cmd.getFamilyId());
    		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Unable to find the community.");
     	}
-    	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
-    	familyCmd.setFamilyId(cmd.getFamilyId());
-    	familyCmd.setMemberUid(cmd.getUserId());
-    	familyProvider.approveMember(familyCmd);
+    	
+       	String reason = "";
+    	familyProvider.ejectMember(cmd.getFamilyId(), cmd.getUserId(), reason);
     }
     
     @Override
