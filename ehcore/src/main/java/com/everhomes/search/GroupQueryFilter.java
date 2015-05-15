@@ -92,9 +92,9 @@ public class GroupQueryFilter {
             qb = QueryBuilders.matchAllQuery();
         } else {
             
-            PrefixQueryBuilder pb = null;
+            PrefixQueryBuilder prefix_b = null;
             if(queryTerms.contains(TERM_CATEGORY_PATH)) {
-                pb = QueryBuilders.prefixQuery(TERM_CATEGORY_PATH, queryString);
+                prefix_b = QueryBuilders.prefixQuery(TERM_CATEGORY_PATH, queryString);
                 }
             queryTerms.remove(TERM_CATEGORY_PATH);
             
@@ -106,8 +106,12 @@ public class GroupQueryFilter {
                     }
                 }
           
-            if(pb != null) {
-                qb = QueryBuilders.boolQuery().should(mqb).should(qb);
+            if(prefix_b != null) {
+                if(queryTerms.size() == 0) {
+                    qb = prefix_b;
+                } else {
+                    qb = QueryBuilders.boolQuery().should(mqb).should(prefix_b);     
+                    }
             } else {
                 qb = mqb;   
                 }

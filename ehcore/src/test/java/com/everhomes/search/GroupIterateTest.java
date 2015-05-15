@@ -2,7 +2,9 @@
 package com.everhomes.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -30,12 +32,15 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.messaging.MessageChannel;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.SendMessageCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.user.base.UserGenerator;
+import com.everhomes.util.StringHelper;
 import com.everhomes.visibility.VisibilityScope;
 
 //public class GroupServiceTest extends UserGenerator {
@@ -162,7 +167,7 @@ public class GroupIterateTest extends LoginAuthTestCase {
         cleanData();
     }
     
-    @Ignore @Test
+    //@Ignore @Test
     public void testIterateGroup() {
         this.groupSearcher.syncFromDb();
         
@@ -189,6 +194,28 @@ public class GroupIterateTest extends LoginAuthTestCase {
         ids = this.groupSearcher.query(filter);
         Assert.assertTrue("found tag", ids.size() > 0);
         
+    }
+    
+    @Test
+    public void testStringHelper() {
+        SendMessageCommand cmd = new SendMessageCommand();
+        cmd.setAppId(32434L);
+        cmd.setBody("This is a body");
+        List<MessageChannel> channels = new ArrayList<MessageChannel>();
+        MessageChannel c1 = new MessageChannel();
+        c1.setChannelToken("channel 1");
+        c1.setChannelType("Group");
+        channels.add(c1);
+        MessageChannel c2 = new MessageChannel();
+        c2.setChannelToken("channel 2");
+        c2.setChannelType("User");
+        channels.add(c2);
+        cmd.setChannels(channels);
+        System.out.println(StringHelper.toJsonString(cmd));
+        
+        Map<String, String> maps = new HashMap<String, String>();
+        StringHelper.toStringMap(null, cmd, maps);
+        System.out.println(StringHelper.toJsonString(maps));
     }
     
     private GroupDTO createGroup(String name, String tag) {
