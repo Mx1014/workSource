@@ -181,10 +181,10 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>embedded_type IN (values)</code>
+	 * Fetch records that have <code>embedded_app_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedAppId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.EMBEDDED_APP_ID, values);
 	}
 
 	/**

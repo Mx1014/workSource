@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -148994531;
+	private static final long serialVersionUID = 972927097;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -33,7 +33,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.String   subject;
 	private java.lang.Integer  contentType;
 	private java.lang.String   content;
-	private java.lang.String   embeddedType;
+	private java.lang.Long     embeddedAppId;
 	private java.lang.Long     embeddedId;
 	private java.lang.String   embeddedJson;
 	private java.lang.Integer  embeddedVersion;
@@ -73,7 +73,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.String   subject,
 		java.lang.Integer  contentType,
 		java.lang.String   content,
-		java.lang.String   embeddedType,
+		java.lang.Long     embeddedAppId,
 		java.lang.Long     embeddedId,
 		java.lang.String   embeddedJson,
 		java.lang.Integer  embeddedVersion,
@@ -110,7 +110,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.subject = subject;
 		this.contentType = contentType;
 		this.content = content;
-		this.embeddedType = embeddedType;
+		this.embeddedAppId = embeddedAppId;
 		this.embeddedId = embeddedId;
 		this.embeddedJson = embeddedJson;
 		this.embeddedVersion = embeddedVersion;
@@ -288,12 +288,12 @@ public class EhForumPosts implements java.io.Serializable {
 		this.content = content;
 	}
 
-	public java.lang.String getEmbeddedType() {
-		return this.embeddedType;
+	public java.lang.Long getEmbeddedAppId() {
+		return this.embeddedAppId;
 	}
 
-	public void setEmbeddedType(java.lang.String embeddedType) {
-		this.embeddedType = embeddedType;
+	public void setEmbeddedAppId(java.lang.Long embeddedAppId) {
+		this.embeddedAppId = embeddedAppId;
 	}
 
 	public java.lang.Long getEmbeddedId() {

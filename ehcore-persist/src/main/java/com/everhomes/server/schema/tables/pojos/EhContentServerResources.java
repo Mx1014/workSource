@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhContentServerResources implements java.io.Serializable {
 
-	private static final long serialVersionUID = 729039200;
+	private static final long serialVersionUID = -2038471780;
 
 	private java.lang.Long    id;
+	private java.lang.Long    ownerId;
 	private java.lang.String  resourceId;
 	private java.lang.String  resourceMd5;
 	private java.lang.Integer resourceType;
@@ -25,6 +26,7 @@ public class EhContentServerResources implements java.io.Serializable {
 
 	public EhContentServerResources(
 		java.lang.Long    id,
+		java.lang.Long    ownerId,
 		java.lang.String  resourceId,
 		java.lang.String  resourceMd5,
 		java.lang.Integer resourceType,
@@ -33,6 +35,7 @@ public class EhContentServerResources implements java.io.Serializable {
 		java.lang.String  metadata
 	) {
 		this.id = id;
+		this.ownerId = ownerId;
 		this.resourceId = resourceId;
 		this.resourceMd5 = resourceMd5;
 		this.resourceType = resourceType;
@@ -47,6 +50,14 @@ public class EhContentServerResources implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public java.lang.String getResourceId() {

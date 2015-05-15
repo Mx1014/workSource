@@ -789,7 +789,7 @@ CREATE TABLE `eh_forum_posts` (
     `content_type` INTEGER NOT NULL DEFAULT 0 COMMENT '0: text, 1: single picture, 2: audio clip, 3: video clip',
     `content` TEXT COMMENT 'content data, depends on value of content_type',
  
-    `embedded_type` VARCHAR(32),
+    `embedded_app_id` BIGINT,
     `embedded_id` BIGINT,
     `embedded_json` TEXT,
     `embedded_version` INTEGER NOT NULL DEFAULT 1,
@@ -1914,6 +1914,7 @@ CREATE TABLE if NOT exists `eh_user_activities` (
 DROP TABLE IF EXISTS `eh_content_server_resources`;
 CREATE  TABLE  `eh_content_server_resources` (
 	`id` BIGINT NOT NULL COMMENT "the id of record",
+     `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
 	`resource_id` VARCHAR(40) NOT NULL,
 	`resource_md5` VARCHAR(40) NOT NULL,
 	`resource_type` INT NOT NULL COMMENT 'current support audio,image and video',

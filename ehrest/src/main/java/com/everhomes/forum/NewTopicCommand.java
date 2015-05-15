@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>subject: 帖子标题</li>
  * <li>content_type: 帖子内容类型，{@link com.everhomes.forum.PostContentType}</li>
  * <li>content: 帖子内容</li>
- * <li>embeddedType: 内嵌对象类型，{@link com.everhomes.forum.PostEmbeddedType}</li>
+ * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.app.AppConstants}</li>
  * <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
  * <li>isForwarded: 是否是转发帖的标记</li>
  * </ul>
@@ -39,7 +39,7 @@ public class NewTopicCommand {
     @NotNull
     private String content;
     
-    private String embeddedType;
+    private long embeddedAppId;
     
     private Long embeddedId;
     
@@ -107,15 +107,15 @@ public class NewTopicCommand {
 		this.content = content;
 	}
 
-	public String getEmbeddedType() {
-		return embeddedType;
-	}
+	public long getEmbeddedAppId() {
+        return embeddedAppId;
+    }
 
-	public void setEmbeddedType(String embeddedType) {
-		this.embeddedType = embeddedType;
-	}
+    public void setEmbeddedAppId(long embeddedAppId) {
+        this.embeddedAppId = embeddedAppId;
+    }
 
-	public Long getEmbeddedId() {
+    public Long getEmbeddedId() {
 		return embeddedId;
 	}
 

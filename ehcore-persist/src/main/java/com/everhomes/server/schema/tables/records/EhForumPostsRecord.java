@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 942495779;
+	private static final long serialVersionUID = -735227893;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -294,17 +294,17 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.embedded_type</code>.
+	 * Setter for <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
-	public void setEmbeddedType(java.lang.String value) {
+	public void setEmbeddedAppId(java.lang.Long value) {
 		setValue(20, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.embedded_type</code>.
+	 * Getter for <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
-	public java.lang.String getEmbeddedType() {
-		return (java.lang.String) getValue(20);
+	public java.lang.Long getEmbeddedAppId() {
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
@@ -543,7 +543,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhForumPostsRecord
 	 */
-	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long dislikeCount, java.lang.String subject, java.lang.Integer contentType, java.lang.String content, java.lang.String embeddedType, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp updateTime, java.sql.Timestamp createTime) {
+	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long dislikeCount, java.lang.String subject, java.lang.Integer contentType, java.lang.String content, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp updateTime, java.sql.Timestamp createTime) {
 		super(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS);
 
 		setValue(0, id);
@@ -566,7 +566,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		setValue(17, subject);
 		setValue(18, contentType);
 		setValue(19, content);
-		setValue(20, embeddedType);
+		setValue(20, embeddedAppId);
 		setValue(21, embeddedId);
 		setValue(22, embeddedJson);
 		setValue(23, embeddedVersion);

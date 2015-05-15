@@ -17,7 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>subject: 帖子或评论标题</li>
  * <li>content_type: 帖子或评论内容类型，{@link com.everhomes.forum.PostContentType}</li>
  * <li>content: 帖子或评论内容</li>
- * <li>embeddedType: 内嵌对象类型，{@link com.everhomes.forum.PostEmbeddedType}</li>
+ * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.app.AppConstants}</li>
+ * <li>embeddedId: 内嵌对象ID</li>
  * <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
  * <li>isForwarded: 是否是转发帖的标记</li>
  * <li>childCount: 孩子数目，如帖子下的评论数目</li>
@@ -47,7 +48,7 @@ public class PostDTO {
     
     private String content;
     
-    private String embeddedType;
+    private Long embeddedAppId;
     
     private Long embeddedId;
     
@@ -140,15 +141,15 @@ public class PostDTO {
 		this.content = content;
 	}
 
-	public String getEmbeddedType() {
-		return embeddedType;
-	}
+	public Long getEmbeddedAppId() {
+        return embeddedAppId;
+    }
 
-	public void setEmbeddedType(String embeddedType) {
-		this.embeddedType = embeddedType;
-	}
+    public void setEmbeddedAppId(Long embeddedAppId) {
+        this.embeddedAppId = embeddedAppId;
+    }
 
-	public Long getEmbeddedId() {
+    public Long getEmbeddedId() {
 		return embeddedId;
 	}
 

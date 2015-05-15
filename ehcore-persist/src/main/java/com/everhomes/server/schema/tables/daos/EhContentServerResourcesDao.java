@@ -48,6 +48,13 @@ public class EhContentServerResourcesDao extends org.jooq.impl.DAOImpl<com.everh
 	}
 
 	/**
+	 * Fetch records that have <code>owner_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhContentServerResources> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES.OWNER_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>resource_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhContentServerResources> fetchByResourceId(java.lang.String... values) {
