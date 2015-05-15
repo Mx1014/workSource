@@ -475,7 +475,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             if (!isFirst){
                 strBuilder.append("-");
            }
-           strBuilder.append(buildingName);
+           strBuilder.append(apartName);
            isFirst = false;
         }
         return strBuilder.toString();
