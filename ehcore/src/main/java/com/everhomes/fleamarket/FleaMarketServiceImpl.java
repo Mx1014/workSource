@@ -41,7 +41,7 @@ public class FleaMarketServiceImpl implements FleaMarketService {
         item.setCloseFlag(cmd.getCloseFlag());
         item.setPrice(cmd.getPrice());
         
-        post.setEmbeddedType(EntityType.FLEAMARKET.getCode());
+        post.setEmbeddedAppId(AppConstants.APPID_FLEAMARKET);
         post.setEmbeddedJson(StringHelper.toJsonString(item));
         
         //post.setVisibleFlag(cmd.getVisibleFlag());
