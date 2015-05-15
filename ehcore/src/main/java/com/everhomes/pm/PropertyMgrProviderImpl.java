@@ -232,7 +232,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
          List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
          SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
          if(communityId != null)
-            query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
          Integer offset = (pageOffset - 1 ) * pageSize;
          query.addOrderBy(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ID.asc());
          query.addLimit(offset, pageSize);
