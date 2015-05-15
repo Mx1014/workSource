@@ -1911,4 +1911,28 @@ CREATE TABLE if NOT exists `eh_user_activities` (
       PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_content_server_resources`;
+CREATE  TABLE  `eh_content_server_resources` (
+	`id` BIGINT NOT NULL COMMENT "the id of record",
+	`resource_id` VARCHAR(40) NOT NULL,
+	`resource_md5` VARCHAR(40) NOT NULL,
+	`resource_type` INT NOT NULL COMMENT 'current support audio,image and video',
+	`resource_size` INT NOT NULL,
+	`resource_name` VARCHAR(128) NOT NULL, 
+	`metadata` text,
+	PRIMARY  KEY (`id`),
+ 	INDEX `i_eh_content_server_key`(`resource_md5`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `eh_content_server`;
+CREATE TABLE  `eh_content_server` (
+        `id` BIGINT NOT NULL COMMENT 'content server id',
+	  `name` VARCHAR(32),
+	  `description` VARCHAR(40),
+        `private_address` VARCHAR(32),
+        `private_port` INT(11),
+        `public_address` VARCHAR(32) NOT NULL,
+        `public_port` INT(11) NOT NULL,
+        PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET foreign_key_checks = 1;
