@@ -5,15 +5,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>addressId: 门牌号</li>
  * <li>apartmentName: 门牌号</li>
  * </ul>
  */
 public class ApartmentDTO {
-    private java.lang.String   apartmentName;
+    private Long addressId;
+    private String   apartmentName;
     
     public ApartmentDTO() {
     }
     
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
     public java.lang.String getApartmentName() {
         return apartmentName;
     }

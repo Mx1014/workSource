@@ -328,7 +328,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
-                    context.selectDistinct(Tables.EH_ADDRESSES.APARTMENT_NAME)
+                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
@@ -336,6 +336,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(cmd.getKeyword() + "%"))
                         .fetch().map((r) -> {
                             ApartmentDTO apartment = new ApartmentDTO();
+                            apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
                             results.add(apartment);
                             return null;
@@ -346,6 +347,32 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         
         return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
+    
+    @Override
+    public List<Address> listAddressByKeyword(ListAddressByKeywordCommand cmd) {
+        if(cmd.getCommunityId() == null || cmd.getKeyword() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId  or keyword parameter");
+
+        List<Address> results = new ArrayList<>();
+        String likeVal = "%" + cmd.getKeyword() + "%";
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME)
+                    .from(Tables.EH_ADDRESSES)
+                    .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
+                    .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                    .fetch().map((r) -> {
+                        results.add(ConvertHelper.convert(r, Address.class));
+                        return null;
+                    });
+                return true;
+            });
+        
+        return results;
+    }
+    
     
     @Override
     public ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd) {
