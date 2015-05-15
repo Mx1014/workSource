@@ -332,7 +332,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(f == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                        "Invalid addressId parameter");
-        if(f.getId() != cmd.getFamilyId())
+        if(f.getId().longValue() != cmd.getFamilyId().longValue())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter,user not in family");
         
@@ -703,7 +703,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         Long pageOffset = cmd.getPageOffset();
         FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
         Family family = self.findFamilyByAddressId(user.getAddressId());
-        if(family == null || family.getId() != familyId){
+        if(family == null || family.getId().longValue() != familyId.longValue()){
             LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + familyId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter,user not in family.");
@@ -822,7 +822,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         }
         FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
         Family family = self.findFamilyByAddressId(user.getAddressId());
-        if(family == null || (cmd.getFamilyId() != null && family.getId() != cmd.getFamilyId())){
+        if(family == null || (cmd.getFamilyId() != null && family.getId().longValue() != cmd.getFamilyId().longValue())){
             LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + cmd.getFamilyId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter,user not in family.");

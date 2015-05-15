@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyMemberDTO;
@@ -27,6 +28,15 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
+/**
+ * <ul>家庭管理：
+ * <li>根据关键字搜索家庭：调用findFamilyByKeyword()接口，关键字keyword为家庭名字；</li>
+ * <li>根据家庭Id获取自己加入的家庭信息：调用getOwningFamilyById()接口；</li>
+ * <li>获取自己加入的所有家庭列表：调用getUserOwningFamilies()接口；</li>
+ * <li>根据地址Id查询家庭信息：调用findFamilyByAddressId()接口；</li>
+ * </ul>
+ */
+@RestDoc(value="Family controller", site="core")
 @RestController
 @RequestMapping("/family")
 public class FamilyController extends ControllerBase {
