@@ -45,7 +45,8 @@
         eh_poll_items | eh_poll_votes | eh_business | eh_business_profiles | 
         eh_biz_coupon_groups | eh_biz_coupon |
         eh_client_package_files | eh_client_packages | 
-        eh_user_locations | eh_user_behaviors | eh_user_contacts | eh_user_installed_apps | eh_user_activities
+        eh_user_locations | eh_user_behaviors | eh_user_contacts | eh_user_installed_apps | eh_user_activities |
+        eh_content_server_resources | eh_content_server
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

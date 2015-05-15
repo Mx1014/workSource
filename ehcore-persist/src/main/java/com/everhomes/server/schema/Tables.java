@@ -159,6 +159,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
 
 	/**
+	 * The table ehcore.eh_content_server
+	 */
+	public static final com.everhomes.server.schema.tables.EhContentServer EH_CONTENT_SERVER = com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER;
+
+	/**
+	 * The table ehcore.eh_content_server_resources
+	 */
+	public static final com.everhomes.server.schema.tables.EhContentServerResources EH_CONTENT_SERVER_RESOURCES = com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES;
+
+	/**
 	 * The table ehcore.eh_devices
 	 */
 	public static final com.everhomes.server.schema.tables.EhDevices EH_DEVICES = com.everhomes.server.schema.tables.EhDevices.EH_DEVICES;
