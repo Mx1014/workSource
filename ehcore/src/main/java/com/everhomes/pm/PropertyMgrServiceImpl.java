@@ -85,6 +85,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	propertyMgrProvider.createPropMember(communityPmMember);
     }
     
+    @Override
+    public ListPropMemberCommandResponse getUserOwningProperties() {
+    	ListPropMemberCommandResponse commandResponse = new ListPropMemberCommandResponse();
+    	User user  = UserContext.current().getUser();
+    	
+    	
+    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listUserCommunityPmMembers(user.getId());
+    	commandResponse.setMembers( entityResultList.stream()
+                 .map(r->{ 
+                	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
+                	 Community community = communityProvider.findCommunityById(dto.getCommunityId());
+                	 dto.setCommunityName(community.getName());
+                	 return dto; })
+                 .collect(Collectors.toList()));
+    	
+        return commandResponse;
+    }
     
     @Override
     public ListPropMemberCommandResponse listCommunityPmMembers(ListPropMemberCommand cmd) {
@@ -103,7 +120,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	//权限控制
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), cmd.getUserId(), null, cmd.getPageOffset(),pageSize);
+    	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), null, cmd.getPageOffset(),pageSize);
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
                 	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);

@@ -141,6 +141,8 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
             LOGGER.info("process count: " + count.get());
         }
         
+        //TODO merge ?
+        //http://www.elastic.co/guide/en/elasticsearch/guide/current/merge-process.html
         this.optimize(1);
         this.refresh();
     }

@@ -21,6 +21,7 @@ import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.family.FamilyDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.util.ConvertHelper;
@@ -37,6 +38,20 @@ public class PropertyMgrController extends ControllerBase {
 	@Autowired
 	PropertyMgrProvider propertyMgrProvider;
 	
+	 /**
+     * <b>URL: /family/getUserOwningProperties</b>
+     * <p>查询用户加入的物业</p>
+     */
+    @RequestMapping("getUserOwningProperties")
+    @RestReturn(value=FamilyDTO.class)
+    public RestResponse getUserOwningProperties() {
+        ListPropMemberCommandResponse commandResponse = propertyMgrService.getUserOwningProperties();
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 	/**
 	 * <b>URL: /pm/listPMGroupMembers</b>
      * <p>查询物业成员列表</p>

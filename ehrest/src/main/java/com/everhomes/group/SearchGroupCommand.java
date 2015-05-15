@@ -1,7 +1,11 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
@@ -18,8 +22,14 @@ public class SearchGroupCommand {
     private Double longitude;
     private Double latitude;
     
-    @NotNull
-    private String searchCondition;
+    private String queryString;
+    
+    @ItemType(String.class)
+    private Map<String, String> includeTerms;
+    
+    @ItemType(String.class)
+    private Map<String, String> excludeTerms;
+    
     private Long pageOffset;
     private int pageSize;
     
@@ -50,14 +60,6 @@ public class SearchGroupCommand {
         this.latitude = latitude;
     }
 
-    public String getSearchCondition() {
-        return searchCondition;
-    }
-
-    public void setSearchCondition(String searchCondition) {
-        this.searchCondition = searchCondition;
-    }
-
     public Long getPageOffset() {
         return pageOffset;
     }
@@ -73,4 +75,29 @@ public class SearchGroupCommand {
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
     }
+
+    public String getQueryString() {
+        return queryString;
+    }
+
+    public void setQueryString(String queryString) {
+        this.queryString = queryString;
+    }
+
+    public Map<String, String> getIncludeTerms() {
+        return includeTerms;
+    }
+
+    public void setIncludeTerms(Map<String, String> includeTerms) {
+        this.includeTerms = includeTerms;
+    }
+
+    public Map<String, String> getExcludeTerms() {
+        return excludeTerms;
+    }
+
+    public void setExcludeTerms(Map<String, String> excludeTerms) {
+        this.excludeTerms = excludeTerms;
+    }
+    
 }

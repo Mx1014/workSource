@@ -51,6 +51,24 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
     // ??? How to set cache if there is more than one parameters? 
     //@Cacheable(value="Region", key="#regionId")
+    @Cacheable(value = "listUserCommunityPmMembers")
+    @Override
+    public List<CommunityPmMember> listUserCommunityPmMembers(Long userId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
+        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
+        if(userId != null)
+           query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
+       
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
+            return null;
+        });
+        return result;
+    }
+    
     @Override
     public List<CommunityPmMember> findPmMemberByTargetTypeAndId(String targetType, long targetId) {
     	final List<CommunityPmMember> groups = new ArrayList<CommunityPmMember>();
@@ -141,16 +159,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     
     @Cacheable(value = "listCommunityPmMembers")
     @Override
-    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, Long userId, String contactToken,Integer pageOffset,Integer pageSize) {
+    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, String contactToken,Integer pageOffset,Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
         SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
         if(communityId != null)
            query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
-        if(userId != null) {
-            query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
-        }
        
         if(contactToken != null) {
         	query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));

@@ -1,0 +1,205 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>
+    Message test
+</title>
+<script src="/static/jquery-2.1.3.min.js"></script>
+<script src="/static/jquery.cookie.js"></script>
+</head>
+
+<body>
+<form>
+SendToUser:<input type="text" name="sendToUser" id="sendToUser"/><br/>
+Message:<input type="text" name="message" id="message"/><br/>
+<div id="content"></div>
+<input type="button" name="send" id="send" value="Send"/>
+</form>
+
+<script>
+function createMessageCommand(senderUid, channels, body, senderTag) {
+    var obj = {};
+    obj.appId = 0;
+    obj.deliveryOption = 3;
+    //obj.channels = channels;
+    obj["channels[0].channelType"] = "user";
+    obj["channels[0].channelToken"] = $("#sendToUser").val();
+    obj.body = body;
+    obj.senderTag = senderTag;
+    obj.metaAppId = 0;
+    obj.meta = {};
+    //obj.token = $.cookie("token");
+    //alert(obj.token);
+    return obj
+}
+function sendMessage(uid, body) {
+    var cmd = createMessageCommand(uid, [{"channelType":"user", "channelToken":"10008"}], body, "testMessage");
+
+    $.post("/user/sendMessage", cmd, function() {
+    ;//alert( "success" )
+    })
+  .done(function() {
+    ;//alert( "second success" );
+  })
+  .fail(function() {
+    alert( "error" );
+  })
+  .always(function() {
+    //alert( "finished" );
+    });
+}
+
+$("#send").click(function (){
+        sendMessage(1023, $("#message").val());
+});
+
+var wsUriPusher = "ws://127.0.0.1:9090/pusher";
+var wsUriClient = "ws://10.1.1.98:9090/client";
+var websocket;
+var clientsocket;
+
+function newHandshake(device) {
+    var obj = {}
+    obj.deviceId = device;
+    obj.deviceType = "browser";
+    obj.meta = {};
+    return obj;
+}
+
+function newPdu(msg, name) {
+    var obj = {}
+    obj.version = "ver_0.00";
+    obj.name = name;
+    obj.requestId = 1;
+    obj.appId = 1;
+    obj.payload = msg;
+    return obj;
+}
+
+function init() { 
+    //initPusherWebSocket();
+    initClientWebSocket();
+}
+
+function initPusherWebSocket() {
+    websocket = new WebSocket(wsUriPusher);
+    websocket.onopen = function(evt) {
+        onOpen(evt) 
+    }; 
+    websocket.onclose = function(evt) {
+        onClose(evt) 
+    }; 
+    websocket.onmessage = function(evt) {
+        onMessage(evt) 
+    };
+    websocket.onerror = function(evt) { 
+        onError(evt) 
+    }; 
+}  
+
+heartbeat_interval = null;
+function onOpen(evt) {
+    writeToScreen("Pusher CONNECTED"); 
+    doSend(document.getElementById("deviceId").value);
+
+    if (heartbeat_interval == null) {
+        //missed_heartbeats = 0;
+        heartbeat_interval = setInterval(function() {
+            try {
+                //missed_heartbeats++;
+                //if (missed_heartbeats >= 3)
+                //    throw new Error("Too many missed heartbeats.");
+                websocket.send("Ping");
+            } catch(e) {
+                clearInterval(heartbeat_interval);
+                heartbeat_interval = null;
+                console.warn("Closing connection. Reason: " + e.message);
+                ws.close();
+            }
+        }, 5000);
+    }
+}  
+function onClose(evt) { 
+    writeToScreen("DISCONNECTED"); 
+}  
+function onMessage(evt) { 
+    writeToScreen('<span style="color: blue;">PUSHER RESPONSE: ' + evt.data + ' </span> '); 
+    var obj = JSON.parse(evt.data);
+    if(obj.name == "NOTIFY") {
+        requestMessages();
+    }
+    //websocket.close();
+}  
+function onError(evt) { 
+    writeToScreen(' <span style="color: red;"> ERROR: </span> ' + evt.data); 
+} 
+function doSend(message) { 
+    writeToScreen("SENT: " + message);
+    handshake = newHandshake(message);
+    pdu = newPdu(JSON.stringify(handshake), "HANDSHAKE");
+    websocket.send(JSON.stringify(pdu));
+} 
+function writeToScreen(message) { 
+    $('#content').append(message + '<br>');
+} 
+function requestMessages() {
+    pdu = newPdu("0", "REQUEST");
+    websocket.send(JSON.stringify(pdu));
+}
+
+function initClientWebSocket() {
+    clientsocket = new WebSocket(wsUriClient);
+    clientsocket.onopen = function(evt) {
+        onClientOpen(evt) 
+    }; 
+    clientsocket.onclose = function(evt) {
+        onClientClose(evt) 
+    }; 
+    clientsocket.onmessage = function(evt) {
+        onClientMessage(evt) 
+    };
+    clientsocket.onerror = function(evt) { 
+        onClientError(evt) 
+    }; 
+}  
+
+var requestId = 0;
+function createClientPdu(name, payload) {
+    var obj = {};
+    obj.version = "";
+    obj.requestId = requestId++;
+    obj.appId = 0;
+    obj.payload = payload;
+    obj.name = name;
+    return obj;
+}
+
+function requestUser() {
+    var obj = {};
+    obj.loginToken = $.cookie("token");
+    pdu = createClientPdu("register", JSON.stringify(obj));
+    return pdu;
+}
+
+function onClientOpen(evt) {
+    writeToScreen("Client CONNECTED"); 
+    msg = JSON.stringify(requestUser());
+    clientsocket.send(msg);
+}
+
+function onClientClose(evt) {
+    $('#content').append('client closed<br>');
+}
+
+function onClientMessage(evt) {
+    $('#content').append("Client message " + evt.data + '<br>');
+}
+
+function onClientError(evt) {
+    $('#content').append('client error<br>');
+}
+
+init();
+</script>
+</body>
+</html>

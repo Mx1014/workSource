@@ -72,7 +72,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        LOGGER.info("Received client message. session: " + session.getId() + ", message: " + message.getPayload());
+        //LOGGER.info("Received client message. session: " + session.getId() + ", message: " + message.getPayload());
         updateSessionReceiveTick(session);
 
         PduFrame frame = PduFrame.fromJson((String)message.getPayload());
@@ -193,9 +193,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     @NamedHandler(value="", byClass=HeartbeatPdu.class)
     private void handleHeartbeatPdu(WebSocketSession session, PduFrame frame) {
         HeartbeatPdu pdu = frame.getPayload(HeartbeatPdu.class);
-        if(LOGGER.isDebugEnabled())
-            LOGGER.debug(String.format("Received heartbeat from client (%s), last receive tick on client is %d", 
-                session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
+        //if(LOGGER.isDebugEnabled())
+        //    LOGGER.debug(String.format("Received heartbeat from client (%s), last receive tick on client is %d", 
+        //        session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
     }
     
     private void registerSession(String loginToken, WebSocketSession session) {
