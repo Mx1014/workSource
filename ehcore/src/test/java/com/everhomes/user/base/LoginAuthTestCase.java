@@ -90,7 +90,7 @@ public class LoginAuthTestCase extends TestCase {
     public void setUp() throws Exception {
     	super.setUp();
     	
-    	createAcl();
+    	//createAcl();
     }
     
     /**

@@ -19,4 +19,5 @@ public interface UserServiceErrorCode {
     static final int ERROR_ACCOUNT_NAME_ALREADY_EXISTS = 10012;
     static final int ERROR_ACCOUNT_PASSWORD_NOT_SET = 10013;
     static final int ERROR_INVALID_INVITATION_CODE=10014;
+    static final int ERROR_INVITATION_CODE=100015;
 }

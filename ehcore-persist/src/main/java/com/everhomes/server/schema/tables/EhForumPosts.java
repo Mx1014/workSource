@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -758085422;
+	private static final long serialVersionUID = -2030659199;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -67,9 +67,14 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> GEOHASH = createField("geohash", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.visible_flag</code>. define the visibiliy, 0-ALL, 1-COMMUNITY_ONLY
+	 * The column <code>ehcore.eh_forum_posts.visibility_scope</code>. define the visibiliy scope
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> VISIBLE_FLAG = createField("visible_flag", org.jooq.impl.SQLDataType.TINYINT, this, "define the visibiliy, 0-ALL, 1-COMMUNITY_ONLY");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> VISIBILITY_SCOPE = createField("visibility_scope", org.jooq.impl.SQLDataType.TINYINT, this, "define the visibiliy scope");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.visibility_scope_id</code>. visibility scope related entity id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> VISIBILITY_SCOPE_ID = createField("visibility_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "visibility scope related entity id");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.category_id</code>.
@@ -122,9 +127,9 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "content data, depends on value of content_type");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.embedded_type</code>.
+	 * The column <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_TYPE = createField("embedded_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> EMBEDDED_APP_ID = createField("embedded_app_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.embedded_id</code>.

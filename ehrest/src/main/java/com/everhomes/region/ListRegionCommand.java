@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态，参考{@link com.everhomes.region.RegionAdminStatus}</li>
  * <li>sortBy</li>
  * <li>sortOrder: 升降排序的方式，{@link com.everhomes.util.SortOrder}</li>
+ * <li>keyword: 关键字</li>
  * </ul>
  */
 public class ListRegionCommand {
@@ -18,6 +19,8 @@ public class ListRegionCommand {
     private Byte status;
     private String sortBy;
     private Byte sortOrder;
+    
+    private String keyword;
     
     public ListRegionCommand() {
     }
@@ -62,6 +65,14 @@ public class ListRegionCommand {
         this.sortOrder = sortOrder;
     }
     
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

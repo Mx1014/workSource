@@ -45,7 +45,20 @@
 		    <td>Response</td><td>${restMethod.returnTemplate}</td>
 		</tr>
         <tr>
-            <td>Java Doc</td><td><a href="${javadocRoot}${restMethod.javadocUrl}">Check out Java doc</a></td>
+            <td>Java doc</td>
+            <td>
+            
+            <ul>
+            <li><a href="${javadocRoot}/${restMethod.getFullJavadocUrl('core')}" target="doc">${restMethod.uri} details</a></li>
+            <li><a href="${javadocRoot}/rest/index.html" target="doc">REST API objects</a></li>
+            <li><a href="${javadocRoot}/messaging/index.html" target="doc">Messaging service API</a></li>
+            <li><a href="${javadocRoot}/forum/index.html" target="doc">Forum service API</a></li>
+            <li><a href="${javadocRoot}/core-api/index.html" target="doc">Core server internal API</a></li>
+            <li><a href="${javadocRoot}/platform/index.html" target="doc">Platform API</a></li>
+            <li><a href="${javadocRoot}/util/index.html" target="doc">Util API</a></li>
+            </ul>
+            
+            </td>
         </tr>
 <tr>
 <td colspan="2" align="center"><input type="submit" value="Submit"></td>

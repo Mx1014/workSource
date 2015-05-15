@@ -16,6 +16,8 @@ public class ListAddressCommand {
     // start from 1, page size is configurable at server side
     Long pageOffset;
     
+    Long pageSize;
+    
     public ListAddressCommand() {
     }
 
@@ -39,7 +41,16 @@ public class ListAddressCommand {
         this.pageOffset = pageOffset;
     }
     
-    @Override
+    
+    public Long getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Long pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

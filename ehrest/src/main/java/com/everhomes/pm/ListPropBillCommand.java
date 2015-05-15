@@ -16,8 +16,8 @@ public class ListPropBillCommand {
     private Long communityId;
     private String dateStr;
     private String address;
-	private Long pageOffset;
-    private Long pageSize;
+    private Integer pageOffset;
+    private Integer pageSize;
     
     public ListPropBillCommand() {
     }
@@ -52,24 +52,29 @@ public class ListPropBillCommand {
 		this.address = address;
 	}
 
+	
 
-	public Long getPageOffset() {
-        return pageOffset;
-    }
+    public Integer getPageOffset() {
+		return pageOffset;
+	}
 
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
-    }
 
-    public Long getPageSize() {
-        return pageSize;
-    }
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
+	}
 
-    public void setPageSize(Long pageSize) {
-        this.pageSize = pageSize;
-    }
 
-    @Override
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

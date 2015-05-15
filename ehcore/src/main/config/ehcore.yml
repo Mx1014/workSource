@@ -62,7 +62,8 @@ messaging.routing.block.size: 1000
 forum.postbox.size: 1000
 forum.flush.interval: 3000
 
-javadoc.root: file:///Users/kelveny/archive/ehng/ehcore/target/site/apidocs/
+javadoc.root: http://localhost:8080/apidocs
+javadoc.location: file:///Users/kelveny/archive/ehng/apidocs/
 
 #
 # Redis configuration

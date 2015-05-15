@@ -41,7 +41,7 @@ public class RegionController extends ControllerBase {
     private RegionProvider regionProvider;
     
     /**
-     * <b>URL: /category/list</b>
+     * <b>URL: /region/list</b>
      * 列出指定范围和状态的区域列表（不用填父亲区域ID）
      */
     @RequireAuthentication(false)
@@ -63,7 +63,7 @@ public class RegionController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /category/listChildren</b>
+     * <b>URL: /region/listChildren</b>
      * 列出指定范围和状态的第一层孩子区域列表（需填父亲区域ID）
      */
     @RequireAuthentication(false)
@@ -86,7 +86,7 @@ public class RegionController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /category/listChildren</b>
+     * <b>URL: /region/listChildren</b>
      * 列出指定范围和状态的所有层孩子区域列表（可不填父亲区域ID）
      */
     @RequireAuthentication(false)
@@ -101,6 +101,29 @@ public class RegionController extends ControllerBase {
         List<Region> entityResultList = this.regionProvider.listDescendantRegions(cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
+        
+        List<RegionDTO> dtoResultList = entityResultList.stream()
+                .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
+                .collect(Collectors.toList());
+        return new RestResponse(dtoResultList);
+    }
+    
+    /**
+     * <b>URL: /region/listRegionByKeyword</b>
+     * 根据关键字查询区域列表（可不填父亲区域ID）
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listRegionByKeyword")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listRegionByKeyword(@Valid ListRegionCommand cmd) {
+        Tuple<String, SortOrder> orderBy = null;
+        if(cmd.getSortBy() != null)
+            orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+        
+        @SuppressWarnings("unchecked")
+        List<Region> entityResultList = this.regionProvider.listRegionByKeyword(cmd.getParentId(), 
+            RegionScope.fromCode(cmd.getScope()), 
+            RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword());
         
         List<RegionDTO> dtoResultList = entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })

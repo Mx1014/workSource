@@ -4,6 +4,7 @@ package com.everhomes.region;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -19,6 +20,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -29,6 +31,7 @@ import com.everhomes.server.schema.tables.daos.EhRegionsDao;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.records.EhRegionsRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -233,6 +236,60 @@ public class RegionProviderImpl implements RegionProvider {
         
         if(status != null)
             condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+        
+        if(condition != null) {
+            selectStep.where(condition);
+        }
+        
+        if(orderByFields != null) {
+            result = selectStep.orderBy(orderByFields).fetch().map(
+                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+            );
+        } else {
+            result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+            );
+        }
+        
+        return result;
+    }
+
+    @Cacheable(value = "listRegionByKeyword")
+    @SuppressWarnings({"unchecked", "rawtypes" })
+    @Override
+    public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
+            Tuple<String, SortOrder> orderBy, String keyword) {
+        List<Region> result = new ArrayList<>();
+        if(StringUtils.isEmpty(keyword)){
+            LOGGER.error("Keyword is null or empty" );
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid keyword parameter,keyword is null or empty.");
+        }
+        if(scope == null){
+            LOGGER.error("Scope is null." );
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid scope parameter,scope is null.");
+        }
+        
+        if(status == null)
+            status = RegionAdminStatus.ACTIVE;
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+        Condition condition = (Tables.EH_REGIONS.NAME.like("%" + keyword + "%").or(Tables.EH_REGIONS.PATH.like("%" + keyword + "%")));
+        
+        if(parentRegionId != null)
+            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
+        
+        if(scope != null)
+            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+        
+        if(status != null)
+            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+        
         
         if(condition != null) {
             selectStep.where(condition);

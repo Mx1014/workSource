@@ -90,7 +90,7 @@ CREATE TABLE `eh_locale_strings`(
     `scope` VARCHAR(64),
     `code` INTEGER,
     `locale` VARCHAR(16),
-    `text` VARCHAR(256),
+    `text` TEXT,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
@@ -604,7 +604,6 @@ CREATE TABLE `eh_groups` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_group_name`(`namespace_id`, `name`, `discriminator`),
     INDEX `i_eh_group_creator`(`creator_uid`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
@@ -774,7 +773,8 @@ CREATE TABLE `eh_forum_posts` (
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     
-    `visible_flag` TINYINT COMMENT 'define the visibiliy, 0-ALL, 1-COMMUNITY_ONLY',
+	`visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
+    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
     
     `category_id` BIGINT,
     `category_path` VARCHAR(128),
@@ -789,7 +789,7 @@ CREATE TABLE `eh_forum_posts` (
     `content_type` INTEGER NOT NULL DEFAULT 0 COMMENT '0: text, 1: single picture, 2: audio clip, 3: video clip',
     `content` TEXT COMMENT 'content data, depends on value of content_type',
  
-    `embedded_type` VARCHAR(32),
+    `embedded_app_id` BIGINT,
     `embedded_id` BIGINT,
     `embedded_json` TEXT,
     `embedded_version` INTEGER NOT NULL DEFAULT 1,
@@ -1910,5 +1910,30 @@ CREATE TABLE if NOT exists `eh_user_activities` (
       `create_time` DATETIME DEFAULT NULL,
       PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_content_server_resources`;
+CREATE  TABLE  `eh_content_server_resources` (
+	`id` BIGINT NOT NULL COMMENT "the id of record",
+     `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+	`resource_id` VARCHAR(40) NOT NULL,
+	`resource_md5` VARCHAR(40) NOT NULL,
+	`resource_type` INT NOT NULL COMMENT 'current support audio,image and video',
+	`resource_size` INT NOT NULL,
+	`resource_name` VARCHAR(128) NOT NULL, 
+	`metadata` text,
+	PRIMARY  KEY (`id`),
+ 	INDEX `i_eh_content_server_key`(`resource_md5`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `eh_content_server`;
+CREATE TABLE  `eh_content_server` (
+        `id` BIGINT NOT NULL COMMENT 'content server id',
+	  `name` VARCHAR(32),
+	  `description` VARCHAR(40),
+        `private_address` VARCHAR(32),
+        `private_port` INT(11),
+        `public_address` VARCHAR(32) NOT NULL,
+        `public_port` INT(11) NOT NULL,
+        PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;

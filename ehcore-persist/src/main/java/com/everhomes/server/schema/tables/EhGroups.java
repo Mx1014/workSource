@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 1395536945;
+	private static final long serialVersionUID = 622853152;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -201,7 +201,7 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUPS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUPS_U_EH_GROUP_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUPS_PRIMARY);
 	}
 
 	/**

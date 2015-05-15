@@ -155,6 +155,15 @@ public class CoreServerBootstrapBean implements ApplicationListener<ApplicationE
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
             
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupInviteAdminRole);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceCreator);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
             // setup default FORUM resource ACL
             acl = new Acl();
             acl.setOwnerType(EntityType.FORUM.getCode());

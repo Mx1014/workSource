@@ -6,14 +6,9 @@ import static com.everhomes.server.schema.Tables.EH_COMMUNITY_PM_MEMBERS;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
-import org.jooq.SortField;
-import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,22 +18,27 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.group.GroupOpRequest;
-import com.everhomes.jooq.JooqHelper;
+import com.everhomes.entity.EntityType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCommunityAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmBillsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmMembersDao;
-import com.everhomes.server.schema.tables.daos.EhGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhCommunityPmOwnersDao;
+import com.everhomes.server.schema.tables.daos.EhCommunityPmTasksDao;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmBills;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhCommunityPmOwners;
+import com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
+import com.everhomes.server.schema.tables.records.EhCommunityPmOwnersRecord;
+import com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.SortOrder;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.Tuple;
 
 
@@ -52,8 +52,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     // ??? How to set cache if there is more than one parameters? 
     //@Cacheable(value="Region", key="#regionId")
     @Override
-    public List<PmMember> findPmMemberByTargetTypeAndId(String targetType, long targetId) {
-    	final List<PmMember> groups = new ArrayList<PmMember>();
+    public List<CommunityPmMember> findPmMemberByTargetTypeAndId(String targetType, long targetId) {
+    	final List<CommunityPmMember> groups = new ArrayList<CommunityPmMember>();
     	
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
@@ -61,7 +61,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(targetId));
         
         query.fetch().map((r) -> {
-            groups.add(ConvertHelper.convert(r, PmMember.class));
+            groups.add(ConvertHelper.convert(r, CommunityPmMember.class));
             return null;
         });
         
@@ -69,8 +69,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Override
-    public List<PmMember> findPmMemberByCommunityAndTarget(long communityId, String targetType, long targetId) {
-    	final List<PmMember> groups = new ArrayList<PmMember>();
+    public List<CommunityPmMember> findPmMemberByCommunityAndTarget(long communityId, String targetType, long targetId) {
+    	final List<CommunityPmMember> groups = new ArrayList<CommunityPmMember>();
     	
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
@@ -79,7 +79,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(targetId));
         
         query.fetch().map((r) -> {
-            groups.add(ConvertHelper.convert(r, PmMember.class));
+            groups.add(ConvertHelper.convert(r, CommunityPmMember.class));
             return null;
         });
         
@@ -140,9 +140,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Cacheable(value = "listCommunityPmMembers")
-    @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, Long userId, String contactToken,int count) {
+    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, Long userId, String contactToken,Integer pageOffset,Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
@@ -154,12 +153,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         }
        
         if(contactToken != null) {
-        	query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
+        	query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
         }
         
-      
+        Integer offset = (pageOffset - 1 ) * pageSize;
         query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
-        query.addLimit(count);
+        query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
             return null;
@@ -226,34 +225,22 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Cacheable(value = "listCommunityAddressMappings")
-    @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<CommunityAddressMapping> listCommunityAddressMappings(Long communityId,Tuple<String, SortOrder>... orderBy) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    public List<CommunityAddressMapping> listCommunityAddressMappings(Long communityId,Integer pageOffset,Integer pageSize) {
+    	 DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS, orderBy);
-        List<CommunityAddressMapping> result;
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
-        Condition condition = null;
-        if(communityId != null)
-            condition = Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId);
-        
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
-                new DefaultRecordMapper(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.recordType(), CommunityAddressMapping.class)
-            );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.recordType(), CommunityAddressMapping.class)
-            );
-        }
-        
-        return result;
+         List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
+         SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
+         if(communityId != null)
+            query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
+         Integer offset = (pageOffset - 1 ) * pageSize;
+         query.addOrderBy(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ID.asc());
+         query.addLimit(offset, pageSize);
+         query.fetch().map((r) -> {
+         	result.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
+             return null;
+         });
+         return result;
     }
    
     @CacheEvict(value = "CommunityPmBill", key="#communityPmBill.id")
@@ -315,48 +302,226 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Cacheable(value = "listCommunityPmBills")
-    @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
-    public List<CommunityPmBill> listCommunityPmBills(Long communityId, String dateStr,String address, Tuple<String, SortOrder>... orderBy) {
+    public List<CommunityPmBill> listCommunityPmBills(Long communityId, String dateStr,String address, Integer pageOffset,Integer pageSize) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        List<CommunityPmBill> result  = new ArrayList<CommunityPmBill>();
+        SelectQuery<EhCommunityPmBillsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_BILLS);
+        if(communityId != null)
+           query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId));
+        if(dateStr != null) {
+            query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
+        }
+       
+        if(address != null) {
+        	query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
+        }
+        
+        Integer offset = (pageOffset - 1 ) * pageSize;
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_BILLS.ID.asc());
+        query.addLimit(offset, pageSize);
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmBill.class));
+            return null;
+        });
+        return result;
+    }
+    
+    @CacheEvict(value = "CommunityPmOwner", key="#communityPmOwner.id")
+    @Override
+    public void createPropOwner(CommunityPmOwner communityPmOwner) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+       EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+        dao.insert(communityPmOwner);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmOwners.class, null);
+    }
+    
+    @CacheEvict(value = "CommunityPmOwner", key="#communityPmOwner.id")
+    @Override
+    public void updatePropOwner(CommunityPmOwner communityPmOwner){
+    	assert(communityPmOwner.getId() == null);
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+    	dao.update(communityPmOwner);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, communityPmOwner.getId());
+    }
+    
+    @CacheEvict(value = "CommunityPmOwner", key="#communityPmOwner.id")
+    @Override
+    public void deletePropOwner(CommunityPmOwner communityPmOwner){
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+    	dao.deleteById(communityPmOwner.getId());
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, communityPmOwner.getId());
+    }
+    
+    @Cacheable(value="CommunityPmOwner", key="#id")
+    @Override
+    public void deletePropOwner(long id){
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+    	dao.deleteById(id);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, id);
+    }
+     
+    @Cacheable(value="CommunityPmOwner", key="#id")
+    @Override
+    public CommunityPmOwner findPropOwnerById(long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CommunityPmOwner.class);
+    }
+    
+    @Cacheable(value = "listCommunityPmOwners")
+    @Override
+    public List<CommunityPmOwner> listCommunityPmOwners(Long communityId, String address, String contactToken,Integer pageOffset,Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_COMMUNITY_PM_BILLS, orderBy);
-        List<CommunityPmBill> result;
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_COMMUNITY_PM_BILLS);
-        Condition condition = null;
+        List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+        SelectQuery<EhCommunityPmOwnersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_OWNERS);
         if(communityId != null)
-            condition = Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId);
-        
-        if(dateStr != null) {
-            if(condition != null)
-                condition = condition.and(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
-            else
-                condition = Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr);
-        }
-        
+           query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.COMMUNITY_ID.eq(communityId));
         if(address != null) {
-            if(condition != null)
-                condition = condition.and(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
-            else
-                condition = Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address);
+            query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS.eq(address));
+        }
+       
+        if(contactToken != null) {
+        	query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.CONTACT_TOKEN.eq(contactToken));
         }
         
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
-                new DefaultRecordMapper(Tables.EH_COMMUNITY_PM_BILLS.recordType(), EhCommunityPmBills.class)
-            );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_COMMUNITY_PM_BILLS.recordType(), EhCommunityPmBills.class)
-            );
-        }
-        
+        Integer offset = (pageOffset - 1 ) * pageSize;
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_OWNERS.ID.asc());
+        query.addLimit(offset, pageSize);
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+            return null;
+        });
         return result;
+    }
+    
+    @Override
+    public void createPmTask(CommunityPmTasks task) {
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
+         dao.insert(task);
+         
+         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmTasks.class, null);
+    }
+
+    @Override
+    public List<CommunityPmTasks> findPmTaskEntityIdAndTargetId(Long communityId, Long entityId,String entityType,
+            Long targetId, String targetType, Byte status) {
+        final List<CommunityPmTasks> groups = new ArrayList<CommunityPmTasks>();
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
+        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        
+        query.fetch().map((r) -> {
+            groups.add(ConvertHelper.convert(r, CommunityPmTasks.class));
+            return null;
+        });
+        
+        return groups;
+    }
+    @Override
+    public List<PropInvitedUserDTO> listInvitedUsers(Long communityId,String contactToken, Long pageOffset, Long pageSize) {
+
+        final List<PropInvitedUserDTO> results = new ArrayList<>();
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        long size = pageSize;
+        contactToken = contactToken == null ? "" : contactToken;
+        String likeVal = contactToken + "%";
+        Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
+        if(offset > 0) {
+            final List<Long> countsInShards = new ArrayList<>();
+            this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
+                    (DSLContext context, Object reducingContext)-> {
+                        
+                    Long count = context.selectCount().from(Tables.EH_COMMUNITY_PM_MEMBERS)
+                            .leftOuterJoin(Tables.EH_USERS)
+                            .on(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                                    .and(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
+                                    .and(Tables.EH_COMMUNITY_PM_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
+                            .where(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId))
+                            .and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.like(likeVal)
+                                    .or(Tables.EH_USERS.ACCOUNT_NAME.like(likeVal)))
+                            .fetchOne(0, Long.class);
+                    
+                    countsInShards.add(count);
+                    return true;
+                });
+            
+            targetShard = PaginationHelper.offsetFallsAt(countsInShards, offset);
+        }
+        if(targetShard.first() < 0)
+            return results;
+
+        final int[] currentShard = new int[1];
+        currentShard[0] = 0;
+        final Tuple<Integer, Long> fallingShard = targetShard;
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), currentShard, 
+            (DSLContext context, Object reducingContext)-> {
+                int[] current = (int[])reducingContext;
+                if(current[0] < fallingShard.first()) {
+                    current[0] += 1;
+                    return true;
+                }
+                
+                long off = 0;
+                if(current[0] == fallingShard.first())
+                    off = fallingShard.second();
+                
+                context.select().from(Tables.EH_COMMUNITY_PM_MEMBERS)
+                .leftOuterJoin(Tables.EH_USERS)
+                .on(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.INVITOR_UID)
+                        .and(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
+                        .and(Tables.EH_COMMUNITY_PM_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
+                .where(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.like(likeVal)
+                                    .or(Tables.EH_USERS.ACCOUNT_NAME.like(likeVal)))
+                    .limit((int)size).offset((int)off)
+                    .fetch().map((r) -> {
+                        //PropInvitedUserDTO user = ConvertHelper.convert(r, PropInvitedUserDTO.class);
+                        PropInvitedUserDTO user = new PropInvitedUserDTO();
+                        user.setUserId(r.getValue(Tables.EH_USERS.ID));
+                        user.setUserName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
+                        user.setInviteType(r.getValue(Tables.EH_USERS.INVITE_TYPE));
+                        user.setRegisterTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+                        user.setContactType(r.getValue(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TYPE));
+                        user.setContactToken(r.getValue(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN));
+                        user.setInvitorId(r.getValue(Tables.EH_USERS.INVITOR_UID));
+                        user.setInvitorName(r.getValue(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_NAME));
+                        if(results.size() <= pageSize + 1)
+                            results.add(user);
+                        return null;
+                });
+                
+            return true;
+        });
+        
+        if(results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            return results;
+        }
+        return results;
+        
     }
     
 

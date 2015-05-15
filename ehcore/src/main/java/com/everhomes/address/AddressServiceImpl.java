@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
@@ -283,10 +285,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(ListBuildingByKeywordCommand cmd) {
-        if(cmd.getCommunityId() == null || cmd.getKeyword() == null || cmd.getKeyword().isEmpty())
+        if(cmd.getCommunityId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId or keyword parameter");
         
+        if(cmd.getKeyword() == null)
+            cmd.setKeyword("");;
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
@@ -314,11 +318,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
-        if(cmd.getCommunityId() == null || cmd.getKeyword() == null ||
-             cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or keyword parameter");
-        
+        if(cmd.getKeyword() == null)
+            cmd.setKeyword("");
         List<ApartmentDTO> results = new ArrayList<>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
@@ -396,6 +400,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
+        long startTime = System.currentTimeMillis();
         Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
                 cmd.getBuildingName(), cmd.getApartmentName());
         
@@ -405,26 +410,43 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId");
         
         if(address == null) {
+            //全局锁导致入库超时，暂时去掉
             // optimize with double-lock pattern 
-            Tuple<Address, Boolean> result = this.coordinationProvider
-                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
-                         
-                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
-                                 cmd.getBuildingName(), cmd.getApartmentName());
-                if(addr == null) {
-                     addr = new Address();
-                     addr.setCityId(community.getCityId());
-                     addr.setCommunityId(cmd.getCommunityId());
-                     addr.setBuildingName(cmd.getBuildingName());
-                     addr.setApartmentName(cmd.getApartmentName());
-                     addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
-                     this.addressProvider.createAddress(addr);
-                }
-                return addr;
-             });
-             
-             address = result.first();
+//            Tuple<Address, Boolean> result = this.coordinationProvider
+//                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
+//                         
+//                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+//                                 cmd.getBuildingName(), cmd.getApartmentName());
+//                if(addr == null) {
+//                     addr = new Address();
+//                     addr.setCityId(community.getCityId());
+//                     addr.setCommunityId(cmd.getCommunityId());
+//                     addr.setBuildingName(cmd.getBuildingName());
+//                     addr.setApartmentName(cmd.getApartmentName());
+//                     addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+//                     addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+//                     this.addressProvider.createAddress(addr);
+//                }
+//                return addr;
+//             });
+//             
+//             address = result.first();
+            Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+                    cmd.getBuildingName(), cmd.getApartmentName());
+            if(addr == null) {
+                addr = new Address();
+                addr.setCityId(community.getCityId());
+                addr.setCommunityId(cmd.getCommunityId());
+                addr.setBuildingName(cmd.getBuildingName());
+                addr.setApartmentName(cmd.getApartmentName());
+                addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+                addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+                this.addressProvider.createAddress(addr);
+            }
+            address = addr;
          }
+         long endTime = System.currentTimeMillis();
+         LOGGER.info("Get or create address,elapse=" + (endTime - startTime));
          
          return address;
     }
@@ -436,8 +458,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId parameter");
             
         final List<Address> results = new ArrayList<>();
-        final long pageSize = this.configurationProvider.getIntValue("pagination.page.size", 
-                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
@@ -457,5 +479,25 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return new Tuple<>(ErrorCodes.SUCCESS, results);
     }
 
+    private String joinAddrStr(String buildingName, String apartName){
+        boolean isFirst = true;
+        StringBuilder strBuilder = new StringBuilder();
+        if (!StringUtils.isEmpty(buildingName)){
+             if (!isFirst){
+                 strBuilder.append("-");
+            }
+            strBuilder.append(buildingName);
+            isFirst = false;
+        }
+
+        if (!StringUtils.isEmpty(apartName)){
+            if (!isFirst){
+                strBuilder.append("-");
+           }
+           strBuilder.append(apartName);
+           isFirst = false;
+        }
+        return strBuilder.toString();
+    }
 
 }
