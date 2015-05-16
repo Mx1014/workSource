@@ -94,13 +94,13 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity == null) {
             LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_POST_ID, "invalid post id " + activity.getPostId());
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         ActivityRoster roster = createRoster(cmd, user, activity);
         dbProvider.execute((status) -> {
@@ -148,13 +148,13 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity == null) {
             LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_POST_ID, "invalid post id " + activity.getPostId());
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         activityProvider.cancelSignup(activity, user.getId());
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
@@ -170,19 +170,19 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity == null) {
             LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_POST_ID, "invalid post id " + activity.getPostId());
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
         if (family == null) {
             LOGGER.error("handle family error.cannot find family");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_CONTACT_FAMILY, "invalid famliy id");
+                    ActivityServiceErrorCode.ERROR_INVALID_CONTACT_FAMILY, "invalid famliy id");
         }
         activityProvider.checkIn(activity, user.getId(), family.getId());
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
@@ -202,13 +202,13 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity == null) {
             LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_POST_ID, "invalid post id " + activity.getPostId());
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         List<ActivityRoster> rsp = activityProvider.listRosterPagination(cmd.getPageOffset(), cmd.getPageSize(),
                 activity.getId());
@@ -252,7 +252,7 @@ public class ActivityServiceImpl implements ActivityService {
         if (item == null) {
             LOGGER.error("cannnot find roster record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ROSTER, "cannnot find roster record in database id="
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "cannnot find roster record in database id="
                             + cmd.getActivityRosterId());
         }
         Activity activity = activityProvider.findActivityById(item.getActivityId());
@@ -260,21 +260,21 @@ public class ActivityServiceImpl implements ActivityService {
             LOGGER.error("cannnot find activity record in database");
             // TODO
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ID,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
                     "cannnot find activity record in database id=" + cmd.getActivityRosterId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("cannnot find post record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_POST_ID,
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID,
                     "cannnot find post record in database id=" + cmd.getActivityRosterId());
         }
         User user = UserContext.current().getUser();
         if (post.getCreatorUid() != user.getId()) {
             LOGGER.error("the user is invalid.cannot confirm");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_USER,
+                    ActivityServiceErrorCode.ERROR_INVALID_USER,
                     "the user is invalid.cannot confirm id=" + cmd.getActivityRosterId());
         }
         activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + item.getChildCount()
@@ -317,7 +317,7 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity == null) {
             LOGGER.error("cannot find activity for post");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_POST_ID, "cannot find activity");
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "cannot find activity");
         }
         User user = UserContext.current().getUser();
         ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());

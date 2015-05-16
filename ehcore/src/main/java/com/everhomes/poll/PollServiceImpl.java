@@ -17,9 +17,7 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
-import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
-import com.everhomes.forum.PostDTO;
 import com.everhomes.poll.PollService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -53,11 +51,6 @@ public class PollServiceImpl implements PollService {
      
         Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
         dbProvider.execute((status)->{
-            PostDTO post = forumService.createTopic(ConvertHelper.convert(cmd, NewTopicCommand.class));
-            if(post==null){
-               LOGGER.error("create poll error.send post failed");
-               throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE,PollServiceErrorCode.INVALID_POLL_POST,"invalid post id");
-            }
             Poll poll=new Poll();
             poll.setPostId(postId);
             poll.setAnonymousFlag((byte)cmd.getAnonymousFlag().intValue());
@@ -67,7 +60,7 @@ public class PollServiceImpl implements PollService {
                 poll.setCreatorFamilyId(family.getId());
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
-            poll.setPostId(post.getPostId());
+            poll.setPostId(postId);
             poll.setStartTime(new Timestamp(cmd.getStartTime()));
             poll.setEndTime(new Timestamp(cmd.getStopTime()));
             poll.setStatus((byte)1);
@@ -90,28 +83,28 @@ public class PollServiceImpl implements PollService {
         Poll poll = pollProvider.findPollById(cmd.getPollId());
         if (poll == null) {
             LOGGER.error("handle polling failed.the polling does not exsit.id={}", cmd.getPollId());
-            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.INVALID_POLL_ID, "invalid poll id.Id="+cmd.getPollId());
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ID, "invalid poll id.Id="+cmd.getPollId());
         }
         Long postId = poll.getPostId();
         Post post = forumProvider.findPostById(postId);
         if (post == null) {
             LOGGER.error("handle poll error.postId={}",postId);
-            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.INVALID_POLL_POST, "invalid poll post.postId="+postId);
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_POST, "invalid poll post.postId="+postId);
         }
         List<PollItem> result = pollProvider.listPollItemByPollId(cmd.getPollId());
         if (CollectionUtils.isEmpty(result)) {
             LOGGER.error("cannot find poll item.pollId={}", cmd.getPollId());
-            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.INVALID_POLL_ITEMS, "poll items cannot be empty");
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ITEMS, "poll items cannot be empty");
         }
          PollItem matchResult = result.stream().filter(r->result.contains(r)).map(m->ConvertHelper.convert(m, PollItem.class)).findFirst().orElse(null);
         if (matchResult==null) {
             LOGGER.error("cannot find any match item.{}", cmd.getItemIds());
-            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
         }
         PollVote voteResult = pollProvider.findPollVoteByUidAndPollId(user.getId(), cmd.getPollId());
         if (voteResult!=null) {
-            LOGGER.error("cannot find poll item.pollId={}", cmd.getPollId());
-            throw RuntimeErrorException.errorWith("", 1, "");
+            LOGGER.error("can not vote again.pollId={}", cmd.getPollId());
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
         PollVote pollVote = new PollVote();
         pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -123,9 +116,12 @@ public class PollServiceImpl implements PollService {
                 //ensure all address is ok
             pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
         pollProvider.createPollVote(pollVote);
-        
+        matchResult.setVoteCount(matchResult.getVoteCount()+1);
+        //update poll item
+        pollProvider.updatePollItem(matchResult, cmd.getPollId());
         //update poll
         poll.setPollCount(poll.getPollCount()+1);
+        pollProvider.updatePoll(poll);
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
@@ -141,13 +137,13 @@ public class PollServiceImpl implements PollService {
         Poll poll = pollProvider.findPollById(cmd.getPollId());
         if (poll == null) {
             LOGGER.error("handle polling failed.the polling does not exsit.id={}", cmd.getPollId());
-            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.INVALID_POLL_ID, "invalid poll id.Id="+cmd.getPollId());
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ID, "invalid poll id.Id="+cmd.getPollId());
         }
         Long postId = poll.getPostId();
         Post post = forumProvider.findPostById(postId);
         if (post == null) {
             LOGGER.error("handle post error.");
-            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.INVALID_POLL_POST, "invalid poll post.postId="+postId);
+            throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_POST, "invalid poll post.postId="+postId);
         }
         List<PollItem> result = pollProvider.listPollItemByPollId(cmd.getPollId());
         PollShowResultResponse response = new PollShowResultResponse();

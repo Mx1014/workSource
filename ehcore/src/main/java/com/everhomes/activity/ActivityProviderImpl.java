@@ -81,7 +81,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (rosters[0] == null) {
             LOGGER.error("cannot find the activity roster record");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ID, "invalid operation.the user is not signup");
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid operation.the user is not signup");
         }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class,
                 rosters[0].getId()));
@@ -102,7 +102,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         LOGGER.error("the user was signin,cannot cancel operation.activityId={},uid={}", activity.getId(), uid);
         throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                ActivityServiceErrorCode.INVILID_OPERATION, "invalid operation.the user is not signup");
+                ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is not signup");
     }
 
     @Override
@@ -135,7 +135,7 @@ public class ActivityProviderImpl implements ActivityProivider {
             // TODO internal error
             LOGGER.error("can not find the roster");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.INVALID_ACTIVITY_ROSTER, "cannot find roster");
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "cannot find roster");
 
         }
         if (CheckInStatus.CHECKIN.getCode().equals(activityRosters[0].getCheckinFlag())) {
