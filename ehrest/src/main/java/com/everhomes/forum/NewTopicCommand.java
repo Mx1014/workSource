@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.forum;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -19,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.app.AppConstants}</li>
  * <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
  * <li>isForwarded: 是否是转发帖的标记</li>
+ * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.forum.AttachmentDescriptor}</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -49,6 +52,8 @@ public class NewTopicCommand {
     private String embeddedJson;
     
     private Byte isForwarded;
+    
+    private List<AttachmentDescriptor> attachments;
     
     public NewTopicCommand() {
     }
@@ -149,7 +154,15 @@ public class NewTopicCommand {
 		this.isForwarded = isForwarded;
 	}
 
-	@Override
+	public List<AttachmentDescriptor> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

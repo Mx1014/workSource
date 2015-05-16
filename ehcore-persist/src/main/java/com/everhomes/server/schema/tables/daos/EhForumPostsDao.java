@@ -169,7 +169,7 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	/**
 	 * Fetch records that have <code>content_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByContentType(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByContentType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.CONTENT_TYPE, values);
 	}
 

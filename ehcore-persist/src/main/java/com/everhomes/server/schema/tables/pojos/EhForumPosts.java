@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 972927097;
+	private static final long serialVersionUID = 121399587;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -31,7 +31,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Long     likeCount;
 	private java.lang.Long     dislikeCount;
 	private java.lang.String   subject;
-	private java.lang.Integer  contentType;
+	private java.lang.String   contentType;
 	private java.lang.String   content;
 	private java.lang.Long     embeddedAppId;
 	private java.lang.Long     embeddedId;
@@ -71,7 +71,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Long     likeCount,
 		java.lang.Long     dislikeCount,
 		java.lang.String   subject,
-		java.lang.Integer  contentType,
+		java.lang.String   contentType,
 		java.lang.String   content,
 		java.lang.Long     embeddedAppId,
 		java.lang.Long     embeddedId,
@@ -272,11 +272,11 @@ public class EhForumPosts implements java.io.Serializable {
 		this.subject = subject;
 	}
 
-	public java.lang.Integer getContentType() {
+	public java.lang.String getContentType() {
 		return this.contentType;
 	}
 
-	public void setContentType(java.lang.Integer contentType) {
+	public void setContentType(java.lang.String contentType) {
 		this.contentType = contentType;
 	}
 
