@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,11 @@ import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.UserTokenCommand;
+import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -65,6 +70,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Autowired
     private FamilyProvider familyProvider;
     
+    @Autowired
+    private UserService userService;
+    
     
     @Override
     public void createPropMember(CreatePropMemberCommand cmd) {
@@ -81,8 +89,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
-    	propertyMgrProvider.createPropMember(communityPmMember);
+    	//先判断，如果不属于这个小区的物业，才添加物业成员
+    	List<CommunityPmMember> list = propertyMgrProvider.findPmMemberByCommunityAndTarget(cmd.getCommunityId(), cmd.getTargetType(), cmd.getTargetId());
+    	if(list == null || list.size() == 0)
+    	{
+    		CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
+        	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
+        	propertyMgrProvider.createPropMember(communityPmMember);
+    	}
+    	
     }
     
     @Override
@@ -132,37 +147,44 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
 	@Override
-	public void improtCommunityAddressMapping(Long communityId) {
+	public void improtCommunityAddressMapping(PropCommunityIdCommand cmd) {
 		User user  = UserContext.current().getUser();
-		Community community = communityProvider.findCommunityById(communityId);
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
     	if(community == null){
-    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
     		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
     	//权限控制
-    	for (int i = 1; i <= 100; i++) {
-    		ListAddressCommand cmd = new ListAddressCommand();
-    		cmd.setCommunityId(communityId);
-    		cmd.setOffset(new Long(i));
-    		cmd.setPageSize(new Long(100));
-    		Tuple<Integer,List<Address>> addresses= addressService.listAddressByCommunityId(cmd);
-    		List<Address> addessList = addresses.second();
-    		if(addessList != null && addessList.size() > 0)
-    		{
-    			for (Address address : addessList) {
-					CommunityAddressMapping m = new CommunityAddressMapping();
-					m.setAddressId(address.getId());
-					m.setCommunityId(communityId);
-					m.setName(address.getAddress());
-					propertyMgrProvider.createPropAddressMapping(m);
-				}
-    		}
-    		else
-    		{
-    			break;
-    		}
+    	
+    	//只需要导入一次。先查询总数如果没有，继续导入。
+    	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), 1, 10);
+    	if(entityResultList == null || entityResultList.size() == 0)
+    	{
+    		for (int i = 1; i <= 100; i++) {
+        		ListAddressCommand comand = new ListAddressCommand();
+        		comand.setCommunityId(cmd.getCommunityId());
+        		comand.setOffset(new Long(i));
+        		comand.setPageSize(new Long(100));
+        		Tuple<Integer,List<Address>> addresses= addressService.listAddressByCommunityId(comand);
+        		List<Address> addessList = addresses.second();
+        		if(addessList != null && addessList.size() > 0)
+        		{
+        			for (Address address : addessList) {
+    					CommunityAddressMapping m = new CommunityAddressMapping();
+    					m.setAddressId(address.getId());
+    					m.setCommunityId(cmd.getCommunityId());
+    					m.setName(address.getAddress());
+    					propertyMgrProvider.createPropAddressMapping(m);
+    				}
+        		}
+        		else
+        		{
+        			break;
+        		}
+        	}
     	}
+    	
     }
     
     @Override
@@ -540,5 +562,28 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	//权限控制
     	
     	return addressService.listApartmentsByKeyword(cmd);
+    }
+    
+    @Override
+    public UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd) {
+    	UserTokenCommandResponse commandResponse = new UserTokenCommandResponse();
+    	User user = userService.findUserByIndentifier(cmd.getUserIdentifier());
+    	if(user != null)
+    	{
+    		List<String> phones = new ArrayList<String>();
+    		phones.add(cmd.getUserIdentifier());
+    		UserInfo userInfo = ConvertHelper.convert(user, UserInfo.class);
+        	userInfo.setPhones(phones);
+        	commandResponse.setUser(userInfo);
+    	}
+    	return commandResponse;
+    }
+    
+    @Override
+    public void setPropCurrentCommunity(Long communityId) {
+    	User user  = UserContext.current().getUser();
+    	//根据communityId 和userId 判断权限
+    	
+    	userService.setUserCurrentCommunity(communityId);
     }
 }

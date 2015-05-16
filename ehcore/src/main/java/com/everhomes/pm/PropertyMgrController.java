@@ -24,6 +24,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
+import com.everhomes.user.SetCurrentCommunityCommand;
+import com.everhomes.user.UserTokenCommand;
+import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 
@@ -39,11 +42,11 @@ public class PropertyMgrController extends ControllerBase {
 	PropertyMgrProvider propertyMgrProvider;
 	
 	 /**
-     * <b>URL: /family/getUserOwningProperties</b>
+     * <b>URL: /pm/getUserOwningProperties</b>
      * <p>查询用户加入的物业</p>
      */
     @RequestMapping("getUserOwningProperties")
-    @RestReturn(value=FamilyDTO.class)
+    @RestReturn(value=ListPropMemberCommandResponse.class)
     public RestResponse getUserOwningProperties() {
         ListPropMemberCommandResponse commandResponse = propertyMgrService.getUserOwningProperties();
         RestResponse response = new RestResponse(commandResponse);
@@ -113,7 +116,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/deletePMGroupMember</b>
+     * <b>URL: /pm/revokePMGroupMember</b>
      * <p>删除物业成员</p>
      * @return 删除的结果
      */
@@ -149,7 +152,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("importPMAddressMapping")
     @RestReturn(value=String.class)
     public RestResponse importPMAddressMapping(@Valid PropCommunityIdCommand cmd) {
-    	propertyMgrService.improtCommunityAddressMapping(cmd.getCommunityId());
+    	propertyMgrService.improtCommunityAddressMapping(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -578,7 +581,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /address/listPropBuildingsByKeyword</b>
+     * <b>URL: /pm/listPropBuildingsByKeyword</b>
      * <p>根据小区Id和关键字查询小区楼栋(物业)</p>
      */
     @RequestMapping("listPropBuildingsByKeyword")
@@ -593,7 +596,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /address/listPropAppartmentsByKeyword</b>
+     * <b>URL: /pm/listPropAppartmentsByKeyword</b>
      * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
      */
     @RequestMapping("listPropAppartmentsByKeyword")
@@ -603,6 +606,38 @@ public class PropertyMgrController extends ControllerBase {
         RestResponse response = new RestResponse(results.second());
         
         response.setErrorCode(results.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/findUserByIndentifier</b>
+     * <p>根据用户token查询用户信息</p>
+     */
+    @RequestMapping("findUserByIndentifier")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse findUserByIndentifier(@Valid UserTokenCommand cmd) {
+        UserTokenCommandResponse commandResponse = propertyMgrService.findUserByIndentifier(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/setPropCurrentCommunity</b>
+     * <p>设置物业用户当前小区（切换物业）</p>
+     * @param communityId 小区ID
+     * @return OK
+     */
+    @RequestMapping("setPropCurrentCommunity")
+    @RestReturn(String.class)
+    public RestResponse setPropCurrentCommunity(@Valid SetCurrentCommunityCommand cmd) throws Exception {
+    	propertyMgrService.setPropCurrentCommunity(cmd.getCommunityId());
+        RestResponse response = new RestResponse();
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
