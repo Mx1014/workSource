@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 public class ActivityListResponse {
     private ActivityDTO activity;
     private Integer creatorFlag;
-    private String signupQRUrl;
+    private String checkinQRUrl;
     
     @ItemType(ActivityMemberDTO.class)
     private List<ActivityMemberDTO> roster;
@@ -33,12 +33,13 @@ public class ActivityListResponse {
         this.creatorFlag = creatorFlag;
     }
 
-    public String getSignupQRUrl() {
-        return signupQRUrl;
+
+    public String getCheckinQRUrl() {
+        return checkinQRUrl;
     }
 
-    public void setSignupQRUrl(String signupQRUrl) {
-        this.signupQRUrl = signupQRUrl;
+    public void setCheckinQRUrl(String checkinQRUrl) {
+        this.checkinQRUrl = checkinQRUrl;
     }
 
     public List<ActivityMemberDTO> getRoster() {

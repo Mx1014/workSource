@@ -1,16 +1,19 @@
 // @formatter:off
 package com.everhomes.poll;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class PollPostCommand {
+public class PollPostCommand{
     private Long startTime;
     private Long stopTime;
     private Integer multiChoiceFlag;
     private Integer anonymousFlag;
     
-    // List<PollItemDTO>
-    private String itemListJson;
+    @ItemType(PollItemDTO.class)
+    private List<PollItemDTO> itemList;
     
     public PollPostCommand() {
     }
@@ -46,15 +49,15 @@ public class PollPostCommand {
     public void setAnonymousFlag(Integer anonymousFlag) {
         this.anonymousFlag = anonymousFlag;
     }
-
-    public String getItemListJson() {
-        return itemListJson;
-    }
-
-    public void setItemListJson(String itemListJson) {
-        this.itemListJson = itemListJson;
-    }
     
+    public List<PollItemDTO> getItemList() {
+        return itemList;
+    }
+
+    public void setItemList(List<PollItemDTO> itemList) {
+        this.itemList = itemList;
+    }
+
     public String toString() {
         return StringHelper.toJsonString(this);
     }
