@@ -786,7 +786,7 @@ CREATE TABLE `eh_forum_posts` (
     `dislike_count` BIGINT NOT NULL DEFAULT 0,
 
     `subject` VARCHAR(512),
-    `content_type` INTEGER NOT NULL DEFAULT 0 COMMENT '0: text, 1: single picture, 2: audio clip, 3: video clip',
+    `content_type` VARCHAR(32) COMMENT 'object content type',
     `content` TEXT COMMENT 'content data, depends on value of content_type',
  
     `embedded_app_id` BIGINT,
@@ -1051,6 +1051,7 @@ CREATE TABLE `eh_community_address_mappings` (
     `address_id` BIGINT NOT NULL COMMENT 'address id',
     
     `name` VARCHAR(128) COMMENT 'building name used in PM management',
+	`living_status` TINYINT NOT NULL,
     
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE

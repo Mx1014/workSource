@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityAddressMappings implements java.io.Serializable {
 
-	private static final long serialVersionUID = 7701603;
+	private static final long serialVersionUID = 1300408773;
 
 	private java.lang.Long   id;
 	private java.lang.Long   communityId;
 	private java.lang.Long   addressId;
 	private java.lang.String name;
+	private java.lang.Byte   livingStatus;
 
 	public EhCommunityAddressMappings() {}
 
@@ -24,12 +25,14 @@ public class EhCommunityAddressMappings implements java.io.Serializable {
 		java.lang.Long   id,
 		java.lang.Long   communityId,
 		java.lang.Long   addressId,
-		java.lang.String name
+		java.lang.String name,
+		java.lang.Byte   livingStatus
 	) {
 		this.id = id;
 		this.communityId = communityId;
 		this.addressId = addressId;
 		this.name = name;
+		this.livingStatus = livingStatus;
 	}
 
 	public java.lang.Long getId() {
@@ -62,5 +65,13 @@ public class EhCommunityAddressMappings implements java.io.Serializable {
 
 	public void setName(java.lang.String name) {
 		this.name = name;
+	}
+
+	public java.lang.Byte getLivingStatus() {
+		return this.livingStatus;
+	}
+
+	public void setLivingStatus(java.lang.Byte livingStatus) {
+		this.livingStatus = livingStatus;
 	}
 }

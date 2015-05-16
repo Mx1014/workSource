@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -2030659199;
+	private static final long serialVersionUID = -1934864729;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -117,9 +117,9 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> SUBJECT = createField("subject", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.content_type</code>. 0: text, 1: single picture, 2: audio clip, 3: video clip
+	 * The column <code>ehcore.eh_forum_posts.content_type</code>. object content type
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Integer> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: text, 1: single picture, 2: audio clip, 3: video clip");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "object content type");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.content</code>. content data, depends on value of content_type
