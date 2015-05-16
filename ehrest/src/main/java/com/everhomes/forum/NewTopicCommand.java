@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -53,6 +54,7 @@ public class NewTopicCommand {
     
     private Byte isForwarded;
     
+    @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
     public NewTopicCommand() {
