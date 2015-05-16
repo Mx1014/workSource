@@ -501,7 +501,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
        	String reason = "";
-    	familyProvider.ejectMember(cmd.getFamilyId(), cmd.getUserId(), reason);
+    	familyProvider.revokeMember(cmd.getFamilyId(), cmd.getUserId(), reason);
     }
     
     @Override

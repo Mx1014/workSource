@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberUid: 用户Id</li>
  * <li>memberNickName: 用户在家庭中的昵称</li>
  * <li>memberAvatar: 用户在家庭中的头像</li>
- * <li>addressId: 用户在家庭中的头像</li>
+ * <li>addressId: 地址Id</li>
  * <li>buildingName: 家庭地址楼栋号</li>
  * <li>apartmentName: 家庭地址门牌号</li>
  * </ul>
