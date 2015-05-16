@@ -1051,6 +1051,7 @@ CREATE TABLE `eh_community_address_mappings` (
     `address_id` BIGINT NOT NULL COMMENT 'address id',
     
     `name` VARCHAR(128) COMMENT 'building name used in PM management',
+	`living_status` TINYINT NOT NULL,
     
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
