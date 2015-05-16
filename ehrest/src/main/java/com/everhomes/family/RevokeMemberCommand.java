@@ -7,15 +7,15 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>familyId: 家庭Id</li>
  * <li>memberUid: 成员Id</li>
- * <li>reason: 拒绝原因（可选）</li>
+ * <li>reason: 剔除原因（可选）</li>
  * </ul>
  */
-public class EjectMemberCommand {
+public class RevokeMemberCommand {
     private Long familyId;
     private Long memberUid;
     private String reason;
 
-    public EjectMemberCommand() {
+    public RevokeMemberCommand() {
     }
 
     public Long getFamilyId() {

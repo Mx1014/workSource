@@ -11,32 +11,32 @@ package com.everhomes.forum;
  * </ul>
  */
 public enum PostContentType {
-    TEXT((byte)0), IMAGE((byte)1), AUDIO((byte)2), VIDEO((byte)3);
+    TEXT("text/plain"), IMAGE("image"), AUDIO("audio/basic"), VIDEO("video");
     
-    private byte code;
-    private PostContentType(byte code) {
+    private String code;
+    private PostContentType(String code) {
         this.code = code;
     }
     
-    public byte getCode() {
+    public String getCode() {
         return this.code;
     }
     
-    public static PostContentType fromCode(Byte code) {
+    public static PostContentType fromCode(String code) {
         if(code == null)
             return null;
         
-        switch(code.byteValue()) {
-        case 0:
-        	return TEXT;
-        case 1:
+        if(code.equalsIgnoreCase(TEXT.getCode())) {
+            return TEXT;
+        }
+        if(code.equalsIgnoreCase(IMAGE.getCode())) {
             return IMAGE;
-        case 2:
+        }
+        if(code.equalsIgnoreCase(AUDIO.getCode())) {
             return AUDIO;
-        case 3:
-        	return VIDEO;
-        default :
-            break;
+        }
+        if(code.equalsIgnoreCase(VIDEO.getCode())) {
+            return VIDEO;
         }
         
         return null;

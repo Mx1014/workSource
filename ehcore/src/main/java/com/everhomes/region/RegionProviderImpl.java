@@ -271,15 +271,18 @@ public class RegionProviderImpl implements RegionProvider {
                     "Invalid scope parameter,scope is null.");
         }
         
+        //如果为空，只查状态正常的
         if(status == null)
             status = RegionAdminStatus.ACTIVE;
+        
+        String likeVal = "%" + keyword + "%";
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = (Tables.EH_REGIONS.NAME.like("%" + keyword + "%").or(Tables.EH_REGIONS.PATH.like("%" + keyword + "%")));
+        Condition condition = (Tables.EH_REGIONS.NAME.like(likeVal).or(Tables.EH_REGIONS.PATH.like(likeVal)));
         
         if(parentRegionId != null)
             condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));

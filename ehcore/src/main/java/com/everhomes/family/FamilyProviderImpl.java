@@ -128,96 +128,58 @@ public class FamilyProviderImpl implements FamilyProvider {
         else
             region = this.regionProvider.findRegionById(address.getCityId());
         assert(region != null);
-        
-        long startTime = System.currentTimeMillis();
+
         //全局锁导致入库超时，暂时去掉
-//        Tuple<Family, Boolean> result = this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_FAMILY.getCode()).enter(()-> {
-//            Family family = findFamilyByAddressId(address.getId());
-//            if(family == null) {
-//                family = this.dbProvider.execute((TransactionStatus status) -> {
-//                    Family f = new Family();
-//                    f.setName(address.getAddress());
-//                    f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-//                    f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
-//                    f.setAddressId(address.getId());
-//                    f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
-//                    f.setCreatorUid(uid);
-//                    f.setMemberCount(0L);   // initialize it to 0
-//                    f.setCommunityId(address.getCommunityId());
-//                    
-//                    this.groupProvider.createGroup(f);
-//                    
-//                    GroupMember m = new GroupMember();
-//                    m.setGroupId(f.getId());
-//                    m.setMemberNickName(user.getAccountName());
-//                    m.setMemberType(EntityType.USER.getCode());
-//                    m.setMemberId(uid);
-//                    m.setMemberRole(Role.ResourceCreator);
-//                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-//                    m.setCreatorUid(uid);
-//                    this.groupProvider.createGroupMember(m);
-//                    
-//                    UserGroup userGroup = new UserGroup();
-//                    userGroup.setOwnerUid(uid);
-//                    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-//                    userGroup.setGroupId(f.getId());
-//                    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-//                    userGroup.setRegionScopeId(community.getId());
-//                    userGroup.setMemberRole(Role.ResourceCreator);
-//                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-//                    this.userProvider.createUserGroup(userGroup);
-//                    
-//                    return f;
-//                });
-//            } else {
-//                GroupMember m = new GroupMember();
-//                m.setGroupId(family.getId());
-//                m.setMemberType(EntityType.USER.getCode());
-//                m.setMemberId(uid);
-//                m.setMemberNickName(user.getAccountName());
-//                m.setMemberRole(Role.ResourceUser);
-//                m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-//                m.setCreatorUid(uid);
-//                this.groupProvider.createGroupMember(m);
-//                
-//                UserGroup userGroup = new UserGroup();
-//                userGroup.setOwnerUid(uid);
-//                userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-//                userGroup.setGroupId(family.getId());
-//                userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-//                userGroup.setRegionScopeId(community.getId());
-//                userGroup.setMemberRole(Role.ResourceUser);
-//                userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-//                this.userProvider.createUserGroup(userGroup);
-//            }
-//            
-//            return family;  
-//        });
-//        
-//        if(result.second())
-//            return result.first();
-        
-        Family family = findFamilyByAddressId(address.getId());
-        if(family == null) {
-            family = this.dbProvider.execute((TransactionStatus status) -> {
-                Family f = new Family();
-                f.setName(address.getAddress());
-                f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-                f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
-                f.setAddressId(address.getId());
-                f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
-                f.setCreatorUid(uid);
-                f.setMemberCount(0L);   // initialize it to 0
-                f.setCommunityId(address.getCommunityId());
-                
-                this.groupProvider.createGroup(f);
-                
+        Tuple<Family, Boolean> result = this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_FAMILY.getCode()).enter(()-> {
+            long lqStartTime = System.currentTimeMillis(); 
+            Family family = findFamilyByAddressId(address.getId());
+            long lqEndTime = System.currentTimeMillis();
+            LOGGER.info("find family in the lock,elapse=" + (lqEndTime - lqStartTime));
+            
+            long lcStartTime = System.currentTimeMillis(); 
+            if(family == null) {
+                family = this.dbProvider.execute((TransactionStatus status) -> {
+                    Family f = new Family();
+                    f.setName(address.getAddress());
+                    f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+                    f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
+                    f.setAddressId(address.getId());
+                    f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+                    f.setCreatorUid(uid);
+                    f.setMemberCount(0L);   // initialize it to 0
+                    f.setCommunityId(address.getCommunityId());
+                    
+                    this.groupProvider.createGroup(f);
+                    
+                    GroupMember m = new GroupMember();
+                    m.setGroupId(f.getId());
+                    m.setMemberNickName(user.getAccountName());
+                    m.setMemberType(EntityType.USER.getCode());
+                    m.setMemberId(uid);
+                    m.setMemberRole(Role.ResourceCreator);
+                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    m.setCreatorUid(uid);
+                    this.groupProvider.createGroupMember(m);
+                    
+                    UserGroup userGroup = new UserGroup();
+                    userGroup.setOwnerUid(uid);
+                    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+                    userGroup.setGroupId(f.getId());
+                    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+                    userGroup.setRegionScopeId(community.getId());
+                    userGroup.setMemberRole(Role.ResourceCreator);
+                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    this.userProvider.createUserGroup(userGroup);
+                    
+                    return f;
+                });
+            } else {
                 GroupMember m = new GroupMember();
-                m.setGroupId(f.getId());
-                m.setMemberNickName(user.getAccountName());
+                m.setGroupId(family.getId());
                 m.setMemberType(EntityType.USER.getCode());
                 m.setMemberId(uid);
-                m.setMemberRole(Role.ResourceCreator);
+                m.setMemberNickName(user.getAccountName());
+                m.setMemberRole(Role.ResourceUser);
                 m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 m.setCreatorUid(uid);
                 this.groupProvider.createGroupMember(m);
@@ -225,40 +187,83 @@ public class FamilyProviderImpl implements FamilyProvider {
                 UserGroup userGroup = new UserGroup();
                 userGroup.setOwnerUid(uid);
                 userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-                userGroup.setGroupId(f.getId());
+                userGroup.setGroupId(family.getId());
                 userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                 userGroup.setRegionScopeId(community.getId());
-                userGroup.setMemberRole(Role.ResourceCreator);
+                userGroup.setMemberRole(Role.ResourceUser);
                 userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 this.userProvider.createUserGroup(userGroup);
-                
-                return f;
-            });
-        } else {
-            GroupMember m = new GroupMember();
-            m.setGroupId(family.getId());
-            m.setMemberType(EntityType.USER.getCode());
-            m.setMemberId(uid);
-            m.setMemberNickName(user.getAccountName());
-            m.setMemberRole(Role.ResourceUser);
-            m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-            m.setCreatorUid(uid);
-            this.groupProvider.createGroupMember(m);
-            
-            UserGroup userGroup = new UserGroup();
-            userGroup.setOwnerUid(uid);
-            userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-            userGroup.setGroupId(family.getId());
-            userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-            userGroup.setRegionScopeId(community.getId());
-            userGroup.setMemberRole(Role.ResourceUser);
-            userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-            this.userProvider.createUserGroup(userGroup);
-        }
-        long endTime = System.currentTimeMillis();
-        LOGGER.info("Get or create family,elapse=" + (endTime - startTime));
-        if(family != null)
-            return family;
+            }
+            long lcEndTime = System.currentTimeMillis();
+            LOGGER.info("create family in the lock,elapse=" + (lcEndTime - lcStartTime));
+            return family;  
+        });
+        
+        if(result.second())
+            return result.first();
+        
+//        Family family = findFamilyByAddressId(address.getId());
+//        if(family == null) {
+//            family = this.dbProvider.execute((TransactionStatus status) -> {
+//                Family f = new Family();
+//                f.setName(address.getAddress());
+//                f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+//                f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
+//                f.setAddressId(address.getId());
+//                f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+//                f.setCreatorUid(uid);
+//                f.setMemberCount(0L);   // initialize it to 0
+//                f.setCommunityId(address.getCommunityId());
+//                
+//                this.groupProvider.createGroup(f);
+//                
+//                GroupMember m = new GroupMember();
+//                m.setGroupId(f.getId());
+//                m.setMemberNickName(user.getAccountName());
+//                m.setMemberType(EntityType.USER.getCode());
+//                m.setMemberId(uid);
+//                m.setMemberRole(Role.ResourceCreator);
+//                m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//                m.setCreatorUid(uid);
+//                this.groupProvider.createGroupMember(m);
+//                
+//                UserGroup userGroup = new UserGroup();
+//                userGroup.setOwnerUid(uid);
+//                userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+//                userGroup.setGroupId(f.getId());
+//                userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+//                userGroup.setRegionScopeId(community.getId());
+//                userGroup.setMemberRole(Role.ResourceCreator);
+//                userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//                this.userProvider.createUserGroup(userGroup);
+//                
+//                return f;
+//            });
+//        } else {
+//            GroupMember m = new GroupMember();
+//            m.setGroupId(family.getId());
+//            m.setMemberType(EntityType.USER.getCode());
+//            m.setMemberId(uid);
+//            m.setMemberNickName(user.getAccountName());
+//            m.setMemberRole(Role.ResourceUser);
+//            m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//            m.setCreatorUid(uid);
+//            this.groupProvider.createGroupMember(m);
+//            
+//            UserGroup userGroup = new UserGroup();
+//            userGroup.setOwnerUid(uid);
+//            userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+//            userGroup.setGroupId(family.getId());
+//            userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+//            userGroup.setRegionScopeId(community.getId());
+//            userGroup.setMemberRole(Role.ResourceUser);
+//            userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//            this.userProvider.createUserGroup(userGroup);
+//        }
+//        long endTime = System.currentTimeMillis();
+//        LOGGER.info("Get or create family,elapse=" + (endTime - startTime));
+//        if(family != null)
+//            return family;
         
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Unable to save into database, SQL exception or storage full?");
@@ -534,7 +539,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     }
 
     @Override
-    public void ejectMember(Long familyId, Long memberUid, String reason) {
+    public void revokeMember(Long familyId, Long memberUid, String reason) {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
@@ -548,7 +553,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     "Invalid familyId parameter");
         if(memberUid.longValue() == userId)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid memberUid parameter,can not eject youself");
+                    "Invalid memberUid parameter,can not revoke youself");
         
         
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
@@ -1083,6 +1088,31 @@ public class FamilyProviderImpl implements FamilyProvider {
             familyDTO.setMembershipStatus(m.getMemberStatus());
         }
         return familyDTO;
+    }
+
+    @Override
+    public List<FamilyDTO> listWaitApproveFamily(Long pageOffset, Long pageSize) {
+        pageOffset = pageOffset == null ? 1L : pageOffset;
+        
+        int size = (int) (pageSize == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize);
+        
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    context.select().from(Tables.EH_GROUP_MEMBERS)
+                    .where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
+                            .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()))
+                    .limit(size).offset((int)offset)
+                    
+                    .fetch().map( (r) ->{
+                            
+                            return null;
+                        });
+                    
+                    return true;
+                });
+        return null;
     }
 
 }

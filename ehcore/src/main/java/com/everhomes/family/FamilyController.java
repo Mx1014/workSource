@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.BuildingDTO;
+import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -156,14 +158,14 @@ public class FamilyController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /family/ejectMember</b>
+     * <b>URL: /family/revokeMember</b>
      * <p>剔除家庭成员</p>
      */
-    @RequestMapping("ejectMember")
+    @RequestMapping("revokeMember")
     @RestReturn(value=String.class)
-    public RestResponse ejectMember(@Valid EjectMemberCommand cmd) {
+    public RestResponse revokeMember(@Valid RevokeMemberCommand cmd) {
     
-        this.familyProvider.ejectMember(cmd.getFamilyId(),cmd.getMemberUid(),cmd.getReason());
+        this.familyProvider.revokeMember(cmd.getFamilyId(),cmd.getMemberUid(),cmd.getReason());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -305,6 +307,22 @@ public class FamilyController extends ControllerBase {
         List<NeighborUserDTO> result = this.familyProvider.listNearbyNeighborUsers(cmd.getFamilyId(),
                 cmd.getLongitude(),cmd.getLatitude(),cmd.getPageOffset());
         RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+
+    /**
+     * <b>URL: /address/listWaitApproveAddress</b>
+     * <p>查询等待审核的地址列表</p>
+     */
+    @RequestMapping("listWaitApproveFamily")
+    @RestReturn(value=FamilyDTO.class, collection=true)
+    public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyCommand cmd) {
+        List<FamilyDTO> results = this.familyProvider.listWaitApproveFamily(cmd.getPageOffset(),cmd.getPageSize());
+        RestResponse response = new RestResponse(results);
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
