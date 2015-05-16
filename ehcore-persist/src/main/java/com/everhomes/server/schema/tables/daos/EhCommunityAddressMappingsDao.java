@@ -67,4 +67,11 @@ public class EhCommunityAddressMappingsDao extends org.jooq.impl.DAOImpl<com.eve
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityAddressMappings> fetchByName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunityAddressMappings.EH_COMMUNITY_ADDRESS_MAPPINGS.NAME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>living_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityAddressMappings> fetchByLivingStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityAddressMappings.EH_COMMUNITY_ADDRESS_MAPPINGS.LIVING_STATUS, values);
+	}
 }

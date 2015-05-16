@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityAddressMappings extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord> {
 
-	private static final long serialVersionUID = 1698484849;
+	private static final long serialVersionUID = 1069373147;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_address_mappings</code>
@@ -45,6 +45,11 @@ public class EhCommunityAddressMappings extends org.jooq.impl.TableImpl<com.ever
 	 * The column <code>ehcore.eh_community_address_mappings.name</code>. building name used in PM management
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "building name used in PM management");
+
+	/**
+	 * The column <code>ehcore.eh_community_address_mappings.living_status</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord, java.lang.Byte> LIVING_STATUS = createField("living_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_community_address_mappings</code> table reference
