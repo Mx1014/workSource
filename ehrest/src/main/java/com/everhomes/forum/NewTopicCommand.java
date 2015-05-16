@@ -27,7 +27,9 @@ public class NewTopicCommand {
     
     private Long categoryId;
     
-    private Byte visibleFlag;
+    private Byte visibilityScope;
+
+    private Long visibilityScopeId;
     
     private Double longitude;
     
@@ -67,15 +69,23 @@ public class NewTopicCommand {
 		this.categoryId = categoryId;
 	}
 
-	public Byte getVisibleFlag() {
-		return visibleFlag;
-	}
+	public Byte getVisibilityScope() {
+        return visibilityScope;
+    }
 
-	public void setVisibleFlag(Byte visibleFlag) {
-		this.visibleFlag = visibleFlag;
-	}
+    public void setVisibilityScope(Byte visibilityScope) {
+        this.visibilityScope = visibilityScope;
+    }
 
-	public Double getLongitude() {
+    public Long getVisibilityScopeId() {
+        return visibilityScopeId;
+    }
+
+    public void setVisibilityScopeId(Long visibilityScopeId) {
+        this.visibilityScopeId = visibilityScopeId;
+    }
+
+    public Double getLongitude() {
 		return longitude;
 	}
 
