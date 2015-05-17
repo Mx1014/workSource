@@ -43,6 +43,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("source.jars", "")
             .withProperty("source.excludes", "com.everhomes.rpc.*")
             .withProperty("destination.dir", "/")
+            .withProperty("destination.dir.java", "/")
             .withProperty("javadoc.root", "/")
             .withProperty("spring.freemarker.check-template-location", false)
             .withProperty("db.driver", "com.mysql.jdbc.Driver")
