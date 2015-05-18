@@ -97,7 +97,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         return result;
     }
 
-    @Cacheable(value="selectContentServer")
+    @Cacheable(value = "selectContentServer")
     @Override
     public ContentServer selectContentServer() throws Exception {
         LOGGER.info("Enter select content server");
@@ -123,24 +123,24 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     @Override
-    public List<String> parserUri(List<String> uris) {
+    public List<String> parserUri(List<String> uris, String ownerType, Long ownerId) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("rebuild url");
         }
         if (CollectionUtils.isEmpty(uris)) {
             return new ArrayList<String>();
         }
-       Map<Long, ContentServer> cache = getServersHash();
-        return uris.stream().map(r -> parserSingleUri(r,cache)).collect(Collectors.toList());
+        Map<Long, ContentServer> cache = getServersHash();
+        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId)).collect(Collectors.toList());
     }
 
     @Override
-    public String parserUri(String uri) {
+    public String parserUri(String uri, String ownerType, Long ownerId) {
         Map<Long, ContentServer> cache = getServersHash();
-        return parserSingleUri(uri,cache);
+        return parserSingleUri(uri, cache, ownerType, ownerId);
     }
-    
-    private Map<Long, ContentServer>  getServersHash(){
+
+    private Map<Long, ContentServer> getServersHash() {
         List<ContentServer> servers = contentServerProvider.listContentServers();
         Map<Long, ContentServer> cache = new HashMap<>();
         servers.forEach(item -> {
@@ -148,8 +148,8 @@ public class ContentServerServiceImpl implements ContentServerService {
         });
         return cache;
     }
-    
-    private static String parserSingleUri(String uri,Map<Long,ContentServer> cache){
+
+    private static String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId) {
         uri = Generator.decode(uri);
         if (!uri.contains("cs://")) {
             return uri;
@@ -169,7 +169,7 @@ public class ContentServerServiceImpl implements ContentServerService {
             return "";
         }
         uri = uri.substring(position, uri.length());
-        return String.format("http://%s:%d/%s", cache.get(serverId).getPublicAddress(), cache.get(serverId)
-                .getPublicPort(), uri);
+        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s", cache.get(serverId).getPublicAddress(), cache
+                .get(serverId).getPublicPort(), uri, ownerType, ownerId);
     }
 }
