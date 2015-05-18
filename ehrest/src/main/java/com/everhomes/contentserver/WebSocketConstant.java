@@ -22,14 +22,6 @@ public interface WebSocketConstant {
 
 	String CONTENT_SERVER_CAPACITY_RSP = "contentstorage.response.capacity";
 
-	interface Scheme {
-		// https scheme
-		String HTTPS = "https";
-
-		// http scheme
-		String HTTP = "http";
-	}
-
 	// ok message code 0
 	int OK_CODE = 0x00000000;
 
