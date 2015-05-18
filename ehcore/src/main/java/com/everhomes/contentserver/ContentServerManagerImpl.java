@@ -1,6 +1,5 @@
 package com.everhomes.contentserver;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,12 +49,12 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             contentServerProvider.addResource(result);
         }
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId()));
-        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name()));
+        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
     }
 
-    private String createUrl(ContentServer content, String resourceId, String type) {
-        return String.format("http://%s:%d/%s/%s", content.getPublicAddress(), content.getPublicPort(), type,
-                Generator.encodeUrl(resourceId));
+    private String createUrl(ContentServer content, String resourceId, String type, String token) {
+        return String.format("http://%s:%d/%s/%s?token=%s", content.getPublicAddress(), content.getPublicPort(), type,
+                Generator.encodeUrl(resourceId), token);
     }
 
     private ContentServerResource createResource(Long serverId, Long uid, MessageHandleRequest request) {

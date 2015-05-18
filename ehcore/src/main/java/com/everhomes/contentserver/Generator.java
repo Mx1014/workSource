@@ -50,21 +50,20 @@ public class Generator {
 
     public static String encodeUrl(String path) {
         byte[] code = Base64.getEncoder().encode(path.getBytes(Charset.forName("utf-8")));
-        String str = new String(code, Charset.forName("utf-8")).replaceAll("/", "_").replaceAll("+", "-")
-                .replaceAll("=", "");
+        String str = new String(code, Charset.forName("utf-8")).replace("/", "_").replace("+", "-").replace("=", "");
         return str;
 
     }
 
     public static String decodeUrl(String path) {
-        String result = path.replaceAll("_", "/").replaceAll("-", "+");
+        String result = path.replace("_", "/").replace("-", "+");
         int length = result.length();
         if (length % 4 == 2) {
             result += "==";
         } else if (length % 4 == 3) {
             result += "=";
         }
-        return result;
+        return new String(Base64.getDecoder().decode(result.getBytes(Charset.forName("utf-8"))));
     }
 
     public static int randomInt(int max) {
