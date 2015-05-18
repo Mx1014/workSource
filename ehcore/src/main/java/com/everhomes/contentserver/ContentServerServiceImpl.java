@@ -169,6 +169,10 @@ public class ContentServerServiceImpl implements ContentServerService {
             return "";
         }
         uri = uri.substring(position, uri.length());
+        if(uri.indexOf("?")!=-1){
+            return String.format("http://%s:%d/%s&ownerType=%s&ownerId=%s", cache.get(serverId).getPublicAddress(), cache
+                    .get(serverId).getPublicPort(), uri, ownerType, ownerId);
+        }
         return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s", cache.get(serverId).getPublicAddress(), cache
                 .get(serverId).getPublicPort(), uri, ownerType, ownerId);
     }
