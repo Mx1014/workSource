@@ -320,7 +320,7 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("listWaitApproveFamily")
     @RestReturn(value=FamilyDTO.class, collection=true)
     public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyCommand cmd) {
-        List<FamilyDTO> results = this.familyProvider.listWaitApproveFamily(cmd.getPageOffset(),cmd.getPageSize());
+        List<FamilyDTO> results = this.familyProvider.listWaitApproveFamily(cmd.getCommunityId(), cmd.getPageOffset(),cmd.getPageSize());
         RestResponse response = new RestResponse(results);
         
         response.setErrorCode(ErrorCodes.SUCCESS);

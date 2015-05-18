@@ -34,7 +34,9 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.server.schema.Tables;
@@ -525,6 +527,38 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
            isFirst = false;
         }
         return strBuilder.toString();
+    }
+
+    @Override
+    public void correctAddress(CorrectAddressCommand cmd) {
+        
+        if(cmd.getCommunityId() == null || cmd.getAddressId() == null 
+                || cmd.getBuildingName() == null || cmd.getApartmentName() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId or addressId or buildingName or apratment parameter");
+        Address address = this.addressProvider.findAddressById(cmd.getAddressId());
+        if(address == null){
+            LOGGER.error("Invalid addressId parameter,address is not found.addressId=" + cmd.getAddressId());
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
+                    "Address is not found.");
+        }
+        
+        Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
+        if(addr == null || addr.getId().longValue() == address.getId().longValue()){
+            address.setBuildingName(cmd.getBuildingName());
+            address.setApartmentName(cmd.getApartmentName());
+            address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+            this.addressProvider.updateAddress(address);
+        }else {
+            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+            if(family == null) return;
+            Group group = ConvertHelper.convert(family, Group.class); 
+            group.setIntegralTag1(addr.getId());
+            this.groupProvider.updateGroup(group);
+            
+            this.addressProvider.deleteAddress(address);
+        }
+        
     }
 
 }

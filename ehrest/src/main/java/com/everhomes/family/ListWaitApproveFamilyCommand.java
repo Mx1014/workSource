@@ -6,17 +6,28 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>pageOffset: 页码</li>
- * <li>pageSize: 每页大小</li>
+ * <li>communityId: 小区Id(可选)</li>
+ * <li>pageOffset: 页码(可选)</li>
+ * <li>pageSize: 每页大小(可选)</li>
  * </ul>
  */
 public class ListWaitApproveFamilyCommand {
-
+    
+    private Long communityId;
+    
     private Long pageOffset;
     
     private Long pageSize;
 
     public ListWaitApproveFamilyCommand() {
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Long getPageOffset() {
