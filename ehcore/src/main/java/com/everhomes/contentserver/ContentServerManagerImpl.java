@@ -96,7 +96,8 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             md5 = uploadInvoke(login, request.getObjectId());
             break;
         default:
-            throw RuntimeErrorException.errorWith("", 1, "");
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_ACTION, "invalid action.cannot known");
         }
         request.setMd5(md5);
     }
