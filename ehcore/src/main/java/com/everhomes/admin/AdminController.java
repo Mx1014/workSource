@@ -35,6 +35,7 @@ import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.codegen.GeneratorContext;
+import com.everhomes.codegen.JavaGenerator;
 import com.everhomes.codegen.ObjectiveCGenerator;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -102,6 +103,9 @@ public class AdminController extends ControllerBase {
     @Value("${destination.dir}")
     private String destinationDir;
     
+    @Value("${destination.dir.java}")
+    private String destinationJavaDir;
+    
     @Value("${class.name.prefix}")
     private String classNamePrefix;
     
@@ -168,9 +172,9 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
         }
         
-        if(!language.equalsIgnoreCase("objc"))
+        if(!language.equalsIgnoreCase("objc") && !language.equalsIgnoreCase("java"))
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Only objc (objective C) is currently supported");
+                    "Only objc (objective C) and java are currently supported");
 
         GeneratorContext context = new GeneratorContext();
         context.setClassNamePrefix(this.classNamePrefix);
@@ -180,32 +184,41 @@ public class AdminController extends ControllerBase {
         context.setSerializationHelper(this.serializationHelper);
         context.setSourceFileExtention(this.sourceFileExtention);
         context.setRestResponseBase(restResponseBase);
+        context.setContextParam("dest.dir.java", this.destinationJavaDir);
         
-        ObjectiveCGenerator generator = new ObjectiveCGenerator();
-        // generator.generatePojos(BorderDTO.class, context);
-
-        // generate REST POJO objects
-        jars.stream().forEach((jar)-> {
-            try {
-                Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(jar);
-                
-                for(Class<?> clz: classes) {
-                    if(!shouldExclude(clz)) {
-                        generator.generatePojos(clz, context);
-                    } else {
-                        LOGGER.info("Skip {} since it matches exclusion configuration", clz.getName());
+        if(language.equalsIgnoreCase("objc")) {
+            ObjectiveCGenerator generator = new ObjectiveCGenerator();
+            // generator.generatePojos(BorderDTO.class, context);
+    
+            // generate REST POJO objects
+            jars.stream().forEach((jar)-> {
+                try {
+                    Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(jar);
+                    
+                    for(Class<?> clz: classes) {
+                        if(!shouldExclude(clz)) {
+                            generator.generatePojos(clz, context);
+                        } else {
+                            LOGGER.info("Skip {} since it matches exclusion configuration", clz.getName());
+                        }
                     }
+                } catch (Exception e) {
+                    LOGGER.error("Unable to open {}", jar, e);
                 }
-            } catch (Exception e) {
-                LOGGER.error("Unable to open {}", jar, e);
-            }
-        });
+            });
+    
+            // generator controller API response objects
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            for(RestMethod restMethod: apiMethods)
+                generator.generateControllerPojos(restMethod, context);
+        } else {
+            JavaGenerator generator = new JavaGenerator();
 
-        // generator controller API response objects
-        List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
-        for(RestMethod restMethod: apiMethods)
-            generator.generateControllerPojos(restMethod, context);
-        
+            // generator controller API response objects
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            for (RestMethod restMethod : apiMethods)
+                generator.generateControllerPojos(restMethod, context);
+        }
         return new RestResponse("OK");
     }
     

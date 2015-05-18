@@ -11,7 +11,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.contentserver.ConfigResponse;
 import com.everhomes.contentserver.WebSocketConstant;
 import com.everhomes.rpc.PduFrame;
@@ -21,11 +20,16 @@ public class ContentServerHandler extends TextWebSocketHandler {
 
     private WebSocketCallback callback;
 
-    private LocalBusOneshotSubscriber subsciber;
+    private MessageQueue proxy;
+
+    private WebSocketMessageSubscriber subscriber;
+
+    private volatile boolean isSubscribe = false;
 
     public ContentServerHandler(WebSocketCallback callback) {
         this.callback = callback;
-        subsciber = new WebSocketMessageSubscriber();
+        subscriber = new WebSocketMessageSubscriber();
+        proxy = MessageQueue.getInstance();
     }
 
     @Override
@@ -36,6 +40,8 @@ public class ContentServerHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        if (!isSubscribe)
+            proxy.subscriber("contentstorage.", subscriber);
         LOGGER.info("handle text message from content server.payload={}", message.getPayload());
         PduFrame frame = PduFrame.fromJson(message.getPayload());
         if (StringUtils.isEmpty(frame.getName())) {
@@ -43,22 +49,21 @@ public class ContentServerHandler extends TextWebSocketHandler {
             return;
         }
         if (StringUtils.contains(frame.getName(), WebSocketConstant.CONTENT_STORAGE_REQ)) {
-            MessageQueue.getInstance().subscriber("contentstorage.", subsciber);
-            MessageQueue.getInstance().publish(session, "contentstorage." + frame.getRequestId(), frame);
+            proxy.publish(session, "contentstorage." + frame.getRequestId(), frame);
             return;
         }
         if (StringUtils.contains(frame.getName(), WebSocketConstant.CONTENT_CONFIG_RSP)) {
 
-            invokeRspMessage(session, frame.getName(), frame);
+            handleResponse(session, frame.getName(), frame);
             return;
         }
         LOGGER.error("handle unknown message.frame={}",
                 ToStringBuilder.reflectionToString(frame, ToStringStyle.MULTI_LINE_STYLE));
     }
 
-    private void invokeRspMessage(WebSocketSession session, String message, PduFrame frame) {
+    private void handleResponse(WebSocketSession session, String message, PduFrame frame) {
         ConfigResponse payLoad = frame.getPayload(ConfigResponse.class);
-        MessageQueue.getInstance().publish(null, "config.contentstorage." + frame.getRequestId(), payLoad);
+        proxy.publish(null, "config.contentstorage." + frame.getRequestId(), payLoad);
     }
 
     @Override

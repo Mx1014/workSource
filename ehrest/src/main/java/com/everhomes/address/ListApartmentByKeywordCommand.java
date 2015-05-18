@@ -19,7 +19,7 @@ public class ListApartmentByKeywordCommand {
     @NotNull
     private String buildingName;
     
-    @NotNull
+  
     private String keyword;
 
     public ListApartmentByKeywordCommand() {

@@ -22,7 +22,7 @@ public class MessageQueue {
     @Autowired
     private ContentServerMananger contentProvider;
 
-    @Autowired(required = true)
+    @Autowired
     private LocalBusOneshotSubscriberBuilder localBusOneshotSubscriberBuilder;
 
     @Bean

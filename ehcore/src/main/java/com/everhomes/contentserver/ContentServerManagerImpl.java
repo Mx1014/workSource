@@ -1,7 +1,6 @@
 package com.everhomes.contentserver;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         }
         ContentServerResource result = contentServerProvider.findByUidAndMD5(login.getUserId(), request.getMd5());
 
-        ContentServer server = contentServerService.selectContentServer(login.getUserId());
+        ContentServer server = contentServerService.selectContentServer();
         if (server == null) {
             LOGGER.error("cannot find server.userId={}", login.getUserId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -58,7 +57,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         ContentServerResource contentServer = new ContentServerResource();
         contentServer.setMetadata(StringHelper.toJsonString(request.getMeta()));
         contentServer.setOwnerId(uid);
-        contentServer.setResourceId(UUID.randomUUID().toString());
+        contentServer.setResourceId(Generator.createRandomKey());
         contentServer.setResourceMd5(request.getMd5());
         contentServer.setResourceName(request.getFilename());
         contentServer.setResourceSize(request.getTotalSize());
@@ -97,7 +96,8 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             md5 = uploadInvoke(login, request.getObjectId());
             break;
         default:
-            throw RuntimeErrorException.errorWith("", 1, "");
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_ACTION, "invalid action.cannot known");
         }
         request.setMd5(md5);
     }
@@ -129,7 +129,8 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         if (login.getUserId() != resource.getOwnerId()) {
             LOGGER.error("cannot delete file.current user is not own.uid={},own={}", login.getUserId(),
                     resource.getOwnerId());
-            throw RuntimeErrorException.errorWith("", 1, "");
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_USER, "invalid owner or user");
         }
         LOGGER.error("the usr cannot delete this file.objectId={}", uniqueId);
         return resource.getResourceMd5();

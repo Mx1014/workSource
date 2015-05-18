@@ -9,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
@@ -41,7 +40,8 @@ public class ContentServerServiceImpl implements ContentServerService {
             connectionProvider.connect(cmd.getPrivateAddress(), cmd.getPrivatePort());
         } catch (Exception e) {
             LOGGER.error("invalid content server");
-            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,ContentServerErrorCode.ERROR_INVALID_SERVER,"invalid content server");
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_SERVER, "invalid content server");
         }
         contentServerProvider.addContentServer(contentServer);
         return contentServer;
@@ -69,7 +69,7 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     @Override
-    public void addConfigItem(AddConfigItemCommand cmd){
+    public void addConfigItem(AddConfigItemCommand cmd) {
         LOGGER.info("Invoke addConfigItem.Item={}", cmd);
         PduFrame frame = Generator.createPduFrame(
                 String.format("%s%s.%s", WebSocketConstant.CONTENT_CONFIG_REQ, cmd.getConfigType().toLowerCase(),
@@ -78,7 +78,7 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     @Override
-    public void removeConfigItem(String itemName){
+    public void removeConfigItem(String itemName) {
         LOGGER.info("Invoke removeConfigItem.itemName={}", itemName);
     }
 
@@ -95,8 +95,7 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     @Override
-    @Cacheable(value = "selectContentServer", key = "#uid")
-    public ContentServer selectContentServer(Long uid) throws Exception {
+    public ContentServer selectContentServer() throws Exception {
         LOGGER.info("Enter select content server");
         List<ContentServer> servers = contentServerProvider.listContentServers();
         if (CollectionUtils.isEmpty(servers)) {
@@ -116,7 +115,7 @@ public class ContentServerServiceImpl implements ContentServerService {
             connectionProvider.connect(address, port);
             return server;
         }
-        return connectionProvider.chooseContentServer(servers, uid);
+        return connectionProvider.chooseContentServer(servers, 0L);
     }
 
     @Override

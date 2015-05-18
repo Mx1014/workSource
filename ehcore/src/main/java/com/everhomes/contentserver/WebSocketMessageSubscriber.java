@@ -18,6 +18,8 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
     private WebSocketSession session;
 
+    private MessageQueue taskPool = MessageQueue.getInstance();
+
     @Override
     public Action onLocalBusMessage(Object paramObject1, String paramString1, Object paramObject2, String paramString2) {
         session = (WebSocketSession) paramObject1;
@@ -66,7 +68,7 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
     }
 
     private void handleAuth(WebSocketSession session, MessageHandleRequest request, PduFrame frame) {
-        MessageQueue.getInstance().submitTask(new MessageTask() {
+        taskPool.submitTask(new MessageTask() {
 
             @Override
             protected void doRequest(ContentServerMananger fileHandlerProvider) throws Exception {
@@ -83,7 +85,7 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
     private void handleUpload(WebSocketSession session, MessageHandleRequest request, PduFrame frame) {
         String objectId = Generator.createRandomKey();
         request.setObjectId(objectId);
-        MessageQueue.getInstance().submitTask(new MessageTask() {
+        taskPool.submitTask(new MessageTask() {
 
             @Override
             protected void doRequest(ContentServerMananger contentServerManager) throws Exception {
@@ -102,7 +104,7 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
     }
 
     private void handleRemove(WebSocketSession session, MessageHandleRequest request, PduFrame frame) {
-        MessageQueue.getInstance().submitTask(new MessageTask() {
+        taskPool.submitTask(new MessageTask() {
 
             @Override
             protected void doRequest(ContentServerMananger contentServerManager) throws Exception {

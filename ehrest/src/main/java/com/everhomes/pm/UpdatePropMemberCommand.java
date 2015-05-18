@@ -8,15 +8,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 主键id</li>
- * <li>communityId: 小区名称</li>
- * <li>targetType：注册用户类型</li>
- * <li>targetId：注册用户对应的userId</li>
+ * <li>communityId: 小区id</li>
+ * <li>targetType：成员是否注册{@link com.everhomes.use.PmMemberTargetType}</li>
+ * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>pmGroup：物业角色类型 参考{@link com.everhomes.pm.PmGroup}</li>
- * <li>contactName：未注册成员名称</li>
- * <li>contactType：未注册成员类型：0-手机，1-邮箱</li>
- * <li>contactToken：未注册成员标识</li>
+ * <li>contactName：成员名称</li>
+ * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
+ * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
- * <li>status：状态 参考{@link com.everhomes.pm.PmMemberStatus}</li>
  * </ul>
  */
 public class UpdatePropMemberCommand {
@@ -30,7 +29,7 @@ public class UpdatePropMemberCommand {
 	private Byte   contactType;
 	private String contactToken;
 	private String contactDescription;
-	private Byte   status;
+
 	
 	public UpdatePropMemberCommand() {
 	}
@@ -88,13 +87,6 @@ public class UpdatePropMemberCommand {
 	public void setContactDescription(String contactDescription) {
 		this.contactDescription = contactDescription;
 	}
-	public Byte getStatus() {
-		return status;
-	}
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
     
 	@Override
     public String toString() {
