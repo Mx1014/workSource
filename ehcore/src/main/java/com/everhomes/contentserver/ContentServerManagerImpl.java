@@ -94,10 +94,10 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         String md5 = "";
         switch (request.getAccessType()) {
         case LOOKUP:
-            md5 = lookupInvoke(login, request.getObjectId());
+            md5 = lookupInvoke(login, request.getMd5());
             break;
         case DELETE:
-            md5 = deleteInvoke(login, request.getObjectId());
+            md5 = deleteInvoke(login, request.getMd5());
             break;
         case UPLOAD:
             md5 = uploadInvoke(login, request.getObjectId());
@@ -109,9 +109,9 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         request.setMd5(md5);
     }
 
-    private String lookupInvoke(LoginToken login, String objectId) {
-        LOGGER.debug("handle lookup message uid={},uniqueId={}", login.getUserId(), objectId);
-        ContentServerResource resource = contentServerProvider.findByResourceId(objectId);
+    private String lookupInvoke(LoginToken login, String md5) {
+        LOGGER.debug("handle lookup message uid={},uniqueId={}", login.getUserId(), md5);
+        ContentServerResource resource = contentServerProvider.findByMD5(md5);
         if (resource == null) {
             LOGGER.error("cannot find resource information");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
