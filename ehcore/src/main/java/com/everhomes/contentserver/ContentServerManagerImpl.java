@@ -1,14 +1,13 @@
 package com.everhomes.contentserver;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.AclProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.user.LoginToken;
+import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -27,7 +26,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     private ContentServerService contentServerService;
 
     @Autowired
-    private AclProvider aclProvider;
+    private UserService userService;
 
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
@@ -86,10 +85,12 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     @Override
     public void auth(MessageHandleRequest request) {
         LOGGER.info("handle auth method.request={}", request);
+
         LoginToken login = LoginToken.fromTokenString(request.getToken());
-        if (null == login) {
-            LOGGER.error("can not check the user information");
-            throw RuntimeErrorException.errorWith("", 1, "invalid user");
+        if (!userService.isValidLoginToken(login)) {
+            LOGGER.error("invalid login token.auth failed");
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlida login token");
         }
         String md5 = "";
         switch (request.getAccessType()) {
