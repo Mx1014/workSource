@@ -150,7 +150,6 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     private static String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId) {
-        uri = Generator.decode(uri);
         if (!uri.contains("cs://")) {
             return uri;
         }
@@ -168,7 +167,7 @@ public class ContentServerServiceImpl implements ContentServerService {
             LOGGER.error("cannot parser");
             return "";
         }
-        uri = uri.substring(position, uri.length());
+        uri = uri.substring(position+1, uri.length());
         if(uri.indexOf("?")!=-1){
             return String.format("http://%s:%d/%s&ownerType=%s&ownerId=%s", cache.get(serverId).getPublicAddress(), cache
                     .get(serverId).getPublicPort(), uri, ownerType, ownerId);
