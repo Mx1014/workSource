@@ -69,7 +69,7 @@ public class ContentServerProviderImpl implements ContentServerProvider {
     @Cacheable(value = "ContentServerResource", key = "#md5")
     @Override
     public ContentServerResource findByMD5(String md5) {
-        ContentServerResource[] resources = new ContentServerResource[0];
+        ContentServerResource[] resources = new ContentServerResource[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhContentServerResources.class), null, (context, object) -> {
             EhContentServerResourcesDao dao = new EhContentServerResourcesDao(context.configuration());
             dao.fetchByResourceMd5(md5).forEach(r -> {
