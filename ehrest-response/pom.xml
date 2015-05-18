@@ -83,6 +83,7 @@
                 <configuration>
                   <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
+<!--                  
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -92,6 +93,7 @@
                         </goals>
                     </execution>
                 </executions>
+-->      
             </plugin>
             <!-- explicitly define maven-deploy-plugin after other to force exec order -->
             <plugin>
