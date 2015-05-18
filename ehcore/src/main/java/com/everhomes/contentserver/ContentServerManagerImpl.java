@@ -1,6 +1,5 @@
 package com.everhomes.contentserver;
 
-import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +46,25 @@ public class ContentServerManagerImpl implements ContentServerMananger {
                     "cannot find server");
         }
         if (result == null) {
-            result = createResource(login.getUserId(), request);
+            result = createResource(server.getId(), login.getUserId(), request);
             contentServerProvider.addResource(result);
         }
         request.setObjectId(result.getResourceId());
     }
 
-    private ContentServerResource createResource(Long uid, MessageHandleRequest request) {
+    private ContentServerResource createResource(Long serverId, Long uid, MessageHandleRequest request) {
         ContentServerResource contentServer = new ContentServerResource();
         contentServer.setMetadata(StringHelper.toJsonString(request.getMeta()));
         contentServer.setOwnerId(uid);
-        contentServer.setResourceId(Generator.createRandomKey());
+        String uri = request.getObjectType().name() + "/" + request.getMd5();
+        if (request.getParamsMap() != null) {
+            StringBuilder sb = new StringBuilder();
+            request.getParamsMap().forEach((key, val) -> {
+                sb.append(key + "=" + val).append("&");
+            });
+            uri = "?" + sb.toString().substring(0, sb.toString().length() - 1);
+        }
+        contentServer.setResourceId(Generator.createKey(serverId, uri));
         contentServer.setResourceMd5(request.getMd5());
         contentServer.setResourceName(request.getFilename());
         contentServer.setResourceSize(request.getTotalSize());
@@ -109,11 +116,6 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             LOGGER.error("cannot find resource information");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "cannot find file");
-        }
-        if (!aclProvider.checkAccess("", login.getUserId(), "", resource.getOwnerId(), 0L, new ArrayList<Long>())) {
-            LOGGER.error("invalid privillage");
-            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_PRIVILLAGE, "invalid privillage");
         }
         return resource.getResourceMd5();
 

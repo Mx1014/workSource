@@ -1,5 +1,8 @@
 package com.everhomes.contentserver;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -39,6 +42,18 @@ public class Generator {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
+    public static String createKey(Long serverId, String path) {
+        if (path.startsWith("/")) {
+            path = path.substring(1, path.length() - 1);
+        }
+        String uri = String.format("cs://%s/%s", serverId, path);
+        try {
+            return URLEncoder.encode(uri, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            return uri;
+        }
+    }
+
     public static int randomInt(int max) {
         return new Random().nextInt(max);
     }
@@ -58,4 +73,13 @@ public class Generator {
     public static String createCacheKey(long uid, String objetId) {
         return String.format("%d-%s", uid, objetId);
     }
+
+    public static String decode(String url) {
+        try {
+            return URLDecoder.decode(url, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            return url;
+        }
+    }
+
 }

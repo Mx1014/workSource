@@ -1,7 +1,9 @@
 package com.everhomes.contentserver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -9,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
@@ -94,6 +97,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         return result;
     }
 
+    @Cacheable(value="selectContentServer")
     @Override
     public ContentServer selectContentServer() throws Exception {
         LOGGER.info("Enter select content server");
@@ -119,12 +123,53 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     @Override
-    public List<String> rebuildUrl(Long uid, List<String> urls, String configName) {
-        List<String> reHashUrl = new ArrayList<String>();
-        urls.forEach(url -> {
-            reHashUrl.add(String.format("%s/%s", url, configName));
+    public List<String> parserUri(List<String> uris) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("rebuild url");
+        }
+        if (CollectionUtils.isEmpty(uris)) {
+            return new ArrayList<String>();
+        }
+       Map<Long, ContentServer> cache = getServersHash();
+        return uris.stream().map(r -> parserSingleUri(r,cache)).collect(Collectors.toList());
+    }
+
+    @Override
+    public String parserUri(String uri) {
+        Map<Long, ContentServer> cache = getServersHash();
+        return parserSingleUri(uri,cache);
+    }
+    
+    private Map<Long, ContentServer>  getServersHash(){
+        List<ContentServer> servers = contentServerProvider.listContentServers();
+        Map<Long, ContentServer> cache = new HashMap<>();
+        servers.forEach(item -> {
+            cache.put(item.getId(), item);
         });
-        // http://localhost:30000/image/<objectId>/<configName>?token=<token>
-        return reHashUrl;
+        return cache;
+    }
+    
+    private static String parserSingleUri(String uri,Map<Long,ContentServer> cache){
+        uri = Generator.decode(uri);
+        if (!uri.contains("cs://")) {
+            return uri;
+        }
+        uri = uri.replace("cs://", "");
+        int position = uri.indexOf("/");
+        if (position < 0) {
+            LOGGER.error("invalid uri.cannot parser.");
+            return "";
+        }
+        String server = uri.substring(0, position);
+        Long serverId = 0L;
+        try {
+            serverId = Long.valueOf(server);
+        } catch (NumberFormatException e) {
+            LOGGER.error("cannot parser");
+            return "";
+        }
+        uri = uri.substring(position, uri.length());
+        return String.format("http://%s:%d/%s", cache.get(serverId).getPublicAddress(), cache.get(serverId)
+                .getPublicPort(), uri);
     }
 }
