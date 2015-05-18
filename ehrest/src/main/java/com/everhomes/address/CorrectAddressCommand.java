@@ -7,30 +7,42 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communitId: 小区Id</li>
+ * <li>communityId: 小区Id</li>
+ * <li>addressId: 地址Id</li>
  * <li>buildingName: 楼栋号</li>
- * <li>keyword: 查询关键字</li>
+ * <li>apartmentName: 门牌号</li>
  * </ul>
  */
-public class ListApartmentByKeywordCommand {
+public class CorrectAddressCommand {
     @NotNull
     private Long communityId;
-
+    
+    @NotNull
+    private Long addressId;
+    
     @NotNull
     private String buildingName;
     
-  
-    private String keyword;
+    @NotNull
+    private String apartmentName;
 
-    public ListApartmentByKeywordCommand() {
+    public CorrectAddressCommand() {
     }
-
+    
     public Long getCommunityId() {
         return communityId;
     }
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public String getBuildingName() {
@@ -41,12 +53,12 @@ public class ListApartmentByKeywordCommand {
         this.buildingName = buildingName;
     }
 
-    public String getKeyword() {
-        return keyword;
+    public String getApartmentName() {
+        return apartmentName;
     }
 
-    public void setKeyword(String keyword) {
-        this.keyword = keyword;
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
     
     @Override

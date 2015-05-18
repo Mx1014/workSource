@@ -155,5 +155,19 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /address/correctAddress</b>
+     * <p>修正地址</p>
+     */
+    @RequestMapping("correctAddress")
+    @RestReturn(value=String.class)
+    public RestResponse correctAddress(@Valid CorrectAddressCommand cmd) {
+        this.addressService.correctAddress(cmd);
+        RestResponse response = new RestResponse(null);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

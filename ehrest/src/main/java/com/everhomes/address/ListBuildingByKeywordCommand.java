@@ -14,8 +14,7 @@ import com.everhomes.util.StringHelper;
 public class ListBuildingByKeywordCommand {
     @NotNull
     private Long communityId;
-    
-    @NotNull
+  
     private String keyword;
     
     public ListBuildingByKeywordCommand() {

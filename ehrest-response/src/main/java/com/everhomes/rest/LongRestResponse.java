@@ -1,6 +1,6 @@
 package com.everhomes.rest;
 
-public class LongRestResponse {
+public class LongRestResponse extends RestResponseBase {
     private Long response;
 
     public LongRestResponse() {

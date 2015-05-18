@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1091,28 +1093,56 @@ public class FamilyProviderImpl implements FamilyProvider {
     }
 
     @Override
-    public List<FamilyDTO> listWaitApproveFamily(Long pageOffset, Long pageSize) {
+    public List<FamilyDTO> listWaitApproveFamily(Long comunityId, Long pageOffset, Long pageSize) {
         pageOffset = pageOffset == null ? 1L : pageOffset;
         
         int size = (int) (pageSize == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize);
+        List<FamilyDTO> results = new ArrayList<FamilyDTO>();
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, size);
         
-        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                    context.select().from(Tables.EH_GROUP_MEMBERS)
+                    SelectConditionStep<Record> step = context.select().from(Tables.EH_GROUP_MEMBERS)
+                    .leftOuterJoin(Tables.EH_GROUPS)
+                    .on(Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID))
                     .where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
-                            .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()))
-                    .limit(size).offset((int)offset)
+                                .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
                     
-                    .fetch().map( (r) ->{
+                    if(comunityId != null){
+                        step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
+                    }
+                    step.orderBy(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL.desc())
+                    .limit(size).offset((int)offset)
+                    .fetch().map((r) ->{
+                        
+                            Address address = this.addressProvider.findAddressById(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
+                            if (address == null) return null;
+                            Community community = this.communityProvider.findCommunityById(address.getCommunityId());
+                            if(community == null) return null;
+                            FamilyDTO f = new FamilyDTO();
+                            f.setAddress(address.getAddress());
+                            f.setAddressId(address.getId());
+                            f.setApartmentName(address.getApartmentName());
+                            f.setBuildingName(address.getBuildingName());
+                            f.setAddressStatus(address.getStatus());
                             
+                            f.setCityName(community.getCityName());
+                            f.setAreaName(community.getAreaName());
+                            f.setCommunityId(community.getId());
+                            f.setCommunityName(community.getName());
+                            f.setId(r.getValue(Tables.EH_GROUPS.ID));
+                            f.setMemberCount(r.getValue(Tables.EH_GROUPS.MEMBER_COUNT));
+                            f.setMemberUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+                            f.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
+                            f.setMembershipStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
+                            results.add(f);
                             return null;
                         });
                     
                     return true;
                 });
-        return null;
+        return results;
     }
 
 }

@@ -2,7 +2,7 @@ package com.everhomes.rest;
 
 import java.util.List;
 
-public class LongListRestResponse {
+public class LongListRestResponse extends RestResponseBase {
     private List<Long> response;
 
     public LongListRestResponse() {

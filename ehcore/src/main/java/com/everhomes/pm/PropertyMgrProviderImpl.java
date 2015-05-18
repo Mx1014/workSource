@@ -257,6 +257,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
          });
          return result;
     }
+    
+    @Override
+    public Integer countCommunityAddressMappings(Long communityId) {
+    	
+    	return null;
+    }
    
     @CacheEvict(value = "CommunityPmBill", key="#communityPmBill.id")
     @Override
