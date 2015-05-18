@@ -2,7 +2,7 @@ package com.everhomes.rest;
 
 import java.util.List;
 
-public class StringListRestResponse {
+public class StringListRestResponse extends RestResponseBase {
     private List<String> response;
 
     public StringListRestResponse() {
