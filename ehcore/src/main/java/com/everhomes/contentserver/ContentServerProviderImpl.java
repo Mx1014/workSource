@@ -157,7 +157,7 @@ public class ContentServerProviderImpl implements ContentServerProvider {
     public List<ContentServer> listContentServers() {
         DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContentServer.class));
         EhContentServerDao dao = new EhContentServerDao(cxt.configuration());
-        return dao.findAll().parallelStream().map(r -> ConvertHelper.convert(r, ContentServer.class))
+        return dao.findAll().stream().map(r -> ConvertHelper.convert(r, ContentServer.class))
                 .collect(Collectors.toList());
     }
 

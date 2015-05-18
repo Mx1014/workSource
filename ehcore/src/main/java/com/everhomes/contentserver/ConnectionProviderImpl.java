@@ -60,7 +60,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
                 }
                 connect(item.getPrivateAddress(), item.getPrivatePort());
             } catch (Exception e) {
-                LOGGER.error("handle error message,err={}", e.getMessage());
+                LOGGER.error("handle error message",e);
             }
         });
     }
@@ -118,19 +118,13 @@ public class ConnectionProviderImpl implements ConnectionProvider {
             LOGGER.error("cannot find any nodes");
             return;
         }
-        sessionCache
-                .values()
-                .parallelStream()
-                .forEach(
+        sessionCache.values().parallelStream().forEach(
                         session -> {
                             try {
                                 session.sendMessage(new TextMessage(item.toJson()));
                             } catch (Exception e) {
                                 LOGGER.error("send message error", e);
-                                throw RuntimeErrorException
-                                        .errorWith(ContentServerErrorCode.SCOPE,
-                                                ContentServerErrorCode.ERROR_INVALID_SERVER,
-                                                "cannot connect to content server");
+                                throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,ContentServerErrorCode.ERROR_INVALID_SERVER,"cannot connect to content server");
                             }
                         });
         List<ConfigResponse> rsp = new ArrayList<>();
@@ -240,8 +234,8 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 
         }).setTimeout(5000).create();
         Map<Long, ContentServer> cache = new HashMap<Long, ContentServer>();
-        servers.parallelStream().map(
-                node -> {
+        servers.parallelStream().map(node -> 
+                        {
                     try {
                         cache.put(node.getId(), node);
                         String address = node.getPrivateAddress();
