@@ -239,6 +239,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return ConvertHelper.convert(dao.findById(id), CommunityAddressMapping.class);
     }
     
+    @Cacheable(value="CommunityAddressMapping", key="#addressId")
+    @Override
+    public CommunityAddressMapping findPropAddressMappingByAddressId(Long communityId,Long addressId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
+        if(communityId != null)
+            query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
+       query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
+       return ConvertHelper.convert(query.fetchOne(), CommunityAddressMapping.class);
+    }
+    
     @Cacheable(value = "listCommunityAddressMappings")
     @Override
     public List<CommunityAddressMapping> listCommunityAddressMappings(Long communityId,Integer pageOffset,Integer pageSize) {

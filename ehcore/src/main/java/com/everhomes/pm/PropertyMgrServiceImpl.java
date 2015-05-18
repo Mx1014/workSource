@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.nio.file.attribute.GroupPrincipal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -27,12 +29,18 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
+import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.FindFamilyByAddressIdCommand;
 import com.everhomes.family.GetFamilyCommand;
+import com.everhomes.family.ListOwningFamilyMembersCommand;
 import com.everhomes.forum.Post;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
+import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -45,6 +53,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
 public class PropertyMgrServiceImpl implements PropertyMgrService {
@@ -76,6 +85,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private GroupProvider groupProvider;
     
     
     @Override
@@ -151,7 +163,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
 	@Override
-	public void improtCommunityAddressMapping(PropCommunityIdCommand cmd) {
+	public void importPMAddressMapping(PropCommunityIdCommand cmd) {
 		User user  = UserContext.current().getUser();
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
     	if(community == null){
@@ -590,10 +602,169 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
     
     @Override
-    public void setPropCurrentCommunity(Long communityId) {
+    public void setPropCurrentCommunity(SetCurrentCommunityCommand cmd) {
     	User user  = UserContext.current().getUser();
     	//根据communityId 和userId 判断权限
     	
-    	userService.setUserCurrentCommunity(communityId);
+    	userService.setUserCurrentCommunity(cmd.getCommunityId());
+    }
+    
+    @Override
+    public ListPropFamilyWaitingMemberCommandResponse listPropFamilyWaitingMember(ListPropFamilyWaitingMemberCommand cmd) {
+    	ListPropFamilyWaitingMemberCommandResponse commandResponse = new ListPropFamilyWaitingMemberCommandResponse();
+    	
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	List<FamilyDTO>  entityResultList = familyProvider.listWaitApproveFamily(cmd.getCommunityId(), new Long(cmd.getPageOffset()), new Long(pageSize));
+    	commandResponse.setMembers( entityResultList.stream()
+                .map(r->{ return r; })
+                .collect(Collectors.toList()));
+    	return commandResponse;
+    }
+    
+    @Override
+    public void setApartmentStatus(SetPropAddressStatusCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
+    	if(mapping == null)
+    	{
+    		PropCommunityIdCommand comand = new PropCommunityIdCommand();
+    		comand.setCommunityId(cmd.getCommunityId());
+    		importPMAddressMapping(comand);
+    	}
+    	mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
+    	mapping.setLivingStatus(cmd.getStatus());
+    	propertyMgrProvider.updatePropAddressMapping(mapping);
+    }
+    
+    @Override
+    public PropFamilyDTO findFamilyByAddressId(ListPropCommunityAddressCommand cmd) {
+    	Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+    	if(family == null)
+    	{
+    		LOGGER.error("family is not existed.communityId=" + cmd.getCommunityId()+",addressId=" + cmd.getAddressId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the family.");
+    	}
+    	if(family.getCommunityId() != cmd.getCommunityId())
+    	{
+    		LOGGER.error("family is not belong to the community.communityId=" + cmd.getCommunityId()+",addressId=" + cmd.getAddressId());
+   		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "family is not belong to the community.");
+    	}
+    	PropFamilyDTO dto = new PropFamilyDTO();
+    	if(family != null){
+    	dto.setName(family.getName());
+    	dto.setId(family.getId());
+    	dto.setMemberCount(family.getMemberCount());
+    	dto.setAddressId(family.getAddressId());
+    	dto.setAddress(family.getDisplayName());
+    	CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
+    	dto.setLivingStatus(mapping.getLivingStatus());
+    	}
+    	return dto;
+    }
+    
+    @Override
+    public List<FamilyMemberDTO> listFamilyMembersByFamilyId(ListPropFamilyMemberCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	List<GroupMember> entityResultList = groupProvider.findGroupMemberByGroupId(cmd.getFamilyId());
+    	List<FamilyMemberDTO> results = new ArrayList<FamilyMemberDTO>();
+    	
+    	for (GroupMember member : entityResultList) {
+    		FamilyMemberDTO dto = new FamilyMemberDTO();
+    		dto.setId(member.getId());
+    		dto.setFamilyId(member.getGroupId());
+    		dto.setMemberUid(member.getMemberId());
+    		dto.setMemberName(member.getMemberNickName());
+    		dto.setMemberAvatar(member.getMemberAvatar());
+    		results.add(dto);
+		}
+    	return results;
+    }
+    
+    @Override
+    public void importPMPropertyOwnerInfo(Long communityId,
+    		MultipartFile[] files) {
+//    	User user  = UserContext.current().getUser();
+//    	if(communityId == null){
+//    		LOGGER.error("propterty communityId paramter can not be null or empty");
+//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+//                    "propterty communityId paramter can not be null or empty");
+//    	}
+//    	Community community = communityProvider.findCommunityById(communityId);
+//    	if(community == null){
+//    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+//    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+//                     "Unable to find the community.");
+//    	}
+//    	
+//    	ArrayList resultList = PropMrgOwnerHandler.processorExcel(files);
+//		List<CommunityPmOwner> contactList = PropMrgOwnerHandler.processorPropMgrContact(user.getId(), communityId, resultList);
+//		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
+//		command.setCommunityId(communityId);
+//		List<PropAddressMappingDTO> mappingList = ListAddressMappings(command).getMembers();
+//		if(contactList != null && contactList.size() > 0)
+//		{
+//			for (CommunityPmOwner contact : contactList)
+//			{
+//				contact.setNeId(processNeId(contact.getAddress(),mappingList));
+//				try {
+//					getBusinessService().savePropMgrContact(contact);
+//				} catch (DuplicateKeyException e) 
+//				{
+//					setErrDesc("此手机号已经存在。手机号是：" + contact.getCellPhone());
+//					setErrCode(PeachConstants.ERRCODE_DB_SAVE_FAIL);
+//				}
+//			}
+//		}
+//    	
     }
 }
