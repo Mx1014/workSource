@@ -1,6 +1,10 @@
 package com.everhomes.contentserver;
 
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
 
 public class AddConfigItemCommand {
     @NotNull
@@ -10,7 +14,8 @@ public class AddConfigItemCommand {
     private String configType;
 
     // include imageconfig, audioconfig,videoconfig
-    private Object configProps;
+    @ItemType(String.class)
+    private Map<String, String> configProps;
 
     public String getConfigName() {
         return configName;
@@ -28,11 +33,11 @@ public class AddConfigItemCommand {
         this.configType = configType;
     }
 
-    public Object getConfigProps() {
+    public Map<String, String> getConfigProps() {
         return configProps;
     }
 
-    public void setConfigProps(Object configProps) {
+    public void setConfigProps(Map<String, String> configProps) {
         this.configProps = configProps;
     }
 
