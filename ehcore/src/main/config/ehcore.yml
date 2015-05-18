@@ -109,6 +109,8 @@ objc.response.base: EvhRestResponseBase
 class.name.prefix: Evh
 
 source.jars: /Users/kelveny/archive/ehng/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
-source.excludes: com.everhomes.rpc.*, com.everhomes.rest.*
+source.excludes: com.everhomes.rpc.*, com.everhomes.rest.*, com.everhomes.contentserver.*
 destination.dir: /Users/kelveny/archive/ehng-ios/API-objects/
+destination.dir.java: /Users/kelveny/archive/ehng/ehrest-response/src/main/java/
+
         

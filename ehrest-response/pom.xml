@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.everhomes</groupId>
-    <artifactId>ehrest</artifactId>
+    <artifactId>ehrest-response</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>ehrest</name>
+    <name>ehrest-response</name>
     <url>http://www.everhomes.com</url>
 
 	<distributionManagement>
@@ -57,8 +57,8 @@
         </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
-            <artifactId>ehutil</artifactId>
-            <version>0.0.5-SNAPSHOT</version>
+            <artifactId>ehrest</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -76,25 +76,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                 <groupId>org.codehaus.mojo</groupId>
-                 <artifactId>properties-maven-plugin</artifactId>
-                 <version>1.0-alpha-1</version>
-                 <executions>
-                     <execution>
-                         <phase>initialize</phase>
-                         <goals>
-                             <goal>read-project-properties</goal>
-                         </goals>
-                         <configuration>
-                             <files>
-                                 <file>${basedir}/../pom.properties</file>
-                             </files>
-                         </configuration>
-                     </execution>
-                 </executions>
-            </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -111,7 +93,7 @@
                         </goals>
                     </execution>
                 </executions>
--->                
+-->      
             </plugin>
             <!-- explicitly define maven-deploy-plugin after other to force exec order -->
             <plugin>
@@ -129,5 +111,4 @@
             
         </plugins>
     </build>
-    
 </project>
