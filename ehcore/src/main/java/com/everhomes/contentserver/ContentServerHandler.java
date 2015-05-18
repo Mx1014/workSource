@@ -24,9 +24,11 @@ public class ContentServerHandler extends TextWebSocketHandler {
 
     private WebSocketMessageSubscriber subscriber;
 
+    private volatile boolean isSubscribe = false;
+
     public ContentServerHandler(WebSocketCallback callback) {
         this.callback = callback;
-        subscriber=new WebSocketMessageSubscriber();
+        subscriber = new WebSocketMessageSubscriber();
         proxy = MessageQueue.getInstance();
     }
 
@@ -38,7 +40,8 @@ public class ContentServerHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        proxy.subscriber("contentstorage.", subscriber);
+        if (!isSubscribe)
+            proxy.subscriber("contentstorage.", subscriber);
         LOGGER.info("handle text message from content server.payload={}", message.getPayload());
         PduFrame frame = PduFrame.fromJson(message.getPayload());
         if (StringUtils.isEmpty(frame.getName())) {
