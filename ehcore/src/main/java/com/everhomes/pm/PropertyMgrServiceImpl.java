@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ApartmentDTO;
 import com.everhomes.address.BuildingDTO;
@@ -60,6 +61,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private AddressService addressService;
+    
+    @Autowired
+    private AddressProvider addressProvider;
     
     @Autowired
     private SmsProvider smsProvider;
@@ -175,6 +179,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     					m.setAddressId(address.getId());
     					m.setCommunityId(cmd.getCommunityId());
     					m.setName(address.getAddress());
+    					m.setLivingStatus((byte)0);
     					propertyMgrProvider.createPropAddressMapping(m);
     				}
         		}
@@ -207,7 +212,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
-                 .map(r->{ return ConvertHelper.convert(r, PropAddressMappingDTO.class); })
+                 .map(r->{ 
+                	 PropAddressMappingDTO dto = ConvertHelper.convert(r, PropAddressMappingDTO.class);
+                	 Address address = addressProvider.findAddressById(dto.getAddressId());
+                	 if(address != null)
+                		 dto.setAddressName(address.getAddress());
+                	 return  dto;})
                  .collect(Collectors.toList()));
     	
         return commandResponse;
@@ -409,7 +419,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 	
 	@Override
-	public void ejectPropMember(DeletePropMemberCommand cmd) {
+	public void revokePMGroupMember(DeletePropMemberCommand cmd) {
     	User user  = UserContext.current().getUser();
     	if(cmd.getCommunityId() == null){
     		LOGGER.error("propterty communityId paramter can not be null or empty");
@@ -500,7 +510,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
     
     @Override
-    public void ejectPropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
+    public void revokePropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
     	User user  = UserContext.current().getUser();
     	if(cmd.getCommunityId() == null){
     		LOGGER.error("propterty communityId paramter can not be null or empty");

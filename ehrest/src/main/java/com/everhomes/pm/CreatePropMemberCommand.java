@@ -20,11 +20,14 @@ import com.everhomes.util.StringHelper;
 public class CreatePropMemberCommand {
     @NotNull
     private Long   communityId;
-    @NotNull
+   
 	private String targetType;
+    @NotNull
 	private Long   targetId;
+
 	private String pmGroup;
 	private String contactName;
+	@NotNull
 	private Byte   contactType;
 	private String contactToken;
 	private String contactDescription;

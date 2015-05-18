@@ -101,7 +101,7 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/ejectMember</b>
+     * <b>URL: /pm/rejectMember</b>
      * <p>拒绝物业成员</p>
      * @return 拒绝的结果
      */
@@ -120,10 +120,10 @@ public class PropertyMgrController extends ControllerBase {
      * <p>删除物业成员</p>
      * @return 删除的结果
      */
-    @RequestMapping("deletePMGroupMember")
+    @RequestMapping("revokePMGroupMember")
     @RestReturn(value=String.class)
-    public RestResponse ejectPropertyMember(@Valid DeletePropMemberCommand cmd) {
-    	propertyMgrService.ejectPropMember(cmd);
+    public RestResponse revokePMGroupMember(@Valid DeletePropMemberCommand cmd) {
+    	propertyMgrService.revokePMGroupMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -566,14 +566,14 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/ejectPropFamilyMember</b>
+     * <b>URL: /pm/revokePropFamilyMember</b>
      * <p>踢出家庭成员</p>
      * @return 踢出的结果
      */
-    @RequestMapping("ejectPropFamilyMember")
+    @RequestMapping("revokePropFamilyMember")
     @RestReturn(value=String.class)
-    public RestResponse ejectPropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
-    	propertyMgrService.ejectPropFamilyMember(cmd);
+    public RestResponse revokePropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
+    	propertyMgrService.revokePropFamilyMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
