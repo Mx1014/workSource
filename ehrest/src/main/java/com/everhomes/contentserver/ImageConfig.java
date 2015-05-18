@@ -1,5 +1,7 @@
 package com.everhomes.contentserver;
 
+import com.everhomes.util.StringHelper;
+
 public class ImageConfig {
 	private int width;
 
@@ -90,5 +92,10 @@ public class ImageConfig {
 	public void setY(int y) {
 		this.y = y;
 	}
+	
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
 }

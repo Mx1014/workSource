@@ -1,5 +1,7 @@
 package com.everhomes.contentserver;
 
+import com.everhomes.util.StringHelper;
+
 public class AudioConfig {
 	private String format;
 
@@ -20,5 +22,8 @@ public class AudioConfig {
 	public void setBit(int bit) {
 		this.bit = bit;
 	}
-
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

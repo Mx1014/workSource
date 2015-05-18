@@ -2,6 +2,8 @@ package com.everhomes.contentserver;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 public class UpdateContentServerCommand extends AddContentServerCommand {
     @NotNull
     private Long serverId;
@@ -13,5 +15,8 @@ public class UpdateContentServerCommand extends AddContentServerCommand {
     public void setServerId(Long serverId) {
         this.serverId = serverId;
     }
-
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

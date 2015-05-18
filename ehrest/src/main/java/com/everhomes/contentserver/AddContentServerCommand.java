@@ -2,6 +2,8 @@ package com.everhomes.contentserver;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * add content storage proxy
  * 
@@ -76,4 +78,8 @@ public class AddContentServerCommand {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
