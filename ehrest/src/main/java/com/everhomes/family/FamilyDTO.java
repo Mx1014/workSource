@@ -59,6 +59,7 @@ public class FamilyDTO {
     private String apartmentName;
     
     private Byte addressStatus;
+    private String proofResourceUrl;
  
     public FamilyDTO () {
     }
@@ -245,6 +246,14 @@ public class FamilyDTO {
 
     public void setAddressStatus(Byte addressStatus) {
         this.addressStatus = addressStatus;
+    }
+
+    public String getProofResourceUrl() {
+        return proofResourceUrl;
+    }
+
+    public void setProofResourceUrl(String proofResourceUrl) {
+        this.proofResourceUrl = proofResourceUrl;
     }
 
     @Override

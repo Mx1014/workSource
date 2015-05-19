@@ -90,7 +90,7 @@ public class AddressController extends ControllerBase {
     public RestResponse listCommunitiesByKeyword(@Valid ListCommunityByKeywordCommand cmd) {
         Tuple<Integer, List<CommunityDTO>> results = this.addressService.listCommunitiesByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
-        
+
         response.setErrorCode(results.first());
         response.setErrorDescription("OK");
         return response;
@@ -116,7 +116,7 @@ public class AddressController extends ControllerBase {
      * <p>根据小区Id、楼栋号和关键字查询门牌</p>
      */
     @RequestMapping("listAppartmentsByKeyword")
-    @RestReturn(value=String.class, collection=true)
+    @RestReturn(value=ApartmentDTO.class, collection=true)
     public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
         Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());

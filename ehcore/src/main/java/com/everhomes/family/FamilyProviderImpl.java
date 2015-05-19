@@ -29,6 +29,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
@@ -94,6 +95,9 @@ public class FamilyProviderImpl implements FamilyProvider {
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Cacheable(value="Family", key="#addressId")
     @Override
@@ -436,6 +440,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group != null){
 
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
+                family.setAvatar(parserUri(family.getAvatar(),"Family",group.getCreatorUid()));
                 family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
                 Community community = this.communityProvider.findCommunityById(communityId);
@@ -554,8 +559,8 @@ public class FamilyProviderImpl implements FamilyProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter");
         if(memberUid.longValue() == userId)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid memberUid parameter,can not revoke youself");
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_REVOKE_SELF, 
+                    "Invalid memberUid parameter,can not revoke self");
         
         
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
@@ -612,7 +617,8 @@ public class FamilyProviderImpl implements FamilyProvider {
     }
     @Override
     public void approveMember(Long familyId, Long memberUid) {
-        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         if(familyId == null || memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId or memberUid parameter");
@@ -623,12 +629,20 @@ public class FamilyProviderImpl implements FamilyProvider {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter,family is not found.");
         }
+        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
+                EntityType.USER.getCode(), userId);
+        if(currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
+            LOGGER.error("The status of user in family invalid.userId=" + userId);
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_STATUS_INVALID, 
+                    "The status of user in family invalid.");
+        }
+        
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), memberUid);
         if(member == null){
-            LOGGER.error("Invalid memberUid parameter,user not apply join in family.memberUid=" + memberUid);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid memberUid parameter,user not apply join in family.");
+            LOGGER.error("Invalid memberUid parameter,user has not apply join in family.memberUid=" + memberUid);
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+                    "Invalid memberUid parameter,user has not apply join in family.");
         }
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
             
@@ -671,9 +685,9 @@ public class FamilyProviderImpl implements FamilyProvider {
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
         if(member == null){
-            LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter,user not in family.");
+            LOGGER.error("User not in family.familyId=" + familyId);
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+                    "User not in family.");
         }
         ListingLocator locator = new ListingLocator();
         locator.setEntityId(familyId);
@@ -688,7 +702,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
                 f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatar(groupMember.getMemberAvatar());
+                f.setMemberAvatar(parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid()));
                 results.add(f);
             }
         });
@@ -811,10 +825,10 @@ public class FamilyProviderImpl implements FamilyProvider {
                         .fetch().map((r) -> {
                            FamilyMembershipRequestDTO member = new FamilyMembershipRequestDTO();
                            member.setFamilyId(familyId);
-                           member.setFamilyAvatar(group.getAvatar());
+                           member.setFamilyAvatar(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
                            member.setFamilyName(group.getName());
                            member.setRequestorUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
-                           member.setRequestorAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
+                           member.setRequestorAvatar(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR),"User",r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
                            member.setRequestorComment(r.getValue(Tables.EH_GROUP_MEMBERS.REQUESTOR_COMMENT));
                            member.setRequestingTime(r.getValue(Tables.EH_GROUP_MEMBERS.CREATE_TIME).toString());
                            
@@ -845,64 +859,63 @@ public class FamilyProviderImpl implements FamilyProvider {
         Family family = self.findFamilyByAddressId(user.getAddressId());
         if(family == null || family.getId().longValue() != familyId){
             LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "Invalid familyId parameter,user not in family.");
         }
         
-        List<Long> addresIds = new ArrayList<Long>();
+        List<Family> familyList = new ArrayList<Family>();
         long communityId = family.getCommunityId();
         List<NeighborUserDetailDTO> userDetailList = new ArrayList<NeighborUserDetailDTO>();
         Address myaddress = this.addressProvider.findAddressById(user.getAddressId());;
         
+        long startTime = System.currentTimeMillis();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
-                    context.select(Tables.EH_GROUPS.INTEGRAL_TAG1).from(Tables.EH_GROUPS)
+                    context.select().from(Tables.EH_GROUPS)
                         .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
                             //排除自己
                             if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != user.getAddressId())
-                                addresIds.add(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
-                            
+                                familyList.add(ConvertHelper.convert(r,Family.class));
                             return null;
                         });
-                    
-                    if(addresIds.size() > 0){
-                        
-                        for(long addressId : addresIds){
-                            Address address = this.addressProvider.findAddressById(addressId);
-                            Family f = self.findFamilyByAddressId(addressId);
-                            if(f != null && address != null){
-                                
-                                List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
-                                if(members != null && !members.isEmpty()){
-                                    for(GroupMember m : members){
-                                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
-                                                && m.getMemberType().equals(EntityType.USER.getCode())){
-                                            
-                                            NeighborUserDetailDTO n = new NeighborUserDetailDTO();
-                                            User u = this.userProvider.findUserById(m.getMemberId());
-                                            n.setUserId(u.getId());
-                                            n.setUserName(m.getMemberNickName());
-                                            n.setUserAvatar(m.getMemberAvatar());
-                                            n.setUserStatusLine(u.getStatusLine());
-                                            n.setBuildingName(address.getBuildingName());
-                                            n.setApartmentFloor(address.getApartmentFloor());
-                                            userDetailList.add(n);
-                                        }
-                                    }
-                                }
-                                
-                            }
-                            
-                        }
-                        
-                    }
                    
                     return true;
                 });
+        
+        familyList.parallelStream().forEach((f) ->{
+            if(f == null) return;
+            
+            Address address = this.addressProvider.findAddressById(f.getAddressId());
+            if(address != null){
+                
+                List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
+                if(members != null && !members.isEmpty()){
+                    for(GroupMember m : members){
+                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
+                                && m.getMemberType().equals(EntityType.USER.getCode())){
+                            
+                            NeighborUserDetailDTO n = new NeighborUserDetailDTO();
+                            User u = this.userProvider.findUserById(m.getMemberId());
+                            n.setUserId(u.getId());
+                            n.setUserName(m.getMemberNickName());
+                            n.setUserAvatar(parserUri(m.getMemberAvatar(),"User",u.getId()));
+                            n.setUserStatusLine(u.getStatusLine());
+                            n.setBuildingName(address.getBuildingName());
+                            n.setApartmentFloor(address.getApartmentFloor());
+                            userDetailList.add(n);
+                        }
+                    }
+                }
+            }
+            
+        });
         pageOffset = pageOffset == null ? 1 : pageOffset;
-        return processNeighborUserInfo(userDetailList,myaddress,pageOffset);
+        List<NeighborUserDTO> results = processNeighborUserInfo(userDetailList,myaddress,pageOffset);
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Query neighbor user of community,elapse=" + (endTime - startTime));
+        return results;
     }
 
     private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,
@@ -910,7 +923,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         if(userDetailList == null || userDetailList.isEmpty())
             return null;
-
+        long startTime = System.currentTimeMillis();
         List<NeighborUserDTO> results = new ArrayList<NeighborUserDTO>();
         for(NeighborUserDetailDTO dto : userDetailList){
             NeighborUserDTO user = ConvertHelper.convert(dto, NeighborUserDTO.class);
@@ -941,7 +954,8 @@ public class FamilyProviderImpl implements FamilyProvider {
             int endIndex = Math.min(results.size(), currentPage*pageSize);
             results = results.subList((currentPage-1)*pageSize,endIndex);
         }
-        
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Process neighbor user,elapse=" + (endTime - startTime));
         return results;
         
     }
@@ -976,6 +990,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         List<Long> userIds = new ArrayList<Long>();
         List<NeighborUserDTO> results = new ArrayList<NeighborUserDTO>();
         
+        long startTime = System.currentTimeMillis();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     context.select(Tables.EH_USER_GROUPS.OWNER_UID).from(Tables.EH_USER_GROUPS)
@@ -1003,7 +1018,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                             n.setUserId(r.getValue(Tables.EH_USERS.ID));
                             n.setUserStatusLine(r.getValue(Tables.EH_USERS.STATUS_LINE));
                             n.setUserName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
-                            n.setUserAvatar(r.getValue(Tables.EH_USERS.AVATAR));
+                            n.setUserAvatar(parserUri(r.getValue(Tables.EH_USERS.AVATAR),"User",r.getValue(Tables.EH_USERS.ID)));
                             //计算距离
                             double lat = r.getValue(Tables.EH_USER_LOCATIONS.LATITUDE);
                             double lon = r.getValue(Tables.EH_USER_LOCATIONS.LONGITUDE);
@@ -1020,7 +1035,8 @@ public class FamilyProviderImpl implements FamilyProvider {
         pageOffset = pageOffset == null ? 1 : pageOffset;
         
         processNeighborUserInfo(results,pageOffset);
-        
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Query nearby neibhor user of communtiy,elapse=" + (endTime - startTime));
         return results;
     }
     
@@ -1086,7 +1102,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(m != null){
             familyDTO.setMemberUid(m.getMemberId());
             familyDTO.setMemberNickName(m.getMemberNickName());
-            familyDTO.setMemberAvatar(m.getMemberAvatar());
+            familyDTO.setMemberAvatar(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
             familyDTO.setMembershipStatus(m.getMemberStatus());
         }
         return familyDTO;
@@ -1136,6 +1152,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                             f.setMemberUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                             f.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
                             f.setMembershipStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
+                            f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL),"Family",r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
                             results.add(f);
                             return null;
                         });
@@ -1144,5 +1161,16 @@ public class FamilyProviderImpl implements FamilyProvider {
                 });
         return results;
     }
+    
+    private String parserUri(String uri,String ownerType, Long ownerId){
+        try {
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+                return contentServerService.parserUri(uri,ownerType,ownerId);
+            
+        } catch (Exception e) {
+            LOGGER.error("Parser uri is error." + e.getMessage());
+        }
+        return null;
 
+    }
 }

@@ -548,6 +548,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setBuildingName(cmd.getBuildingName());
             address.setApartmentName(cmd.getApartmentName());
             address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+            address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
             this.addressProvider.updateAddress(address);
         }else {
             Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
@@ -559,6 +560,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             this.addressProvider.deleteAddress(address);
         }
         
+    }
+    
+    private String parserApartmentFloor(String apartmentName){
+        if(StringUtils.isEmpty(apartmentName)) return null;
+
+        if(apartmentName.length() <= 2)
+            return "1";
+        else if(apartmentName.length() > 2 && 
+                apartmentName.startsWith(apartmentName.substring(0, apartmentName.length() - 2))){
+            return apartmentName.substring(0, apartmentName.length() - 2);
+        }
+        return null;
     }
 
 }
