@@ -453,6 +453,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                      addr.setBuildingName(cmd.getBuildingName());
                      addr.setApartmentName(cmd.getApartmentName());
                      addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+                     addr.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
                      addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
                      this.addressProvider.createAddress(addr);
                 }

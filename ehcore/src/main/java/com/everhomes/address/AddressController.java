@@ -112,12 +112,12 @@ public class AddressController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /address/listAppartmentsByKeyword</b>
+     * <b>URL: /address/listApartmentsByKeyword</b>
      * <p>根据小区Id、楼栋号和关键字查询门牌</p>
      */
-    @RequestMapping("listAppartmentsByKeyword")
+    @RequestMapping("listApartmentsByKeyword")
     @RestReturn(value=ApartmentDTO.class, collection=true)
-    public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+    public RestResponse listApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
         Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
         
