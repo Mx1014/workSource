@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CreateInvitationCommand {
 
+    
     @NotNull
     private String inviteType;
     @NotNull
