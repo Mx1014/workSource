@@ -1,15 +1,13 @@
 package com.everhomes.contentserver;
 
-import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.AclProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.user.LoginToken;
+import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -28,7 +26,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     private ContentServerService contentServerService;
 
     @Autowired
-    private AclProvider aclProvider;
+    private UserService userService;
 
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
@@ -47,17 +45,24 @@ public class ContentServerManagerImpl implements ContentServerMananger {
                     "cannot find server");
         }
         if (result == null) {
-            result = createResource(login.getUserId(), request);
+            result = createResource(server.getId(), login.getUserId(), request);
             contentServerProvider.addResource(result);
         }
-        request.setObjectId(result.getResourceId());
+        request.setObjectId(Generator.createKey(server.getId(), result.getResourceId()));
+        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
     }
 
-    private ContentServerResource createResource(Long uid, MessageHandleRequest request) {
+    private String createUrl(ContentServer content, String resourceId, String type, String token) {
+        return String.format("http://%s:%d/%s/%s?token=%s", content.getPublicAddress(), content.getPublicPort(), type,
+                Generator.encodeUrl(resourceId), token);
+    }
+
+    private ContentServerResource createResource(Long serverId, Long uid, MessageHandleRequest request) {
         ContentServerResource contentServer = new ContentServerResource();
         contentServer.setMetadata(StringHelper.toJsonString(request.getMeta()));
         contentServer.setOwnerId(uid);
-        contentServer.setResourceId(Generator.createRandomKey());
+        String uri = request.getObjectType().name() + "/" + request.getMd5();
+        contentServer.setResourceId(uri);
         contentServer.setResourceMd5(request.getMd5());
         contentServer.setResourceName(request.getFilename());
         contentServer.setResourceSize(request.getTotalSize());
@@ -79,10 +84,12 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     @Override
     public void auth(MessageHandleRequest request) {
         LOGGER.info("handle auth method.request={}", request);
+
         LoginToken login = LoginToken.fromTokenString(request.getToken());
-        if (null == login) {
-            LOGGER.error("can not check the user information");
-            throw RuntimeErrorException.errorWith("", 1, "invalid user");
+        if (!userService.isValidLoginToken(login)) {
+            LOGGER.error("invalid login token.auth failed");
+            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
+                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlida login token");
         }
         String md5 = "";
         switch (request.getAccessType()) {
@@ -102,24 +109,21 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         request.setMd5(md5);
     }
 
-    private String lookupInvoke(LoginToken login, String objectId) {
-        LOGGER.debug("handle lookup message uid={},uniqueId={}", login.getUserId(), objectId);
-        ContentServerResource resource = contentServerProvider.findByResourceId(objectId);
+    private String lookupInvoke(LoginToken login, String resourceId) {
+        LOGGER.info("handle lookup message uid={},uniqueId={}", login.getUserId(), resourceId);
+        resourceId = Generator.decodeUrl(resourceId);
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
             LOGGER.error("cannot find resource information");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "cannot find file");
-        }
-        if (!aclProvider.checkAccess("", login.getUserId(), "", resource.getOwnerId(), 0L, new ArrayList<Long>())) {
-            LOGGER.error("invalid privillage");
-            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_PRIVILLAGE, "invalid privillage");
         }
         return resource.getResourceMd5();
 
     }
 
     private String deleteInvoke(LoginToken login, String uniqueId) {
+        uniqueId = Generator.decodeUrl(uniqueId);
         ContentServerResource resource = contentServerProvider.findByResourceId(uniqueId);
         if (resource == null) {
             LOGGER.error("can not find file information");

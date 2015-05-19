@@ -1,5 +1,7 @@
 package com.everhomes.contentserver;
 
+import com.everhomes.util.StringHelper;
+
 public class ContentServerDTO {
     private Long id;
     private String name;
@@ -63,6 +65,10 @@ public class ContentServerDTO {
 
     public void setPublicPort(Integer publicPort) {
         this.publicPort = publicPort;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 
 }

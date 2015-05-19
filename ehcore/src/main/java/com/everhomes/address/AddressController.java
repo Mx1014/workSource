@@ -90,7 +90,7 @@ public class AddressController extends ControllerBase {
     public RestResponse listCommunitiesByKeyword(@Valid ListCommunityByKeywordCommand cmd) {
         Tuple<Integer, List<CommunityDTO>> results = this.addressService.listCommunitiesByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
-        
+
         response.setErrorCode(results.first());
         response.setErrorDescription("OK");
         return response;
@@ -112,12 +112,12 @@ public class AddressController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /address/listAppartmentsByKeyword</b>
+     * <b>URL: /address/listApartmentsByKeyword</b>
      * <p>根据小区Id、楼栋号和关键字查询门牌</p>
      */
-    @RequestMapping("listAppartmentsByKeyword")
-    @RestReturn(value=String.class, collection=true)
-    public RestResponse listAppartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+    @RequestMapping("listApartmentsByKeyword")
+    @RestReturn(value=ApartmentDTO.class, collection=true)
+    public RestResponse listApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
         Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
         
@@ -149,6 +149,20 @@ public class AddressController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse disclaimAddress(@Valid DisclaimAddressCommand cmd) {
         this.addressService.disclaimAddress(cmd);
+        RestResponse response = new RestResponse(null);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /address/correctAddress</b>
+     * <p>修正地址</p>
+     */
+    @RequestMapping("correctAddress")
+    @RestReturn(value=String.class)
+    public RestResponse correctAddress(@Valid CorrectAddressCommand cmd) {
+        this.addressService.correctAddress(cmd);
         RestResponse response = new RestResponse(null);
         
         response.setErrorCode(ErrorCodes.SUCCESS);

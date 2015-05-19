@@ -53,8 +53,11 @@ public class PollServiceImpl implements PollService {
         dbProvider.execute((status)->{
             Poll poll=new Poll();
             poll.setPostId(postId);
-            poll.setAnonymousFlag((byte)cmd.getAnonymousFlag().intValue());
+            if(cmd.getAnonymousFlag()!=null)
+                poll.setAnonymousFlag((byte)cmd.getAnonymousFlag().intValue());
             poll.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            if(cmd.getMultiChoiceFlag()!=null)
+                poll.setMultiSelectFlag((byte)cmd.getMultiChoiceFlag().intValue());
             //family
             if(family!=null)
                 poll.setCreatorFamilyId(family.getId());
@@ -96,8 +99,8 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("cannot find poll item.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ITEMS, "poll items cannot be empty");
         }
-         PollItem matchResult = result.stream().filter(r->result.contains(r)).map(m->ConvertHelper.convert(m, PollItem.class)).findFirst().orElse(null);
-        if (matchResult==null) {
+        List<PollItem> matchResult = result.stream().filter(r->result.contains(r)).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(matchResult)) {
             LOGGER.error("cannot find any match item.{}", cmd.getItemIds());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
         }
@@ -106,20 +109,40 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("can not vote again.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
-        PollVote pollVote = new PollVote();
-        pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        pollVote.setItemId(matchResult.getId());
-        pollVote.setPollId(poll.getId());
-        pollVote.setVoterUid(user.getId());
-        //if addresses is not empty
-        if(user.getAddressId()!=null)
-                //ensure all address is ok
-            pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
-        pollProvider.createPollVote(pollVote);
-        matchResult.setVoteCount(matchResult.getVoteCount()+1);
-        //update poll item
-        pollProvider.updatePollItem(matchResult, cmd.getPollId());
-        //update poll
+        if(Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)){
+            matchResult.forEach(item->{
+                PollVote pollVote = new PollVote();
+                pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                pollVote.setItemId(item.getId());
+                pollVote.setPollId(poll.getId());
+                pollVote.setVoterUid(user.getId());
+                //if addresses is not empty
+                if(user.getAddressId()!=null)
+                        //ensure all address is ok
+                    pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
+                pollProvider.createPollVote(pollVote);
+                item.setVoteCount(item.getVoteCount()+1);
+                //update poll item
+                pollProvider.updatePollItem(item, cmd.getPollId());
+                //update poll
+            });
+        }else{
+            PollItem item = matchResult.get(0);
+            PollVote pollVote = new PollVote();
+            pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            pollVote.setItemId(item.getId());
+            pollVote.setPollId(poll.getId());
+            pollVote.setVoterUid(user.getId());
+            //if addresses is not empty
+            if(user.getAddressId()!=null)
+                    //ensure all address is ok
+                pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
+            pollProvider.createPollVote(pollVote);
+            item.setVoteCount(item.getVoteCount()+1);
+            //update poll item
+            pollProvider.updatePollItem(item, cmd.getPollId());
+            
+        }
         poll.setPollCount(poll.getPollCount()+1);
         pollProvider.updatePoll(poll);
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
@@ -127,6 +150,7 @@ public class PollServiceImpl implements PollService {
         dto.setProcessStatus(getStatus(poll).getCode());
         return dto;
     }
+    
     
    private ProcessStatus getStatus(Poll poll){
       return StatusChecker.getProcessStatus(poll.getStartTimeMs(), poll.getStartTimeMs());

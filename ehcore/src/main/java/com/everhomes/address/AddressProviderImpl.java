@@ -49,7 +49,6 @@ public class AddressProviderImpl implements AddressProvider {
     @Override
     public void createAddress(Address address) {
         long id = shardingProvider.allocShardableContentId(EhAddresses.class).second();
-        
         address.setId(id);
         address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
@@ -58,6 +57,7 @@ public class AddressProviderImpl implements AddressProvider {
         dao.insert(address);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null);
+        
     }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),

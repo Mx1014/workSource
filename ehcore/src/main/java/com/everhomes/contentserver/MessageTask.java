@@ -33,7 +33,7 @@ public abstract class MessageTask implements Runnable {
     }
 
     // handle request message
-    protected abstract void doRequest(ContentServerMananger fileHandlerProvider) throws Exception;
+    protected abstract void doRequest(ContentServerMananger contentServermanager) throws Exception;
 
     // send response message
     protected abstract void doResponse(String errMsg, int errCode) throws Exception;

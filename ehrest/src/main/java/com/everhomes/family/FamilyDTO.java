@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 地址Id</li>
  * <li>buildingName: 家庭地址楼栋号</li>
  * <li>apartmentName: 家庭地址门牌号</li>
+ * <li>addressStatus: 地址状态, {@link com.everhomes.address.AddressAdminStatus}</li>
  * </ul>
  */
 public class FamilyDTO {
@@ -56,6 +57,9 @@ public class FamilyDTO {
     private Long addressId;
     private String buildingName;
     private String apartmentName;
+    
+    private Byte addressStatus;
+    private String proofResourceUrl;
  
     public FamilyDTO () {
     }
@@ -234,6 +238,22 @@ public class FamilyDTO {
 
     public void setApartmentName(String apartmentName) {
         this.apartmentName = apartmentName;
+    }
+
+    public Byte getAddressStatus() {
+        return addressStatus;
+    }
+
+    public void setAddressStatus(Byte addressStatus) {
+        this.addressStatus = addressStatus;
+    }
+
+    public String getProofResourceUrl() {
+        return proofResourceUrl;
+    }
+
+    public void setProofResourceUrl(String proofResourceUrl) {
+        this.proofResourceUrl = proofResourceUrl;
     }
 
     @Override

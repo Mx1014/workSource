@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 public class AddConfigItemCommand {
     @NotNull
@@ -40,5 +41,10 @@ public class AddConfigItemCommand {
     public void setConfigProps(Map<String, String> configProps) {
         this.configProps = configProps;
     }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+    
 
 }
