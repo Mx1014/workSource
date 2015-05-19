@@ -20,8 +20,10 @@ public class ListTopicCommand {
     private Long actionCategory;
     private Byte visibilityScope;
     private Long visibilityScopeId;
-    private Long pageOffset;
-    private Long pageSize;
+    private Long pageAnchor;
+//    private Integer pageOffset;
+    private Integer pageSize;
+    
     
     public ListTopicCommand() {
     }
@@ -65,20 +67,20 @@ public class ListTopicCommand {
 	public void setVisibilityScopeId(Long visibilityScopeId) {
 		this.visibilityScopeId = visibilityScopeId;
 	}
-
-	public Long getPageOffset() {
-        return pageOffset;
+	
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
-    public Long getPageSize() {
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Long pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 

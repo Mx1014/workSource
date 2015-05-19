@@ -17,7 +17,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
 @SuppressWarnings("rawtypes")
-public class GroupQueryFilter {
+public class GroupQueryFilter implements QueryMaker {
     public static final String TERM_ID = "id";
     public static final String TERM_NAME = "name";
     public static final String TERM_TAG = "tags.tag.name";
@@ -51,6 +51,7 @@ public class GroupQueryFilter {
         setPageInfo(pageNum, pageSize);
     }
     
+    @Override
     public GroupQueryFilter setPageInfo(int pageNum, int pageSize) {
         this.pageSize = pageSize;
         this.pageNumber = pageNum;
@@ -58,6 +59,7 @@ public class GroupQueryFilter {
         return this;
     }
     
+    @Override
     public GroupQueryFilter addQueryTerm(String term) {
         if(!queryTerms.contains(term)) {
             queryTerms.add(term);
@@ -66,20 +68,24 @@ public class GroupQueryFilter {
         return this;
     }
     
+    @Override
     public String getQueryString() {
         return queryString;
     }
 
+    @Override
     public GroupQueryFilter setQueryString(String queryString) {
         this.queryString = queryString;
         return this;
     }
 
+    @Override
     public GroupQueryFilter includeFilter(String term, List objs) {
         inTerms.put(term, objs);
         return this;
     }
     
+    @Override
     public GroupQueryFilter excludeFilter(String term, List objs) {
         notTerms.put(term, objs);
         return this;
@@ -186,7 +192,8 @@ public class GroupQueryFilter {
         }
     }
     
-    public void initQueryBuilder(SearchRequestBuilder builder) {
+    @Override
+    public void makeQueryBuilder(SearchRequestBuilder builder) {
         QueryBuilder qb = getQueryBuilder();
         
         FilterBuilder commonFilter = getCommonFilter();
@@ -195,8 +202,9 @@ public class GroupQueryFilter {
             }
         
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        
         if(pageSize > 0) {
-            builder.setFrom(pageNumber * pageSize).setSize(pageSize);
+            builder.setFrom(pageNumber * pageSize).setSize(pageSize + 1);
             }
         
         if(!queryString.isEmpty()) {
@@ -206,6 +214,16 @@ public class GroupQueryFilter {
         }
         
         builder.setQuery(qb);
+    }
+
+    @Override
+    public int getPageSize() {
+        return this.pageSize;
+    }
+
+    @Override
+    public int getPageNumber() {
+        return pageNumber;
     }
     
 }

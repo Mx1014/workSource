@@ -9,8 +9,10 @@ import com.everhomes.util.StringHelper;
  * <li>postId: 帖子或评论ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
- * <li>categoryId: 类型ID</li>
- * <li>visibleFlag: 可见性范围类型，{@link com.everhomes.forum.PostVisibleFlag}</li>
+ * <li>contentCategory: 内容类型ID，含类和子类</li>
+ * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
+ * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
+ * <li>visibilityScopeId: 可见性类型对应的ID</li>
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
  * <li>category_id: 帖子或评论类型ID</li>
@@ -35,10 +37,14 @@ public class PostDTO {
 	private Long parentPostId;
 	
     private Long forumId;
+
+    private Long contentCategory;
     
-    private Long categoryId;
+    private Long actionCategory;
     
-    private Byte visibleFlag;
+    private Byte visibilityScope;
+
+    private Long visibilityScopeId;
     
     private Double longitude;
     
@@ -93,23 +99,39 @@ public class PostDTO {
 		this.forumId = forumId;
 	}
 
-	public Long getCategoryId() {
-		return categoryId;
-	}
+	public Long getContentCategory() {
+        return contentCategory;
+    }
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
-	}
+    public void setContentCategory(Long contentCategory) {
+        this.contentCategory = contentCategory;
+    }
 
-	public Byte getVisibleFlag() {
-		return visibleFlag;
-	}
+    public Long getActionCategory() {
+        return actionCategory;
+    }
 
-	public void setVisibleFlag(Byte visibleFlag) {
-		this.visibleFlag = visibleFlag;
-	}
+    public void setActionCategory(Long actionCategory) {
+        this.actionCategory = actionCategory;
+    }
 
-	public Double getLongitude() {
+    public Byte getVisibilityScope() {
+        return visibilityScope;
+    }
+
+    public void setVisibilityScope(Byte visibilityScope) {
+        this.visibilityScope = visibilityScope;
+    }
+
+    public Long getVisibilityScopeId() {
+        return visibilityScopeId;
+    }
+
+    public void setVisibilityScopeId(Long visibilityScopeId) {
+        this.visibilityScopeId = visibilityScopeId;
+    }
+
+    public Double getLongitude() {
 		return longitude;
 	}
 

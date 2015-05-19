@@ -20,6 +20,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.SearchGroupCommand;
 
 @Service
 public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSearcher {
@@ -39,12 +40,21 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     }
     
     @Override
-    public List<Long> query(GroupQueryFilter filter) {
+    public GroupQueryResult query(QueryMaker filter) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
-        filter.initQueryBuilder(builder);
+        filter.makeQueryBuilder(builder);
         
         SearchResponse rsp = builder.execute().actionGet();
-        return getIds(rsp);
+        List<Long> ids = getIds(rsp);
+        
+        GroupQueryResult result = new GroupQueryResult();
+        if(ids.size() > filter.getPageSize()) {
+            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+            }
+        ids.remove(ids.size() - 1);
+        result.setIds(ids);
+        
+        return result;
     }
     
     private XContentBuilder createDoc(Group group){
@@ -116,6 +126,8 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         int pageSize = 200;
         AtomicInteger count = new AtomicInteger(); 
         
+        
+        
         this.deleteAll();
         
         this.groupProvider.iterateGroups(pageSize, GroupDiscriminator.GROUP, (group)->{
@@ -145,6 +157,14 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         //http://www.elastic.co/guide/en/elasticsearch/guide/current/merge-process.html
         this.optimize(1);
         this.refresh();
+    }
+
+    @Override
+    public GroupQueryResult query(SearchGroupCommand cmd) {
+        GroupQueryFilter filter = new GroupQueryFilter();
+        filter.setPageInfo(cmd.getPageAnchor().intValue(), cmd.getPageSize());
+        filter.setQueryString(cmd.getQueryString());
+        return this.query(filter);
     }
 
 }

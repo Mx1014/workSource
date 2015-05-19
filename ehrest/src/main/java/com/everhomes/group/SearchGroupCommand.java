@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -18,54 +19,22 @@ import com.everhomes.discover.ItemType;
  * </ul>
  */
 public class SearchGroupCommand {
-    private Long familyId;
-    private Double longitude;
-    private Double latitude;
-    
     private String queryString;
     
-    @ItemType(String.class)
-    private Map<String, String> includeTerms;
+    @NotNull
+    private Long pageAnchor;
     
-    @ItemType(String.class)
-    private Map<String, String> excludeTerms;
-    
-    private Long pageOffset;
     private int pageSize;
     
     public SearchGroupCommand() {
     }
-
-    public Long getFamilyId() {
-        return familyId;
+    
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Long getPageOffset() {
-        return pageOffset;
-    }
-
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     public int getPageSize() {
@@ -82,22 +51,6 @@ public class SearchGroupCommand {
 
     public void setQueryString(String queryString) {
         this.queryString = queryString;
-    }
-
-    public Map<String, String> getIncludeTerms() {
-        return includeTerms;
-    }
-
-    public void setIncludeTerms(Map<String, String> includeTerms) {
-        this.includeTerms = includeTerms;
-    }
-
-    public Map<String, String> getExcludeTerms() {
-        return excludeTerms;
-    }
-
-    public void setExcludeTerms(Map<String, String> excludeTerms) {
-        this.excludeTerms = excludeTerms;
     }
     
 }
