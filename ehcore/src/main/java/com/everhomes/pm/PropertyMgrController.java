@@ -201,10 +201,9 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping(value="importPMPropertyOwnerInfo", method = RequestMethod.POST)
     @RestReturn(value=String.class)
-    public RestResponse importPMPropertyOwnerInfo(
-    	@RequestParam(value = "communityId", required = true) Long communityId,
+    public RestResponse importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,
     	@RequestParam(value = "attachment") MultipartFile[] files) {
-    	propertyMgrService.importPMPropertyOwnerInfo(communityId,files);
+    	propertyMgrService.importPMPropertyOwnerInfo(cmd,files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -212,10 +211,10 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/getPMPropertyOwnerInfo</b>
+     * <b>URL: /pm/ListPropOwnerCommandResponse</b>
      * <p>列出业主信息表</p>
      */
-    @RequestMapping("getPMPropertyOwnerInfo")
+    @RequestMapping("listPMPropertyOwnerInfo")
     @RestReturn(value=ListPropOwnerCommandResponse.class, collection=true)
     public RestResponse listPMPropertyOwnerInfo(@Valid ListPropOwnerCommand cmd) {
     	ListPropOwnerCommandResponse commandResponse = propertyMgrService.listPMPropertyOwnerInfo(cmd);
@@ -388,17 +387,18 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
     /**
-     * <b>URL: /pm/uploadPropertyBills</b>
+     * <b>URL: /pm/importPropertyBills</b>
      * 上传缴费账单excel文件
      * @param communityId 小区id
      * @param files 要上传文件
      * @return 
      */
-    @RequestMapping(value="uploadPropertyBills", method = RequestMethod.POST)
+    @RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
     @RestReturn(value=String.class)
-    public RestResponse uploadPropertyBills(
-    	@RequestParam(value = "communityId", required = true) Long communityId,
+    public RestResponse importPropertyBills(@Valid PropCommunityIdCommand cmd,
     	@RequestParam(value = "attachment") MultipartFile[] files) {
+    	
+    	propertyMgrService.importPropertyBills(cmd, files);
     	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -406,10 +406,10 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
-	 * <b>URL: /pm/getPropertyBill</b>
+	 * <b>URL: /pm/listPropertyBill</b>
 	 * 查询缴费账单详情
 	 */
-    @RequestMapping("getPropertyBill")
+    @RequestMapping("listPropertyBill")
     @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
     public RestResponse listPropertyBill(
     	@Valid ListPropBillCommand cmd) {
@@ -420,35 +420,7 @@ public class PropertyMgrController extends ControllerBase {
         return response;
     }
 	
-	/**
-	 * <b>URL: /pm/listPropertyBillByMonth</b>
-	 * 列出指定月份的缴费账单
-	 */
-    @RequestMapping("listPropertyBillByMonth")
-    @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
-    public RestResponse listPropertyBillByMonth(@Valid ListPropBillCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
-	/**
-	 * <b>URL: /pm/listPropertyBillByTimeRange</b>
-	 * 列出指定时间范围的缴费账单
-	 */
-    @RequestMapping("listPropertyBillByTimeRange")
-    @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
-    public RestResponse listPropertyBillByTimeRange(
-    	@Valid ListPropBillCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-	
+
 	/**
 	 * <b>URL: /pm/deletePropertyBillByMonth</b>
 	 * 删除指定月份的缴费账单
@@ -603,12 +575,12 @@ public class PropertyMgrController extends ControllerBase {
      * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
      */
     @RequestMapping("listPropAppartmentsByKeyword")
-    @RestReturn(value=String.class, collection=true)
+    @RestReturn(value=PropFamilyDTO.class, collection=true)
     public RestResponse listPropApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
-        Tuple<Integer, List<ApartmentDTO>> results = propertyMgrService.listPropApartmentsByKeyword(cmd);
-        RestResponse response = new RestResponse(results.second());
+        List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
+        RestResponse response = new RestResponse(results);
         
-        response.setErrorCode(results.first());
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
@@ -618,7 +590,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>根据用户token查询用户信息</p>
      */
     @RequestMapping("findUserByIndentifier")
-    @RestReturn(value=String.class, collection=true)
+    @RestReturn(value=UserTokenCommandResponse.class, collection=true)
     public RestResponse findUserByIndentifier(@Valid UserTokenCommand cmd) {
         UserTokenCommandResponse commandResponse = propertyMgrService.findUserByIndentifier(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -685,9 +657,24 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("listFamilyMembersByFamilyId")
     @RestReturn(value=FamilyMemberDTO.class, collection=true)
     public RestResponse listFamilyMembersByFamilyId(@Valid ListPropFamilyMemberCommand cmd) {
-            
         List<FamilyMemberDTO> results = propertyMgrService.listFamilyMembersByFamilyId(cmd);
         RestResponse response = new RestResponse(results);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/listPropBillDateStr</b>
+     * <p>查询物业账单的时间列表</p>
+     */
+    @RequestMapping("listPropBillDateStr")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse listPropBillDateStr(@Valid PropCommunityIdCommand cmd) {
+        List<String> results = propertyMgrProvider.listPropBillDateStr(cmd.getCommunityId());
+        RestResponse response = new RestResponse(results);
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -1,6 +1,7 @@
 package com.everhomes.util.excel.handler;
 
 import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -16,8 +17,10 @@ import java.util.TreeMap;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 
 
@@ -39,7 +42,7 @@ import com.everhomes.util.excel.SAXHandlerEventUserModel;
 public class PropMrgOwnerHandler
 {
 	/** 日志 */
-	 private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrController.class);
+	 private static final Logger LOGGER = LoggerFactory.getLogger(PropMrgOwnerHandler.class);
 	
 	public static ArrayList processorExcel(File file)
 	{
@@ -49,6 +52,22 @@ public class PropMrgOwnerHandler
 		try
 		{
 			userModel.processASheets(file,0);
+			resultList=sheetContenthandler.getResultList();
+		} catch (Exception e)
+		{
+			LOGGER.error("failed to processor the file ", e);
+		}
+		return resultList;
+	}
+	
+	public static ArrayList processorExcel(InputStream is)
+	{
+		ArrayList resultList = new ArrayList();
+		MySheetContentsHandler sheetContenthandler=new MySheetContentsHandler();
+		SAXHandlerEventUserModel userModel=new SAXHandlerEventUserModel(sheetContenthandler);
+		try
+		{
+			userModel.processASheets(is,0);
 			resultList=sheetContenthandler.getResultList();
 		} catch (Exception e)
 		{
