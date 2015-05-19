@@ -1,10 +1,9 @@
 package com.everhomes.contentserver;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Random;
 import java.util.UUID;
 
@@ -44,14 +43,27 @@ public class Generator {
 
     public static String createKey(Long serverId, String path) {
         if (path.startsWith("/")) {
-            path = path.substring(1, path.length() - 1);
+            path = path.substring(1, path.length());
         }
-        String uri = String.format("cs://%s/%s", serverId, path);
-        try {
-            return URLEncoder.encode(uri, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            return uri;
+        return String.format("cs://%s/%s", serverId, path);
+    }
+
+    public static String encodeUrl(String path) {
+        byte[] code = Base64.getEncoder().encode(path.getBytes(Charset.forName("utf-8")));
+        String str = new String(code, Charset.forName("utf-8")).replace("/", "_").replace("+", "-").replace("=", "");
+        return str;
+
+    }
+
+    public static String decodeUrl(String path) {
+        String result = path.replace("_", "/").replace("-", "+");
+        int length = result.length();
+        if (length % 4 == 2) {
+            result += "==";
+        } else if (length % 4 == 3) {
+            result += "=";
         }
+        return new String(Base64.getDecoder().decode(result.getBytes(Charset.forName("utf-8"))));
     }
 
     public static int randomInt(int max) {
@@ -72,14 +84,6 @@ public class Generator {
 
     public static String createCacheKey(long uid, String objetId) {
         return String.format("%d-%s", uid, objetId);
-    }
-
-    public static String decode(String url) {
-        try {
-            return URLDecoder.decode(url, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            return url;
-        }
     }
 
 }

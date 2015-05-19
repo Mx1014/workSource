@@ -22,6 +22,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyDTO;
+import com.everhomes.family.FamilyMemberDTO;
+import com.everhomes.family.FindFamilyByAddressIdCommand;
+import com.everhomes.family.ListOwningFamilyMembersCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.user.SetCurrentCommunityCommand;
@@ -152,7 +155,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("importPMAddressMapping")
     @RestReturn(value=String.class)
     public RestResponse importPMAddressMapping(@Valid PropCommunityIdCommand cmd) {
-    	propertyMgrService.improtCommunityAddressMapping(cmd);
+    	propertyMgrService.importPMAddressMapping(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -201,7 +204,7 @@ public class PropertyMgrController extends ControllerBase {
     public RestResponse importPMPropertyOwnerInfo(
     	@RequestParam(value = "communityId", required = true) Long communityId,
     	@RequestParam(value = "attachment") MultipartFile[] files) {
-    	
+    	propertyMgrService.importPMPropertyOwnerInfo(communityId,files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -260,7 +263,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("setAddressPMStatus")
     @RestReturn(value=String.class)
     public RestResponse setApartmentStatus(@Valid SetPropAddressStatusCommand cmd) {
-    	
+    	propertyMgrService.setApartmentStatus(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -634,9 +637,57 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("setPropCurrentCommunity")
     @RestReturn(String.class)
     public RestResponse setPropCurrentCommunity(@Valid SetCurrentCommunityCommand cmd) throws Exception {
-    	propertyMgrService.setPropCurrentCommunity(cmd.getCommunityId());
+    	propertyMgrService.setPropCurrentCommunity(cmd);
         RestResponse response = new RestResponse();
         
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/listPropFamilyWaitingMember</b>
+     * <p>查询小区的待审核家庭成员列表</p>
+     * @param communityId 小区ID
+     */
+    @RequestMapping("listPropFamilyWaitingMember")
+    @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
+    public RestResponse listPropFamilyWaitingMember(@Valid ListPropFamilyWaitingMemberCommand cmd) throws Exception {
+    	ListPropFamilyWaitingMemberCommandResponse commandResponse =  propertyMgrService.listPropFamilyWaitingMember(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/findFamilyByAddressId</b>
+     * <p>根据addressId查询family</p>
+     * @param communityId 小区ID
+     */
+    @RequestMapping("findFamilyByAddressId")
+    @RestReturn(value=PropFamilyDTO.class)
+    public RestResponse findFamilyByAddressId(@Valid ListPropCommunityAddressCommand cmd) throws Exception {
+    	PropFamilyDTO commandResponse =  propertyMgrService.findFamilyByAddressId(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+   
+    /**
+     * <b>URL: /pm/listFamilyMembersByFamilyId</b>
+     * <p>查询家庭的成员列表</p>
+     */
+    @RequestMapping("listFamilyMembersByFamilyId")
+    @RestReturn(value=FamilyMemberDTO.class, collection=true)
+    public RestResponse listFamilyMembersByFamilyId(@Valid ListPropFamilyMemberCommand cmd) {
+            
+        List<FamilyMemberDTO> results = propertyMgrService.listFamilyMembersByFamilyId(cmd);
+        RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

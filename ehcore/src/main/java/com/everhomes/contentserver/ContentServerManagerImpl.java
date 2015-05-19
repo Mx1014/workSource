@@ -48,7 +48,13 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             result = createResource(server.getId(), login.getUserId(), request);
             contentServerProvider.addResource(result);
         }
-        request.setObjectId(result.getResourceId());
+        request.setObjectId(Generator.createKey(server.getId(), result.getResourceId()));
+        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+    }
+
+    private String createUrl(ContentServer content, String resourceId, String type, String token) {
+        return String.format("http://%s:%d/%s/%s?token=%s", content.getPublicAddress(), content.getPublicPort(), type,
+                Generator.encodeUrl(resourceId), token);
     }
 
     private ContentServerResource createResource(Long serverId, Long uid, MessageHandleRequest request) {
@@ -56,14 +62,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         contentServer.setMetadata(StringHelper.toJsonString(request.getMeta()));
         contentServer.setOwnerId(uid);
         String uri = request.getObjectType().name() + "/" + request.getMd5();
-        if (request.getParamsMap() != null) {
-            StringBuilder sb = new StringBuilder();
-            request.getParamsMap().forEach((key, val) -> {
-                sb.append(key + "=" + val).append("&");
-            });
-            uri = "?" + sb.toString().substring(0, sb.toString().length() - 1);
-        }
-        contentServer.setResourceId(Generator.createKey(serverId, uri));
+        contentServer.setResourceId(uri);
         contentServer.setResourceMd5(request.getMd5());
         contentServer.setResourceName(request.getFilename());
         contentServer.setResourceSize(request.getTotalSize());
@@ -110,9 +109,10 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         request.setMd5(md5);
     }
 
-    private String lookupInvoke(LoginToken login, String md5) {
-        LOGGER.info("handle lookup message uid={},uniqueId={}", login.getUserId(), md5);
-        ContentServerResource resource = contentServerProvider.findByMD5(md5);
+    private String lookupInvoke(LoginToken login, String resourceId) {
+        LOGGER.info("handle lookup message uid={},uniqueId={}", login.getUserId(), resourceId);
+        resourceId = Generator.decodeUrl(resourceId);
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
             LOGGER.error("cannot find resource information");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -123,7 +123,8 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     }
 
     private String deleteInvoke(LoginToken login, String uniqueId) {
-        ContentServerResource resource = contentServerProvider.findByMD5(uniqueId);
+        uniqueId = Generator.decodeUrl(uniqueId);
+        ContentServerResource resource = contentServerProvider.findByResourceId(uniqueId);
         if (resource == null) {
             LOGGER.error("can not find file information");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
