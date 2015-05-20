@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -21,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 创建时间</li>
  * <li>notifyCount: 通知总数</li>
  * <li>notifyTime: 通知时间</li>
+ * <li>itemList: 具体账单项列表</li>
  * </ul>
  */
 public class PropBillDTO {
@@ -37,7 +39,9 @@ public class PropBillDTO {
 	private Timestamp   createTime;
 	private Integer    notifyCount;
 	private Timestamp   notifyTime;
-    
+	
+	private List<PropBillItemDTO> itemList;
+	
     public PropBillDTO() {
     }
     
@@ -143,6 +147,14 @@ public class PropBillDTO {
 
 	public void setNotifyTime(Timestamp notifyTime) {
 		this.notifyTime = notifyTime;
+	}
+	
+	public List<PropBillItemDTO> getItemList() {
+		return itemList;
+	}
+
+	public void setItemList(List<PropBillItemDTO> itemList) {
+		this.itemList = itemList;
 	}
 
 	@Override

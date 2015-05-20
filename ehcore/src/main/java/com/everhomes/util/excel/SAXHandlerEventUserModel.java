@@ -54,4 +54,30 @@ public class SAXHandlerEventUserModel {
          
     }  
     
+    
+    public void processASheets(InputStream is,int count) throws Exception {  
+    	OPCPackage pkg = OPCPackage.open(is);  
+        XSSFReader reader  = new XSSFReader( pkg );  
+        StylesTable styles = reader.getStylesTable();
+        ReadOnlySharedStringsTable sharedStrings = new ReadOnlySharedStringsTable(pkg);
+      
+        ContentHandler handler = new XSSFSheetXMLHandler(styles, sharedStrings, sheetContenthandler, false);
+        XMLReader parser = XMLReaderFactory.createXMLReader();
+        parser.setContentHandler(handler);
+
+        Iterator<InputStream> sheets = reader.getSheetsData();  
+      
+        int i=0;
+        while(sheets.hasNext()) {  
+        	InputStream sheet = sheets.next();  
+        	if(i==count)
+        	{
+        		 InputSource sheetSource = new InputSource(sheet);  
+                 parser.parse(sheetSource);  
+        	}
+            sheet.close();  
+            i++;
+        }  
+         
+    }  
 }

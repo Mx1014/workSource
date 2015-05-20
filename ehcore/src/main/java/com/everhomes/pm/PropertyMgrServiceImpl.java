@@ -1,10 +1,14 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.io.IOException;
 import java.nio.file.attribute.GroupPrincipal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.naming.spi.DirStateFactory.Result;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +29,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.core.AppConfig;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.Family;
@@ -53,6 +58,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.handler.ProcessBillModel1;
+import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
@@ -88,6 +95,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private DbProvider dbProvider;
     
     
     @Override
@@ -254,14 +264,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<CommunityPmBill> entityResultList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
-                 .map(r->{ return ConvertHelper.convert(r, PropBillDTO.class); })
+                 .map(r->{ 
+                	 PropBillDTO dto = ConvertHelper.convert(r, PropBillDTO.class);
+                	 List<CommunityPmBillItem> itemList = propertyMgrProvider.listCommunityPmBillItems(dto.getId());
+                	 List<PropBillItemDTO> itemDtoList = new ArrayList<PropBillItemDTO>();
+                	 for (CommunityPmBillItem item : itemList) {
+                		 PropBillItemDTO itemDto = ConvertHelper.convert(item, PropBillItemDTO.class);
+                		 itemDtoList.add(itemDto);
+					 }
+                	 dto.setItemList(itemDtoList);
+                	 return  dto;})
                  .collect(Collectors.toList()));
     	
         return commandResponse;
     }
     
     @Override
-    public ListPropOwnerCommandResponse listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
+    public ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
     	ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
     	User user  = UserContext.current().getUser();
     	if(cmd.getCommunityId() == null){
@@ -279,10 +298,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
-                 .map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
-                 .collect(Collectors.toList()));
-    	
-        return commandResponse;
+                .map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
+                .collect(Collectors.toList()));
+   	
+       return commandResponse;
     }
     
     @Override
@@ -568,7 +587,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
     
     @Override
-    public Tuple<Integer, List<ApartmentDTO>> listPropApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
+    public List<PropFamilyDTO> listPropApartmentsByKeyword(ListApartmentByKeywordCommand cmd) {
+    	List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
     	User user  = UserContext.current().getUser();
     	if(cmd.getCommunityId() == null){
     		LOGGER.error("propterty communityId paramter can not be null or empty");
@@ -582,8 +602,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	
-    	return addressService.listApartmentsByKeyword(cmd);
+    	Tuple<Integer,List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(cmd);
+    	List<ApartmentDTO> aptList = apts.second();
+    	for (ApartmentDTO apartmentDTO : aptList) {
+    		PropFamilyDTO dto = new PropFamilyDTO();
+    		Family family = familyProvider.findFamilyByAddressId(apartmentDTO.getAddressId());
+    		if(family != null )
+    		{
+    			dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
+        		dto.setName(family.getDisplayName());
+        		dto.setAddressId(family.getAddressId());
+        		dto.setId(family.getId());
+        		dto.setMemberCount(family.getMemberCount());
+    		}
+    		else
+    		{
+    			dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
+        		dto.setName(apartmentDTO.getApartmentName());
+        		dto.setAddressId(apartmentDTO.getAddressId());
+        		dto.setId(0l);
+        		dto.setMemberCount(0l);
+    		}
+    		CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(),apartmentDTO.getAddressId());
+        	if(mapping != null){
+        		dto.setLivingStatus(mapping.getLivingStatus());
+        	}
+        	else{
+        		dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+        	}
+        	list.add(dto);
+		}
+    	return list;
     }
     
     @Override
@@ -654,8 +703,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		PropCommunityIdCommand comand = new PropCommunityIdCommand();
     		comand.setCommunityId(cmd.getCommunityId());
     		importPMAddressMapping(comand);
+    		mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
     	}
-    	mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
     	mapping.setLivingStatus(cmd.getStatus());
     	propertyMgrProvider.updatePropAddressMapping(mapping);
     }
@@ -690,13 +739,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	PropFamilyDTO dto = new PropFamilyDTO();
     	if(family != null){
-    	dto.setName(family.getName());
-    	dto.setId(family.getId());
-    	dto.setMemberCount(family.getMemberCount());
-    	dto.setAddressId(family.getAddressId());
-    	dto.setAddress(family.getDisplayName());
+	    	dto.setName(family.getDisplayName());
+	    	dto.setId(family.getId());
+	    	dto.setMemberCount(family.getMemberCount());
+	    	dto.setAddressId(family.getAddressId());
+	    	dto.setAddress(family.getName());
+    	}
     	CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
-    	dto.setLivingStatus(mapping.getLivingStatus());
+    	if(mapping != null){
+    		dto.setLivingStatus(mapping.getLivingStatus());
+    	}
+    	else{
+    		dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
     	}
     	return dto;
     }
@@ -731,40 +785,121 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
     
     @Override
-    public void importPMPropertyOwnerInfo(Long communityId,
+    public void importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,
     		MultipartFile[] files) {
-//    	User user  = UserContext.current().getUser();
-//    	if(communityId == null){
-//    		LOGGER.error("propterty communityId paramter can not be null or empty");
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                    "propterty communityId paramter can not be null or empty");
-//    	}
-//    	Community community = communityProvider.findCommunityById(communityId);
-//    	if(community == null){
-//    		LOGGER.error("Unable to find the community.communityId=" + communityId);
-//    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-//                     "Unable to find the community.");
-//    	}
-//    	
-//    	ArrayList resultList = PropMrgOwnerHandler.processorExcel(files);
-//		List<CommunityPmOwner> contactList = PropMrgOwnerHandler.processorPropMgrContact(user.getId(), communityId, resultList);
-//		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
-//		command.setCommunityId(communityId);
-//		List<PropAddressMappingDTO> mappingList = ListAddressMappings(command).getMembers();
-//		if(contactList != null && contactList.size() > 0)
-//		{
-//			for (CommunityPmOwner contact : contactList)
-//			{
-//				contact.setNeId(processNeId(contact.getAddress(),mappingList));
-//				try {
-//					getBusinessService().savePropMgrContact(contact);
-//				} catch (DuplicateKeyException e) 
-//				{
-//					setErrDesc("此手机号已经存在。手机号是：" + contact.getCellPhone());
-//					setErrCode(PeachConstants.ERRCODE_DB_SAVE_FAIL);
-//				}
-//			}
-//		}
-//    	
+    	User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	ArrayList resultList = new ArrayList();
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<CommunityPmOwner> contactList = PropMrgOwnerHandler.processorPropMgrContact(user.getId(), communityId, resultList);
+		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
+		command.setCommunityId(communityId);
+		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(communityId);
+		long addressId = 0;
+		if(contactList != null && contactList.size() > 0)
+		{
+			for (CommunityPmOwner contact : contactList)
+			{
+				if(mappingList != null && mappingList.size() > 0)
+				{
+					for (CommunityAddressMapping mapping : mappingList)
+					{
+						if(contact != null && contact.getAddress().equals(mapping.getName()))
+						{
+							addressId = mapping.getAddressId();
+							break;
+						}
+					}
+					
+				}
+				contact.setAddressId(addressId);
+				propertyMgrProvider.createPropOwner(contact);
+				
+			}
+		}
+    	
+    }
+    
+    @Override
+    public void importPropertyBills(@Valid PropCommunityIdCommand cmd, MultipartFile[] files) {
+    	User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	ArrayList resultList = new ArrayList();
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<CommunityPmBill> billList = PropMgrBillHandler.processorPropBill(user.getId(), communityId, resultList, ProcessBillModel1.PROCESS_TO_OBJECT_PER_ROW, ProcessBillModel1.PROCESS_PREVIOUS_ROW_TITLE);
+		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
+		command.setCommunityId(communityId);
+		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(communityId);
+		long addressId = 0;
+		if(billList != null && billList.size() > 0)
+		{
+			for (CommunityPmBill bill : billList)
+			{
+				if(mappingList != null && mappingList.size() > 0)
+				{
+					for (CommunityAddressMapping mapping : mappingList)
+					{
+						if(bill != null && bill.getAddress().equals(mapping.getName()))
+						{
+							addressId = mapping.getAddressId();
+							break;
+						}
+					}
+					
+				}
+				bill.setEntityId(addressId);
+				bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
+				createPropBill(bill);
+			}
+		}
+    }
+    
+    @Override
+    public void createPropBill(CommunityPmBill bill) {
+    	User user  = UserContext.current().getUser();
+    	this.dbProvider.execute((status) ->{
+    		propertyMgrProvider.createPropBill(bill);
+    		System.out.println(bill);
+    		List<CommunityPmBillItem> itemList =  bill.getItemList();
+    		if(itemList != null && itemList.size() > 0){
+    			for (CommunityPmBillItem communityPmBillItem : itemList) {
+    				communityPmBillItem.setBillId(bill.getId());
+    				propertyMgrProvider.createPropBillItem(communityPmBillItem);
+				}
+    		}
+    		return status;
+    	});
     }
 }

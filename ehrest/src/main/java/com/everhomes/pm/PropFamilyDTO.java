@@ -9,13 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>name: 家庭名称</li>
  * <li>memberCount: 家庭成员数</li>
  * <li>address: 家庭所在地址详情</li>
- * <li>communityId: 小区Id</li>
- * <li>communityName: 小区名称</li>
- * <li>cityId: 城市Id</li>
- * <li>cityName: 城市名称</li>
- * <li>areaId: 区域Id（如南山区的Id）</li>
- * <li>areaName: 区域名称</li>
- * <li>livingStatus: 地址状态, {@link com.everhomes.address.AddressAdminStatus}</li>
+ * <li>addressId: 地址信息</li>
+ * <li>livingStatus: 地址状态, {@link com.everhomes.pm.PmMemberStatus}</li>
  * </ul>
  */
 public class PropFamilyDTO {
