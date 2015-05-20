@@ -41,11 +41,11 @@ public class Generator {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public static String createKey(Long serverId, String path) {
+    public static String createKey(Long serverId, String path, String type) {
         if (path.startsWith("/")) {
             path = path.substring(1, path.length());
         }
-        return String.format("cs://%s/%s", serverId, encodeUrl(path));
+        return String.format("cs://%s/%s/%s", serverId, type, encodeUrl(path));
     }
 
     public static String encodeUrl(String path) {
@@ -63,7 +63,7 @@ public class Generator {
         } else if (length % 4 == 3) {
             result += "=";
         }
-        
+
         return new String(Base64.getDecoder().decode(result.getBytes(Charset.forName("utf-8"))));
     }
 

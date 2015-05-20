@@ -48,7 +48,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             result = createResource(server.getId(), login.getUserId(), request);
             contentServerProvider.addResource(result);
         }
-        request.setObjectId(Generator.createKey(server.getId(), result.getResourceId()));
+        request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
         request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
     }
 
