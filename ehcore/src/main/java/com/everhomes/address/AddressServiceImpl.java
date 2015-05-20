@@ -366,6 +366,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
                     .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                    .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                     .fetch().map((r) -> {
                         results.add(ConvertHelper.convert(r, Address.class));
                         return null;
@@ -511,6 +512,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         
         return new Tuple<>(ErrorCodes.SUCCESS, results);
     }
+    
 
     private String joinAddrStr(String buildingName, String apartName){
         boolean isFirst = true;
