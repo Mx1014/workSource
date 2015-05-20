@@ -45,7 +45,7 @@ public class Generator {
         if (path.startsWith("/")) {
             path = path.substring(1, path.length());
         }
-        return String.format("cs://%s/%s", serverId, path);
+        return String.format("cs://%s/%s", serverId, encodeUrl(path));
     }
 
     public static String encodeUrl(String path) {
