@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberUid: 家庭成员Id</li>
  * <li>memberName: 家庭成员名称</li>
  * <li>memberAvatar: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * <li>cellPhone:用户电话号码</li>
  * </ul>
  */
 public class FamilyMemberDTO {
@@ -19,6 +20,7 @@ public class FamilyMemberDTO {
     private Long memberUid;
     private String memberName;
     private String memberAvatar;
+    private String cellPhone;
     
     public FamilyMemberDTO() {
     }
@@ -63,6 +65,14 @@ public class FamilyMemberDTO {
         this.memberAvatar = memberAvatar;
     }
     
+    public String getCellPhone() {
+        return cellPhone;
+    }
+
+    public void setCellPhone(String cellPhone) {
+        this.cellPhone = cellPhone;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

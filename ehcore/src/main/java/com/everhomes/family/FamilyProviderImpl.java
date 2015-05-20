@@ -1,12 +1,13 @@
 // @formatter:off
 package com.everhomes.family;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -20,6 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -54,12 +56,15 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import freemarker.core.ReturnInstruction.Return;
+
 
 
 /**
@@ -732,6 +737,13 @@ public class FamilyProviderImpl implements FamilyProvider {
                 f.setMemberUid(groupMember.getMemberId());
                 f.setMemberName(groupMember.getMemberNickName());
                 f.setMemberAvatar(parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid()));
+                List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(groupMember.getMemberId());
+                userIdentifiers.forEach((u) ->{
+                   if(u.getIdentifierType().byteValue() == 0){
+                       f.setCellPhone(u.getIdentifierToken());
+                   }
+                });
+                
                 results.add(f);
             }
         });
