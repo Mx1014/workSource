@@ -130,4 +130,21 @@ public class RegionController extends ControllerBase {
                 .collect(Collectors.toList());
         return new RestResponse(dtoResultList);
     }
+    
+    /**
+     * <b>URL: /region/listActiveRegion</b>
+     * 根据关键字查询区域列表（可不填父亲区域ID）
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActiveRegion")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listActiveRegion(@Valid ListActiveRegionCommand cmd) {
+        
+        List<Region> entityResultList = this.regionProvider.listActiveRegion(RegionScope.fromCode(cmd.getScope()));
+        
+        List<RegionDTO> dtoResultList = entityResultList.stream()
+                .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
+                .collect(Collectors.toList());
+        return new RestResponse(dtoResultList);
+    }
 }

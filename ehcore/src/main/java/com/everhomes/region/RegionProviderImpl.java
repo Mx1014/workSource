@@ -310,4 +310,29 @@ public class RegionProviderImpl implements RegionProvider {
         
         return result;
     }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<Region> listActiveRegion(RegionScope scope) {
+        
+        List<Region> result = new ArrayList<>();
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+        Condition condition = Tables.EH_REGIONS.STATUS.eq(RegionAdminStatus.ACTIVE.getCode());
+        
+        if(scope != null)
+            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+        
+        if(condition != null) {
+            
+            selectStep.where(condition);
+        }
+        result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+            );
+        
+        return result;
+    }
 }

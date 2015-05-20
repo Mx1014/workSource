@@ -63,7 +63,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
-import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -482,6 +481,13 @@ public class FamilyProviderImpl implements FamilyProvider {
     public List<FamilyDTO> getUserOwningFamilies() {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
+       
+        return getUserFamiliesByUserId(userId);
+    }
+    
+    @Override
+    public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
+        
         List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
         
         if(list == null || list.isEmpty())
@@ -491,7 +497,6 @@ public class FamilyProviderImpl implements FamilyProvider {
             familyIds.add(u.getGroupId());
         }
        return getUserOwningFamiliesByIds(familyIds, userId);
-       
     }
 
     @Override
