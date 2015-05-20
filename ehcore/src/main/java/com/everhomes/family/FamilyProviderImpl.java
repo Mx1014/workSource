@@ -1158,6 +1158,9 @@ public class FamilyProviderImpl implements FamilyProvider {
             familyDTO.setMemberNickName(m.getMemberNickName());
             familyDTO.setMemberAvatar(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
             familyDTO.setMembershipStatus(m.getMemberStatus());
+            Community community = communityProvider.findCommunityById(family.getCommunityId());
+            familyDTO.setCommunityName(community == null ? null : community.getName());
+            
         }
         return familyDTO;
     }
