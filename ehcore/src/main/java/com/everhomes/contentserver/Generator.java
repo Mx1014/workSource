@@ -63,6 +63,7 @@ public class Generator {
         } else if (length % 4 == 3) {
             result += "=";
         }
+        
         return new String(Base64.getDecoder().decode(result.getBytes(Charset.forName("utf-8"))));
     }
 
