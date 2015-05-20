@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions implements java.io.Serializable {
 
-	private static final long serialVersionUID = -563171674;
+	private static final long serialVersionUID = 277122060;
 
 	private java.lang.Long    id;
 	private java.lang.Long    parentId;
@@ -22,6 +22,7 @@ public class EhRegions implements java.io.Serializable {
 	private java.lang.String  isoCode;
 	private java.lang.String  telCode;
 	private java.lang.Byte    status;
+	private java.lang.Byte    hotFlag;
 
 	public EhRegions() {}
 
@@ -34,7 +35,8 @@ public class EhRegions implements java.io.Serializable {
 		java.lang.Byte    scopeCode,
 		java.lang.String  isoCode,
 		java.lang.String  telCode,
-		java.lang.Byte    status
+		java.lang.Byte    status,
+		java.lang.Byte    hotFlag
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -45,6 +47,7 @@ public class EhRegions implements java.io.Serializable {
 		this.isoCode = isoCode;
 		this.telCode = telCode;
 		this.status = status;
+		this.hotFlag = hotFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhRegions implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Byte getHotFlag() {
+		return this.hotFlag;
+	}
+
+	public void setHotFlag(java.lang.Byte hotFlag) {
+		this.hotFlag = hotFlag;
 	}
 }

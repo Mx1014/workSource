@@ -31,10 +31,10 @@
         eh_users | eh_user_identifiers | eh_user_groups | eh_user_blacklist | eh_user_favorates | eh_user_profiles |
         eh_user_invitations | eh_user_invitation_roster | eh_user_followed_families | eh_user_likes |
         eh_groups | eh_group_members | eh_group_profiles | eh_group_op_requests | eh_group_visible_scopes |
-        eh_forums | eh_forum_posts | eh_forum_attachments | eh_forum_visible_scopes | 
+        eh_forums | eh_forum_posts | eh_forum_attachments | eh_forum_visible_scopes | eh_forum_assigned_scopes |
         eh_borders | eh_categories | eh_state_triggers | eh_search_keywords | eh_app_promotions |
         eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks | 
-        eh_audit_logs | eh_locale_strings | eh_devices | eh_certs |
+        eh_audit_logs | eh_locale_strings | eh_locale_templates | eh_devices | eh_certs |
         eh_regions | eh_communities | eh_community_geopoints | eh_community_pm_members | eh_community_address_mappings |
         eh_community_pm_tasks | eh_community_pm_bills | eh_community_pm_bill_items | eh_community_pm_contacts | 
         eh_community_pm_owners | eh_community_profiles | eh_addresses | 

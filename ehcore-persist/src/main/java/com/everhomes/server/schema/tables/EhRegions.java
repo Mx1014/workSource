@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRegionsRecord> {
 
-	private static final long serialVersionUID = 980932439;
+	private static final long serialVersionUID = -18260166;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_regions</code>
@@ -70,6 +70,11 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_regions.status</code>. 1: inactive, 2: active, 3: locked, 4: mark as deleted
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: inactive, 2: active, 3: locked, 4: mark as deleted");
+
+	/**
+	 * The column <code>ehcore.eh_regions.hot_flag</code>. 0: not hot, 1: hot
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.Byte> HOT_FLAG = createField("hot_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: not hot, 1: hot");
 
 	/**
 	 * Create a <code>ehcore.eh_regions</code> table reference

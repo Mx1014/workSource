@@ -95,6 +95,23 @@ CREATE TABLE `eh_locale_strings`(
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_locale_templates`;
+CREATE TABLE `eh_locale_templates`(
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `scope` VARCHAR(64),
+    `code` INTEGER,
+    `locale` VARCHAR(16),
+	`description` VARCHAR(2048),
+    `text` TEXT,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
  
 DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
@@ -717,7 +734,7 @@ CREATE TABLE `eh_group_op_requests` (
     `reqestor_uid` BIGINT,
     `requestor_comment` TEXT,
     `operation_type` TINYINT COMMENT '1: request for admin role, 2: invite to become admin',
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: requesting, 1: accepted, 2: rejected',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: requesting, 2: accepted, 3: rejected',
     `operator_uid` BIGINT,
     `process_message` TEXT,
     `create_time` DATETIME,
@@ -838,12 +855,40 @@ CREATE TABLE `eh_forum_visible_scopes` (
 #
 # member of forum post sharding group
 #
+DROP TABLE IF EXISTS `eh_forum_assigned_scopes`;
+CREATE TABLE `eh_forum_assigned_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner post id',
+    `scope_code` TINYINT,
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of forum post sharding group
+#
+DROP TABLE IF EXISTS `eh_forum_visible_scopes`;
+CREATE TABLE `eh_forum_visible_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner post id',
+    `scope_code` TINYINT,
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of forum post sharding group
+#
 DROP TABLE IF EXISTS `eh_forum_attachments`;
 CREATE TABLE `eh_forum_attachments` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `post_id` BIGINT NOT NULL,
-    `store_type` VARCHAR(32) COMMENT 'content store type',
-    `store_uri` VARCHAR(32) COMMENT 'identify the store instance',
     `content_type` VARCHAR(32) COMMENT 'attachment object content type',
     `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
     `creator_uid` BIGINT NOT NULL,
@@ -884,6 +929,7 @@ CREATE TABLE `eh_regions` (
 	`iso_code` VARCHAR(32) COMMENT 'international standard code for the region if exists',
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
+	`hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not hot, 1: hot',
     
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_region_name`(`parent_id`, `name`),

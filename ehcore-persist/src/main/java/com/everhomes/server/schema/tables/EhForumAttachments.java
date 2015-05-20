@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord> {
 
-	private static final long serialVersionUID = -1717769021;
+	private static final long serialVersionUID = 416988935;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_attachments</code>
@@ -35,16 +35,6 @@ public class EhForumAttachments extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_forum_attachments.post_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord, java.lang.Long> POST_ID = createField("post_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_forum_attachments.store_type</code>. content store type
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord, java.lang.String> STORE_TYPE = createField("store_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "content store type");
-
-	/**
-	 * The column <code>ehcore.eh_forum_attachments.store_uri</code>. identify the store instance
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord, java.lang.String> STORE_URI = createField("store_uri", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "identify the store instance");
 
 	/**
 	 * The column <code>ehcore.eh_forum_attachments.content_type</code>. attachment object content type
