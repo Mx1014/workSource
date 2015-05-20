@@ -1,12 +1,14 @@
-curl -XPUT 'http://localhost:9200/everhomesv3' -d '
+ELASTIC=127.0.0.1:9200
+
+curl -XPUT "http://$ELASTIC/everhomesv3" -d '
     "settings" : {
         "number_of_shards" : 1
     },
 '
 
-curl -XDELETE http://localhost:9200/everhomesv3/_mapping/group
+curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/group
 
-curl -XPUT 'http://localhost:9200/everhomesv3/_mapping/group' -d '
+curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/group" -d '
 {
     "group" : {
         "properties" : {

@@ -1,4 +1,5 @@
-curl -XGET http://127.0.0.1:9200/everhomesv3/group/_search?pretty=True -d '
+ELASTIC=127.0.0.1:9200
+curl -XGET http://$ELASTIC/everhomesv3/group/_search?pretty=True -d '
 {
     "query": {
         "prefix": {
