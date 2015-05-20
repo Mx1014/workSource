@@ -112,8 +112,8 @@ public class CategoryProviderImpl implements CategoryProvider {
     public List<Category> listChildCategories(Long parentId, CategoryAdminStatus status,
             Tuple<String, SortOrder>... orderBy) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
+        //暂不向客户端开放排序字段指定 20150519
+        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
         List<Category> result;
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
@@ -131,15 +131,18 @@ public class CategoryProviderImpl implements CategoryProvider {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+//        if(orderByFields != null) {
+//            result = selectStep.orderBy(orderByFields).fetch().map(
+//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+//            );
+//        } else {
+//            result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+//            );
+//        }
+        result = selectStep.fetch().map(
                 new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
             );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
-            );
-        }
         
         return result;
     }
@@ -168,8 +171,8 @@ public class CategoryProviderImpl implements CategoryProvider {
         }
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
+        //暂不向客户端开放排序字段指定 20150519
+        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
         Condition condition = Tables.EH_CATEGORIES.PATH.like(pathLike);
@@ -186,15 +189,18 @@ public class CategoryProviderImpl implements CategoryProvider {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+//        if(orderByFields != null) {
+//            result = selectStep.orderBy(orderByFields).fetch().map(
+//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+//            );
+//        } else {
+//            result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+//            );
+//        }
+        result = selectStep.fetch().map(
                 new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
             );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
-            );
-        }
         
         return result;
     }

@@ -22,6 +22,8 @@ import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.address.ListCommunityByKeywordCommand;
 import com.everhomes.address.ListNearbyCommunityCommand;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -35,7 +37,8 @@ public class AddressController extends ControllerBase {
     
     @Autowired
     private AddressService addressService;
-
+    @Autowired
+    private CommunityProvider communityProvider;
     /**
      * <b>URL: /address/suggestCommunity</b>
      * <p>添加小区</p>
@@ -169,5 +172,21 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /address/searchCommunities</b>
+     * <p>根据关键字搜索小区</p>
+     */
+    @RequestMapping("searchCommunities")
+    @RestReturn(value=String.class)
+    public RestResponse searchCommunities(@Valid SearchCommunityCommand cmd) {
+        List<String> results = this.addressService.searchCommunities(cmd);
+        RestResponse response =  new RestResponse(results);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 
 }

@@ -53,7 +53,7 @@ public class FamilyController extends ControllerBase {
 	 * <p>根据关键字查询家庭信息</p>
 	 */
     @RequestMapping("findFamilyByKeyword")
-    @RestReturn(value=FamilyDTO.class)
+    @RestReturn(value=FamilyDTO.class ,collection=true)
     public RestResponse findFamilyByKeyword(
         @Valid ListFamilyByKeywordCommand cmd) {
         
@@ -102,7 +102,7 @@ public class FamilyController extends ControllerBase {
      * <p>查询用户加入的家庭</p>
      */
     @RequestMapping("getUserOwningFamilies")
-    @RestReturn(value=FamilyDTO.class)
+    @RestReturn(value=FamilyDTO.class ,collection=true)
     public RestResponse getUserOwningFamilies() {
         
         List<FamilyDTO> results = familyProvider.getUserOwningFamilies();

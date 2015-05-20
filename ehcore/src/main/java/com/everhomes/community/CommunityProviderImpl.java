@@ -1,11 +1,23 @@
 // @formatter:off
 package com.everhomes.community;
 
+import static com.everhomes.server.schema.Tables.EH_GROUP_MEMBERS;
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.hibernate.validator.constraints.br.CPF;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,17 +25,16 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.address.CommunityAdminStatus;
-import com.everhomes.address.CommunityDTO;
-import com.everhomes.address.ListAllCommunitesCommand;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupMember;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.region.Region;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -31,16 +42,21 @@ import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
 @Component
 public class CommunityProviderImpl implements CommunityProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommunityProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
     
@@ -202,11 +218,77 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         return result[0];
     }
-
+    
     @Override
-    public List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(String geoHashStr) {
-        List<CommunityGeoPoint> l = new ArrayList<>();
+    public List<Community> findNearyByCommunityById(long communityId){
+        long startTime = System.currentTimeMillis();
+        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
+        List<CommunityGeoPoint> pointList = self.listCommunityGeoPoints(communityId);
+        List<Community> results = new ArrayList<Community>();
+        List<CommunityGeoPoint> nearyByPointList = new ArrayList<CommunityGeoPoint>();
         
+//        pointList.forEach((CommunityGeoPoint p) ->{
+//            List<CommunityGeoPoint> l = self.findCommunityGeoPointByGeoHash(p.getLatitude(),p.getLongitude());
+//            if(l != null && !l.isEmpty())
+//                nearyByPointList.addAll(l);
+//        });
+        nearyByPointList = findCommunityGeoPointByGeoHash(pointList);
+        
+        List<Long> communityIds = new ArrayList<Long>();
+        if(nearyByPointList == null || nearyByPointList.isEmpty()) return null;
+        for(CommunityGeoPoint p : nearyByPointList){
+            if(!communityIds.contains(p.getCommunityId().longValue()))
+                communityIds.add(p.getCommunityId());
+        }
+        
+        communityIds.forEach((Long id) ->{
+            Community community = self.findCommunityById(id);
+            if(community != null)
+                results.add(community);
+        });
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Find nearby community elapse=" + (endTime - startTime));
+        return results;
+    }
+    
+    private List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(List<CommunityGeoPoint> list) {
+        
+        if(list == null || list.isEmpty()) return null;
+        
+        List<CommunityGeoPoint> results = new ArrayList<>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), results, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<?> query = context.selectQuery(Tables.EH_COMMUNITY_GEOPOINTS);
+            Condition condition = null;
+            boolean isFirst = true;
+            for(CommunityGeoPoint p : list){
+                String geoHashStr = GeoHashUtils.encode(p.getLatitude(), p.getLongitude()).substring(0, 6) + "%";
+                
+                if(isFirst){
+                    condition = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr);
+                    isFirst = false;
+                    continue;
+                }
+                if(!isFirst){
+                    condition = condition.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr));
+              }
+               
+            }
+            query.addConditions(condition);
+            
+            query.fetch().map((r) -> {
+                results.add(ConvertHelper.convert(r, CommunityGeoPoint.class));
+                return null;
+            });
+            return true;
+        });
+        return results;
+    }
+    
+    
+    @Override
+    public List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(double latitude, double longitude) {
+        List<CommunityGeoPoint> l = new ArrayList<>();
+        String geoHashStr = GeoHashUtils.encode(latitude, longitude).substring(0, 6);
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
@@ -225,16 +307,11 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
     
     @Override
-    public List<Community> listAllCommunities(ListAllCommunitesCommand cmd) {
-        if(cmd.getPageOffset() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid page offset parameter");
+    public List<Community> listAllCommunities(long pageOffset, long pageSize) {
             
         final List<Community> results = new ArrayList<>();
-        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
-                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
-        long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
         if(offset > 0) {
             final List<Long> countsInShards = new ArrayList<>();

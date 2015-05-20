@@ -39,6 +39,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -84,6 +85,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private UserProvider userProvide;
+    
+    @Autowired
+    private CommunitySearcher communitySearcher;
     
     @PostConstruct
     public void setup() {
@@ -178,8 +182,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
         // TODO, return all communities only to test our REST response for now
         
-        String geoHash = GeoHashUtils.encode(cmd.getLatigtue(), cmd.getLongitude());
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(geoHash.substring(0, 5));
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude());
         List<Long> communityIds = getAllCommunityIds(pointList);
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -573,6 +576,23 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             return apartmentName.substring(0, apartmentName.length() - 2);
         }
         return null;
+    }
+
+    @Override
+    public List<String> searchCommunities(SearchCommunityCommand cmd) {
+        if(cmd.getKeyword() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid keyword paramter.");
+        }
+        if(cmd.getCityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid cityId paramter.");
+        }
+        
+        final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        
+        return communitySearcher.search(cmd.getKeyword(), cmd.getCityId(), pageSize);
     }
 
 }

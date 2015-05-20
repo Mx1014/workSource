@@ -59,15 +59,12 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     
     @Override
     public void syncDb() {
-        ListAllCommunitesCommand cmd = new ListAllCommunitesCommand();
         Long pageSize = 200l;
         Long i = 1l;
         Long count = 0l;
         
         for(;;) {
-            cmd.setPageOffset(i);
-            cmd.setPageSize(pageSize);
-            List<Community> communities = this.communityProvider.listAllCommunities(cmd);
+            List<Community> communities = this.communityProvider.listAllCommunities(i,pageSize);
             bulkUpdate(communities);
             count += communities.size();
             LOGGER.info("communities sync count= " + count);
