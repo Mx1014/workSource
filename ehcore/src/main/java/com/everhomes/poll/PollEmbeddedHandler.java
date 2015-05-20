@@ -1,11 +1,14 @@
 package com.everhomes.poll;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import com.everhomes.app.AppConstants;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.util.StringHelper;
 
+@Component(ForumEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_POLL)
 public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Autowired

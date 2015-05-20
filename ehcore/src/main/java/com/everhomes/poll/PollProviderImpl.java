@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -46,8 +47,12 @@ public class PollProviderImpl implements PollProvider {
     }
 
     @Override
-    public void createPollItem(List<PollItem> pollItems,Long pollId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(PollItem.class, pollId));
+    public void createPollItem(List<PollItem> pollItems) {
+        pollItems.forEach(item->{
+            Long id=shardingProvider.allocShardableContentId(EhPollItems.class).second();
+            item.setId(id);
+        });
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(PollItem.class));
         EhPollItemsDao dao = new EhPollItemsDao(context.configuration());
         dao.insert(pollItems.stream().map(r->ConvertHelper.convert(r, EhPollItems.class)).collect(Collectors.toList()));
     }
@@ -64,9 +69,16 @@ public class PollProviderImpl implements PollProvider {
     @Cacheable(value="listPollItemByPollId",key="#pollId")
     @Override
     public List<PollItem> listPollItemByPollId(Long pollId) {
-       DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPollItems.class,pollId));
-       EhPollItemsDao dao=new EhPollItemsDao(cxt.configuration());
-       return dao.fetchByPollId(pollId).stream().map(r->ConvertHelper.convert(r, PollItem.class)).collect(Collectors.toList());
+        List<PollItem> values=new ArrayList<PollItem>();
+       dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPollItems.class), null, (context,object)->{
+           EhPollItemsDao dao=new EhPollItemsDao(context.configuration());
+           List<PollItem> result = dao.fetchByPollId(pollId).stream().map(r->ConvertHelper.convert(r, PollItem.class)).collect(Collectors.toList());
+           if(CollectionUtils.isNotEmpty(result)){
+               values.addAll(result);
+           }
+           return true;
+       });
+       return values;
     }
 
     @Cacheable(value="listPollVoteByPollId",key="#pollId")
@@ -98,7 +110,7 @@ public class PollProviderImpl implements PollProvider {
     @Cacheable(value="listPollVoteByPollId",key="{#uid,#pollId}")
     @Override
     public PollVote findPollVoteByUidAndPollId(Long uid, Long pollId) {
-        PollVote[] pollVote = new PollVote[0];
+        PollVote[] pollVote = new PollVote[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPollVotes.class),pollVote,
                 (context, object) -> {
                     EhPollVotesRecord result = (EhPollVotesRecord)context.select().from(Tables.EH_POLL_VOTES).where(Tables.EH_POLL_VOTES.POLL_ID.eq(pollId))
@@ -135,8 +147,8 @@ public class PollProviderImpl implements PollProvider {
     }
 
     @Override
-    public void updatePollItem(PollItem pollItem,Long pollId) {
-        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPollItems.class,pollId));
+    public void updatePollItem(PollItem pollItem) {
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPollItems.class,pollItem.getId()));
         EhPollItemsDao dao=new EhPollItemsDao(cxt.configuration());
         dao.update(pollItem);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPollItems.class, pollItem.getId());
