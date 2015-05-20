@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 public class ActivityCheckinCommand {
+    @NotNull
     private Long activityId;
 
     public ActivityCheckinCommand() {

@@ -6,14 +6,14 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class InvitationCommandResponse {
-    @ItemType(InvitationRecord.class)
-    private List<InvitationRecord> recipientList;
+    @ItemType(InvitationDTO.class)
+    private List<InvitationDTO> recipientList;
 
-    public List<InvitationRecord> getRecipientList() {
+    public List<InvitationDTO> getRecipientList() {
         return recipientList;
     }
 
-    public void setRecipientList(List<InvitationRecord> recipientList) {
+    public void setRecipientList(List<InvitationDTO> recipientList) {
         this.recipientList = recipientList;
     }
 
