@@ -2,7 +2,7 @@ package com.everhomes.user;
 
 import com.everhomes.util.StringHelper;
 
-public class InvitationRecord {
+public class InvitationDTO {
     private String name;
     private String identifier;
     private Byte inviteType;

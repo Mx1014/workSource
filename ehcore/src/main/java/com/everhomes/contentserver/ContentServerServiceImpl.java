@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.WebSocketConstant;
 import com.everhomes.rpc.PduFrame;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -131,13 +132,16 @@ public class ContentServerServiceImpl implements ContentServerService {
             return new ArrayList<String>();
         }
         Map<Long, ContentServer> cache = getServersHash();
-        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId)).collect(Collectors.toList());
+        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
+        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token))
+                .collect(Collectors.toList());
     }
 
     @Override
     public String parserUri(String uri, String ownerType, Long ownerId) {
         Map<Long, ContentServer> cache = getServersHash();
-        return parserSingleUri(uri, cache, ownerType, ownerId);
+        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
+        return parserSingleUri(uri, cache, ownerType, ownerId, token);
     }
 
     private Map<Long, ContentServer> getServersHash() {
@@ -149,7 +153,8 @@ public class ContentServerServiceImpl implements ContentServerService {
         return cache;
     }
 
-    private static String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId) {
+    private static String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId,
+            String token) {
         if (!uri.contains("cs://")) {
             return uri;
         }
@@ -167,12 +172,13 @@ public class ContentServerServiceImpl implements ContentServerService {
             LOGGER.error("cannot parser");
             return "";
         }
-        uri = uri.substring(position+1, uri.length());
-        if(uri.indexOf("?")!=-1){
-            return String.format("http://%s:%d/%s&ownerType=%s&ownerId=%s", cache.get(serverId).getPublicAddress(), cache
-                    .get(serverId).getPublicPort(), uri, ownerType, ownerId);
+        uri = uri.substring(position + 1, uri.length());
+        if (uri.indexOf("?") != -1) {
+            return String.format("http://%s:%d/%s&ownerType=%s&ownerId=%s&token=%s", cache.get(serverId)
+                    .getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId, token);
         }
-        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s", cache.get(serverId).getPublicAddress(), cache
-                .get(serverId).getPublicPort(), uri, ownerType, ownerId);
+        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s",
+                cache.get(serverId).getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId,
+                token);
     }
 }

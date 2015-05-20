@@ -48,8 +48,9 @@ public class PollServiceImpl implements PollService {
     @Override
     public void createPoll(PollPostCommand cmd,Long postId) {
         User user=UserContext.current().getUser();
-     
-        Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+        Family[] families = new Family[1];
+        if(user.getAddressId()!=null)
+            families[0] = familyProvider.findFamilyByAddressId(user.getAddressId());
         dbProvider.execute((status)->{
             Poll poll=new Poll();
             poll.setPostId(postId);
@@ -59,23 +60,27 @@ public class PollServiceImpl implements PollService {
             if(cmd.getMultiChoiceFlag()!=null)
                 poll.setMultiSelectFlag((byte)cmd.getMultiChoiceFlag().intValue());
             //family
-            if(family!=null)
-                poll.setCreatorFamilyId(family.getId());
+            if(families[0]!=null)
+                poll.setCreatorFamilyId(families[0].getId());
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
             poll.setStartTime(new Timestamp(cmd.getStartTime()));
+            poll.setStartTimeMs(cmd.getStartTime());
+            poll.setEndTimeMs(cmd.getStopTime());
             poll.setEndTime(new Timestamp(cmd.getStopTime()));
-            poll.setStatus((byte)1);
+            poll.setStatus(PollStatus.Published.getCode());
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
                 PollItem item=ConvertHelper.convert(r, PollItem.class);
                 item.setPollId(poll.getId());
+                item.setResourceUrl(r.getCoverUrl());
+                //how set resource id
+                item.setResourceId(r.getItemId());
                 item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                item.setId(r.getItemId());
                 return item;
             }).collect(Collectors.toList());
-            pollProvider.createPollItem(pollItems,poll.getId());
+            pollProvider.createPollItem(pollItems);
             return status;
         });
     }
@@ -109,8 +114,9 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("can not vote again.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
+        //do transaction
         if(Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)){
-            matchResult.forEach(item->{
+            dbProvider.execute(status->{ matchResult.forEach(item->{
                 PollVote pollVote = new PollVote();
                 pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 pollVote.setItemId(item.getId());
@@ -123,10 +129,23 @@ public class PollServiceImpl implements PollService {
                 pollProvider.createPollVote(pollVote);
                 item.setVoteCount(item.getVoteCount()+1);
                 //update poll item
-                pollProvider.updatePollItem(item, cmd.getPollId());
+                pollProvider.updatePollItem(item);
                 //update poll
+                poll.setPollCount(poll.getPollCount()+1);
+                pollProvider.updatePoll(poll);
             });
-        }else{
+            return true;
+            });
+            
+            PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
+            dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+            dto.setProcessStatus(getStatus(poll).getCode());
+            return dto;
+        }
+        
+        //do transaction
+        dbProvider.execute(status->{
+
             PollItem item = matchResult.get(0);
             PollVote pollVote = new PollVote();
             pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -134,17 +153,20 @@ public class PollServiceImpl implements PollService {
             pollVote.setPollId(poll.getId());
             pollVote.setVoterUid(user.getId());
             //if addresses is not empty
-            if(user.getAddressId()!=null)
-                    //ensure all address is ok
-                pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
+            if(user.getAddressId()!=null){
+                Family  family=familyProvider.findFamilyByAddressId(user.getAddressId());
+                if(family!=null)
+                pollVote.setVoterFamilyId(family.getId());
+            }
             pollProvider.createPollVote(pollVote);
             item.setVoteCount(item.getVoteCount()+1);
             //update poll item
-            pollProvider.updatePollItem(item, cmd.getPollId());
+            pollProvider.updatePollItem(item);
             
-        }
         poll.setPollCount(poll.getPollCount()+1);
         pollProvider.updatePoll(poll);
+        return status;
+        });
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
@@ -196,7 +218,13 @@ public class PollServiceImpl implements PollService {
         Poll poll=pollProvider.findByPostId(postId);
         List<PollItem> result = pollProvider.listPollItemByPollId(poll.getId());
         PollShowResultResponse response = new PollShowResultResponse();
-        response.setItems(result.stream().map(r->ConvertHelper.convert(r, PollItemDTO.class)).collect(Collectors.toList()));
+        response.setItems(result.stream().map(r->{
+            PollItemDTO item= ConvertHelper.convert(r, PollItemDTO.class);
+            item.setCoverUrl(r.getResourceUrl());
+            item.setItemId(r.getResourceId());
+            item.setCreateTime(r.getCreateTime().toString());
+            return item;
+        }).collect(Collectors.toList()));
         PollDTO dto=new PollDTO();
         try{
             BeanUtils.copyProperties(poll, dto);

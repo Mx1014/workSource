@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.activity;
 
 import java.util.ArrayList;
@@ -61,12 +62,9 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public ActivityRoster cancelSignup(Activity activity, Long uid) {
+    public ActivityRoster cancelSignup(Activity activity, Long uid, Long familyId) {
         ActivityRoster[] rosters = new ActivityRoster[1];
-        dbProvider.mapReduce(
-                AccessSpec.readOnlyWith(EhActivityRoster.class),
-                rosters,
-                (context, obj) -> {
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,(context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
                             .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(item -> {
@@ -93,16 +91,16 @@ public class ActivityProviderImpl implements ActivityProivider {
             // decrease count
             activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
                     - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
-            activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
+            if (familyId != null)
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
             updateActivity(activity);
             // update dao and push event
             DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
-            // unsubscribe?
             return rosters[0];
         }
-        LOGGER.error("the user was signin,cannot cancel operation.activityId={},uid={}", activity.getId(), uid);
+        LOGGER.error("the user was checkin,cannot cancel operation.activityId={},uid={}", activity.getId(), uid);
         throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is not signup");
+                ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is checkin,cannot cancel");
     }
 
     @Override
@@ -118,9 +116,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     public void checkIn(Activity activity, Long uid, Long familyId) {
 
         ActivityRoster[] activityRosters = new ActivityRoster[1];
-        dbProvider.mapReduce(
-                AccessSpec.readOnlyWith(Void.class),
-                activityRosters,
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(Void.class),null,
                 (context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
@@ -140,15 +136,17 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         if (CheckInStatus.CHECKIN.getCode().equals(activityRosters[0].getCheckinFlag())) {
             // concurrent?
-            LOGGER.warn("can not find the roster");
-            return;
+            LOGGER.warn("the user is checkin before");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "the user is checkin before");
         }
         activityRosters[0].setCheckinFlag(CheckInStatus.CHECKIN.getCode());
         activityRosters[0].setCheckinUid(uid);
         updateRoster(activityRosters[0]);
         activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
                 + (activityRosters[0].getAdultCount() + activityRosters[0].getChildCount()));
-        activity.setCheckinFamilyCount(activity.getConfirmAttendeeCount() + 1);
+        if (familyId != null)
+            activity.setCheckinFamilyCount(activity.getConfirmAttendeeCount() + 1);
         updateActivity(activity);
 
     }
@@ -183,8 +181,9 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}")
     @Override
     public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid) {
-        ActivityRoster[] rosters = new ActivityRoster[0];
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),rosters,(context, obj) -> {
+        ActivityRoster[] rosters = new ActivityRoster[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,
+                (context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId))
                             .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(item -> {
@@ -217,7 +216,10 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         // find all shard
         List<Long> counts = new ArrayList<Long>();
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class), null,(context, obj) -> {
+        this.dbProvider.mapReduce(
+                AccessSpec.readOnlyWith(EhActivityRoster.class),
+                null,
+                (context, obj) -> {
                     Long count = context.selectCount().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetchOne(0, Long.class);
                     counts.add(count);
@@ -251,7 +253,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public Activity findSnapshotByPostId(Long postId) {
-        Activity[] activity = new Activity[0];
+        Activity[] activity = new Activity[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class), null, (context, obj) -> {
             EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
             dao.fetchByPostId(postId).forEach(result -> {
@@ -263,5 +265,13 @@ public class ActivityProviderImpl implements ActivityProivider {
             return true;
         });
         return activity[0];
+    }
+
+    @Override
+    public void deleteRoster(ActivityRoster createRoster) {
+        DSLContext cxt = dbProvider
+                .getDslContext(AccessSpec.readOnlyWith(EhActivityRoster.class, createRoster.getId()));
+        EhActivityRosterDao dao = new EhActivityRosterDao(cxt.configuration());
+        dao.delete(createRoster);
     }
 }
