@@ -1292,11 +1292,14 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group == null)
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                            "Invalid familyId parameter");
+            return true;
         }
         if(type == ParamType.COMMUNITY.getCode()){
             //TODO
+            
         }
-        return true;
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                "Invalid id or type parameter");
     }
 
 }
