@@ -214,6 +214,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhForums EH_FORUMS = com.everhomes.server.schema.tables.EhForums.EH_FORUMS;
 
 	/**
+	 * The table ehcore.eh_forum_assigned_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhForumAssignedScopes EH_FORUM_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhForumAssignedScopes.EH_FORUM_ASSIGNED_SCOPES;
+
+	/**
 	 * The table ehcore.eh_forum_attachments
 	 */
 	public static final com.everhomes.server.schema.tables.EhForumAttachments EH_FORUM_ATTACHMENTS = com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS;
@@ -257,6 +262,11 @@ public class Tables {
 	 * The table ehcore.eh_locale_strings
 	 */
 	public static final com.everhomes.server.schema.tables.EhLocaleStrings EH_LOCALE_STRINGS = com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS;
+
+	/**
+	 * The table ehcore.eh_locale_templates
+	 */
+	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
 	 * The table ehcore.eh_polls

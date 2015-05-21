@@ -11,12 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAttachments implements java.io.Serializable {
 
-	private static final long serialVersionUID = 571493846;
+	private static final long serialVersionUID = 1997699862;
 
 	private java.lang.Long     id;
 	private java.lang.Long     postId;
-	private java.lang.String   storeType;
-	private java.lang.String   storeUri;
 	private java.lang.String   contentType;
 	private java.lang.String   contentUri;
 	private java.lang.Long     creatorUid;
@@ -27,8 +25,6 @@ public class EhForumAttachments implements java.io.Serializable {
 	public EhForumAttachments(
 		java.lang.Long     id,
 		java.lang.Long     postId,
-		java.lang.String   storeType,
-		java.lang.String   storeUri,
 		java.lang.String   contentType,
 		java.lang.String   contentUri,
 		java.lang.Long     creatorUid,
@@ -36,8 +32,6 @@ public class EhForumAttachments implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.postId = postId;
-		this.storeType = storeType;
-		this.storeUri = storeUri;
 		this.contentType = contentType;
 		this.contentUri = contentUri;
 		this.creatorUid = creatorUid;
@@ -58,22 +52,6 @@ public class EhForumAttachments implements java.io.Serializable {
 
 	public void setPostId(java.lang.Long postId) {
 		this.postId = postId;
-	}
-
-	public java.lang.String getStoreType() {
-		return this.storeType;
-	}
-
-	public void setStoreType(java.lang.String storeType) {
-		this.storeType = storeType;
-	}
-
-	public java.lang.String getStoreUri() {
-		return this.storeUri;
-	}
-
-	public void setStoreUri(java.lang.String storeUri) {
-		this.storeUri = storeUri;
 	}
 
 	public java.lang.String getContentType() {

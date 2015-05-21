@@ -97,4 +97,23 @@ public class CategoryController extends ControllerBase {
         }).collect(Collectors.toList());
         return new RestResponse(convertCategories);
     }
+    
+    /**
+     * <b>URL: /category/listInterestCategories</b> 列出所有兴趣分类，客户端建圈使用
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listInterestCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listInterestCategories() {
+        
+        Tuple<String, SortOrder> orderBy = null;
+        @SuppressWarnings("unchecked")
+        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.Interest,
+                CategoryAdminStatus.ACTIVE, orderBy);
+
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        return new RestResponse(dtoResultList);
+    }
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> implements org.jooq.Record10<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.Byte, java.lang.Byte, java.lang.Long, java.lang.String, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -841228877;
+	private static final long serialVersionUID = 1796599687;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_op_requests.id</code>. id of the record
@@ -84,14 +84,14 @@ public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_op_requests.status</code>. 0: requesting, 1: accepted, 2: rejected
+	 * Setter for <code>ehcore.eh_group_op_requests.status</code>. 0: none, 1: requesting, 2: accepted, 3: rejected
 	 */
 	public void setStatus(java.lang.Byte value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_op_requests.status</code>. 0: requesting, 1: accepted, 2: rejected
+	 * Getter for <code>ehcore.eh_group_op_requests.status</code>. 0: none, 1: requesting, 2: accepted, 3: rejected
 	 */
 	public java.lang.Byte getStatus() {
 		return (java.lang.Byte) getValue(5);

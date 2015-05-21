@@ -8,7 +8,8 @@ import com.everhomes.util.StringHelper;
  * @author elians
  *         <ul>
  *         <li>nickName:昵称</li>
- *         <li>avatar:头像</li>
+ *         <li>avatarUri:头像uri</li>
+ *         <li>avatarUrl:头像url</li>
  *         <li>statusLine:状态</li>
  *         <li>gender:性别</li>
  *         <li>birthday:生日</li>
@@ -20,7 +21,8 @@ import com.everhomes.util.StringHelper;
  */
 public class SetUserInfoCommand {
     private String nickName;
-    private String avatar;
+    private String avatarUri;
+    private String avatarUrl;
     private String statusLine;
     private Byte gender;
     private String birthday;
@@ -40,12 +42,20 @@ public class SetUserInfoCommand {
         this.nickName = nickName;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public String getAvatarUri() {
+        return avatarUri;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setAvatarUri(String avatarUri) {
+        this.avatarUri = avatarUri;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getStatusLine() {

@@ -171,4 +171,31 @@ public class AddressProviderImpl implements AddressProvider {
         
         return addresses;
     }
+
+    @Override
+    public List<ApartmentDTO> listApartmentsByBuildingName(long communityId, String buildingName , int offset , int size) {
+        
+        List<ApartmentDTO> results = new ArrayList<>();
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    
+                    context.select(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME)
+                        .from(Tables.EH_ADDRESSES)
+                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(communityId)
+                        .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)))
+                        .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                        .limit(size).offset(offset)
+                        .fetch().map((r) -> {
+                            ApartmentDTO apartment = new ApartmentDTO();
+                            apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
+                            apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+                            results.add(apartment);
+                            return null;
+                        });
+                    
+                return true;
+            });
+        return results;
+    }
 }

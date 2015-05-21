@@ -48,7 +48,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             result = createResource(server.getId(), login.getUserId(), request);
             contentServerProvider.addResource(result);
         }
-        request.setObjectId(Generator.createKey(server.getId(), result.getResourceId()));
+        request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
         request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
     }
 
@@ -89,7 +89,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         if (!userService.isValidLoginToken(login)) {
             LOGGER.error("invalid login token.auth failed");
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlida login token");
+                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlid login token");
         }
         String md5 = "";
         switch (request.getAccessType()) {

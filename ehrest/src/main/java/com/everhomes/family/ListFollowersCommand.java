@@ -5,23 +5,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>familyId: 家庭Id </li>
+ * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
+ * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>pageOffset: 页码（可选）</li>
  * </ul>
  */
-public class ListFollowersCommand {
-    private Long familyId;
+public class ListFollowersCommand extends BaseCommand{
+
     private Long pageOffset;
 
     public ListFollowersCommand() {
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
     }
     
     public Long getPageOffset() {

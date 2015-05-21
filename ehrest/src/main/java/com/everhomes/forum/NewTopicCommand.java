@@ -11,15 +11,17 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>forumId: 论坛ID</li>
- * <li>categoryId: 类型ID</li>
- * <li>visibleFlag: 可见性范围类型，{@link com.everhomes.forum.PostVisibleFlag}</li>
+ * <li>contentCategory: 内容类型ID，含类和子类</li>
+ * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
+ * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
+ * <li>visibilityScopeId: 可见性类型对应的ID</li>
  * <li>longitude: 帖子内容涉及到的经度如活动</li>
  * <li>latitude: 帖子内容涉及到的纬度如活动</li>
- * <li>category_id: 帖子类型ID</li>
  * <li>subject: 帖子标题</li>
- * <li>content_type: 帖子内容类型，{@link com.everhomes.forum.PostContentType}</li>
+ * <li>contentType: 帖子内容类型，{@link com.everhomes.forum.PostContentType}</li>
  * <li>content: 帖子内容</li>
  * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.app.AppConstants}</li>
+ * <li>embeddedId: 内嵌对象对应的ID</li>
  * <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
  * <li>isForwarded: 是否是转发帖的标记</li>
  * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.forum.AttachmentDescriptor}</li>
@@ -28,8 +30,10 @@ import com.everhomes.util.StringHelper;
 public class NewTopicCommand {
     @NotNull
     private Long forumId;
+
+    private Long contentCategory;
     
-    private Long categoryId;
+    private Long actionCategory;
     
     private Byte visibilityScope;
 
@@ -41,6 +45,9 @@ public class NewTopicCommand {
     
     @NotNull
     private String subject;
+    
+    @NotNull
+    private String contentType;
     
     @NotNull
     private String content;
@@ -68,15 +75,23 @@ public class NewTopicCommand {
 		this.forumId = forumId;
 	}
 
-	public Long getCategoryId() {
-		return categoryId;
-	}
+	public Long getContentCategory() {
+        return contentCategory;
+    }
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
-	}
+    public void setContentCategory(Long contentCategory) {
+        this.contentCategory = contentCategory;
+    }
 
-	public Byte getVisibilityScope() {
+    public Long getActionCategory() {
+        return actionCategory;
+    }
+
+    public void setActionCategory(Long actionCategory) {
+        this.actionCategory = actionCategory;
+    }
+
+    public Byte getVisibilityScope() {
         return visibilityScope;
     }
 
@@ -116,7 +131,15 @@ public class NewTopicCommand {
 		this.subject = subject;
 	}
 
-	public String getContent() {
+	public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getContent() {
 		return content;
 	}
 

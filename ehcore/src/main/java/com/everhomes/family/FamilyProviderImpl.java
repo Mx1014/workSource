@@ -1,12 +1,18 @@
 // @formatter:off
 package com.everhomes.family;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
+
+
+
+
+
+
 
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -20,6 +26,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
+
+
+
 
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -54,12 +66,14 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+
 
 
 /**
@@ -166,7 +180,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     m.setCreatorUid(uid);
                     this.groupProvider.createGroupMember(m);
-                    
+
                     UserGroup userGroup = new UserGroup();
                     userGroup.setOwnerUid(uid);
                     userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
@@ -308,6 +322,8 @@ public class FamilyProviderImpl implements FamilyProvider {
             this.userProvider.deleteUserGroup(userGroup);
             return null;
         });
+        
+        setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
     }
     
     private GroupMember pickOneMemberToPromote(Family family) {
@@ -360,14 +376,11 @@ public class FamilyProviderImpl implements FamilyProvider {
     public void joinFamily(Long familyId) {
     	User user = UserContext.current().getUser();
     	long userId = user.getId();
-    	if(familyId == null)
-    	    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
+    	
+    	Group group = this.groupProvider.findGroupById(familyId);
+    	
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
-    		Group f = this.groupProvider.findGroupById(familyId);
-    		if(f == null)
-    			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-    	                    "Invalid familyId parameter");
+    		
     		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), userId);
     		if(m != null)
     			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -388,7 +401,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 		    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
 		    userGroup.setGroupId(familyId);
 		    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-		    userGroup.setRegionScopeId(f.getIntegralTag2());
+		    userGroup.setRegionScopeId(group.getIntegralTag2());
 		    userGroup.setMemberRole(Role.ResourceUser);
 		    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		    this.userProvider.createUserGroup(userGroup);
@@ -404,20 +417,12 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public FamilyDTO getOwningFamilyById(Long familyId) {
         User user = UserContext.current().getUser();
-        Long addressId = user.getAddressId();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
+        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
         
-        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
-        Family f = self.findFamilyByAddressId(addressId);
-        if(f == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                       "Invalid addressId parameter");
-        if(f.getId().longValue() != familyId.longValue())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter,user not in family");
+        if(m == null)
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+                    "User not in family");
         
         final FamilyDTO[] results = new FamilyDTO[1];
         List<Long> familyIds = new ArrayList<Long>();
@@ -440,7 +445,8 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group != null){
 
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatar(parserUri(family.getAvatar(),"Family",group.getCreatorUid()));
+                family.setAvatarUrl((parserUri(group.getAvatar(),"Family",group.getCreatorUid())));
+                family.setAvatarUri(group.getAvatar());
                 family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
                 Community community = this.communityProvider.findCommunityById(communityId);
@@ -462,6 +468,11 @@ public class FamilyProviderImpl implements FamilyProvider {
                 if(address != null){
                     family.setBuildingName(address.getBuildingName());
                     family.setApartmentName(address.getApartmentName());
+                    family.setAddressStatus(address.getStatus());
+                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
+                                    address.getBuildingName(), address.getApartmentName());
+                    family.setDisplayName(addrStr);
+                    family.setAddress(addrStr);
                 }
                 familyList.add(family);
             }
@@ -474,6 +485,13 @@ public class FamilyProviderImpl implements FamilyProvider {
     public List<FamilyDTO> getUserOwningFamilies() {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
+       
+        return getUserFamiliesByUserId(userId);
+    }
+    
+    @Override
+    public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
+        
         List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
         
         if(list == null || list.isEmpty())
@@ -483,7 +501,6 @@ public class FamilyProviderImpl implements FamilyProvider {
             familyIds.add(u.getGroupId());
         }
        return getUserOwningFamiliesByIds(familyIds, userId);
-       
     }
 
     @Override
@@ -491,14 +508,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
@@ -523,11 +533,8 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public FamilyDTO getFamilyById(Long familyId) {
 
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
+        
         FamilyDTO family = null;
         if(group != null){
             family = ConvertHelper.convert(group,FamilyDTO.class);
@@ -550,14 +557,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        if(familyId == null || memberUid == null)
+        if(memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId or memberUid parameter");
-        //剔除别人，是否保留历史??
+                    "Invalid memberUid parameter");
+        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
+        
         if(memberUid.longValue() == userId)
             throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_REVOKE_SELF, 
                     "Invalid memberUid parameter,can not revoke self");
@@ -582,14 +587,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        if(familyId == null || memberUid == null)
+        if(memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId or memberUid parameter");
+                    "Invalid memberUid parameter");
         
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter.");
+        
         //家庭成员拒绝
         if(memberUid != userId && operatorRole == 0){
             GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
@@ -599,8 +602,6 @@ public class FamilyProviderImpl implements FamilyProvider {
                         "User status is not active.");
             }
         }
-        
-        
         
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         
@@ -619,23 +620,20 @@ public class FamilyProviderImpl implements FamilyProvider {
     public void approveMember(Long familyId, Long memberUid) {
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        if(familyId == null || memberUid == null)
+        if(memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId or memberUid parameter");
-        
+                    "Invalid memberUid parameter");
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null){
-            LOGGER.error("Invalid familyId parameter,family is not found.familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter,family is not found.");
-        }
-        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
-                EntityType.USER.getCode(), userId);
-        if(currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
-            LOGGER.error("The status of user in family invalid.userId=" + userId);
-            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_STATUS_INVALID, 
-                    "The status of user in family invalid.");
-        }
+        
+        long startTime = System.currentTimeMillis();
+
+//        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
+//                EntityType.USER.getCode(), userId);
+//        if(currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
+//            LOGGER.error("The status of user in family invalid.userId=" + userId);
+//            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_STATUS_INVALID, 
+//                    "The status of user in family invalid.");
+//        }
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), memberUid);
@@ -666,21 +664,48 @@ public class FamilyProviderImpl implements FamilyProvider {
             
         });
         
-        if(flag)
+        if(flag){
+            setCurrentFamilyAfterApproval(memberUid,familyId,0);
+            //??发送更新命令
+            
+            //通知小区用户有新用户入住
+            
+            //通知通讯录好友
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Approve family elapse=" + (endTime - startTime));
             return;
+        }
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Unable to save into database, SQL exception or storage full?");
-        //??发送更新命令
+        
+        
+    }
+    private void setCurrentFamilyAfterApproval(long userId, long familyId, int status){
+        //set with first pass
+        //after delete random set one if exists
+        List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
+        if(list != null && !list.isEmpty()){
+            if(status == 0){
+                list = list.stream().filter((UserGroup u) -> {
+                   return u.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode();
+                }).collect(Collectors.toList());
+                if(list.size() == 1){
+                    updateUserContext(userId, familyId);
+                }
+            }
+            else {
+                updateUserContext(userId, list.get(0).getGroupId());
+            }
+            
+        }else {
+            updateUserContext(userId, familyId);
+        }
     }
 
     @Override
     public List<FamilyMemberDTO> listOwningFamilyMembers(Long familyId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
@@ -702,7 +727,15 @@ public class FamilyProviderImpl implements FamilyProvider {
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
                 f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatar(parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid()));
+                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid())));
+                f.setMemberAvatarUri(groupMember.getMemberAvatar());
+                List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(groupMember.getMemberId());
+                userIdentifiers.forEach((u) ->{
+                   if(u.getIdentifierType().byteValue() == 0){
+                       f.setCellPhone(u.getIdentifierToken());
+                   }
+                });
+                
                 results.add(f);
             }
         });
@@ -716,12 +749,25 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(familyId == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid familyId parameter");
+        updateUserContext(userId,familyId);
+    }
+    
+    private void updateUserContext(long userId, long familyId){
+        
         User u = this.userProvider.findUserById(userId);
-        Address address = getAddressByFamilyId(familyId);
-        if(address != null){
-            u.setAddressId(address.getId());
-            u.setAddress(address.getAddress());
+        if(familyId != 0){
+            Address address = getAddressByFamilyId(familyId);
+            if(address != null){
+                u.setAddressId(address.getId());
+                u.setAddress(address.getAddress());
+                u.setCommunityId(address.getCommunityId());
+            }
         }
+        else {
+            u.setAddressId(0L);
+            u.setAddress(null);
+        }
+       
         this.userProvider.updateUser(u);
     }
     
@@ -780,16 +826,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null){
-            LOGGER.error("Invalid familyId parameter,family is not found,familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        }
 
         if(pageOffset == null){
             LOGGER.warn("Invalid pageOffset parameter,pageOffset=" + pageOffset);
@@ -825,7 +862,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                         .fetch().map((r) -> {
                            FamilyMembershipRequestDTO member = new FamilyMembershipRequestDTO();
                            member.setFamilyId(familyId);
-                           member.setFamilyAvatar(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
+                           member.setFamilyAvatarUrl(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
+                           member.setFamilyAvatarUri(group.getAvatar());
                            member.setFamilyName(group.getName());
                            member.setRequestorUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                            member.setRequestorAvatar(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR),"User",r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
@@ -845,28 +883,19 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public List<NeighborUserDTO> listNeighborUsers(Long familyId ,Long pageOffset) {
         User user = UserContext.current().getUser();
-        if(user.getAddressId() == null || user.getAddressId() == 0){
-            LOGGER.error("User has not address.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "User has not address.");
-        }
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
+        Group group = this.groupProvider.findGroupById(familyId);
         
-        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
-        Family family = self.findFamilyByAddressId(user.getAddressId());
-        if(family == null || family.getId().longValue() != familyId){
-            LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + familyId);
+        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
+        
+        if(member == null || member.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode())
             throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "Invalid familyId parameter,user not in family.");
-        }
+                    "User not in family");
         
         List<Family> familyList = new ArrayList<Family>();
-        long communityId = family.getCommunityId();
+        long communityId = group.getIntegralTag2();
         List<NeighborUserDetailDTO> userDetailList = new ArrayList<NeighborUserDetailDTO>();
-        Address myaddress = this.addressProvider.findAddressById(user.getAddressId());;
+        Address myaddress = this.addressProvider.findAddressById(group.getIntegralTag1());
         
         long startTime = System.currentTimeMillis();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
@@ -876,7 +905,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                         .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
                             //排除自己
-                            if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != user.getAddressId())
+                            if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != group.getIntegralTag1())
                                 familyList.add(ConvertHelper.convert(r,Family.class));
                             return null;
                         });
@@ -884,7 +913,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     return true;
                 });
         
-        familyList.parallelStream().forEach((f) ->{
+        familyList.stream().forEach((f) ->{
             if(f == null) return;
             
             Address address = this.addressProvider.findAddressById(f.getAddressId());
@@ -900,7 +929,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             User u = this.userProvider.findUserById(m.getMemberId());
                             n.setUserId(u.getId());
                             n.setUserName(m.getMemberNickName());
-                            n.setUserAvatar(parserUri(m.getMemberAvatar(),"User",u.getId()));
+                            n.setUserAvatarUrl(parserUri(m.getMemberAvatar(),"User",u.getId()));
+                            n.setUserAvatarUri(m.getMemberAvatar());
                             n.setUserStatusLine(u.getStatusLine());
                             n.setBuildingName(address.getBuildingName());
                             n.setApartmentFloor(address.getApartmentFloor());
@@ -939,21 +969,21 @@ public class FamilyProviderImpl implements FamilyProvider {
                 user.setNeighborhoodRelation((byte) 0);
             results.add(user);
         }
-        
-        final int pageSize = this.configurationProvider.getIntValue("pagination.page.size", 
-                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
-        int totalCount = results == null ? 0 : results.size();
-        int totalPage = totalCount / pageSize;
-        if ((totalCount % pageSize) > 0)
-        {
-            totalPage++;
-        }
-        int currentPage = (int) pageOffset;
-        if(pageOffset <= totalPage){
-            //sortNeighborUser(results);
-            int endIndex = Math.min(results.size(), currentPage*pageSize);
-            results = results.subList((currentPage-1)*pageSize,endIndex);
-        }
+        //屏蔽分页
+//        final int pageSize = this.configurationProvider.getIntValue("pagination.page.size", 
+//                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+//        int totalCount = results == null ? 0 : results.size();
+//        int totalPage = totalCount / pageSize;
+//        if ((totalCount % pageSize) > 0)
+//        {
+//            totalPage++;
+//        }
+//        int currentPage = (int) pageOffset;
+//        if(pageOffset <= totalPage){
+//            //sortNeighborUser(results);
+//            int endIndex = Math.min(results.size(), currentPage*pageSize);
+//            results = results.subList((currentPage-1)*pageSize,endIndex);
+//        }
         long endTime = System.currentTimeMillis();
         LOGGER.info("Process neighbor user,elapse=" + (endTime - startTime));
         return results;
@@ -963,30 +993,21 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public List<NeighborUserDTO> listNearbyNeighborUsers(Long familyId ,Double longitude, Double latitude,Long pageOffset) {
         
+        User user = UserContext.current().getUser();
         if(latitude == null || longitude == null){
             LOGGER.error("Invalid parameter.latitude or longitude is null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter,latitude or longitude is null.");
         }
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
         
-        User user = UserContext.current().getUser();
-        if(user.getAddressId() == null || user.getAddressId() == 0){
-            LOGGER.error("User has not address.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "User has not address.");
-        }
-        FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
-        Family family = self.findFamilyByAddressId(user.getAddressId());
-        if(family == null || (family != null && family.getId().longValue() != familyId.longValue())){
-            LOGGER.error("Invalid familyId parameter,user not in family.familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter,user not in family.");
-        }
+        Group group = this.groupProvider.findGroupById(familyId);
+        
+        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
+        if(m == null)
+            throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+                    "User not in family");
             
-        long communityId = family.getCommunityId();
+        long communityId = group.getIntegralTag2();
         List<Long> userIds = new ArrayList<Long>();
         List<NeighborUserDTO> results = new ArrayList<NeighborUserDTO>();
         
@@ -1003,7 +1024,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                         });
                     
                     if(userIds.size() > 0){
-                        String geoHash = GeoHashUtils.encode(longitude, latitude);
+                        String geoHash = GeoHashUtils.encode(longitude, latitude).substring(0, 6);
                         String likeVal = geoHash + "%";
                         context.selectDistinct(Tables.EH_USERS.ID,Tables.EH_USERS.STATUS_LINE,Tables.EH_USERS.ACCOUNT_NAME
                                 ,Tables.EH_USERS.AVATAR,Tables.EH_USER_LOCATIONS.LATITUDE,Tables.EH_USER_LOCATIONS.LONGITUDE)
@@ -1018,7 +1039,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             n.setUserId(r.getValue(Tables.EH_USERS.ID));
                             n.setUserStatusLine(r.getValue(Tables.EH_USERS.STATUS_LINE));
                             n.setUserName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
-                            n.setUserAvatar(parserUri(r.getValue(Tables.EH_USERS.AVATAR),"User",r.getValue(Tables.EH_USERS.ID)));
+                            n.setUserAvatarUrl(parserUri(r.getValue(Tables.EH_USERS.AVATAR),"User",r.getValue(Tables.EH_USERS.ID)));
+                            n.setUserAvatarUri(r.getValue(Tables.EH_USERS.AVATAR));
                             //计算距离
                             double lat = r.getValue(Tables.EH_USER_LOCATIONS.LATITUDE);
                             double lon = r.getValue(Tables.EH_USER_LOCATIONS.LONGITUDE);
@@ -1080,15 +1102,12 @@ public class FamilyProviderImpl implements FamilyProvider {
     }
 
     @Override
-    public FamilyDTO findFamilyByAddressId(FindFamilyByAddressIdCommand cmd) {
-        if(cmd.getAddressId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid addressId parameter.");
-        }
+    public FamilyDTO getFamilyDetailByAddressId(Long addressId) {
+        if(addressId == null) return null;
         User user = UserContext.current().getUser();
 
         FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
-        Family family = self.findFamilyByAddressId(cmd.getAddressId());
+        Family family = self.findFamilyByAddressId(addressId);
         if(family == null)
             return null;
         
@@ -1102,8 +1121,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(m != null){
             familyDTO.setMemberUid(m.getMemberId());
             familyDTO.setMemberNickName(m.getMemberNickName());
-            familyDTO.setMemberAvatar(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
+            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
+            familyDTO.setMemberAvatarUri(m.getMemberAvatar());
             familyDTO.setMembershipStatus(m.getMemberStatus());
+            Community community = communityProvider.findCommunityById(family.getCommunityId());
+            familyDTO.setCommunityName(community == null ? null : community.getName());
+            
         }
         return familyDTO;
     }
@@ -1173,4 +1196,116 @@ public class FamilyProviderImpl implements FamilyProvider {
         return null;
 
     }
+    
+    public List<GroupMember> listCommunityFamilyMember(Long communityId){
+        if(communityId == null){
+            LOGGER.error("Invalid communityId parameter.communityId=" + communityId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId parameter.");
+        }
+        Community community = this.communityProvider.findCommunityById(communityId);
+        if(community == null){
+            LOGGER.error("Community is not found.communityId=" + communityId);
+        }
+        List<Group> listGroup = listCommunityFamily(communityId);
+        if(listGroup == null || listGroup.isEmpty()) return null;
+        List<GroupMember> results = new ArrayList<GroupMember>();
+        
+        for(Group group : listGroup){
+            List<GroupMember> groupMembers = findGroupMemberByGroupId(group.getId());
+            if(groupMembers != null && !groupMembers.isEmpty())
+                results.addAll(groupMembers);
+        }
+        return null;
+    }
+    
+    public List<GroupMember> findGroupMemberByGroupId(Long groupId){
+        List<GroupMember> groupMembers = this.groupProvider.findGroupMemberByGroupId(groupId);
+        groupMembers = groupMembers.stream().filter((GroupMember m) ->{
+            if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode())
+                return true;
+            return false;
+                
+        }).collect(Collectors.toList());
+        return groupMembers;
+    }
+    
+    public List<Group> listCommunityFamily(Long communityId){
+        List<Group> groupList = new ArrayList<Group>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+            groupList, (DSLContext context, Object reducingContext) -> {
+                List<Group> list = context.select().from(Tables.EH_GROUPS)
+                    .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
+                    .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                    .fetch().map((r) -> {
+                        return ConvertHelper.convert(r, Group.class);
+                    });
+
+                if (list != null && !list.isEmpty()) {
+                    groupList.addAll(list);
+                }
+
+                return true;
+            });
+        
+        return groupList;
+    }
+    
+    @Override
+    public int countUserByCommunityId(long communityId){
+        final Integer[] count = new Integer[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+                null, (DSLContext context, Object reducingContext) -> {
+                    Integer c = context.selectCount().from(Tables.EH_USER_GROUPS)
+                        .where(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
+                        .and(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
+                        .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                        .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+                        .fetchOne(0,Integer.class);
+                    count[0] = c;
+                    return true;
+                });
+        return count[0];
+    }
+    
+    @Override
+    public int countFamiliesByCommunityId(long communityId){
+        final Integer[] count = new Integer[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+                null, (DSLContext context, Object reducingContext) -> {
+                    Integer c = context.selectCount().from(Tables.EH_GROUPS)
+                        .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
+                        .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+                        .and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()))
+                        .fetchOne(0,Integer.class);
+                    count[0] = c;
+                    return true;
+                });
+        return count[0];
+    }
+
+    @Override
+    public boolean checkParamIsValid(Byte type, Long id) {
+        if(id == null || type == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id or type parameter");
+        if(type.byteValue() != ParamType.FAMILY.getCode() && type.byteValue() != ParamType.COMMUNITY.getCode())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+        
+        if(type == ParamType.FAMILY.getCode()){
+            Group group = this.groupProvider.findGroupById(id);
+            if(group == null)
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                           "Invalid familyId parameter");
+            return true;
+        }
+        if(type == ParamType.COMMUNITY.getCode()){
+            //TODO
+            
+        }
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                "Invalid id or type parameter");
+    }
+
 }

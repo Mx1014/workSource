@@ -1,31 +1,26 @@
 // @formatter:off
 package com.everhomes.family;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>familyId: 家庭Id</li>
+ * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
+ * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>memberUid: 成员Id</li>
  * <li>reason: 拒绝原因（可选）</li>
  * <li>operatorRole: 操作者角色</li>
  * </ul>
  */
-public class RejectMemberCommand {
-    private Long familyId;
+public class RejectMemberCommand extends BaseCommand{
+    @NotNull
     private Long memberUid;
     private String reason;
     private Byte operatorRole;
     
     public RejectMemberCommand() {
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
     }
     
     public Long getMemberUid() {

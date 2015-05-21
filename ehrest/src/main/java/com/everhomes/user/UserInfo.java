@@ -12,7 +12,8 @@ import com.everhomes.util.StringHelper;
  *         <li>id:用户id</li>
  *         <li>accountName:用户名</li>
  *         <li>nickName:用户昵称</li>
- *         <li>avatar:用户头像</li>
+ *         <li>avatarUrl:用户头像url</li>
+ *         <li>avatarUri:用户头像url</li>
  *         <li>statusLine:用户状态</li>
  *         <li>gender:用户性别.0代表未知，1为男性，2为女性</li>
  *         <li>birthday:用户生日</li>
@@ -34,10 +35,11 @@ import com.everhomes.util.StringHelper;
  *         </ul>
  **/
 public class UserInfo {
+    
     private Long id;
     private String accountName;
     private String nickName;
-    private String avatar;
+    private String avatarUrl;
     private String statusLine;
     private Byte gender;
     private String birthday;
@@ -54,6 +56,7 @@ public class UserInfo {
     private Long regionId;
     private String regionName;
     private String regionPath;
+    private String avatarUri;
 
     @ItemType(String.class)
     private List<String> phones;
@@ -88,12 +91,12 @@ public class UserInfo {
         this.nickName = nickName;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getStatusLine() {
@@ -238,6 +241,14 @@ public class UserInfo {
 
     public void setRegionPath(String regionPath) {
         this.regionPath = regionPath;
+    }
+
+    public String getAvatarUri() {
+        return avatarUri;
+    }
+
+    public void setAvatarUri(String avatarUri) {
+        this.avatarUri = avatarUri;
     }
 
     @Override

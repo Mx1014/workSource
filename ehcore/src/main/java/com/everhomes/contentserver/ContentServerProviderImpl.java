@@ -66,7 +66,7 @@ public class ContentServerProviderImpl implements ContentServerProvider {
         return resources;
     }
 
-    @Cacheable(value = "ContentServerResource", key = "#md5")
+    @Cacheable(value = "ContentServerResource", key = "#md5", unless = "#result == null")
     @Override
     public ContentServerResource findByMD5(String md5) {
         ContentServerResource[] resources = new ContentServerResource[1];
@@ -83,7 +83,7 @@ public class ContentServerProviderImpl implements ContentServerProvider {
         return resources[0];
     }
 
-    @Cacheable(value = "findByResourceId", key = "#resourceId")
+    @Cacheable(value = "findByResourceId", key = "#resourceId", unless = "#result == null")
     @Override
     public ContentServerResource findByResourceId(String resourceId) {
         ContentServerResource[] resources = new ContentServerResource[1];
@@ -124,11 +124,11 @@ public class ContentServerProviderImpl implements ContentServerProvider {
 
     }
 
-    @Cacheable(value = "findByUidAndMD5", key = "{#uid,#md5}")
+    @Cacheable(value = "findByUidAndMD5", key = "{#uid,#md5}", unless = "#result == null")
     @Override
     public ContentServerResource findByUidAndMD5(Long uid, String md5) {
         ContentServerResource[] resources = new ContentServerResource[1];
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhContentServerResources.class), null,(context, object) -> {
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhContentServerResources.class),null,(context, object) -> {
                     context.select().from(Tables.EH_CONTENT_SERVER_RESOURCES)
                             .where(Tables.EH_CONTENT_SERVER_RESOURCES.OWNER_ID.eq(uid))
                             .and(Tables.EH_CONTENT_SERVER_RESOURCES.RESOURCE_MD5.eq(md5)).fetch().forEach(r -> {
@@ -144,12 +144,15 @@ public class ContentServerProviderImpl implements ContentServerProvider {
 
     @Override
     public void deleteByUidAndResourceId(Long uid, String resourceId) {
-        dbProvider.mapReduce(AccessSpec.readWriteWith(EhContentServerResources.class), null, (context,obj)->{
-            context.delete(Tables.EH_CONTENT_SERVER_RESOURCES).
-                where(Tables.EH_CONTENT_SERVER_RESOURCES.OWNER_ID.eq(uid)).
-                and(Tables.EH_CONTENT_SERVER_RESOURCES.RESOURCE_ID.eq(resourceId)).execute();
-            return true;
-        });
+        dbProvider.mapReduce(
+                AccessSpec.readWriteWith(EhContentServerResources.class),
+                null,
+                (context, obj) -> {
+                    context.delete(Tables.EH_CONTENT_SERVER_RESOURCES)
+                            .where(Tables.EH_CONTENT_SERVER_RESOURCES.OWNER_ID.eq(uid))
+                            .and(Tables.EH_CONTENT_SERVER_RESOURCES.RESOURCE_ID.eq(resourceId)).execute();
+                    return true;
+                });
 
     }
 
@@ -175,7 +178,7 @@ public class ContentServerProviderImpl implements ContentServerProvider {
     @Override
     public void cleanAll(long serverId) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Null;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -19,6 +20,7 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
+import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -39,10 +41,12 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
@@ -84,6 +88,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private UserProvider userProvide;
+    
+    @Autowired
+    private CommunitySearcher communitySearcher;
     
     @PostConstruct
     public void setup() {
@@ -178,8 +185,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
         // TODO, return all communities only to test our REST response for now
         
-        String geoHash = GeoHashUtils.encode(cmd.getLatigtue(), cmd.getLongitude());
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(geoHash.substring(0, 5));
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude());
         List<Long> communityIds = getAllCommunityIds(pointList);
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -363,6 +369,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
                     .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                    .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                     .fetch().map((r) -> {
                         results.add(ConvertHelper.convert(r, Address.class));
                         return null;
@@ -508,6 +515,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         
         return new Tuple<>(ErrorCodes.SUCCESS, results);
     }
+    
 
     private String joinAddrStr(String buildingName, String apartName){
         boolean isFirst = true;
@@ -573,6 +581,48 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             return apartmentName.substring(0, apartmentName.length() - 2);
         }
         return null;
+    }
+
+    @Override
+    public List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd) {
+        if(cmd.getKeyword() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid keyword paramter.");
+        }
+        if(cmd.getCityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid cityId paramter.");
+        }
+        int pageNum = cmd.getPageNum() == null ? 1: cmd.getPageNum();
+        final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        
+        return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(),pageNum , pageSize);
+    }
+
+    @Override
+    public Tuple<Integer, List<ApartmentDTO>> listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId, buildingName parameter");
+        
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, (long)pageSize);
+        
+        List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(), 
+                cmd.getBuildingName() , offset , pageSize);
+        list.stream().map((r) ->{
+            Family family = this.familyProvider.findFamilyByAddressId(r.getAddressId());
+            if(family != null && family.getMemberCount() > 0)
+                r.setLivingStatus(AddressLivingStatus.LIVINGSELF.getCode());
+            results.add(r);
+            return null;
+        }).collect(Collectors.toList());
+        
+        return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
 
 }

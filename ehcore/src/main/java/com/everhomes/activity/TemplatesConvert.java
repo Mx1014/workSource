@@ -11,7 +11,6 @@ public class TemplatesConvert {
         Matcher m = match.matcher(template);
         while (m.find()) {
             String name = m.group(1);
-            System.out.println(name);
             template = template.replace(String.format("${%s}", name), getValue(variables, name, ""));
         }
         return template;

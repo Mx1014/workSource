@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.family;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindFamilyByAddressIdCommand {
+    @NotNull
     private Long addressId;
 
     public Long getAddressId() {

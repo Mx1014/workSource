@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communitId: 小区Id</li>
+ * <li>communityId: 小区Id</li>
  * <li>keyword: 查询关键字</li>
  * </ul>
  */

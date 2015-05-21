@@ -117,13 +117,31 @@ public class RegionController extends ControllerBase {
     @RestReturn(value=RegionDTO.class, collection=true)
     public RestResponse listRegionByKeyword(@Valid ListRegionCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
+        if(cmd.getSortBy() == null)
+            cmd.setSortBy("");
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
-        @SuppressWarnings("unchecked")
         List<Region> entityResultList = this.regionProvider.listRegionByKeyword(cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword());
+        
+        List<RegionDTO> dtoResultList = entityResultList.stream() 
+                .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
+                .collect(Collectors.toList());
+        return new RestResponse(dtoResultList);
+    }
+    
+    /**
+     * <b>URL: /region/listActiveRegion</b>
+     * 查询热门区域列表（sope可选，不填默认查询城市）
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActiveRegion")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listActiveRegion(@Valid ListActiveRegionCommand cmd) {
+        
+        List<Region> entityResultList = this.regionProvider.listActiveRegion(RegionScope.fromCode(cmd.getScope()));
         
         List<RegionDTO> dtoResultList = entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })

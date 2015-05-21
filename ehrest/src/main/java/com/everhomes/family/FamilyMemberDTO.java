@@ -10,7 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>familyId: 家庭Id</li>
  * <li>memberUid: 家庭成员Id</li>
  * <li>memberName: 家庭成员名称</li>
- * <li>memberAvatar: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * <li>memberAvatarUri: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * <li>memberAvatarUrl: 家庭头像url</li>
+ * <li>cellPhone:用户电话号码</li>
  * </ul>
  */
 public class FamilyMemberDTO {
@@ -18,7 +20,9 @@ public class FamilyMemberDTO {
     private Long familyId;
     private Long memberUid;
     private String memberName;
-    private String memberAvatar;
+    private String memberAvatarUri;
+    private String memberAvatarUrl;
+    private String cellPhone;
     
     public FamilyMemberDTO() {
     }
@@ -54,15 +58,31 @@ public class FamilyMemberDTO {
     public void setMemberName(String memberName) {
         this.memberName = memberName;
     }
-
-    public String getMemberAvatar() {
-        return memberAvatar;
-    }
-
-    public void setMemberAvatar(String memberAvatar) {
-        this.memberAvatar = memberAvatar;
-    }
     
+    public String getMemberAvatarUri() {
+        return memberAvatarUri;
+    }
+
+    public void setMemberAvatarUri(String memberAvatarUri) {
+        this.memberAvatarUri = memberAvatarUri;
+    }
+
+    public String getMemberAvatarUrl() {
+        return memberAvatarUrl;
+    }
+
+    public void setMemberAvatarUrl(String memberAvatarUrl) {
+        this.memberAvatarUrl = memberAvatarUrl;
+    }
+
+    public String getCellPhone() {
+        return cellPhone;
+    }
+
+    public void setCellPhone(String cellPhone) {
+        this.cellPhone = cellPhone;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -55,20 +55,6 @@ public class EhForumAttachmentsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>store_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumAttachments> fetchByStoreType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS.STORE_TYPE, values);
-	}
-
-	/**
-	 * Fetch records that have <code>store_uri IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumAttachments> fetchByStoreUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS.STORE_URI, values);
-	}
-
-	/**
 	 * Fetch records that have <code>content_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumAttachments> fetchByContentType(java.lang.String... values) {

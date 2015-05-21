@@ -102,4 +102,11 @@ public class EhRegionsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>hot_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByHotFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.HOT_FLAG, values);
+	}
 }

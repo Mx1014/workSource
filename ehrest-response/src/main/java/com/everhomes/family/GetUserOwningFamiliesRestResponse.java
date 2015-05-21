@@ -2,22 +2,24 @@
 // generated at 2015-05-16 21:41:03
 package com.everhomes.family;
 
-import com.everhomes.rest.RestResponseBase;
+import java.util.List;
 
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.family.FamilyDTO;
 
 public class GetUserOwningFamiliesRestResponse extends RestResponseBase {
 
-    private FamilyDTO response;
+    private List<FamilyDTO> response;
 
     public GetUserOwningFamiliesRestResponse () {
     }
 
-    public FamilyDTO getResponse() {
+    public List<FamilyDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(FamilyDTO response) {
+    public void setResponse(List<FamilyDTO> response) {
         this.response = response;
     }
+
 }
