@@ -34,6 +34,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("db.master", "jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore")
             .withProperty("db.conn.pool", 8)
             .withProperty("db.tx.timeout", 600)
+            .withProperty("db.conn.borrow.timeout", 60)
             .withProperty("serialization.serializable", "EvhJsonSerializable")
             .withProperty("serialization.helper", "EvhJsonSerializationHelper")
             .withProperty("objc.header.ext", ".h")
