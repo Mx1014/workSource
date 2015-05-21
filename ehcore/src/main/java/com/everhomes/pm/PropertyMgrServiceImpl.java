@@ -504,9 +504,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
    		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Unable to find the community.");
     	}
-    	ApproveMemberCommand familyCmd = new ApproveMemberCommand();
-    	familyCmd.setFamilyId(cmd.getFamilyId());
-    	familyCmd.setMemberUid(cmd.getUserId());
+
     	familyProvider.approveMember(cmd.getFamilyId(),cmd.getUserId());
 		
 	}

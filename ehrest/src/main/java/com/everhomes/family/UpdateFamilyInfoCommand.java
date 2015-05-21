@@ -1,13 +1,13 @@
 // @formatter:off
 package com.everhomes.family;
 
-import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>familyId: 家庭Id</li>
+ * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
+ * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>familyName: 家庭名称</li>
  * <li>familyDescription: 家庭描述</li>
  * <li>familyAvatar: 家庭头像Id</li>
@@ -15,9 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberAvatar: 用户在家庭的头像Id</li>
  * </ul>
  */
-public class UpdateFamilyInfoCommand {
-    @NotNull
-    private Long familyId;
+public class UpdateFamilyInfoCommand extends BaseCommand{
     
     private String familyName;
     private String familyDescription;
@@ -28,15 +26,7 @@ public class UpdateFamilyInfoCommand {
     
     public UpdateFamilyInfoCommand() {
     }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
-    }
-
+    
     public String getFamilyName() {
         return familyName;
     }

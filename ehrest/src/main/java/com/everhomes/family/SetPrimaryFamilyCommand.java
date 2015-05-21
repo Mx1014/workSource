@@ -5,21 +5,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>familyId: 家庭Id</li>
+ * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
+ * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * </ul>
  */
-public class SetPrimaryFamilyCommand {
-    private Long familyId;
+public class SetPrimaryFamilyCommand extends BaseCommand{
 
     public SetPrimaryFamilyCommand() {
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
     }
     
     @Override

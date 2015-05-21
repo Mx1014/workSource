@@ -211,12 +211,27 @@ public class AddressController extends ControllerBase {
      * <p>根据关键字查询地址</p>
      */
     @RequestMapping("listAddressByKeyword")
-    @RestReturn(value=String.class)
+    @RestReturn(value=Address.class, collection=true)
     public RestResponse listAddressByKeyword(ListAddressByKeywordCommand cmd) {
         
         List<Address> results = this.addressService.listAddressByKeyword(cmd);
         RestResponse response =  new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /address/listApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询门牌列表</p>
+     */
+    @RequestMapping("listApartmentsByBuildingName")
+    @RestReturn(value=ApartmentDTO.class, collection=true)
+    public RestResponse listApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd) {
+        Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByBuildingName(cmd);
+        RestResponse response = new RestResponse(results.second());
+        
+        response.setErrorCode(results.first());
         response.setErrorDescription("OK");
         return response;
     }

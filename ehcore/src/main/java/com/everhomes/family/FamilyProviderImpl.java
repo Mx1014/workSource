@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -31,10 +32,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
 import com.everhomes.acl.Role;
-import com.everhomes.acl.RoleConstants;
 import com.everhomes.address.Address;
-import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
@@ -376,14 +376,11 @@ public class FamilyProviderImpl implements FamilyProvider {
     public void joinFamily(Long familyId) {
     	User user = UserContext.current().getUser();
     	long userId = user.getId();
-    	if(familyId == null)
-    	    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
+    	
+    	Group group = this.groupProvider.findGroupById(familyId);
+    	
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
-    		Group f = this.groupProvider.findGroupById(familyId);
-    		if(f == null)
-    			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-    	                    "Invalid familyId parameter");
+    		
     		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), userId);
     		if(m != null)
     			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -404,7 +401,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 		    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
 		    userGroup.setGroupId(familyId);
 		    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-		    userGroup.setRegionScopeId(f.getIntegralTag2());
+		    userGroup.setRegionScopeId(group.getIntegralTag2());
 		    userGroup.setMemberRole(Role.ResourceUser);
 		    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		    this.userProvider.createUserGroup(userGroup);
@@ -421,13 +418,6 @@ public class FamilyProviderImpl implements FamilyProvider {
     public FamilyDTO getOwningFamilyById(Long familyId) {
         User user = UserContext.current().getUser();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                       "Invalid familyId parameter");
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
         
         if(m == null)
@@ -517,14 +507,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
@@ -549,11 +532,8 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public FamilyDTO getFamilyById(Long familyId) {
 
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
+        
         FamilyDTO family = null;
         if(group != null){
             family = ConvertHelper.convert(group,FamilyDTO.class);
@@ -576,14 +556,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        if(familyId == null || memberUid == null)
+        if(memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId or memberUid parameter");
-        //剔除别人，是否保留历史??
+                    "Invalid memberUid parameter");
+        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
+        
         if(memberUid.longValue() == userId)
             throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_REVOKE_SELF, 
                     "Invalid memberUid parameter,can not revoke self");
@@ -608,14 +586,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        if(familyId == null || memberUid == null)
+        if(memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId or memberUid parameter");
+                    "Invalid memberUid parameter");
         
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter.");
+        
         //家庭成员拒绝
         if(memberUid != userId && operatorRole == 0){
             GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
@@ -643,16 +619,13 @@ public class FamilyProviderImpl implements FamilyProvider {
     public void approveMember(Long familyId, Long memberUid) {
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        if(familyId == null || memberUid == null)
+        if(memberUid == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId or memberUid parameter");
-        long startTime = System.currentTimeMillis();
+                    "Invalid memberUid parameter");
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null){
-            LOGGER.error("Invalid familyId parameter,family is not found.familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter,family is not found.");
-        }
+        
+        long startTime = System.currentTimeMillis();
+
 //        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
 //                EntityType.USER.getCode(), userId);
 //        if(currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
@@ -732,10 +705,6 @@ public class FamilyProviderImpl implements FamilyProvider {
     public List<FamilyMemberDTO> listOwningFamilyMembers(Long familyId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
@@ -855,16 +824,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null){
-            LOGGER.error("Invalid familyId parameter,family is not found,familyId=" + familyId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        }
 
         if(pageOffset == null){
             LOGGER.warn("Invalid pageOffset parameter,pageOffset=" + pageOffset);
@@ -921,14 +881,8 @@ public class FamilyProviderImpl implements FamilyProvider {
     public List<NeighborUserDTO> listNeighborUsers(Long familyId ,Long pageOffset) {
         User user = UserContext.current().getUser();
         
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                       "Invalid familyId parameter");
+        
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
         
         if(member == null || member.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode())
@@ -1035,23 +989,16 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public List<NeighborUserDTO> listNearbyNeighborUsers(Long familyId ,Double longitude, Double latitude,Long pageOffset) {
         
+        User user = UserContext.current().getUser();
         if(latitude == null || longitude == null){
             LOGGER.error("Invalid parameter.latitude or longitude is null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter,latitude or longitude is null.");
         }
-        if(familyId == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid familyId parameter");
-        
-        User user = UserContext.current().getUser();
         
         Group group = this.groupProvider.findGroupById(familyId);
-        if(group == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                       "Invalid familyId parameter");
-        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
         
+        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
         if(m == null)
             throw RuntimeErrorException.errorWith(FamilyProvideErrorCode.SCOPE, FamilyProvideErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in family");
@@ -1300,33 +1247,56 @@ public class FamilyProviderImpl implements FamilyProvider {
     
     @Override
     public int countUserByCommunityId(long communityId){
-        final Integer count = 0;
+        final Integer[] count = new Integer[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
                 null, (DSLContext context, Object reducingContext) -> {
-                    context.selectCount().from(Tables.EH_USER_GROUPS)
+                    Integer c = context.selectCount().from(Tables.EH_USER_GROUPS)
                         .where(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
                         .and(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
                         .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
                         .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
-                        .fetchOne(count,Integer.class);
+                        .fetchOne(0,Integer.class);
+                    count[0] = c;
                     return true;
                 });
-        return count;
+        return count[0];
     }
     
     @Override
     public int countFamiliesByCommunityId(long communityId){
-        final Integer count = 0;
+        final Integer[] count = new Integer[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
                 null, (DSLContext context, Object reducingContext) -> {
-                    context.selectCount().from(Tables.EH_GROUPS)
+                    Integer c = context.selectCount().from(Tables.EH_GROUPS)
                         .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
                         .and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()))
-                        .fetchOne(count,Integer.class);
+                        .fetchOne(0,Integer.class);
+                    count[0] = c;
                     return true;
                 });
-        return count;
+        return count[0];
+    }
+
+    @Override
+    public boolean checkParamIsValid(Byte type, Long id) {
+        if(id == null || type == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id or type parameter");
+        if(type.byteValue() != ParamType.FAMILY.getCode() && type.byteValue() != ParamType.COMMUNITY.getCode())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+        
+        if(type == ParamType.FAMILY.getCode()){
+            Group group = this.groupProvider.findGroupById(id);
+            if(group == null)
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                           "Invalid familyId parameter");
+        }
+        if(type == ParamType.COMMUNITY.getCode()){
+            //TODO
+        }
+        return true;
     }
 
 }

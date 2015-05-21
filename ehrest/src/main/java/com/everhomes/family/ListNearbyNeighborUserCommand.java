@@ -1,29 +1,24 @@
 // @formatter:off
 package com.everhomes.family;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
- * <li>familyId: 家庭Id</li>
- * <li>longitude: 用户当前经度</li>
+ * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
+ * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>latitude: 用户当前经度</li>
  * <li>pageOffset: 页码（可选）</li>
  * </ul>
  */
-public class ListNearbyNeighborUserCommand {
-    private Long familyId;
+public class ListNearbyNeighborUserCommand extends BaseCommand{
+    @NotNull
     private Double longitude;
+    @NotNull
     private Double latitude;
     private Long pageOffset;
 
     public ListNearbyNeighborUserCommand() {
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
     }
 
     public Double getLongitude() {

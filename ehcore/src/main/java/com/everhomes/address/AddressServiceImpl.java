@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Null;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -45,6 +46,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
@@ -596,6 +598,31 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
         return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(),pageNum , pageSize);
+    }
+
+    @Override
+    public Tuple<Integer, List<ApartmentDTO>> listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId, buildingName parameter");
+        
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, (long)pageSize);
+        
+        List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(), 
+                cmd.getBuildingName() , offset , pageSize);
+        list.stream().map((r) ->{
+            Family family = this.familyProvider.findFamilyByAddressId(r.getAddressId());
+            if(family != null && family.getMemberCount() > 0)
+                r.setLivingStatus(AddressLivingStatus.LIVINGSELF.getCode());
+            results.add(r);
+            return null;
+        }).collect(Collectors.toList());
+        
+        return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
 
 }

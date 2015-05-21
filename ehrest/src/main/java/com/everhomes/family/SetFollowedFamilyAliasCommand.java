@@ -5,22 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>familyId: 家庭Id</li>
+ * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
+ * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * </ul>
  */
-public class SetFollowedFamilyAliasCommand {
-    private Long familyId;
+public class SetFollowedFamilyAliasCommand extends BaseCommand{
     private String aliasName;
 
     public SetFollowedFamilyAliasCommand() {
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
     }
     
     public String getAliasName() {

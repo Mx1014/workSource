@@ -9,10 +9,11 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>communityId: 小区Id</li>
  * <li>buildingName: 楼栋号</li>
- * <li>keyword: 查询关键字</li>
+ * <li>pageOffset: 页码</li>
+ * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListApartmentByKeywordCommand {
+public class ListApartmentByBuildingNameCommand {
     @NotNull
     private Long communityId;
 
@@ -20,9 +21,11 @@ public class ListApartmentByKeywordCommand {
     private String buildingName;
     
   
-    private String keyword;
+    private Integer pageOffset;
+    
+    private Integer pageSize;
 
-    public ListApartmentByKeywordCommand() {
+    public ListApartmentByBuildingNameCommand() {
     }
 
     public Long getCommunityId() {
@@ -41,14 +44,23 @@ public class ListApartmentByKeywordCommand {
         this.buildingName = buildingName;
     }
 
-    public String getKeyword() {
-        return keyword;
+    
+    public Integer getPageOffset() {
+        return pageOffset;
     }
 
-    public void setKeyword(String keyword) {
-        this.keyword = keyword;
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
-    
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
