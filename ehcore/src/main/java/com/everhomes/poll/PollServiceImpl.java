@@ -198,7 +198,7 @@ public class PollServiceImpl implements PollService {
         try{
             BeanUtils.copyProperties(poll, dto);
         }catch(Exception e){
-            //skip
+            LOGGER.error("convert bean failed.error={}",e.getMessage());
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
