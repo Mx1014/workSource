@@ -321,6 +321,7 @@ public class RegionProviderImpl implements RegionProvider {
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
         Condition condition = Tables.EH_REGIONS.STATUS.eq(RegionAdminStatus.ACTIVE.getCode());
+        condition = condition.and(Tables.EH_REGIONS.HOT_FLAG.eq(RegionActiveStatus.ACTIVE.getCode()));
         
         if(scope != null)
             condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));

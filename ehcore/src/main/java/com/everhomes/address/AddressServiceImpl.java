@@ -19,6 +19,7 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
+import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -581,7 +582,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
 
     @Override
-    public List<String> searchCommunities(SearchCommunityCommand cmd) {
+    public List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd) {
         if(cmd.getKeyword() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid keyword paramter.");
@@ -590,11 +591,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid cityId paramter.");
         }
-        
+        int pageNum = cmd.getPageNum() == null ? 1: cmd.getPageNum();
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
-        return communitySearcher.search(cmd.getKeyword(), cmd.getCityId(), pageSize);
+        return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(),pageNum , pageSize);
     }
 
 }

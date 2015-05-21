@@ -24,6 +24,7 @@ import com.everhomes.family.ListNearbyNeighborUserCommand;
 import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserServiceErrorCode;
 import com.everhomes.util.ConvertHelper;
@@ -47,6 +48,8 @@ public class FamilyController extends ControllerBase {
 	
 	@Autowired
     private FamilyProvider familyProvider;
+	@Autowired
+	private CommunitySearcher searcher;
 	
 	/**
 	 * <b>URL: /family/findFamilyByKeyword</b>
@@ -90,7 +93,7 @@ public class FamilyController extends ControllerBase {
     public RestResponse findFamilyByAddressId(
         @Valid FindFamilyByAddressIdCommand cmd) {
         
-        FamilyDTO familyDTO = familyProvider.findFamilyByAddressId(cmd);
+        FamilyDTO familyDTO = familyProvider.getFamilyDetailByAddressId(cmd.getAddressId());
         RestResponse response = new RestResponse(familyDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -314,7 +317,7 @@ public class FamilyController extends ControllerBase {
     
 
     /**
-     * <b>URL: /address/listWaitApproveAddress</b>
+     * <b>URL: /family/listWaitApproveAddress</b>
      * <p>查询等待审核的地址列表</p>
      */
     @RequestMapping("listWaitApproveFamily")

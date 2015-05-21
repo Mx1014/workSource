@@ -22,11 +22,13 @@ import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.address.ListCommunityByKeywordCommand;
 import com.everhomes.address.ListNearbyCommunityCommand;
+import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.util.Tuple;
 
 @RestController
@@ -38,6 +40,8 @@ public class AddressController extends ControllerBase {
     private AddressService addressService;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    private CommunitySearcher searcher;
 
     /**
      * <b>URL: /address/suggestCommunity</b>
@@ -178,9 +182,9 @@ public class AddressController extends ControllerBase {
      * <p>根据关键字搜索小区</p>
      */
     @RequestMapping("searchCommunities")
-    @RestReturn(value=String.class)
+    @RestReturn(value=CommunityDoc.class, collection=true)
     public RestResponse searchCommunities(@Valid SearchCommunityCommand cmd) {
-        List<String> results = this.addressService.searchCommunities(cmd);
+        List<CommunityDoc> results = this.addressService.searchCommunities(cmd);
         RestResponse response =  new RestResponse(results);
 
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -188,6 +192,20 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/syncCommunities</b>
+     * <p>同步小区</p>
+     */
+    @RequestMapping("syncCommunities")
+    @RestReturn(value=String.class)
+    public RestResponse syncCommunities() {
+        searcher.syncDb();
+        RestResponse response =  new RestResponse();
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     /**
      * <b>URL: /address/listAddressByKeyword</b>
      * <p>根据关键字查询地址</p>
