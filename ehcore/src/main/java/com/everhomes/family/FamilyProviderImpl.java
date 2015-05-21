@@ -445,7 +445,8 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group != null){
 
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatar(parserUri(family.getAvatar(),"Family",group.getCreatorUid()));
+                family.setAvatarUrl((parserUri(group.getAvatar(),"Family",group.getCreatorUid())));
+                family.setAvatarUri(group.getAvatar());
                 family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
                 Community community = this.communityProvider.findCommunityById(communityId);
@@ -726,7 +727,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
                 f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatar(parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid()));
+                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid())));
+                f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(groupMember.getMemberId());
                 userIdentifiers.forEach((u) ->{
                    if(u.getIdentifierType().byteValue() == 0){
@@ -860,7 +862,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                         .fetch().map((r) -> {
                            FamilyMembershipRequestDTO member = new FamilyMembershipRequestDTO();
                            member.setFamilyId(familyId);
-                           member.setFamilyAvatar(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
+                           member.setFamilyAvatarUrl(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
+                           member.setFamilyAvatarUri(group.getAvatar());
                            member.setFamilyName(group.getName());
                            member.setRequestorUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                            member.setRequestorAvatar(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR),"User",r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
@@ -926,7 +929,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             User u = this.userProvider.findUserById(m.getMemberId());
                             n.setUserId(u.getId());
                             n.setUserName(m.getMemberNickName());
-                            n.setUserAvatar(parserUri(m.getMemberAvatar(),"User",u.getId()));
+                            n.setUserAvatarUrl(parserUri(m.getMemberAvatar(),"User",u.getId()));
+                            n.setUserAvatarUri(m.getMemberAvatar());
                             n.setUserStatusLine(u.getStatusLine());
                             n.setBuildingName(address.getBuildingName());
                             n.setApartmentFloor(address.getApartmentFloor());
@@ -1035,7 +1039,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             n.setUserId(r.getValue(Tables.EH_USERS.ID));
                             n.setUserStatusLine(r.getValue(Tables.EH_USERS.STATUS_LINE));
                             n.setUserName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
-                            n.setUserAvatar(parserUri(r.getValue(Tables.EH_USERS.AVATAR),"User",r.getValue(Tables.EH_USERS.ID)));
+                            n.setUserAvatarUrl(parserUri(r.getValue(Tables.EH_USERS.AVATAR),"User",r.getValue(Tables.EH_USERS.ID)));
+                            n.setUserAvatarUri(r.getValue(Tables.EH_USERS.AVATAR));
                             //计算距离
                             double lat = r.getValue(Tables.EH_USER_LOCATIONS.LATITUDE);
                             double lon = r.getValue(Tables.EH_USER_LOCATIONS.LONGITUDE);
@@ -1116,7 +1121,8 @@ public class FamilyProviderImpl implements FamilyProvider {
         if(m != null){
             familyDTO.setMemberUid(m.getMemberId());
             familyDTO.setMemberNickName(m.getMemberNickName());
-            familyDTO.setMemberAvatar(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
+            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
+            familyDTO.setMemberAvatarUri(m.getMemberAvatar());
             familyDTO.setMembershipStatus(m.getMemberStatus());
             Community community = communityProvider.findCommunityById(family.getCommunityId());
             familyDTO.setCommunityName(community == null ? null : community.getName());
@@ -1292,11 +1298,14 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group == null)
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                            "Invalid familyId parameter");
+            return true;
         }
         if(type == ParamType.COMMUNITY.getCode()){
             //TODO
+            
         }
-        return true;
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                "Invalid id or type parameter");
     }
 
 }

@@ -7,7 +7,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>userId: 邻居用户Id</li>
  * <li>userName: 邻居用户名称</li>
- * <li>userAvatar: 邻居用户头像Id</li>
+ * <li>userAvatarUri: 邻居用户头像Id</li>
+ * <li>userAvatarUrl: 邻居用户头像url</li>
  * <li>userStatusLine: 个性签名</li>
  * <li>neighborhoodRelation: 邻居关系0-未知、1-同层、2-同楼</li>
  * <li>distance: 邻居用户与自己的距离</li>
@@ -16,7 +17,8 @@ import com.everhomes.util.StringHelper;
 public class NeighborUserDTO {
     private Long userId;
     private String userName;
-    private String userAvatar;
+    private String userAvatarUri;
+    private String userAvatarUrl;
     private String userStatusLine;
     private Byte neighborhoodRelation;
     private Double distance;
@@ -40,12 +42,20 @@ public class NeighborUserDTO {
         this.userName = userName;
     }
 
-    public String getUserAvatar() {
-        return userAvatar;
+    public String getUserAvatarUri() {
+        return userAvatarUri;
     }
 
-    public void setUserAvatar(String userAvatar) {
-        this.userAvatar = userAvatar;
+    public void setUserAvatarUri(String userAvatarUri) {
+        this.userAvatarUri = userAvatarUri;
+    }
+
+    public String getUserAvatarUrl() {
+        return userAvatarUrl;
+    }
+
+    public void setUserAvatarUrl(String userAvatarUrl) {
+        this.userAvatarUrl = userAvatarUrl;
     }
 
     public String getUserStatusLine() {

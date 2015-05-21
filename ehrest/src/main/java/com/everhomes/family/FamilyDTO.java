@@ -11,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>id: 家庭Id</li>
  * <li>name: 家庭名称</li>
  * <li>displayName: 家庭显示名称，用于客户端显示</li>
- * <li>avatar: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * <li>avatarUri: 家庭头像Id，图片上传到ContentServer得到的ID</li>
+ * <li>avatarUri: 家庭头像url</li>
  * <li>description: 家庭描述</li>
  * <li>memberCount: 家庭成员数</li>
  * <li>address: 家庭所在地址详情</li>
@@ -26,18 +27,21 @@ import com.everhomes.util.StringHelper;
  * <li>adminStatus: 管理员状态0-非管理员，1-管理员</li>
  * <li>memberUid: 用户Id</li>
  * <li>memberNickName: 用户在家庭中的昵称</li>
- * <li>memberAvatar: 用户在家庭中的头像</li>
+ * <li>memberAvatarUri: 用户在家庭中的头像ID</li>
+ * <li>memberAvatarUrl: 用户在家庭中的头像url</li>
  * <li>addressId: 地址Id</li>
  * <li>buildingName: 家庭地址楼栋号</li>
  * <li>apartmentName: 家庭地址门牌号</li>
  * <li>addressStatus: 地址状态, {@link com.everhomes.address.AddressAdminStatus}</li>
+ * <li>proofResourceUrl: 存在该字段有值表名是加速审核的</li>
  * </ul>
  */
 public class FamilyDTO {
     private Long id;
     private String name;
     private String displayName;
-    private String avatar;
+    private String avatarUri;
+    private String avatarUrl;
     private String description;
     private Long memberCount;
     
@@ -55,7 +59,8 @@ public class FamilyDTO {
     
     private Long memberUid;
     private String memberNickName;
-    private String memberAvatar;
+    private String memberAvatarUri;
+    private String memberAvatarUrl;
     
     private Long addressId;
     private String buildingName;
@@ -91,12 +96,36 @@ public class FamilyDTO {
         this.displayName = displayName;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public String getAvatarUri() {
+        return avatarUri;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setAvatarUri(String avatarUri) {
+        this.avatarUri = avatarUri;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public String getMemberAvatarUri() {
+        return memberAvatarUri;
+    }
+
+    public void setMemberAvatarUri(String memberAvatarUri) {
+        this.memberAvatarUri = memberAvatarUri;
+    }
+
+    public String getMemberAvatarUrl() {
+        return memberAvatarUrl;
+    }
+
+    public void setMemberAvatarUrl(String memberAvatarUrl) {
+        this.memberAvatarUrl = memberAvatarUrl;
     }
 
     public String getDescription() {
@@ -201,14 +230,6 @@ public class FamilyDTO {
 
     public void setMemberNickName(String memberNickName) {
         this.memberNickName = memberNickName;
-    }
-
-    public String getMemberAvatar() {
-        return memberAvatar;
-    }
-
-    public void setMemberAvatar(String memberAvatar) {
-        this.memberAvatar = memberAvatar;
     }
 
     public Long getAddressId() {
