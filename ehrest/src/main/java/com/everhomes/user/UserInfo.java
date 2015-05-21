@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
  *         </ul>
  **/
 public class UserInfo {
+    
     private Long id;
     private String accountName;
     private String nickName;
