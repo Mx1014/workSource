@@ -89,7 +89,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         if (!userService.isValidLoginToken(login)) {
             LOGGER.error("invalid login token.auth failed");
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlida login token");
+                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlid login token");
         }
         String md5 = "";
         switch (request.getAccessType()) {

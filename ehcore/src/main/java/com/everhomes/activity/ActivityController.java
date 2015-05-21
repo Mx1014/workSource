@@ -91,8 +91,9 @@ public class ActivityController extends ControllerBase {
     }
     
     @RequestMapping("reject")
-    @RestReturn(ActivityDTO.class)
+    @RestReturn(String.class)
     public RestResponse reject(@Valid ActivityRejectCommand cmd){
-        return null;
+        activityService.rejectPost(cmd);
+        return new RestResponse("OK");
     }
 }

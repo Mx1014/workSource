@@ -22,8 +22,10 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.forum.PostContentType;
 import com.everhomes.group.GroupService;
 import com.everhomes.group.LeaveGroupCommand;
+import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.user.User;
@@ -113,8 +115,8 @@ public class ActivityServiceImpl implements ActivityService {
             comment.setForumId(post.getForumId());
             comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             comment.setCreatorUid(user.getId());
-            comment.setContentType("text");
-            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "auto comment");
+            comment.setContentType(PostContentType.TEXT.getCode());
+            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
 
             if (!StringUtils.isEmpty(template)) {
                 comment.setContent(template);
@@ -369,6 +371,7 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }, ""));
         post.setCreatorUid(uid);
+        post.setContent(PostContentType.TEXT.getCode());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         return post;
     }
@@ -432,10 +435,12 @@ public class ActivityServiceImpl implements ActivityService {
         }
         activityProvider.updateActivity(activity);
         if (activity.getGroupId() != null) {
-            LeaveGroupCommand leaveCmd = new LeaveGroupCommand();
-            leaveCmd.setGroupId(activity.getGroupId());
-            // leave via user
-            // groupService.leaveGroup(leaveCmd);
+            RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
+            rejectCmd.setGroupId(activity.getGroupId());
+            rejectCmd.setUserId(roster.getUid());
+            rejectCmd.setRejectText(cmd.getReason());
+            //reject to join group
+            groupService.rejectJoinGroupRequest(rejectCmd);
         }
     }
 }
