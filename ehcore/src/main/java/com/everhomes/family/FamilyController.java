@@ -260,22 +260,7 @@ public class FamilyController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /family/setPrimaryFamily</b>
-     * <p>设置常用家庭</p>
-     */
-    @RequestMapping("setPrimaryFamily")
-    @RestReturn(value=String.class)
-    public RestResponse setPrimaryFamily(@Valid SetPrimaryFamilyCommand cmd) {
-        
-        // ???
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * <b>URL: /family/updateFamilyInfo</b>
      * <p>更新家庭信息</p>
@@ -286,7 +271,7 @@ public class FamilyController extends ControllerBase {
         
         familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         this.familyProvider.updateFamilyInfo(cmd.getId(),cmd.getFamilyName(),cmd.getFamilyDescription()
-                ,cmd.getFamilyAvatar(),cmd.getMemberNickName(),cmd.getMemberAvatar());
+                ,cmd.getFamilyAvatarUri(),cmd.getMemberNickName(),cmd.getFamilyAvatarUri());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -344,6 +329,21 @@ public class FamilyController extends ControllerBase {
     }
     
     
+//    /**
+//     * <b>URL: /family/setPrimaryFamily</b>
+//     * <p>设置常用家庭</p>
+//     */
+//    @RequestMapping("setPrimaryFamily")
+//    @RestReturn(value=String.class)
+//    public RestResponse setPrimaryFamily(@Valid SetPrimaryFamilyCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
 //    /**
 //     * <b>URL: /family/follow</b>
 //     * <p>关注家庭</p>

@@ -12,7 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>address: 家庭详细地址</li>
  * <li>requestorUid: 申请加入家庭的用户Id</li>
  * <li>requestorName: 申请加入家庭的用户名称</li>
- * <li>requestorAvatar: 申请加入家庭的用户头像Id</li>
+ * <li>requestorAvatarUri: 申请加入家庭的用户头像Id</li>
+ * <li>requestorAvatarUrl: 申请加入家庭的用户头像url</li>
  * <li>requestingTime: 申请时间</li>
  * <li>requestorComment: 申请加入原因</li>
  * </ul>
@@ -21,7 +22,8 @@ public class FamilyMembershipRequestDTO {
     Long id;
     Long familyId;
     String familyName;
-    String familyAvatar;
+    String familyAvatarUri;
+    String familyAvatarUrl;
     String address;
     Long requestorUid;
     String requestorName;
@@ -56,12 +58,20 @@ public class FamilyMembershipRequestDTO {
         this.familyName = familyName;
     }
 
-    public String getFamilyAvatar() {
-        return familyAvatar;
+    public String getFamilyAvatarUri() {
+        return familyAvatarUri;
     }
 
-    public void setFamilyAvatar(String familyAvatar) {
-        this.familyAvatar = familyAvatar;
+    public void setFamilyAvatarUri(String familyAvatarUri) {
+        this.familyAvatarUri = familyAvatarUri;
+    }
+
+    public String getFamilyAvatarUrl() {
+        return familyAvatarUrl;
+    }
+
+    public void setFamilyAvatarUrl(String familyAvatarUrl) {
+        this.familyAvatarUrl = familyAvatarUrl;
     }
 
     public String getAddress() {

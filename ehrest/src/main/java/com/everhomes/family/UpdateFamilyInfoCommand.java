@@ -10,19 +10,23 @@ import com.everhomes.util.StringHelper;
  * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>familyName: 家庭名称</li>
  * <li>familyDescription: 家庭描述</li>
- * <li>familyAvatar: 家庭头像Id</li>
+ * <li>familyAvatarUri: 家庭头像Id</li>
+ * <li>familyAvatarUrl: 家庭头像url</li>
  * <li>memberNickName: 用户在家庭内的昵称</li>
- * <li>memberAvatar: 用户在家庭的头像Id</li>
+ * <li>memberAvatarUri: 用户在家庭的头像Id</li>
+ * <li>memberAvatarUrl: 用户在家庭的头像url</li>
  * </ul>
  */
 public class UpdateFamilyInfoCommand extends BaseCommand{
     
     private String familyName;
     private String familyDescription;
-    private String familyAvatar;
+    private String familyAvatarUri;
+    private String familyAvatarUrl;
     
     private String memberNickName;
-    private String memberAvatar;
+    private String memberAvatarUri;
+    private String memberAvatarUrl;
     
     public UpdateFamilyInfoCommand() {
     }
@@ -43,12 +47,20 @@ public class UpdateFamilyInfoCommand extends BaseCommand{
         this.familyDescription = familyDescription;
     }
 
-    public String getFamilyAvatar() {
-        return familyAvatar;
+    public String getFamilyAvatarUri() {
+        return familyAvatarUri;
     }
 
-    public void setFamilyAvatar(String familyAvatar) {
-        this.familyAvatar = familyAvatar;
+    public void setFamilyAvatarUri(String familyAvatarUri) {
+        this.familyAvatarUri = familyAvatarUri;
+    }
+
+    public String getFamilyAvatarUrl() {
+        return familyAvatarUrl;
+    }
+
+    public void setFamilyAvatarUrl(String familyAvatarUrl) {
+        this.familyAvatarUrl = familyAvatarUrl;
     }
 
     public String getMemberNickName() {
@@ -58,15 +70,23 @@ public class UpdateFamilyInfoCommand extends BaseCommand{
     public void setMemberNickName(String memberNickName) {
         this.memberNickName = memberNickName;
     }
-
-    public String getMemberAvatar() {
-        return memberAvatar;
-    }
-
-    public void setMemberAvatar(String memberAvatar) {
-        this.memberAvatar = memberAvatar;
-    }
     
+    public String getMemberAvatarUri() {
+        return memberAvatarUri;
+    }
+
+    public void setMemberAvatarUri(String memberAvatarUri) {
+        this.memberAvatarUri = memberAvatarUri;
+    }
+
+    public String getMemberAvatarUrl() {
+        return memberAvatarUrl;
+    }
+
+    public void setMemberAvatarUrl(String memberAvatarUrl) {
+        this.memberAvatarUrl = memberAvatarUrl;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

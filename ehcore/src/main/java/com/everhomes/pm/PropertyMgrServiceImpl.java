@@ -776,7 +776,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		dto.setFamilyId(member.getGroupId());
     		dto.setMemberUid(member.getMemberId());
     		dto.setMemberName(member.getMemberNickName());
-    		dto.setMemberAvatar(member.getMemberAvatar());
+    		dto.setMemberAvatarUri((member.getMemberAvatar()));
     		results.add(dto);
 		}
     	return results;
