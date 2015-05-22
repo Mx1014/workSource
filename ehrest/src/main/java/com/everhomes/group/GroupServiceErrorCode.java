@@ -9,4 +9,5 @@ public interface GroupServiceErrorCode {
     static final int ERROR_USER_IN_JOINING_GROUP_PROCESS = 10003;
     static final int ERROR_GROUP_MEMBER_NOT_EXIST = 10004;
     static final int ERROR_GROUP_MEMBER_NOT_IN_ACCEPT_STATE = 10005;
+    static final int ERROR_GROUP_INVITED_USER_NOT_FOUND = 10006;
 }

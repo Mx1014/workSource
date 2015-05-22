@@ -1,4 +1,6 @@
-curl -XPUT 'http://localhost:9200/everhomesv3/_mapping/community' -d '
+ELASTIC=127.0.0.1:9200
+
+curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
 {
     "community": {
         "properties": {

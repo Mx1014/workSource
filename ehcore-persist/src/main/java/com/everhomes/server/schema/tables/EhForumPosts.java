@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -1934864729;
+	private static final long serialVersionUID = 994320341;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -50,6 +50,11 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.creator_uid</code>. post creator uid
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "post creator uid");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.creator_tag</code>. post creator tag
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CREATOR_TAG = createField("creator_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "post creator tag");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.longitude</code>.

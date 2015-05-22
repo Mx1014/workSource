@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 121399587;
+	private static final long serialVersionUID = -1596488933;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
 	private java.lang.Long     forumId;
 	private java.lang.Long     parentPostId;
 	private java.lang.Long     creatorUid;
+	private java.lang.String   creatorTag;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
@@ -58,6 +59,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Long     forumId,
 		java.lang.Long     parentPostId,
 		java.lang.Long     creatorUid,
+		java.lang.String   creatorTag,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
@@ -95,6 +97,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.forumId = forumId;
 		this.parentPostId = parentPostId;
 		this.creatorUid = creatorUid;
+		this.creatorTag = creatorTag;
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.geohash = geohash;
@@ -166,6 +169,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setCreatorUid(java.lang.Long creatorUid) {
 		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.String getCreatorTag() {
+		return this.creatorTag;
+	}
+
+	public void setCreatorTag(java.lang.String creatorTag) {
+		this.creatorTag = creatorTag;
 	}
 
 	public java.lang.Double getLongitude() {

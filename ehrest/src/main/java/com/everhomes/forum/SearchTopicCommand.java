@@ -15,11 +15,14 @@ public class SearchTopicCommand {
     private Double longitude;
     private Double latitude;
     
-    // json encoded condition string
-    private String conditionJson;
+    private String queryString;
+    private Long forumId;
+    private Long contentCategory;
+    private Long actionCategory;
     
-    private Byte globalFlag;
-    private Long pageOffset;
+    private int searchFlag;
+    private Long nextAnchor;
+    
     private Long pageSize;
     
     public SearchTopicCommand() {
@@ -40,31 +43,7 @@ public class SearchTopicCommand {
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
-
-    public String getConditionJson() {
-        return conditionJson;
-    }
-
-    public void setConditionJson(String conditionJson) {
-        this.conditionJson = conditionJson;
-    }
-
-    public Byte getGlobalFlag() {
-        return globalFlag;
-    }
-
-    public void setGlobalFlag(Byte globalFlag) {
-        this.globalFlag = globalFlag;
-    }
-
-    public Long getPageOffset() {
-        return pageOffset;
-    }
-
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
-    }
-
+    
     public Long getPageSize() {
         return pageSize;
     }
@@ -72,4 +51,53 @@ public class SearchTopicCommand {
     public void setPageSize(Long pageSize) {
         this.pageSize = pageSize;
     }
+
+    public String getQueryString() {
+        return queryString;
+    }
+
+    public void setQueryString(String queryString) {
+        this.queryString = queryString;
+    }
+
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
+    }
+
+    public Long getContentCategory() {
+        return contentCategory;
+    }
+
+    public void setContentCategory(Long contentCategory) {
+        this.contentCategory = contentCategory;
+    }
+
+    public Long getActionCategory() {
+        return actionCategory;
+    }
+
+    public void setActionCategory(Long actionCategory) {
+        this.actionCategory = actionCategory;
+    }
+
+    public int getSearchFlag() {
+        return searchFlag;
+    }
+
+    public void setSearchFlag(int searchFlag) {
+        this.searchFlag = searchFlag;
+    }
+
+    public Long getNextAnchor() {
+        return nextAnchor;
+    }
+
+    public void setNextAnchor(Long nextAnchor) {
+        this.nextAnchor = nextAnchor;
+    }
+    
 }

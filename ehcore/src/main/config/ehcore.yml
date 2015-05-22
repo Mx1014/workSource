@@ -85,6 +85,8 @@ db:
     master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8
     conn:
         pool: 8
+        borrow:
+            timeout: 60
     tx:
         timeout: 600
         

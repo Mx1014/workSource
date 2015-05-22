@@ -26,15 +26,23 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rpc.HeartbeatPdu;
 import com.everhomes.rpc.PduFrame;
 import com.everhomes.rpc.client.RegisterConnectionRequestPdu;
+import com.everhomes.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rpc.server.ClientForwardPdu;
+import com.everhomes.user.AppIdStatusCommand;
+import com.everhomes.user.AppIdStatusResponse;
+import com.everhomes.user.AppIdStatusRestResponse;
+import com.everhomes.user.RegistedOkResponse;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.JsonAccessor;
 import com.everhomes.util.NamedHandler;
 import com.everhomes.util.NamedHandlerDispatcher;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -176,8 +184,20 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                 if(root != null) {
                     JsonAccessor accessor = new JsonAccessor(root);
                     int id = accessor.getAsInt("response.loginBorderId");
-                    if(borderId == id)
+                    if(borderId == id) {
                         registerSession(cmd.getLoginToken(), session);
+                            }
+                    
+                    PduFrame pdu = new PduFrame();
+                    RegistedOkResponse respPdu = new RegistedOkResponse();
+                    pdu.setPayload(respPdu);
+                    
+                    try {
+                        session.sendMessage(new TextMessage(pdu.toJson()));
+                    } catch (IOException e) {
+                        LOGGER.error("Send registedOk message error");
+                            }
+                    
                 } else {
                     LOGGER.error("Invalid REST call response");
                 }
@@ -196,6 +216,55 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         //if(LOGGER.isDebugEnabled())
         //    LOGGER.debug(String.format("Received heartbeat from client (%s), last receive tick on client is %d", 
         //        session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
+    }
+    
+    @NamedHandler(value="", byClass=AppIdStatusCommand.class)
+    private void handleAppIdStatusCommandPdu(WebSocketSession session, PduFrame frame) {
+        final AppIdStatusCommand cmd = frame.getPayload(AppIdStatusCommand.class);
+        Map<String, String> params = new HashMap<String, String>();
+        StringHelper.toStringMap(null, cmd, params);
+      
+        String token = null;
+        synchronized(this) {
+            token = sessionToTokenMap.get(session);
+            }
+        if(token == null || token.isEmpty()) {
+            LOGGER.info("invalid Session: " + session.getId());
+            return;
+            }
+        params.put("token", token);
+        
+        restCall("/user/appIdStatus", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+            @Override
+            public void onSuccess(ResponseEntity<String> result) {
+                LOGGER.info("REST call /user/appIdStatus result: " + result.getBody());
+                Gson gson = new Gson();
+                AppIdStatusRestResponse resp = gson.fromJson(result.getBody(), AppIdStatusRestResponse.class);
+                //Object respObj = StringHelper.fromJsonString(result.getBody(), AppIdStatusRestResponse.class);
+                //if(respObj == null) {
+                //    LOGGER.error("error for /user/appIdStatus");
+                //    return;
+                    //}
+                //AppIdStatusRestResponse resp = (AppIdStatusRestResponse) respObj;
+                
+                for(Long appId : resp.getResponse().getAppIds()) {
+                    PduFrame pdu = new PduFrame();
+                    StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
+                    pdu.setPayload(clientPdu);
+                    pdu.setAppId(appId);
+                    try {
+                        session.sendMessage(new TextMessage(pdu.toJson()));
+                    } catch (IOException e) {
+                        LOGGER.error("Session send error, appId= " + appId.toString() + ", "  + e.getMessage());
+                        }    
+                    }
+                }
+
+            @Override
+            public void onFailure(Throwable ex) {
+                LOGGER.info("Failed to make REST call /user/appIdStatus. exception: " + ex);
+                }
+        });
     }
     
     private void registerSession(String loginToken, WebSocketSession session) {
