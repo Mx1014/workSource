@@ -1,10 +1,10 @@
 // @formatter:off
-// generated at 2015-05-16 21:41:03
+// generated at 2015-05-21 22:00:49
 package com.everhomes.family;
 
-import java.util.List;
-
 import com.everhomes.rest.RestResponseBase;
+
+import java.util.List;
 import com.everhomes.family.FamilyDTO;
 
 public class GetUserOwningFamiliesRestResponse extends RestResponseBase {
@@ -21,5 +21,4 @@ public class GetUserOwningFamiliesRestResponse extends RestResponseBase {
     public void setResponse(List<FamilyDTO> response) {
         this.response = response;
     }
-
 }

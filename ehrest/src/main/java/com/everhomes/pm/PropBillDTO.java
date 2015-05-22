@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -40,6 +41,7 @@ public class PropBillDTO {
 	private Integer    notifyCount;
 	private Timestamp   notifyTime;
 	
+	@ItemType(PropBillItemDTO.class)
 	private List<PropBillItemDTO> itemList;
 	
     public PropBillDTO() {

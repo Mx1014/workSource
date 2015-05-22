@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-05-16 21:41:03
+// generated at 2015-05-21 22:00:49
 package com.everhomes.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.family.FamilyDTO;
+import com.everhomes.pm.ListPropMemberCommandResponse;
 
 public class GetUserOwningPropertiesRestResponse extends RestResponseBase {
 
-    private FamilyDTO response;
+    private ListPropMemberCommandResponse response;
 
     public GetUserOwningPropertiesRestResponse () {
     }
 
-    public FamilyDTO getResponse() {
+    public ListPropMemberCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(FamilyDTO response) {
+    public void setResponse(ListPropMemberCommandResponse response) {
         this.response = response;
     }
 }

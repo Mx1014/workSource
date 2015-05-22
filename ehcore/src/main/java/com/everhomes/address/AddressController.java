@@ -1,6 +1,7 @@
 package com.everhomes.address;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -29,6 +30,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 
 @RestController
@@ -211,11 +213,11 @@ public class AddressController extends ControllerBase {
      * <p>根据关键字查询地址</p>
      */
     @RequestMapping("listAddressByKeyword")
-    @RestReturn(value=Address.class, collection=true)
+    @RestReturn(value=AddressDTO.class, collection=true)
     public RestResponse listAddressByKeyword(ListAddressByKeywordCommand cmd) {
         
         List<Address> results = this.addressService.listAddressByKeyword(cmd);
-        RestResponse response =  new RestResponse(results);
+        RestResponse response =  new RestResponse(results.stream().map( (r) -> { return ConvertHelper.convert(r, AddressDTO.class); }).collect(Collectors.toList())) ;
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
