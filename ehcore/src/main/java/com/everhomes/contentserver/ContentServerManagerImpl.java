@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.user.LoginToken;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 
 @Component
 public class ContentServerManagerImpl implements ContentServerMananger {
@@ -26,6 +29,9 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     private ContentServerService contentServerService;
 
     @Autowired
+    private CoordinationProvider coordinationProvider;
+
+    @Autowired
     private UserService userService;
 
     @Override
@@ -36,18 +42,30 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             LOGGER.error("cannot find login information");
             throw new RuntimeErrorException("token message is invalid");
         }
-        ContentServerResource result = contentServerProvider.findByUidAndMD5(login.getUserId(), request.getMd5());
-
         ContentServer server = contentServerService.selectContentServer();
         if (server == null) {
             LOGGER.error("cannot find server.userId={}", login.getUserId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "cannot find server");
         }
-        if (result == null) {
-            result = createResource(server.getId(), login.getUserId(), request);
-            contentServerProvider.addResource(result);
+        ContentServerResource result = contentServerProvider.findByUidAndMD5(login.getUserId(), request.getMd5());
+        if (result != null) {
+            request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType()
+                    .name()));
+            request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+            return;
         }
+        //add transaction command
+        Tuple<ContentServerResource, Boolean> resource = coordinationProvider.getNamedLock(
+                CoordinationLocks.CREATE_RESOURCE.getCode()).enter(() -> {
+            ContentServerResource r = contentServerProvider.findByUidAndMD5(login.getUserId(), request.getMd5());
+            if (r == null) {
+                r = createResource(server.getId(), login.getUserId(), request);
+                contentServerProvider.addResource(r);
+            }
+            return r;
+        });
+        result = resource.first();
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
         request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
     }
@@ -89,7 +107,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         if (!userService.isValidLoginToken(login)) {
             LOGGER.error("invalid login token.auth failed");
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invlid login token");
+                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invalid login token");
         }
         String md5 = "";
         switch (request.getAccessType()) {
