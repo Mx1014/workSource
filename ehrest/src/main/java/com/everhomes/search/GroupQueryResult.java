@@ -2,8 +2,12 @@ package com.everhomes.search;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 public class GroupQueryResult {
     private Long pageAnchor;
+    
+    @ItemType(Long.class)
     private List<Long> ids;
    
     public Long getPageAnchor() {

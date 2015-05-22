@@ -1,10 +1,11 @@
 // @formatter:off
-// generated at 2015-05-16 21:41:03
+// generated at 2015-05-21 22:00:49
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
+import com.everhomes.address.ApartmentDTO;
 
 public class ListApartmentsByKeywordRestResponse extends RestResponseBase {
 
