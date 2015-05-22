@@ -785,6 +785,7 @@ CREATE TABLE `eh_forum_posts` (
     `forum_id` BIGINT NOT NULL COMMENT 'forum that it belongs',
     `parent_post_id` BIGINT COMMENT 'replied post id',
     `creator_uid` BIGINT NOT NULL COMMENT 'post creator uid',
+    `creator_tag` VARCHAR(128) COMMENT 'post creator tag',
     
     `longitude` DOUBLE,
     `latitude` DOUBLE,
