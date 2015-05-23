@@ -87,6 +87,7 @@ db:
         pool: 8
         borrow:
             timeout: 60
+    jta: false
     tx:
         timeout: 600
         
