@@ -1973,7 +1973,7 @@ CREATE  TABLE  `eh_content_server_resources` (
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 DROP TABLE IF EXISTS `eh_content_server`;
 CREATE TABLE  `eh_content_server` (
-        `id` BIGINT NOT NULL COMMENT 'content server id',
+        `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'content server id',
 	  `name` VARCHAR(32),
 	  `description` VARCHAR(40),
         `private_address` VARCHAR(32),
