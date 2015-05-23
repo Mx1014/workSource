@@ -11,7 +11,7 @@ package com.everhomes.forum;
  * </ul>
  */
 public enum PostContentType {
-    TEXT("text/plain"), IMAGE("image"), AUDIO("audio/basic"), VIDEO("video");
+    TEXT("text"), IMAGE("image"), AUDIO("audio"), VIDEO("video");
     
     private String code;
     private PostContentType(String code) {

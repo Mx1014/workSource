@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>forumId: 论坛ID</li>
+ * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostCreatorTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
@@ -30,6 +31,9 @@ import com.everhomes.util.StringHelper;
 public class NewTopicCommand {
     @NotNull
     private Long forumId;
+    
+    @NotNull
+    private String creatorTag;
 
     private Long contentCategory;
     
@@ -52,7 +56,7 @@ public class NewTopicCommand {
     @NotNull
     private String content;
     
-    private long embeddedAppId;
+    private Long embeddedAppId;
     
     private Long embeddedId;
     
@@ -147,11 +151,11 @@ public class NewTopicCommand {
 		this.content = content;
 	}
 
-	public long getEmbeddedAppId() {
+	public Long getEmbeddedAppId() {
         return embeddedAppId;
     }
 
-    public void setEmbeddedAppId(long embeddedAppId) {
+    public void setEmbeddedAppId(Long embeddedAppId) {
         this.embeddedAppId = embeddedAppId;
     }
 
