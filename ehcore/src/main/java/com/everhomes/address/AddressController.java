@@ -23,6 +23,7 @@ import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.address.ListCommunityByKeywordCommand;
 import com.everhomes.address.ListNearbyCommunityCommand;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.Role;
+import com.everhomes.acl.RoleConstants;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -22,7 +24,6 @@ import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
-
 import com.everhomes.util.Tuple;
 
 /**
@@ -169,8 +170,8 @@ public class FamilyController extends ControllerBase {
     public RestResponse revokeMember(@Valid RevokeMemberCommand cmd) {
     
         familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        
-        this.familyProvider.revokeMember(cmd.getId(),cmd.getMemberUid(),cmd.getReason());
+
+        this.familyProvider.revokeMember(cmd.getId(),cmd.getMemberUid(),cmd.getReason(),Role.ResourceOperator);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -188,7 +189,7 @@ public class FamilyController extends ControllerBase {
     
         familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         
-        this.familyProvider.rejectMember(cmd.getId(),cmd.getMemberUid(),cmd.getReason(),cmd.getOperatorRole());
+        this.familyProvider.rejectMember(cmd.getId(),cmd.getMemberUid(),cmd.getReason(),Role.ResourceOperator);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -205,7 +206,7 @@ public class FamilyController extends ControllerBase {
     
         familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         
-        this.familyProvider.approveMember(cmd.getId(),cmd.getMemberUid());
+        this.familyProvider.approveMember(cmd.getId(),cmd.getMemberUid(),Role.ResourceOperator);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

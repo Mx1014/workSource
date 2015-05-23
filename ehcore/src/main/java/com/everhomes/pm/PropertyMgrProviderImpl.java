@@ -119,8 +119,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmMembers.class, null);
     }
     
-    @Caching(evict = { @CacheEvict(value="CommunityPmMember", key="#id"), 
-            @CacheEvict(value="CommunityPmMemberList", key="#communityId")})
+    @CacheEvict(value="CommunityPmMember", key="#id")
     @Override
     public void updatePropMember(CommunityPmMember communityPmMember){
     	assert(communityPmMember.getId() == null);
@@ -132,8 +131,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmMembers.class, communityPmMember.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="CommunityPmMember", key="#id"), 
-            @CacheEvict(value="CommunityPmMemberList", key="#communityId")})
+    @CacheEvict(value="CommunityPmMember", key="#id")
     @Override
     public void deletePropMember(CommunityPmMember communityPmMember){
     	
@@ -145,8 +143,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     //@CacheEvict(value="CommunityPmMember", key="#id")
-    @Caching(evict = { @CacheEvict(value="CommunityPmMember", key="#id"), 
-            @CacheEvict(value="CommunityPmMemberList", key="#communityId")})
+    @CacheEvict(value="CommunityPmMember", key="#id")
     @Override
     public void deletePropMember(long id){
     	
@@ -165,7 +162,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return ConvertHelper.convert(dao.findById(id), CommunityPmMember.class);
     }
     
-    @Cacheable(value = "CommunityPmMemberList", key="#communityId")
+    //@Cacheable(value = "CommunityPmMemberList", key="#communityId")
     @Override
     public List<CommunityPmMember> listCommunityPmMembers(Long communityId, String contactToken,Integer pageOffset,Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -255,12 +252,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Cacheable(value="CommunityAddressMappingByAddressId", key="{#communityId,#addressId}")
     @Override
     public CommunityAddressMapping findPropAddressMappingByAddressId(Long communityId,Long addressId){
+        final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
         if(communityId != null)
             query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
        query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
-       return ConvertHelper.convert(query.fetchOne(), CommunityAddressMapping.class);
+       query.fetchAny().map((r) -> {
+           result[0] = ConvertHelper.convert(r, CommunityAddressMapping.class);
+           return null;
+       });
+       return result[0];
     }
     
     @Override

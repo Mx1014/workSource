@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
@@ -505,7 +506,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "Unable to find the community.");
     	}
 
-    	familyProvider.approveMember(cmd.getFamilyId(),cmd.getUserId());
+    	familyProvider.approveMember(cmd.getFamilyId(),cmd.getUserId(),Role.ResourceAdmin);
 		
 	}
 	
@@ -533,8 +534,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	String reason = "";
-    	Byte operatorRole = 0;
-    	familyProvider.rejectMember(cmd.getFamilyId(), cmd.getUserId(), reason, operatorRole);
+    	familyProvider.rejectMember(cmd.getFamilyId(), cmd.getUserId(), reason, Role.ResourceAdmin);
 		
 	}
     
@@ -562,7 +562,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
        	String reason = "";
-    	familyProvider.revokeMember(cmd.getFamilyId(), cmd.getUserId(), reason);
+    	familyProvider.revokeMember(cmd.getFamilyId(), cmd.getUserId(), reason,Role.ResourceAdmin);
     }
     
     @Override

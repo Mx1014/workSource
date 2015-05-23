@@ -1,21 +1,15 @@
 // @formatter:off
 package com.everhomes.community;
 
-import static com.everhomes.server.schema.Tables.EH_GROUP_MEMBERS;
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.hibernate.validator.constraints.br.CPF;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
-import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +25,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupMember;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.region.Region;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -42,13 +33,8 @@ import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -255,26 +241,27 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         if(list == null || list.isEmpty()) return null;
         
+        Condition c = null;
+        boolean isFirst = true;
+        for(CommunityGeoPoint p : list){
+            String geoHashStr = GeoHashUtils.encode(p.getLatitude(), p.getLongitude()).substring(0, 6) + "%";
+            
+            if(isFirst){
+                c = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr);
+                isFirst = false;
+                continue;
+            }
+            if(!isFirst){
+                c = c.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr));
+          }
+        }
+        final Condition condition = c;
+        
         List<CommunityGeoPoint> results = new ArrayList<>();
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), results, (DSLContext context, Object reducingContext) -> {
             SelectQuery<?> query = context.selectQuery(Tables.EH_COMMUNITY_GEOPOINTS);
-            Condition condition = null;
-            boolean isFirst = true;
-            for(CommunityGeoPoint p : list){
-                String geoHashStr = GeoHashUtils.encode(p.getLatitude(), p.getLongitude()).substring(0, 6) + "%";
-                
-                if(isFirst){
-                    condition = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr);
-                    isFirst = false;
-                    continue;
-                }
-                if(!isFirst){
-                    condition = condition.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr));
-              }
-               
-            }
-            query.addConditions(condition);
             
+            query.addConditions(condition);
             query.fetch().map((r) -> {
                 results.add(ConvertHelper.convert(r, CommunityGeoPoint.class));
                 return null;

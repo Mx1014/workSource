@@ -44,7 +44,12 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
     public String getLocaleTemplateString(String scope, int code, String locale, Object model, String defaultValue) {
         String templateKey = getTemplateKey(scope, code, locale);
         try {
-            Template freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
+            Template freeMarkerTemplate = null;
+            try {
+                templateConfig.getTemplate(templateKey, "UTF8");
+            }catch(Exception e) {
+                
+            }
             if(freeMarkerTemplate == null) {
                 LocaleTemplate template = getLocalizedTemplate(scope, code, locale);
                 if(template != null) {
