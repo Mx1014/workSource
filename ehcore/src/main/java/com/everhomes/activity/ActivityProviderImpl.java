@@ -8,7 +8,9 @@ import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -267,6 +269,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         return activity[0];
     }
 
+    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id")})
     @Override
     public void deleteRoster(ActivityRoster createRoster) {
         DSLContext cxt = dbProvider

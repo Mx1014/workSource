@@ -812,12 +812,12 @@ CREATE TABLE `eh_forum_posts` (
     `embedded_json` TEXT,
     `embedded_version` INTEGER NOT NULL DEFAULT 1,
     
-    `integral_tag1` BIGINT,
+    `integral_tag1` BIGINT COMMENT 'user for action category id',
     `integral_tag2` BIGINT,
     `integral_tag3` BIGINT,
     `integral_tag4` BIGINT,
     `integral_tag5` BIGINT,
-    `string_tag1` VARCHAR(128),
+    `string_tag1` VARCHAR(128) COMMENT 'user for action category path',
     `string_tag2` VARCHAR(128),
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
@@ -1973,7 +1973,7 @@ CREATE  TABLE  `eh_content_server_resources` (
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 DROP TABLE IF EXISTS `eh_content_server`;
 CREATE TABLE  `eh_content_server` (
-        `id` BIGINT NOT NULL COMMENT 'content server id',
+        `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'content server id',
 	  `name` VARCHAR(32),
 	  `description` VARCHAR(40),
         `private_address` VARCHAR(32),
