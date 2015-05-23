@@ -21,7 +21,6 @@ import com.everhomes.discover.ItemType;
 public class SearchGroupCommand {
     private String queryString;
     
-    @NotNull
     private Long pageAnchor;
     
     private int pageSize;
