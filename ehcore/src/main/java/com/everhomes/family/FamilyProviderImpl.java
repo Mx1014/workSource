@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
@@ -34,6 +35,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -74,6 +76,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.locale.LocaleTemplateServiceImpl;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
@@ -292,8 +296,14 @@ public class FamilyProviderImpl implements FamilyProvider {
     
     private void sendFamilyNotification(long userId, String message) {
         if(message != null && message.length() != 0) {
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+            messageDto.setBody(message);
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "user", 
-                String.valueOf(userId), AppConstants.APPID_FAMILY, null, message, MessagingService.MSG_FLAG_STORED);
+                String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
         }
     }
     

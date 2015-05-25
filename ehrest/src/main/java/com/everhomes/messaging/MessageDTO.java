@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
-import com.google.gson.Gson;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -27,6 +27,9 @@ public class MessageDTO {
     private Long appId;
     private Long senderUid;
     
+    private String contextType;
+    private String contextToken;
+    
     @ItemType(MessageChannel.class)
     @NotNull
     private List<MessageChannel> channels;
@@ -34,18 +37,21 @@ public class MessageDTO {
     @ItemType(String.class)
     private Map<String, String> meta;
     
-    private long metaAppId;
+    private Long metaAppId;
     
     private String body;
 
     // used for sender to tag on a message
     private String senderTag;
     
+    // unique message sequence number
+    private Long messageSequence;
+    
     // used to indicate the message store(anchor) position in message responses
     private Long storeSequence;
-
-    private static Gson gson = new Gson();
     
+    private Long createTime;
+     
     public MessageDTO() {
     }
 
@@ -65,6 +71,22 @@ public class MessageDTO {
         this.senderUid = senderUid;
     }
 
+    public String getContextType() {
+        return contextType;
+    }
+
+    public void setContextType(String contextType) {
+        this.contextType = contextType;
+    }
+
+    public String getContextToken() {
+        return contextToken;
+    }
+
+    public void setContextToken(String contextToken) {
+        this.contextToken = contextToken;
+    }
+
     public List<MessageChannel> getChannels() {
         return channels;
     }
@@ -82,11 +104,11 @@ public class MessageDTO {
         }
     }
 
-    public long getMetaAppId() {
+    public Long getMetaAppId() {
         return metaAppId;
     }
 
-    public void setMetaAppId(long metaAppId) {
+    public void setMetaAppId(Long metaAppId) {
         this.metaAppId = metaAppId;
     }
 
@@ -122,11 +144,27 @@ public class MessageDTO {
         this.storeSequence = storeSequence;
     }
 
+    public Long getMessageSequence() {
+        return messageSequence;
+    }
+
+    public void setMessageSequence(Long messageSequence) {
+        this.messageSequence = messageSequence;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
     public String toJson() {
-        return gson.toJson(this);
+        return StringHelper.toJsonString(this);
     }
     
     public static MessageDTO fromJson(String json) {
-        return gson.fromJson(json, MessageDTO.class);
+        return (MessageDTO)StringHelper.fromJsonString(json, MessageDTO.class);
     }
 }

@@ -23,6 +23,9 @@ public class SendMessageCommand {
     
     private Long senderUid;
     
+    private String contextType;
+    private String contextToken;
+    
     @ItemType(MessageChannel.class)
     @NotNull
     private List<MessageChannel> channels;
@@ -30,7 +33,7 @@ public class SendMessageCommand {
     @ItemType(String.class)
     private Map<String, String> meta;
     
-    private long metaAppId;
+    private Long metaAppId;
     
     private String body;
 
@@ -64,6 +67,22 @@ public class SendMessageCommand {
         this.senderUid = senderUid;
     }
 
+    public String getContextType() {
+        return contextType;
+    }
+
+    public void setContextType(String contextType) {
+        this.contextType = contextType;
+    }
+
+    public String getContextToken() {
+        return contextToken;
+    }
+
+    public void setContextToken(String contextToken) {
+        this.contextToken = contextToken;
+    }
+
     public List<MessageChannel> getChannels() {
         return channels;
     }
@@ -80,11 +99,11 @@ public class SendMessageCommand {
         this.meta = meta;
     }
 
-    public long getMetaAppId() {
+    public Long getMetaAppId() {
         return metaAppId;
     }
 
-    public void setMetaAppId(long metaAppId) {
+    public void setMetaAppId(Long metaAppId) {
         this.metaAppId = metaAppId;
     }
 

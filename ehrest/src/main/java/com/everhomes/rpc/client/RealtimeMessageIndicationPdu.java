@@ -10,12 +10,15 @@ import com.everhomes.util.Name;
 public class RealtimeMessageIndicationPdu {
     private long senderUid;
     private Long appId;
+    private String contextType;
+    private String contextToken;
     private String channelType;
     private String channelToken;
     private String content;
     private String senderTag;
     private long createTime;
     
+    private Long metaAppId;
     private Map<String, String> metaMap = new HashMap<String, String>();
 
     public RealtimeMessageIndicationPdu() {
@@ -37,6 +40,22 @@ public class RealtimeMessageIndicationPdu {
         this.appId = appId;
     }
     
+    public String getContextType() {
+        return contextType;
+    }
+
+    public void setContextType(String contextType) {
+        this.contextType = contextType;
+    }
+
+    public String getContextToken() {
+        return contextToken;
+    }
+
+    public void setContextToken(String contextToken) {
+        this.contextToken = contextToken;
+    }
+
     public String getChannelType() {
         return channelType;
     }
@@ -75,6 +94,14 @@ public class RealtimeMessageIndicationPdu {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public Long getMetaAppId() {
+        return metaAppId;
+    }
+
+    public void setMetaAppId(Long metaAppId) {
+        this.metaAppId = metaAppId;
     }
 
     public Map<String, String> getMetaMap() {
