@@ -233,7 +233,32 @@ CREATE TABLE `eh_scoped_configurations`(
     INDEX `i_eh_scoped_cfg_itag2`(`integral_tag2`),
     INDEX `i_eh_scoped_cfg_stag1`(`string_tag1`),
     INDEX `i_eh_scoped_cfg_stag2`(`string_tag2`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global sharding group
+#
+DROP TABLE IF EXISTS `eh_launch_pad_items`;
+CREATE TABLE `eh_launch_pad_items` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `namespace_id` INTEGER,
+    `app_id` BIGINT,
+    `scope_type` VARCHAR(32),
+    `scope_id` BIGINT,
+    `item_name` VARCHAR(32),
+    `item_label` VARCHAR(64),
+    `item_group` VARCHAR(32),
+    `action_name` VARCHAR(32),
+    `action_icon` VARCHAR(128),
+    `action_uri` VARCHAR(128),
+    `default_order` INTEGER NOT NULL DEFAULT 0,
+    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
+
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
+    INDEX `i_eh_scoped_cfg_group`(`item_group`),
+    INDEX `i_eh_scoped_cfg_group_order`(`item_group`, `default_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
 # member of global partition

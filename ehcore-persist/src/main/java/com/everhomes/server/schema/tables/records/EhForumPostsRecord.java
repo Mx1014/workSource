@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -171750394;
+	private static final long serialVersionUID = -187518714;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -364,14 +364,14 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.integral_tag1</code>.
+	 * Setter for <code>ehcore.eh_forum_posts.integral_tag1</code>. user for action category id
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
 		setValue(25, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.integral_tag1</code>.
+	 * Getter for <code>ehcore.eh_forum_posts.integral_tag1</code>. user for action category id
 	 */
 	public java.lang.Long getIntegralTag1() {
 		return (java.lang.Long) getValue(25);
@@ -434,14 +434,14 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.string_tag1</code>.
+	 * Setter for <code>ehcore.eh_forum_posts.string_tag1</code>. user for action category path
 	 */
 	public void setStringTag1(java.lang.String value) {
 		setValue(30, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.string_tag1</code>.
+	 * Getter for <code>ehcore.eh_forum_posts.string_tag1</code>. user for action category path
 	 */
 	public java.lang.String getStringTag1() {
 		return (java.lang.String) getValue(30);
