@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropOwnerDTO}</li>
+ * <li>pageCount：总页数</li>
  * </ul>
  */
 public class ListPropOwnerCommandResponse {
@@ -19,6 +20,8 @@ public class ListPropOwnerCommandResponse {
 	@ItemType(PropOwnerDTO.class)
     private List<PropOwnerDTO> owners;
     
+	private Integer pageCount;
+	
     public ListPropOwnerCommandResponse() {
     }
     
@@ -43,6 +46,14 @@ public class ListPropOwnerCommandResponse {
         this.owners = owners;
     }
     
+    public Integer getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

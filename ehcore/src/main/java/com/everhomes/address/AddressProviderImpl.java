@@ -220,4 +220,20 @@ public class AddressProviderImpl implements AddressProvider {
             });
         return results;
     }
+    
+    @Override
+    public int countApartmentsByBuildingName(long communityId, String buildingName) {
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddresses.class));
+        
+        int count = context.selectCount().from(Tables.EH_ADDRESSES)
+                .leftOuterJoin(Tables.EH_GROUPS)
+                .on(Tables.EH_ADDRESSES.ID.eq(Tables.EH_GROUPS.INTEGRAL_TAG1))
+                .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(communityId)
+                        .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)))
+                        .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                        .and(Tables.EH_GROUPS.MEMBER_COUNT.greaterThan(0L))
+        .fetchOneInto(Integer.class);
+        return count;
+    }
 }

@@ -9,17 +9,18 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>cityId: 城市Id</li>
  * <li>keyword: 查询关键字</li>
- * <li>pageNum: 页码</li>
+ * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class SearchCommunityCommand {
+    @NotNull
     private Long cityId;
     
     @NotNull
     private String keyword;
     
-    private Integer pageNum;
+    private Integer pageOffset;
     // start from 1, page size is configurable at server side
     private Integer pageSize;
     
@@ -50,12 +51,12 @@ public class SearchCommunityCommand {
         this.pageSize = pageSize;
     }
 
-    public Integer getPageNum() {
-        return pageNum;
+    public Integer getPageOffset() {
+        return pageOffset;
     }
-    
-    public void setPageNum(Integer pageNum) {
-        this.pageNum = pageNum;
+
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
 
     @Override

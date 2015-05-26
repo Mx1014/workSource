@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import java.io.IOException;
 import java.nio.file.attribute.GroupPrincipal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.Role;
@@ -40,7 +42,9 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FindFamilyByAddressIdCommand;
 import com.everhomes.family.GetFamilyCommand;
 import com.everhomes.family.ListOwningFamilyMembersCommand;
+import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.forum.PostContentType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -56,6 +60,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -66,7 +71,8 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 @Component
 public class PropertyMgrServiceImpl implements PropertyMgrService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
-    
+    private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
+    private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
     
@@ -100,6 +106,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Autowired
     private DbProvider dbProvider;
     
+    @Autowired
+    private ForumProvider forumProvider;
     
     @Override
     public void createPropMember(CreatePropMemberCommand cmd) {
@@ -161,7 +169,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	int totalCount = propertyMgrProvider.countCommunityPmMembers(cmd.getCommunityId(), null);
+    	if(totalCount == 0) return commandResponse;
+    	
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	
     	List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), null, cmd.getPageOffset(),pageSize);
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
@@ -169,7 +183,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 	 dto.setCommunityName(community.getName());
                 	 return dto; })
                  .collect(Collectors.toList()));
-    	
+    	commandResponse.setPageCount(pageCount);
         return commandResponse;
     }
 
@@ -232,7 +246,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId());
+    	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
     	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
@@ -242,7 +260,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 		 dto.setAddressName(address.getAddress());
                 	 return  dto;})
                  .collect(Collectors.toList()));
-    	
+    	commandResponse.setPageCount(pageCount);
         return commandResponse;
     }
     
@@ -262,7 +280,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	int totalCount = propertyMgrProvider.countCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress());
+    	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	int pageCount = getPageCount(totalCount, pageSize);
     	List<CommunityPmBill> entityResultList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
@@ -276,9 +298,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 	 dto.setItemList(itemDtoList);
                 	 return  dto;})
                  .collect(Collectors.toList()));
-    	
+    	commandResponse.setPageCount(pageCount);
         return commandResponse;
     }
+    
+
     
     @Override
     public ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
@@ -296,17 +320,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
+    	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	
+    	int pageCount = getPageCount(totalCount, pageSize);
     	List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
                 .collect(Collectors.toList()));
+    	commandResponse.setPageCount(pageCount);
    	
        return commandResponse;
+    }
+    private int getPageCount(int totalCount, int pageSize){
+        int pageCount = totalCount/pageSize;
+        
+        if(totalCount % pageSize != 0){
+            pageCount ++;
+        }
+        return pageCount;
     }
     
     @Override
     public void assignPMTopics(AssginPmTopicCommand cmd) {
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         if(cmd.getTopicIds() == null || cmd.getTopicIds().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid topicIds paramter.");
@@ -317,9 +356,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId paramter.");
         long communityId = cmd.getCommunityId();
+        
         List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
                 EntityType.USER.getCode(), cmd.getUserId());
-        
         if(pmMemberList == null || pmMemberList.isEmpty()){
             LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -329,39 +368,104 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         for(Long topicId : cmd.getTopicIds()){
             List<CommunityPmTasks> pmTaskList = this.propertyMgrProvider.findPmTaskEntityIdAndTargetId(communityId, topicId, 
                     EntityType.TOPIC.getCode(), cmd.getUserId(),EntityType.USER.getCode(),cmd.getStatus());
+            //任务已存在跳过
             if(pmTaskList != null && !pmTaskList.isEmpty()){
-                LOGGER.error("Pm taks is exists.");
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                        "Task is exists.");
+                LOGGER.error("Pm task is exists.");
+                continue;
             }
-            CommunityPmTasks task = new CommunityPmTasks();
-            task.setCommunityId(communityId);
-            task.setEntityId(topicId);
-            task.setEntityType(EntityType.TOPIC.getCode());
-            task.setTargetId(cmd.getUserId());
-            task.setTaskType(EntityType.USER.getCode());
-            task.setTaskStatus(cmd.getStatus());
-            this.propertyMgrProvider.createPmTask(task);
-            //自动回复
             
-            //发送短信
-            Post topic = new Post();
-            sendMSMToUser(topic,cmd.getUserId(),cmd.getStatus());
+            Post topic = this.forumProvider.findPostById(topicId);
+            if(topic == null){
+                LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
+                continue;
+            }
+            
+            dbProvider.execute((status) -> {
+                CommunityPmTasks task = new CommunityPmTasks();
+                task.setCommunityId(communityId);
+                task.setEntityId(topicId);
+                task.setEntityType(EntityType.TOPIC.getCode());
+                task.setTargetId(cmd.getUserId());
+                task.setTaskType(EntityType.USER.getCode());
+                task.setTaskStatus(cmd.getStatus());
+                this.propertyMgrProvider.createPmTask(task);
+                
+                if(cmd.getStatus() == PmTaskStatus.TREATING.getCode()){
+                  //发送评论
+                    sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
+                    //发送短信
+                    sendMSMToUser(topicId,cmd.getUserId(),topic.getCreatorUid(),cmd.getStatus(),topic.getCategoryId());
+                }
+                
+                return null;
+            });
+           
         }
     }
 
-    private void sendMSMToUser(Post topic, Long userId, Byte status) {
-        //??短信模板
-        String content = "";
+    private void sendComment(long topicId, long forumId, long userId, long category) {
+        Post comment = new Post();
+        comment.setParentPostId(topicId);
+        comment.setForumId(forumId);
+        comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        comment.setCreatorUid(userId);
+        comment.setContentType(PostContentType.TEXT.getCode());
+        String template = configProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
+
+        if (!StringUtils.isEmpty(template)) {
+            comment.setContent(template);
+            forumProvider.createPost(comment);
+        }
+       
+    }
+
+    /**
+     * 
+     * @param topicId
+     * @param userId 维修人员id
+     * @param owerId 业主id
+     * @param status 状态
+     * @param category 分类
+     */
+    private void sendMSMToUser(long topicId, long userId, long owerId,byte status, long category) {
+        //给维修人员发送短信是否显示业主地址
+        String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
         List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
-        userList.parallelStream().filter((u) -> {
+        userList.stream().filter((u) -> {
             if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
                 return false;
             return true;
         });
+        if(userList == null || userList.isEmpty()) return ;
         String cellPhone = userList.get(0).getIdentifierToken();
-        this.smsProvider.sendSms(cellPhone, content);
+        this.smsProvider.sendSms(cellPhone, template);
         
+    }
+    
+    public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
+        if(cmd.getTopicIds() == null || cmd.getStatus() == null || cmd.getCommunityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid topicIds or status or communityId paramter.");
+        }
+        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        
+        for(long topicId : cmd.getTopicIds()){
+            Post topic = this.forumProvider.findPostById(topicId);
+            if(topic == null){ 
+                LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
+                continue;
+            }
+            List<CommunityPmTasks> tasks = this.propertyMgrProvider.findPmTaskEntityId(cmd.getCommunityId(), 
+                    topicId, EntityType.TOPIC.getCode());
+            if(tasks == null){
+                LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
+                continue;
+            }
+            this.propertyMgrProvider.updatePmTaskListStatus(tasks);
+            
+        }
     }
 
     @Override
@@ -380,9 +484,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize(); 
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         
-        List<PropInvitedUserDTO> userDTOs = this.propertyMgrProvider.listInvitedUsers(cmd.getCommunityId(),
+        return this.propertyMgrProvider.listInvitedUsers(cmd.getCommunityId(),
                 cmd.getContactToken(),offset,pageSize);
-        return new ListPropInvitedUserCommandResponse(0L,userDTOs);
     }
 
 	@Override
@@ -672,11 +775,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+    	int totalCount = familyProvider.countWaitApproveFamily(cmd.getCommunityId());
+    	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	int pageCount = getPageCount(totalCount, pageSize);
     	List<FamilyDTO>  entityResultList = familyProvider.listWaitApproveFamily(cmd.getCommunityId(), new Long(cmd.getPageOffset()), new Long(pageSize));
     	commandResponse.setMembers( entityResultList.stream()
                 .map(r->{ return r; })
                 .collect(Collectors.toList()));
+    	commandResponse.setPageCount(pageCount);
     	return commandResponse;
     }
     

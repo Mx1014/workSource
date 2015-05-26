@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropBillDTO}</li>
+ * <li>pageCount: 总页数</li>
  * </ul>
  */
 public class ListPropBillCommandResponse {
@@ -21,6 +22,8 @@ public class ListPropBillCommandResponse {
     
     public ListPropBillCommandResponse() {
     }
+    
+    private Integer pageCount;
     
     public ListPropBillCommandResponse(Long nextPageAnchor, List<PropBillDTO> bills) {
         this.nextPageAnchor = nextPageAnchor;
@@ -43,6 +46,14 @@ public class ListPropBillCommandResponse {
         this.bills = bills;
     }
     
+    public Integer getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -22,15 +22,25 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -40,6 +50,22 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import ch.hsr.geohash.GeoHash;
 
 
 
@@ -89,6 +115,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -296,14 +323,16 @@ public class FamilyProviderImpl implements FamilyProvider {
     
     private void sendFamilyNotification(long userId, String message) {
         if(message != null && message.length() != 0) {
-            MessageDTO messageDto = new MessageDTO();
-            messageDto.setAppId(AppConstants.APPID_MESSAGING);
-            messageDto.setSenderUid(User.SYSTEM_UID);
-            messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
-            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
-            messageDto.setBody(message);
-            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "user", 
-                String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+            if(message != null && message.length() != 0) {
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
+                messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+                messageDto.setBody(message);
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "user", 
+                    String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+            }
         }
     }
     
@@ -316,7 +345,9 @@ public class FamilyProviderImpl implements FamilyProvider {
             		EntityType.USER.getCode(), userGroup.getOwnerUid());
             assert(m != null);
             if(m != null) {
-                this.groupProvider.deleteGroupMember(m);
+                //this.groupProvider.deleteGroupMember(m);
+                //clear findFamilyByAddress cache
+                deleteFamilyMember(m);
                 
                 // retrieve family info after membership changes
                 FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
@@ -342,6 +373,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         });
         
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
+    }
+    
+    @CacheEvict(value="Family", key="#addressId")
+    @Override
+    public void deleteFamilyMember(GroupMember m){
+        this.groupProvider.deleteGroupMember(m);
     }
     
     private GroupMember pickOneMemberToPromote(Family family) {
@@ -1141,7 +1178,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     }
 
     @Override
-    public List<NeighborUserDTO> listNeighborUsers(Long familyId ,Long pageOffset) {
+    public ListNeighborUsersCommandResponse listNeighborUsers(Long familyId ,Long pageOffset) {
         User user = UserContext.current().getUser();
         
         Group group = this.groupProvider.findGroupById(familyId);
@@ -1205,7 +1242,10 @@ public class FamilyProviderImpl implements FamilyProvider {
         List<NeighborUserDTO> results = processNeighborUserInfo(userDetailList,myaddress,pageOffset);
         long endTime = System.currentTimeMillis();
         LOGGER.info("Query neighbor user of community,elapse=" + (endTime - startTime));
-        return results;
+        ListNeighborUsersCommandResponse response = new ListNeighborUsersCommandResponse();
+        response.setNeighborUserList(results);
+        response.setNeighborCount(results == null ? null : results.size());
+        return response;
     }
 
     private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,
@@ -1286,34 +1326,47 @@ public class FamilyProviderImpl implements FamilyProvider {
                 });
         
         if(userIds.size() > 0){
-            String geoHash = GeoHashUtils.encode(longitude, latitude).substring(0, 6);
-            String likeVal = geoHash + "%";
+            boolean isFirst = true;
+            Condition c = Tables.EH_USER_LOCATIONS.UID.in(userIds);
+            List<String> geoHashCodeList = getGeoHashCodeList(latitude,longitude);
+            for(String geoHashCode : geoHashCodeList){
+                if(isFirst){
+                    c = Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode);
+                    isFirst = false;
+                    continue;
+                }
+                if(!isFirst){
+                    c = c.or(Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode));
+                }
+            }
+            final Condition condition = c;
             
             this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                     (DSLContext context, Object reducingContext)-> {
-                        context.selectDistinct(Tables.EH_USERS.ID,Tables.EH_USERS.STATUS_LINE,Tables.EH_USERS.ACCOUNT_NAME
-                                ,Tables.EH_USERS.AVATAR,Tables.EH_USER_LOCATIONS.LATITUDE,Tables.EH_USER_LOCATIONS.LONGITUDE)
-                        .from(Tables.EH_USER_LOCATIONS)
-                        .leftOuterJoin(Tables.EH_USERS).on(Tables.EH_USER_LOCATIONS.UID.eq(Tables.EH_USERS.ID))
-                        .where(Tables.EH_USER_LOCATIONS.UID.in(userIds))
-                        .and(Tables.EH_USER_LOCATIONS.GEOHASH.like(likeVal))
-                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_ID.notEqual(user.getId()))
-                        .fetch().map( (r) ->{
-                            
+                        
+                        SelectQuery<?> query = context.selectQuery(Tables.EH_USER_LOCATIONS);
+                        
+                        query.addConditions(condition);
+                        query.addGroupBy(Tables.EH_USER_LOCATIONS.UID);
+                        query.addOrderBy(Tables.EH_USER_LOCATIONS.CREATE_TIME.desc());
+                        query.fetch().map((r) -> {
+                            UserLocation userLocation = ConvertHelper.convert(r,UserLocation.class);
+                            User u = this.userProvider.findUserById(userLocation.getUid());
                             NeighborUserDTO n = new NeighborUserDTO();
-                            n.setUserId(r.getValue(Tables.EH_USERS.ID));
-                            n.setUserStatusLine(r.getValue(Tables.EH_USERS.STATUS_LINE));
-                            n.setUserName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
-                            n.setUserAvatarUrl(parserUri(r.getValue(Tables.EH_USERS.AVATAR),"User",r.getValue(Tables.EH_USERS.ID)));
-                            n.setUserAvatarUri(r.getValue(Tables.EH_USERS.AVATAR));
+                            n.setUserId(u.getId());
+                            n.setUserStatusLine(u.getStatusLine());
+                            n.setUserName(u.getAccountName());
+                            n.setUserAvatarUrl(parserUri(u.getAvatar(),"User",u.getId()));
+                            n.setUserAvatarUri(u.getAvatar());
                             //计算距离
-                            double lat = r.getValue(Tables.EH_USER_LOCATIONS.LATITUDE);
-                            double lon = r.getValue(Tables.EH_USER_LOCATIONS.LONGITUDE);
+                            double lat = userLocation.getLatitude();
+                            double lon = userLocation.getLongitude();
                             double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon);
                             n.setDistance(distince);
                             results.add(n);
                             return null;
                         });
+                        
                         return true;
                     });
         }
@@ -1325,7 +1378,20 @@ public class FamilyProviderImpl implements FamilyProvider {
         return results;
     }
     
-  private void processNeighborUserInfo(List<NeighborUserDTO> results ,long pageOffset) {
+    private List<String> getGeoHashCodeList(double latitude, double longitude){
+        
+        GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+        GeoHash[] adjacents = geo.getAdjacent();
+        List<String> geoHashCodes = new ArrayList<String>();
+        geoHashCodes.add(geo.toBase32());
+        for(GeoHash g : adjacents) {
+            geoHashCodes.add(g.toBase32());
+        }
+        return geoHashCodes;
+    }
+    
+    
+    private void processNeighborUserInfo(List<NeighborUserDTO> results ,long pageOffset) {
         if(results == null || results.isEmpty())
             return;
         final int pageSize = this.configurationProvider.getIntValue("pagination.page.size", 
@@ -1382,13 +1448,28 @@ public class FamilyProviderImpl implements FamilyProvider {
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
                 EntityType.USER.getCode(), user.getId());
         if(m != null){
+            
+            
             familyDTO.setMemberUid(m.getMemberId());
             familyDTO.setMemberNickName(m.getMemberNickName());
             familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
             familyDTO.setMemberAvatarUri(m.getMemberAvatar());
             familyDTO.setMembershipStatus(m.getMemberStatus());
+            Address address = this.addressProvider.findAddressById(addressId);
+            if(address != null){
+            familyDTO.setAddress(address.getAddress());
+                familyDTO.setAddressId(address.getId());
+                familyDTO.setApartmentName(address.getApartmentName());
+                familyDTO.setBuildingName(address.getBuildingName());
+                familyDTO.setAddressStatus(address.getStatus());
+            }
+            
             Community community = communityProvider.findCommunityById(family.getCommunityId());
-            familyDTO.setCommunityName(community == null ? null : community.getName());
+            if(community != null){
+                familyDTO.setCityName(community.getCityName());
+                familyDTO.setAreaName(community.getAreaName());
+                familyDTO.setCommunityName(community.getName());
+            }
             
         }
         return familyDTO;
@@ -1446,6 +1527,23 @@ public class FamilyProviderImpl implements FamilyProvider {
                     return true;
                 });
         return results;
+    }
+    
+    @Override
+    public int countWaitApproveFamily(Long comunityId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+        
+        SelectConditionStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_GROUP_MEMBERS)
+                .leftOuterJoin(Tables.EH_GROUPS)
+                .on(Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID))
+                .where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
+                            .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
+               
+        if(comunityId != null){
+            step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
+        }
+ 
+        return step.fetchOneInto(Integer.class);
     }
     
     private String parserUri(String uri,String ownerType, Long ownerId){

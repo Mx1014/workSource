@@ -1,0 +1,43 @@
+package com.everhomes.address;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>apartmentLivingCount：存在用户的门牌数</li>
+ * <li>groups: group信息，参考{@link com.everhomes.address.ApartmentDTO}</li>
+ * </ul>
+ */
+public class ListApartmentByBuildingNameCommandResponse {
+    private Integer apartmentLivingCount;
+
+    @ItemType(ApartmentDTO.class)
+    private List<ApartmentDTO> apartmentList;
+    
+    public ListApartmentByBuildingNameCommandResponse() {
+    }
+
+    public Integer getApartmentLivingCount() {
+        return apartmentLivingCount;
+    }
+
+    public void setApartmentLivingCount(Integer apartmentLivingCount) {
+        this.apartmentLivingCount = apartmentLivingCount;
+    }
+
+    public List<ApartmentDTO> getApartmentList() {
+        return apartmentList;
+    }
+
+    public void setApartmentList(List<ApartmentDTO> apartmentList) {
+        this.apartmentList = apartmentList;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

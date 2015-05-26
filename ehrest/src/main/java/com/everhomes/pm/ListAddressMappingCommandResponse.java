@@ -7,26 +7,27 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
+/**
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropertyMemberDTO}</li>
+ * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropOwnerDTO}</li>
  * <li>pageCount：总页数</li>
  * </ul>
  */
-public class ListPropMemberCommandResponse {
-    private Long nextPageAnchor;
+public class ListAddressMappingCommandResponse {
+	private Long nextPageAnchor;
+	
+	@ItemType(PropOwnerDTO.class)
+    private List<PropOwnerDTO> owners;
     
-    @ItemType(PropertyMemberDTO.class)
-    private List<PropertyMemberDTO> members;
-    
-    private Integer pageCount;
-    
-    public ListPropMemberCommandResponse() {
+	private Integer pageCount;
+	
+    public ListAddressMappingCommandResponse() {
     }
     
-    public ListPropMemberCommandResponse(Long nextPageAnchor, List<PropertyMemberDTO> members) {
+    public ListAddressMappingCommandResponse(Long nextPageAnchor, List<PropOwnerDTO> owners) {
         this.nextPageAnchor = nextPageAnchor;
-        this.members = members;
+        this.owners = owners;
     }
 
     public Long getNextPageAnchor() {
@@ -37,12 +38,12 @@ public class ListPropMemberCommandResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<PropertyMemberDTO> getMembers() {
-        return members;
+    public List<PropOwnerDTO> getMembers() {
+        return owners;
     }
 
-    public void setMembers(List<PropertyMemberDTO> members) {
-        this.members = members;
+    public void setMembers(List<PropOwnerDTO> owners) {
+        this.owners = owners;
     }
     
     public Integer getPageCount() {

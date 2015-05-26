@@ -18,6 +18,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import ch.hsr.geohash.GeoHash;
+
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -244,16 +246,18 @@ public class CommunityProviderImpl implements CommunityProvider {
         Condition c = null;
         boolean isFirst = true;
         for(CommunityGeoPoint p : list){
-            String geoHashStr = GeoHashUtils.encode(p.getLatitude(), p.getLongitude()).substring(0, 6) + "%";
             
-            if(isFirst){
-                c = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr);
-                isFirst = false;
-                continue;
+            List<String> geoHashList = getGeoHashCodeList(p.getLatitude(), p.getLongitude());
+            for(String geoHashStr : geoHashList){
+                if(isFirst){
+                    c = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr);
+                    isFirst = false;
+                    continue;
+                }
+                if(!isFirst){
+                    c = c.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr));
+                }
             }
-            if(!isFirst){
-                c = c.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr));
-          }
         }
         final Condition condition = c;
         
@@ -271,6 +275,17 @@ public class CommunityProviderImpl implements CommunityProvider {
         return results;
     }
     
+    private List<String> getGeoHashCodeList(double latitude, double longitude){
+        
+        GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+        GeoHash[] adjacents = geo.getAdjacent();
+        List<String> geoHashCodes = new ArrayList<String>();
+        geoHashCodes.add(geo.toBase32());
+        for(GeoHash g : adjacents) {
+            geoHashCodes.add(g.toBase32());
+        }
+        return geoHashCodes;
+    }
     
     @Override
     public List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(double latitude, double longitude) {

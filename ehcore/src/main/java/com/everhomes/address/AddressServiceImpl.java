@@ -593,7 +593,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid cityId paramter.");
         }
-        int pageNum = cmd.getPageNum() == null ? 1: cmd.getPageNum();
+        int pageNum = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
@@ -601,17 +601,20 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
 
     @Override
-    public Tuple<Integer, List<ApartmentDTO>> listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+    public ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName parameter");
-        
+        List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
         int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, (long)pageSize);
+        ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
         
-        List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
+        int totalCount = this.addressProvider.countApartmentsByBuildingName(cmd.getCommunityId(), cmd.getBuildingName());
+        if(totalCount == 0) return response;
+        
         List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(), 
                 cmd.getBuildingName() , offset , pageSize);
         list.stream().map((r) ->{
@@ -621,8 +624,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             results.add(r);
             return null;
         }).collect(Collectors.toList());
-        
-        return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
+        response.setApartmentLivingCount(totalCount);
+        response.setApartmentList(results);
+        return response;
     }
 
 }

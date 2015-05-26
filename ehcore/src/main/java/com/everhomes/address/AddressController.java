@@ -196,6 +196,21 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/findNearyCommunityById</b>
+     * <p>根据小区Id查询附近小区</p>
+     */
+    @RequestMapping("findNearyCommunityById")
+    @RestReturn(value=CommunityDoc.class, collection=true)
+    public RestResponse findNearyCommunityById(@Valid ListApartmentByKeywordCommand cmd) {
+        List<Community> results = this.communityProvider.findNearyByCommunityById(cmd.getCommunityId());
+        RestResponse response =  new RestResponse(results);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /address/syncCommunities</b>
      * <p>同步小区</p>
      */
@@ -229,12 +244,12 @@ public class AddressController extends ControllerBase {
      * <p>根据小区Id、楼栋号查询门牌列表</p>
      */
     @RequestMapping("listApartmentsByBuildingName")
-    @RestReturn(value=ApartmentDTO.class, collection=true)
+    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class, collection=true)
     public RestResponse listApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd) {
-        Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByBuildingName(cmd);
-        RestResponse response = new RestResponse(results.second());
+        ListApartmentByBuildingNameCommandResponse result = this.addressService.listApartmentsByBuildingName(cmd);
+        RestResponse response = new RestResponse(result);
         
-        response.setErrorCode(results.first());
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }

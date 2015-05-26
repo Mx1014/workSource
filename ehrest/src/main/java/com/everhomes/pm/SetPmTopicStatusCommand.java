@@ -11,12 +11,14 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>topicId: 帖子Id</li>
  * <li>status: 任务状态，0-未处理，1-处理中，2-已处理，参考{@link com.everhomes.pm.PmTaskStatus}</li>
+ * <li>communityId: 小区Id</li>
  * </ul>
  */
 public class SetPmTopicStatusCommand {
     @ItemType(Long.class)
     private List<Long> topicIds;
     private Byte status;
+    private Long communityId;
     
     public SetPmTopicStatusCommand() {
     }
@@ -35,6 +37,14 @@ public class SetPmTopicStatusCommand {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

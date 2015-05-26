@@ -284,12 +284,13 @@ public class FamilyController extends ControllerBase {
      * <p>查询小区邻居列表</p>
      */
     @RequestMapping("listNeighborUsers")
-    @RestReturn(value=NeighborUserDTO.class, collection=true)
+    @RestReturn(value=ListNeighborUsersCommandResponse.class, collection=true)
     public RestResponse listNeighborUsers(@Valid ListNeighborUsersCommand cmd) {
         
         familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        List<NeighborUserDTO> results = this.familyProvider.listNeighborUsers(cmd.getId(),cmd.getPageOffset());
-        RestResponse response = new RestResponse(results);
+        ListNeighborUsersCommandResponse result = this.familyProvider.listNeighborUsers(cmd.getId(),cmd.getPageOffset());
+
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropAddressMappingDTO}</li>
+ * <li>pageCount：总页数</li>
  * </ul>
  */
 public class ListPropAddressMappingCommandResponse {
@@ -20,6 +21,8 @@ public class ListPropAddressMappingCommandResponse {
     
     public ListPropAddressMappingCommandResponse() {
     }
+    
+    private Integer pageCount;
     
     public ListPropAddressMappingCommandResponse(Long nextPageAnchor, List<PropAddressMappingDTO> mappings) {
         this.nextPageAnchor = nextPageAnchor;
@@ -42,6 +45,14 @@ public class ListPropAddressMappingCommandResponse {
         this.mappings = mappings;
     }
     
+    public Integer getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>members：小区待审核家庭成员信息，参考{@link com.everhomes.family.FamilyDTO}</li>
+ * <li>pageCount：总页数</li>
  * </ul>
  */
 public class ListPropFamilyWaitingMemberCommandResponse {
@@ -20,6 +21,8 @@ public class ListPropFamilyWaitingMemberCommandResponse {
 	@ItemType(FamilyDTO.class)
     private List<FamilyDTO> members;
     
+	private Integer pageCount;
+	
     public ListPropFamilyWaitingMemberCommandResponse() {
     }
     
@@ -44,6 +47,14 @@ public class ListPropFamilyWaitingMemberCommandResponse {
         this.members = users;
     }
     
+    public Integer getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

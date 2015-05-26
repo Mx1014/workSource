@@ -488,8 +488,8 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("listInvitedUsers")
     @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
     public RestResponse listInvitedUsers(@Valid ListPropInvitedUserCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+        ListPropInvitedUserCommandResponse  commandResponse = this.propertyMgrService.listInvitedUsers(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -503,8 +503,8 @@ public class PropertyMgrController extends ControllerBase {
     @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
     public RestResponse searchInvitedUsers(
     	@Valid ListPropInvitedUserCommand cmd) {
-    	
-        RestResponse response = new RestResponse();
+        ListPropInvitedUserCommandResponse  commandResponse = this.propertyMgrService.listInvitedUsers(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -623,7 +623,7 @@ public class PropertyMgrController extends ControllerBase {
      * @param communityId 小区ID
      */
     @RequestMapping("listPropFamilyWaitingMember")
-    @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropFamilyWaitingMemberCommandResponse.class, collection=true)
     public RestResponse listPropFamilyWaitingMember(@Valid ListPropFamilyWaitingMemberCommand cmd) throws Exception {
     	ListPropFamilyWaitingMemberCommandResponse commandResponse =  propertyMgrService.listPropFamilyWaitingMember(cmd);
         RestResponse response = new RestResponse(commandResponse);
