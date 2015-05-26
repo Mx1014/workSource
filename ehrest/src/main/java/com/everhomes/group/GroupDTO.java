@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberStatus: group成员状态，{@link com.everhomes.group.GroupMemberStatus}</li>
  * <li>memberNickName: group成员在group内的昵称，是group成员时字段才有效</li>
  * <li>memberConfigFlag: group成员自定义标识：是否屏蔽（暂不用），是group成员时字段才有效</li>
+ * <li>memberRole: group成员角色，用于判断是否为管理员，参考{@link com.everhomes.acl.Role}</li>
  * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
  * </ul>
@@ -51,6 +52,7 @@ public class GroupDTO {
     private Byte memberStatus;
     private String memberNickName;
     private Long memberConfigFlag;
+    private Long memberRole;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -211,6 +213,14 @@ public class GroupDTO {
 
     public void setMemberConfigFlag(Long memberConfigFlag) {
         this.memberConfigFlag = memberConfigFlag;
+    }
+
+    public Long getMemberRole() {
+        return memberRole;
+    }
+
+    public void setMemberRole(Long memberRole) {
+        this.memberRole = memberRole;
     }
 
     @Override

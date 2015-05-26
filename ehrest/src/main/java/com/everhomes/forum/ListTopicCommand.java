@@ -16,8 +16,6 @@ import com.everhomes.util.StringHelper;
  */
 public class ListTopicCommand {
     private Long forumId;
-    private Long contentCategory;
-    private Long actionCategory;
     private Byte visibilityScope;
     private Long visibilityScopeId;
     private Long pageAnchor;
@@ -34,22 +32,6 @@ public class ListTopicCommand {
 
     public void setForumId(Long forumId) {
         this.forumId = forumId;
-    }
-
-    public Long getContentCategory() {
-        return contentCategory;
-    }
-
-    public void setContentCategory(Long contentCategory) {
-        this.contentCategory = contentCategory;
-    }
-
-    public Long getActionCategory() {
-        return actionCategory;
-    }
-
-    public void setActionCategory(Long actionCategory) {
-        this.actionCategory = actionCategory;
     }
     
     public Byte getVisibilityScope() {
