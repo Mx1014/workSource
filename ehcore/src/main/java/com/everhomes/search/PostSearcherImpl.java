@@ -58,8 +58,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("forumId", post.getForumId());
             b.field("categoryId", post.getCategoryId());
             b.field("creatorUid", post.getCreatorUid());
-            b.field("visibilityScopeId", post.getVisibilityScopeId());
-            b.field("visibilityScope", post.getVisibilityScope().intValue());
+            b.field("visibleRegionType", post.getVisibleRegionType());
+            b.field("visibleRegionId", post.getVisibleRegionId().intValue());
             b.field("senderName", u.getAccountName());
             b.field("senderAvatar", u.getAvatar());
             b.field("forumName", 0);

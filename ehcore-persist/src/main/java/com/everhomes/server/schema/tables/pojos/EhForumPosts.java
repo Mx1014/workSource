@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1596488933;
+	private static final long serialVersionUID = -571059891;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -19,11 +19,13 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Long     parentPostId;
 	private java.lang.Long     creatorUid;
 	private java.lang.String   creatorTag;
+	private java.lang.String   targetTag;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
-	private java.lang.Byte     visibilityScope;
-	private java.lang.Long     visibilityScopeId;
+	private java.lang.Byte     visibleRegionType;
+	private java.lang.Long     visibleRegionId;
+	private java.lang.String   visibleRegionPath;
 	private java.lang.Long     categoryId;
 	private java.lang.String   categoryPath;
 	private java.lang.Long     modifySeq;
@@ -60,11 +62,13 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Long     parentPostId,
 		java.lang.Long     creatorUid,
 		java.lang.String   creatorTag,
+		java.lang.String   targetTag,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
-		java.lang.Byte     visibilityScope,
-		java.lang.Long     visibilityScopeId,
+		java.lang.Byte     visibleRegionType,
+		java.lang.Long     visibleRegionId,
+		java.lang.String   visibleRegionPath,
 		java.lang.Long     categoryId,
 		java.lang.String   categoryPath,
 		java.lang.Long     modifySeq,
@@ -98,11 +102,13 @@ public class EhForumPosts implements java.io.Serializable {
 		this.parentPostId = parentPostId;
 		this.creatorUid = creatorUid;
 		this.creatorTag = creatorTag;
+		this.targetTag = targetTag;
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.geohash = geohash;
-		this.visibilityScope = visibilityScope;
-		this.visibilityScopeId = visibilityScopeId;
+		this.visibleRegionType = visibleRegionType;
+		this.visibleRegionId = visibleRegionId;
+		this.visibleRegionPath = visibleRegionPath;
 		this.categoryId = categoryId;
 		this.categoryPath = categoryPath;
 		this.modifySeq = modifySeq;
@@ -179,6 +185,14 @@ public class EhForumPosts implements java.io.Serializable {
 		this.creatorTag = creatorTag;
 	}
 
+	public java.lang.String getTargetTag() {
+		return this.targetTag;
+	}
+
+	public void setTargetTag(java.lang.String targetTag) {
+		this.targetTag = targetTag;
+	}
+
 	public java.lang.Double getLongitude() {
 		return this.longitude;
 	}
@@ -203,20 +217,28 @@ public class EhForumPosts implements java.io.Serializable {
 		this.geohash = geohash;
 	}
 
-	public java.lang.Byte getVisibilityScope() {
-		return this.visibilityScope;
+	public java.lang.Byte getVisibleRegionType() {
+		return this.visibleRegionType;
 	}
 
-	public void setVisibilityScope(java.lang.Byte visibilityScope) {
-		this.visibilityScope = visibilityScope;
+	public void setVisibleRegionType(java.lang.Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
 	}
 
-	public java.lang.Long getVisibilityScopeId() {
-		return this.visibilityScopeId;
+	public java.lang.Long getVisibleRegionId() {
+		return this.visibleRegionId;
 	}
 
-	public void setVisibilityScopeId(java.lang.Long visibilityScopeId) {
-		this.visibilityScopeId = visibilityScopeId;
+	public void setVisibleRegionId(java.lang.Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
+	}
+
+	public java.lang.String getVisibleRegionPath() {
+		return this.visibleRegionPath;
+	}
+
+	public void setVisibleRegionPath(java.lang.String visibleRegionPath) {
+		this.visibleRegionPath = visibleRegionPath;
 	}
 
 	public java.lang.Long getCategoryId() {

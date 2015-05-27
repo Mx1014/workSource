@@ -11,11 +11,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>forumId: 论坛ID</li>
- * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostCreatorTag}</li>
+ * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
+ * <li>targetTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
- * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
- * <li>visibilityScopeId: 可见性类型对应的ID</li>
+ * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.visibility.VisibleRegionType}</li>
+ * <li>visibleRegionId: 区域范围类型对应的ID</li>
  * <li>longitude: 帖子内容涉及到的经度如活动</li>
  * <li>latitude: 帖子内容涉及到的纬度如活动</li>
  * <li>subject: 帖子标题</li>
@@ -32,16 +33,17 @@ public class NewTopicCommand {
     @NotNull
     private Long forumId;
     
-    @NotNull
     private String creatorTag;
-
+    
+    private String targetTag;    
+    
     private Long contentCategory;
     
     private Long actionCategory;
     
-    private Byte visibilityScope;
+    private Byte visibleRegionType;
 
-    private Long visibilityScopeId;
+    private Long visibleRegionId;
     
     private Double longitude;
     
@@ -68,6 +70,8 @@ public class NewTopicCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
+    private Byte privateFlag;
+    
     public NewTopicCommand() {
     }
     
@@ -79,7 +83,23 @@ public class NewTopicCommand {
 		this.forumId = forumId;
 	}
 
-	public Long getContentCategory() {
+    public String getCreatorTag() {
+        return creatorTag;
+    }
+
+    public void setCreatorTag(String creatorTag) {
+        this.creatorTag = creatorTag;
+    }
+
+    public String getTargetTag() {
+        return targetTag;
+    }
+
+    public void setTargetTag(String targetTag) {
+        this.targetTag = targetTag;
+    }
+
+    public Long getContentCategory() {
         return contentCategory;
     }
 
@@ -95,20 +115,20 @@ public class NewTopicCommand {
         this.actionCategory = actionCategory;
     }
 
-    public Byte getVisibilityScope() {
-        return visibilityScope;
+    public Byte getVisibleRegionType() {
+        return visibleRegionType;
     }
 
-    public void setVisibilityScope(Byte visibilityScope) {
-        this.visibilityScope = visibilityScope;
+    public void setVisibleRegionType(Byte visibleRegionType) {
+        this.visibleRegionType = visibleRegionType;
     }
 
-    public Long getVisibilityScopeId() {
-        return visibilityScopeId;
+    public Long getVisibleRegionId() {
+        return visibleRegionId;
     }
 
-    public void setVisibilityScopeId(Long visibilityScopeId) {
-        this.visibilityScopeId = visibilityScopeId;
+    public void setVisibleRegionId(Long visibleRegionId) {
+        this.visibleRegionId = visibleRegionId;
     }
 
     public Double getLongitude() {
@@ -189,6 +209,14 @@ public class NewTopicCommand {
 
     public void setAttachments(List<AttachmentDescriptor> attachments) {
         this.attachments = attachments;
+    }
+
+    public Byte getPrivateFlag() {
+        return privateFlag;
+    }
+
+    public void setPrivateFlag(Byte privateFlag) {
+        this.privateFlag = privateFlag;
     }
 
     @Override

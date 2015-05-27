@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CommunityStatusResponse {
     private Integer userCount;
-    @ItemType(String.class)
+    @ItemType(Contact.class)
     private List<Contact> contacts;
 
     public Integer getUserCount() {

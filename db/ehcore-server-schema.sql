@@ -811,13 +811,15 @@ CREATE TABLE `eh_forum_posts` (
     `parent_post_id` BIGINT COMMENT 'replied post id',
     `creator_uid` BIGINT NOT NULL COMMENT 'post creator uid',
     `creator_tag` VARCHAR(128) COMMENT 'post creator tag',
+	`target_tag` VARCHAR(128) COMMENT 'post target tag',
     
     `longitude` DOUBLE,
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     
-	`visibility_scope` TINYINT COMMENT 'define the visibiliy scope',
-    `visibility_scope_id` BIGINT COMMENT 'visibility scope related entity id',
+	`visible_region_type` TINYINT COMMENT 'define the visible region type',
+    `visible_region_id` BIGINT COMMENT 'visible region id',
+	`visible_region_path` VARCHAR(128) COMMENT 'visible region path',
     
     `category_id` BIGINT,
     `category_path` VARCHAR(128),

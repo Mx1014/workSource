@@ -30,14 +30,15 @@
             </c:otherwise>
         </c:choose>
         </td>
-        <c:choose>
+        <td><input style="width:99%;" name="${p.paramName}" /></td>
+        <!-- <c:choose>
 	        <c:when test="${fn:contains(p.paramName,'attachment')}">
 	        	<td><input style="width:99%;" type="file" name="${p.paramName}" /></td>
 	        </c:when>
 	        <c:otherwise>
 	        	<td><input style="width:99%;" name="${p.paramName}" /></td>
 	        </c:otherwise>
-        </c:choose>
+        </c:choose>-->
     </tr>
 </c:forEach>
 

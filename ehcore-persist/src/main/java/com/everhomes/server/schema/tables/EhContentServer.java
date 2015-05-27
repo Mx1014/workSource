@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhContentServer extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhContentServerRecord> {
 
-	private static final long serialVersionUID = 2027779514;
+	private static final long serialVersionUID = 1686545434;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_content_server</code>
@@ -81,14 +81,6 @@ public class EhContentServer extends org.jooq.impl.TableImpl<com.everhomes.serve
 
 	private EhContentServer(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhContentServerRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhContentServerRecord, java.lang.Long> getIdentity() {
-		return com.everhomes.server.schema.Keys.IDENTITY_EH_CONTENT_SERVER;
 	}
 
 	/**

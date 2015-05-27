@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 689514755;
+	private static final long serialVersionUID = 677236695;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -57,6 +57,11 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CREATOR_TAG = createField("creator_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "post creator tag");
 
 	/**
+	 * The column <code>ehcore.eh_forum_posts.target_tag</code>. post target tag
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> TARGET_TAG = createField("target_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "post target tag");
+
+	/**
 	 * The column <code>ehcore.eh_forum_posts.longitude</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Double> LONGITUDE = createField("longitude", org.jooq.impl.SQLDataType.DOUBLE, this, "");
@@ -72,14 +77,19 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> GEOHASH = createField("geohash", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.visibility_scope</code>. define the visibiliy scope
+	 * The column <code>ehcore.eh_forum_posts.visible_region_type</code>. define the region visibiliy type
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> VISIBILITY_SCOPE = createField("visibility_scope", org.jooq.impl.SQLDataType.TINYINT, this, "define the visibiliy scope");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> VISIBLE_REGION_TYPE = createField("visible_region_type", org.jooq.impl.SQLDataType.TINYINT, this, "define the region visibiliy type");
 
 	/**
-	 * The column <code>ehcore.eh_forum_posts.visibility_scope_id</code>. visibility scope related entity id
+	 * The column <code>ehcore.eh_forum_posts.visible_region_id</code>. region visibility type related entity id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> VISIBILITY_SCOPE_ID = createField("visibility_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "visibility scope related entity id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> VISIBLE_REGION_ID = createField("visible_region_id", org.jooq.impl.SQLDataType.BIGINT, this, "region visibility type related entity id");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.visible_region_path</code>. region visibility type related path, for example, city_id/region_id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> VISIBLE_REGION_PATH = createField("visible_region_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "region visibility type related path, for example, city_id/region_id");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.category_id</code>.

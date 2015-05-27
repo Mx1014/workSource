@@ -126,6 +126,7 @@ public class LoginAuthTestCase extends TestCase {
      * @param password 密码
      */
     protected long createPhoneUser(String phone, String password) {
+        password = EncryptionUtils.hashPassword(password);
     	User user = new User();
     	String salt=EncryptionUtils.createRandomSalt();
         user.setSalt(salt);

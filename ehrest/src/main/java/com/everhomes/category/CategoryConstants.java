@@ -5,5 +5,10 @@ public interface CategoryConstants {
     public static final long Business = 10000L;
     public static final long Interest = 10001L;
     public static final long ApplicationTool = 10002L;
+    
+    /** 物业 */
+    public static final long CATEGORY_ID_PM = 9L;
+    /** 公告（物业、业委、居委、公安等） */
+    public static final long CATEGORY_ID_GA_NOTICE = 3091L;
 
 }
