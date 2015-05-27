@@ -181,4 +181,20 @@ public class ContentServerServiceImpl implements ContentServerService {
                 cache.get(serverId).getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId,
                 token);
     }
+
+    @Override
+    public ContentServerResource findResourceByUri(String uri) {
+        if (StringUtils.isEmpty(uri)) {
+            return null;
+        }
+        String result = uri.replace("cs://", "");
+        int postion = result.indexOf("/");
+        if (postion < 0) {
+            LOGGER.error("cannot find any pattern resource");
+            return null;
+        }
+        result = result.substring(postion + 1, result.length());
+        return contentServerProvider.findByResourceId(result);
+    }
+
 }
