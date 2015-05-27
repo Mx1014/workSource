@@ -244,7 +244,7 @@ public class AddressController extends ControllerBase {
      * <p>根据小区Id、楼栋号查询门牌列表</p>
      */
     @RequestMapping("listApartmentsByBuildingName")
-    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class, collection=true)
+    @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class)
     public RestResponse listApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd) {
         ListApartmentByBuildingNameCommandResponse result = this.addressService.listApartmentsByBuildingName(cmd);
         RestResponse response = new RestResponse(result);

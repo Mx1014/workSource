@@ -284,7 +284,7 @@ public class FamilyController extends ControllerBase {
      * <p>查询小区邻居列表</p>
      */
     @RequestMapping("listNeighborUsers")
-    @RestReturn(value=ListNeighborUsersCommandResponse.class, collection=true)
+    @RestReturn(value=ListNeighborUsersCommandResponse.class)
     public RestResponse listNeighborUsers(@Valid ListNeighborUsersCommand cmd) {
         
         familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());

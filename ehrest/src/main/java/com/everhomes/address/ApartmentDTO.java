@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>addressId: 门牌号</li>
  * <li>apartmentName: 门牌号</li>
-  * <li>livingStatus: 地址入住状态</li>
+  * <li>livingStatus: 地址入住状态 ，参考{@link com.everhomes.address.AddressLivingStatus}</li>
  * </ul>
  */
 public class ApartmentDTO {

@@ -122,7 +122,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmMembers.class, null);
     }
     
-    @CacheEvict(value="CommunityPmMember", key="#id")
+    @CacheEvict(value="CommunityPmMember", key="#communityPmMember.id")
     @Override
     public void updatePropMember(CommunityPmMember communityPmMember){
     	assert(communityPmMember.getId() == null);
@@ -134,7 +134,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmMembers.class, communityPmMember.getId());
     }
     
-    @CacheEvict(value="CommunityPmMember", key="#id")
+    @CacheEvict(value="CommunityPmMember", key="#communityPmMember.id")
     @Override
     public void deletePropMember(CommunityPmMember communityPmMember){
     	
@@ -219,9 +219,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
    
-    @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityId"),
-            @CacheEvict(value = "CommunityAddressMappingsList", key="#communityId")})
+    @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId"),
+            @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void updatePropAddressMapping(CommunityAddressMapping communityAddressMapping){
     	assert(communityAddressMapping.getId() == null);
@@ -233,9 +233,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityAddressMappings.class, communityAddressMapping.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityId"),
-            @CacheEvict(value = "CommunityAddressMappingsList", key="#communityId")})
+    @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId"),
+            @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void deletePropAddressMapping(CommunityAddressMapping communityAddressMapping){
     	
@@ -246,9 +246,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityAddressMappings.class, communityAddressMapping.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityId"),
-            @CacheEvict(value = "CommunityAddressMappingsList", key="#communityId")})
+    @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId"),
+            @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void deletePropAddressMapping(long id){
     	
@@ -355,7 +355,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBills.class, communityPmBill.getId());
     }
     
-    @CacheEvict(value = "CommunityPmBill", key="#id")
+    @CacheEvict(value = "CommunityPmBill", key="#communityPmBill.id")
     @Override
     public void deletePropBill(CommunityPmBill communityPmBill){
     	
@@ -441,7 +441,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmOwners.class, null);
     }
     
-    @CacheEvict(value = "CommunityPmOwner", key="#id")
+    @CacheEvict(value = "CommunityPmOwner", key="communityPmOwner.#id")
     @Override
     public void updatePropOwner(CommunityPmOwner communityPmOwner){
     	assert(communityPmOwner.getId() == null);
@@ -453,7 +453,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, communityPmOwner.getId());
     }
     
-    @CacheEvict(value = "CommunityPmOwner", key="#id")
+    @CacheEvict(value = "CommunityPmOwner", key="#communityPmOwner.id")
     @Override
     public void deletePropOwner(CommunityPmOwner communityPmOwner){
     	
@@ -656,8 +656,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmBillItems.class, null);
     }
     
-    @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#id"),
-            @CacheEvict(value="CommunityPmBillItemsList", key="#billId")})
+    @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#communityPmBillItem.id"),
+            @CacheEvict(value="CommunityPmBillItemsList", key="#communityPmBillItem.billId")})
     @Override
     public void updatePropBillItem(CommunityPmBillItem communityPmBillItem){
     	assert(communityPmBillItem.getId() == null);
@@ -669,8 +669,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBillItems.class, communityPmBillItem.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#id"),
-            @CacheEvict(value="CommunityPmBillItemsList", key="#billId")})
+    @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#communityPmBillItem.id"),
+            @CacheEvict(value="CommunityPmBillItemsList", key="#communityPmBillItem.billId")})
     @Override
     public void deletePropBillItem(CommunityPmBillItem communityPmBillItem){
     	

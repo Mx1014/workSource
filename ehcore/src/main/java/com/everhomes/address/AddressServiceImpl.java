@@ -620,7 +620,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         list.stream().map((r) ->{
             Family family = this.familyProvider.findFamilyByAddressId(r.getAddressId());
             if(family != null && family.getMemberCount() > 0)
-                r.setLivingStatus(AddressLivingStatus.LIVINGSELF.getCode());
+                r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
             results.add(r);
             return null;
         }).collect(Collectors.toList());

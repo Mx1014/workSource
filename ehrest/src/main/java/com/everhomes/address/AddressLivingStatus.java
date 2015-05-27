@@ -2,15 +2,14 @@
 package com.everhomes.address;
 
 /**
- * <p>地址居住状态:0-未知、1-自住、2-出租、3-空置、4-装修、5-待售</p>
+ * <p>地址入住状态</p>
  * <ul>
- * <li>UNKNOWN: 未知 </li>
- * <li>LIVINGSELF: 自住 </li>
- * <li>RENT: 出租 </li>
+ * <li>INACTIVE: 无人 入住</li>
+ * <li>ACTIVE: 有人入住</li>
  * </ul>
  */
 public enum AddressLivingStatus {
-    UNKNOWN((byte)0), LIVINGSELF((byte)1),RENT((byte)2);
+    INACTIVE((byte)0), ACTIVE((byte)1);
     
     private byte code;
     private AddressLivingStatus(byte code) {
@@ -27,13 +26,10 @@ public enum AddressLivingStatus {
         
         switch(code.byteValue()) {
         case 0 :
-            return UNKNOWN;
+            return INACTIVE;
             
         case 1 :
-            return LIVINGSELF;
-            
-        case 2 :
-            return RENT;
+            return ACTIVE;
             
         default :
             assert(false);
