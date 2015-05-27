@@ -15,6 +15,9 @@ public class AppConfigAdapter extends WebMvcConfigurerAdapter {
 
     @Value("${javadoc.location}")
     private String javaDocLocation;
+    
+    @Value("${web.location}")
+    private String webLocation;
 
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
@@ -33,6 +36,7 @@ public class AppConfigAdapter extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/apidocs/**").addResourceLocations(javaDocLocation);
+        registry.addResourceHandler("/web/**").addResourceLocations(webLocation);
         super.addResourceHandlers(registry);
     }    
     
