@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.forum;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>postId: 帖子或评论ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
+ * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
+ * <li>targetTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
@@ -29,6 +34,8 @@ import com.everhomes.util.StringHelper;
  * <li>dislikeCount: 帖子或评论踩的数目</li>
  * <li>updateTime: 帖子或评论更新时间</li>
  * <li>createTime: 帖子或评论创建时间</li>
+ * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.forum.AttachmentDTO}</li>
+ * <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostAssignedFlag}</li>
  * </ul>
  */
 public class PostDTO {
@@ -37,6 +44,10 @@ public class PostDTO {
 	private Long parentPostId;
 	
     private Long forumId;
+    
+    private String creatorTag;
+    
+    private String targetTag;    
 
     private Long contentCategory;
     
@@ -74,6 +85,11 @@ public class PostDTO {
     private String updateTime;
     
     private String createTime;
+    
+    @ItemType(AttachmentDTO.class)
+    private List<AttachmentDTO> attachments;
+    
+    private Byte assignedFlag;
 
 	public Long getPostId() {
 		return postId;
@@ -99,7 +115,23 @@ public class PostDTO {
 		this.forumId = forumId;
 	}
 
-	public Long getContentCategory() {
+	public String getCreatorTag() {
+        return creatorTag;
+    }
+
+    public void setCreatorTag(String creatorTag) {
+        this.creatorTag = creatorTag;
+    }
+
+    public String getTargetTag() {
+        return targetTag;
+    }
+
+    public void setTargetTag(String targetTag) {
+        this.targetTag = targetTag;
+    }
+
+    public Long getContentCategory() {
         return contentCategory;
     }
 
@@ -243,7 +275,23 @@ public class PostDTO {
 		this.createTime = createTime;
 	}
 
-	@Override
+	public List<AttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<AttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    public Byte getAssignedFlag() {
+        return assignedFlag;
+    }
+
+    public void setAssignedFlag(Byte assignedFlag) {
+        this.assignedFlag = assignedFlag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -53,6 +53,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("elastic.nodes.ports", "9300")
             .withProperty("javadoc.root", "http://localhost:8080/apidocs")
             .withProperty("javadoc.location", "file:///Users/kelveny/archive/ehng/apidocs/")
+            .withProperty("web.location", "/resources/")
             );
     }
 }
