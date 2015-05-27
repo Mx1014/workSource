@@ -412,6 +412,26 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return result;
     }
     
+    @Cacheable(value = "listCommunityPmBills")
+    @Override
+    public List<CommunityPmBill> listCommunityPmBills(Long communityId, String dateStr) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        List<CommunityPmBill> result  = new ArrayList<CommunityPmBill>();
+        SelectQuery<EhCommunityPmBillsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_BILLS);
+        if(communityId != null){
+           query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId));
+        }
+        if(dateStr != null && !"".equals(dateStr)) {
+            query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
+        }
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_BILLS.ID.asc());
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmBill.class));
+            return null;
+        });
+        return result;
+    }
 
     @Override
     public int countCommunityPmBills(long communityId, String dateStr, String address) {
