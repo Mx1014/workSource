@@ -6,7 +6,7 @@ use ehcore;
 # System forum
 #
 INSERT INTO `eh_forums`(`id`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(1, 0, 0, 'System', 0, '社区论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+	VALUES(1, 0, 2, '', 0, '社区论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 #
 # Root categories
