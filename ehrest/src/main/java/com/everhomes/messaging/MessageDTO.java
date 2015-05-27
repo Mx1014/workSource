@@ -12,14 +12,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>appId: 应用ID</li>
- * <li>senderUid: 发送者UiD</li>
- * <li>channels: 通道列表。参考{@link com.everhomes.messaging.MessageChannel}</li>
- * <li>meta: 额外的消息信息</li>
- * <li>metaAppId: 消息模块的发送相关的应用ID</li>
- * <li>body: 消息内容</li>
- * <li>senderTag: 发送者标签</li>
- * <li>storeSequence: 消息体的位置游标</li>
+ * <li><p>appId:应用ID</p></li>
+ * <li><p>senderUid:发送者UiD</p></li>
+ * <li><p>contextType:上下文件类型</p></li>
+ * <li>contextToken:上下文件token</li>
+ * <li><p>channels:通道列表。参考{@link com.everhomes.messaging.MessageChannel}</p></li>
+ * <li><p>meta:额外要添加的信息</p></li>
+ * <li><p>metaAppId:消息模块的发送相关的应用ID</p></li>
+ * <li><p>body:消息内容</p></li>
+ * <li><p>senderTag:发送者标签</p></li>
+ * <li><p>messageSequence:</p></li>
+ * <li><p>storeSequence:消息体的位置游标</p></li>
+ * <li><p>createTime:记录创建时间</p></li>
  * </ul>
  *
  */

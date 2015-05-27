@@ -283,6 +283,10 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             }
             DeviceInfo dev = devNode.Item();
             Long anchor = frame.getPayload(Long.class);
+            if(anchor == null) {
+                LOGGER.error("request message error, missing anchor");
+                return;
+                }
             
             Map<String, String> params = new HashMap<String, String>();
             params.put("deviceId", dev.getDeviceId());
