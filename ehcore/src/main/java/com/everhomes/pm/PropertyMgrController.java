@@ -63,7 +63,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>查询物业成员列表</p>
      */
     @RequestMapping("listPMGroupMembers")
-    @RestReturn(value=ListPropMemberCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropMemberCommandResponse.class)
     public RestResponse listPropertyMembers(@Valid ListPropMemberCommand cmd) {
     	ListPropMemberCommandResponse commandResponse = propertyMgrService.listCommunityPmMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -138,7 +138,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
      */
     @RequestMapping("listPMAddressMapping")
-    @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropAddressMappingCommandResponse.class)
     public RestResponse listApartmentMappings(@Valid ListPropAddressMappingCommand cmd) {
     	ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.ListAddressMappings(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -167,7 +167,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
      */
     @RequestMapping("getPMAddressMapping")
-    @RestReturn(value=ListPropAddressMappingCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropAddressMappingCommandResponse.class)
     public RestResponse getPMAddressMapping(
     		@Valid ListPropAddressMappingCommand cmd) {
     	ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.ListAddressMappings(cmd);
@@ -215,7 +215,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>列出业主信息表</p>
      */
     @RequestMapping("listPMPropertyOwnerInfo")
-    @RestReturn(value=ListPropOwnerCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropOwnerCommandResponse.class)
     public RestResponse listPMPropertyOwnerInfo(@Valid ListPropOwnerCommand cmd) {
     	ListPropOwnerCommandResponse commandResponse = propertyMgrService.listPMPropertyOwnerInfo(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -317,7 +317,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它</p>
      */
     @RequestMapping("getPMTopicStatistics")
-    @RestReturn(value=ListPropTopicStatisticCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropTopicStatisticCommandResponse.class)
     public RestResponse getPMTopicStatistics(
     	@Valid ListPropTopicStatisticCommand  cmd) {
     	
@@ -410,7 +410,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * 查询缴费账单详情
 	 */
     @RequestMapping("listPropertyBill")
-    @RestReturn(value=ListPropBillCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropBillCommandResponse.class)
     public RestResponse listPropertyBill(
     	@Valid ListPropBillCommand cmd) {
     	ListPropBillCommandResponse commandResponse = propertyMgrService.listPropertyBill(cmd);
@@ -486,7 +486,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * 查询邀请加入左邻的用户列表
 	 */
     @RequestMapping("listInvitedUsers")
-    @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropInvitedUserCommandResponse.class)
     public RestResponse listInvitedUsers(@Valid ListPropInvitedUserCommand cmd) {
         ListPropInvitedUserCommandResponse  commandResponse = this.propertyMgrService.listInvitedUsers(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -500,7 +500,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * 搜索邀请加入左邻的用户
 	 */
     @RequestMapping("searchInvitedUsers")
-    @RestReturn(value=ListPropInvitedUserCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropInvitedUserCommandResponse.class)
     public RestResponse searchInvitedUsers(
     	@Valid ListPropInvitedUserCommand cmd) {
         ListPropInvitedUserCommandResponse  commandResponse = this.propertyMgrService.listInvitedUsers(cmd);
@@ -590,7 +590,7 @@ public class PropertyMgrController extends ControllerBase {
      * <p>根据用户token查询用户信息</p>
      */
     @RequestMapping("findUserByIndentifier")
-    @RestReturn(value=UserTokenCommandResponse.class, collection=true)
+    @RestReturn(value=UserTokenCommandResponse.class)
     public RestResponse findUserByIndentifier(@Valid UserTokenCommand cmd) {
         UserTokenCommandResponse commandResponse = propertyMgrService.findUserByIndentifier(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -623,7 +623,7 @@ public class PropertyMgrController extends ControllerBase {
      * @param communityId 小区ID
      */
     @RequestMapping("listPropFamilyWaitingMember")
-    @RestReturn(value=ListPropFamilyWaitingMemberCommandResponse.class, collection=true)
+    @RestReturn(value=ListPropFamilyWaitingMemberCommandResponse.class)
     public RestResponse listPropFamilyWaitingMember(@Valid ListPropFamilyWaitingMemberCommand cmd) throws Exception {
     	ListPropFamilyWaitingMemberCommandResponse commandResponse =  propertyMgrService.listPropFamilyWaitingMember(cmd);
         RestResponse response = new RestResponse(commandResponse);

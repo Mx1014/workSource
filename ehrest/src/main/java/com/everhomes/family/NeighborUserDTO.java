@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>userAvatarUri: 邻居用户头像Id</li>
  * <li>userAvatarUrl: 邻居用户头像url</li>
  * <li>userStatusLine: 个性签名</li>
- * <li>neighborhoodRelation: 邻居关系0-未知、1-同层、2-同楼</li>
+ * <li>neighborhoodRelation: 邻居关系参考，{@link com.everhomes.family.NeighborhoodRelation}</li>
  * <li>distance: 邻居用户与自己的距离</li>
  * </ul>
  */

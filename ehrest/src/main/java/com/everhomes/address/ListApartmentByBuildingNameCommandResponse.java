@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>apartmentLivingCount：存在用户的门牌数</li>
- * <li>groups: group信息，参考{@link com.everhomes.address.ApartmentDTO}</li>
+ * <li>apartmentList: apartment信息，参考{@link com.everhomes.address.ApartmentDTO}</li>
  * </ul>
  */
 public class ListApartmentByBuildingNameCommandResponse {

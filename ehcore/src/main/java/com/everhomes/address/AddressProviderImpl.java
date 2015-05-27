@@ -48,37 +48,16 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Override
     public void createAddress(Address address) {
-        long shardingTime1 = System.currentTimeMillis(); 
         long id = shardingProvider.allocShardableContentId(EhAddresses.class).second(); 
-        long shardingTime2 = System.currentTimeMillis(); 
-        LOGGER.info("allocShardableContentId elapse=" + (shardingTime2 - shardingTime1)); 
-         //1、allocShardableContentId elapse=348ms
-        //2、allocShardableContentId elapse=140ms
-        //3、allocShardableContentId elapse=224ms
 
-        long getDslContextTime1 = System.currentTimeMillis(); 
         address.setId(id); 
         address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id)); 
-        long getDslContextTime2 = System.currentTimeMillis(); 
-        LOGGER.info("getDslContextTime elapse=" + (getDslContextTime2 - getDslContextTime1)); 
-        //1、getDslContextTime elapse=159ms
-        //2、getDslContextTime elapse=93ms
-        //2、getDslContextTime elapse=100ms
 
-        long insertTime1 = System.currentTimeMillis(); 
         EhAddressesDao dao = new EhAddressesDao(context.configuration()); 
         dao.insert(address); 
-        long insertTime2 = System.currentTimeMillis(); 
-        LOGGER.info("insert time elapse=" + (insertTime2 - insertTime1)); 
-        //1、insert time elapse=113ms
-        //2、insert time elapse=81ms
-        //3、insert time elapse=87ms
 
-        long publishTime1 = System.currentTimeMillis(); 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null); 
-        long publishTime2 = System.currentTimeMillis(); 
-        LOGGER.info("push time elapse=" + (publishTime2 - publishTime1));
         
     }
 
@@ -207,7 +186,7 @@ public class AddressProviderImpl implements AddressProvider {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(communityId)
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)))
                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
-                        .limit(size).offset(offset)
+                        //.limit(size).offset(offset)
                         .fetch().map((r) -> {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
