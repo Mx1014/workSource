@@ -99,7 +99,7 @@ public class LoginAuthTestCase extends TestCase {
      * @param password 密码
      */
     protected User logon(String phone, String password) {
-    	UserLogin login = userService.logon(0, phone, password, null);
+    	UserLogin login = userService.logon(0, phone, EncryptionUtils.hashPassword(password), null);
         Assert.assertNotNull(login);
         Assert.assertTrue(login.getLoginId() > 0);
         
