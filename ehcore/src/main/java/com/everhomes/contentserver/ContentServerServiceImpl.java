@@ -193,8 +193,8 @@ public class ContentServerServiceImpl implements ContentServerService {
             LOGGER.error("cannot find any pattern resource");
             return null;
         }
-        result = result.substring(postion + 1, result.length());
-        return contentServerProvider.findByResourceId(result);
+        String[] arr = result.split("/");
+        String resourceId = Generator.decodeUrl(arr[arr.length - 1]);
+        return contentServerProvider.findByResourceId(resourceId);
     }
-
 }
