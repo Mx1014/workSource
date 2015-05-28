@@ -58,12 +58,12 @@ public class CommunityProviderImpl implements CommunityProvider {
     private ConfigurationProvider configurationProvider;
     
     @Override
-    public void createCommunity(Community community) {
+    public void createCommunity(Long creatorId, Community community) {
         long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
         
         community.setId(id);
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        community.setCreatorUid(UserContext.current().getUser().getId());
+        community.setCreatorUid(creatorId);
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));
         EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());

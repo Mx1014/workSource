@@ -72,7 +72,7 @@ public class AddressTest extends TestCase {
         User user = new User();
         user.setId(10001L);
         UserContext.current().setUser(user);
-        communityProvider.createCommunity(community);
+        communityProvider.createCommunity(user.getId(), community);
         communityCleanupList.add(community);
         
         for(int i = 1; i < 5; i++) {
@@ -84,7 +84,7 @@ public class AddressTest extends TestCase {
             c.setCityId(1L);
             c.setAreaId(1L);
             
-            communityProvider.createCommunity(c);
+            communityProvider.createCommunity(user.getId(), c);
             communityCleanupList.add(c);
         }
         

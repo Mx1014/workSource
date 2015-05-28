@@ -47,6 +47,7 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
@@ -127,12 +128,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         community.setName(cmd.getName());
         community.setAddress(cmd.getAddress());
         
-        UserContext user = UserContext.current();
-        community.setCreatorUid(user.getUser().getId());
+        User user = UserContext.current().getUser();
+        community.setCreatorUid(user.getId());
         community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
 
         this.dbProvider.execute((TransactionStatus status) ->  {
-            this.communityProvider.createCommunity(community);
+            this.communityProvider.createCommunity(user.getId(), community);
             if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
                 CommunityGeoPoint point = new CommunityGeoPoint();
                 point.setCommunityId(community.getId());
