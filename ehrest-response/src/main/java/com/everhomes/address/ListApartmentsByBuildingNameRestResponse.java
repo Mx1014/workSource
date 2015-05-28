@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-05-21 22:00:49
+// generated at 2015-05-27 21:29:38
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.address.ApartmentDTO;
+import com.everhomes.address.ListApartmentByBuildingNameCommandResponse;
 
 public class ListApartmentsByBuildingNameRestResponse extends RestResponseBase {
 
-    private List<ApartmentDTO> response;
+    private ListApartmentByBuildingNameCommandResponse response;
 
     public ListApartmentsByBuildingNameRestResponse () {
     }
 
-    public List<ApartmentDTO> getResponse() {
+    public ListApartmentByBuildingNameCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<ApartmentDTO> response) {
+    public void setResponse(ListApartmentByBuildingNameCommandResponse response) {
         this.response = response;
     }
 }

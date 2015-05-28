@@ -7,11 +7,11 @@ import com.everhomes.rest.RestResponseBase;
 import java.util.List;
 import com.everhomes.community.CommunityDoc;
 
-public class SearchCommunitiesRestResponse extends RestResponseBase {
+public class FindNearyCommunityByIdRestResponse extends RestResponseBase {
 
     private List<CommunityDoc> response;
 
-    public SearchCommunitiesRestResponse () {
+    public FindNearyCommunityByIdRestResponse () {
     }
 
     public List<CommunityDoc> getResponse() {

@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-05-21 22:00:49
+// generated at 2015-05-27 21:29:38
 package com.everhomes.family;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.family.NeighborUserDTO;
+import com.everhomes.family.ListNeighborUsersCommandResponse;
 
 public class ListNeighborUsersRestResponse extends RestResponseBase {
 
-    private List<NeighborUserDTO> response;
+    private ListNeighborUsersCommandResponse response;
 
     public ListNeighborUsersRestResponse () {
     }
 
-    public List<NeighborUserDTO> getResponse() {
+    public ListNeighborUsersCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<NeighborUserDTO> response) {
+    public void setResponse(ListNeighborUsersCommandResponse response) {
         this.response = response;
     }
 }

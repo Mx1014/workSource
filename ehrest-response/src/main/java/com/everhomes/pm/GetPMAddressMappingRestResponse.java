@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-05-21 22:00:49
+// generated at 2015-05-27 21:29:38
 package com.everhomes.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.pm.ListPropAddressMappingCommandResponse;
 
 public class GetPMAddressMappingRestResponse extends RestResponseBase {
 
-    private List<ListPropAddressMappingCommandResponse> response;
+    private ListPropAddressMappingCommandResponse response;
 
     public GetPMAddressMappingRestResponse () {
     }
 
-    public List<ListPropAddressMappingCommandResponse> getResponse() {
+    public ListPropAddressMappingCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<ListPropAddressMappingCommandResponse> response) {
+    public void setResponse(ListPropAddressMappingCommandResponse response) {
         this.response = response;
     }
 }

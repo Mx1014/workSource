@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -1533279137;
+	private static final long serialVersionUID = -571978955;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -154,42 +154,42 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.visible_region_type</code>. define the region visibiliy type
+	 * Setter for <code>ehcore.eh_forum_posts.visible_region_type</code>. define the visible region type
 	 */
 	public void setVisibleRegionType(java.lang.Byte value) {
 		setValue(10, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.visible_region_type</code>. define the region visibiliy type
+	 * Getter for <code>ehcore.eh_forum_posts.visible_region_type</code>. define the visible region type
 	 */
 	public java.lang.Byte getVisibleRegionType() {
 		return (java.lang.Byte) getValue(10);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.visible_region_id</code>. region visibility type related entity id
+	 * Setter for <code>ehcore.eh_forum_posts.visible_region_id</code>. visible region id
 	 */
 	public void setVisibleRegionId(java.lang.Long value) {
 		setValue(11, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.visible_region_id</code>. region visibility type related entity id
+	 * Getter for <code>ehcore.eh_forum_posts.visible_region_id</code>. visible region id
 	 */
 	public java.lang.Long getVisibleRegionId() {
 		return (java.lang.Long) getValue(11);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.visible_region_path</code>. region visibility type related path, for example, city_id/region_id
+	 * Setter for <code>ehcore.eh_forum_posts.visible_region_path</code>. visible region path
 	 */
 	public void setVisibleRegionPath(java.lang.String value) {
 		setValue(12, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.visible_region_path</code>. region visibility type related path, for example, city_id/region_id
+	 * Getter for <code>ehcore.eh_forum_posts.visible_region_path</code>. visible region path
 	 */
 	public java.lang.String getVisibleRegionPath() {
 		return (java.lang.String) getValue(12);

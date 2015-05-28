@@ -84,7 +84,7 @@ public class BusBridgeTest  extends TestCase {
         }
         
         MessageLocator l = new MessageLocator(testPrefix);
-        l.setAnchor(0l);
+        //l.setAnchor(0l);
         List<Message> msgInBox = messageBoxProvider.getPastToRecentMessages(l, 5, true);
         System.out.println("Got content: " + msgInBox.get(msgInBox.size()-1).getContent() + " anchor: " + l.getAnchor() + " size: " + msgInBox.size());
 
@@ -95,13 +95,13 @@ public class BusBridgeTest  extends TestCase {
         System.out.println("Got content: " + msgInBox.get(msgInBox.size()-1).getContent() + " anchor: " + l.getAnchor() + " size: " + msgInBox.size());
         
         l = new MessageLocator(testPrefix);
-        l.setAnchor(0l);
+        // l.setAnchor(0l);
         msgInBox = messageBoxProvider.getPastToRecentMessages(l, 5, true);
         System.out.println("Got content: " + msgInBox.get(msgInBox.size()-1).getContent() + " anchor: " + l.getAnchor() + " size: " + msgInBox.size());
         assertTrue(msgInBox.size() == 2);
         
         l = new MessageLocator(testPrefix);
-        l.setAnchor(0l);
+        //l.setAnchor(0l);
         msgInBox = messageBoxProvider.getPastToRecentMessages(l, 5, true);
         assertTrue(msgInBox.size() == 0);
     }

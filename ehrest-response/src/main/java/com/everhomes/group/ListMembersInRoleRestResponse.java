@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-05-21 22:00:49
+// generated at 2015-05-27 21:29:38
 package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.group.ListMemberCommandResponse;
 
 public class ListMembersInRoleRestResponse extends RestResponseBase {
 
-    private List<ListMemberCommandResponse> response;
+    private ListMemberCommandResponse response;
 
     public ListMembersInRoleRestResponse () {
     }
 
-    public List<ListMemberCommandResponse> getResponse() {
+    public ListMemberCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<ListMemberCommandResponse> response) {
+    public void setResponse(ListMemberCommandResponse response) {
         this.response = response;
     }
 }
