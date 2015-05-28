@@ -379,7 +379,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("sendNoticeToAddress")
 	@RestReturn(value=String.class)
     public RestResponse sendNoticeToFamily(@Valid PropCommunityBuildAddessCommand cmd) {
-		
+		propertyMgrService.sendNoticeToFamily(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -428,7 +428,7 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("deletePropertyBillByMonth")
     @RestReturn(value=String.class)
-    public RestResponse deletePropertyBillByMonth(@Valid PropCommunityBillDateStrCommand cmd) {
+    public RestResponse deletePropertyBillByMonth(@Valid PropCommunityBillDateCommand cmd) {
     	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -458,8 +458,8 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("sendPropertyBillsByMonth")
     @RestReturn(value=String.class)
-    public RestResponse sendPropertyBillsByMonth(@Valid PropCommunityBillDateStrCommand cmd) {
-    	
+    public RestResponse sendPropertyBillsByMonth(@Valid PropCommunityBillDateCommand cmd) {
+    	propertyMgrService.sendPropertyBillByMonth(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -467,14 +467,14 @@ public class PropertyMgrController extends ControllerBase {
     }
 	
 	/**
-	 * <b>URL: /pm/sendPropertyBill</b>
+	 * <b>URL: /pm/sendPropertyBillById</b>
 	 * 发指定的单个缴费账单
      * @return 发送物业缴费通知的结果
      */
-    @RequestMapping("sendPropertyBill")
+    @RequestMapping("sendPropertyBillById")
     @RestReturn(value=String.class)
-    public RestResponse sendPropertyBill(@Valid PropCommunityBillIdCommand cmd) {
-    	
+    public RestResponse sendPropertyBillById(@Valid PropCommunityBillIdCommand cmd) {
+    	propertyMgrService.sendPropertyBillById(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

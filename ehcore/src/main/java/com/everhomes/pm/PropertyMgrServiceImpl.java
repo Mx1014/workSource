@@ -20,13 +20,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressDTO;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ApartmentDTO;
 import com.everhomes.address.BuildingDTO;
+import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.address.ListAddressCommand;
+import com.everhomes.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
+import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -47,6 +51,9 @@ import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -108,6 +115,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private ForumProvider forumProvider;
+    
+    @Autowired
+    private MessagingService messagingService;
     
     @Override
     public void createPropMember(CreatePropMemberCommand cmd) {
@@ -202,30 +212,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), 1, 10);
     	if(entityResultList == null || entityResultList.size() == 0)
     	{
-    		for (int i = 1; i <= 100; i++) {
-        		ListAddressCommand comand = new ListAddressCommand();
-        		comand.setCommunityId(cmd.getCommunityId());
-        		comand.setOffset(new Long(i));
-        		comand.setPageSize(new Long(100));
-        		Tuple<Integer,List<Address>> addresses= addressService.listAddressByCommunityId(comand);
-        		List<Address> addessList = addresses.second();
-        		if(addessList != null && addessList.size() > 0)
-        		{
-        			for (Address address : addessList) {
-    					CommunityAddressMapping m = new CommunityAddressMapping();
-    					m.setAddressId(address.getId());
-    					m.setCommunityId(cmd.getCommunityId());
-    					m.setName(address.getAddress());
-    					m.setLivingStatus((byte)0);
-    					propertyMgrProvider.createPropAddressMapping(m);
-    				}
-        		}
-        		else
-        		{
-        			break;
-        		}
-        	}
-    	}
+    		ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
+    		comand.setCommunityId(cmd.getCommunityId());
+    		comand.setKeyword(null);
+    		List<Address> addresses= addressService.listAddressByKeyword(comand);
+    		if(addresses != null && addresses.size() > 0)
+    		{
+    			for (Address address : addresses) {
+					CommunityAddressMapping m = new CommunityAddressMapping();
+					m.setAddressId(address.getId());
+					m.setCommunityId(cmd.getCommunityId());
+					m.setName(address.getAddress());
+					m.setLivingStatus((byte)0);
+					propertyMgrProvider.createPropAddressMapping(m);
+				}
+    		}
+        }
     	
     }
     
@@ -1007,5 +1009,170 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		}
     		return status;
     	});
+    }
+    
+    @Override
+    public void sendPropertyBillById(PropCommunityBillIdCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	CommunityPmBill bill = propertyMgrProvider.findPropBillById(cmd.getBillId());
+    	sendPropertyBill(bill);
+    	
+    }
+    
+    @Override
+    public void sendPropertyBillByMonth(PropCommunityBillDateCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	List<CommunityPmBill> billList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr());
+    	if(billList != null && billList.size() > 0)
+    	{
+    		for (CommunityPmBill communityPmBill : billList) {
+    			sendPropertyBill(communityPmBill);
+			}
+    	}
+    	
+    }
+    
+    
+    public void sendPropertyBill(CommunityPmBill bill) {
+    	if(bill == null)
+    	{
+    		LOGGER.error("Unable to find the bill." );
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_BILL, 
+                     "Unable to find the bill.");
+    	}
+    	Address address = addressProvider.findAddressById(bill.getEntityId());
+    	if(address == null)
+    	{
+    		LOGGER.error("Unable to find the address.addressId=" + bill.getEntityId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_ADDRESS, 
+                     "Unable to find the address.");
+    	}
+    	Family family = familyProvider.findFamilyByAddressId(address.getId());
+    	if(family == null)
+    	{
+    		LOGGER.error("Unable to find the family.familyId=" +address.getId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_FAMILY, 
+                     "Unable to find the family.");
+    	}
+    	String content = "账单时间：" + bill.getDateStr() +"\n";
+		List<CommunityPmBillItem> itemList  = propertyMgrProvider.listCommunityPmBillItems(bill.getId());
+		if(itemList != null && itemList.size() > 0)
+		{
+			for (CommunityPmBillItem item : itemList)
+			{
+				content += item.getItemName()+": " + item.getTotalAmount() + "元\n";
+			}
+		}
+		content += "总费用：" + bill.getTotalAmount();
+		sendNoticeToFamilyById(family.getId(), content);
+    }
+    
+    @Override
+    public void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	List<String> buildingNames = cmd.getBuildingNames();
+    	List<Long> addressIds = cmd.getAddressIds();
+    	
+    	//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。 
+    	List<Long> familyIds = new ArrayList<Long>();
+    	List<Long> userIds = new ArrayList<Long>();
+    	
+    	
+    	//按小区发送: buildingNames 和 addressIds 为空。
+    	if((buildingNames == null || buildingNames.size() > 0) && (addressIds == null || addressIds.size() > 0)){
+    		ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
+    		comand.setCommunityId(cmd.getCommunityId());
+    		comand.setKeyword(null);
+    		List<Address> addresses= addressService.listAddressByKeyword(comand);
+    		if(addresses != null && addresses.size() > 0){
+    			for (Address address : addresses) {
+    				Family family = familyProvider.findFamilyByAddressId(address.getId());
+    				if(family != null){
+    					familyIds.add(family.getId());
+    				}
+				}
+    		}
+    	}
+    	
+    	//按地址发送：
+    	else if(addressIds != null && addressIds.size() > 0){
+    		for (Long addressId : addressIds) {
+				Family family = familyProvider.findFamilyByAddressId(addressId);
+				if(family != null){
+					familyIds.add(family.getId());
+				}
+			}
+    	}
+    	
+    	//按楼栋发送：
+    	else if((addressIds == null || addressIds.size() == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
+    		for (String buildingName : buildingNames) {
+    			int pageSize = configProvider.getIntValue("pagination.page.size",  AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+    			List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, pageSize);
+        		if(addresses != null && addresses.size() > 0){
+        			for (ApartmentDTO address : addresses) {
+        				Family family = familyProvider.findFamilyByAddressId(address.getAddressId());
+        				if(family != null){
+        					familyIds.add(family.getId());
+        				}
+    				}
+        		}
+			}
+		}
+    	
+    	if(familyIds != null && familyIds.size() > 0){
+    		for (Long familyId : userIds) {
+    			sendNoticeToFamilyById(familyId, cmd.getMessage());
+			}
+    	}
+    }
+    
+    public void sendNoticeToFamilyById(Long familyId,String message){
+    	MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_FAMILY);
+        messageDto.setSenderUid(UserContext.current().getUser().getId());
+        messageDto.setChannels(new MessageChannel("group", String.valueOf(familyId)));
+        messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+        messageDto.setBody(message);
+        
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "group", 
+       		 String.valueOf(familyId), messageDto, MessagingService.MSG_FLAG_STORED);
     }
 }

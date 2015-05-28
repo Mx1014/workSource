@@ -6,13 +6,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>communityId: 小区id</li>
- * <li>dateStr: 账单时间</li>
+ * <li>billId: 账单id</li>
  * </ul>
  */
 public class PropCommunityBillIdCommand {
     private Long communityId;
     
-    private String dateStr;
+    private int billId;
    
     public PropCommunityBillIdCommand() {
     }
@@ -27,15 +27,14 @@ public class PropCommunityBillIdCommand {
 		this.communityId = communityId;
 	}
 	
-
-
-	public String getDateStr() {
-		return dateStr;
+	
+	public int getBillId() {
+		return billId;
 	}
 
 
-	public void setDateStr(String dateStr) {
-		this.dateStr = dateStr;
+	public void setBillId(int billId) {
+		this.billId = billId;
 	}
 
 

@@ -1,21 +1,29 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>communityId: 小区id</li>
- * <li>buildingName: 小区楼栋号</li>
- * <li>apartmentName: 小区门牌号</li>
+ * <li>buildingNames: 小区楼栋号列表</li>
+ * <li>addressIds: 地址id列表</li>
+ * <li>message: 消息内容</li>
  * </ul>
  */
 public class PropCommunityBuildAddessCommand {
     private Long communityId;
     
-    private String buildingName;
+    @ItemType(String.class)
+    private List<String> buildingNames;
     
-    private String apartmentName;
+    @ItemType(Long.class)
+    private List<Long> addressIds;
+    
+    private String message;
    
     public PropCommunityBuildAddessCommand() {
     }
@@ -30,25 +38,33 @@ public class PropCommunityBuildAddessCommand {
 		this.communityId = communityId;
 	}
 	
-
-	public String getBuildingName() {
-		return buildingName;
+	public List<String> getBuildingNames() {
+		return buildingNames;
 	}
 
 
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
-
-	
-
-	public String getApartmentName() {
-		return apartmentName;
+	public void setBuildingNames(List<String> buildingNames) {
+		this.buildingNames = buildingNames;
 	}
 
 
-	public void setApartmentName(String apartmentName) {
-		this.apartmentName = apartmentName;
+	public List<Long> getAddressIds() {
+		return addressIds;
+	}
+
+
+	public void setAddressIds(List<Long> addressIds) {
+		this.addressIds = addressIds;
+	}
+
+
+	public String getMessage() {
+		return message;
+	}
+
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 
