@@ -20,7 +20,6 @@ import com.everhomes.util.StringHelper;
  * <li>visibilityScopeId: 可见性类型对应的ID</li>
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
- * <li>category_id: 帖子或评论类型ID</li>
  * <li>subject: 帖子或评论标题</li>
  * <li>content_type: 帖子或评论内容类型，{@link com.everhomes.forum.PostContentType}</li>
  * <li>content: 帖子或评论内容</li>
