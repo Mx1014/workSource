@@ -48,10 +48,24 @@ public class EhRecommendationConfigsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
+	 * Fetch records that have <code>appId IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByAppid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.APPID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>suggest_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchBySuggestType(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.SUGGEST_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>source_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchBySourceType(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.SOURCE_TYPE, values);
 	}
 
 	/**
@@ -69,17 +83,17 @@ public class EhRecommendationConfigsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>source_type IN (values)</code>
+	 * Fetch records that have <code>period_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchBySourceType(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.SOURCE_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByPeriodType(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.PERIOD_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>content IN (values)</code>
+	 * Fetch records that have <code>period_value IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByContent(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.CONTENT, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByPeriodValue(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.PERIOD_VALUE, values);
 	}
 
 	/**
@@ -97,10 +111,10 @@ public class EhRecommendationConfigsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>start_time_millis IN (values)</code>
+	 * Fetch records that have <code>start_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByStartTimeMillis(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.START_TIME_MILLIS, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByStartTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.START_TIME, values);
 	}
 
 	/**
@@ -111,16 +125,23 @@ public class EhRecommendationConfigsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
+	 * Fetch records that have <code>expire_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByExpireTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.EXPIRE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>embedded_json IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByEmbeddedJson(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.EMBEDDED_JSON, values);
+	}
+
+	/**
 	 * Fetch records that have <code>description IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.DESCRIPTION, values);
-	}
-
-	/**
-	 * Fetch records that have <code>expire_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendationConfigs> fetchByExpireTime(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS.EXPIRE_TIME, values);
 	}
 }

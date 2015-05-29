@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord> {
 
-	private static final long serialVersionUID = -1670948141;
+	private static final long serialVersionUID = 1251123545;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recommendation_configs</code>
@@ -32,9 +32,19 @@ public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_recommendation_configs.appId</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_recommendation_configs.suggest_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Integer> SUGGEST_TYPE = createField("suggest_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recommendation_configs.source_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Integer> SOURCE_TYPE = createField("source_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendation_configs.target_type</code>.
@@ -47,14 +57,14 @@ public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendation_configs.source_type</code>.
+	 * The column <code>ehcore.eh_recommendation_configs.period_type</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Integer> SOURCE_TYPE = createField("source_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Integer> PERIOD_TYPE = createField("period_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendation_configs.content</code>.
+	 * The column <code>ehcore.eh_recommendation_configs.period_value</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.VARCHAR.length(1024).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Integer> PERIOD_VALUE = createField("period_value", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendation_configs.status</code>.
@@ -67,9 +77,9 @@ public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendation_configs.start_time_millis</code>.
+	 * The column <code>ehcore.eh_recommendation_configs.start_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Long> START_TIME_MILLIS = createField("start_time_millis", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.sql.Timestamp> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendation_configs.running_time</code>.
@@ -77,14 +87,19 @@ public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.sql.Timestamp> RUNNING_TIME = createField("running_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendation_configs.description</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(2048).defaulted(true), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_recommendation_configs.expire_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.String> EXPIRE_TIME = createField("expire_time", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.sql.Timestamp> EXPIRE_TIME = createField("expire_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recommendation_configs.embedded_json</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recommendation_configs.description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(1024).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_recommendation_configs</code> table reference

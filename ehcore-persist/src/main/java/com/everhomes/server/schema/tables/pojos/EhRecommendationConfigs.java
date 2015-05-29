@@ -11,49 +11,58 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendationConfigs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 632260769;
+	private static final long serialVersionUID = 1821686683;
 
 	private java.lang.Long     id;
+	private java.lang.Long     appid;
 	private java.lang.Integer  suggestType;
+	private java.lang.Integer  sourceType;
 	private java.lang.Integer  targetType;
 	private java.lang.Long     targetId;
-	private java.lang.Integer  sourceType;
-	private java.lang.String   content;
+	private java.lang.Integer  periodType;
+	private java.lang.Integer  periodValue;
 	private java.lang.Integer  status;
 	private java.sql.Timestamp createTime;
-	private java.lang.Long     startTimeMillis;
+	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp runningTime;
+	private java.sql.Timestamp expireTime;
+	private java.lang.String   embeddedJson;
 	private java.lang.String   description;
-	private java.lang.String   expireTime;
 
 	public EhRecommendationConfigs() {}
 
 	public EhRecommendationConfigs(
 		java.lang.Long     id,
+		java.lang.Long     appid,
 		java.lang.Integer  suggestType,
+		java.lang.Integer  sourceType,
 		java.lang.Integer  targetType,
 		java.lang.Long     targetId,
-		java.lang.Integer  sourceType,
-		java.lang.String   content,
+		java.lang.Integer  periodType,
+		java.lang.Integer  periodValue,
 		java.lang.Integer  status,
 		java.sql.Timestamp createTime,
-		java.lang.Long     startTimeMillis,
+		java.sql.Timestamp startTime,
 		java.sql.Timestamp runningTime,
-		java.lang.String   description,
-		java.lang.String   expireTime
+		java.sql.Timestamp expireTime,
+		java.lang.String   embeddedJson,
+		java.lang.String   description
 	) {
 		this.id = id;
+		this.appid = appid;
 		this.suggestType = suggestType;
+		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.targetId = targetId;
-		this.sourceType = sourceType;
-		this.content = content;
+		this.periodType = periodType;
+		this.periodValue = periodValue;
 		this.status = status;
 		this.createTime = createTime;
-		this.startTimeMillis = startTimeMillis;
+		this.startTime = startTime;
 		this.runningTime = runningTime;
-		this.description = description;
 		this.expireTime = expireTime;
+		this.embeddedJson = embeddedJson;
+		this.description = description;
 	}
 
 	public java.lang.Long getId() {
@@ -64,12 +73,28 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 		this.id = id;
 	}
 
+	public java.lang.Long getAppid() {
+		return this.appid;
+	}
+
+	public void setAppid(java.lang.Long appid) {
+		this.appid = appid;
+	}
+
 	public java.lang.Integer getSuggestType() {
 		return this.suggestType;
 	}
 
 	public void setSuggestType(java.lang.Integer suggestType) {
 		this.suggestType = suggestType;
+	}
+
+	public java.lang.Integer getSourceType() {
+		return this.sourceType;
+	}
+
+	public void setSourceType(java.lang.Integer sourceType) {
+		this.sourceType = sourceType;
 	}
 
 	public java.lang.Integer getTargetType() {
@@ -88,20 +113,20 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 		this.targetId = targetId;
 	}
 
-	public java.lang.Integer getSourceType() {
-		return this.sourceType;
+	public java.lang.Integer getPeriodType() {
+		return this.periodType;
 	}
 
-	public void setSourceType(java.lang.Integer sourceType) {
-		this.sourceType = sourceType;
+	public void setPeriodType(java.lang.Integer periodType) {
+		this.periodType = periodType;
 	}
 
-	public java.lang.String getContent() {
-		return this.content;
+	public java.lang.Integer getPeriodValue() {
+		return this.periodValue;
 	}
 
-	public void setContent(java.lang.String content) {
-		this.content = content;
+	public void setPeriodValue(java.lang.Integer periodValue) {
+		this.periodValue = periodValue;
 	}
 
 	public java.lang.Integer getStatus() {
@@ -120,12 +145,12 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.lang.Long getStartTimeMillis() {
-		return this.startTimeMillis;
+	public java.sql.Timestamp getStartTime() {
+		return this.startTime;
 	}
 
-	public void setStartTimeMillis(java.lang.Long startTimeMillis) {
-		this.startTimeMillis = startTimeMillis;
+	public void setStartTime(java.sql.Timestamp startTime) {
+		this.startTime = startTime;
 	}
 
 	public java.sql.Timestamp getRunningTime() {
@@ -136,19 +161,27 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 		this.runningTime = runningTime;
 	}
 
+	public java.sql.Timestamp getExpireTime() {
+		return this.expireTime;
+	}
+
+	public void setExpireTime(java.sql.Timestamp expireTime) {
+		this.expireTime = expireTime;
+	}
+
+	public java.lang.String getEmbeddedJson() {
+		return this.embeddedJson;
+	}
+
+	public void setEmbeddedJson(java.lang.String embeddedJson) {
+		this.embeddedJson = embeddedJson;
+	}
+
 	public java.lang.String getDescription() {
 		return this.description;
 	}
 
 	public void setDescription(java.lang.String description) {
 		this.description = description;
-	}
-
-	public java.lang.String getExpireTime() {
-		return this.expireTime;
-	}
-
-	public void setExpireTime(java.lang.String expireTime) {
-		this.expireTime = expireTime;
 	}
 }

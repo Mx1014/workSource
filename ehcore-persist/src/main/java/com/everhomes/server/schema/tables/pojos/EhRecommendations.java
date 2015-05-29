@@ -11,41 +11,44 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1902563859;
+	private static final long serialVersionUID = 508495383;
 
 	private java.lang.Long     id;
+	private java.lang.Long     appid;
 	private java.lang.Integer  suggestType;
 	private java.lang.Long     userId;
 	private java.lang.Integer  targetType;
 	private java.lang.Long     targetId;
-	private java.lang.String   reasonJson;
+	private java.lang.String   embeddedJson;
 	private java.lang.Integer  maxCount;
 	private java.lang.Double   score;
 	private java.lang.Integer  status;
 	private java.sql.Timestamp createTime;
-	private java.lang.String   expireTime;
+	private java.sql.Timestamp expireTime;
 
 	public EhRecommendations() {}
 
 	public EhRecommendations(
 		java.lang.Long     id,
+		java.lang.Long     appid,
 		java.lang.Integer  suggestType,
 		java.lang.Long     userId,
 		java.lang.Integer  targetType,
 		java.lang.Long     targetId,
-		java.lang.String   reasonJson,
+		java.lang.String   embeddedJson,
 		java.lang.Integer  maxCount,
 		java.lang.Double   score,
 		java.lang.Integer  status,
 		java.sql.Timestamp createTime,
-		java.lang.String   expireTime
+		java.sql.Timestamp expireTime
 	) {
 		this.id = id;
+		this.appid = appid;
 		this.suggestType = suggestType;
 		this.userId = userId;
 		this.targetType = targetType;
 		this.targetId = targetId;
-		this.reasonJson = reasonJson;
+		this.embeddedJson = embeddedJson;
 		this.maxCount = maxCount;
 		this.score = score;
 		this.status = status;
@@ -59,6 +62,14 @@ public class EhRecommendations implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getAppid() {
+		return this.appid;
+	}
+
+	public void setAppid(java.lang.Long appid) {
+		this.appid = appid;
 	}
 
 	public java.lang.Integer getSuggestType() {
@@ -93,12 +104,12 @@ public class EhRecommendations implements java.io.Serializable {
 		this.targetId = targetId;
 	}
 
-	public java.lang.String getReasonJson() {
-		return this.reasonJson;
+	public java.lang.String getEmbeddedJson() {
+		return this.embeddedJson;
 	}
 
-	public void setReasonJson(java.lang.String reasonJson) {
-		this.reasonJson = reasonJson;
+	public void setEmbeddedJson(java.lang.String embeddedJson) {
+		this.embeddedJson = embeddedJson;
 	}
 
 	public java.lang.Integer getMaxCount() {
@@ -133,11 +144,11 @@ public class EhRecommendations implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.lang.String getExpireTime() {
+	public java.sql.Timestamp getExpireTime() {
 		return this.expireTime;
 	}
 
-	public void setExpireTime(java.lang.String expireTime) {
+	public void setExpireTime(java.sql.Timestamp expireTime) {
 		this.expireTime = expireTime;
 	}
 }

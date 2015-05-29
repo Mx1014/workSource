@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRecommendationsRecord> {
 
-	private static final long serialVersionUID = 882071703;
+	private static final long serialVersionUID = 1417007322;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recommendations</code>
@@ -30,6 +30,11 @@ public class EhRecommendations extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_recommendations.id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recommendations.appId</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendations.suggest_type</code>.
@@ -52,9 +57,9 @@ public class EhRecommendations extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendations.reason_json</code>.
+	 * The column <code>ehcore.eh_recommendations.embedded_json</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.String> REASON_JSON = createField("reason_json", org.jooq.impl.SQLDataType.VARCHAR.length(1024).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendations.max_count</code>.
@@ -79,7 +84,7 @@ public class EhRecommendations extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_recommendations.expire_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.String> EXPIRE_TIME = createField("expire_time", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.sql.Timestamp> EXPIRE_TIME = createField("expire_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_recommendations</code> table reference

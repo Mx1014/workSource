@@ -48,6 +48,13 @@ public class EhRecommendationsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>appId IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByAppid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.APPID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>suggest_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchBySuggestType(java.lang.Integer... values) {
@@ -76,10 +83,10 @@ public class EhRecommendationsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>reason_json IN (values)</code>
+	 * Fetch records that have <code>embedded_json IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByReasonJson(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.REASON_JSON, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByEmbeddedJson(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.EMBEDDED_JSON, values);
 	}
 
 	/**
@@ -113,7 +120,7 @@ public class EhRecommendationsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>expire_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByExpireTime(java.lang.String... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByExpireTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.EXPIRE_TIME, values);
 	}
 }
