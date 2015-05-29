@@ -767,7 +767,7 @@ CREATE TABLE `eh_group_op_requests` (
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_grp_op_group`(`group_id`),
-    INDEX `i_eh_grp_op_requestor`(`reqestor_uid`),
+    INDEX `i_eh_grp_op_requestor`(`requestor_uid`),
     INDEX `i_eh_grp_op_create_time`(`create_time`),
     INDEX `i_eh_grp_op_process_time`(`process_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
