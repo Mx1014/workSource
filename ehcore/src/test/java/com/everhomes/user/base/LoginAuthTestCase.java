@@ -194,6 +194,13 @@ public class LoginAuthTestCase extends TestCase {
     	return userIdList;
     }
     
+    protected void prepareAclAndAssignments() {
+        deleteAllAcls();
+        deleteAllAssignments();
+        
+        createAcl();
+    }
+    
     protected void createAcl() {
         Acl acl = new Acl();
         acl.setOwnerType("system");
@@ -379,5 +386,19 @@ public class LoginAuthTestCase extends TestCase {
     	} catch(Exception e) {
     		e.printStackTrace();
     	}
+    }
+    
+    protected void deleteAllAcls() {
+        List<Acl> aclList = this.aclProvider.getAllAcls();
+        for(Acl acl : aclList) {
+            this.aclProvider.deleteAcl(acl);
+        }
+    }
+    
+    protected void deleteAllAssignments() {
+        List<RoleAssignment> assignments = this.aclProvider.getAllRoleAssignments();
+        for(RoleAssignment assignment : assignments) {
+            this.aclProvider.deleteRoleAssignment(assignment);
+        }
     }
 }
