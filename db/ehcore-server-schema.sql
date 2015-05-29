@@ -790,7 +790,6 @@ CREATE TABLE `eh_forums` (
     `create_time` DATETIME NOT NULL,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_frm_owner_name`(`owner_type`, `owner_id`, `name`),
     INDEX `i_eh_frm_namespace`(`namespace_id`),
     INDEX `i_eh_frm_owner`(`owner_type`, `owner_id`),
     INDEX `i_eh_frm_post_count` (`post_count`),

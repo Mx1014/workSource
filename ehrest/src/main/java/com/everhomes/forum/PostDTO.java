@@ -9,15 +9,15 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>帖子或评论信息：</p>
  * <ul>
- * <li>postId: 帖子或评论ID</li>
+ * <li>id: 帖子或评论ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
- * <li>visibilityScope: 可见性范围类型，{@link com.everhomes.visibility.VisibilityScope}</li>
- * <li>visibilityScopeId: 可见性类型对应的ID</li>
+ * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.visibility.VisibleRegionType}</li>
+ * <li>visibleRegionId: 区域范围类型对应的ID</li>
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
  * <li>subject: 帖子或评论标题</li>
@@ -38,7 +38,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class PostDTO {
-	private Long postId;
+	private Long id;
 	
 	private Long parentPostId;
 	
@@ -52,9 +52,9 @@ public class PostDTO {
     
     private Long actionCategory;
     
-    private Byte visibilityScope;
+    private Byte visibleRegionType;
 
-    private Long visibilityScopeId;
+    private Long visibleRegionId;
     
     private Double longitude;
     
@@ -90,15 +90,15 @@ public class PostDTO {
     
     private Byte assignedFlag;
 
-	public Long getPostId() {
-		return postId;
-	}
+	public Long getId() {
+        return id;
+    }
 
-	public void setPostId(Long postId) {
-		this.postId = postId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Long getParentPostId() {
+    public Long getParentPostId() {
 		return parentPostId;
 	}
 
@@ -146,20 +146,20 @@ public class PostDTO {
         this.actionCategory = actionCategory;
     }
 
-    public Byte getVisibilityScope() {
-        return visibilityScope;
+    public Byte getVisibleRegionType() {
+        return visibleRegionType;
     }
 
-    public void setVisibilityScope(Byte visibilityScope) {
-        this.visibilityScope = visibilityScope;
+    public void setVisibleRegionType(Byte visibleRegionType) {
+        this.visibleRegionType = visibleRegionType;
     }
 
-    public Long getVisibilityScopeId() {
-        return visibilityScopeId;
+    public Long getVisibleRegionId() {
+        return visibleRegionId;
     }
 
-    public void setVisibilityScopeId(Long visibilityScopeId) {
-        this.visibilityScopeId = visibilityScopeId;
+    public void setVisibleRegionId(Long visibleRegionId) {
+        this.visibleRegionId = visibleRegionId;
     }
 
     public Double getLongitude() {

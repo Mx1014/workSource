@@ -244,18 +244,13 @@ public class CommunityProviderImpl implements CommunityProvider {
         if(list == null || list.isEmpty()) return null;
         
         Condition c = null;
-        boolean isFirst = true;
         for(CommunityGeoPoint p : list){
-            
             List<String> geoHashList = getGeoHashCodeList(p.getLatitude(), p.getLongitude());
             for(String geoHashStr : geoHashList){
-                if(isFirst){
-                    c = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr);
-                    isFirst = false;
-                    continue;
-                }
-                if(!isFirst){
-                    c = c.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr));
+                if(c == null) {
+                    c = Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr + "%");
+                } else {
+                    c = c.or(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(geoHashStr + "%"));
                 }
             }
         }
