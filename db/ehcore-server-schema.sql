@@ -2075,16 +2075,17 @@ CREATE TABLE `eh_suggestions` (
 DROP TABLE IF EXISTS `eh_recommendations`;
 CREATE TABLE `eh_recommendations` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `appId` BIGINT,
   `suggest_type` int(11) NOT NULL DEFAULT '0',
   `user_id` bigint(20) NOT NULL DEFAULT '0',
   `target_type` int(11) NOT NULL DEFAULT '0',
   `target_id` bigint(20) NOT NULL DEFAULT '0',
-  `reason_json` varchar(1024) DEFAULT '',
+  `embedded_json` TEXT,
   `max_count` int(11) NOT NULL DEFAULT '0',
   `score` double NOT NULL DEFAULT '0',
   `status` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
-  `expire_time` varchar(64) NOT NULL DEFAULT '0',
+  `expire_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_eh_recommendations_user_idx` (`user_id`),
   CONSTRAINT `fk_eh_recommendations_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -2098,17 +2099,20 @@ CREATE TABLE `eh_recommendations` (
 DROP TABLE IF EXISTS `eh_recommendation_configs`;
 CREATE TABLE `eh_recommendation_configs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `appId` BIGINT,
   `suggest_type` int(11) NOT NULL DEFAULT '0',
+  `source_type` int(11) NOT NULL DEFAULT '0',
   `target_type` int(11) NOT NULL DEFAULT '0',
   `target_id` bigint(20) NOT NULL DEFAULT '0',
-  `source_type` int(11) NOT NULL DEFAULT '0',
-  `content` varchar(1024) DEFAULT '',
+  `period_type` int(11) NOT NULL DEFAULT '0',
+  `period_value` int(11) NOT NULL DEFAULT '0',
   `status` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
-  `start_time_millis` bigint(20) NOT NULL DEFAULT '0',
+  `start_time` datetime DEFAULT NULL,
   `running_time` datetime DEFAULT NULL,
-  `description` varchar(2048) DEFAULT '',
-  `expire_time` varchar(64) NOT NULL DEFAULT '0',
+  `expire_time` datetime DEFAULT NULL,
+  `embedded_json` TEXT,
+  `description` varchar(1024) DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
