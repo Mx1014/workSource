@@ -2010,4 +2010,40 @@ CREATE TABLE  `eh_content_server` (
         PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_suggestions`;
+CREATE TABLE `eh_suggestions` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `SUGGEST_TYPE` int(11) NOT NULL DEFAULT '0',
+  `USER_ID` bigint(20) NOT NULL DEFAULT '0',
+  `TARGET_TYPE` int(11) NOT NULL DEFAULT '0',
+  `TARGET_ID` bigint(20) NOT NULL DEFAULT '0',
+  `REASON_JSON` varchar(1024) DEFAULT '',
+  `MAX_COUNT` int(11) NOT NULL DEFAULT '0',
+  `SCORE` double NOT NULL DEFAULT '0',
+  `STATUS` int(11) NOT NULL DEFAULT '0',
+  `CREATE_TIME` datetime DEFAULT NULL,
+  `EXPIRED_TIME` varchar(64) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`),
+  KEY `fk_eh_suggestions_user_idx` (`USER_ID`),
+  CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_suggestions`;
+CREATE TABLE `eh_suggestions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `suggest_type` int(11) NOT NULL DEFAULT '0',
+  `user_id` bigint(20) NOT NULL DEFAULT '0',
+  `target_type` int(11) NOT NULL DEFAULT '0',
+  `target_id` bigint(20) NOT NULL DEFAULT '0',
+  `reason_json` varchar(1024) DEFAULT '',
+  `max_count` int(11) NOT NULL DEFAULT '0',
+  `score` double NOT NULL DEFAULT '0',
+  `status` int(11) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `expire_time` varchar(64) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`),
+  KEY `fk_eh_suggestions_user_idx` (`user_id`),
+  CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 SET foreign_key_checks = 1;
