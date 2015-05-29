@@ -1,0 +1,39 @@
+// @formatter:off
+package com.everhomes.forum;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>forumId: 论坛ID</li>
+ * <li>topicId: 帖子ID</li>
+ * </ul>
+ */
+public class GetTopicCommand {
+    private Long forumId;
+    private Long topicId;
+    
+    public GetTopicCommand() {
+    }
+
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
+    }
+
+    public Long getTopicId() {
+        return topicId;
+    }
+
+    public void setTopicId(Long topicId) {
+        this.topicId = topicId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
