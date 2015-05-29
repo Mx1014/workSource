@@ -756,7 +756,7 @@ DROP TABLE IF EXISTS `eh_group_op_requests`;
 CREATE TABLE `eh_group_op_requests` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `group_id` BIGINT,
-    `reqestor_uid` BIGINT,
+    `requestor_uid` BIGINT,
     `requestor_comment` TEXT,
     `operation_type` TINYINT COMMENT '1: request for admin role, 2: invite to become admin',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: requesting, 2: accepted, 3: rejected',
