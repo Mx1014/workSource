@@ -2027,6 +2027,7 @@ CREATE TABLE `eh_suggestions` (
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#推荐给用户的结果
 DROP TABLE IF EXISTS `eh_suggestions`;
 CREATE TABLE `eh_suggestions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2040,9 +2041,27 @@ CREATE TABLE `eh_suggestions` (
   `status` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `expire_time` varchar(64) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`ID`),
+  PRIMARY KEY (`id`),
   KEY `fk_eh_suggestions_user_idx` (`user_id`),
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#管理员相关推荐配置，会生成推荐结果，并推送推荐给相关用户。
+DROP TABLE IF EXISTS `eh_suggestion_configs`;
+CREATE TABLE `eh_suggestion_configs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `suggest_type` int(11) NOT NULL DEFAULT '0',
+  `target_type` int(11) NOT NULL DEFAULT '0',
+  `target_id` bigint(20) NOT NULL DEFAULT '0',
+  `source_type` int(11) NOT NULL DEFAULT '0',
+  `content` varchar(1024) DEFAULT '',
+  `status` int(11) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `start_time_millis` bigint(20) NOT NULL DEFAULT '0',
+  `running_time` datetime DEFAULT NULL,
+  `description` varchar(2048) DEFAULT '',
+  `expire_time` varchar(64) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET foreign_key_checks = 1;
