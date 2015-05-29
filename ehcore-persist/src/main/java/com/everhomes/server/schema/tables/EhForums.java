@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForums extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumsRecord> {
 
-	private static final long serialVersionUID = -34235875;
+	private static final long serialVersionUID = 978614516;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forums</code>
@@ -116,7 +116,7 @@ public class EhForums extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhForumsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhForumsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_FORUMS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_FORUMS_U_EH_FRM_OWNER_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhForumsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_FORUMS_PRIMARY);
 	}
 
 	/**

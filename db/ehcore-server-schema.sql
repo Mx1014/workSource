@@ -1883,6 +1883,10 @@ CREATE TABLE `eh_biz_coupon`(
     INDEX `i_eh_biz_coupon_create_time`(`create_time`)    
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_client_packages`;
 CREATE TABLE `eh_client_packages`(
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
@@ -1899,6 +1903,10 @@ CREATE TABLE `eh_client_packages`(
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_client_package_files`;
 CREATE TABLE `eh_client_package_files`(
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
@@ -1912,6 +1920,10 @@ CREATE TABLE `eh_client_package_files`(
     FOREIGN KEY `fk_eh_cpkg_file_package`(`package_id`) REFERENCES `eh_client_packages`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_user_locations`;
 CREATE TABLE `eh_user_locations`(
     `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -1925,6 +1937,10 @@ CREATE TABLE `eh_user_locations`(
     PRIMARY KEY  (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS  `eh_user_behaviors`;
 CREATE TABLE `eh_user_behaviors`(
     `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -1937,6 +1953,10 @@ CREATE TABLE `eh_user_behaviors`(
      PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS  `eh_user_contacts`;
 CREATE TABLE `eh_user_contacts`(
       `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -1948,6 +1968,10 @@ CREATE TABLE `eh_user_contacts`(
       PRIMARY KEY  (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS  `eh_user_installed_apps`;
 CREATE TABLE `eh_user_installed_apps`(
       `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -1962,6 +1986,10 @@ CREATE TABLE `eh_user_installed_apps`(
       PRIMARY KEY  (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_user_activities`;
 CREATE TABLE if NOT exists `eh_user_activities` (
       `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -1985,6 +2013,10 @@ CREATE TABLE if NOT exists `eh_user_activities` (
       PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_content_server_resources`;
 CREATE  TABLE  `eh_content_server_resources` (
 	`id` BIGINT NOT NULL COMMENT "the id of record",
@@ -1997,6 +2029,11 @@ CREATE  TABLE  `eh_content_server_resources` (
 	`metadata` text,
 	PRIMARY  KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_content_server`;
 CREATE TABLE  `eh_content_server` (
         `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'content server id',
@@ -2009,6 +2046,10 @@ CREATE TABLE  `eh_content_server` (
         PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
 DROP TABLE IF EXISTS `eh_suggestions`;
 CREATE TABLE `eh_suggestions` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2027,9 +2068,12 @@ CREATE TABLE `eh_suggestions` (
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#推荐给用户的结果
-DROP TABLE IF EXISTS `eh_suggestions`;
-CREATE TABLE `eh_suggestions` (
+#
+# member of eh_users partition
+# the result of recommendations
+#
+DROP TABLE IF EXISTS `eh_recommendations`;
+CREATE TABLE `eh_recommendations` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `suggest_type` int(11) NOT NULL DEFAULT '0',
   `user_id` bigint(20) NOT NULL DEFAULT '0',
@@ -2042,13 +2086,17 @@ CREATE TABLE `eh_suggestions` (
   `create_time` datetime DEFAULT NULL,
   `expire_time` varchar(64) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `fk_eh_suggestions_user_idx` (`user_id`),
-  CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `fk_eh_recommendations_user_idx` (`user_id`),
+  CONSTRAINT `fk_eh_recommendations_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#管理员相关推荐配置，会生成推荐结果，并推送推荐给相关用户。
-DROP TABLE IF EXISTS `eh_suggestion_configs`;
-CREATE TABLE `eh_suggestion_configs` (
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+# the configurations recommended by admin
+#
+DROP TABLE IF EXISTS `eh_recommendation_configs`;
+CREATE TABLE `eh_recommendation_configs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `suggest_type` int(11) NOT NULL DEFAULT '0',
   `target_type` int(11) NOT NULL DEFAULT '0',

@@ -289,6 +289,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
+	 * The table ehcore.eh_recommendations
+	 */
+	public static final com.everhomes.server.schema.tables.EhRecommendations EH_RECOMMENDATIONS = com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS;
+
+	/**
+	 * The table ehcore.eh_recommendation_configs
+	 */
+	public static final com.everhomes.server.schema.tables.EhRecommendationConfigs EH_RECOMMENDATION_CONFIGS = com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS;
+
+	/**
 	 * The table ehcore.eh_regions
 	 */
 	public static final com.everhomes.server.schema.tables.EhRegions EH_REGIONS = com.everhomes.server.schema.tables.EhRegions.EH_REGIONS;
