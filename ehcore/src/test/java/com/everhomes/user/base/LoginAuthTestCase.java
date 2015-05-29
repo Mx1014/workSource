@@ -89,8 +89,6 @@ public class LoginAuthTestCase extends TestCase {
     @Before
     public void setUp() throws Exception {
     	super.setUp();
-    	
-    	//createAcl();
     }
     
     /**
@@ -289,6 +287,33 @@ public class LoginAuthTestCase extends TestCase {
         acl.setGrantType((byte)1);
         acl.setCreatorUid(User.ROOT_UID);
         acl.setRoleId(Role.ResourceUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupRequestAdminRole);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceUser);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupInviteAdminRole);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
+        acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.aclProvider.createAcl(acl);
+        
+        acl = new Acl();
+        acl.setOwnerType(EntityType.GROUP.getCode());
+        acl.setPrivilegeId(PrivilegeConstants.GroupAdminOps);
+        acl.setGrantType((byte)1);
+        acl.setCreatorUid(User.ROOT_UID);
+        acl.setRoleId(Role.ResourceAdmin);
         acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.aclProvider.createAcl(acl);
         

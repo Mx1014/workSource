@@ -169,7 +169,16 @@ public class CoreServerBootstrapBean implements ApplicationListener<ApplicationE
             acl.setPrivilegeId(PrivilegeConstants.GroupInviteAdminRole);
             acl.setGrantType((byte)1);
             acl.setCreatorUid(User.ROOT_UID);
-            acl.setRoleId(Role.ResourceCreator);
+            acl.setRoleId(Role.ResourceAdmin);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupAdminOps);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
             
