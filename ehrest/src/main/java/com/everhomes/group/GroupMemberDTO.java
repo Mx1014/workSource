@@ -10,8 +10,14 @@ import com.everhomes.util.StringHelper;
  * <li>memberType：成员类型，参考{@link com.everhomes.entity.EntityType}</li>
  * <li>memberId：成员ID</li>
  * <li>memberRole：成员在group内的角色</li>
- * <li>avatar：成员在group内的头像</li>
+ * <li>memberNickName：成员在group内的昵称</li>
+ * <li>memberAvatar：成员在group内的头像URI</li>
+ * <li>memberAvatarUrl：成员在group内的头像URL</li>
  * <li>memberStatus：成员在group内的状态，参考{@link com.everhomes.group.GroupMemberStatus}</li>
+ * <li>createTime：成员加入group的时间</li>
+ * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.group.GroupMemberPhonePrivacy}</li>
+ * <li>cellPhone: group成员手机码，当<code>phonePrivateFlag</code>设置为公开手机号时才有效</li>
+ * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.group.GroupMemberMuteNotificationFlag}</li>
  * </ul>
  */
 public class GroupMemberDTO {
@@ -20,8 +26,14 @@ public class GroupMemberDTO {
     private String memberType;
     private Long memberId;
     private Long memberRole;
-    private String avatar;
+    private String memberNickName;
+    private String memberAvatar;
+    private String memberAvatarUrl;
     private Byte memberStatus;
+    private String createTime;
+    private Byte phonePrivateFlag;
+    private String cellPhone;
+    private Byte muteNotificationFlag;
     
     public GroupMemberDTO() {
     }
@@ -65,21 +77,69 @@ public class GroupMemberDTO {
     public void setMemberRole(Long memberRole) {
         this.memberRole = memberRole;
     }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
     
+    public String getMemberAvatar() {
+        return memberAvatar;
+    }
+
+    public void setMemberAvatar(String memberAvatar) {
+        this.memberAvatar = memberAvatar;
+    }
+
+    public String getMemberAvatarUrl() {
+        return memberAvatarUrl;
+    }
+
+    public void setMemberAvatarUrl(String memberAvatarUrl) {
+        this.memberAvatarUrl = memberAvatarUrl;
+    }
+
+    public String getMemberNickName() {
+        return memberNickName;
+    }
+
+    public void setMemberNickName(String memberNickName) {
+        this.memberNickName = memberNickName;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
     public Byte getMemberStatus() {
         return memberStatus;
     }
 
     public void setMemberStatus(Byte memberStatus) {
         this.memberStatus = memberStatus;
+    }
+
+    public Byte getPhonePrivateFlag() {
+        return phonePrivateFlag;
+    }
+
+    public void setPhonePrivateFlag(Byte phonePrivateFlag) {
+        this.phonePrivateFlag = phonePrivateFlag;
+    }
+
+    public String getCellPhone() {
+        return cellPhone;
+    }
+
+    public void setCellPhone(String cellPhone) {
+        this.cellPhone = cellPhone;
+    }
+
+    public Byte getMuteNotificationFlag() {
+        return muteNotificationFlag;
+    }
+
+    public void setMuteNotificationFlag(Byte muteNotificationFlag) {
+        this.muteNotificationFlag = muteNotificationFlag;
     }
 
     @Override

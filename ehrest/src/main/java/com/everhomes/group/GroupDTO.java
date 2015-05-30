@@ -11,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>id: group ID</li>
  * <li>owningForumId: 拥有的论坛ID</li>
  * <li>name: group名称</li>
- * <li>avatar: group头像ID</li>
+ * <li>avatar: group头像URI</li>
+ * <li>avatarUrl: group头像URL</li>
  * <li>description: group描述</li>
  * <li>creatorUid: group创建者ID</li>
  * <li>createTime: group创建时间</li>
@@ -21,11 +22,12 @@ import com.everhomes.util.StringHelper;
  * <li>tag: group标签</li>
  * <li>categoryId: group类别ID</li>
  * <li>categoryName: group类别名称</li>
- * <li>memberOf: 是否是group成员，1-是(成员状态为待审核时也置为1)、0-否</li>
+ * <li>memberOf: 是否是group成员，1-是(成员状态为待审核时也置为1，也就是服务器有记录则为1，还需要根据<code>memberStatus</code>来判断是否是正常成员)、0-否</li>
  * <li>memberStatus: group成员状态，{@link com.everhomes.group.GroupMemberStatus}</li>
  * <li>memberNickName: group成员在group内的昵称，是group成员时字段才有效</li>
- * <li>memberConfigFlag: group成员自定义标识：是否屏蔽（暂不用），是group成员时字段才有效</li>
  * <li>memberRole: group成员角色，用于判断是否为管理员，参考{@link com.everhomes.acl.RoleConstants}</li>
+ * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.group.GroupMemberPhonePrivacy}</li>
+ * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.group.GroupMemberMuteNotificationFlag}</li>
  * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
  * </ul>
@@ -35,6 +37,7 @@ public class GroupDTO {
     private Long owningForumId;
     private String name;
     private String avatar;
+    private String avatarUrl;
     private String description;
     private Long creatorUid;
     private String createTime;
@@ -44,15 +47,12 @@ public class GroupDTO {
     private String tag;
     private Long categoryId;
     private String categoryName;
-    
-    //
-    // requestor/group relationship information
-    // 
     private Byte memberOf;
     private Byte memberStatus;
     private String memberNickName;
-    private Long memberConfigFlag;
     private Long memberRole;
+    private Byte phonePrivateFlag;
+    private Byte muteNotificationFlag;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -85,6 +85,14 @@ public class GroupDTO {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getDescription() {
@@ -207,20 +215,28 @@ public class GroupDTO {
         this.owningForumId = owningForumId;
     }
 
-    public Long getMemberConfigFlag() {
-        return memberConfigFlag;
-    }
-
-    public void setMemberConfigFlag(Long memberConfigFlag) {
-        this.memberConfigFlag = memberConfigFlag;
-    }
-
     public Long getMemberRole() {
         return memberRole;
     }
 
     public void setMemberRole(Long memberRole) {
         this.memberRole = memberRole;
+    }
+
+    public Byte getPhonePrivateFlag() {
+        return phonePrivateFlag;
+    }
+
+    public void setPhonePrivateFlag(Byte phonePrivateFlag) {
+        this.phonePrivateFlag = phonePrivateFlag;
+    }
+
+    public Byte getMuteNotificationFlag() {
+        return muteNotificationFlag;
+    }
+
+    public void setMuteNotificationFlag(Byte muteNotificationFlag) {
+        this.muteNotificationFlag = muteNotificationFlag;
     }
 
     @Override
