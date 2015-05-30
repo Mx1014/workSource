@@ -756,7 +756,7 @@ DROP TABLE IF EXISTS `eh_group_op_requests`;
 CREATE TABLE `eh_group_op_requests` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `group_id` BIGINT,
-    `reqestor_uid` BIGINT,
+    `requestor_uid` BIGINT,
     `requestor_comment` TEXT,
     `operation_type` TINYINT COMMENT '1: request for admin role, 2: invite to become admin',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: requesting, 2: accepted, 3: rejected',
@@ -767,7 +767,7 @@ CREATE TABLE `eh_group_op_requests` (
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_grp_op_group`(`group_id`),
-    INDEX `i_eh_grp_op_requestor`(`reqestor_uid`),
+    INDEX `i_eh_grp_op_requestor`(`requestor_uid`),
     INDEX `i_eh_grp_op_create_time`(`create_time`),
     INDEX `i_eh_grp_op_process_time`(`process_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -2078,8 +2078,8 @@ CREATE TABLE `eh_recommendations` (
   `appId` BIGINT,
   `suggest_type` int(11) NOT NULL DEFAULT '0',
   `user_id` bigint(20) NOT NULL DEFAULT '0',
-  `target_type` int(11) NOT NULL DEFAULT '0',
-  `target_id` bigint(20) NOT NULL DEFAULT '0',
+  `source_type` int(11) NOT NULL DEFAULT '0',
+  `source_id` bigint(20) NOT NULL DEFAULT '0',
   `embedded_json` TEXT,
   `max_count` int(11) NOT NULL DEFAULT '0',
   `score` double NOT NULL DEFAULT '0',

@@ -55,10 +55,10 @@ public class EhGroupOpRequestsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>reqestor_uid IN (values)</code>
+	 * Fetch records that have <code>requestor_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupOpRequests> fetchByReqestorUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.REQESTOR_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupOpRequests> fetchByRequestorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.REQUESTOR_UID, values);
 	}
 
 	/**

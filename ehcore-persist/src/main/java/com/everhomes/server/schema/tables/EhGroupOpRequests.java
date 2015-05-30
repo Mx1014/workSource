@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> {
 
-	private static final long serialVersionUID = -58310884;
+	private static final long serialVersionUID = -1474759781;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_op_requests</code>
@@ -37,9 +37,9 @@ public class EhGroupOpRequests extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_op_requests.reqestor_uid</code>.
+	 * The column <code>ehcore.eh_group_op_requests.requestor_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Long> REQESTOR_UID = createField("reqestor_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Long> REQUESTOR_UID = createField("requestor_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_op_requests.requestor_comment</code>.

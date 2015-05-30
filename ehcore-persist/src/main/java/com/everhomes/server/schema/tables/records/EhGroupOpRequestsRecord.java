@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> implements org.jooq.Record10<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.Byte, java.lang.Byte, java.lang.Long, java.lang.String, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1796599687;
+	private static final long serialVersionUID = 396052660;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_op_requests.id</code>. id of the record
@@ -42,16 +42,16 @@ public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_op_requests.reqestor_uid</code>.
+	 * Setter for <code>ehcore.eh_group_op_requests.requestor_uid</code>.
 	 */
-	public void setReqestorUid(java.lang.Long value) {
+	public void setRequestorUid(java.lang.Long value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_op_requests.reqestor_uid</code>.
+	 * Getter for <code>ehcore.eh_group_op_requests.requestor_uid</code>.
 	 */
-	public java.lang.Long getReqestorUid() {
+	public java.lang.Long getRequestorUid() {
 		return (java.lang.Long) getValue(2);
 	}
 
@@ -206,7 +206,7 @@ public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field3() {
-		return com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.REQESTOR_UID;
+		return com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.REQUESTOR_UID;
 	}
 
 	/**
@@ -286,7 +286,7 @@ public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public java.lang.Long value3() {
-		return getReqestorUid();
+		return getRequestorUid();
 	}
 
 	/**
@@ -368,7 +368,7 @@ public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public EhGroupOpRequestsRecord value3(java.lang.Long value) {
-		setReqestorUid(value);
+		setRequestorUid(value);
 		return this;
 	}
 
@@ -457,12 +457,12 @@ public class EhGroupOpRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	/**
 	 * Create a detached, initialised EhGroupOpRequestsRecord
 	 */
-	public EhGroupOpRequestsRecord(java.lang.Long id, java.lang.Long groupId, java.lang.Long reqestorUid, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Byte status, java.lang.Long operatorUid, java.lang.String processMessage, java.sql.Timestamp createTime, java.sql.Timestamp processTime) {
+	public EhGroupOpRequestsRecord(java.lang.Long id, java.lang.Long groupId, java.lang.Long requestorUid, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Byte status, java.lang.Long operatorUid, java.lang.String processMessage, java.sql.Timestamp createTime, java.sql.Timestamp processTime) {
 		super(com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS);
 
 		setValue(0, id);
 		setValue(1, groupId);
-		setValue(2, reqestorUid);
+		setValue(2, requestorUid);
 		setValue(3, requestorComment);
 		setValue(4, operationType);
 		setValue(5, status);

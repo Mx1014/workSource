@@ -116,6 +116,24 @@ public class CoreServerBootstrapBean implements ApplicationListener<ApplicationE
             acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             this.aclProvider.createAcl(acl);
             
+            // Creator/admin can update group member info
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupUpdateMember);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceCreator);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            acl = new Acl();
+            acl.setOwnerType(EntityType.GROUP.getCode());
+            acl.setPrivilegeId(PrivilegeConstants.GroupUpdateMember);
+            acl.setGrantType((byte)1);
+            acl.setCreatorUid(User.ROOT_UID);
+            acl.setRoleId(Role.ResourceAdmin);
+            acl.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            this.aclProvider.createAcl(acl);
+            
             // Only admin can approve group member request
             acl = new Acl();
             acl.setOwnerType(EntityType.GROUP.getCode());
