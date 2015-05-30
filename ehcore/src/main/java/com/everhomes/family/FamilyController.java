@@ -45,6 +45,8 @@ public class FamilyController extends ControllerBase {
     private FamilyProvider familyProvider;
 	@Autowired
 	private CommunitySearcher searcher;
+	@Autowired
+    private FamilyService familyService;
 	
 	/**
 	 * <b>URL: /family/findFamilyByKeyword</b>
@@ -71,8 +73,7 @@ public class FamilyController extends ControllerBase {
     public RestResponse getOwningFamilyById(@Valid GetOwningFamilyByIdCommand cmd) {
         
         // familyId should be one of the families that user is currently in relation with
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        FamilyDTO family = familyProvider.getOwningFamilyById(cmd.getId());
+        FamilyDTO family = familyService.getOwningFamilyById(cmd);
         RestResponse response = new RestResponse(family);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -88,7 +89,7 @@ public class FamilyController extends ControllerBase {
     public RestResponse findFamilyByAddressId(
         @Valid FindFamilyByAddressIdCommand cmd) {
         
-        FamilyDTO familyDTO = familyProvider.getFamilyDetailByAddressId(cmd.getAddressId());
+        FamilyDTO familyDTO = this.familyService.getFamilyDetailByAddressId(cmd);
         RestResponse response = new RestResponse(familyDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -103,7 +104,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=FamilyDTO.class ,collection=true)
     public RestResponse getUserOwningFamilies() {
         
-        List<FamilyDTO> results = familyProvider.getUserOwningFamilies();
+        List<FamilyDTO> results = familyService.getUserOwningFamilies();
         RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -118,9 +119,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse join(@Valid JoinFamilyCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        
-    	familyProvider.joinFamily(cmd.getId());
+        familyService.joinFamily(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -135,8 +134,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse leave(@Valid LeaveFamilyCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        familyProvider.leave(cmd.getId());
+        familyService.leave(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -149,12 +147,9 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("get")
     @RestReturn(value=FamilyDTO.class)
-    public RestResponse get(
-        @Valid GetFamilyCommand cmd) {
+    public RestResponse get(@Valid GetFamilyCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        
-        FamilyDTO family = this.familyProvider.getFamilyById(cmd.getId());
+        FamilyDTO family = this.familyService.getFamilyById(cmd);
         RestResponse response = new RestResponse(family);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -169,10 +164,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse revokeMember(@Valid RevokeMemberCommand cmd) {
     
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-
-        this.familyProvider.revokeMember(cmd.getId(),cmd.getMemberUid(),cmd.getReason(),Role.ResourceOperator);
-        
+        this.familyService.revokeMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -187,10 +179,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse rejectMember(@Valid RejectMemberCommand cmd) {
     
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        
-        this.familyProvider.rejectMember(cmd.getId(),cmd.getMemberUid(),cmd.getReason(),Role.ResourceOperator);
-        
+        this.familyService.rejectMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -204,9 +193,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse approveMember(@Valid ApproveMemberCommand cmd) {
     
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        
-        this.familyProvider.approveMember(cmd.getId(),cmd.getMemberUid(),Role.ResourceOperator);
+        this.familyService.approveMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -221,8 +208,8 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=FamilyMemberDTO.class, collection=true)
     public RestResponse listOwningFamilyMembers(@Valid ListOwningFamilyMembersCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        List<FamilyMemberDTO> results = this.familyProvider.listOwningFamilyMembers(cmd.getId());
+        List<FamilyMemberDTO> results = this.familyService.listOwningFamilyMembers(cmd);
+        
         RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -237,9 +224,8 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=FamilyMembershipRequestDTO.class, collection=true)
     public RestResponse listFamilyRequests(@Valid ListFamilyRequestsCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
+        List<FamilyMembershipRequestDTO> results = this.familyService.listFamilyRequests(cmd);
         
-        List<FamilyMembershipRequestDTO> results = this.familyProvider.listFamilyRequests(cmd.getId(),cmd.getPageOffset());
         RestResponse response = new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -254,8 +240,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse setCurrentFamily(@Valid SetCurrentFamilyCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        this.familyProvider.setCurrentFamily(cmd.getId());
+        this.familyService.setCurrentFamily(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -270,9 +255,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateFamilyInfo(@Valid UpdateFamilyInfoCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        this.familyProvider.updateFamilyInfo(cmd.getId(),cmd.getFamilyName(),cmd.getFamilyDescription()
-                ,cmd.getFamilyAvatarUri(),cmd.getMemberNickName(),cmd.getFamilyAvatarUri());
+        this.familyService.updateFamilyInfo(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -287,8 +270,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=ListNeighborUsersCommandResponse.class)
     public RestResponse listNeighborUsers(@Valid ListNeighborUsersCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
-        ListNeighborUsersCommandResponse result = this.familyProvider.listNeighborUsers(cmd.getId(),cmd.getPageOffset());
+        ListNeighborUsersCommandResponse result = this.familyService.listNeighborUsers(cmd);
 
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -304,10 +286,8 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=NeighborUserDTO.class, collection=true)
     public RestResponse listNearbyNeighborUsers(@Valid ListNearbyNeighborUserCommand cmd) {
         
-        familyProvider.checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
+        List<NeighborUserDTO> result = this.familyService.listNearbyNeighborUsers(cmd);
         
-        List<NeighborUserDTO> result = this.familyProvider.listNearbyNeighborUsers(cmd.getId(),
-                cmd.getLongitude(),cmd.getLatitude(),cmd.getPageOffset());
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -322,7 +302,8 @@ public class FamilyController extends ControllerBase {
     @RequestMapping("listWaitApproveFamily")
     @RestReturn(value=FamilyDTO.class, collection=true)
     public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyCommand cmd) {
-        List<FamilyDTO> results = this.familyProvider.listWaitApproveFamily(cmd.getCommunityId(), cmd.getPageOffset(),cmd.getPageSize());
+        List<FamilyDTO> results = this.familyService.listWaitApproveFamily(cmd);
+        
         RestResponse response = new RestResponse(results);
 
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -18,7 +18,7 @@ public class RejectMemberCommand extends BaseCommand{
     @NotNull
     private Long memberUid;
     private String reason;
-    private Byte operatorRole;
+    private Long operatorRole;
     
     public RejectMemberCommand() {
     }
@@ -39,11 +39,11 @@ public class RejectMemberCommand extends BaseCommand{
         this.reason = reason;
     }
 
-    public Byte getOperatorRole() {
+    public Long getOperatorRole() {
         return operatorRole;
     }
 
-    public void setOperatorRole(Byte operatorRole) {
+    public void setOperatorRole(Long operatorRole) {
         this.operatorRole = operatorRole;
     }
 

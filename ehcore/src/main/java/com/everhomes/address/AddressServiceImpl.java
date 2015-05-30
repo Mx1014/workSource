@@ -34,6 +34,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.FamilyService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
@@ -92,6 +93,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private CommunitySearcher communitySearcher;
+    
+    @Autowired
+    private FamilyService familyService;
     
     @PostConstruct
     public void setup() {
@@ -424,7 +428,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
         Address address = this.getOrCreateAddress(cmd);
-        Family family = this.familyProvider.getOrCreatefamily(address);
+        Family family = this.familyService.getOrCreatefamily(address);
         
         ClaimedAddressInfo info = new ClaimedAddressInfo();
         info.setAddressId(address.getId());

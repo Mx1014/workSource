@@ -116,4 +116,37 @@ public class CategoryController extends ControllerBase {
         }).collect(Collectors.toList());
         return new RestResponse(dtoResultList);
     }
+    
+    /**
+     * <b>URL: /category/listActionCategories</b> 
+     * 获取帖子操作分类列表
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActionCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listActionCategories() {
+        
+        List<Category> entityResultList = this.categoryProvider.listActionCategories();
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        return new RestResponse(dtoResultList);
+    }
+    
+    /**
+     * <b>URL: /category/listContentCategories</b> 
+     * 根据帖子操作分类获取具体分类
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listContentCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listContentCategories(ListCategoryCommand cmd) {
+        
+        List<Category> entityResultList = this.categoryProvider.listContentCategories(cmd.getParentId());
+
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        return new RestResponse(dtoResultList);
+    }
 }

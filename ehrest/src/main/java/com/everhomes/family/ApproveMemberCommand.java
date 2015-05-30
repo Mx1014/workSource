@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
 public class ApproveMemberCommand extends BaseCommand{
     @NotNull
     private Long memberUid;
+    
+    private Long operatorRole;
 
     public ApproveMemberCommand() {
     }
@@ -25,6 +27,14 @@ public class ApproveMemberCommand extends BaseCommand{
 
     public void setMemberUid(Long memberUid) {
         this.memberUid = memberUid;
+    }
+
+    public Long getOperatorRole() {
+        return operatorRole;
+    }
+
+    public void setOperatorRole(Long operatorRole) {
+        this.operatorRole = operatorRole;
     }
 
     @Override

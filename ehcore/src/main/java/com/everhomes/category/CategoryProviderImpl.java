@@ -214,4 +214,56 @@ public class CategoryProviderImpl implements CategoryProvider {
         });;
         return categories;
     }
+    
+    @Cacheable(value = "listActionCategory")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<Category> listActionCategories() {
+        List<Category> result = new ArrayList<>();
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
+        Condition condition = Tables.EH_CATEGORIES.PARENT_ID.eq(CategoryConstants.Business);
+
+        condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+        
+        if(condition != null) {
+            selectStep.where(condition);
+        }
+        
+        result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+            );
+        
+        return result;
+    }
+
+    @Cacheable(value = "listContentCategories")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<Category> listContentCategories(Long linkId) {
+        
+        List<Category> result = new ArrayList<>();
+        
+        if(linkId == null) {
+            LOGGER.error("Could not find parent region, linkId=" + linkId);
+            return null;
+        }
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
+        Condition condition = Tables.EH_CATEGORIES.LINK_ID.eq(linkId);
+           
+        if(condition != null) {
+            selectStep.where(condition);
+        }
+        
+        result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+            );
+        
+        return result;
+    }
 }
