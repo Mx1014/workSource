@@ -111,6 +111,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return groups;
     }
 
+    @CacheEvict(value="CommunityPmMember", key="#communityPmMember.id")
     //@Cache(value = "CommunityPmMember", key="#communityPmMember.id")
     @Override
     public void createPropMember(CommunityPmMember communityPmMember) {
@@ -202,6 +203,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return step.where(condition).fetchOneInto(Integer.class);
     }
     
+    @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id")
     //@Cacheable(value = "CommunityAddressMapping", key="#communityAddressMapping.id")
     @Override
     public void createPropAddressMapping(CommunityAddressMapping communityAddressMapping) {
@@ -220,7 +222,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     
    
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId"),
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId,#communityAddressMapping.addressId"),
             @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void updatePropAddressMapping(CommunityAddressMapping communityAddressMapping){
@@ -234,7 +236,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId"),
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId,#communityAddressMapping.addressId"),
             @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void deletePropAddressMapping(CommunityAddressMapping communityAddressMapping){
@@ -247,7 +249,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId"),
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId,#communityAddressMapping.addressId"),
             @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void deletePropAddressMapping(long id){
@@ -276,9 +278,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if(communityId != null)
             query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
        query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
-       query.fetchAny().map((r) -> {
+       query.fetch().map((r) -> {
+    	   if(r != null)
            result[0] = ConvertHelper.convert(r, CommunityAddressMapping.class);
-           return null;
+    	   return null;
        });
        return result[0];
     }
@@ -377,7 +380,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBills.class, id);
     }
      
-    @Cacheable(value = "CommunityPmBill", key="id")
+    @Cacheable(value = "CommunityPmBill", key="#id")
     @Override
     public CommunityPmBill findPropBillById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -522,6 +525,25 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
         query.addOrderBy(Tables.EH_COMMUNITY_PM_OWNERS.ID.asc());
         query.addLimit(offset, pageSize);
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+            return null;
+        });
+        return result;
+    }
+    
+    @Override
+    public List<CommunityPmOwner> listCommunityPmOwners(Long communityId, Long addressId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
+        SelectQuery<EhCommunityPmOwnersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_OWNERS);
+        if(communityId != null)
+           query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.COMMUNITY_ID.eq(communityId));
+        if(addressId != null && !"".equals(addressId)) {
+            query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS_ID.eq(addressId));
+        }
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_OWNERS.ID.desc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
             return null;

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -16,6 +17,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressService;
+import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.db.DbProvider;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.sharding.ShardingProvider;
@@ -36,6 +40,9 @@ public class PropertyTest {
     
     @Autowired
     private PropertyMgrService ps;
+    
+    @Autowired
+    private AddressService addressService;
 
     @Configuration
     @ComponentScan(basePackages = {
@@ -113,5 +120,69 @@ public class PropertyTest {
 		}
     }
    
+    @Test
+    public void testSendBill () {
+    	PropCommunityBillIdCommand cmd = new PropCommunityBillIdCommand();
+    	cmd.setCommunityId(12l);
+    	cmd.setBillId(5);
+		ps.sendPropertyBillById(cmd );
+    }
+    
+    @Test
+    public void testSendBillDate () {
+    	PropCommunityBillDateCommand cmd = new PropCommunityBillDateCommand();
+    	cmd.setCommunityId(12l);
+    	cmd.setDateStr("2015-01");
+		ps.sendPropertyBillByMonth(cmd);
+    }
+    
+    @Test
+    public void testSendBillById () {
+    	PropCommunityBillIdCommand cmd = new PropCommunityBillIdCommand();
+    	CommunityPmBill bill = pp.findPropBillById(5l);
+    	System.out.println(bill);
+    }
+    @Test
+    public void testSendMessageToFamily () {
+    	PropCommunityBuildAddessCommand cmd = new PropCommunityBuildAddessCommand();
+//    	List<Long> list = new ArrayList<Long>();
+//    	list.add(16129l);
+//    	list.add(17002l);
+//		cmd.setAddressIds(list);
+	
+//		List<String> buildingNames = new ArrayList<String>();
+//		buildingNames.add("1-1");
+//		buildingNames.add("10-1");
+//		cmd.setBuildingNames(buildingNames );
+//    	cmd.setBuildingNames();
+    	cmd.setCommunityId(9l);
+//    	cmd.setMessage("hello  everyone");
+    	ps.sendNoticeToFamily(cmd);
+    	
+    }
+    
+    @Test
+    public void testAddress () {
+    	ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
+    	comand.setCommunityId(9l);
+		comand.setKeyword("");
+		List<Address> addresses= addressService.listAddressByKeyword(comand );
+		System.out.println(addresses.size());
+//		if(addresses != null && addresses.size() > 0)
+//		{
+//			System.out.println();
+//		}
+    }
+    
+    @Test
+    public void testImprotAdddressMapping () {
+    	PropCommunityIdCommand cmd = new PropCommunityIdCommand();
+    	cmd.setCommunityId(9l);
+		ps.importPMAddressMapping(cmd);
+//		if(addresses != null && addresses.size() > 0)
+//		{
+//			System.out.println();
+//		}
+    }
    
 }

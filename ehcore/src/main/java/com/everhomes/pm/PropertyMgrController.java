@@ -73,6 +73,22 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /pm/applyPropertyMember</b>
+     * <p>申请物业管理员</p>
+     * @return 添加的结果
+     */
+    @RequestMapping("applyPropertyMember")
+    @RestReturn(value=String.class)
+    public RestResponse applyPropertyMember(@Valid applyPropertyMemberCommand cmd) {
+    	
+    	propertyMgrService.applyPropertyMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /pm/addPropertyMemberByPhone</b>
      * <p>通过手机添加物业成员</p>
      * @return 添加的结果
@@ -376,9 +392,9 @@ public class PropertyMgrController extends ControllerBase {
 	 * 发通知给指定门牌号（是左邻用户则发消息、不是左邻用户则发短信）
      * @return 发通知的结果
      */
-	@RequestMapping("sendNoticeToAddress")
+	@RequestMapping("sendNoticeToFamily")
 	@RestReturn(value=String.class)
-    public RestResponse sendNoticeToFamily(@Valid PropCommunityBuildAddessCommand cmd) {
+    public RestResponse sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
 		propertyMgrService.sendNoticeToFamily(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

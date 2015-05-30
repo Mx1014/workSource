@@ -17,11 +17,11 @@ import com.everhomes.util.StringHelper;
 public class PropCommunityBuildAddessCommand {
     private Long communityId;
     
-    @ItemType(String.class)
-    private List<String> buildingNames;
+//    @ItemType(String.class)
+//    private List<String> buildingNames;
     
     @ItemType(Long.class)
-    private List<Long> addressIds;
+    private Long[] addressIds;
     
     private String message;
    
@@ -39,21 +39,22 @@ public class PropCommunityBuildAddessCommand {
 	}
 	
 	public List<String> getBuildingNames() {
-		return buildingNames;
+		//return buildingNames;
+		return null;
 	}
 
 
 	public void setBuildingNames(List<String> buildingNames) {
-		this.buildingNames = buildingNames;
+		//this.buildingNames = buildingNames;
 	}
 
 
-	public List<Long> getAddressIds() {
+	public Long[] getAddressIds() {
 		return addressIds;
 	}
 
 
-	public void setAddressIds(List<Long> addressIds) {
+	public void setAddressIds(Long[] addressIds) {
 		this.addressIds = addressIds;
 	}
 

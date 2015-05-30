@@ -43,9 +43,12 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.FamilyService;
 import com.everhomes.family.FindFamilyByAddressIdCommand;
 import com.everhomes.family.GetFamilyCommand;
 import com.everhomes.family.ListOwningFamilyMembersCommand;
+import com.everhomes.family.RejectMemberCommand;
+import com.everhomes.family.RevokeMemberCommand;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
@@ -119,7 +122,61 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Autowired
     private MessagingService messagingService;
     
+    @Autowired
+    private FamilyService familySerivce;
+    
     @Override
+    public void applyPropertyMember(applyPropertyMemberCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	Long communityId = user.getCommunityId();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	if(communityId != cmd.getCommunityId()){
+    		LOGGER.error("you not belong to the community.communityId=" + cmd.getCommunityId());
+   		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "you not belong to the community.");
+    	}
+    	CommunityPmMember communityPmMember = createCommunityPmMember(communityId,cmd.getContactDescription(),user);
+    	propertyMgrProvider.createPropMember(communityPmMember);
+    	
+    }
+    
+    public CommunityPmMember createCommunityPmMember(Long communityId,String description,User user) {
+    	UserIdentifier identifier = null; 
+    	List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(user.getId());
+    	if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
+    		for (UserIdentifier userIdentifier : userIndIdentifiers) {
+				if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
+					identifier = userIdentifier;
+					break;
+				}
+			}
+    	}
+    	CommunityPmMember communityPmMember = new CommunityPmMember();
+    	communityPmMember.setCommunityId(communityId);
+    	communityPmMember.setContactName(user.getNickName());
+    	if(identifier != null){
+	    	communityPmMember.setContactToken(identifier.getIdentifierToken());
+	    	communityPmMember.setContactType(identifier.getIdentifierType());
+    	}
+    	communityPmMember.setPmGroup(PmGroup.MANAGER.getCode());
+    	communityPmMember.setStatus(PmMemberStatus.CONFIRMING.getCode());
+    	communityPmMember.setTargetType(PmMemberTargetType.USER.getCode());
+    	communityPmMember.setTargetId(user.getId());
+    	communityPmMember.setContactDescription(description);
+		return communityPmMember;
+	}
+
+	@Override
     public void createPropMember(CreatePropMemberCommand cmd) {
     	User user  = UserContext.current().getUser();
     	if(cmd.getCommunityId() == null){
@@ -134,15 +191,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	//先判断，如果不属于这个小区的物业，才添加物业成员
-    	List<CommunityPmMember> list = propertyMgrProvider.findPmMemberByCommunityAndTarget(cmd.getCommunityId(), cmd.getTargetType(), cmd.getTargetId());
-    	if(list == null || list.size() == 0)
-    	{
-    		CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
-        	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
-        	propertyMgrProvider.createPropMember(communityPmMember);
+    	//先判断，如果不属于这个小区的物业，才添加物业成员。状态直接设为正常
+    	Long addUserId =  cmd.getTargetId();
+    	//添加已注册用户为管理员。
+    	if(addUserId != null && addUserId != 0){
+	    	List<CommunityPmMember> list = propertyMgrProvider.findPmMemberByCommunityAndTarget(cmd.getCommunityId(), cmd.getTargetType(), cmd.getTargetId());
+	    	if(list == null || list.size() == 0)
+	    	{
+	    		CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
+	        	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
+	        	propertyMgrProvider.createPropMember(communityPmMember);
+	    	}
     	}
-    	
     }
     
     @Override
@@ -214,7 +274,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	{
     		ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
     		comand.setCommunityId(cmd.getCommunityId());
-    		comand.setKeyword(null);
+    		comand.setKeyword("");
     		List<Address> addresses= addressService.listAddressByKeyword(comand);
     		if(addresses != null && addresses.size() > 0)
     		{
@@ -611,7 +671,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                     "Unable to find the community.");
     	}
 
-    	familyProvider.approveMember(cmd.getFamilyId(),cmd.getUserId(),Role.ResourceAdmin);
+    	//familyProvider.approveMember(cmd.getFamilyId(),cmd.getUserId(),Role.ResourceAdmin);
+    	ApproveMemberCommand comand = new ApproveMemberCommand();
+    	comand.setId(cmd.getFamilyId());
+    	comand.setMemberUid(cmd.getUserId());
+    	comand.setOperatorRole(Role.ResourceAdmin);
+    	familySerivce.approveMember(comand);
+    	
 		
 	}
 	
@@ -639,8 +705,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	String reason = "";
-    	familyProvider.rejectMember(cmd.getFamilyId(), cmd.getUserId(), reason, Role.ResourceAdmin);
-		
+//    	familyProvider.rejectMember(cmd.getFamilyId(), cmd.getUserId(), reason, Role.ResourceAdmin);
+    	
+    	RejectMemberCommand command = new RejectMemberCommand();
+    	command.setId(cmd.getFamilyId());
+    	command.setMemberUid(cmd.getUserId());
+    	command.setOperatorRole(Role.ResourceAdmin);
+    	command.setReason(reason);
+		familySerivce.rejectMember(command );
 	}
     
     @Override
@@ -667,7 +739,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
        	String reason = "";
-    	familyProvider.revokeMember(cmd.getFamilyId(), cmd.getUserId(), reason,Role.ResourceAdmin);
+//    	familyProvider.revokeMember(cmd.getFamilyId(), cmd.getUserId(), reason,Role.ResourceAdmin);
+    	RevokeMemberCommand comand = new RevokeMemberCommand();
+    	comand.setId(cmd.getFamilyId());
+    	comand.setMemberUid(cmd.getUserId());
+    	comand.setOperatorRole(Role.ResourceAdmin);
+    	comand.setReason(reason);
+		familySerivce.revokeMember(comand );
     }
     
     @Override
@@ -1027,7 +1105,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	CommunityPmBill bill = propertyMgrProvider.findPropBillById(cmd.getBillId());
-    	sendPropertyBill(bill);
+    	sendPropertyBillById(bill);
     	
     }
     
@@ -1047,17 +1125,43 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	List<CommunityPmBill> billList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr());
-    	if(billList != null && billList.size() > 0)
-    	{
-    		for (CommunityPmBill communityPmBill : billList) {
-    			sendPropertyBill(communityPmBill);
-			}
-    	}
+    	sendPropertyBills(billList);
+    	
     	
     }
     
     
-    public void sendPropertyBill(CommunityPmBill bill) {
+    public void sendPropertyBills(List<CommunityPmBill> billList) {
+    	if(billList != null && billList.size() > 0){
+    		for (CommunityPmBill communityPmBill : billList) {
+    			Address address = addressProvider.findAddressById(communityPmBill.getEntityId());
+    			if(address != null){
+    				Family family = familyProvider.findFamilyByAddressId(address.getId());
+    				if(family != null){
+    					String message = buildBillMessage(communityPmBill);
+    					sendNoticeToFamilyById(family.getId(), message);
+    				}
+    			}
+			}
+    	}
+		
+	}
+
+	public String buildBillMessage(CommunityPmBill bill) {
+		String content = "账单时间：" + bill.getDateStr() +"\n";
+		List<CommunityPmBillItem> itemList  = propertyMgrProvider.listCommunityPmBillItems(bill.getId());
+		if(itemList != null && itemList.size() > 0)
+		{
+			for (CommunityPmBillItem item : itemList)
+			{
+				content += item.getItemName()+": " + item.getTotalAmount() + "元\n";
+			}
+		}
+		content += "总费用：" + bill.getTotalAmount();
+		return content;
+	}
+
+	public void sendPropertyBillById(CommunityPmBill bill) {
     	if(bill == null)
     	{
     		LOGGER.error("Unable to find the bill." );
@@ -1078,17 +1182,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_FAMILY, 
                      "Unable to find the family.");
     	}
-    	String content = "账单时间：" + bill.getDateStr() +"\n";
-		List<CommunityPmBillItem> itemList  = propertyMgrProvider.listCommunityPmBillItems(bill.getId());
-		if(itemList != null && itemList.size() > 0)
-		{
-			for (CommunityPmBillItem item : itemList)
-			{
-				content += item.getItemName()+": " + item.getTotalAmount() + "元\n";
-			}
-		}
-		content += "总费用：" + bill.getTotalAmount();
-		sendNoticeToFamilyById(family.getId(), content);
+    	String message = buildBillMessage(bill);
+		sendNoticeToFamilyById(family.getId(), message);
     }
     
     @Override
@@ -1108,18 +1203,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	List<String> buildingNames = cmd.getBuildingNames();
-    	List<Long> addressIds = cmd.getAddressIds();
+    	Long[] addressIds = cmd.getAddressIds();
     	
     	//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。 
     	List<Long> familyIds = new ArrayList<Long>();
+    	List<String> phones = new ArrayList<String>();
     	List<Long> userIds = new ArrayList<Long>();
     	
-    	
     	//按小区发送: buildingNames 和 addressIds 为空。
-    	if((buildingNames == null || buildingNames.size() > 0) && (addressIds == null || addressIds.size() > 0)){
+    	if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.length == 0)){
     		ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
     		comand.setCommunityId(cmd.getCommunityId());
-    		comand.setKeyword(null);
+    		comand.setKeyword("");
     		List<Address> addresses= addressService.listAddressByKeyword(comand);
     		if(addresses != null && addresses.size() > 0){
     			for (Address address : addresses) {
@@ -1127,12 +1222,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     				if(family != null){
     					familyIds.add(family.getId());
     				}
+    				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(communityId, address.getId());
+    				if(ownerList != null && ownerList.size() > 0){
+	    				for (CommunityPmOwner communityPmOwner : ownerList) {
+							User userPhone = userService.findUserByIndentifier(communityPmOwner.getContactToken());
+							if(userPhone == null){
+								phones.add(communityPmOwner.getContactToken());
+							}
+							else{
+								userIds.add(userPhone.getId());
+//								groupProvider.findGroupMemberByMemberInfo(groupId, memberType, memberId)
+							}
+						}
+    				}
 				}
     		}
     	}
     	
     	//按地址发送：
-    	else if(addressIds != null && addressIds.size() > 0){
+    	else if(addressIds != null && addressIds.length  > 0){
     		for (Long addressId : addressIds) {
 				Family family = familyProvider.findFamilyByAddressId(addressId);
 				if(family != null){
@@ -1142,7 +1250,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	//按楼栋发送：
-    	else if((addressIds == null || addressIds.size() == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
+    	else if((addressIds == null || addressIds.length  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
     		for (String buildingName : buildingNames) {
     			int pageSize = configProvider.getIntValue("pagination.page.size",  AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
     			List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, pageSize);
