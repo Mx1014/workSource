@@ -162,7 +162,11 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     @Override
     public GroupQueryResult query(SearchGroupCommand cmd) {
         GroupQueryFilter filter = new GroupQueryFilter();
-        filter.setPageInfo(cmd.getPageAnchor().intValue(), cmd.getPageSize());
+        int pageNum = 0;
+        if(cmd.getPageAnchor() != null) {
+            pageNum = cmd.getPageAnchor().intValue();
+        }
+        filter.setPageInfo(pageNum, cmd.getPageSize());
         filter.setQueryString(cmd.getQueryString());
         return this.query(filter);
     }
