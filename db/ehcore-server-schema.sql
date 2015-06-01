@@ -67,6 +67,8 @@ CREATE TABLE `eh_devices` (
     INDEX `u_eh_dev_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_certs`;
+
 #
 # member of global partition
 #
@@ -74,6 +76,7 @@ CREATE TABLE `ehcore`.`eh_certs` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(32) NOT NULL,
   `cert_type` INT NOT NULL,
+  `cert_pass` VARCHAR(128),
   `data` BLOB NOT NULL,
   
   PRIMARY KEY (`id`),
