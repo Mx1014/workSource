@@ -1,12 +1,6 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.NotNull;
-
-import com.everhomes.discover.ItemType;
 
 /**
  * <ul>

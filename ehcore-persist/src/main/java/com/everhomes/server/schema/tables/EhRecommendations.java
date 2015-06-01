@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRecommendationsRecord> {
 
-	private static final long serialVersionUID = 1417007322;
+	private static final long serialVersionUID = 557923054;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recommendations</code>
@@ -47,14 +47,14 @@ public class EhRecommendations extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Long> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendations.target_type</code>.
+	 * The column <code>ehcore.eh_recommendations.source_type</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Integer> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Integer> SOURCE_TYPE = createField("source_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recommendations.target_id</code>.
+	 * The column <code>ehcore.eh_recommendations.source_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationsRecord, java.lang.Long> SOURCE_ID = createField("source_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendations.embedded_json</code>.

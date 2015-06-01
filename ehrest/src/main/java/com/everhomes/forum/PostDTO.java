@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.forum;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -12,6 +13,11 @@ import com.everhomes.util.StringHelper;
  * <li>id: 帖子或评论ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
+ * <li>creatorUid: 创建者ID</li>
+ * <li>creatorNickName: 创建者在圈内的昵称</li>
+ * <li>creatorAvatar: 创建者在圈内的头像URI</li>
+ * <li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
+ * <li>creatorAdminFlag: 创建者是否为圈的管理员</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
@@ -43,6 +49,16 @@ public class PostDTO {
 	private Long parentPostId;
 	
     private Long forumId;
+    
+    private Long creatorUid;
+    
+    private String creatorNickName;
+    
+    private String creatorAvatar;
+    
+    private String creatorAvatarUrl;
+    
+    private Byte creatorAdminFlag;
     
     private String creatorTag;
     
@@ -81,9 +97,9 @@ public class PostDTO {
     
     private Long dislikeCount;
     
-    private String updateTime;
+    private Timestamp updateTime;
     
-    private String createTime;
+    private Timestamp createTime;
     
     @ItemType(AttachmentDTO.class)
     private List<AttachmentDTO> attachments;
@@ -114,7 +130,47 @@ public class PostDTO {
 		this.forumId = forumId;
 	}
 
-	public String getCreatorTag() {
+	public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
+
+    public String getCreatorNickName() {
+        return creatorNickName;
+    }
+
+    public void setCreatorNickName(String creatorNickName) {
+        this.creatorNickName = creatorNickName;
+    }
+
+    public String getCreatorAvatar() {
+        return creatorAvatar;
+    }
+
+    public void setCreatorAvatar(String creatorAvatar) {
+        this.creatorAvatar = creatorAvatar;
+    }
+
+    public String getCreatorAvatarUrl() {
+        return creatorAvatarUrl;
+    }
+
+    public void setCreatorAvatarUrl(String creatorAvatarUrl) {
+        this.creatorAvatarUrl = creatorAvatarUrl;
+    }
+
+    public Byte getCreatorAdminFlag() {
+        return creatorAdminFlag;
+    }
+
+    public void setCreatorAdminFlag(Byte creatorAdminFlag) {
+        this.creatorAdminFlag = creatorAdminFlag;
+    }
+
+    public String getCreatorTag() {
         return creatorTag;
     }
 
@@ -258,19 +314,19 @@ public class PostDTO {
 		this.dislikeCount = dislikeCount;
 	}
 
-	public String getUpdateTime() {
+	public Timestamp getUpdateTime() {
 		return updateTime;
 	}
 
-	public void setUpdateTime(String updateTime) {
+	public void setUpdateTime(Timestamp updateTime) {
 		this.updateTime = updateTime;
 	}
 
-	public String getCreateTime() {
+	public Timestamp getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(String createTime) {
+	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
 	}
 

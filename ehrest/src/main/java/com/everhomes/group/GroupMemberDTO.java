@@ -33,6 +33,7 @@ public class GroupMemberDTO {
     private String memberAvatarUrl;
     private Byte memberStatus;
     private Timestamp createTime;
+    private Timestamp approveTime;
     private Byte phonePrivateFlag;
     private String cellPhone;
     private Byte muteNotificationFlag;
@@ -110,6 +111,14 @@ public class GroupMemberDTO {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Timestamp getApproveTime() {
+        return approveTime;
+    }
+
+    public void setApproveTime(Timestamp approveTime) {
+        this.approveTime = approveTime;
     }
 
     public Byte getMemberStatus() {

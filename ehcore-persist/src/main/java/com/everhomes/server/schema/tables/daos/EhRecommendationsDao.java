@@ -69,17 +69,17 @@ public class EhRecommendationsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>target_type IN (values)</code>
+	 * Fetch records that have <code>source_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByTargetType(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.TARGET_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchBySourceType(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.SOURCE_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>target_id IN (values)</code>
+	 * Fetch records that have <code>source_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchByTargetId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.TARGET_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRecommendations> fetchBySourceId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.SOURCE_ID, values);
 	}
 
 	/**

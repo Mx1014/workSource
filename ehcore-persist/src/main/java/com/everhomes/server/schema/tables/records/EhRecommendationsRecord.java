@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRecommendationsRecord> implements org.jooq.Record12<java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.String, java.lang.Integer, java.lang.Double, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1507892773;
+	private static final long serialVersionUID = -609625711;
 
 	/**
 	 * Setter for <code>ehcore.eh_recommendations.id</code>.
@@ -70,30 +70,30 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_recommendations.target_type</code>.
+	 * Setter for <code>ehcore.eh_recommendations.source_type</code>.
 	 */
-	public void setTargetType(java.lang.Integer value) {
+	public void setSourceType(java.lang.Integer value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_recommendations.target_type</code>.
+	 * Getter for <code>ehcore.eh_recommendations.source_type</code>.
 	 */
-	public java.lang.Integer getTargetType() {
+	public java.lang.Integer getSourceType() {
 		return (java.lang.Integer) getValue(4);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_recommendations.target_id</code>.
+	 * Setter for <code>ehcore.eh_recommendations.source_id</code>.
 	 */
-	public void setTargetId(java.lang.Long value) {
+	public void setSourceId(java.lang.Long value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_recommendations.target_id</code>.
+	 * Getter for <code>ehcore.eh_recommendations.source_id</code>.
 	 */
-	public java.lang.Long getTargetId() {
+	public java.lang.Long getSourceId() {
 		return (java.lang.Long) getValue(5);
 	}
 
@@ -250,7 +250,7 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Integer> field5() {
-		return com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.TARGET_TYPE;
+		return com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.SOURCE_TYPE;
 	}
 
 	/**
@@ -258,7 +258,7 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field6() {
-		return com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.TARGET_ID;
+		return com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS.SOURCE_ID;
 	}
 
 	/**
@@ -346,7 +346,7 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public java.lang.Integer value5() {
-		return getTargetType();
+		return getSourceType();
 	}
 
 	/**
@@ -354,7 +354,7 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public java.lang.Long value6() {
-		return getTargetId();
+		return getSourceId();
 	}
 
 	/**
@@ -446,7 +446,7 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public EhRecommendationsRecord value5(java.lang.Integer value) {
-		setTargetType(value);
+		setSourceType(value);
 		return this;
 	}
 
@@ -455,7 +455,7 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public EhRecommendationsRecord value6(java.lang.Long value) {
-		setTargetId(value);
+		setSourceId(value);
 		return this;
 	}
 
@@ -535,15 +535,15 @@ public class EhRecommendationsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	/**
 	 * Create a detached, initialised EhRecommendationsRecord
 	 */
-	public EhRecommendationsRecord(java.lang.Long id, java.lang.Long appid, java.lang.Integer suggestType, java.lang.Long userId, java.lang.Integer targetType, java.lang.Long targetId, java.lang.String embeddedJson, java.lang.Integer maxCount, java.lang.Double score, java.lang.Integer status, java.sql.Timestamp createTime, java.sql.Timestamp expireTime) {
+	public EhRecommendationsRecord(java.lang.Long id, java.lang.Long appid, java.lang.Integer suggestType, java.lang.Long userId, java.lang.Integer sourceType, java.lang.Long sourceId, java.lang.String embeddedJson, java.lang.Integer maxCount, java.lang.Double score, java.lang.Integer status, java.sql.Timestamp createTime, java.sql.Timestamp expireTime) {
 		super(com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS);
 
 		setValue(0, id);
 		setValue(1, appid);
 		setValue(2, suggestType);
 		setValue(3, userId);
-		setValue(4, targetType);
-		setValue(5, targetId);
+		setValue(4, sourceType);
+		setValue(5, sourceId);
 		setValue(6, embeddedJson);
 		setValue(7, maxCount);
 		setValue(8, score);

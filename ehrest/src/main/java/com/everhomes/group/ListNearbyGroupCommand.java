@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>categoryId: 请求人所在位置对应的经度</li>
  * <li>longitude: 请求人所在位置对应的经度</li>
  * <li>latitude: 请求人所在位置对应的纬度</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
@@ -12,13 +13,25 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListNearbyGroupCommand {
+    private Long categoryId;
+    
     private Double longitude;
+    
     private Double latitude;
     
     private Long pageAnchor;
+    
     private Integer pageSize;
     
     public ListNearbyGroupCommand() {
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public Long getPageAnchor() {
