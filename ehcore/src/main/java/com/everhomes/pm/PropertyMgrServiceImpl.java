@@ -2,13 +2,11 @@
 package com.everhomes.pm;
 
 import java.io.IOException;
-import java.nio.file.attribute.GroupPrincipal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.naming.spi.DirStateFactory.Result;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -20,14 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
-import com.everhomes.address.AddressDTO;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ApartmentDTO;
 import com.everhomes.address.BuildingDTO;
 import com.everhomes.address.ListAddressByKeywordCommand;
-import com.everhomes.address.ListAddressCommand;
-import com.everhomes.address.ListApartmentByBuildingNameCommand;
 import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.app.AppConstants;
@@ -44,14 +39,12 @@ import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
-import com.everhomes.family.FindFamilyByAddressIdCommand;
-import com.everhomes.family.GetFamilyCommand;
-import com.everhomes.family.ListOwningFamilyMembersCommand;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.family.RevokeMemberCommand;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
+import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.messaging.MessageChannel;
@@ -140,7 +133,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
-    	if(communityId != cmd.getCommunityId()){
+    	if(!communityId .equals( cmd.getCommunityId())){
     		LOGGER.error("you not belong to the community.communityId=" + cmd.getCommunityId());
    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "you not belong to the community.");
@@ -1203,15 +1196,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	List<String> buildingNames = cmd.getBuildingNames();
-    	Long[] addressIds = cmd.getAddressIds();
+    	List<Long> addressIds = cmd.getAddressIds();
     	
-    	//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。 
-    	List<Long> familyIds = new ArrayList<Long>();
-    	List<String> phones = new ArrayList<String>();
-    	List<Long> userIds = new ArrayList<Long>();
+    	//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。
+    	//已注册的user 分两种： 1-已加入家庭，发家庭消息。 2-还未加入家庭，发个人信息。
+    	List<CommunityPmOwner> owners  = new ArrayList<CommunityPmOwner>();
+     	List<Long> familyIds = new ArrayList<Long>();
+    	
     	
     	//按小区发送: buildingNames 和 addressIds 为空。
-    	if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.length == 0)){
+    	if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.size() == 0)){
     		ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
     		comand.setCommunityId(cmd.getCommunityId());
     		comand.setKeyword("");
@@ -1223,34 +1217,26 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     					familyIds.add(family.getId());
     				}
     				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(communityId, address.getId());
-    				if(ownerList != null && ownerList.size() > 0){
-	    				for (CommunityPmOwner communityPmOwner : ownerList) {
-							User userPhone = userService.findUserByIndentifier(communityPmOwner.getContactToken());
-							if(userPhone == null){
-								phones.add(communityPmOwner.getContactToken());
-							}
-							else{
-								userIds.add(userPhone.getId());
-//								groupProvider.findGroupMemberByMemberInfo(groupId, memberType, memberId)
-							}
-						}
-    				}
+    				owners.addAll(ownerList);
+
 				}
     		}
     	}
     	
     	//按地址发送：
-    	else if(addressIds != null && addressIds.length  > 0){
+    	else if(addressIds != null && addressIds.size()  > 0){
     		for (Long addressId : addressIds) {
 				Family family = familyProvider.findFamilyByAddressId(addressId);
 				if(family != null){
 					familyIds.add(family.getId());
 				}
+				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(communityId, addressId);
+				owners.addAll(ownerList);
 			}
     	}
     	
     	//按楼栋发送：
-    	else if((addressIds == null || addressIds.length  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
+    	else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
     		for (String buildingName : buildingNames) {
     			int pageSize = configProvider.getIntValue("pagination.page.size",  AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
     			List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, pageSize);
@@ -1260,19 +1246,62 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         				if(family != null){
         					familyIds.add(family.getId());
         				}
+        				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(communityId, address.getAddressId());
+        				owners.addAll(ownerList);
     				}
         		}
 			}
 		}
     	
     	if(familyIds != null && familyIds.size() > 0){
-    		for (Long familyId : userIds) {
+    		for (Long familyId : familyIds) {
     			sendNoticeToFamilyById(familyId, cmd.getMessage());
 			}
     	}
+    	
+    	//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息。 3-不是user，发短信。
+    	processCommunityPmOwner(communityId,owners,cmd.getMessage());
     }
     
-    public void sendNoticeToFamilyById(Long familyId,String message){
+    private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message) {
+    	List<String> phones = new ArrayList<String>();
+    	List<Long> userIds = new ArrayList<Long>();
+		if(owners != null && owners.size() > 0){
+			for (CommunityPmOwner communityPmOwner : owners) {
+				User userPhone = userService.findUserByIndentifier(communityPmOwner.getContactToken());
+				if(userPhone == null){
+					phones.add(communityPmOwner.getContactToken());
+				}
+				else{
+					Family family = familyProvider.findFamilyByAddressId(communityPmOwner.getAddressId());
+    				if(family != null){
+    					GroupMember member = groupProvider.findGroupMemberByMemberInfo(family.getId(), GroupDiscriminator.FAMILY.getCode(), userPhone.getId());
+    					if(member == null){
+    						userIds.add(userPhone.getId());
+    					}
+    				}
+					
+				}
+			}
+		}
+		
+		//是user，还未加入家庭，发个人信息.
+		if(userIds != null && userIds.size() > 0){
+			for (Long userId : userIds) {
+				sendNoticeToUserById(userId, message);
+			}
+		}
+		
+		//不是user，发短信。
+		if(phones != null && phones.size() > 0 ){
+			for (String phone : phones) {
+				smsProvider.sendSms(phone, message);
+			}
+		}
+		
+	}
+
+	public void sendNoticeToFamilyById(Long familyId,String message){
     	MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_FAMILY);
         messageDto.setSenderUid(UserContext.current().getUser().getId());
@@ -1282,5 +1311,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "group", 
        		 String.valueOf(familyId), messageDto, MessagingService.MSG_FLAG_STORED);
+    }
+	
+	public void sendNoticeToUserById(Long userId,String message){
+    	MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_FAMILY);
+        messageDto.setSenderUid(UserContext.current().getUser().getId());
+        messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
+        messageDto.setMetaAppId(AppConstants.APPID_USER);
+        messageDto.setBody(message);
+        
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, "user", 
+       		 String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
     }
 }
