@@ -69,10 +69,17 @@ public class EhAuditLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>operation_name IN (values)</code>
+	 * Fetch records that have <code>requestor_comment IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAuditLogs> fetchByOperationName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS.OPERATION_NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAuditLogs> fetchByRequestorComment(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS.REQUESTOR_COMMENT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operation_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAuditLogs> fetchByOperationType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS.OPERATION_TYPE, values);
 	}
 
 	/**
