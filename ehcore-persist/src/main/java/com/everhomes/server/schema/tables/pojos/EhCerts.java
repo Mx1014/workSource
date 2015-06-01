@@ -11,11 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCerts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1091001634;
+	private static final long serialVersionUID = 1556366744;
 
 	private java.lang.Integer id;
 	private java.lang.String  name;
 	private java.lang.Integer certType;
+	private java.lang.String  certPass;
 	private byte[]            data;
 
 	public EhCerts() {}
@@ -24,11 +25,13 @@ public class EhCerts implements java.io.Serializable {
 		java.lang.Integer id,
 		java.lang.String  name,
 		java.lang.Integer certType,
+		java.lang.String  certPass,
 		byte[]            data
 	) {
 		this.id = id;
 		this.name = name;
 		this.certType = certType;
+		this.certPass = certPass;
 		this.data = data;
 	}
 
@@ -54,6 +57,14 @@ public class EhCerts implements java.io.Serializable {
 
 	public void setCertType(java.lang.Integer certType) {
 		this.certType = certType;
+	}
+
+	public java.lang.String getCertPass() {
+		return this.certPass;
+	}
+
+	public void setCertPass(java.lang.String certPass) {
+		this.certPass = certPass;
 	}
 
 	public byte[] getData() {

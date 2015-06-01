@@ -69,6 +69,13 @@ public class EhCertsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>cert_pass IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCerts> fetchByCertPass(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCerts.EH_CERTS.CERT_PASS, values);
+	}
+
+	/**
 	 * Fetch records that have <code>data IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCerts> fetchByData(byte[]... values) {
