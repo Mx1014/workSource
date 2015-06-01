@@ -28,7 +28,7 @@ public class GroupOpRequestDTO {
     private Long id;
     private Long groupId;
     private String groupName;
-    private Long reqestorUid;
+    private Long requestorUid;
     private String requestorName;
     private String requestorAvatar;
     private String requestorAvatarUrl;
@@ -67,12 +67,12 @@ public class GroupOpRequestDTO {
         this.groupName = groupName;
     }
 
-    public Long getReqestorUid() {
-        return reqestorUid;
+    public Long getRequestorUid() {
+        return requestorUid;
     }
 
-    public void setReqestorUid(Long reqestorUid) {
-        this.reqestorUid = reqestorUid;
+    public void setRequestorUid(Long requestorUid) {
+        this.requestorUid = requestorUid;
     }
 
     public String getRequestorName() {
