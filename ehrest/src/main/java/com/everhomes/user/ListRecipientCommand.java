@@ -1,20 +1,22 @@
 package com.everhomes.user;
+
 /**
  * 查询邀请人列表
+ * 
  * @author elians
- *<ul>
- *<li>pageOffset:页码偏移</li>
- *</ul>
+ *         <ul>
+ *         <li>anchor:id偏移值</li>
+ *         </ul>
  */
 public class ListRecipientCommand {
-    private Integer pageOffset;
+    private Long anchor;
 
-    public Integer getPageOffset() {
-        return pageOffset;
+    public Long getAnchor() {
+        return anchor;
     }
 
-    public void setPageOffset(Integer pageOffset) {
-        this.pageOffset = pageOffset;
+    public void setAnchor(Long anchor) {
+        this.anchor = anchor;
     }
 
 }
