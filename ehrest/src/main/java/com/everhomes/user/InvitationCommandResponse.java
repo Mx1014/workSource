@@ -9,12 +9,22 @@ public class InvitationCommandResponse {
     @ItemType(InvitationDTO.class)
     private List<InvitationDTO> recipientList;
 
+    private Long nextAnchor;
+
     public List<InvitationDTO> getRecipientList() {
         return recipientList;
     }
 
     public void setRecipientList(List<InvitationDTO> recipientList) {
         this.recipientList = recipientList;
+    }
+
+    public Long getNextAnchor() {
+        return nextAnchor;
+    }
+
+    public void setNextAnchor(Long nextAnchor) {
+        this.nextAnchor = nextAnchor;
     }
 
     @Override
