@@ -1246,7 +1246,8 @@ public class FamilyServiceImpl implements FamilyService {
                             NeighborUserDTO n = new NeighborUserDTO();
                             n.setUserId(u.getId());
                             n.setUserStatusLine(u.getStatusLine());
-                            n.setUserName(u.getAccountName());
+                            //n.setUserName(u.getAccountName());
+                            n.setUserName(u.getNickName());
                             n.setUserAvatarUrl(parserUri(u.getAvatar(),"User",u.getId()));
                             n.setUserAvatarUri(u.getAvatar());
                             //计算距离
