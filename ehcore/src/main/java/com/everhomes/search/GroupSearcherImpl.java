@@ -50,8 +50,11 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         GroupQueryResult result = new GroupQueryResult();
         if(ids.size() > filter.getPageSize()) {
             result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+            ids.remove(ids.size() - 1);
+         } else {
+            result.setPageAnchor(null);    
             }
-        ids.remove(ids.size() - 1);
+        
         result.setIds(ids);
         
         return result;
