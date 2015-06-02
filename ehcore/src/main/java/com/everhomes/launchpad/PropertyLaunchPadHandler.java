@@ -13,10 +13,10 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Override
-    public LaunchPadItem accesProcessLaunchPadItem(long userId, long commnunityId, long itemId) {
-        LaunchPadItem launchPadItem = this.launchPadProvider.findLaunchPadItemById(itemId);
+    public LaunchPadItem accesProcessLaunchPadItem(long userId, long commnunityId, LaunchPadItem launchPadItem) {
+
         assert(launchPadItem != null);
-        launchPadItem.setActionUri(parserUri(userId,commnunityId,itemId,launchPadItem.getActionUri()));
+        launchPadItem.setActionUri(parserUri(userId,commnunityId,launchPadItem.getId(),launchPadItem.getActionUri()));
         
         return launchPadItem;
     }

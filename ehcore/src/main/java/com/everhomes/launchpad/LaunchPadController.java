@@ -1,16 +1,12 @@
 package com.everhomes.launchpad;
 
 
-
-
-
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -34,8 +30,52 @@ public class LaunchPadController extends ControllerBase {
     public RestResponse listLaunchPadByCommunityId(@Valid ListLaunchPadByCommunityIdCommand cmd) {
         
         ListLaunchPadByCommunityIdCommandResponse commandResponse = launchPadService.listLaunchPadByCommunityId(cmd);
-        
         RestResponse response =  new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /launchpad/createLaunchPadItem</b>
+     * <p>创建服务市场条目</p>
+     */
+    @RequestMapping("createLaunchPadItem")
+    @RestReturn(value=String.class)
+    public RestResponse createLaunchPadItem(@Valid CreateLaunchPadItemCommand cmd) {
+        
+        launchPadService.createLaunchPadItem(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /launchpad/userDefinedLaunchPad</b>
+     * <p>用户自定义服务市场</p>
+     */
+    @RequestMapping("userDefinedLaunchPad")
+    @RestReturn(value=String.class)
+    public RestResponse userDefinedLaunchPad(@Valid UserDefinedLaunchPadCommand cmd) {
+        
+        launchPadService.userDefinedLaunchPad(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /launchpad/deleteLaunchPadItem</b>
+     * <p>删除服务市场Item列表</p>
+     */
+    @RequestMapping("deleteLaunchPadItem")
+    @RestReturn(value=String.class)
+    public RestResponse deleteLaunchPadItem(@Valid DeleteLaunchPadItemCommand cmd) {
+        
+        this.launchPadService.deleteLaunchPadItem(cmd);
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

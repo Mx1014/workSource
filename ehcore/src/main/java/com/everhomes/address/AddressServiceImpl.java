@@ -563,6 +563,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setApartmentName(cmd.getApartmentName());
             address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
             address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             this.addressProvider.updateAddress(address);
         }else {
             Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());

@@ -296,16 +296,45 @@ public class FamilyController extends ControllerBase {
     
 
     /**
-     * <b>URL: /family/listWaitApproveAddress</b>
+     * <b>URL: /family/admin/listWaitApproveAddress</b>
      * <p>查询等待审核的地址列表</p>
      */
-    @RequestMapping("listWaitApproveFamily")
+    @RequestMapping("admin/listWaitApproveFamily")
     @RestReturn(value=FamilyDTO.class, collection=true)
     public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyCommand cmd) {
         List<FamilyDTO> results = this.familyService.listWaitApproveFamily(cmd);
         
         RestResponse response = new RestResponse(results);
-
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /family/admin/adminApproveMember</b>
+     * <p>管理员批准用户通过</p>
+     */
+    @RequestMapping("admin/adminApproveMember")
+    @RestReturn(value=String.class)
+    public RestResponse adminApproveMember(@Valid ApproveMemberCommand cmd) {
+        this.familyService.approveMember(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /family/admin/adminRejectMember</b>
+     * <p>管理员拒绝用户</p>
+     */
+    @RequestMapping("admin/adminRejectMember")
+    @RestReturn(value=String.class)
+    public RestResponse adminRejectMember(@Valid RejectMemberCommand cmd) {
+        this.familyService.rejectMember(cmd);
+        
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

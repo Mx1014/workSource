@@ -594,9 +594,9 @@ public class FamilyServiceImpl implements FamilyService {
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
-        if(cmd.getOperatorRole() != Role.ResourceAdmin)
+        if(cmd.getOperatorRole() == Role.ResourceOperator)
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);
-        else
+        else if(cmd.getOperatorRole() == Role.ResourceAdmin)
             sendFamilyNotificationForMemberRejectFamilyByAdmin(address,group,member,userId);
     }
     
@@ -721,8 +721,10 @@ public class FamilyServiceImpl implements FamilyService {
         });
         
         if(flag){
-            
-            sendFamilyNotificationForApproveMember(null,group,member,userId);
+            if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
+                sendFamilyNotificationForApproveMember(null,group,member,userId);
+            else if(cmd.getOperatorRole().byteValue() == Role.ResourceAdmin)
+                sendFamilyNotificationForApproveMember(null,group,member,userId);
             //update current family
             setCurrentFamilyAfterApproval(memberUid,familyId,0);
             
@@ -1266,8 +1268,10 @@ public class FamilyServiceImpl implements FamilyService {
         User user = UserContext.current().getUser();
 
         Family family = this.familyProvider.findFamilyByAddressId(addressId);
-        if(family == null)
+        if(family == null){
+            LOGGER.warn("Family is not found with addressId=" + addressId);
             return null;
+        }
         
         FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
         //familyDTO.setAddressId(cmd.getAddressId());

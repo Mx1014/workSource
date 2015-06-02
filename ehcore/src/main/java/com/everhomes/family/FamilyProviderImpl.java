@@ -127,10 +127,12 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(m != null) {
                 //this.groupProvider.deleteGroupMember(m);
                 //clear findFamilyByAddress cache
-                deleteFamilyMember(m);
+                FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+                
+                self.deleteFamilyMember(m);
                 
                 // retrieve family info after membership changes
-                FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+                
                 family = self.findFamilyByAddressId(address.getId());
                 
                 if(family.getMemberCount() == 0) {
@@ -139,10 +141,13 @@ public class FamilyProviderImpl implements FamilyProvider {
                     if(m.getMemberRole() == Role.ResourceCreator) {
                         // reassign resource creator to other member
                         GroupMember newCreator = pickOneMemberToPromote(family);
-                        newCreator.setMemberRole(Role.ResourceCreator);
-                        this.groupProvider.updateGroupMember(newCreator);
+                        if(newCreator != null){
+                            newCreator.setMemberRole(Role.ResourceCreator);
+                            this.groupProvider.updateGroupMember(newCreator);
+                            
+                            family.setCreatorUid(newCreator.getMemberId());
+                        }
                         
-                        family.setCreatorUid(newCreator.getMemberId());
                     }
                     this.groupProvider.updateGroup(family);
                 }
@@ -164,6 +169,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         CrossShardListingLocator locator = new CrossShardListingLocator(family.getId());
         
         List<GroupMember> members = this.groupProvider.listGroupMembers(locator, Integer.MAX_VALUE);
+        if(members == null || members.isEmpty()) return null;
         return members.get(0);
     }
 
@@ -218,7 +224,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group != null){
 
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatarUrl((parserUri(group.getAvatar(),"Family",group.getCreatorUid())));
+                family.setAvatarUrl(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
                 family.setAvatarUri(group.getAvatar());
                 family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
@@ -234,8 +240,11 @@ public class FamilyProviderImpl implements FamilyProvider {
                 
                 GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
                         EntityType.USER.getCode(), userId);
-                if(member != null)
+                if(member != null){
                     family.setMembershipStatus(member.getMemberStatus());
+                    family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), "User", member.getCreatorUid()));
+                    family.setMemberAvatarUri(member.getMemberAvatar());
+                }
                 
                 Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
                 if(address != null){

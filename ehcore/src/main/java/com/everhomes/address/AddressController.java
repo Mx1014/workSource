@@ -166,7 +166,7 @@ public class AddressController extends ControllerBase {
         return response;
     }
     /**
-     * <b>URL: /address/correctAddress</b>
+     * <b>URL: /address/admin/correctAddress</b>
      * <p>修正地址</p>
      */
     @RequestMapping("correctAddress")

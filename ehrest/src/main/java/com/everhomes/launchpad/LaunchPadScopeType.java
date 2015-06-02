@@ -4,12 +4,14 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>参数类型
- * <li>FAMILY: 家庭</li>
+ * <li>COUNTRY: 全国</li>
+ * <li>CITY: 城市</li>
  * <li>COMMUNITY: 小区</li>
+ * <li>USERDEFINED: 用户自定义</li>
  * </ul>
  */
 public enum LaunchPadScopeType {
-    COUNTRY("Country"),CITY("City"), COMMUNITY("Community");
+    COUNTRY("Country"),CITY("City"), COMMUNITY("Community"), USERDEFINED("UserDefined");
     
  private String code;
     
@@ -31,6 +33,8 @@ public enum LaunchPadScopeType {
             return CITY;
         else if(code.equalsIgnoreCase(COMMUNITY.getCode()))
             return COMMUNITY;
+        else if(code.equalsIgnoreCase(USERDEFINED.getCode()))
+            return USERDEFINED;
         
         return null;
     }

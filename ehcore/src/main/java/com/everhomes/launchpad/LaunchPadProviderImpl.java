@@ -3,6 +3,7 @@ package com.everhomes.launchpad;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -77,7 +78,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadItems.class, null);
         
     }
-    //@Cacheable(value="LaunchPadItem", key="#id")
+    //@Cacheable(value="LaunchPadItem", key="#id" unless="#result == null")
     @Override
     public LaunchPadItem findLaunchPadItemById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(LaunchPadItem.class, id));
@@ -85,7 +86,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         return ConvertHelper.convert(dao.findById(id), LaunchPadItem.class);
     }
 
-    //@Cacheable(value="LaunchPadItemList", key="{#scopeType, #scopeId}")
+    //@Cacheable(value="LaunchPadItemList", key="{#scopeType, #scopeId}" unless="#result.size() == 0")
     @Override
     public List<LaunchPadItem> listLaunchPadItemsByScopeTypeAndScopeId(String scopeType, long scopeId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
@@ -102,7 +103,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         return items;
     }
 
-    //@Cacheable(value="LaunchPadItemByItemGroupList", key="#itemGroup")
+    //@Cacheable(value="LaunchPadItemByItemGroupList", key="#itemGroup" unless="#result.size() == 0")
     @Override
     public List<LaunchPadItem> listLaunchPadItemsByItemGroup(String itemGroup) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
@@ -136,6 +137,32 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         });
         
         return items;
+    }
+    @Override
+    public List<LaunchPadItem> listLaunchPadItemsByScopeTypeAndItemNameItemGroup(
+            String scopeType, String itemName, String itemGroup) {
+        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType);
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup));
+        
+        step.where(condition).fetch().map((r) ->{
+            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
+    }
+    @Override
+    public void createLaunchPadItems(List<LaunchPadItem> items) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLaunchPadItemsDao dao = new EhLaunchPadItemsDao(context.configuration()); 
+        dao.insert(items.stream().map(r->ConvertHelper.convert(r, EhLaunchPadItems.class)).collect(Collectors.toList()));
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadItems.class, null); 
+        
     }
 
 }
