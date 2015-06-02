@@ -27,7 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
  * <li>subject: 帖子或评论标题</li>
- * <li>content_type: 帖子或评论内容类型，{@link com.everhomes.forum.PostContentType}</li>
+ * <li>contentType: 帖子或评论内容类型，{@link com.everhomes.forum.PostContentType}</li>
  * <li>content: 帖子或评论内容</li>
  * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.app.AppConstants}</li>
  * <li>embeddedId: 内嵌对象ID</li>
@@ -77,6 +77,8 @@ public class PostDTO {
     private Double latitude;
     
     private String subject;
+    
+    private String contentType;
     
     private String content;
     
@@ -242,7 +244,15 @@ public class PostDTO {
 		this.subject = subject;
 	}
 
-	public String getContent() {
+	public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getContent() {
 		return content;
 	}
 
