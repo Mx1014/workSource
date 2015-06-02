@@ -556,7 +556,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
                     "Address is not found.");
         }
-        
+
         Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
         if(addr == null || addr.getId().longValue() == address.getId().longValue()){
             address.setBuildingName(cmd.getBuildingName());
@@ -565,13 +565,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             this.addressProvider.updateAddress(address);
+            //approve members of this address
+            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+            if(family != null)
+                this.familyService.approveMembersByFamily(family);
+            
         }else {
             Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
             if(family == null) return;
             Group group = ConvertHelper.convert(family, Group.class); 
             group.setIntegralTag1(addr.getId());
             this.groupProvider.updateGroup(group);
-            
+            this.familyService.approveMembersByFamily(family);
             this.addressProvider.deleteAddress(address);
         }
         

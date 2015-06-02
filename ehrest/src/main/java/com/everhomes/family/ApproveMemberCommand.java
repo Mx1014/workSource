@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>memberUid: 成员Id</li>
+ * <li>operatorRole: 操作者角色</li>
  * </ul>
  */
 public class ApproveMemberCommand extends BaseCommand{
