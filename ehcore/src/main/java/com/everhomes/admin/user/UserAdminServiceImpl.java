@@ -74,10 +74,12 @@ public class UserAdminServiceImpl implements UserAdminService {
             }
         });
         Long nextAnchor = null;
+        List<UserInfo> values=userInfos;
         if (userInfos.size() > pageNum) {
+            values=userInfos.subList(0, userInfos.size()-1);
             nextAnchor = locator.getAnchor();
         }
-        return new Tuple<Long, List<UserInfo>>(nextAnchor,userInfos.subList(0, userInfos.size()-1));
+        return new Tuple<Long, List<UserInfo>>(nextAnchor,values);
     }
 
     @Override
@@ -87,12 +89,14 @@ public class UserAdminServiceImpl implements UserAdminService {
             locator.setAnchor(cmd.getAnchor());
         }
         int pageNum = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        List<UserIdentifier> identiifers = userAdminProvider.listUserIdentifiersByOrder(locator, pageNum, null);
+        List<UserIdentifier> identifiers = userAdminProvider.listUserIdentifiersByOrder(locator, pageNum, null);
         Long nextAnchor = null;
-        if (identiifers.size() >= pageNum) {
+        List<UserIdentifier> values = identifiers;
+        if (identifiers.size() > pageNum) {
+            values=identifiers.subList(1, identifiers.size());
             nextAnchor = locator.getAnchor();
         }
-        return new Tuple<Long, List<UserIdentifier>>(nextAnchor, identiifers.subList(1, identiifers.size()));
+        return new Tuple<Long, List<UserIdentifier>>(nextAnchor, values);
     }
 
     @Override
@@ -122,11 +126,13 @@ public class UserAdminServiceImpl implements UserAdminService {
             }catch(Exception e){}
             return info;
         }).collect(Collectors.toList());
-        Long nextAnchor = null;
-        if (userInfos.size() > pageNum) {
+        List<UserInfo> values = userInfos;
+        Long nextAnchor=null;
+        if (identifiers.size() > pageNum) {
+            values=userInfos.subList(1, identifiers.size());
             nextAnchor = locator.getAnchor();
         }
-        return new Tuple<Long, List<UserInfo>>(nextAnchor, userInfos.subList(1, userInfos.size()));
+        return new Tuple<Long, List<UserInfo>>(nextAnchor, values);
     }
 
     @Override
@@ -138,10 +144,12 @@ public class UserAdminServiceImpl implements UserAdminService {
         int pageNum = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
         List<UserIdentifier> userIdentifiers = userAdminProvider.listAllVerifyCode(locator, pageNum + 1, null);
         Long nextAnchor = null;
-        if (userIdentifiers.size() >= pageNum) {
+        List<UserIdentifier> values = userIdentifiers;
+        if (userIdentifiers.size() > pageNum) {
+            values=userIdentifiers.subList(1, userIdentifiers.size());
             nextAnchor = locator.getAnchor();
         }
-        return new Tuple<Long, List<UserIdentifier>>(nextAnchor, userIdentifiers.subList(1, userIdentifiers.size()));
+        return new Tuple<Long, List<UserIdentifier>>(nextAnchor, values);
     }
 
 }
