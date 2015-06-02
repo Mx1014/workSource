@@ -135,7 +135,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
        if(session != null) {
            TextMessage msg = new TextMessage(pdu.getEncodedFrame());
            try {
-               session.sendMessage(msg);
+               synchronized(session) {
+                   session.sendMessage(msg);
+               }
                this.updateSessionSendTick(session);
            } catch(IOException e) {
                LOGGER.warn("Unable to send message " + pdu.getEncodedFrame() + " to client", e);
@@ -157,7 +159,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                 frame.setPayload(pdu);
                 TextMessage msg = new TextMessage(frame.toJson());
                 try {
-                    session.sendMessage(msg);
+                    synchronized(session) {
+                        session.sendMessage(msg);
+                    }
                     updateSessionSendTick(session);
                 } catch(IOException e) {
                     LOGGER.warn("Unable to send imessage to " + session.getRemoteAddress().toString(), e);
@@ -193,10 +197,12 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     pdu.setPayload(respPdu);
                     
                     try {
-                        session.sendMessage(new TextMessage(pdu.toJson()));
+                        synchronized(session) {
+                            session.sendMessage(new TextMessage(pdu.toJson()));
+                        }
                     } catch (IOException e) {
                         LOGGER.error("Send registedOk message error");
-                            }
+                    }
                     
                 } else {
                     LOGGER.error("Invalid REST call response");
@@ -253,17 +259,19 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     pdu.setPayload(clientPdu);
                     pdu.setAppId(appId);
                     try {
-                        session.sendMessage(new TextMessage(pdu.toJson()));
+                        synchronized(session) {
+                            session.sendMessage(new TextMessage(pdu.toJson()));
+                        }
                     } catch (IOException e) {
                         LOGGER.error("Session send error, appId= " + appId.toString() + ", "  + e.getMessage());
-                        }    
-                    }
+                    }    
                 }
+            }
 
             @Override
             public void onFailure(Throwable ex) {
                 LOGGER.info("Failed to make REST call /user/appIdStatus. exception: " + ex);
-                }
+            }
         });
     }
     

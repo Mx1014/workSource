@@ -4,20 +4,21 @@ package com.everhomes.family;
 
 import com.everhomes.rest.RestResponseBase;
 
+import java.util.List;
 import com.everhomes.family.FamilyDTO;
 
-public class GetRestResponse extends RestResponseBase {
+public class AdminRestResponse extends RestResponseBase {
 
-    private FamilyDTO response;
+    private List<FamilyDTO> response;
 
-    public GetRestResponse () {
+    public AdminRestResponse () {
     }
 
-    public FamilyDTO getResponse() {
+    public List<FamilyDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(FamilyDTO response) {
+    public void setResponse(List<FamilyDTO> response) {
         this.response = response;
     }
 }
