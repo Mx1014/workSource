@@ -222,7 +222,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     
    
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId,#communityAddressMapping.addressId"),
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="{#communityAddressMapping.communityId, #communityAddressMapping.addressId}"),
             @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void updatePropAddressMapping(CommunityAddressMapping communityAddressMapping){
@@ -236,7 +236,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId,#communityAddressMapping.addressId"),
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="{#communityAddressMapping.communityId,#communityAddressMapping.addressId}"),
             @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void deletePropAddressMapping(CommunityAddressMapping communityAddressMapping){
@@ -249,7 +249,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
-            @CacheEvict(value="CommunityAddressMappingByAddressId", key="#communityAddressMapping.communityId,#communityAddressMapping.addressId"),
+            @CacheEvict(value="CommunityAddressMappingByAddressId", key="{#communityAddressMapping.communityId,#communityAddressMapping.addressId}"),
             @CacheEvict(value = "CommunityAddressMappingsList", key="#communityAddressMapping.communityId")})
     @Override
     public void deletePropAddressMapping(long id){

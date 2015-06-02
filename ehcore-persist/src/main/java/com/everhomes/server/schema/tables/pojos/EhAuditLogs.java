@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAuditLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2063105491;
+	private static final long serialVersionUID = -722682831;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
 	private java.lang.Long     operatorUid;
 	private java.lang.Long     requestorUid;
-	private java.lang.String   operationName;
+	private java.lang.String   requestorComment;
+	private java.lang.String   operationType;
 	private java.lang.Integer  resultCode;
 	private java.lang.String   reason;
 	private java.lang.String   resourceType;
@@ -42,7 +43,8 @@ public class EhAuditLogs implements java.io.Serializable {
 		java.lang.Long     appId,
 		java.lang.Long     operatorUid,
 		java.lang.Long     requestorUid,
-		java.lang.String   operationName,
+		java.lang.String   requestorComment,
+		java.lang.String   operationType,
 		java.lang.Integer  resultCode,
 		java.lang.String   reason,
 		java.lang.String   resourceType,
@@ -64,7 +66,8 @@ public class EhAuditLogs implements java.io.Serializable {
 		this.appId = appId;
 		this.operatorUid = operatorUid;
 		this.requestorUid = requestorUid;
-		this.operationName = operationName;
+		this.requestorComment = requestorComment;
+		this.operationType = operationType;
 		this.resultCode = resultCode;
 		this.reason = reason;
 		this.resourceType = resourceType;
@@ -115,12 +118,20 @@ public class EhAuditLogs implements java.io.Serializable {
 		this.requestorUid = requestorUid;
 	}
 
-	public java.lang.String getOperationName() {
-		return this.operationName;
+	public java.lang.String getRequestorComment() {
+		return this.requestorComment;
 	}
 
-	public void setOperationName(java.lang.String operationName) {
-		this.operationName = operationName;
+	public void setRequestorComment(java.lang.String requestorComment) {
+		this.requestorComment = requestorComment;
+	}
+
+	public java.lang.String getOperationType() {
+		return this.operationType;
+	}
+
+	public void setOperationType(java.lang.String operationType) {
+		this.operationType = operationType;
 	}
 
 	public java.lang.Integer getResultCode() {

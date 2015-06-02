@@ -21,7 +21,7 @@ public class PropCommunityBuildAddessCommand {
 //    private List<String> buildingNames;
     
     @ItemType(Long.class)
-    private Long[] addressIds;
+    private List<Long> addressIds;
     
     private String message;
    
@@ -49,12 +49,12 @@ public class PropCommunityBuildAddessCommand {
 	}
 
 
-	public Long[] getAddressIds() {
+	public List<Long> getAddressIds() {
 		return addressIds;
 	}
 
 
-	public void setAddressIds(Long[] addressIds) {
+	public void setAddressIds(List<Long> addressIds) {
 		this.addressIds = addressIds;
 	}
 

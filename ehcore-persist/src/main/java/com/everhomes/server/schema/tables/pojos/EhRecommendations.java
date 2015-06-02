@@ -11,14 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 508495383;
+	private static final long serialVersionUID = 153022959;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appid;
 	private java.lang.Integer  suggestType;
 	private java.lang.Long     userId;
-	private java.lang.Integer  targetType;
-	private java.lang.Long     targetId;
+	private java.lang.Integer  sourceType;
+	private java.lang.Long     sourceId;
 	private java.lang.String   embeddedJson;
 	private java.lang.Integer  maxCount;
 	private java.lang.Double   score;
@@ -33,8 +33,8 @@ public class EhRecommendations implements java.io.Serializable {
 		java.lang.Long     appid,
 		java.lang.Integer  suggestType,
 		java.lang.Long     userId,
-		java.lang.Integer  targetType,
-		java.lang.Long     targetId,
+		java.lang.Integer  sourceType,
+		java.lang.Long     sourceId,
 		java.lang.String   embeddedJson,
 		java.lang.Integer  maxCount,
 		java.lang.Double   score,
@@ -46,8 +46,8 @@ public class EhRecommendations implements java.io.Serializable {
 		this.appid = appid;
 		this.suggestType = suggestType;
 		this.userId = userId;
-		this.targetType = targetType;
-		this.targetId = targetId;
+		this.sourceType = sourceType;
+		this.sourceId = sourceId;
 		this.embeddedJson = embeddedJson;
 		this.maxCount = maxCount;
 		this.score = score;
@@ -88,20 +88,20 @@ public class EhRecommendations implements java.io.Serializable {
 		this.userId = userId;
 	}
 
-	public java.lang.Integer getTargetType() {
-		return this.targetType;
+	public java.lang.Integer getSourceType() {
+		return this.sourceType;
 	}
 
-	public void setTargetType(java.lang.Integer targetType) {
-		this.targetType = targetType;
+	public void setSourceType(java.lang.Integer sourceType) {
+		this.sourceType = sourceType;
 	}
 
-	public java.lang.Long getTargetId() {
-		return this.targetId;
+	public java.lang.Long getSourceId() {
+		return this.sourceId;
 	}
 
-	public void setTargetId(java.lang.Long targetId) {
-		this.targetId = targetId;
+	public void setSourceId(java.lang.Long sourceId) {
+		this.sourceId = sourceId;
 	}
 
 	public java.lang.String getEmbeddedJson() {

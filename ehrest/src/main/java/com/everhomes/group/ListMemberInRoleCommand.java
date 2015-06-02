@@ -1,14 +1,17 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>groupId: group id</li>
- * <li>roleId: 成员在group里的角色ID</li>
+ * <li>roleIds: 成员在group里的角色ID数组（可多个roleId）</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -17,8 +20,8 @@ public class ListMemberInRoleCommand {
     @NotNull
     private Long groupId;
     
-    @NotNull
-    private Long roleId;
+    @ItemType(Long.class)
+    private List<Long> roleIds;
     
     private Long pageAnchor;
     
@@ -35,12 +38,12 @@ public class ListMemberInRoleCommand {
         this.groupId = groupId;
     }
 
-    public Long getRoleId() {
-        return roleId;
+    public List<Long> getRoleIds() {
+        return roleIds;
     }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+    public void setRoleIds(List<Long> roleIds) {
+        this.roleIds = roleIds;
     }
 
     public Long getPageAnchor() {

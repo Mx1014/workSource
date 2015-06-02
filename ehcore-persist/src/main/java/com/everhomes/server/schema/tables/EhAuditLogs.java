@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAuditLogs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAuditLogsRecord> {
 
-	private static final long serialVersionUID = -400547241;
+	private static final long serialVersionUID = 155428479;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_audit_logs</code>
@@ -47,9 +47,14 @@ public class EhAuditLogs extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAuditLogsRecord, java.lang.Long> REQUESTOR_UID = createField("requestor_uid", org.jooq.impl.SQLDataType.BIGINT, this, "user who initiated the original request");
 
 	/**
-	 * The column <code>ehcore.eh_audit_logs.operation_name</code>.
+	 * The column <code>ehcore.eh_audit_logs.requestor_comment</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAuditLogsRecord, java.lang.String> OPERATION_NAME = createField("operation_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAuditLogsRecord, java.lang.String> REQUESTOR_COMMENT = createField("requestor_comment", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_audit_logs.operation_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAuditLogsRecord, java.lang.String> OPERATION_TYPE = createField("operation_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_audit_logs.result_code</code>. 0: common positive result, otherwise, application defined result code

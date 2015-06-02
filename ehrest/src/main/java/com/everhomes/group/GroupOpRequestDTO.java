@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -8,9 +10,11 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: 申请记录ID</li>
  * <li>groupId: group id</li>
+ * <li>groupName: group名称</li>
  * <li>reqestorUid: 申请人ID</li>
  * <li>requestorName: 申请人名称</li>
- * <li>requestorAvatar: 申请人头像</li>
+ * <li>requestorAvatar: 申请人头像URI</li>
+ * <li>requestorAvatarUrl: 申请人头像URL</li>
  * <li>requestorComment: 申请原因</li>
  * <li>operationType: 操作类型</li>
  * <li>status: 成为管理员申请的状态，参考{@link com.everhomes.group.GroupOpRequestStatus}</li>
@@ -23,16 +27,18 @@ import com.everhomes.util.StringHelper;
 public class GroupOpRequestDTO {
     private Long id;
     private Long groupId;
-    private Long reqestorUid;
+    private String groupName;
+    private Long requestorUid;
     private String requestorName;
     private String requestorAvatar;
+    private String requestorAvatarUrl;
     private String requestorComment;
     private Byte operationType;
     private Byte status;
     private Long operatorUid;
     private String processMessage;
-    private String createTime;
-    private String processTime;
+    private Timestamp createTime;
+    private Timestamp processTime;
 
     public GroupOpRequestDTO() {
     }
@@ -53,12 +59,20 @@ public class GroupOpRequestDTO {
         this.groupId = groupId;
     }
 
-    public Long getReqestorUid() {
-        return reqestorUid;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setReqestorUid(Long reqestorUid) {
-        this.reqestorUid = reqestorUid;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public Long getRequestorUid() {
+        return requestorUid;
+    }
+
+    public void setRequestorUid(Long requestorUid) {
+        this.requestorUid = requestorUid;
     }
 
     public String getRequestorName() {
@@ -75,6 +89,14 @@ public class GroupOpRequestDTO {
 
     public void setRequestorAvatar(String requestorAvatar) {
         this.requestorAvatar = requestorAvatar;
+    }
+
+    public String getRequestorAvatarUrl() {
+        return requestorAvatarUrl;
+    }
+
+    public void setRequestorAvatarUrl(String requestorAvatarUrl) {
+        this.requestorAvatarUrl = requestorAvatarUrl;
     }
 
     public String getRequestorComment() {
@@ -117,19 +139,19 @@ public class GroupOpRequestDTO {
         this.processMessage = processMessage;
     }
 
-    public String getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
-    public String getProcessTime() {
+    public Timestamp getProcessTime() {
         return processTime;
     }
 
-    public void setProcessTime(String processTime) {
+    public void setProcessTime(Timestamp processTime) {
         this.processTime = processTime;
     }
     

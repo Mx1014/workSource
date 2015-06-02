@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -30,7 +32,8 @@ public class GroupMemberDTO {
     private String memberAvatar;
     private String memberAvatarUrl;
     private Byte memberStatus;
-    private String createTime;
+    private Timestamp createTime;
+    private Timestamp approveTime;
     private Byte phonePrivateFlag;
     private String cellPhone;
     private Byte muteNotificationFlag;
@@ -102,12 +105,20 @@ public class GroupMemberDTO {
         this.memberNickName = memberNickName;
     }
 
-    public String getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Timestamp getApproveTime() {
+        return approveTime;
+    }
+
+    public void setApproveTime(Timestamp approveTime) {
+        this.approveTime = approveTime;
     }
 
     public Byte getMemberStatus() {

@@ -67,6 +67,8 @@ CREATE TABLE `eh_devices` (
     INDEX `u_eh_dev_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_certs`;
+
 #
 # member of global partition
 #
@@ -74,6 +76,7 @@ CREATE TABLE `ehcore`.`eh_certs` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(32) NOT NULL,
   `cert_type` INT NOT NULL,
+  `cert_pass` VARCHAR(128),
   `data` BLOB NOT NULL,
   
   PRIMARY KEY (`id`),
@@ -328,7 +331,8 @@ CREATE TABLE `eh_audit_logs`(
     `app_id` BIGINT COMMENT 'application that provides the operation',
     `operator_uid` BIGINT,
 	`requestor_uid` BIGINT COMMENT 'user who initiated the original request',
-    `operation_name` VARCHAR(32),
+	`requestor_comment` TEXT,
+    `operation_type` VARCHAR(32),
     `result_code` INTEGER COMMENT '0: common positive result, otherwise, application defined result code', 
     `reason` VARCHAR(256),
 	`resource_type` VARCHAR(32) COMMENT 'operation related resource type',

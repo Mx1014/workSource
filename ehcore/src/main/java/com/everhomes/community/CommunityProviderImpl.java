@@ -223,7 +223,10 @@ public class CommunityProviderImpl implements CommunityProvider {
         nearyByPointList = findCommunityGeoPointByGeoHash(pointList);
         
         List<Long> communityIds = new ArrayList<Long>();
-        if(nearyByPointList == null || nearyByPointList.isEmpty()) return null;
+        if(nearyByPointList == null || nearyByPointList.isEmpty()) {
+            return results;
+        }
+        
         for(CommunityGeoPoint p : nearyByPointList){
             if(!communityIds.contains(p.getCommunityId().longValue()))
                 communityIds.add(p.getCommunityId());

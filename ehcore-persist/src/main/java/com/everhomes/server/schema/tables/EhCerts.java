@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCerts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCertsRecord> {
 
-	private static final long serialVersionUID = 1666604702;
+	private static final long serialVersionUID = -1701918108;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_certs</code>
@@ -40,6 +40,11 @@ public class EhCerts extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_certs.cert_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCertsRecord, java.lang.Integer> CERT_TYPE = createField("cert_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_certs.cert_pass</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCertsRecord, java.lang.String> CERT_PASS = createField("cert_pass", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_certs.data</code>.
