@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -41,7 +43,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 import ch.hsr.geohash.GeoHash;
+
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -85,6 +89,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+
+import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -721,10 +727,11 @@ public class FamilyServiceImpl implements FamilyService {
         });
         
         if(flag){
+            cmd.setOperatorRole(cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole());
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
             else if(cmd.getOperatorRole().byteValue() == Role.ResourceAdmin)
-                sendFamilyNotificationForApproveMember(null,group,member,userId);
+                sendFamilyNotificationForApproveMemberByAdmin(null,group,member,userId);
             //update current family
             setCurrentFamilyAfterApproval(memberUid,familyId,0);
             
@@ -779,6 +786,39 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
     
+    private void sendFamilyNotificationForApproveMemberByAdmin(Address address, Group group, GroupMember member,long operatorId) {
+        // send notification to the applicant
+        try {
+            
+            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceOperator);
+            
+            User user = userProvider.findUserById(member.getMemberId());
+            String locale = user.getLocale();
+            if(locale == null) locale = "zh_CN";
+            
+            // send notification member who applicant
+            String scope = FamilyNotificationTemplateCode.SCOPE;
+            int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            
+            // send notification to family other members
+            code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_OTHER;
+            final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            groupProvider.iterateGroupMembers(1000, group.getId(), null,
+            (groupMember) -> {
+                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue() 
+                        && groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
+                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
+                }
+            });
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
+        }
+    }
+    
     
     private Map<String, Object> bulidMapBeforeSendFamilyNotification(Address address, Group group, 
             GroupMember member,long operatorId, long operatorRole){
@@ -798,8 +838,6 @@ public class FamilyServiceImpl implements FamilyService {
                 map.put("operatorName", operator.getMemberNickName());
             }
             else{ 
-//                User operator = this.userProvider.findUserById(operatorId);
-//                assert(operator != null);
                 map.put("operatorName", "管理员");
             }
             
@@ -946,6 +984,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(!StringUtils.isEmpty(familyName)){
             group.setName(familyName);
         }
+        
         this.groupProvider.updateGroup(group);
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
@@ -959,6 +998,10 @@ public class FamilyServiceImpl implements FamilyService {
         String memberNickName = cmd.getMemberNickName();
         if(!StringUtils.isEmpty(memberNickName)){
             member.setMemberNickName(memberNickName);
+        }
+        String proofResourceUrl = cmd.getProofResourceUrl();
+        if(!StringUtils.isEmpty(proofResourceUrl)){
+            member.setProofResourceUrl(proofResourceUrl);
         }
         this.groupProvider.updateGroupMember(member);
         //更新之后，发送命令
@@ -1155,7 +1198,11 @@ public class FamilyServiceImpl implements FamilyService {
                         .and(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
                         .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
                         .fetch().map( (r) ->{
-                            userIds.add(r.getValue(Tables.EH_USER_GROUPS.OWNER_UID));
+                            Long id = r.getValue(Tables.EH_USER_GROUPS.OWNER_UID);
+                            if(!userIds.contains(id) && id.longValue() != user.getId().longValue()){
+                                userIds.add(r.getValue(Tables.EH_USER_GROUPS.OWNER_UID));
+                                
+                            }
                             return null;
                         });
                     return true;
@@ -1164,34 +1211,43 @@ public class FamilyServiceImpl implements FamilyService {
         if(userIds.size() > 0){
             boolean isFirst = true;
             Condition c = Tables.EH_USER_LOCATIONS.UID.in(userIds);
+            Condition geoCondition = null;
             List<String> geoHashCodeList = getGeoHashCodeList(latitude,longitude);
             for(String geoHashCode : geoHashCodeList){
                 if(isFirst){
-                    c = Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%");
+                    geoCondition = Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%");
                     isFirst = false;
                     continue;
                 }
                 if(!isFirst){
-                    c = c.or(Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%"));
+                    geoCondition = geoCondition.or(Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%"));
                 }
             }
+            if(geoCondition != null)
+                c.and(geoCondition);
             final Condition condition = c;
             
+            List<Long> userLocationUserIds = new ArrayList<Long>();
             this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                     (DSLContext context, Object reducingContext)-> {
                         
                         SelectQuery<?> query = context.selectQuery(Tables.EH_USER_LOCATIONS);
                         
                         query.addConditions(condition);
-                        query.addGroupBy(Tables.EH_USER_LOCATIONS.UID);
+                        //query.addGroupBy(Tables.EH_USER_LOCATIONS.UID);
                         query.addOrderBy(Tables.EH_USER_LOCATIONS.CREATE_TIME.desc());
                         query.fetch().map((r) -> {
+                            
                             UserLocation userLocation = ConvertHelper.convert(r,UserLocation.class);
+                            if(userLocationUserIds.contains(userLocation.getUid())) return null;
+                            userLocationUserIds.add(userLocation.getUid());
+                            
                             User u = this.userProvider.findUserById(userLocation.getUid());
                             NeighborUserDTO n = new NeighborUserDTO();
                             n.setUserId(u.getId());
                             n.setUserStatusLine(u.getStatusLine());
-                            n.setUserName(u.getAccountName());
+                            //n.setUserName(u.getAccountName());
+                            n.setUserName(u.getNickName());
                             n.setUserAvatarUrl(parserUri(u.getAvatar(),"User",u.getId()));
                             n.setUserAvatarUri(u.getAvatar());
                             //计算距离
@@ -1397,6 +1453,68 @@ public class FamilyServiceImpl implements FamilyService {
         Long familyId = cmd.getId();
         
         return this.familyProvider.getFamilyById(familyId);
+    }
+
+    @Override
+    public void approveMembersByFamily(Family family) {
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        long familyId = family.getId();
+        Group group = ConvertHelper.convert(family, Group.class);
+        List<GroupMember> groupMembers = this.groupProvider.findGroupMemberByGroupId(familyId);
+        if(groupMembers != null){
+
+            groupMembers.forEach((GroupMember member) ->{
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                    member.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    member.setOperatorUid(userId);
+                    this.groupProvider.updateGroupMember(member);
+                    UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(member.getMemberId(), familyId);
+                    if(userGroup != null){
+                        userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                        this.userProvider.updateUserGroup(userGroup);
+                    }
+                    sendFamilyNotificationCorrectAddressByAdmin(null,group,member,userId);
+                    return null;
+                });
+                
+            });
+        }
+        
+    }
+    
+    private void sendFamilyNotificationCorrectAddressByAdmin(Address address, Group group, GroupMember member,long operatorId) {
+        // send notification to the applicant
+        try {
+            
+            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceAdmin);
+            
+            User user = userProvider.findUserById(member.getMemberId());
+            String locale = user.getLocale();
+            if(locale == null) locale = "zh_CN";
+            
+            // send notification member who applicant
+            String scope = FamilyNotificationTemplateCode.SCOPE;
+            int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_CORRECT_FOR_APPLICANT;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            
+            // send notification to family other members
+            code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_CORRECT_FOR_OTHER;
+            final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            groupProvider.iterateGroupMembers(1000, group.getId(), null,
+            (groupMember) -> {
+                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue() 
+                        && groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
+                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
+                }
+            });
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
+        }
     }
 
 

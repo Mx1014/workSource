@@ -1,17 +1,21 @@
 package com.everhomes.user;
 
-import javax.validation.constraints.NotNull;
-
+/**
+ * 
+ * @author elians
+ *anchor:ID偏移值
+ */
 public class ListContactsCommand {
-    @NotNull
-    private Integer pageOffset;
+    private Long anchor;
 
-    public Integer getPageOffset() {
-        return pageOffset;
+    public Long getAnchor() {
+        return anchor;
     }
 
-    public void setPageOffset(Integer pageOffset) {
-        this.pageOffset = pageOffset;
+    public void setAnchor(Long anchorPage) {
+        this.anchor = anchorPage;
     }
+
+   
 
 }

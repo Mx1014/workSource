@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberNickName: 用户在家庭内的昵称</li>
  * <li>memberAvatarUri: 用户在家庭的头像Id</li>
  * <li>memberAvatarUrl: 用户在家庭的头像url</li>
+ * <li>proofResourceUrl: 存在该字段有值表名是加速审核的</li>
  * </ul>
  */
 public class UpdateFamilyInfoCommand extends BaseCommand{
@@ -27,6 +28,8 @@ public class UpdateFamilyInfoCommand extends BaseCommand{
     private String memberNickName;
     private String memberAvatarUri;
     private String memberAvatarUrl;
+    
+    private String proofResourceUrl;
     
     public UpdateFamilyInfoCommand() {
     }
@@ -85,6 +88,14 @@ public class UpdateFamilyInfoCommand extends BaseCommand{
 
     public void setMemberAvatarUrl(String memberAvatarUrl) {
         this.memberAvatarUrl = memberAvatarUrl;
+    }
+
+    public String getProofResourceUrl() {
+        return proofResourceUrl;
+    }
+
+    public void setProofResourceUrl(String proofResourceUrl) {
+        this.proofResourceUrl = proofResourceUrl;
     }
 
     @Override

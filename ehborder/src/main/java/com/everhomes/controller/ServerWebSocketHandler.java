@@ -87,20 +87,22 @@ public class ServerWebSocketHandler implements WebSocketHandler {
         responseFrame.setRequestId(frame.getRequestId());
         TextMessage msg = new TextMessage(responseFrame.toJson());
         try {
-            session.sendMessage(msg);
+            synchronized(session) {
+                session.sendMessage(msg);
+            }
             updateSessionSendTick(session);
         } catch(IOException e) {
             LOGGER.warn("Unable to send inter-server message to " + session.getRemoteAddress().toString(), e);
         }
     }
     
-    @NamedHandler(value="", byClass=ClientForwardPdu.class)
+    @NamedHandler(byClass=ClientForwardPdu.class)
     private void handleClientForwardPdu(WebSocketSession session, PduFrame frame) {
         ClientForwardPdu pdu = frame.getPayload(ClientForwardPdu.class);
         this.clientWebSocketHandler.forward(pdu);
     }
     
-    @NamedHandler(value="", byClass=HeartbeatPdu.class)
+    @NamedHandler(byClass=HeartbeatPdu.class)
     private void handleHeartbeatPdu(WebSocketSession session, PduFrame frame) {
         HeartbeatPdu pdu = frame.getPayload(HeartbeatPdu.class);
         if(LOGGER.isDebugEnabled())
@@ -108,7 +110,7 @@ public class ServerWebSocketHandler implements WebSocketHandler {
                 session.getRemoteAddress().toString(), pdu.getLastPeerReceiveTime()));
     }
     
-    @NamedHandler(value="", byClass=PusherNotifyPdu.class)
+    @NamedHandler(byClass=PusherNotifyPdu.class)
     private void handlePusherNotifyPdu(WebSocketSession session, PduFrame frame) {
         PusherNotifyPdu pdu = frame.getPayload(PusherNotifyPdu.class);
         pusherWebSocketHandler.notify(session, pdu);
@@ -150,7 +152,9 @@ public class ServerWebSocketHandler implements WebSocketHandler {
                 frame.setPayload(pdu);
                 TextMessage msg = new TextMessage(frame.toJson());
                 try {
-                    session.sendMessage(msg);
+                    synchronized(session) {
+                        session.sendMessage(msg);
+                    }
                     updateSessionSendTick(session);
                 } catch(IOException e) {
                     LOGGER.warn("Unable to send inter-server message to " + session.getRemoteAddress().toString(), e);

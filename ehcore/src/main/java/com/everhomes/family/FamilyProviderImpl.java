@@ -244,6 +244,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     family.setMembershipStatus(member.getMemberStatus());
                     family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), "User", member.getCreatorUid()));
                     family.setMemberAvatarUri(member.getMemberAvatar());
+                    family.setProofResourceUrl(parserUri(member.getProofResourceUrl(), "User", member.getCreatorUid()));
                 }
                 
                 Address address = this.addressProvider.findAddressById(group.getIntegralTag1());

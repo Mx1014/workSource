@@ -302,7 +302,9 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     pdu.setName("MESSAGES");
                     pdu.setPayLoadForString(result.getBody());
                     try {
-                        session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+                        synchronized(session) {
+                            session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+                        }
                     } catch (IOException e) {
                         LOGGER.error("Session send error: " + e.getMessage());
                     }
@@ -370,7 +372,9 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
 //                PduFrame pdu = new PduFrame();
 //                pdu.setPayload(resp);
 //                try {
-//                      session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+//                        synchronized(session) {
+//                          session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+//                        }
 //                } catch (IOException e) {
 //                      LOGGER.error("Notify server error: " + e.getMessage());
 //                     }
@@ -395,7 +399,9 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);
             try {
+                synchronized(clientSession) {
                   clientSession.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+                }
             } catch (IOException e) {
                     LOGGER.error("Notify server error: " + e.getMessage());
                }
