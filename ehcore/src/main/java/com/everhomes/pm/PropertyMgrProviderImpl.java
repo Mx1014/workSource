@@ -27,6 +27,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCommunityAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmBillItemsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmBillsDao;
+import com.everhomes.server.schema.tables.daos.EhCommunityPmContactsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmMembersDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityPmTasksDao;
@@ -34,6 +35,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmBillItems;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmBills;
+import com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmOwners;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks;
@@ -41,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmBillItemsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord;
+import com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmOwnersRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord;
@@ -58,7 +61,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
     // ??? How to set cache if there is more than one parameters? 
     //@Cacheable(value="Region", key="#regionId")
-    @Cacheable(value = "listUserCommunityPmMembers")
+
     @Override
     public List<CommunityPmMember> listUserCommunityPmMembers(Long userId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -183,6 +186,23 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         Integer offset = (pageOffset - 1 ) * pageSize;
         query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
         query.addLimit(offset, pageSize);
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
+            return null;
+        });
+        return result;
+    }
+    
+    //@Cacheable(value = "CommunityPmMemberList", key="#communityId")
+    @Override
+    public List<CommunityPmMember> listCommunityPmMembers(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
+        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
+        if(communityId != null)
+           query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
             return null;
@@ -458,7 +478,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropOwner(CommunityPmOwner communityPmOwner) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-       EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+        EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
         dao.insert(communityPmOwner);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmOwners.class, null);
@@ -805,4 +825,73 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         dao.update(pmTasks);
     }
 
+    @Override
+    public void createPropContact(CommunityPmContact communityPmContact) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+        dao.insert(communityPmContact);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmContacts.class, null);
+    }
+    
+    @CacheEvict(value = "CommunityPmContact", key="#CommunityPmContact.id")
+    @Override
+    public void updatePropContact(CommunityPmContact communityPmContact){
+    	assert(communityPmContact.getId() == null);
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+    	dao.update(communityPmContact);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmContacts.class, communityPmContact.getId());
+    }
+    
+    @CacheEvict(value = "CommunityPmContact", key="#CommunityPmContact.id")
+    @Override
+    public void deletePropContact(CommunityPmContact communityPmContact){
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+    	dao.deleteById(communityPmContact.getId());
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmContacts.class, communityPmContact.getId());
+    }
+    
+    @CacheEvict(value="CommunityPmContact", key="#id")
+    @Override
+    public void deletePropContact(long id){
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+    	dao.deleteById(id);
+    	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmContacts.class, id);
+    }
+     
+    @Cacheable(value="CommunityPmContact", key="#id")
+    @Override
+    public CommunityPmContact findPropContactById(long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CommunityPmContact.class);
+    }
+    
+    
+    @Override
+    public List<CommunityPmContact> listCommunityPmContacts(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        List<CommunityPmContact> result  = new ArrayList<CommunityPmContact>();
+        SelectQuery<EhCommunityPmContactsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_CONTACTS);
+        if(communityId != null)
+           query.addConditions(Tables.EH_COMMUNITY_PM_CONTACTS.COMMUNITY_ID.eq(communityId));
+       
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_CONTACTS.ID.desc());
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, CommunityPmContact.class));
+            return null;
+        });
+        return result;
+    }
 }

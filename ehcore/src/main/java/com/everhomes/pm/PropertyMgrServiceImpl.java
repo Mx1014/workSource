@@ -563,7 +563,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	{
     		LOGGER.error("Unable to find the property member or the property member status is not confirming.communityId=" + cmd.getCommunityId() +",memberId=" + cmd.getMemberId());
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Unable to find the community.");
+                    "Unable to find the property member or the property member status is not confirming.");
     	}
     	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
     	propertyMgrProvider.updatePropMember(communityPmMember);
@@ -596,7 +596,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	{
     		LOGGER.error("Unable to find the property member or the property member status is not confirming.communityId=" + cmd.getCommunityId() +",memberId=" + cmd.getMemberId());
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Unable to find the community.");
+                    "Unable to find the property member or the property member status is not confirming.");
     	}
     	long userId = communityPmMember.getTargetId();
     	propertyMgrProvider.deletePropMember(communityPmMember);
@@ -628,7 +628,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	{
     		LOGGER.error("Unable to find the property member.communityId=" + cmd.getCommunityId() +",memberId=" + cmd.getMemberId());
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Unable to find the community.");
+                    "Unable to find the property member.");
     	}
     	long userId = communityPmMember.getTargetId();
     	propertyMgrProvider.deletePropMember(communityPmMember);
@@ -1324,4 +1324,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, "user", 
        		 String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
     }
+	
+	@Override
+	public void sendMsgToPMGroup(PropCommunityIdMessageCommand cmd) {
+		List<CommunityPmMember> memberList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId());
+		if(memberList != null && memberList.size() > 0){
+			for (CommunityPmMember communityPmMember : memberList) {
+				sendNoticeToUserById(communityPmMember.getTargetId(), cmd.getMessage());
+			}
+		}
+	}
 }

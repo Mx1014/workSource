@@ -184,5 +184,20 @@ public class PropertyTest {
 //			System.out.println();
 //		}
     }
+    
+    @Test
+    public void testListPropMember () {
+    	DeletePropMemberCommand cmd = new DeletePropMemberCommand();
+    	cmd.setCommunityId(9l);
+    	cmd.setMemberId(36);
+		ps.revokePMGroupMember(cmd );
+		System.out.println("=====================");
+    	List<CommunityPmMember> memberList = pp.listCommunityPmMembers(9l);
+		if(memberList != null && memberList.size() > 0){
+			for (CommunityPmMember communityPmMember : memberList) {
+				System.out.println(communityPmMember);
+			}
+		}
+    }
    
 }

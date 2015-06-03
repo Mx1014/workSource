@@ -17,8 +17,8 @@ import com.everhomes.util.StringHelper;
 public class PropCommunityBuildAddessCommand {
     private Long communityId;
     
-//    @ItemType(String.class)
-//    private List<String> buildingNames;
+    @ItemType(String.class)
+    private List<String> buildingNames;
     
     @ItemType(Long.class)
     private List<Long> addressIds;
@@ -39,13 +39,13 @@ public class PropCommunityBuildAddessCommand {
 	}
 	
 	public List<String> getBuildingNames() {
-		//return buildingNames;
-		return null;
+		return buildingNames;
+		
 	}
 
 
 	public void setBuildingNames(List<String> buildingNames) {
-		//this.buildingNames = buildingNames;
+		this.buildingNames = buildingNames;
 	}
 
 
