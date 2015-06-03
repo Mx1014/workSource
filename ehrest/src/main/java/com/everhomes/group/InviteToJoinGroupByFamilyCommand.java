@@ -10,19 +10,19 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId：group id</li>
- * <li>userIds: 被邀请加入group的用户ID列表</li>
+ * <li>phone: 被邀请加入group的用户手机号列表</li>
  * <li>invitationText: 邀请用户时填写的说明文本</li>
  * </ul>
  */
-public class InviteToJoinGroupCommand {
+public class InviteToJoinGroupByFamilyCommand {
     @NotNull
     private Long groupId;
     
-    private List<Long> userIds;
+    private List<Long> familyIds;
     
     private String invitationText;
 
-    public InviteToJoinGroupCommand() {
+    public InviteToJoinGroupByFamilyCommand() {
     }
 
     public Long getGroupId() {
@@ -33,12 +33,12 @@ public class InviteToJoinGroupCommand {
         this.groupId = groupId;
     }
 
-    public List<Long> getUserIds() {
-        return userIds;
+    public List<Long> getFamilyIds() {
+        return familyIds;
     }
 
-    public void setUserIds(List<Long> userIds) {
-        this.userIds = userIds;
+    public void setFamilyIds(List<Long> familyIds) {
+        this.familyIds = familyIds;
     }
 
     public String getInvitationText() {

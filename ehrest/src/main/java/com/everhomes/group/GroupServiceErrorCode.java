@@ -10,4 +10,9 @@ public interface GroupServiceErrorCode {
     static final int ERROR_GROUP_MEMBER_NOT_EXIST = 10004;
     static final int ERROR_GROUP_MEMBER_NOT_IN_ACCEPT_STATE = 10005;
     static final int ERROR_GROUP_INVITED_USER_NOT_FOUND = 10006;
+    static final int ERROR_GROUP_INVALID_ROLE_STATUS = 10007;
+    static final int ERROR_GROUP_NOT_IN_ADMIN_ROLE = 10008;
+    static final int ERROR_GROUP_CREATOR_LEAVE_NOT_ALLOW = 10009;
+    static final int ERROR_GROUP_CREATOR_RESIGN_NOT_ALLOW = 10010;
+    static final int ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW = 10011;
 }
