@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,6 +19,7 @@ public class InviteToJoinGroupCommand {
     @NotNull
     private Long groupId;
     
+    @ItemType(Long.class)
     private List<Long> userIds;
     
     private String invitationText;
