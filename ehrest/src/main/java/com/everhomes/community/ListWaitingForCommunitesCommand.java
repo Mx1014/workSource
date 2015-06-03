@@ -1,23 +1,21 @@
 // @formatter:off
-package com.everhomes.family;
+package com.everhomes.community;
 
 import com.everhomes.util.StringHelper;
 
 /**
+ * <p>
  * <ul>
- * <li>type: 类型，详情{@link com.everhomes.family.BaseCommand}</li>
- * <li>id: 类型对应的Id，详情{@link com.everhomes.family.BaseCommand}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
- * <li>pageSize: 每页大小</li>
+ * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListFamilyRequestsCommand extends BaseCommand{
-    
-    private Long pageAnchor;;
+public class ListWaitingForCommunitesCommand {
+    private Long pageAnchor;
     
     private Integer pageSize;
     
-    public ListFamilyRequestsCommand() {
+    public ListWaitingForCommunitesCommand() {
     }
 
     public Long getPageAnchor() {

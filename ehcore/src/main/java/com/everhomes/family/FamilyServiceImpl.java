@@ -33,6 +33,10 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -68,6 +72,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageChannel;
@@ -79,12 +84,15 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -137,7 +145,9 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private MessagingService messagingService;
-
+    
+    @Autowired
+    private UserService userService;
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -174,7 +184,7 @@ public class FamilyServiceImpl implements FamilyService {
                     
                     GroupMember m = new GroupMember();
                     m.setGroupId(f.getId());
-                    m.setMemberNickName(user.getAccountName());
+                    m.setMemberNickName(user.getNickName());
                     m.setMemberType(EntityType.USER.getCode());
                     m.setMemberId(uid);
                     m.setMemberRole(Role.ResourceCreator);
@@ -303,7 +313,7 @@ public class FamilyServiceImpl implements FamilyService {
     		m.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     		m.setGroupId(familyId);
     		m.setMemberId(userId);
-    		m.setMemberNickName(user.getAccountName());
+    		m.setMemberNickName(user.getNickName());
     		m.setMemberAvatar(user.getAvatar());
     		m.setMemberRole(Role.ResourceUser);
     		m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
@@ -1008,19 +1018,13 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public List<FamilyMembershipRequestDTO> listFamilyRequests(ListFamilyRequestsCommand cmd) {
+    public ListFamilyRequestsCommandResponse listFamilyRequests(ListFamilyRequestsCommand cmd) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         Long familyId = cmd.getId();
-        Long pageOffset = cmd.getPageOffset();
         Group group = this.groupProvider.findGroupById(familyId);
-
-        if(pageOffset == null){
-            LOGGER.warn("Invalid pageOffset parameter,pageOffset=" + pageOffset);
-            pageOffset = 1L;
-        }
         
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
@@ -1029,10 +1033,31 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "member status is not active");
         }
-
-        List<FamilyMembershipRequestDTO> results = new ArrayList<FamilyMembershipRequestDTO>();
         
-        List<GroupMember> listGroupMembers = this.familyProvider.listFamilyRequests(userId, familyId, pageOffset);
+        List<FamilyMembershipRequestDTO> results = new ArrayList<FamilyMembershipRequestDTO>();
+        if(cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
+        locator.setAnchor(cmd.getPageAnchor());
+        List<GroupMember> listGroupMembers = this.familyProvider.listFamilyRequests(locator, pageSize + 1,
+                (loc, query) -> {
+                    Condition c1 = Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(familyId);
+                    c1 = c1.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
+
+                    Condition c2 = Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(userId);
+                    c2 = c2.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode()));
+                    
+                    query.addConditions(c1.or(c2));
+                    return query;
+                });
+        
+        Long nextPageAnchor = null;
+        if(listGroupMembers != null && listGroupMembers.size() > pageSize) {
+            listGroupMembers.remove(listGroupMembers.size() - 1);
+            nextPageAnchor = listGroupMembers.get(listGroupMembers.size() -1).getId();
+        }
+        
         listGroupMembers.forEach((r) ->{
             FamilyMembershipRequestDTO member = new FamilyMembershipRequestDTO();
             member.setFamilyId(familyId);
@@ -1046,8 +1071,10 @@ public class FamilyServiceImpl implements FamilyService {
             
             results.add(member);
         });
-        
-        return results;
+        ListFamilyRequestsCommandResponse response = new ListFamilyRequestsCommandResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setRequests(results);
+        return response;
     }
 
     @Override
@@ -1209,17 +1236,14 @@ public class FamilyServiceImpl implements FamilyService {
                 });
         
         if(userIds.size() > 0){
-            boolean isFirst = true;
+
             Condition c = Tables.EH_USER_LOCATIONS.UID.in(userIds);
             Condition geoCondition = null;
             List<String> geoHashCodeList = getGeoHashCodeList(latitude,longitude);
             for(String geoHashCode : geoHashCodeList){
-                if(isFirst){
+                if(geoCondition == null){
                     geoCondition = Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%");
-                    isFirst = false;
-                    continue;
-                }
-                if(!isFirst){
+                }else{
                     geoCondition = geoCondition.or(Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%"));
                 }
             }
@@ -1242,14 +1266,16 @@ public class FamilyServiceImpl implements FamilyService {
                             if(userLocationUserIds.contains(userLocation.getUid())) return null;
                             userLocationUserIds.add(userLocation.getUid());
                             
-                            User u = this.userProvider.findUserById(userLocation.getUid());
+                            //User u = this.userProvider.findUserById(userLocation.getUid());
+                            UserInfo u = this.userService.getUserSnapshotInfo(userLocation.getUid());
                             NeighborUserDTO n = new NeighborUserDTO();
                             n.setUserId(u.getId());
                             n.setUserStatusLine(u.getStatusLine());
                             //n.setUserName(u.getAccountName());
                             n.setUserName(u.getNickName());
-                            n.setUserAvatarUrl(parserUri(u.getAvatar(),"User",u.getId()));
-                            n.setUserAvatarUri(u.getAvatar());
+                            n.setUserAvatarUrl(u.getAvatarUrl());
+                            n.setUserAvatarUri(u.getAvatarUri());
+                            n.setOccupation(u.getOccupationName());
                             //计算距离
                             double lat = userLocation.getLatitude();
                             double lon = userLocation.getLongitude();
@@ -1515,6 +1541,28 @@ public class FamilyServiceImpl implements FamilyService {
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
+    }
+
+    @Override
+    public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
+        
+//        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        locator.setAnchor(cmd.getPageAnchor());
+//        
+//        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
+//            (loc,query) -> {
+//                query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
+//                return query;
+//            });
+//        
+//        Long nextPageAnchor = null;
+//        if(members.size() > pageSize) {
+//            members.remove(members.size() - 1);
+//            nextPageAnchor = members.get(members.size() -1).getId();
+//        }
+        
+        return null;
     }
 
 
