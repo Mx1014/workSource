@@ -54,6 +54,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("javadoc.root", "http://localhost:8080/apidocs")
             .withProperty("javadoc.location", "file:///Users/kelveny/archive/ehng/apidocs/")
             .withProperty("web.location", "/resources/")
+            .withProperty("apns.certname", "apns-develop")
             );
     }
 }

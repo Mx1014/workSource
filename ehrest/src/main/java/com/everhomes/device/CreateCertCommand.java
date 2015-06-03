@@ -4,6 +4,7 @@ public class CreateCertCommand {
     private String name;
     private Integer certType;
     private String certKey;
+    private String certPass;
     
     public String getName() {
         return name;
@@ -22,6 +23,12 @@ public class CreateCertCommand {
     }
     public void setCertType(Integer certType) {
         this.certType = certType;
+    }
+    public String getCertPass() {
+        return certPass;
+    }
+    public void setCertPass(String certPass) {
+        this.certPass = certPass;
     }   
 
 }
