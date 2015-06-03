@@ -17,7 +17,6 @@ public class ListMemberInStatusCommand {
     @NotNull
     private Long groupId;
     
-    @NotNull
     private Byte status;
 
     private Long pageAnchor;

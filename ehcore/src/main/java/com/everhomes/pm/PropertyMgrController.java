@@ -258,6 +258,7 @@ public class PropertyMgrController extends ControllerBase {
     
     /**
      * <b>URL: /pm/deletePMPropertyOwnerInfo</b>
+     * <p>删除业主信息</p>
      * @return 删除的结果
      */
     @RequestMapping("deletePMPropertyOwnerInfo")
@@ -349,8 +350,8 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("sendMsgToPMGroup")
 	@RestReturn(value=String.class)
-    public RestResponse sendMsgToPMGroup(@Valid PropCommunityIdCommand cmd) {
-    	
+    public RestResponse sendMsgToPMGroup(@Valid PropCommunityIdMessageCommand cmd) {
+		propertyMgrService.sendMsgToPMGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

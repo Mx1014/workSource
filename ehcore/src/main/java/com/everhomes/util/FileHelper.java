@@ -2,15 +2,22 @@ package com.everhomes.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.atomikos.datasource.ResourceException;
 
 public class FileHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileHelper.class);
@@ -148,4 +155,159 @@ public class FileHelper {
 			}
 		}
 	}
+	
+	
+	 /**
+		 * 读取文本数据 生成 List<String[]> 数组数据列表
+		 * 
+		 * @param files 文件数组, dataSeperator 数据分隔符（从配置表中读取）
+		 * 
+		 * @return List<String[]> 数据对应的 String 数组
+		 * @throws IOException 
+		 * @throws ResourceException 
+		 */
+		public static List<String[]> getDataArrayByFile(File[] files, String dataSeperator) throws ResourceException, IOException 
+		{
+			List<String[]> dataList = new ArrayList<String[]>();
+			if(files != null && files.length > 0)
+			{
+				for (File file : files)
+				{
+					dataList.addAll(getDataArrayByFile(file, dataSeperator));
+				}
+				
+			}
+			return dataList;
+		}
+		
+		/**
+		 * 读取文本数据 生成 List<String[]> 数组数据列表
+		 * 
+		 * @param filePath 文件路径 , dataSeperator 数据分隔符（从配置表中读取）
+		 * 
+		 * @return List<String[]> 数据对应的 String 数组
+		 */
+		public static List<String[]> getDataArrayByFile(File file, String dataSeperator) throws IOException,
+				ResourceException
+		{
+			List<String[]> dataList = new ArrayList<String[]>();
+
+			BufferedReader br = null;
+			try
+			{
+				FileInputStream fis = new FileInputStream(file);
+				br = new BufferedReader(new InputStreamReader(fis, "UTF8"));
+				String st = "";
+				while ((st = br.readLine()) != null && !st.equals(""))
+				{
+					// split : 默认情况下 第二个参数=0 智能去除最后的空值 导致数组长度变小。
+					// 第二个参数： 如果是正数：参数将会匹配n次，
+					// 第二个参数： 如果是负数：参数将会匹配尽可能多的次数，
+					// 如果是0： 参数将会匹配尽可能多的次数，但是会智能去除最后若干个无效项（空值）
+					String str[] = st.trim().split(dataSeperator, -1);
+					String rowDatas[] = new String[str.length];
+					for (int i = 0; i < str.length; i++)
+					{
+						rowDatas[i] = str[i].trim();
+
+					}
+					dataList.add(rowDatas);
+				}
+
+			} catch (IOException e)
+			{
+				LOGGER.error("failed to processor the file .error io", e);
+			}
+
+			finally
+			{
+				closeBufferedReader(br);
+			}
+			return dataList;
+		}
+		
+		/**
+		 * 读取文本数据 生成 List<String[]> 数组数据列表
+		 * 
+		 * @param filePath 文件路径 , dataSeperator 数据分隔符（从配置表中读取）
+		 * 
+		 * @return List<String[]> 数据对应的 String 数组
+		 */
+		public static List<String[]> getDataArrayByInputStream(InputStream is, String dataSeperator) throws IOException,
+				ResourceException
+		{
+			List<String[]> dataList = new ArrayList<String[]>();
+
+			BufferedReader br = null;
+			try
+			{
+				br = new BufferedReader(new InputStreamReader(is, "UTF8"));
+				String st = "";
+				while ((st = br.readLine()) != null && !st.equals(""))
+				{
+					// split : 默认情况下 第二个参数=0 智能去除最后的空值 导致数组长度变小。
+					// 第二个参数： 如果是正数：参数将会匹配n次，
+					// 第二个参数： 如果是负数：参数将会匹配尽可能多的次数，
+					// 如果是0： 参数将会匹配尽可能多的次数，但是会智能去除最后若干个无效项（空值）
+					String str[] = st.trim().split(dataSeperator, -1);
+					String rowDatas[] = new String[str.length];
+					for (int i = 0; i < str.length; i++)
+					{
+						rowDatas[i] = str[i].trim();
+
+					}
+					dataList.add(rowDatas);
+				}
+
+			} catch (IOException e)
+			{
+				LOGGER.error("failed to processor the file .error io", e);
+			}
+
+			finally
+			{
+				closeBufferedReader(br);
+			}
+			return dataList;
+		}
+		
+		/**
+		 * 关闭缓冲流
+		 * 
+		 * @param 缓冲输入流
+		 * @return
+		 */
+		public static void closeBufferedReader(BufferedReader br)
+		{
+			if (br != null)
+			{
+				try
+				{
+					br.close();
+				} catch (IOException e)
+				{
+					LOGGER.error("failed to close BufferedReader .BufferedReader = " + br, e);
+				}
+			}
+		}
+		
+		/**
+		 * 关闭缓冲流
+		 * 
+		 * @param 缓冲输出流
+		 * @return
+		 */
+		public static void closeBufferedWriter(BufferedWriter bw)
+		{
+			if (bw != null)
+			{
+				try
+				{
+					bw.close();
+				} catch (IOException e)
+				{
+					LOGGER.error("failed to close BufferedWriter .BufferedWriter = " + bw, e);
+				}
+			}
+		}
 }

@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>userStatusLine: 个性签名</li>
  * <li>neighborhoodRelation: 邻居关系参考，{@link com.everhomes.family.NeighborhoodRelation}</li>
  * <li>distance: 邻居用户与自己的距离</li>
+ * <li>occupation: 邻居用户职业</li>
  * </ul>
  */
 public class NeighborUserDTO {
@@ -22,6 +23,7 @@ public class NeighborUserDTO {
     private String userStatusLine;
     private Byte neighborhoodRelation;
     private Double distance;
+    private String occupation;
 
     public NeighborUserDTO() {
     }
@@ -82,6 +84,14 @@ public class NeighborUserDTO {
         this.distance = distance;
     }
     
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
