@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.acl.Role;
-import com.everhomes.acl.RoleConstants;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -221,12 +219,12 @@ public class FamilyController extends ControllerBase {
      * <p>查询加入家庭的待处理的申请列表</p>
      */
     @RequestMapping("listFamilyRequests")
-    @RestReturn(value=FamilyMembershipRequestDTO.class, collection=true)
+    @RestReturn(value=ListFamilyRequestsCommandResponse.class)
     public RestResponse listFamilyRequests(@Valid ListFamilyRequestsCommand cmd) {
         
-        List<FamilyMembershipRequestDTO> results = this.familyService.listFamilyRequests(cmd);
+        ListFamilyRequestsCommandResponse cmdResponse = this.familyService.listFamilyRequests(cmd);
         
-        RestResponse response = new RestResponse(results);
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -333,6 +331,21 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse adminRejectMember(@Valid RejectMemberCommand cmd) {
         this.familyService.rejectMember(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /family/admin/listAllFamilyMembers</b>
+     * <p>查询系统中存在家庭且状态正常的用户</p>
+     */
+    @RequestMapping("admin/listFamilyMembers")
+    @RestReturn(value=ListAllFamilyMembersCommandResponse.class)
+    public RestResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
+        this.familyService.listAllFamilyMembers(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

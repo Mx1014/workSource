@@ -1,13 +1,16 @@
 // @formatter:off
 package com.everhomes.family;
 
-import java.util.ArrayList;
+import static com.everhomes.server.schema.Tables.EH_GROUP_MEMBERS;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +41,14 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -310,6 +316,59 @@ public class FamilyProviderImpl implements FamilyProvider {
             });
         
         return results;
+    }
+    @Override
+    public List<GroupMember> listFamilyRequests(ListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, locator.getEntityId()));
+        
+        final List<GroupMember> members = new ArrayList<GroupMember>();
+        SelectQuery<EhGroupMembersRecord> query = context.selectQuery(Tables.EH_GROUP_MEMBERS);
+
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+            
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.asc());
+        query.addLimit(count);
+        
+        query.fetch().map((r) -> {
+            members.add(ConvertHelper.convert(r, GroupMember.class));
+            return null;
+        });
+        
+        if(members.size() > 0) {
+            locator.setAnchor(members.get(members.size() -1).getId());
+        }
+        
+        return members;
+        
+//        List<GroupMember> results = new ArrayList<GroupMember>();
+//        
+//        //查询待处理的审核，别人主动加入（WAITING_FOR_APPROVAL），被人拉入（WAITING_FOR_ACCEPTANCE）
+//        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+//                (DSLContext context, Object reducingContext)-> {
+//                    
+//                    context.select().from(Tables.EH_GROUP_MEMBERS)
+//                        .where((Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(familyId)
+//                                .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
+//                                        .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode())))
+//                                .or((Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(userId)
+//                                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
+//                                                .eq(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode()))))
+//                                )
+//                        .limit((int)pageSize).offset((int)offset)
+//                        .fetch().map((r) -> {
+//                           results.add(ConvertHelper.convert(r,GroupMember.class));
+//                           return null;
+//                        });
+//                    
+//                return true;
+//            });
+//        
+//        return results;
     }
 
 

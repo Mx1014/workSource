@@ -27,6 +27,9 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.group.GroupMember;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -35,6 +38,9 @@ import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -366,5 +372,34 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         
         return results;
+    }
+
+    @Override
+    public List<Community> listWaitingForApproveCommunities(ListingLocator locator, int count,
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        
+        final List<Community> communities = new ArrayList<Community>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+            
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_COMMUNITIES.ID.asc());
+        query.addLimit(count);
+        
+        query.fetch().map((r) -> {
+            communities.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+        
+        if(communities.size() > 0) {
+            locator.setAnchor(communities.get(communities.size() -1).getId());
+        }
+        
+        return communities;
     }
 }
