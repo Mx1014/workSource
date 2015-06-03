@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>groupId：group id</li>
  * <li>memberId：group成员id</li>
  * <li>memberNickName：group成员昵称</li>
- * <li>memberAvatar：group成员头像URL</li>
+ * <li>memberAvatar：group成员头像URI</li>
  * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.group.GroupMemberPhonePrivacy}</li>
  * <li>muteNotificationFlag: group成员是否免打扰标记，{@link com.everhomes.group.GroupMemberMuteNotificationFlag}</li>
  * </ul>

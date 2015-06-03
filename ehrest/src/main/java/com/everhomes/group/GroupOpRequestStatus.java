@@ -29,10 +29,12 @@ public enum GroupOpRequestStatus {
         
         switch(code.byteValue()) {
         case 0 :
-            return REQUESTING;
+            return NONE;
         case 1 :
-            return ACCEPTED;
+            return REQUESTING;
         case 2 :
+            return ACCEPTED;
+        case 3 :
             return REJECTED;
             
         default :

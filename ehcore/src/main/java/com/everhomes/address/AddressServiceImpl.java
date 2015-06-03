@@ -1,12 +1,12 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.validation.constraints.Null;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -16,10 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.atomikos.datasource.ResourceException;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
+import com.everhomes.community.CommunityDataInfo;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
@@ -38,25 +41,27 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
-import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.listing.ListingLocator;
+import com.everhomes.pm.CommunityPmContact;
+import com.everhomes.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.region.RegionScope;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.file.DataFileHandler;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
@@ -97,6 +102,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private FamilyService familyService;
+    
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
     
     @PostConstruct
     public void setup() {
@@ -665,5 +673,97 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         response.setApartmentList(results);
         return response;
     }
+
+	@Override
+	public void importCommunityInfos(MultipartFile[] files) {
+		User user  = UserContext.current().getUser();
+		List<Region> cityList = regionProvider.listActiveRegion(RegionScope.CITY);
+		List<Region> areaList = regionProvider.listActiveRegion(RegionScope.AREA);
+		try {
+			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), "#@");
+			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
+			
+			if(communityList != null && communityList.size() > 0){
+				//事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目 
+				txImportCommunity(user, communityList);
+			}
+			else{
+				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+		                    "can not to import the community.parse file error.");
+			}
+			
+		} catch (ResourceException e) {
+			
+		} catch (IOException e) {
+		
+		}
+		
+	}
+
+	private void txImportCommunity(User user,List<CommunityDataInfo> communityList) {
+		this.dbProvider.execute((status) ->{
+			
+			// 导入小区信息 和小区坐标
+			importCommunityInfo(user,communityList);
+
+			// 导入小区物业条目
+			importCommunityProperty(user, communityList);
+			
+			return status;
+		});
+	}
+
+	private void importCommunityProperty(User user,List<CommunityDataInfo> communityList) {
+		for (CommunityDataInfo communityDataInfo : communityList) {
+			List<CommunityPmContact> contacts = DataFileHandler.getPropItemsByData(user, communityDataInfo);
+			if(contacts != null && contacts.size() > 0){
+				for (CommunityPmContact communityPmContact : contacts) {
+					propertyMgrProvider.createPropContact(communityPmContact);
+				}
+			}
+		}
+	}
+
+	private void importCommunityInfo(User user,List<CommunityDataInfo> communityList) {
+		for (int i = 0; i < communityList.size(); i++)
+		{
+			CommunityDataInfo communityDataInfo = communityList.get(i);
+			Community community = DataFileHandler.getCommunityByData(communityDataInfo);
+			CommunityGeoPoint communityGeoPoint = DataFileHandler.getCommunityPosByData(communityDataInfo);
+			if (!isCommunityExit(community.getAreaId(), community.getName()))
+			{
+				communityProvider.createCommunity(user.getId(), community);
+				communityGeoPoint.setCommunityId(community.getId());
+				communityProvider.createCommunityGeoPoint(communityGeoPoint);
+				communityDataInfo.setId(community.getId());
+			} else
+			{
+				LOGGER.error("community  duplicate .community = " + community);
+				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+		                    "the community is existed.");
+			}
+		}
+	}
+	
+	// 判断小区是否重复 : 和数据库中已存在的小区比较 重复返回true 不重复返回false
+	public boolean isCommunityExit(long areaId, String communityName)
+	{
+//		Community community = communityProvider.getCommunityByAreaIdAndName(areaId, communityName);
+//		if (community != null)
+//		{
+//			return true;
+//		} else
+//		{
+//			return false;
+//		}
+		return true;
+	}
+
+	@Override
+	public void importAddressInfos(MultipartFile[] files) {
+		
+		
+		
+	}
 
 }
