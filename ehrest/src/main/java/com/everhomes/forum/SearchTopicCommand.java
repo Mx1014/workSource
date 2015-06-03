@@ -21,7 +21,7 @@ public class SearchTopicCommand {
     private Long actionCategory;
     
     private int searchFlag;
-    private Long nextAnchor;
+    private Long pageAnchor;
     
     private Long pageSize;
     
@@ -92,12 +92,12 @@ public class SearchTopicCommand {
         this.searchFlag = searchFlag;
     }
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
     
 }
