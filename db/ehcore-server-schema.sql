@@ -1305,47 +1305,32 @@ CREATE TABLE `eh_family_followers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# key table of the sharding group
-# first level resource objects
+# member of global partition
 #
-# DROP TABLE IF EXISTS `eh_banners`;
-# CREATE TABLE `eh_banners` (
-#     `id` BIGINT NOT NULL COMMENT 'id of the record',
-#     `namespace_id` INTEGER,
-#     `appId` BIGINT,
-#     `name` VARCHAR(128),
-#     `description` TEXT,
-#     `banner_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: advertisement, 2: backend',
-#     `vendor_tag` VARCHAR(64),
-#     `flow_type` TINYINT COMMENT '1: event, 2: slot machine, 3: merchandiser',
-#     `flow_data` TEXT,
-#     `resource_id` BIGINT,
-#     `resource_url` VARCHAR(512), 
-#     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
-#     `group_id` BIGINT COMMENT 'point to the group created for the banner',
-#     `forum_id` BIGINT COMMENT 'point to the forum created for the banner',
-#     `order` INTEGER NOT NULL DEFAULT 0,
-#     `create_time` DATETIME,
-#     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
-#     
-#     PRIMARY KEY (`id`),
-#     INDEX `i_eh_banner_create_time`(`create_time`),
-#     INDEX `i_eh_banner_delete_time`(`delete_time`)
-# ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+# (scope_type, scope_id) : specifies the banner distribution scope
+# name : specifies an administrative banner name if needed
+# vendor_tag : a tag specified by external vendor to help associate everhome system and third-party system on the banner
+# poster_path: banner display image
+# action_name: action name defined by the banner serving application module
+# action_uri: action uri, for Everhomes application modules, action URI scheme uses evh:// as prefix, for external systems, URI scheme uses standard http:// or https://
+# (start_time, end_time) banner active time period, effective only after status has been put into active state
+# status: banner administrative status
+# order: default listing order, depends on banner slide-showing algorithm
+#
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `appId` BIGINT,
+    `scope_type` VARCHAR(32),
+    `scope_id` BIGINT,
     `name` VARCHAR(128),
-    `poster_path` VARCHAR(128),
     `vendor_tag` VARCHAR(64),
-	`listing_start_time` DATETIME,
-	`listing_end_time` DATETIME,
-	`resource_type` VARCHAR(32),
-    `resource_id` BIGINT,
-    `resource_url` VARCHAR(512), 
+    `poster_path` VARCHAR(128),
+    `action_name` VARCHAR(32),
+    `action_uri` VARCHAR(128),
+    `start_time` DATETIME,
+    `end_time` DATETIME,
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: closed, 1: waiting for confirmation, 2: active',
     `order` INTEGER NOT NULL DEFAULT 0,
     `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
@@ -1356,43 +1341,9 @@ CREATE TABLE `eh_banners` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# member of eh_banners partition
-# banner distribution scope will be managed through banner profile in item group named as 'scope'
+# Record banner clicks at per user basis, due to amount of potential users, may
+# need to be put at user partition
 #
-DROP TABLE IF EXISTS `eh_banner_profiles`;
-CREATE TABLE `eh_banner_profiles` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `app_id` BIGINT,
-    `owner_id` BIGINT NOT NULL COMMENT 'owner banner id',
-    `item_name` VARCHAR(32),
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
-    `item_value` TEXT,
-    `target_type` VARCHAR(32),
-    `target_id` BIGINT,
-    
-    `integral_tag1` BIGINT,
-    `integral_tag2` BIGINT,
-    `integral_tag3` BIGINT,
-    `integral_tag4` BIGINT,
-    `integral_tag5` BIGINT,
-    `string_tag1` VARCHAR(128),
-    `string_tag2` VARCHAR(128),
-    `string_tag3` VARCHAR(128),
-    `string_tag4` VARCHAR(128),
-    `string_tag5` VARCHAR(128),
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_bprof_item`(`app_id`, `owner_id`, `item_name`),
-    INDEX `i_eh_bprof_owner`(`owner_id`),
-    INDEX `i_eh_bprof_itag1`(`integral_tag1`),
-    INDEX `i_eh_bprof_itag2`(`integral_tag2`),
-    INDEX `i_eh_bprof_stag1`(`string_tag1`),
-    INDEX `i_eh_bprof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#
-# member of eh_banners partition
-# secondary resource objects (after eh_banners)
 #
 DROP TABLE IF EXISTS `eh_banner_clicks`;
 CREATE TABLE `eh_banner_clicks`(
@@ -1412,9 +1363,9 @@ CREATE TABLE `eh_banner_clicks`(
     INDEX `i_eh_banner_clk_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#
-# member of eh_banners partition
-# secondary resource objects(after eh_banners)
+# 
+# Record banner related user purchase, due to amount of potential users, may
+# need to be put at user partition
 #
 DROP TABLE IF EXISTS `eh_banner_orders`;
 CREATE TABLE `eh_banner_orders` (
