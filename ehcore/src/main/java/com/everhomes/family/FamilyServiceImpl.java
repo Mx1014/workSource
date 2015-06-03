@@ -37,10 +37,18 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.jooq.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +56,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
+
+
+
 import ch.hsr.geohash.GeoHash;
 
+
+
+
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
+import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.AppConstants;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -74,6 +92,7 @@ import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
@@ -84,7 +103,9 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
@@ -97,6 +118,10 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.fabric.xmlrpc.base.Array;
+
+
+
 
 import freemarker.core.ReturnInstruction.Return;
 
@@ -148,6 +173,9 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private AclProvider aclProvider;
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -701,7 +729,7 @@ public class FamilyServiceImpl implements FamilyService {
 
 //        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
 //                EntityType.USER.getCode(), userId);
-//        if(currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
+//        if(currMember == null || (currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode())){
 //            LOGGER.error("The status of user in family invalid.userId=" + userId);
 //            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_STATUS_INVALID, 
 //                    "The status of user in family invalid.");
@@ -890,6 +918,7 @@ public class FamilyServiceImpl implements FamilyService {
         Long userId = user.getId();
         
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
+
         Long familyId = cmd.getId();
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), userId);
@@ -914,11 +943,14 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(groupMember.getMemberId());
-                userIdentifiers.forEach((u) ->{
-                   if(u.getIdentifierType().byteValue() == 0){
-                       f.setCellPhone(u.getIdentifierToken());
-                   }
-                });
+                if(userIdentifiers != null && !userIdentifiers.isEmpty()){
+                    userIdentifiers.forEach((u) ->{
+                        if(u.getIdentifierType().byteValue() == 0){
+                            f.setCellPhone(u.getIdentifierToken());
+                        }
+                     });
+                }
+                
                 
                 results.add(f);
             }
@@ -1040,7 +1072,7 @@ public class FamilyServiceImpl implements FamilyService {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
         locator.setAnchor(cmd.getPageAnchor());
-        List<GroupMember> listGroupMembers = this.familyProvider.listFamilyRequests(locator, pageSize + 1,
+        List<GroupMember> listGroupMembers = this.familyProvider.listFamilyMembers(locator, pageSize + 1,
                 (loc, query) -> {
                     Condition c1 = Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(familyId);
                     c1 = c1.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
@@ -1236,57 +1268,32 @@ public class FamilyServiceImpl implements FamilyService {
                 });
         
         if(userIds.size() > 0){
+            LOGGER.info("Community neary by user,userIds=" + userIds);
 
-            Condition c = Tables.EH_USER_LOCATIONS.UID.in(userIds);
-            Condition geoCondition = null;
-            List<String> geoHashCodeList = getGeoHashCodeList(latitude,longitude);
-            for(String geoHashCode : geoHashCodeList){
-                if(geoCondition == null){
-                    geoCondition = Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%");
-                }else{
-                    geoCondition = geoCondition.or(Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%"));
-                }
-            }
-            if(geoCondition != null)
-                c.and(geoCondition);
-            final Condition condition = c;
+            List<UserLocation> listUserLocations = listCommunityUserLocation(userIds,latitude,longitude);
             
-            List<Long> userLocationUserIds = new ArrayList<Long>();
-            this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-                    (DSLContext context, Object reducingContext)-> {
-                        
-                        SelectQuery<?> query = context.selectQuery(Tables.EH_USER_LOCATIONS);
-                        
-                        query.addConditions(condition);
-                        //query.addGroupBy(Tables.EH_USER_LOCATIONS.UID);
-                        query.addOrderBy(Tables.EH_USER_LOCATIONS.CREATE_TIME.desc());
-                        query.fetch().map((r) -> {
-                            
-                            UserLocation userLocation = ConvertHelper.convert(r,UserLocation.class);
-                            if(userLocationUserIds.contains(userLocation.getUid())) return null;
-                            userLocationUserIds.add(userLocation.getUid());
-                            
-                            //User u = this.userProvider.findUserById(userLocation.getUid());
-                            UserInfo u = this.userService.getUserSnapshotInfo(userLocation.getUid());
-                            NeighborUserDTO n = new NeighborUserDTO();
-                            n.setUserId(u.getId());
-                            n.setUserStatusLine(u.getStatusLine());
-                            //n.setUserName(u.getAccountName());
-                            n.setUserName(u.getNickName());
-                            n.setUserAvatarUrl(u.getAvatarUrl());
-                            n.setUserAvatarUri(u.getAvatarUri());
-                            n.setOccupation(u.getOccupationName());
-                            //计算距离
-                            double lat = userLocation.getLatitude();
-                            double lon = userLocation.getLongitude();
-                            double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon);
-                            n.setDistance(distince);
-                            results.add(n);
-                            return null;
-                        });
-                        
-                        return true;
-                    });
+            if(listUserLocations != null && !listUserLocations.isEmpty()){
+                //User u = this.userProvider.findUserById(userLocation.getUid());
+                listUserLocations.forEach((userLocation) ->{
+                    UserInfo u = this.userService.getUserSnapshotInfo(userLocation.getUid());
+                    NeighborUserDTO n = new NeighborUserDTO();
+                    n.setUserId(u.getId());
+                    n.setUserStatusLine(u.getStatusLine());
+                    //n.setUserName(u.getAccountName());
+                    n.setUserName(u.getNickName());
+                    n.setUserAvatarUrl(u.getAvatarUrl());
+                    n.setUserAvatarUri(u.getAvatarUri());
+                    n.setOccupation(u.getOccupationName());
+                    //计算距离
+                    double lat = userLocation.getLatitude();
+                    double lon = userLocation.getLongitude();
+                    double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon);
+                    n.setDistance(distince);
+                    results.add(n);
+                });
+                
+            }
+
         }
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1 : pageOffset;
@@ -1295,6 +1302,40 @@ public class FamilyServiceImpl implements FamilyService {
         long endTime = System.currentTimeMillis();
         LOGGER.info("Query nearby neibhor user of communtiy,elapse=" + (endTime - startTime));
         return results;
+    }
+    
+    private List<UserLocation> listCommunityUserLocation(List<Long> userIds,double latitude,double longitude) {
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+        
+        final List<UserLocation> members = new ArrayList<UserLocation>();
+        SelectQuery<?> query = context.selectQuery(Tables.EH_USER_LOCATIONS);
+        Condition c = Tables.EH_USER_LOCATIONS.UID.in(userIds);
+        Condition geoCondition = null;
+        List<String> geoHashCodeList = getGeoHashCodeList(latitude,longitude);
+        for(String geoHashCode : geoHashCodeList){
+            if(geoCondition == null){
+                geoCondition = Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%");
+            }else{
+                geoCondition = geoCondition.or(Tables.EH_USER_LOCATIONS.GEOHASH.like(geoHashCode + "%"));
+            }
+        }
+        if(geoCondition != null)
+            c = c.and(geoCondition);
+        query.addConditions(c);
+        query.addOrderBy(Tables.EH_USER_LOCATIONS.CREATE_TIME.desc());
+        //嵌套子查询??
+        SelectQuery<?> query1 = context.selectQuery();
+        Table<?> t = query.asTable();
+        query1.addFrom(t);
+        query1.addGroupBy(t.fields()[1]);
+
+        query1.fetch().map((r) -> {
+            members.add(ConvertHelper.convert(r, UserLocation.class));
+            return null;
+        });
+        
+        return members;
     }
     
     private List<String> getGeoHashCodeList(double latitude, double longitude){
@@ -1447,9 +1488,16 @@ public class FamilyServiceImpl implements FamilyService {
         return groupMembers;
     }
 
-
-    @Override
-    public boolean checkParamIsValid(Byte type, Long id) {
+//    private void checkFamilyPrivilege(long uid, long familyId, long privilege) {
+//        ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.FAMILY.getCode());
+//        List<Long> roles = resolver.determineRoleInResource(uid, familyId, EntityType.FAMILY.getCode(), familyId);
+//        if(!this.aclProvider.checkAccess(EntityType.FAMILY.getCode(), familyId, EntityType.USER.getCode(), uid, privilege, 
+//                roles))
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+//                    "Insufficient privilege");
+//    }
+    
+    private boolean checkParamIsValid(Byte type, Long id) {
         if(id == null || type == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid id or type parameter");
@@ -1546,23 +1594,65 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
         
-//        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//        CrossShardListingLocator locator = new CrossShardListingLocator();
-//        locator.setAnchor(cmd.getPageAnchor());
-//        
-//        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
-//            (loc,query) -> {
-//                query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
-//                return query;
-//            });
-//        
-//        Long nextPageAnchor = null;
-//        if(members.size() > pageSize) {
-//            members.remove(members.size() - 1);
-//            nextPageAnchor = members.get(members.size() -1).getId();
-//        }
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
         
-        return null;
+        List<GroupMember> members = this.familyProvider.listFamilyMembers(locator, pageSize + 1,null);
+            
+        
+        Long nextPageAnchor = null;
+        
+        if(members != null && members.size() > pageSize) {
+            members.remove(members.size() - 1);
+            nextPageAnchor = members.get(members.size() -1).getId();
+        }
+        
+        List<FamilyMemberFullDTO> results = new ArrayList<FamilyMemberFullDTO>();
+        if(members != null && !members.isEmpty()){
+            members.forEach((member) -> {
+                Group group = this.groupProvider.findGroupById(member.getGroupId());
+                FamilyMemberFullDTO familyMember = new FamilyMemberFullDTO();
+                familyMember.setMemberUid(member.getMemberId());
+                familyMember.setMemberNickName(member.getMemberNickName());
+                familyMember.setMembershipStatus(member.getMemberStatus());
+                familyMember.setId(member.getId());
+                if(group != null){
+                    familyMember.setFamilyId(group.getId());
+                    familyMember.setFamilyName(group.getName());
+                    long communityId = group.getIntegralTag2();
+                    Community community = this.communityProvider.findCommunityById(communityId);
+                    if(community != null){
+                        familyMember.setCommunityId(communityId);
+                        familyMember.setCommunityName(community.getName());
+                        familyMember.setCityId(community.getCityId());
+                        familyMember.setCityName(community.getCityName());
+                        familyMember.setAreaName(community.getAreaName());
+                    }
+                    
+                    Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+                    if(address != null){
+                        familyMember.setBuildingName(address.getBuildingName());
+                        familyMember.setApartmentName(address.getApartmentName());
+                        
+                    }
+                   
+                }
+                List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(member.getMemberId());
+                userIdentifiers.stream().filter((u) ->{
+                    return u.getIdentifierType() == IdentifierType.MOBILE.getCode();
+                });
+                if(userIdentifiers != null && !userIdentifiers.isEmpty()){
+                    familyMember.setCellPhone(userIdentifiers.get(0).getIdentifierToken());
+                }
+                results.add(familyMember);
+            });
+        }
+        ListAllFamilyMembersCommandResponse response = new ListAllFamilyMembersCommandResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setRequests(results);
+        
+        return response;
     }
 
 

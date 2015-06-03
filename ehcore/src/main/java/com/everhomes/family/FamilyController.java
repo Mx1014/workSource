@@ -342,12 +342,12 @@ public class FamilyController extends ControllerBase {
      * <b>URL: /family/admin/listAllFamilyMembers</b>
      * <p>查询系统中存在家庭且状态正常的用户</p>
      */
-    @RequestMapping("admin/listFamilyMembers")
+    @RequestMapping("admin/listAllFamilyMembers")
     @RestReturn(value=ListAllFamilyMembersCommandResponse.class)
     public RestResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
-        this.familyService.listAllFamilyMembers(cmd);
+        ListAllFamilyMembersCommandResponse cmdResponse = this.familyService.listAllFamilyMembers(cmd);
         
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -13,13 +13,13 @@ import com.everhomes.util.StringHelper;
  * <li>requests: 申请信息，参考{@link com.everhomes.address.CommunityDTO}</li>
  * </ul>
  */
-public class ListWaitingForCommunitesCommandResponse {
+public class ListCommunitesByStatusCommandResponse {
     
     private Long nextPageAnchor;
     
     private List<CommunityDTO> requests;
     
-    public ListWaitingForCommunitesCommandResponse() {
+    public ListCommunitesByStatusCommandResponse() {
     }
 
     public Long getNextPageAnchor() {
