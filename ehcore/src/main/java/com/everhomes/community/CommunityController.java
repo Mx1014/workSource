@@ -23,14 +23,14 @@ public class CommunityController extends ControllerBase {
 
 
     /**
-     * <b>URL: /community/admin/listWaitingForApproveCommunities</b>
+     * <b>URL: /community/admin/listCommunitiesByStatus</b>
      * <p>查询待审核小区列表</p>
      */
-    @RequestMapping("listWaitingForApproveCommunities")
-    @RestReturn(value=ListWaitingForCommunitesCommandResponse.class)
-    public RestResponse listWaitForApproveCommunities(@Valid ListWaitingForCommunitesCommand cmd) {
+    @RequestMapping("listCommunitiesByStatus")
+    @RestReturn(value=ListCommunitesByStatusCommandResponse.class)
+    public RestResponse listCommunitiesByStatus(@Valid ListCommunitesByStatusCommand cmd) {
         
-        ListWaitingForCommunitesCommandResponse cmdResponse = this.communityService.listWaitingForApproveCommunities(cmd);
+        ListCommunitesByStatusCommandResponse cmdResponse = this.communityService.listCommunitiesByStatus(cmd);
         
         RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -38,6 +38,21 @@ public class CommunityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /community/admin/approveCommunity</b>
+     * <p>查询待审核小区列表</p>
+     */
+    @RequestMapping("approveCommunity")
+    @RestReturn(value=String.class)
+    public RestResponse approveCommunity(@Valid ApproveCommunityCommand cmd) {
+        
+        this.communityService.approveCommuniy(cmd);
+        
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
    
     
 

@@ -8,14 +8,17 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>status: 小区状态,参考{@link com.everhomes.address.CommunityAdminStatus}}</li>
  * </ul>
  */
-public class ListWaitingForCommunitesCommand {
+public class ListCommunitesByStatusCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
     
-    public ListWaitingForCommunitesCommand() {
+    private Byte status;
+    
+    public ListCommunitesByStatusCommand() {
     }
 
     public Long getPageAnchor() {
@@ -32,6 +35,14 @@ public class ListWaitingForCommunitesCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = 569826941;
+	private static final long serialVersionUID = 1689796453;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -42,14 +42,19 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_banners.scope_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> SCOPE_TYPE = createField("scope_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.scope_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_banners.name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_banners.poster_path</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> POSTER_PATH = createField("poster_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_banners.vendor_tag</code>.
@@ -57,29 +62,29 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> VENDOR_TAG = createField("vendor_tag", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.listing_start_time</code>.
+	 * The column <code>ehcore.eh_banners.poster_path</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> LISTING_START_TIME = createField("listing_start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> POSTER_PATH = createField("poster_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.listing_end_time</code>.
+	 * The column <code>ehcore.eh_banners.action_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> LISTING_END_TIME = createField("listing_end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> ACTION_NAME = createField("action_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.resource_type</code>.
+	 * The column <code>ehcore.eh_banners.action_uri</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> RESOURCE_TYPE = createField("resource_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> ACTION_URI = createField("action_uri", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.resource_id</code>.
+	 * The column <code>ehcore.eh_banners.start_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> RESOURCE_ID = createField("resource_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.resource_url</code>.
+	 * The column <code>ehcore.eh_banners.end_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> RESOURCE_URL = createField("resource_url", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_banners.status</code>. 0: closed, 1: waiting for confirmation, 2: active

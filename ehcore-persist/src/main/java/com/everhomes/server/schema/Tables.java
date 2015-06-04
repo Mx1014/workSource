@@ -54,11 +54,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhBannerOrders EH_BANNER_ORDERS = com.everhomes.server.schema.tables.EhBannerOrders.EH_BANNER_ORDERS;
 
 	/**
-	 * The table ehcore.eh_banner_profiles
-	 */
-	public static final com.everhomes.server.schema.tables.EhBannerProfiles EH_BANNER_PROFILES = com.everhomes.server.schema.tables.EhBannerProfiles.EH_BANNER_PROFILES;
-
-	/**
 	 * The table ehcore.eh_binary_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhBinaryResources EH_BINARY_RESOURCES = com.everhomes.server.schema.tables.EhBinaryResources.EH_BINARY_RESOURCES;

@@ -8,21 +8,19 @@ import com.everhomes.discover.ItemType;
 /**
  * 设备推送消息
  * <ul>
- * <li>messageId:</li>
- * <li>alert:</li>
- * <li>title:</li>
- * <li>icon:</li>
- * <li>audio:</li>
- * <li>alertType:</li>
+ * <li>alert:消息的文字内容</li>
+ * <li>title:消息标题</li>
+ * <li>icon:消息图标</li>
+ * <li>audio:音频</li>
+ * <li>alertType:消息类型</li>
  * <li><p>createTime:记录创建时间</p></li>
- * <li><p>timeLive:</p></li>
- * <li>extra:</li>
+ * <li><p>timeLive:消息存活时间</p></li>
+ * <li>extra:附加内容</li>
  * </ul>
  * @author janson
  *
  */
 public class DeviceMessage {
-    private Long messageId;
     private String alert;
     private String title;
     private String icon;
@@ -30,16 +28,11 @@ public class DeviceMessage {
     private String alertType;
     private Date createTime;
     private Long timeLive;
+    private String action;
     
     @ItemType(String.class)
     private Map<String, String> extra;
     
-    public Long getMessageId() {
-        return messageId;
-    }
-    public void setMessageId(Long messageId) {
-        this.messageId = messageId;
-    }
     public String getAlert() {
         return alert;
     }
@@ -87,6 +80,12 @@ public class DeviceMessage {
     }
     public void setTimeLive(Long timeLive) {
         this.timeLive = timeLive;
+    }
+    public String getAction() {
+        return action;
+    }
+    public void setAction(String action) {
+        this.action = action;
     }
     
 }

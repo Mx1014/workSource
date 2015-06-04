@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.forum;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,6 +12,10 @@ import com.everhomes.util.StringHelper;
  * <li>topicId: 帖子ID</li>
  * <li>content_type: 帖子内容类型，{@link com.everhomes.forum.PostContentType}</li>
  * <li>content: 帖子内容</li>
+ * <li>embeddedAppId: 内嵌对象对应的App ID，{@link com.everhomes.app.AppConstants}</li>
+ * <li>embeddedId: 内嵌对象对应的ID</li>
+ * <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
+ * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.forum.AttachmentDescriptor}</li>
  * </ul>
  */
 public class NewCommentCommand {
@@ -19,6 +26,15 @@ public class NewCommentCommand {
     private String contentType;
     
     private String content;
+    
+    private Long embeddedAppId;
+    
+    private Long embeddedId;
+    
+    private String embeddedJson;
+    
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
     
     public NewCommentCommand() {
     }
@@ -53,6 +69,38 @@ public class NewCommentCommand {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Long getEmbeddedAppId() {
+        return embeddedAppId;
+    }
+
+    public void setEmbeddedAppId(Long embeddedAppId) {
+        this.embeddedAppId = embeddedAppId;
+    }
+
+    public Long getEmbeddedId() {
+        return embeddedId;
+    }
+
+    public void setEmbeddedId(Long embeddedId) {
+        this.embeddedId = embeddedId;
+    }
+
+    public String getEmbeddedJson() {
+        return embeddedJson;
+    }
+
+    public void setEmbeddedJson(String embeddedJson) {
+        this.embeddedJson = embeddedJson;
+    }
+
+    public List<AttachmentDescriptor> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
+        this.attachments = attachments;
     }
 
     @Override

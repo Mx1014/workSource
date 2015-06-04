@@ -36,6 +36,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.Family;
+import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.group.Group;
@@ -619,11 +620,36 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(),pageNum , pageSize);
     }
 
+    private void checkUserPrivilege(long userId, long communityId) {
+        boolean flag = false;
+        List<FamilyDTO> familydtos = this.familyProvider.getUserFamiliesByUserId(userId);
+        if(familydtos == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+                    "User has not living in community.");
+        }
+        for (FamilyDTO family : familydtos) {
+            if(family.getCommunityId().longValue() == communityId){
+                flag = true;
+                break;
+            }
+        }
+        if(!flag){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+                    "User has not living in community.");
+        }
+        
+    }
     @Override
     public ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName parameter");
+        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        
+        checkUserPrivilege(userId,cmd.getCommunityId());
+        
         List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
         int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 

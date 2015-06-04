@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("workerFactory")
 public class SpringWorkerFactory implements Callable<WorkerImpl>, ApplicationContextAware {
 
     private Logger logger = LoggerFactory.getLogger(SpringWorkerFactory.class);

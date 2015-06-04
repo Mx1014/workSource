@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.everhomes.message.HandshakeMessage;
-import com.everhomes.message.PusherMessageResp;
+import com.everhomes.pusher.PusherMessageResp;
 import com.everhomes.rpc.PduFrame;
 import com.everhomes.rpc.server.PusherNotifyPdu;
 import com.everhomes.util.SignatureHelper;
@@ -395,12 +395,12 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
             PusherMessageResp resp = new PusherMessageResp();
-            resp.setContent("notify from server :)");
+            resp.setContent("notify");
             PduFrame pdu = new PduFrame();
             pdu.setPayload(resp);
             try {
                 synchronized(clientSession) {
-                  clientSession.sendMessage(new TextMessage(pdu.getEncodedPayload()));
+                  clientSession.sendMessage(new TextMessage(pdu.toJson()));
                 }
             } catch (IOException e) {
                     LOGGER.error("Notify server error: " + e.getMessage());

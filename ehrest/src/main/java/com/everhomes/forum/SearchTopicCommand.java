@@ -21,9 +21,9 @@ public class SearchTopicCommand {
     private Long actionCategory;
     
     private int searchFlag;
-    private Long nextAnchor;
+    private Long pageAnchor;
     
-    private Long pageSize;
+    private Integer pageSize;
     
     public SearchTopicCommand() {
     }
@@ -44,11 +44,12 @@ public class SearchTopicCommand {
         this.latitude = latitude;
     }
     
-    public Long getPageSize() {
+
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Long pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 
@@ -92,12 +93,12 @@ public class SearchTopicCommand {
         this.searchFlag = searchFlag;
     }
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
     
 }

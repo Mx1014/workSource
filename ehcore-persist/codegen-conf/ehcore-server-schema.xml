@@ -38,7 +38,7 @@
         eh_regions | eh_communities | eh_community_geopoints | eh_community_pm_members | eh_community_address_mappings |
         eh_community_pm_tasks | eh_community_pm_bills | eh_community_pm_bill_items | eh_community_pm_contacts | 
         eh_community_pm_owners | eh_community_profiles | eh_addresses | 
-        eh_family_followers | eh_banners | eh_banner_profiles | eh_banner_clicks | 
+        eh_family_followers | eh_banners | eh_banner_clicks | 
         eh_banner_orders | eh_binary_resources | eh_rtxt_resources | 
         eh_events | eh_event_roster | eh_event_ticket_groups | eh_event_tickets |
         eh_event_profiles | eh_activities | eh_activity_roster | eh_polls |
@@ -47,7 +47,8 @@
         eh_client_package_files | eh_client_packages | 
         eh_user_locations | eh_user_behaviors | eh_user_contacts | eh_user_installed_apps | eh_user_activities |
         eh_content_server_resources | eh_content_server |
-        eh_launch_pad_items | eh_recommendations | eh_recommendation_configs
+        eh_launch_pad_items | eh_recommendations | eh_recommendation_configs |
+        eh_departments | eh_department_members | eh_department_communities
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

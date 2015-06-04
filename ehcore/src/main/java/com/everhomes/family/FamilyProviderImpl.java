@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.family;
 
-import static com.everhomes.server.schema.Tables.EH_GROUP_MEMBERS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -318,7 +317,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         return results;
     }
     @Override
-    public List<GroupMember> listFamilyRequests(ListingLocator locator, int count, 
+    public List<GroupMember> listFamilyMembers(ListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, locator.getEntityId()));
@@ -344,31 +343,6 @@ public class FamilyProviderImpl implements FamilyProvider {
         }
         
         return members;
-        
-//        List<GroupMember> results = new ArrayList<GroupMember>();
-//        
-//        //查询待处理的审核，别人主动加入（WAITING_FOR_APPROVAL），被人拉入（WAITING_FOR_ACCEPTANCE）
-//        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-//                (DSLContext context, Object reducingContext)-> {
-//                    
-//                    context.select().from(Tables.EH_GROUP_MEMBERS)
-//                        .where((Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(familyId)
-//                                .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
-//                                        .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode())))
-//                                .or((Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(userId)
-//                                        .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
-//                                                .eq(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode()))))
-//                                )
-//                        .limit((int)pageSize).offset((int)offset)
-//                        .fetch().map((r) -> {
-//                           results.add(ConvertHelper.convert(r,GroupMember.class));
-//                           return null;
-//                        });
-//                    
-//                return true;
-//            });
-//        
-//        return results;
     }
 
 
@@ -529,5 +503,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             
         return family;
     }
+    
+  
 
 }
