@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>embeddedJson: 内嵌对象列表对应的json字符串</li>
  * <li>isForwarded: 是否是转发帖的标记</li>
  * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.forum.AttachmentDescriptor}</li>
+ * <li>privateFlag: 帖子是否公开标记，参考{@link com.everhomes.forum.PostPrivacy}</li>
  * </ul>
  */
 public class NewTopicCommand {
