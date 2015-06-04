@@ -23,7 +23,7 @@ public class SearchTopicCommand {
     private int searchFlag;
     private Long pageAnchor;
     
-    private Long pageSize;
+    private Integer pageSize;
     
     public SearchTopicCommand() {
     }
@@ -44,11 +44,12 @@ public class SearchTopicCommand {
         this.latitude = latitude;
     }
     
-    public Long getPageSize() {
+
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Long pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 

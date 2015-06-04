@@ -12,7 +12,7 @@ package com.everhomes.pusher;
 public class RecentMessageCommand {
     private String deviceId;
     private Long anchor;
-    private Long count;
+    private Integer count;
     
     public String getDeviceId() {
         return deviceId;
@@ -26,11 +26,12 @@ public class RecentMessageCommand {
     public void setAnchor(Long anchor) {
         this.anchor = anchor;
     }
-    public Long getCount() {
+    public Integer getCount() {
         return count;
     }
-    public void setCount(Long count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
+    
     
 }
