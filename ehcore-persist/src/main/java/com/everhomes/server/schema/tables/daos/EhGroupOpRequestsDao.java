@@ -69,6 +69,20 @@ public class EhGroupOpRequestsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>target_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupOpRequests> fetchByTargetType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.TARGET_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupOpRequests> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS.TARGET_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>operation_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupOpRequests> fetchByOperationType(java.lang.Byte... values) {

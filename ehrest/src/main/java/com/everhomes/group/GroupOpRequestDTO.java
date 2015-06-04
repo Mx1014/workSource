@@ -6,7 +6,8 @@ import java.sql.Timestamp;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>成为管理员申请信息</p>
+ * <p>成为管理员申请信息: 当申请为管理员时，requestor为申请者，无target；
+ *    当邀请人成为管理员时，requestor为邀请者、target为被邀请者；</p>
  * <ul>
  * <li>id: 申请记录ID</li>
  * <li>groupId: group id</li>
@@ -18,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>requestorComment: 申请原因</li>
  * <li>operationType: 操作类型</li>
  * <li>status: 成为管理员申请的状态，参考{@link com.everhomes.group.GroupOpRequestStatus}</li>
+ * <li>targetType: 目标类型，{@link com.everhomes.entity.EntityType}</li>
+ * <li>ID: 目标用户ID</li>
  * <li>operatorUid: 操作人ID</li>
  * <li>processMessage: 操作描述</li>
  * <li>createTime: 记录创建时间</li>
@@ -34,6 +37,8 @@ public class GroupOpRequestDTO {
     private String requestorAvatarUrl;
     private String requestorComment;
     private Byte operationType;
+    private String targetType;
+    private Long targetId;
     private Byte status;
     private Long operatorUid;
     private String processMessage;
@@ -113,6 +118,22 @@ public class GroupOpRequestDTO {
 
     public void setOperationType(Byte operationType) {
         this.operationType = operationType;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 
     public Byte getStatus() {
