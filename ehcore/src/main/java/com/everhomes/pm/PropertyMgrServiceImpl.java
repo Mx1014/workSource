@@ -42,8 +42,13 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.family.RevokeMemberCommand;
 import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.ForumService;
+import com.everhomes.forum.ListPostCommandResponse;
+import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
+import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.QueryTopicByCategoryCommand;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
@@ -70,6 +75,7 @@ import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.visibility.VisibleRegionType;
 
 @Component
 public class PropertyMgrServiceImpl implements PropertyMgrService {
@@ -118,6 +124,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private FamilyService familySerivce;
+    
+    @Autowired
+    private  ForumService forumService;
     
     @Override
     public void applyPropertyMember(applyPropertyMemberCommand cmd) {
@@ -1335,5 +1344,43 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				sendNoticeToUserById(communityPmMember.getTargetId(), cmd.getMessage());
 			}
 		}
+	}
+	
+	@Override
+	public PostDTO createTopic(NewTopicCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	if(cmd.getVisibleRegionId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getVisibleRegionId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getVisibleRegionId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	PostDTO post = forumService.createTopic(cmd);
+    	return post;
+	}
+	
+	@Override
+	public ListPostCommandResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	return forumService.queryTopicsByCategory(cmd);
 	}
 }
