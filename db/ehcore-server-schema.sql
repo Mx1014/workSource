@@ -853,8 +853,10 @@ CREATE TABLE `eh_forum_posts` (
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
     
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
     `update_time` DATETIME NOT NULL,
     `create_time` DATETIME NOT NULL,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_post_seqs`(`modify_seq`),

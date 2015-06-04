@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -571059891;
+	private static final long serialVersionUID = -1324989707;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -50,8 +50,10 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Byte     status;
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp deleteTime;
 
 	public EhForumPosts() {}
 
@@ -93,8 +95,10 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
+		java.lang.Byte     status,
 		java.sql.Timestamp updateTime,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
 		this.appId = appId;
@@ -133,8 +137,10 @@ public class EhForumPosts implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.status = status;
 		this.updateTime = updateTime;
 		this.createTime = createTime;
+		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Long getId() {
@@ -433,6 +439,14 @@ public class EhForumPosts implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
+	}
+
 	public java.sql.Timestamp getUpdateTime() {
 		return this.updateTime;
 	}
@@ -447,5 +461,13 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getDeleteTime() {
+		return this.deleteTime;
+	}
+
+	public void setDeleteTime(java.sql.Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 }

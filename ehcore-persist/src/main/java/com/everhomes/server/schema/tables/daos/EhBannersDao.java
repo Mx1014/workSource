@@ -62,17 +62,24 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>scope_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByScopeType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.SCOPE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>scope_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.SCOPE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.NAME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>poster_path IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByPosterPath(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.POSTER_PATH, values);
 	}
 
 	/**
@@ -83,38 +90,38 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>listing_start_time IN (values)</code>
+	 * Fetch records that have <code>poster_path IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByListingStartTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.LISTING_START_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByPosterPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.POSTER_PATH, values);
 	}
 
 	/**
-	 * Fetch records that have <code>listing_end_time IN (values)</code>
+	 * Fetch records that have <code>action_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByListingEndTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.LISTING_END_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_NAME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>resource_type IN (values)</code>
+	 * Fetch records that have <code>action_uri IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByResourceType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.RESOURCE_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_URI, values);
 	}
 
 	/**
-	 * Fetch records that have <code>resource_id IN (values)</code>
+	 * Fetch records that have <code>start_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByResourceId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.RESOURCE_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByStartTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.START_TIME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>resource_url IN (values)</code>
+	 * Fetch records that have <code>end_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByResourceUrl(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.RESOURCE_URL, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByEndTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.END_TIME, values);
 	}
 
 	/**

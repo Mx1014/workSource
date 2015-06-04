@@ -11,19 +11,20 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 776470504;
+	private static final long serialVersionUID = 90025754;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     appid;
+	private java.lang.String   scopeType;
+	private java.lang.Long     scopeId;
 	private java.lang.String   name;
-	private java.lang.String   posterPath;
 	private java.lang.String   vendorTag;
-	private java.sql.Timestamp listingStartTime;
-	private java.sql.Timestamp listingEndTime;
-	private java.lang.String   resourceType;
-	private java.lang.Long     resourceId;
-	private java.lang.String   resourceUrl;
+	private java.lang.String   posterPath;
+	private java.lang.String   actionName;
+	private java.lang.String   actionUri;
+	private java.sql.Timestamp startTime;
+	private java.sql.Timestamp endTime;
 	private java.lang.Byte     status;
 	private java.lang.Integer  order;
 	private java.lang.Long     creatorUid;
@@ -36,14 +37,15 @@ public class EhBanners implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Integer  namespaceId,
 		java.lang.Long     appid,
+		java.lang.String   scopeType,
+		java.lang.Long     scopeId,
 		java.lang.String   name,
-		java.lang.String   posterPath,
 		java.lang.String   vendorTag,
-		java.sql.Timestamp listingStartTime,
-		java.sql.Timestamp listingEndTime,
-		java.lang.String   resourceType,
-		java.lang.Long     resourceId,
-		java.lang.String   resourceUrl,
+		java.lang.String   posterPath,
+		java.lang.String   actionName,
+		java.lang.String   actionUri,
+		java.sql.Timestamp startTime,
+		java.sql.Timestamp endTime,
 		java.lang.Byte     status,
 		java.lang.Integer  order,
 		java.lang.Long     creatorUid,
@@ -53,14 +55,15 @@ public class EhBanners implements java.io.Serializable {
 		this.id = id;
 		this.namespaceId = namespaceId;
 		this.appid = appid;
+		this.scopeType = scopeType;
+		this.scopeId = scopeId;
 		this.name = name;
-		this.posterPath = posterPath;
 		this.vendorTag = vendorTag;
-		this.listingStartTime = listingStartTime;
-		this.listingEndTime = listingEndTime;
-		this.resourceType = resourceType;
-		this.resourceId = resourceId;
-		this.resourceUrl = resourceUrl;
+		this.posterPath = posterPath;
+		this.actionName = actionName;
+		this.actionUri = actionUri;
+		this.startTime = startTime;
+		this.endTime = endTime;
 		this.status = status;
 		this.order = order;
 		this.creatorUid = creatorUid;
@@ -92,20 +95,28 @@ public class EhBanners implements java.io.Serializable {
 		this.appid = appid;
 	}
 
+	public java.lang.String getScopeType() {
+		return this.scopeType;
+	}
+
+	public void setScopeType(java.lang.String scopeType) {
+		this.scopeType = scopeType;
+	}
+
+	public java.lang.Long getScopeId() {
+		return this.scopeId;
+	}
+
+	public void setScopeId(java.lang.Long scopeId) {
+		this.scopeId = scopeId;
+	}
+
 	public java.lang.String getName() {
 		return this.name;
 	}
 
 	public void setName(java.lang.String name) {
 		this.name = name;
-	}
-
-	public java.lang.String getPosterPath() {
-		return this.posterPath;
-	}
-
-	public void setPosterPath(java.lang.String posterPath) {
-		this.posterPath = posterPath;
 	}
 
 	public java.lang.String getVendorTag() {
@@ -116,44 +127,44 @@ public class EhBanners implements java.io.Serializable {
 		this.vendorTag = vendorTag;
 	}
 
-	public java.sql.Timestamp getListingStartTime() {
-		return this.listingStartTime;
+	public java.lang.String getPosterPath() {
+		return this.posterPath;
 	}
 
-	public void setListingStartTime(java.sql.Timestamp listingStartTime) {
-		this.listingStartTime = listingStartTime;
+	public void setPosterPath(java.lang.String posterPath) {
+		this.posterPath = posterPath;
 	}
 
-	public java.sql.Timestamp getListingEndTime() {
-		return this.listingEndTime;
+	public java.lang.String getActionName() {
+		return this.actionName;
 	}
 
-	public void setListingEndTime(java.sql.Timestamp listingEndTime) {
-		this.listingEndTime = listingEndTime;
+	public void setActionName(java.lang.String actionName) {
+		this.actionName = actionName;
 	}
 
-	public java.lang.String getResourceType() {
-		return this.resourceType;
+	public java.lang.String getActionUri() {
+		return this.actionUri;
 	}
 
-	public void setResourceType(java.lang.String resourceType) {
-		this.resourceType = resourceType;
+	public void setActionUri(java.lang.String actionUri) {
+		this.actionUri = actionUri;
 	}
 
-	public java.lang.Long getResourceId() {
-		return this.resourceId;
+	public java.sql.Timestamp getStartTime() {
+		return this.startTime;
 	}
 
-	public void setResourceId(java.lang.Long resourceId) {
-		this.resourceId = resourceId;
+	public void setStartTime(java.sql.Timestamp startTime) {
+		this.startTime = startTime;
 	}
 
-	public java.lang.String getResourceUrl() {
-		return this.resourceUrl;
+	public java.sql.Timestamp getEndTime() {
+		return this.endTime;
 	}
 
-	public void setResourceUrl(java.lang.String resourceUrl) {
-		this.resourceUrl = resourceUrl;
+	public void setEndTime(java.sql.Timestamp endTime) {
+		this.endTime = endTime;
 	}
 
 	public java.lang.Byte getStatus() {
