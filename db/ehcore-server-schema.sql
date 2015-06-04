@@ -999,10 +999,6 @@ CREATE TABLE `eh_department_members` (
     `department_id` BIGINT NOT NULL COMMENT 'owner community id',
     `member_uid` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `member_group` VARCHAR(32) COMMENT 'group that the member belongs to',
-    `contact_name` VARCHAR(64),
-    `contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
-    `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
-    `contact_description` TEXT,
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
     
     PRIMARY KEY (`id`),

@@ -71,12 +71,6 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             if(null == communities || communities.size() == 0) {
                 break;
             }
-            
-            //Just test 400 items
-            if(count > 400) {
-                break;
-            }
-            
         }
     }
    
