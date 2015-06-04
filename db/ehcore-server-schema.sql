@@ -973,6 +973,55 @@ CREATE TABLE `eh_regions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_departments`;
+CREATE TABLE `eh_departments` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `parent_id` BIGINT COMMENT 'id of the parent region', 
+    `name` VARCHAR(64),
+    `path` VARCHAR(128) COMMENT 'path from the root',
+    `level` INTEGER NOT NULL DEFAULT 0,
+    `scope_code` TINYINT COMMENT '0: government, 1: public security(police), 2: decease control',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
+    
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_dept_name`(`parent_id`, `name`),
+    INDEX `i_eh_dept_name_level`(`name`, `level`),   
+    INDEX `i_eh_dept_path`(`path`),
+    INDEX `i_eh_dept_path_level`(`path`, `level`),   
+    INDEX `i_eh_dept_parent`(`parent_id`)   
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_department_members`;
+CREATE TABLE `eh_department_members` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `department_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `member_uid` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
+    `member_group` VARCHAR(32) COMMENT 'group that the member belongs to',
+    `contact_name` VARCHAR(64),
+    `contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+    `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+    `contact_description` TEXT,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
+    
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_deptm_owner`(`department_id`) REFERENCES `eh_departments`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_deptm_uid`(`member_uid`),
+    INDEX `i_eh_deptm_group`(`member_group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_department_communities`;
+CREATE TABLE `eh_department_communities` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `department_id` BIGINT NOT NULL,
+    `community_id` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `i_eh_deptc_dept`(`department_id`),
+    INDEX `i_eh_deptc_community`(`community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+#
 # key table of the sharding group
 # shared resource objects, custom fields may not really be needed
 #
