@@ -375,7 +375,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
-    public List<Community> listWaitingForApproveCommunities(ListingLocator locator, int count,
+    public List<Community> listCommunitiesByStatus(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));

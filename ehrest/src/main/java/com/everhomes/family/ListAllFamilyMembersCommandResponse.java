@@ -10,14 +10,14 @@ import com.everhomes.util.StringHelper;
  * <p>
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>requests: 申请信息，参考{@link  com.everhomes.family.FamilyDTO}</li>
+ * <li>requests: 成员列表，参考{@link  com.everhomes.family.FamilyMemberFullDTO}</li>
  * </ul>
  */
 public class ListAllFamilyMembersCommandResponse {
     private Long nextPageAnchor;
     
-    @ItemType(FamilyDTO.class)
-    private List<FamilyDTO> requests;
+    @ItemType(FamilyMemberFullDTO.class)
+    private List<FamilyMemberFullDTO> requests;
     
     public ListAllFamilyMembersCommandResponse() {
     }
@@ -30,11 +30,11 @@ public class ListAllFamilyMembersCommandResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<FamilyDTO> getRequests() {
+    public List<FamilyMemberFullDTO> getRequests() {
         return requests;
     }
 
-    public void setRequests(List<FamilyDTO> requests) {
+    public void setRequests(List<FamilyMemberFullDTO> requests) {
         this.requests = requests;
     }
 
