@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.pm.CommunityPmContact;
 import com.everhomes.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
+import com.everhomes.region.RegionAdminStatus;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.search.CommunitySearcher;
@@ -700,6 +703,34 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		
 	}
 
+	@Override
+	public void importCommunityInfos(File file) {
+//		User user  = UserContext.current().getUser();
+		User user  = new User();
+		user.setId(10017l);
+		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		try {
+			List<String[]> dataList =FileHelper.getDataArrayByInputStream(new FileInputStream(file), "#@");
+			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
+			
+			if(communityList != null && communityList.size() > 0){
+				//事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目 
+				txImportCommunity(user, communityList);
+			}
+			else{
+				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+		                    "can not to import the community.parse file error.");
+			}
+			
+		} catch (ResourceException e) {
+			
+		} catch (IOException e) {
+		
+		}
+		
+	}
+	
 	private void txImportCommunity(User user,List<CommunityDataInfo> communityList) {
 		this.dbProvider.execute((status) ->{
 			
@@ -756,7 +787,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 //		{
 //			return false;
 //		}
-		return true;
+		return false;
 	}
 
 	@Override

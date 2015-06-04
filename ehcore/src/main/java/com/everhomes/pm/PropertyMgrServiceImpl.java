@@ -76,6 +76,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
     private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
     private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
+    private static final String PROP_MESSAGE_BILL = "prop.message.bill";
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
     
@@ -1141,7 +1142,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	public String buildBillMessage(CommunityPmBill bill) {
-		String content = "账单时间：" + bill.getDateStr() +"\n";
+		String template = configProvider.getValue(PROP_MESSAGE_BILL, "");
+		String content = "\n" + template +"账单时间：" + bill.getDateStr() +"\n";
 		List<CommunityPmBillItem> itemList  = propertyMgrProvider.listCommunityPmBillItems(bill.getId());
 		if(itemList != null && itemList.size() > 0)
 		{
