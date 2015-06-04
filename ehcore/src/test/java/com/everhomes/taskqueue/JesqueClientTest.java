@@ -35,6 +35,9 @@ public class JesqueClientTest extends LoginAuthTestCase {
     @Autowired
     SpringWorkerFactory springWorkerFactory;
     
+    @Autowired
+    CommonWorkerPool recommendWorkerPool;
+    
     @Configuration
     @ComponentScan(basePackages = {
         "com.everhomes"
@@ -105,7 +108,7 @@ public class JesqueClientTest extends LoginAuthTestCase {
              }
     }
     
-    @Test
+    //@Test
     public void test002() {
         final Job job = new Job(TestAction.class.getName(),
                 new Object[]{ 1, 2.3, true, "test", Arrays.asList("inner", 4.5)});
@@ -120,5 +123,23 @@ public class JesqueClientTest extends LoginAuthTestCase {
             Thread.sleep((delay * 1000) + 5000); 
        } catch (Exception e){} // Give ourselves time to process
         workerPool.end(true);
+        }
+    
+    @Test
+    public void test003() {
+        final Job job = new Job(TestAction.class.getName(),
+                new Object[]{ 1, 2.3, true, "test", Arrays.asList("inner", 4.5)});
+        
+        recommendWorkerPool.addQueue("QUEUE_NAME");
+        //recommendWorkerPool.run();
+        
+        jesqueClientFactory.getClientPool().enqueue("QUEUE_NAME", job);
+       
+        try {
+            int delay = 500;
+            Thread.sleep((delay * 1000) + 5000); 
+        } catch (Exception e){} // Give ourselves time to process
+        
+        recommendWorkerPool.end(true);
     }
 }
