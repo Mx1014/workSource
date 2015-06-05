@@ -44,6 +44,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+import javassist.runtime.DotClass;
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -59,7 +64,13 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
 import ch.hsr.geohash.GeoHash;
+
+
+
 
 
 
@@ -116,9 +127,13 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.mysql.fabric.xmlrpc.base.Array;
+
+
+
 
 
 
@@ -207,6 +222,7 @@ public class FamilyServiceImpl implements FamilyService {
                     f.setCreatorUid(uid);
                     f.setMemberCount(0L);   // initialize it to 0
                     f.setCommunityId(address.getCommunityId());
+                    f.setCityId(address.getCityId());
                     
                     this.groupProvider.createGroup(f);
                     
@@ -1659,6 +1675,65 @@ public class FamilyServiceImpl implements FamilyService {
         response.setRequests(results);
         
         return response;
+    }
+    
+    @Override
+    public List<FamilyMemberDTO> listFamilyMembersByCityId(long cityId,int pageOffset,int pageSize){
+        pageSize = pageSize == 0 ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize;
+        
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+        List<GroupMember> groupMembers = this.familyProvider.listFamilyMembersByCityId(cityId,offset,pageSize);
+        List<FamilyMemberDTO> result = groupMembers.stream().map(r ->{
+            FamilyMemberDTO dto = new FamilyMemberDTO();
+            dto.setId(r.getId());
+            dto.setFamilyId(r.getGroupId());
+            dto.setMemberUid(r.getMemberId());
+            dto.setMemberName(r.getMemberNickName());
+            dto.setMemberAvatarUri(r.getMemberAvatar());
+            return dto;
+        }).collect(Collectors.toList());
+        
+        return result;
+    }
+    @Override
+    public List<FamilyMemberDTO> listFamilyMembersByCommunityId(long communityId,int pageOffset,int pageSize){
+        pageSize = pageSize == 0 ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize;
+        
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+        List<GroupMember> groupMembers = this.familyProvider.listFamilyMembersByCommunityId(communityId,offset,pageSize);
+        List<FamilyMemberDTO> result = groupMembers.stream().map(r ->{
+            FamilyMemberDTO dto = new FamilyMemberDTO();
+            dto.setId(r.getId());
+            dto.setFamilyId(r.getGroupId());
+            dto.setMemberUid(r.getMemberId());
+            dto.setMemberName(r.getMemberNickName());
+            dto.setMemberAvatarUri(r.getMemberAvatar());
+            return dto;
+        }).collect(Collectors.toList());
+        
+        return result;
+    }
+    
+    @Override
+    public List<FamilyMemberDTO> listFamilyMembersByFamilyId(long familyId,int pageOffset,int pageSize){
+        pageSize = pageSize == 0 ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize;
+        
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+        List<GroupMember> groupMembers = this.familyProvider.listFamilyMembersByFamilyId(familyId,offset,pageSize);
+        List<FamilyMemberDTO> result = groupMembers.stream().map(r ->{
+            FamilyMemberDTO dto = new FamilyMemberDTO();
+            dto.setId(r.getId());
+            dto.setFamilyId(r.getGroupId());
+            dto.setMemberUid(r.getMemberId());
+            dto.setMemberName(r.getMemberNickName());
+            dto.setMemberAvatarUri(r.getMemberAvatar());
+            return dto;
+        }).collect(Collectors.toList());
+        
+        return result;
     }
 
 

@@ -16,17 +16,17 @@ public class CouponLaunchPadHandler implements LaunchPadHandler {
     public LaunchPadItem accesProcessLaunchPadItem(long userId, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
-        launchPadItem.setActionUri(parserUri(userId,commnunityId,launchPadItem.getActionUri()));
+        //launchPadItem.setActionUri(parserUri(userId,commnunityId,launchPadItem.getActionUri()));
         
         return launchPadItem;
     }
     
-    private String parserUri(long userId, long commnunityId,String actionUri) {
-        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "userId", String.valueOf(userId));
-        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "commnunityId", String.valueOf(commnunityId));
-        return actionUri;
-        
-    }
+//    private String parserUri(long userId, long commnunityId,String actionUri) {
+//        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "userId", String.valueOf(userId));
+//        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "commnunityId", String.valueOf(commnunityId));
+//        return actionUri;
+//        
+//    }
     
 
 

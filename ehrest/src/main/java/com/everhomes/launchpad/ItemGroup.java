@@ -6,10 +6,11 @@ package com.everhomes.launchpad;
  * <li>PROPERTY: 物业</li>
  * <li>COUPON: 优惠券</li>
  * <li>THIRDSERVICE: 第三方服务</li>
+ * <li>FLEAMARKET: 市场动态</li>
  * </ul>
  */
 public enum ItemGroup {
-    PROPERTY("Property"),COUPON("Coupon"),THIRDSERVICE("ThirdService");
+    PROPERTY("Property"),COUPON("Coupon"),THIRDSERVICE("ThirdService"),FLEAMARKET("FleaMarket");
     
     private String code;
        
@@ -31,7 +32,8 @@ public enum ItemGroup {
                return COUPON;
            else if(code.equalsIgnoreCase(THIRDSERVICE.getCode()))
                return THIRDSERVICE;
-           
+           else if(code.equalsIgnoreCase(FLEAMARKET.getCode()))
+               return FLEAMARKET;
            return null;
        }
 }
