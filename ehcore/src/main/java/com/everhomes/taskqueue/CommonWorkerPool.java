@@ -20,7 +20,7 @@ public class CommonWorkerPool extends SpringWorkerPool {
     
     @Autowired(required = true)
     public CommonWorkerPool(@Qualifier(value="workerFactory") Callable<? extends Worker> workerFactory) {
-        super(workerFactory, 1);
+        super(workerFactory, 3);
     }
 
 }
