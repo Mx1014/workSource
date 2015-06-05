@@ -674,8 +674,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 cmd.getBuildingName() , offset , pageSize);
         list.stream().map((r) ->{
             Family family = this.familyProvider.findFamilyByAddressId(r.getAddressId());
-            if(family != null && family.getMemberCount() > 0)
+            if(family != null && family.getMemberCount() > 0){
                 r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
+                r.setFamilyId(family.getId());
+            }
             results.add(r);
             return null;
         }).collect(Collectors.toList());

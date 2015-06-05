@@ -6,12 +6,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>addressId: 门牌号</li>
+ * <li>familyId: 家庭ID，如果为0，则表示地址不存在家庭</li>
  * <li>apartmentName: 门牌号</li>
   * <li>livingStatus: 地址入住状态 ，参考{@link com.everhomes.address.AddressLivingStatus}</li>
  * </ul>
  */
 public class ApartmentDTO {
     private Long addressId;
+    private Long familyId;
     private String apartmentName;
     private Byte livingStatus;
     
@@ -40,6 +42,14 @@ public class ApartmentDTO {
 
     public void setLivingStatus(Byte livingStatus) {
         this.livingStatus = livingStatus;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
     }
 
     @Override

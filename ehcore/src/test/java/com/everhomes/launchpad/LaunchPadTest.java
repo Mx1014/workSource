@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.app.AppConstants;
+import com.everhomes.category.CategoryType;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.user.User;
@@ -60,12 +61,11 @@ public class LaunchPadTest extends TestCase {
     @Test
     public void testCreateLaunchPadItems() {
         CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
-        cmd.setActionName("baidu");
-        cmd.setActionUri("http://www.baidu.com");
-        cmd.setItemGroup(ItemGroup.THIRDSERVICE.getCode());
-        cmd.setItemLabel("百度");
-        cmd.setItemName("百度");
-        cmd.setAppId(AppConstants.APPID_THIRD_SERVICE);
+        
+        cmd.setItemGroup(ItemGroup.PROPERTY.getCode());
+        cmd.setItemLabel("物业建议");
+        cmd.setItemName(CategoryType.ADVISE.getCode());
+        cmd.setAppId(AppConstants.APPID_PM);
         List<ItemScope> itemScopes = new ArrayList<ItemScope>();
         ItemScope scope1 = new ItemScope();
         scope1.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
