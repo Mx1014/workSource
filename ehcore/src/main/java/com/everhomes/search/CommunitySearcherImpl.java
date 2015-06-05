@@ -65,12 +65,14 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         
         for(;;) {
             List<Community> communities = this.communityProvider.listAllCommunities(i,pageSize);
-            bulkUpdate(communities);
-            count += communities.size();
-            LOGGER.info("communities sync count= " + count);
             if(null == communities || communities.size() == 0) {
                 break;
-            }
+                }
+            
+            bulkUpdate(communities);
+            i++;
+            count += communities.size();
+            LOGGER.info("communities sync count= " + count);
         }
     }
    
