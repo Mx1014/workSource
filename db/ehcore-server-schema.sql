@@ -731,7 +731,7 @@ CREATE TABLE `eh_group_members` (
     `requestor_comment` TEXT,
     `operation_type` TINYINT COMMENT '1: request to join, 2: invite to join',
     `inviter_uid` BIGINT COMMENT 'record inviter user id',
-    `invite_time` DATETIME NOT NULL COMMENT 'the time the member is invited',
+    `invite_time` DATETIME COMMENT 'the time the member is invited',
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,
