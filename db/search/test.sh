@@ -8,3 +8,5 @@ curl -XGET http://$ELASTIC/everhomesv3/group/_search?pretty=True -d '
     }
 }
 '
+
+curl -XGET http://$ELASTIC/everhomesv3/community/_search?pretty=True&q=*

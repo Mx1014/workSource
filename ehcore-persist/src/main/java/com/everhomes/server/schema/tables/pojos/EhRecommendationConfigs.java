@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendationConfigs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1821686683;
+	private static final long serialVersionUID = -761413283;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appid;
 	private java.lang.Integer  suggestType;
 	private java.lang.Integer  sourceType;
+	private java.lang.Long     sourceId;
 	private java.lang.Integer  targetType;
 	private java.lang.Long     targetId;
 	private java.lang.Integer  periodType;
@@ -36,6 +37,7 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 		java.lang.Long     appid,
 		java.lang.Integer  suggestType,
 		java.lang.Integer  sourceType,
+		java.lang.Long     sourceId,
 		java.lang.Integer  targetType,
 		java.lang.Long     targetId,
 		java.lang.Integer  periodType,
@@ -52,6 +54,7 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 		this.appid = appid;
 		this.suggestType = suggestType;
 		this.sourceType = sourceType;
+		this.sourceId = sourceId;
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.periodType = periodType;
@@ -95,6 +98,14 @@ public class EhRecommendationConfigs implements java.io.Serializable {
 
 	public void setSourceType(java.lang.Integer sourceType) {
 		this.sourceType = sourceType;
+	}
+
+	public java.lang.Long getSourceId() {
+		return this.sourceId;
+	}
+
+	public void setSourceId(java.lang.Long sourceId) {
+		this.sourceId = sourceId;
 	}
 
 	public java.lang.Integer getTargetType() {

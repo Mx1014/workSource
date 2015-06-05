@@ -26,8 +26,10 @@ import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.family.FindFamilyByAddressIdCommand;
 import com.everhomes.family.ListOwningFamilyMembersCommand;
 import com.everhomes.forum.ListPostCommandResponse;
+import com.everhomes.forum.ListTopicCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.PropertyPostDTO;
 import com.everhomes.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
@@ -312,7 +314,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("assignPMTopics")
     @RestReturn(value=String.class)
     public RestResponse assignPMTopics(@Valid AssginPmTopicCommand cmd) {
-    	
+    	propertyMgrService.assignPMTopics(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -722,9 +724,23 @@ public class PropertyMgrController extends ControllerBase {
      * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
      */
     @RequestMapping("queryTopicsByCategory")
+    @RestReturn(value=PropertyPostDTO.class)
+    public RestResponse queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+    	List<PropertyPostDTO>  cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/listTopics</b>
+     * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
+     */
+    @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)
-    public RestResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
-        ListPostCommandResponse cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
+    public RestResponse listTopics(ListTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = propertyMgrService.listTopics(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);

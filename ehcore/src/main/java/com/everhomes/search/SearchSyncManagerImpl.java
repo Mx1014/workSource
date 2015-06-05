@@ -20,11 +20,11 @@ public class SearchSyncManagerImpl implements SearchSyncManager {
     @Autowired
     JesqueClientFactory jesqueClientFactory;
     
-    private String queue_name = "search-sync";
+    private String queueName = "search-sync";
     
     @PostConstruct
     public void setup() {
-        workerPool.addQueue(queue_name);
+        workerPool.addQueue(queueName);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class SearchSyncManagerImpl implements SearchSyncManager {
         final Job job = new Job(SearchSyncAction.class.getName(),
                 new Object[]{ syncType });
         
-        jesqueClientFactory.getClientPool().enqueue(queue_name, job);
+        jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
 
 }
