@@ -143,11 +143,6 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
                 groups.clear();
                 LOGGER.info("process count: " + count.get());
                 }
-            
-         int real = count.addAndGet(1);
-         if(real > 400) {
-             return;
-             }
         });
         
         if(groups.size() > 0) {

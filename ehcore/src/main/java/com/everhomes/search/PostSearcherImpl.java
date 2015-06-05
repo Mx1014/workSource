@@ -153,12 +153,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                     bulkUpdate(posts);
                     posts.clear();
                     }
-               
-                int real = count.addAndGet(1);
-                if(real > 400) {
-                    return;
-                    }
-            }
+                }
             
         }, new ListingQueryBuilderCallback() {
 
@@ -176,6 +171,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             posts.clear();
             LOGGER.info("posts process count: " + count.get());
         }
+        
+        this.optimize(1);
+        this.refresh();
         
     }
 

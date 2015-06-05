@@ -74,6 +74,9 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             count += communities.size();
             LOGGER.info("communities sync count= " + count);
         }
+        
+        this.optimize(1);
+        this.refresh();
     }
    
     @Override
