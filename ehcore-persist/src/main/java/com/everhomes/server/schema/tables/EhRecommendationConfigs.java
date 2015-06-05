@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord> {
 
-	private static final long serialVersionUID = 1251123545;
+	private static final long serialVersionUID = -1590815142;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recommendation_configs</code>
@@ -45,6 +45,11 @@ public class EhRecommendationConfigs extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_recommendation_configs.source_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Integer> SOURCE_TYPE = createField("source_type", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recommendation_configs.source_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord, java.lang.Long> SOURCE_ID = createField("source_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recommendation_configs.target_type</code>.
