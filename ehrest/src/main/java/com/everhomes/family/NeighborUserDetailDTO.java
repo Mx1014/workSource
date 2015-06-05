@@ -49,6 +49,5 @@ public class NeighborUserDetailDTO extends NeighborUserDTO {
     public void setApartmentFloor(String apartmentFloor) {
         this.apartmentFloor = apartmentFloor;
     }
-
-   
+    
 }
