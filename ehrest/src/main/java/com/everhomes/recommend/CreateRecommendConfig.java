@@ -4,6 +4,7 @@ public class CreateRecommendConfig {
     private Long     appid;
     private Integer  suggestType;
     private Integer  sourceType;
+    private Integer sourceId;
     private Integer  targetType;
     private Long     targetId;
     private Integer  periodType;
@@ -79,6 +80,10 @@ public class CreateRecommendConfig {
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    
+    public Integer getSourceId() {
+        return sourceId;
+    }
+    public void setSourceId(Integer sourceId) {
+        this.sourceId = sourceId;
+    }
 }

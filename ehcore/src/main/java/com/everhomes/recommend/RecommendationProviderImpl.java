@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,16 @@ public class RecommendationProviderImpl implements RecommendationProvider {
         if(item.execute() > 0) {
             recommend.setId(item.getReturnedRecord().getId());
            }
+    }
+    
+    @Override
+    public void updateRecommendation(Recommendation recommend) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, recommend.getUserId()));
+        UpdateQuery<EhRecommendationsRecord> item = context.updateQuery(Tables.EH_RECOMMENDATIONS);
+        item.setRecord(ConvertHelper.convert(recommend, EhRecommendationsRecord.class));
+        
+        item.setReturning(Tables.EH_RECOMMENDATIONS.ID);
+        item.execute();
     }
     
     @Override

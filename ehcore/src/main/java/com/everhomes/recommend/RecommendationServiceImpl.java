@@ -23,6 +23,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Autowired
     RecommendationConfigProvider recommendationConfigProvider;
     
+    @Autowired
+    RecommendationProvider recommendationProvider;
+    
     private final String queueName = "recommend";
     
     @PostConstruct
@@ -44,5 +47,5 @@ public class RecommendationServiceImpl implements RecommendationService {
        }
        
        return config;
-   }
+    }
 }
