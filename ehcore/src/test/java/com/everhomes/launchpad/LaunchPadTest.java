@@ -63,8 +63,8 @@ public class LaunchPadTest extends TestCase {
         CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
         
         cmd.setItemGroup(ItemGroup.PROPERTY.getCode());
-        cmd.setItemLabel("物业建议");
-        cmd.setItemName(CategoryType.ADVISE.getCode());
+        cmd.setItemLabel("物业报修");
+        cmd.setItemName(CategoryType.REPAIR.getCode());
         cmd.setAppId(AppConstants.APPID_PM);
         List<ItemScope> itemScopes = new ArrayList<ItemScope>();
         ItemScope scope1 = new ItemScope();

@@ -46,12 +46,14 @@ import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.ListPostCommandResponse;
+import com.everhomes.forum.ListTopicCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
+import com.everhomes.forum.PropertyPostDTO;
 import com.everhomes.forum.QueryTopicByCategoryCommand;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
@@ -427,7 +429,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         long communityId = cmd.getCommunityId();
         
         List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
-                EntityType.USER.getCode(), cmd.getUserId());
+        		PmMemberTargetType.USER.getCode(), cmd.getUserId());
         if(pmMemberList == null || pmMemberList.isEmpty()){
             LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -507,6 +509,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         });
         if(userList == null || userList.isEmpty()) return ;
         String cellPhone = userList.get(0).getIdentifierToken();
+        if(template == null){
+        	template = "该物业已在处理";
+        }
         this.smsProvider.sendSms(cellPhone, template);
         
     }
@@ -1367,8 +1372,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	if(cmd.getForumId() == null){
-    		cmd.setForumId(ForumConstants.SYSTEM_FORUM);
+    	if(cmd.getCreatorTag() == null){
+    		cmd.setCreatorTag(PostEntityTag.PM.getCode());
     	}
     	if(cmd.getPrivateFlag() == null){
     		cmd.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
@@ -1384,7 +1389,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 	
 	@Override
-	public ListPostCommandResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
+	public List<PropertyPostDTO>  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
 		User user  = UserContext.current().getUser();
     	Long communityId = cmd.getCommunityId();
     	if(communityId == null){
@@ -1407,6 +1412,42 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 //    			CommunityPmTasks task = propertyMgrProvider.findPmTaskEntityId(communityId, postDTO.getId(), EntityType.TOPIC.getCode());
 //			}
 //    	}
-    	return forumService.queryTopicsByCategory(cmd);
+    	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
+    	List<CommunityPmTasks> tasks = propertyMgrProvider.findPmTaskEntityIdAndTargetId(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+    	if(tasks != null && tasks.size() > 0){
+    		for (CommunityPmTasks task : tasks) {
+				Post post = forumProvider.findPostById(task.getEntityId());
+				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
+				dto.setCommunityId(task.getCommunityId());
+				dto.setEntityType(task.getEntityType());
+				dto.setEntityId(task.getEntityId());
+				dto.setTargetType(task.getTargetType());
+				dto.setTargetId(task.getTargetId());
+				dto.setTaskType(task.getTaskType());
+				dto.setTaskStatus(task.getTaskStatus());
+				results.add(dto);
+			}
+    	}
+    	return results;
+	}
+	
+	@Override
+	public ListPostCommandResponse listTopics(ListTopicCommand cmd) {
+		User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	//权限控制
+		return forumService.listTopics(cmd);
 	}
 }

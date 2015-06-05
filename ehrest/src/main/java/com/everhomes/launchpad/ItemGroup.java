@@ -34,6 +34,7 @@ public enum ItemGroup {
                return THIRDSERVICE;
            else if(code.equalsIgnoreCase(FLEAMARKET.getCode()))
                return FLEAMARKET;
+
            return null;
        }
 }
