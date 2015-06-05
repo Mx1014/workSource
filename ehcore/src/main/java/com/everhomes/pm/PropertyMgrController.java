@@ -710,7 +710,7 @@ public class PropertyMgrController extends ControllerBase {
     @RestReturn(value=PostDTO.class)
     public RestResponse createTopic(@Valid NewTopicCommand cmd) {
     	PostDTO postDto = propertyMgrService.createTopic(cmd);
-    	RestResponse response = new RestResponse();
+    	RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

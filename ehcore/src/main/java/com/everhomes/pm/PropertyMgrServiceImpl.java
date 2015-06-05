@@ -41,6 +41,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.family.RevokeMemberCommand;
+import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.ListPostCommandResponse;
@@ -48,6 +49,8 @@ import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
 import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.PostEntityTag;
+import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.QueryTopicByCategoryCommand;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
@@ -1361,6 +1364,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	if(cmd.getForumId() == null){
+    		cmd.setForumId(ForumConstants.SYSTEM_FORUM);
+    	}
+    	if(cmd.getPrivateFlag() == null){
+    		cmd.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
+    	}
+    	if(cmd.getVisibleRegionType() == null){
+    		cmd.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+    	}
+    	if(cmd.getTargetTag() == null ){
+    		cmd.setTargetTag(PostEntityTag.USER.getCode());
+    	}
     	PostDTO post = forumService.createTopic(cmd);
     	return post;
 	}
