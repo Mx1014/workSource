@@ -169,20 +169,6 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    /**
-     * <b>URL: /address/admin/correctAddress</b>
-     * <p>修正地址</p>
-     */
-    @RequestMapping("correctAddress")
-    @RestReturn(value=String.class)
-    public RestResponse correctAddress(@Valid CorrectAddressCommand cmd) {
-        this.addressService.correctAddress(cmd);
-        RestResponse response = new RestResponse(null);
-        
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     
     /**
      * <b>URL: /address/searchCommunities</b>
@@ -213,21 +199,7 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /address/syncCommunities</b>
-     * <p>同步小区</p>
-     */
-    @RequestMapping("syncCommunities")
-    @RestReturn(value=String.class)
-    public RestResponse syncCommunities() {
-        searcher.syncDb();
-        RestResponse response =  new RestResponse();
 
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     /**
      * <b>URL: /address/listAddressByKeyword</b>
      * <p>根据关键字查询地址</p>
@@ -253,36 +225,6 @@ public class AddressController extends ControllerBase {
         ListApartmentByBuildingNameCommandResponse result = this.addressService.listApartmentsByBuildingName(cmd);
         RestResponse response = new RestResponse(result);
         
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: admin/address/importCommunityInfos</b>
-     * @param files 上传的文件
-     * @return 上传的结果
-     */
-    @RequestMapping(value="importCommunityInfos", method = RequestMethod.POST)
-    @RestReturn(value=String.class)
-    public RestResponse importCommunityInfos(@RequestParam(value = "attachment") MultipartFile[] files) {
-    	addressService.importCommunityInfos(files);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: admin/address/importAddressInfos</b>
-     * @param files 上传的文件
-     * @return 上传的结果
-     */
-    @RequestMapping(value="importAddressInfos", method = RequestMethod.POST)
-    @RestReturn(value=String.class)
-    public RestResponse importAddressInfos(@RequestParam(value = "attachment") MultipartFile[] files) {
-    	addressService.importAddressInfos(files);
-        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

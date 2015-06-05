@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = -1089923535;
+	private static final long serialVersionUID = -277847166;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -105,6 +105,21 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_group_members.requestor_comment</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> REQUESTOR_COMMENT = createField("requestor_comment", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.operation_type</code>. 1: request to join, 2: invite to join
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> OPERATION_TYPE = createField("operation_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: request to join, 2: invite to join");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.inviter_uid</code>. record inviter user id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INVITER_UID = createField("inviter_uid", org.jooq.impl.SQLDataType.BIGINT, this, "record inviter user id");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.invite_time</code>. the time the member is invited
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> INVITE_TIME = createField("invite_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "the time the member is invited");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.integral_tag1</code>.

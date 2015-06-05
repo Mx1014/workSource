@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> {
 
-	private static final long serialVersionUID = -1474759781;
+	private static final long serialVersionUID = -2093733350;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_op_requests</code>
@@ -47,14 +47,19 @@ public class EhGroupOpRequests extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.String> REQUESTOR_COMMENT = createField("requestor_comment", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_group_op_requests.target_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Long> TARGET_UID = createField("target_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_group_op_requests.operation_type</code>. 1: request for admin role, 2: invite to become admin
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Byte> OPERATION_TYPE = createField("operation_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: request for admin role, 2: invite to become admin");
 
 	/**
-	 * The column <code>ehcore.eh_group_op_requests.status</code>. 0: none, 1: requesting, 2: accepted, 3: rejected
+	 * The column <code>ehcore.eh_group_op_requests.status</code>. 0: none, 1: requesting, 2: accepted
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: requesting, 2: accepted, 3: rejected");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: requesting, 2: accepted");
 
 	/**
 	 * The column <code>ehcore.eh_group_op_requests.operator_uid</code>.

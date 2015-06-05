@@ -6,15 +6,19 @@ import java.util.List;
 
 
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -37,6 +41,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private UserActivityProvider userActivityProvider;
     @Autowired
     private DbProvider dbProvider;
+    @Autowired 
+    private ContentServerService contentServerService;
 
     @Override
     public ListLaunchPadByCommunityIdCommandResponse listLaunchPadByCommunityId(ListLaunchPadByCommunityIdCommand cmd) {
@@ -84,19 +90,31 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             if(handler == null)
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Unable to find launch pad handler.");
-            
-            result.add(ConvertHelper.convert(handler.accesProcessLaunchPadItem(user.getId(), communityId, r), LaunchPadItemDTO.class));
+            LaunchPadItemDTO itemDTO = ConvertHelper.convert(handler.accesProcessLaunchPadItem(user.getId(), communityId, r), LaunchPadItemDTO.class);
+            itemDTO.setActionIcon(parserUri(itemDTO.getActionIcon(),"user",user.getId()));
+            result.add(itemDTO);
         });
 
         long endTime = System.currentTimeMillis();
         
-        LOGGER.info("Query launch pad,esplse=" + (endTime - startTime));
+        LOGGER.info("Query launch pad complete,esplse=" + (endTime - startTime));
         ListLaunchPadByCommunityIdCommandResponse response = new ListLaunchPadByCommunityIdCommandResponse();
         response.setLaunchPadItems(result);
         
         return response;
     }
+    
+    private String parserUri(String uri,String ownerType, long ownerId){
+        try {
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+                return contentServerService.parserUri(uri,ownerType,ownerId);
+            
+        } catch (Exception e) {
+            LOGGER.error("Parser uri is error." + e.getMessage());
+        }
+        return null;
 
+    }
     
     /**
      * 1、applyPolicy=1(覆盖)，小范围覆盖大范围

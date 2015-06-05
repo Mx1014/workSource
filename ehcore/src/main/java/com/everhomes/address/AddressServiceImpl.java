@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.pm.CommunityPmContact;
 import com.everhomes.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
+import com.everhomes.region.RegionAdminStatus;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.search.CommunitySearcher;
@@ -457,7 +460,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId");
 
         if(address == null) {
-            //全局锁导致入库超时，暂时去掉
             // optimize with double-lock pattern 
             Tuple<Address, Boolean> result = this.coordinationProvider
                      .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
@@ -565,29 +567,37 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
                     "Address is not found.");
         }
-
+        long startTime = System.currentTimeMillis();
         Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
-        if(addr == null || addr.getId().longValue() == address.getId().longValue()){
-            address.setBuildingName(cmd.getBuildingName());
-            address.setApartmentName(cmd.getApartmentName());
-            address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
-            address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
-            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-            this.addressProvider.updateAddress(address);
-            //approve members of this address
-            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-            if(family != null)
+        this.dbProvider.execute((TransactionStatus status) -> {
+            if(addr == null || addr.getId().longValue() == address.getId().longValue()){
+                address.setBuildingName(cmd.getBuildingName());
+                address.setApartmentName(cmd.getApartmentName());
+                address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+                address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
+                address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+                this.addressProvider.updateAddress(address);
+                //approve members of this address
+                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+                if(family != null)
+                    this.familyService.approveMembersByFamily(family);
+                
+            }else {
+                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+                if(family == null){
+                    LOGGER.error("Family is not found with addressId=" + cmd.getAddressId());
+                    return null;
+                }
+                Group group = ConvertHelper.convert(family, Group.class); 
+                group.setIntegralTag1(addr.getId());
+                this.groupProvider.updateGroup(group);
                 this.familyService.approveMembersByFamily(family);
-            
-        }else {
-            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-            if(family == null) return;
-            Group group = ConvertHelper.convert(family, Group.class); 
-            group.setIntegralTag1(addr.getId());
-            this.groupProvider.updateGroup(group);
-            this.familyService.approveMembersByFamily(family);
-            this.addressProvider.deleteAddress(address);
-        }
+                this.addressProvider.deleteAddress(address);
+            }
+            return null;
+        });
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Correct address elapse=" + (endTime - startTime));
         
     }
     
@@ -700,6 +710,34 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		
 	}
 
+	@Override
+	public void importCommunityInfos(File file) {
+//		User user  = UserContext.current().getUser();
+		User user  = new User();
+		user.setId(10017l);
+		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		try {
+			List<String[]> dataList =FileHelper.getDataArrayByInputStream(new FileInputStream(file), "#@");
+			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
+			
+			if(communityList != null && communityList.size() > 0){
+				//事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目 
+				txImportCommunity(user, communityList);
+			}
+			else{
+				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+		                    "can not to import the community.parse file error.");
+			}
+			
+		} catch (ResourceException e) {
+			
+		} catch (IOException e) {
+		
+		}
+		
+	}
+	
 	private void txImportCommunity(User user,List<CommunityDataInfo> communityList) {
 		this.dbProvider.execute((status) ->{
 			
@@ -756,7 +794,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 //		{
 //			return false;
 //		}
-		return true;
+		return false;
 	}
 
 	@Override

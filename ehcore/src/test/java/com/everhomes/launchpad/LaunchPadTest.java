@@ -20,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import com.everhomes.app.AppConstants;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.user.User;
@@ -56,13 +57,15 @@ public class LaunchPadTest extends TestCase {
        
     }
     
-    @Ignore @Test
+    @Test
     public void testCreateLaunchPadItems() {
         CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
-        cmd.setActionName("carSharing");
-        cmd.setActionUri("/forum/carSharing");
-        cmd.setItemGroup("Car");
-        cmd.setItemLabel("Car");
+        cmd.setActionName("baidu");
+        cmd.setActionUri("http://www.baidu.com");
+        cmd.setItemGroup(ItemGroup.THIRDSERVICE.getCode());
+        cmd.setItemLabel("百度");
+        cmd.setItemName("百度");
+        cmd.setAppId(AppConstants.APPID_THIRD_SERVICE);
         List<ItemScope> itemScopes = new ArrayList<ItemScope>();
         ItemScope scope1 = new ItemScope();
         scope1.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());

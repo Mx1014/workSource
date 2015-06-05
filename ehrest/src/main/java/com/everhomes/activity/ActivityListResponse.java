@@ -14,6 +14,8 @@ public class ActivityListResponse {
     @ItemType(ActivityMemberDTO.class)
     private List<ActivityMemberDTO> roster;
     
+    private Long nextAnchor;
+    
     public ActivityListResponse() {
     }
 
@@ -48,6 +50,15 @@ public class ActivityListResponse {
 
     public void setRoster(List<ActivityMemberDTO> roster) {
         this.roster = roster;
+    }
+    
+
+    public Long getNextAnchor() {
+        return nextAnchor;
+    }
+
+    public void setNextAnchor(Long nextAnchor) {
+        this.nextAnchor = nextAnchor;
     }
 
     @Override

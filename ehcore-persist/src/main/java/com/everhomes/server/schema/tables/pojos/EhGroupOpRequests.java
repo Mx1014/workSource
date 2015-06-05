@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = -847801079;
+	private static final long serialVersionUID = 603281757;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
 	private java.lang.Long     requestorUid;
 	private java.lang.String   requestorComment;
+	private java.lang.Long     targetUid;
 	private java.lang.Byte     operationType;
 	private java.lang.Byte     status;
 	private java.lang.Long     operatorUid;
@@ -31,6 +32,7 @@ public class EhGroupOpRequests implements java.io.Serializable {
 		java.lang.Long     groupId,
 		java.lang.Long     requestorUid,
 		java.lang.String   requestorComment,
+		java.lang.Long     targetUid,
 		java.lang.Byte     operationType,
 		java.lang.Byte     status,
 		java.lang.Long     operatorUid,
@@ -42,6 +44,7 @@ public class EhGroupOpRequests implements java.io.Serializable {
 		this.groupId = groupId;
 		this.requestorUid = requestorUid;
 		this.requestorComment = requestorComment;
+		this.targetUid = targetUid;
 		this.operationType = operationType;
 		this.status = status;
 		this.operatorUid = operatorUid;
@@ -80,6 +83,14 @@ public class EhGroupOpRequests implements java.io.Serializable {
 
 	public void setRequestorComment(java.lang.String requestorComment) {
 		this.requestorComment = requestorComment;
+	}
+
+	public java.lang.Long getTargetUid() {
+		return this.targetUid;
+	}
+
+	public void setTargetUid(java.lang.Long targetUid) {
+		this.targetUid = targetUid;
 	}
 
 	public java.lang.Byte getOperationType() {

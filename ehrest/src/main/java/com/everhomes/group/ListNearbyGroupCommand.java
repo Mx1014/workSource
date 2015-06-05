@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 请求人所在位置对应的经度</li>
  * <li>longitude: 请求人所在位置对应的经度</li>
  * <li>latitude: 请求人所在位置对应的纬度</li>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageOffset: 页码，从1开始</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
@@ -19,7 +19,7 @@ public class ListNearbyGroupCommand {
     
     private Double latitude;
     
-    private Long pageAnchor;
+    private Integer pageOffset;
     
     private Integer pageSize;
     
@@ -34,12 +34,12 @@ public class ListNearbyGroupCommand {
         this.categoryId = categoryId;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
+    public Integer getPageOffset() {
+        return pageOffset;
     }
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
 
     public Integer getPageSize() {

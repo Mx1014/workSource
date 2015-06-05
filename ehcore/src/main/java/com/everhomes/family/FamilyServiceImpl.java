@@ -215,6 +215,7 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberNickName(user.getNickName());
                     m.setMemberType(EntityType.USER.getCode());
                     m.setMemberId(uid);
+                    m.setMemberAvatar(user.getAvatar());
                     m.setMemberRole(Role.ResourceCreator);
                     m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     m.setCreatorUid(uid);
@@ -240,6 +241,7 @@ public class FamilyServiceImpl implements FamilyService {
                 m.setMemberType(EntityType.USER.getCode());
                 m.setMemberId(uid);
                 m.setMemberNickName(user.getAccountName());
+                m.setMemberAvatar(user.getAvatar());
                 m.setMemberRole(Role.ResourceUser);
                 m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 m.setCreatorUid(uid);
@@ -1143,6 +1145,7 @@ public class FamilyServiceImpl implements FamilyService {
                    
                     return true;
                 });
+        List<Long> neighborUserIds = new ArrayList<Long>();
         
         familyList.stream().forEach((f) ->{
             if(f == null) return;
@@ -1154,8 +1157,11 @@ public class FamilyServiceImpl implements FamilyService {
                 if(members != null && !members.isEmpty()){
                     for(GroupMember m : members){
                         if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
-                                && m.getMemberType().equals(EntityType.USER.getCode())){
+                                && m.getMemberType().equals(EntityType.USER.getCode())
+                                        && m.getMemberId().longValue() != user.getId().longValue()){
                             
+                            if(neighborUserIds.contains(m.getMemberId())) return;
+                            neighborUserIds.add(m.getMemberId());
                             NeighborUserDetailDTO n = new NeighborUserDetailDTO();
                             User u = this.userProvider.findUserById(m.getMemberId());
                             n.setUserId(u.getId());
@@ -1194,14 +1200,14 @@ public class FamilyServiceImpl implements FamilyService {
             NeighborUserDTO user = ConvertHelper.convert(dto, NeighborUserDTO.class);
             if(myaddress.getApartmentFloor() != null && dto.getApartmentFloor() != null){
                 if(myaddress.getApartmentFloor().equals(dto.getApartmentFloor()))
-                    user.setNeighborhoodRelation((byte) 1);
+                    user.setNeighborhoodRelation(NeighborhoodRelation.SAMEFLOOR.getCode());
             }
             else if(myaddress.getBuildingName().equals(dto.getBuildingName())){
-                user.setNeighborhoodRelation((byte) 2);
+                user.setNeighborhoodRelation(NeighborhoodRelation.SAMEBUILDING.getCode());
             }
             
             else
-                user.setNeighborhoodRelation((byte) 0);
+                user.setNeighborhoodRelation(NeighborhoodRelation.UNKNOWN.getCode());
             results.add(user);
         }
         //屏蔽分页
@@ -1328,7 +1334,7 @@ public class FamilyServiceImpl implements FamilyService {
         SelectQuery<?> query1 = context.selectQuery();
         Table<?> t = query.asTable();
         query1.addFrom(t);
-        query1.addGroupBy(t.fields()[1]);
+        query1.addGroupBy(t.field("uid"));
 
         query1.fetch().map((r) -> {
             members.add(ConvertHelper.convert(r, UserLocation.class));
@@ -1339,7 +1345,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
     
     private List<String> getGeoHashCodeList(double latitude, double longitude){
-        
+
         GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
         GeoHash[] adjacents = geo.getAdjacent();
         List<String> geoHashCodes = new ArrayList<String>();

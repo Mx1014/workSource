@@ -167,7 +167,7 @@ public class DataFileHandler {
 				communityData.setCityId(cityId);
 				communityData.setCityName(city.getName());
 				Region area = getAreaByData(cityId, areaName, areaList);
-				if (area != null && city.getScopeCode() == RegionScope.AREA.getCode())
+				if (area != null && area.getScopeCode() == RegionScope.AREA.getCode())
 				{
 					communityData.setAreaId(area.getId());
 					communityData.setAreaName(area.getName());
@@ -244,7 +244,7 @@ public class DataFileHandler {
 			{
 				if (areaName != null)
 				{
-					if (areaName.equals(areaDB.getName()) && cityId == areaDB.getId())
+					if (areaName.equals(areaDB.getName()) && cityId == areaDB.getParentId())
 					{
 						area = areaDB;
 						break;

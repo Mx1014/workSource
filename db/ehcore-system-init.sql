@@ -3,7 +3,11 @@ SET foreign_key_checks = 0;
 use ehcore;
 
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('db.init.timestamp', UTC_TIMESTAMP(), 'Database seeding timestamp');
-
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('sms.handler.type','MW','sms handler');
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.port','9003','sms handler');
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.password','223651','mw password');
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.user','J02300','mw user');
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.host','61.145.229.29','mw host ,special line');
 ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, 'All');
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(2, 0, 'Visible');

@@ -16,6 +16,11 @@ import com.everhomes.util.StringHelper;
  * <li>memberAvatar：成员在group内的头像URI</li>
  * <li>memberAvatarUrl：成员在group内的头像URL</li>
  * <li>memberStatus：成员在group内的状态，参考{@link com.everhomes.group.GroupMemberStatus}</li>
+ * <li>inviterUid：被邀请人用户ID，有邀请人时才有效</li>
+ * <li>inviterNickName：被邀请人用户昵称，有邀请人时才有效</li>
+ * <li>inviterAvatar：被邀请人用户头像URI，有邀请人时才有效</li>
+ * <li>inviterAvatarUrl：被邀请人用户头像URL，有邀请人时才有效</li>
+ * <li>inviteTime：被邀请时间，有邀请人时才有效</li>
  * <li>createTime：成员加入group的时间</li>
  * <li>phonePrivateFlag: group成员是否显示手机号标记，{@link com.everhomes.group.GroupMemberPhonePrivacy}</li>
  * <li>cellPhone: group成员手机码，当<code>phonePrivateFlag</code>设置为公开手机号时才有效</li>
@@ -32,6 +37,11 @@ public class GroupMemberDTO {
     private String memberAvatar;
     private String memberAvatarUrl;
     private Byte memberStatus;
+    private Long inviterUid;
+    private String inviterNickName;
+    private String inviterAvatar;
+    private String inviterAvatarUrl;
+    private Timestamp inviteTime;
     private Timestamp createTime;
     private Timestamp approveTime;
     private Byte phonePrivateFlag;
@@ -103,6 +113,46 @@ public class GroupMemberDTO {
 
     public void setMemberNickName(String memberNickName) {
         this.memberNickName = memberNickName;
+    }
+
+    public Long getInviterUid() {
+        return inviterUid;
+    }
+
+    public void setInviterUid(Long inviterUid) {
+        this.inviterUid = inviterUid;
+    }
+
+    public String getInviterNickName() {
+        return inviterNickName;
+    }
+
+    public void setInviterNickName(String inviterNickName) {
+        this.inviterNickName = inviterNickName;
+    }
+
+    public String getInviterAvatar() {
+        return inviterAvatar;
+    }
+
+    public void setInviterAvatar(String inviterAvatar) {
+        this.inviterAvatar = inviterAvatar;
+    }
+
+    public String getInviterAvatarUrl() {
+        return inviterAvatarUrl;
+    }
+
+    public void setInviterAvatarUrl(String inviterAvatarUrl) {
+        this.inviterAvatarUrl = inviterAvatarUrl;
+    }
+
+    public Timestamp getInviteTime() {
+        return inviteTime;
+    }
+
+    public void setInviteTime(Timestamp inviteTime) {
+        this.inviteTime = inviteTime;
     }
 
     public Timestamp getCreateTime() {
