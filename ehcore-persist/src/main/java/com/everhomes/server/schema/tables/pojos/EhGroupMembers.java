@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -252052469;
+	private static final long serialVersionUID = -241013339;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
@@ -29,6 +29,9 @@ public class EhGroupMembers implements java.io.Serializable {
 	private java.lang.String   proofResourceUrl;
 	private java.sql.Timestamp approveTime;
 	private java.lang.String   requestorComment;
+	private java.lang.Byte     operationType;
+	private java.lang.Long     inviterUid;
+	private java.sql.Timestamp inviteTime;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -59,6 +62,9 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   proofResourceUrl,
 		java.sql.Timestamp approveTime,
 		java.lang.String   requestorComment,
+		java.lang.Byte     operationType,
+		java.lang.Long     inviterUid,
+		java.sql.Timestamp inviteTime,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -86,6 +92,9 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.proofResourceUrl = proofResourceUrl;
 		this.approveTime = approveTime;
 		this.requestorComment = requestorComment;
+		this.operationType = operationType;
+		this.inviterUid = inviterUid;
+		this.inviteTime = inviteTime;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -224,6 +233,30 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setRequestorComment(java.lang.String requestorComment) {
 		this.requestorComment = requestorComment;
+	}
+
+	public java.lang.Byte getOperationType() {
+		return this.operationType;
+	}
+
+	public void setOperationType(java.lang.Byte operationType) {
+		this.operationType = operationType;
+	}
+
+	public java.lang.Long getInviterUid() {
+		return this.inviterUid;
+	}
+
+	public void setInviterUid(java.lang.Long inviterUid) {
+		this.inviterUid = inviterUid;
+	}
+
+	public java.sql.Timestamp getInviteTime() {
+		return this.inviteTime;
+	}
+
+	public void setInviteTime(java.sql.Timestamp inviteTime) {
+		this.inviteTime = inviteTime;
 	}
 
 	public java.lang.Long getIntegralTag1() {
