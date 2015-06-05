@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -27,6 +28,7 @@ import com.everhomes.group.GroupService;
 import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -222,7 +224,13 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
-        List<ActivityRoster> rosterList = activityProvider.listRosterPagination(cmd.getPageOffset(), cmd.getPageSize(),
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getAnchor()==null?0L:cmd.getAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+        List<ActivityRoster> rosterList = activityProvider.listRosterPagination(locator, cmd.getPageSize(),
                 activity.getId());
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
                 .current().getUser().getId());
@@ -257,6 +265,11 @@ public class ActivityServiceImpl implements ActivityService {
             d.setSignupTime(r.getCreateTime().toString());
             return d;
         }).collect(Collectors.toList());
+        if(rosterList.size()<cmd.getPageSize()){
+            response.setNextAnchor(null);
+        }else{
+            response.setNextAnchor(locator.getAnchor());
+        }
         response.setRoster(result);
         response.setCreatorFlag(0);
         // current user is sender?
@@ -323,6 +336,7 @@ public class ActivityServiceImpl implements ActivityService {
                             + cmd.getActivityRosterId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
+        //validate post status
         if (post == null) {
             LOGGER.error("cannnot find post record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -412,6 +426,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         Long postId = activity.getPostId();
         Post post = forumProvider.findPostById(postId);
+      //validate post status
         if (post == null) {
             LOGGER.error("invalid post.id={}", postId);
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,

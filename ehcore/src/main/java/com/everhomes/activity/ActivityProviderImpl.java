@@ -4,7 +4,9 @@ package com.everhomes.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +20,19 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
+import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class ActivityProviderImpl implements ActivityProivider {
@@ -198,58 +203,47 @@ public class ActivityProviderImpl implements ActivityProivider {
         return rosters[0];
     }
 
-    @Cacheable(value = "listRosterPagination", key = "{#pageOffset,#pageSize,#activityId}")
     @Override
-    public List<ActivityRoster> listRosterPagination(Long pageOffset, Long pageSize, Long activityId) {
-        List<ActivityRoster> rosters = new ArrayList<ActivityRoster>(pageSize.intValue());
-        if (pageOffset == null) {
-            dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class), null, (context, obj) -> {
-                EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
-                dao.fetchByActivityId(activityId).forEach(roster -> {
-                    if (rosters.size() < pageSize)
-                        rosters.add(ConvertHelper.convert(roster, ActivityRoster.class));
-                });
-                if (pageSize == rosters.size()) {
-                    return false;
-                }
-                return true;
-            });
-            return rosters;
+    public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId) {
+       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+    }
+    
+    
+    
+    private List<ActivityRoster> listInvitationsByConditions(CrossShardListingLocator locator, int count,
+            Condition... conditons) {
+        List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
         }
-        // find all shard
-        List<Long> counts = new ArrayList<Long>();
-        this.dbProvider.mapReduce(
-                AccessSpec.readOnlyWith(EhActivityRoster.class),
-                null,
-                (context, obj) -> {
-                    Long count = context.selectCount().from(Tables.EH_ACTIVITY_ROSTER)
-                            .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetchOne(0, Long.class);
-                    counts.add(count);
-                    return true;
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+           SelectQuery<EhActivityRosterRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
 
-                });
-        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
-        Tuple<Integer, Long> shard = PaginationHelper.offsetFallsAt(counts, offset);
-        if (shard.first() < 0) {
-            return rosters;
-        }
-        final int[] currentShard = new int[1];
-        currentShard[0] = 0;
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class), null, (context, object) -> {
-            if (currentShard[0] < shard.first()) {
-                currentShard[0] += 1;
-                return true;
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ACTIVITY_ROSTER.ID.gt(locator.getAnchor()));
+            if (conditons != null) {
+                query.addConditions(conditons);
             }
-            EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
-            dao.fetchByActivityId(activityId).forEach(item -> {
-                if (rosters.size() < pageSize)
-                    rosters.add(ConvertHelper.convert(item, ActivityRoster.class));
+            query.addLimit(count - rosters.size());
+
+            query.fetch().map((r) -> {
+                rosters.add(ConvertHelper.convert(r, ActivityRoster.class));
+                return null;
             });
-            if (rosters.size() >= pageSize) {
-                return false;
+
+            if (rosters.size() >= count) {
+                locator.setAnchor(rosters.get(rosters.size() - 1).getId());
+                return AfterAction.done;
             }
-            return true;
+            return AfterAction.next;
         });
+
+        if (rosters.size() > 0) {
+            locator.setAnchor(rosters.get(rosters.size() - 1).getId());
+        }
+
         return rosters;
     }
 
