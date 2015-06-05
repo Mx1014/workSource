@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.crypto.spec.PSource;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -435,7 +436,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         
         for(Long topicId : cmd.getTopicIds()){
             List<CommunityPmTasks> pmTaskList = this.propertyMgrProvider.findPmTaskEntityIdAndTargetId(communityId, topicId, 
-                    EntityType.TOPIC.getCode(), cmd.getUserId(),EntityType.USER.getCode(),cmd.getStatus());
+                    EntityType.TOPIC.getCode(), cmd.getUserId(),EntityType.USER.getCode(),null,cmd.getStatus());
             //任务已存在跳过
             if(pmTaskList != null && !pmTaskList.isEmpty()){
                 LOGGER.error("Pm task is exists.");
@@ -510,6 +511,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         
     }
     
+    @Override
     public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
         if(cmd.getTopicIds() == null || cmd.getStatus() == null || cmd.getCommunityId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -525,13 +527,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
                 continue;
             }
-            List<CommunityPmTasks> tasks = this.propertyMgrProvider.findPmTaskEntityId(cmd.getCommunityId(), 
+            CommunityPmTasks task = this.propertyMgrProvider.findPmTaskEntityId(cmd.getCommunityId(), 
                     topicId, EntityType.TOPIC.getCode());
-            if(tasks == null){
+            if(task == null){
                 LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
                 continue;
             }
-            this.propertyMgrProvider.updatePmTaskListStatus(tasks);
+            task.setTaskStatus(cmd.getStatus());
+            this.propertyMgrProvider.updatePmTask(task);
             
         }
     }
@@ -1395,7 +1398,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
+    	
     	//权限控制
+//    	ListPostCommandResponse  response= forumService.queryTopicsByCategory(cmd);
+//    	List<PostDTO> posts = response.getPosts();
+//    	if(posts != null && posts.size() > 0){
+//    		for (PostDTO postDTO : posts) {
+//    			CommunityPmTasks task = propertyMgrProvider.findPmTaskEntityId(communityId, postDTO.getId(), EntityType.TOPIC.getCode());
+//			}
+//    	}
     	return forumService.queryTopicsByCategory(cmd);
 	}
 }

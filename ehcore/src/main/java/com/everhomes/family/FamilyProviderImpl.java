@@ -10,6 +10,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
+import org.jooq.SelectWhereStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.user.UserGroup;
@@ -54,6 +56,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.fabric.xmlrpc.base.Member;
+
+import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -502,6 +507,93 @@ public class FamilyProviderImpl implements FamilyProvider {
         }
             
         return family;
+    }
+
+    @Override
+    public List<GroupMember> listFamilyMembersByCityId(long cityId, int offset, int pageSize) {
+        
+        List<GroupMember> members = new ArrayList<GroupMember>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+                (DSLContext context, Object reducingContext) -> {
+                    
+                    context.select(Tables.EH_GROUP_MEMBERS.fields()).from(Tables.EH_GROUP_MEMBERS)
+                            .leftOuterJoin(Tables.EH_GROUPS)
+                            .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                            .where(Tables.EH_GROUPS.INTEGRAL_TAG3.eq(cityId))
+                            .limit(pageSize).offset(offset)
+                            .fetch().map((r) -> {
+                                GroupMember member = new GroupMember();
+                                member.setId(r.getValue(Tables.EH_GROUP_MEMBERS.ID));
+                                member.setGroupId(r.getValue(Tables.EH_GROUP_MEMBERS.GROUP_ID));
+                                member.setMemberId(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+                                member.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
+                                member.setMemberAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
+                                members.add(member);
+                                return null;
+                            });
+                        
+                        return true;
+                });
+        
+        return members;
+    }
+
+    @Override
+    public List<GroupMember> listFamilyMembersByCommunityId(long communityId, int offset, int pageSize) {
+
+        List<GroupMember> members = new ArrayList<GroupMember>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+                (DSLContext context, Object reducingContext) -> {
+                    
+                    context.select(Tables.EH_GROUP_MEMBERS.fields()).from(Tables.EH_GROUP_MEMBERS)
+                            .leftOuterJoin(Tables.EH_GROUPS)
+                            .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                            .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
+                            .limit(pageSize).offset(offset)
+                            .fetch().map((r) -> {
+                                GroupMember member = new GroupMember();
+                                member.setId(r.getValue(Tables.EH_GROUP_MEMBERS.ID));
+                                member.setGroupId(r.getValue(Tables.EH_GROUP_MEMBERS.GROUP_ID));
+                                member.setMemberId(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+                                member.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
+                                member.setMemberAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
+                                members.add(member);
+                                return null;
+                            });
+                        
+                        return true;
+                });
+        
+        return members;
+    }
+    
+    @Override
+    public List<GroupMember> listFamilyMembersByFamilyId(long groupId, int offset, int pageSize) {
+
+        List<GroupMember> members = new ArrayList<GroupMember>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+                (DSLContext context, Object reducingContext) -> {
+                    
+                    context.select(Tables.EH_GROUP_MEMBERS.fields()).from(Tables.EH_GROUP_MEMBERS)
+                            .leftOuterJoin(Tables.EH_GROUPS)
+                            .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                            .where(Tables.EH_GROUPS.ID.eq(groupId))
+                            .limit(pageSize).offset(offset)
+                            .fetch().map((r) -> {
+                                GroupMember member = new GroupMember();
+                                member.setId(r.getValue(Tables.EH_GROUP_MEMBERS.ID));
+                                member.setGroupId(r.getValue(Tables.EH_GROUP_MEMBERS.GROUP_ID));
+                                member.setMemberId(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+                                member.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
+                                member.setMemberAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
+                                members.add(member);
+                                return null;
+                            });
+                        
+                        return true;
+                });
+        
+        return members;
     }
     
   

@@ -327,6 +327,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("setPMTopicStatus")
     @RestReturn(value=String.class)
     public RestResponse setPMTopicStatus(@Valid SetPmTopicStatusCommand cmd) {
+    	propertyMgrService.setPMTopicStatus(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

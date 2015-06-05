@@ -589,6 +589,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return step.where(condition).fetchOneInto(Integer.class);
     }
     
+    @CacheEvict(value="CommunityPmTasks", key="#task.id")
     @Override
     public void createPmTask(CommunityPmTasks task) {
         
@@ -602,16 +603,25 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
     @Override
     public List<CommunityPmTasks> findPmTaskEntityIdAndTargetId(Long communityId, Long entityId,String entityType,
-            Long targetId, String targetType, Byte status) {
+            Long targetId, String targetType,String taskType, Byte status) {
         final List<CommunityPmTasks> groups = new ArrayList<CommunityPmTasks>();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        if(communityId != null && communityId > 0)
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
+        if(entityId != null && entityId > 0)
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        if(entityType != null && !entityType .equals(""))
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        if(targetType != null && !targetType .equals(""))
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        if(targetId != null && targetId > 0)
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        if(taskType != null && !taskType .equals(""))
+            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+        if(status != null && status > 0)
+            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
         
         query.fetch().map((r) -> {
             groups.add(ConvertHelper.convert(r, CommunityPmTasks.class));
@@ -794,10 +804,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
     @Override
-    public List<CommunityPmTasks> findPmTaskEntityId(long communityId, long entityId, String entityType) {
-        
-        final List<CommunityPmTasks> tasks = new ArrayList<CommunityPmTasks>();
-        
+    public CommunityPmTasks findPmTaskEntityId(long communityId, long entityId, String entityType) {
+    	final CommunityPmTasks[] result = new CommunityPmTasks[1];
+    	
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
         query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
@@ -805,11 +814,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
         
         query.fetch().map((r) -> {
-            tasks.add(ConvertHelper.convert(r, CommunityPmTasks.class));
-            return null;
+     	   if(r != null)
+     		  result[0] = ConvertHelper.convert(r, CommunityPmTasks.class);
+     	   return null;
         });
         
-        return tasks;
+        return result[0];
     }
 
     @Override
@@ -824,7 +834,19 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         });
         dao.update(pmTasks);
     }
+    
+    @CacheEvict(value="CommunityPmTasks", key="#task.id")
+    @Override
+    public void updatePmTask(CommunityPmTasks task) {
+    	assert(task != null);
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
+        dao.update(task);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhCommunityPmContacts.class, task.getId());
+     }
 
+    
     @Override
     public void createPropContact(CommunityPmContact communityPmContact) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

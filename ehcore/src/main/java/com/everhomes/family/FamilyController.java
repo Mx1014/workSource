@@ -292,6 +292,42 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
+    @RequestMapping("listFamilyMembersByCityId")
+    @RestReturn(value=FamilyMemberDTO.class, collection=true)
+    public RestResponse listFamilyMembersByCityId(ListNeighborUsersCommand cmd) {
+        
+        List<FamilyMemberDTO> result = this.familyService.listFamilyMembersByCityId(cmd.getId(), 1, 20);
+        
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("listFamilyMembersByCommunityId")
+    @RestReturn(value=FamilyMemberDTO.class, collection=true)
+    public RestResponse listFamilyMembersByCommunityId(ListNeighborUsersCommand cmd) {
+        
+        List<FamilyMemberDTO> result = this.familyService.listFamilyMembersByCommunityId(cmd.getId(), 1, 20);
+        
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("listFamilyMembersByFamilyId")
+    @RestReturn(value=FamilyMemberDTO.class, collection=true)
+    public RestResponse listFamilyMembersByFamilyId(ListNeighborUsersCommand cmd) {
+        
+        List<FamilyMemberDTO> result = this.familyService.listFamilyMembersByFamilyId(cmd.getId(), 1, 20);
+        
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     
     
 //    /**
