@@ -25,6 +25,10 @@ import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.family.FindFamilyByAddressIdCommand;
 import com.everhomes.family.ListOwningFamilyMembersCommand;
+import com.everhomes.forum.ListPostCommandResponse;
+import com.everhomes.forum.NewTopicCommand;
+import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.user.SetCurrentCommunityCommand;
@@ -692,6 +696,36 @@ public class PropertyMgrController extends ControllerBase {
         List<String> results = propertyMgrProvider.listPropBillDateStr(cmd.getCommunityId());
         RestResponse response = new RestResponse(results);
         
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/createTopic</b>
+     * <p>物业人员发帖</p>
+     * @return 发帖的内容
+     */
+    @RequestMapping("createTopic")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse createTopic(@Valid NewTopicCommand cmd) {
+    	PostDTO postDto = propertyMgrService.createTopic(cmd);
+    	RestResponse response = new RestResponse(postDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/queryTopicsByCategory</b>
+     * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
+     */
+    @RequestMapping("queryTopicsByCategory")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
+        ListPostCommandResponse cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

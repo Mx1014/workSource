@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,11 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionAdminStatus;
+import com.everhomes.region.RegionProvider;
+import com.everhomes.region.RegionScope;
+import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
@@ -44,6 +50,9 @@ public class AddressTest extends TestCase {
     
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private RegionProvider regionProvider;
     
     private List<Community> communityCleanupList = new ArrayList<>();
     private List<CommunityGeoPoint> communityGeopointsCleanupList = new ArrayList<>();
@@ -299,4 +308,17 @@ public class AddressTest extends TestCase {
             System.out.println(address);
         }
     }
+    
+    @Test
+    public void testAdminImportCommunity(){
+    	
+       File f = new File("e://communities0602103742.txt");
+       addressService.importCommunityInfos(f);
+       
+//       List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+//       for (Region region : cityList) {
+//		System.out.println(region);
+//       }
+    }
+    
 }
