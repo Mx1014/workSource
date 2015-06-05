@@ -64,30 +64,50 @@ public class RecommendAction implements Runnable {
         int pageSize = 200;
         int pageOffset = 1;
         
-//        for(;;) {
-//            List<FamilyMemberDTO> familyDtos = familyService.listFamilyMembersByCityId(this.recommendConfig.getTargetId().longValue(), pageOffset, pageSize);
-//            
-//            if(null == familyDtos || familyDtos.size() == 0) {
-//                break;
-//            }
-//            
-//            for(FamilyMemberDTO fm : familyDtos) {
-//                Long userId = fm.getMemberUid();
-//                this.runByUserId(userId);
-//                }
-//            
-//            pageOffset++;            
-//            if(pageOffset > 10000) {
-//                log.error("Loop so large!");
-//                break;
-//                }
-//            }
+        for(;;) {
+            List<FamilyMemberDTO> familyDtos = familyService.listFamilyMembersByCommunityId(this.recommendConfig.getTargetId().longValue(), pageOffset, pageSize);
+            
+            if(null == familyDtos || familyDtos.size() == 0) {
+                break;
+            }
+            
+            for(FamilyMemberDTO fm : familyDtos) {
+                Long userId = fm.getMemberUid();
+                this.runByUserId(userId);
+                }
+            
+            pageOffset++;            
+            if(pageOffset > 1000) {
+                log.error("Loop so large!");
+                break;
+                }
+            }
     }
     private void runFamily() {
+        int pageSize = 200;
+        int pageOffset = 1;
         
+        for(;;) {
+            List<FamilyMemberDTO> familyDtos = this.familyService.listFamilyMembersByFamilyId(this.recommendConfig.getTargetId().longValue(), pageOffset, pageSize);
+            
+            if(null == familyDtos || familyDtos.size() == 0) {
+                break;
+            }
+            
+            for(FamilyMemberDTO fm : familyDtos) {
+                Long userId = fm.getMemberUid();
+                this.runByUserId(userId);
+                }
+            
+            pageOffset++;            
+            if(pageOffset > 1000) {
+                log.error("Loop so large!");
+                break;
+                }
+            }
     }
     private void runUser() {
-        
+        this.runByUserId(this.recommendConfig.getTargetId());
     }
     
     private void runByUserId(Long userId) {
