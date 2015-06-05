@@ -38,7 +38,6 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
     }
 
     private void invokeRequestMessage(WebSocketSession session, String message, PduFrame frame) {
-        LOGGER.info("receive message and message type={}", message);
         String[] arr = message.split(WebSocketConstant.CONTENT_STORAGE_REQ)[1].split("\\.");
         if (arr.length < 2) {
             throw new IllegalArgumentException("cannot regonize message");
@@ -89,7 +88,6 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doRequest(ContentServerMananger contentServerManager) throws Exception {
-                LOGGER.info("can upload file now");
                 contentServerManager.upload(request);
 
             }
@@ -108,13 +106,11 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doRequest(ContentServerMananger contentServerManager) throws Exception {
-                LOGGER.info("invoke delete method");
                 contentServerManager.delete(request);
             }
 
             @Override
             protected void doResponse(String errMsg, int errCode) throws Exception {
-                LOGGER.debug("send message to server .remvoe file ok");
                 session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
             }
         });

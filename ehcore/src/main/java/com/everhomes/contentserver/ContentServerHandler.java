@@ -69,7 +69,6 @@ public class ContentServerHandler extends TextWebSocketHandler {
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         if (LOGGER.isDebugEnabled())
-            LOGGER.debug("handle pong message,pong={}", message);
         super.handlePongMessage(session, message);
     }
 
