@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord> {
 
-	private static final long serialVersionUID = 876668741;
+	private static final long serialVersionUID = -2093733350;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_op_requests</code>
@@ -47,14 +47,9 @@ public class EhGroupOpRequests extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.String> REQUESTOR_COMMENT = createField("requestor_comment", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_op_requests.target_type</code>. target type, refer to EntityType
+	 * The column <code>ehcore.eh_group_op_requests.target_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.String> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "target type, refer to EntityType");
-
-	/**
-	 * The column <code>ehcore.eh_group_op_requests.target_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord, java.lang.Long> TARGET_UID = createField("target_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_op_requests.operation_type</code>. 1: request for admin role, 2: invite to become admin

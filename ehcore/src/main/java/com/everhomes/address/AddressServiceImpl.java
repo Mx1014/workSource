@@ -460,7 +460,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     "Invalid communityId");
 
         if(address == null) {
-            //全局锁导致入库超时，暂时去掉
             // optimize with double-lock pattern 
             Tuple<Address, Boolean> result = this.coordinationProvider
                      .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
@@ -568,29 +567,37 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
                     "Address is not found.");
         }
-
+        long startTime = System.currentTimeMillis();
         Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
-        if(addr == null || addr.getId().longValue() == address.getId().longValue()){
-            address.setBuildingName(cmd.getBuildingName());
-            address.setApartmentName(cmd.getApartmentName());
-            address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
-            address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
-            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-            this.addressProvider.updateAddress(address);
-            //approve members of this address
-            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-            if(family != null)
+        this.dbProvider.execute((TransactionStatus status) -> {
+            if(addr == null || addr.getId().longValue() == address.getId().longValue()){
+                address.setBuildingName(cmd.getBuildingName());
+                address.setApartmentName(cmd.getApartmentName());
+                address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
+                address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
+                address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+                this.addressProvider.updateAddress(address);
+                //approve members of this address
+                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+                if(family != null)
+                    this.familyService.approveMembersByFamily(family);
+                
+            }else {
+                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+                if(family == null){
+                    LOGGER.error("Family is not found with addressId=" + cmd.getAddressId());
+                    return null;
+                }
+                Group group = ConvertHelper.convert(family, Group.class); 
+                group.setIntegralTag1(addr.getId());
+                this.groupProvider.updateGroup(group);
                 this.familyService.approveMembersByFamily(family);
-            
-        }else {
-            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-            if(family == null) return;
-            Group group = ConvertHelper.convert(family, Group.class); 
-            group.setIntegralTag1(addr.getId());
-            this.groupProvider.updateGroup(group);
-            this.familyService.approveMembersByFamily(family);
-            this.addressProvider.deleteAddress(address);
-        }
+                this.addressProvider.deleteAddress(address);
+            }
+            return null;
+        });
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Correct address elapse=" + (endTime - startTime));
         
     }
     

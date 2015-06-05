@@ -7,19 +7,19 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>与组相关的待处理列表，主要包含两种：1) 别人对自己的邀请；2) 若作为组管理员则可处理别人的请求；</p>
+ * <p>列出组相关的可处理的被邀请请求列表</p>
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
  * <li>requests: 申请信息，参考{@link com.everhomes.group.GroupMemberDTO}</li>
  * </ul>
  */
-public class ListUserRelatedGroupActionsCommandResponse {
+public class ListGroupWaitingApprovalsCommandResponse {
     private Long nextPageAnchor;
     
     @ItemType(GroupMemberDTO.class)
     private List<GroupMemberDTO> requests;
     
-    public ListUserRelatedGroupActionsCommandResponse() {
+    public ListGroupWaitingApprovalsCommandResponse() {
     }
 
     public Long getNextPageAnchor() {

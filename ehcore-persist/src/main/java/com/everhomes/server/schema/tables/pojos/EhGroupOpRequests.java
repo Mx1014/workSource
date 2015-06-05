@@ -11,14 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupOpRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1488250979;
+	private static final long serialVersionUID = 603281757;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
 	private java.lang.Long     requestorUid;
 	private java.lang.String   requestorComment;
-	private java.lang.String   targetType;
-	private java.lang.Long     targetId;
+	private java.lang.Long     targetUid;
 	private java.lang.Byte     operationType;
 	private java.lang.Byte     status;
 	private java.lang.Long     operatorUid;
@@ -33,8 +32,7 @@ public class EhGroupOpRequests implements java.io.Serializable {
 		java.lang.Long     groupId,
 		java.lang.Long     requestorUid,
 		java.lang.String   requestorComment,
-		java.lang.String   targetType,
-		java.lang.Long     targetId,
+		java.lang.Long     targetUid,
 		java.lang.Byte     operationType,
 		java.lang.Byte     status,
 		java.lang.Long     operatorUid,
@@ -46,8 +44,7 @@ public class EhGroupOpRequests implements java.io.Serializable {
 		this.groupId = groupId;
 		this.requestorUid = requestorUid;
 		this.requestorComment = requestorComment;
-		this.targetType = targetType;
-		this.targetId = targetId;
+		this.targetUid = targetUid;
 		this.operationType = operationType;
 		this.status = status;
 		this.operatorUid = operatorUid;
@@ -88,20 +85,12 @@ public class EhGroupOpRequests implements java.io.Serializable {
 		this.requestorComment = requestorComment;
 	}
 
-	public java.lang.String getTargetType() {
-		return this.targetType;
+	public java.lang.Long getTargetUid() {
+		return this.targetUid;
 	}
 
-	public void setTargetType(java.lang.String targetType) {
-		this.targetType = targetType;
-	}
-
-	public java.lang.Long getTargetId() {
-		return this.targetId;
-	}
-
-	public void setTargetId(java.lang.Long targetId) {
-		this.targetId = targetId;
+	public void setTargetUid(java.lang.Long targetUid) {
+		this.targetUid = targetUid;
 	}
 
 	public java.lang.Byte getOperationType() {

@@ -9,8 +9,9 @@ public class ActivityListCommand {
     @NotNull
     private Long activityId;
 
-    private Long pageOffset;
-    private Long pageSize;
+    private Long anchor;
+    
+    private Integer pageSize;
     
     public ActivityListCommand() {
     }
@@ -23,22 +24,24 @@ public class ActivityListCommand {
         this.activityId = activityId;
     }
 
-    public Long getPageOffset() {
-        return pageOffset;
-    }
-
-    public void setPageOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
-    }
-
-    public Long getPageSize() {
+    
+    
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Long pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
-    
+
+    public Long getAnchor() {
+        return anchor;
+    }
+
+    public void setAnchor(Long anchor) {
+        this.anchor = anchor;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

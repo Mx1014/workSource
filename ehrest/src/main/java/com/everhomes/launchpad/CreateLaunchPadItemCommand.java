@@ -11,11 +11,11 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namespaceId: 命名空间</li>
- * <li>appId: 应用Id</li>
+ * <li>appId: 应用Id，参考{@link com.everhomes.app.AppConstants}</li>
  * <li>ItemScope: item可见范围列表， 参考{@link com.everhomes.launchpad.ItemScope}</li>
  * <li>itemName: 名称</li>
  * <li>itemLabel: 显示标签</li>
- * <li>itemGroup: item归属某一组</li>
+ * <li>itemGroup: item归属某一组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
  * <li>actionName: 动作名称</li>
  * <li>actionIcon: 动作图标</li>
  * <li>actionUri: 动作uri</li>
