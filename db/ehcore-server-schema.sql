@@ -2108,6 +2108,7 @@ CREATE TABLE `eh_recommendation_configs` (
   `appId` BIGINT,
   `suggest_type` int(11) NOT NULL DEFAULT '0',
   `source_type` int(11) NOT NULL DEFAULT '0',
+  `source_id` bigint(11) NOT NULL DEFAULT '0',
   `target_type` int(11) NOT NULL DEFAULT '0',
   `target_id` bigint(20) NOT NULL DEFAULT '0',
   `period_type` int(11) NOT NULL DEFAULT '0',
