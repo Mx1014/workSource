@@ -98,7 +98,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         return result;
     }
 
-    @Cacheable(value = "selectContentServer",unless="result!=null")
+    @Cacheable(value = "selectContentServer",unless="#result==null")
     @Override
     public ContentServer selectContentServer() throws Exception {
         LOGGER.info("Enter select content server");
