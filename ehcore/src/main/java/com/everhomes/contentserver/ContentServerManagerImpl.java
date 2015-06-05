@@ -36,7 +36,6 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
-        LOGGER.info("upload file and send response.request={}", request);
         LoginToken login = LoginToken.fromTokenString(request.getToken());
         if (null == login) {
             LOGGER.error("cannot find login information");
@@ -101,7 +100,6 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     @Override
     public void auth(MessageHandleRequest request) {
-        LOGGER.info("handle auth method.request={}", request);
 
         LoginToken login = LoginToken.fromTokenString(request.getToken());
         if (!userService.isValidLoginToken(login)) {
@@ -128,7 +126,6 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     }
 
     private String lookupInvoke(LoginToken login, String resourceId) {
-        LOGGER.info("handle lookup message uid={},uniqueId={}", login.getUserId(), resourceId);
         resourceId = Generator.decodeUrl(resourceId);
         ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
