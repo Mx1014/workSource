@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLikesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUserLikesRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Byte, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 2098850972;
+	private static final long serialVersionUID = 1078406684;
 
 	/**
 	 * Setter for <code>ehcore.eh_user_likes.id</code>. id of the record
@@ -70,14 +70,14 @@ public class EhUserLikesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_user_likes.like_type</code>. 0: dislike, 1: like
+	 * Setter for <code>ehcore.eh_user_likes.like_type</code>. 0:none, 1: dislike, 2: like
 	 */
 	public void setLikeType(java.lang.Byte value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_user_likes.like_type</code>. 0: dislike, 1: like
+	 * Getter for <code>ehcore.eh_user_likes.like_type</code>. 0:none, 1: dislike, 2: like
 	 */
 	public java.lang.Byte getLikeType() {
 		return (java.lang.Byte) getValue(4);

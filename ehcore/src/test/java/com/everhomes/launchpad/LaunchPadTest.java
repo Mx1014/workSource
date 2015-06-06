@@ -62,10 +62,11 @@ public class LaunchPadTest extends TestCase {
     public void testCreateLaunchPadItems() {
         CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
         
-        cmd.setItemGroup(ItemGroup.PROPERTY.getCode());
-        cmd.setItemLabel("物业报修");
-        cmd.setItemName(CategoryType.REPAIR.getCode());
-        cmd.setAppId(AppConstants.APPID_PM);
+        cmd.setItemGroup(ItemGroup.FLEAMARKET.getCode());
+        cmd.setItemLabel("市场动态");
+        cmd.setItemName("fleamarket");
+        cmd.setAppId(AppConstants.APPID_FLEAMARKET);
+        
         List<ItemScope> itemScopes = new ArrayList<ItemScope>();
         ItemScope scope1 = new ItemScope();
         scope1.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());

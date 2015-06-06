@@ -10,7 +10,7 @@ package com.everhomes.launchpad;
  * </ul>
  */
 public enum ItemGroup {
-    PROPERTY("Property"),COUPON("Coupon"),THIRDSERVICE("ThirdService"),FLEAMARKET("FleaMarket");
+    PROPERTY("property"),COUPON("coupon"),THIRDSERVICE("thirdService"),FLEAMARKET("fleaMarket");
     
     private String code;
        

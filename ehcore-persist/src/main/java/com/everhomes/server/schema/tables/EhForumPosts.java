@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 1245891011;
+	private static final long serialVersionUID = 992680996;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -44,7 +44,7 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_forum_posts.parent_post_id</code>. replied post id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> PARENT_POST_ID = createField("parent_post_id", org.jooq.impl.SQLDataType.BIGINT, this, "replied post id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> PARENT_POST_ID = createField("parent_post_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "replied post id");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.creator_uid</code>. post creator uid
@@ -120,11 +120,6 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.like_count</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> LIKE_COUNT = createField("like_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_forum_posts.dislike_count</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> DISLIKE_COUNT = createField("dislike_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.subject</code>.
@@ -210,6 +205,11 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.floor_number</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> FLOOR_NUMBER = createField("floor_number", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active

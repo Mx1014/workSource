@@ -11,7 +11,7 @@ package com.everhomes.launchpad;
  * </ul>
  */
 public enum LaunchPadScopeType {
-    COUNTRY("Country"),CITY("City"), COMMUNITY("Community"), USERDEFINED("UserDefined");
+    COUNTRY("country"),CITY("city"), COMMUNITY("community"), USERDEFINED("userDefined");
     
  private String code;
     

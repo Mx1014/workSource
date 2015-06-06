@@ -29,17 +29,17 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
         JSONObject jsonObject = new JSONObject();
         String itemName = launchPadItem.getItemName();
         if(itemName.equals(CategoryType.ADVISE.getCode())){
-            jsonObject.put("categoryId", CategoryConstants.CATEGORY_ID_GA_ADVISE);
+            jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_ADVISE);
         }else if(itemName.equals(CategoryType.HELP.getCode())){
-            jsonObject.put("categoryId", CategoryConstants.CATEGORY_ID_GA_HELP);
+            jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_HELP);
         }
         else if(itemName.equals(CategoryType.NOTICE.getCode())){
-            jsonObject.put("categoryId", CategoryConstants.CATEGORY_ID_GA_NOTICE);
+            jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_NOTICE);
         }
         else if(itemName.equals(CategoryType.REPAIR.getCode())){
-            jsonObject.put("categoryId", CategoryConstants.CATEGORY_ID_GA_REPAIR);
+            jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_REPAIR);
         }
-        jsonObject.put("commnunityId", commnunityId);
+        jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
         return jsonObject.toJSONString();
     }
 

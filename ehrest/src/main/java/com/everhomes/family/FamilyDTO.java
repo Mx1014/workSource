@@ -29,6 +29,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberNickName: 用户在家庭中的昵称</li>
  * <li>memberAvatarUri: 用户在家庭中的头像ID</li>
  * <li>memberAvatarUrl: 用户在家庭中的头像url</li>
+ * <li>cellPhone: 用户电话号码</li>
  * <li>addressId: 地址Id</li>
  * <li>buildingName: 家庭地址楼栋号</li>
  * <li>apartmentName: 家庭地址门牌号</li>
@@ -61,6 +62,7 @@ public class FamilyDTO {
     private String memberNickName;
     private String memberAvatarUri;
     private String memberAvatarUrl;
+    private String cellPhone;
     
     private Long addressId;
     private String buildingName;
@@ -68,7 +70,7 @@ public class FamilyDTO {
     
     private Byte addressStatus;
     private String proofResourceUrl;
- 
+    
     public FamilyDTO () {
     }
 
@@ -280,6 +282,14 @@ public class FamilyDTO {
         this.proofResourceUrl = proofResourceUrl;
     }
     
+    public String getCellPhone() {
+        return cellPhone;
+    }
+
+    public void setCellPhone(String cellPhone) {
+        this.cellPhone = cellPhone;
+    }
+
     public boolean equals(Object obj){
         if (! (obj instanceof FamilyDTO)) {
             return false;

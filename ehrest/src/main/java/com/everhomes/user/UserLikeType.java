@@ -2,7 +2,7 @@
 package com.everhomes.user;
 
 public enum UserLikeType {
-    DISLIKE((byte)0), LIKE((byte)1);
+    NONE((byte)0), DISLIKE((byte)1), LIKE((byte)2);
     
     private byte code;
     private UserLikeType(byte code) {
@@ -14,18 +14,11 @@ public enum UserLikeType {
     }
    
     public static UserLikeType fromCode(Byte code) {
-        if(code == null)
-            return null;
-        
-        switch(code.byteValue()) {
-        case 0 :
-            return DISLIKE;
-            
-        case 1 :
-            return LIKE;
-            
-        default :
-            break;
+        UserLikeType[] values = UserLikeType.values();
+        for(UserLikeType value : values) {
+            if(value == UserLikeType.fromCode(code)) {
+                return value;
+            }
         }
         
         return null;

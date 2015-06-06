@@ -2,9 +2,13 @@
 package com.everhomes.launchpad;
 
 
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.everhomes.app.AppConstants;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 
 
 @Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_COUPON)
@@ -12,21 +16,28 @@ public class CouponLaunchPadHandler implements LaunchPadHandler {
     
     @Autowired
     private LaunchPadProvider launchPadProvider;
+    @Autowired
+    private CommunityProvider communityProvider;
     @Override
     public LaunchPadItem accesProcessLaunchPadItem(long userId, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
-        //launchPadItem.setActionUri(parserUri(userId,commnunityId,launchPadItem.getActionUri()));
+        launchPadItem.setJsonObj(parserJson(userId, commnunityId, launchPadItem));
         
         return launchPadItem;
     }
     
-//    private String parserUri(long userId, long commnunityId,String actionUri) {
-//        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "userId", String.valueOf(userId));
-//        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "commnunityId", String.valueOf(commnunityId));
-//        return actionUri;
-//        
-//    }
+    @SuppressWarnings("unchecked")
+    private String parserJson(long userId, long commnunityId,LaunchPadItem launchPadItem) {
+        JSONObject jsonObject = new JSONObject();
+        
+        Community community = this.communityProvider.findCommunityById(commnunityId);
+        assert(community != null);
+        
+        jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
+        jsonObject.put(LaunchPadConstants.CITY_ID, community.getCityId());
+        return jsonObject.toJSONString();
+    }
     
 
 

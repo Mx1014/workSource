@@ -208,10 +208,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<Item> items = cmd.getItems();
         this.dbProvider.execute((TransactionStatus status) -> {
             
-            //先删除之前的
+            //delete before
             List<UserProfile> userProfiles = this.userActivityProvider.findProfileByUid(userId);
             userProfiles.forEach((UserProfile p) ->{
-                this.userActivityProvider.deleteProfile(p);
+                if(p.getItemKind().byteValue() == ItemKind.JSON.getCode())
+                    this.userActivityProvider.deleteProfile(p);
             });
             
             items.forEach((Item item) ->{

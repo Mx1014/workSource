@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionUri: 动作uri</li>
  * <li>defaultOrder: 默认顺序</li>
  * <li>applyPolicy: 应用策略{@link com.everhomes.launchpad.ApplyPolicy}</li>
+ * <li>jsonObj: json字符串，存储附加信息</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -35,6 +36,7 @@ public class LaunchPadItemDTO {
 	private String  actionUri;
 	private Integer defaultOrder;
 	private Byte    applyPolicy;
+	private String  jsonObj;
     
 	public Long getId() {
         return id;
@@ -140,6 +142,14 @@ public class LaunchPadItemDTO {
         this.applyPolicy = applyPolicy;
     }
     
+    public String getJsonObj() {
+        return jsonObj;
+    }
+
+    public void setJsonObj(String jsonObj) {
+        this.jsonObj = jsonObj;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
