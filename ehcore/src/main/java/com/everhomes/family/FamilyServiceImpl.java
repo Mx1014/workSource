@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import javassist.runtime.DotClass;
 
 import org.apache.lucene.spatial.DistanceUtils;
@@ -67,7 +68,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
 import ch.hsr.geohash.GeoHash;
+
 
 
 
@@ -131,6 +134,7 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.mysql.fabric.xmlrpc.base.Array;
+
 
 
 
@@ -235,6 +239,7 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberRole(Role.ResourceCreator);
                     m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                     m.setCreatorUid(uid);
+                    m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     this.groupProvider.createGroupMember(m);
 
                     UserGroup userGroup = new UserGroup();
@@ -256,7 +261,7 @@ public class FamilyServiceImpl implements FamilyService {
                 m.setGroupId(family.getId());
                 m.setMemberType(EntityType.USER.getCode());
                 m.setMemberId(uid);
-                m.setMemberNickName(user.getAccountName());
+                m.setMemberNickName(user.getNickName());
                 m.setMemberAvatar(user.getAvatar());
                 m.setMemberRole(Role.ResourceUser);
                 m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
@@ -960,20 +965,25 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setMemberName(groupMember.getMemberNickName());
                 f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
-                List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(groupMember.getMemberId());
-                if(userIdentifiers != null && !userIdentifiers.isEmpty()){
-                    userIdentifiers.forEach((u) ->{
-                        if(u.getIdentifierType().byteValue() == 0){
-                            f.setCellPhone(u.getIdentifierToken());
-                        }
-                     });
-                }
-                
+                UserIdentifier userIdentifier = getMobileOfUserIdentifier(groupMember.getMemberId());
+                if(userIdentifier != null)
+                    f.setCellPhone(userIdentifier.getIdentifierToken());
                 
                 results.add(f);
             }
         });
         return results;
+    }
+    
+    private UserIdentifier getMobileOfUserIdentifier(long userId){
+        List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(userId);
+        userIdentifiers.stream().filter((u) ->{
+            return u.getIdentifierType().byteValue() == IdentifierType.MOBILE.getCode();
+        }).collect(Collectors.toList());
+        if(userIdentifiers != null && !userIdentifiers.isEmpty())
+            return userIdentifiers.get(0);
+        return null;
+
     }
 
     @Override
@@ -1454,14 +1464,27 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public List<FamilyDTO> listWaitApproveFamily(ListWaitApproveFamilyCommand cmd) {
+    public ListWaitApproveFamilyCommandResponse listWaitApproveFamily(ListWaitApproveFamilyCommand cmd) {
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1L : pageOffset;
         
         Long pageSize = cmd.getPageSize();
-        Long communityId = cmd.getCommunityId();
-         
-        return this.familyProvider.listWaitApproveFamily(communityId, pageOffset, pageSize);
+        long communityId = cmd.getCommunityId() == null ? 0L : cmd.getCommunityId();
+        
+        pageSize =  (pageSize == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize);
+
+        long offset = (int) PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        ListWaitApproveFamilyCommandResponse response = new ListWaitApproveFamilyCommandResponse();
+        
+        List<FamilyDTO> list = this.familyProvider.listWaitApproveFamily(communityId, offset, pageSize);
+        if(list != null && !list.isEmpty()){
+            response.setRequests(list);
+            if(list.size() == pageSize){
+                response.setNextPageOffset(pageOffset + 1);
+            }
+        }
+        return response;
     }
     
     
@@ -1660,13 +1683,9 @@ public class FamilyServiceImpl implements FamilyService {
                     }
                    
                 }
-                List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(member.getMemberId());
-                userIdentifiers.stream().filter((u) ->{
-                    return u.getIdentifierType() == IdentifierType.MOBILE.getCode();
-                });
-                if(userIdentifiers != null && !userIdentifiers.isEmpty()){
-                    familyMember.setCellPhone(userIdentifiers.get(0).getIdentifierToken());
-                }
+                UserIdentifier userIdentifier = getMobileOfUserIdentifier(member.getMemberId());
+                if(userIdentifier != null)
+                    familyMember.setCellPhone(userIdentifier.getIdentifierToken());
                 results.add(familyMember);
             });
         }

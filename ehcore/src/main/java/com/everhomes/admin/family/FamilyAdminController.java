@@ -1,7 +1,5 @@
 package com.everhomes.admin.family;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -15,33 +13,13 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.ApproveMemberCommand;
-import com.everhomes.family.FamilyDTO;
-import com.everhomes.family.FamilyMemberDTO;
-import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
-import com.everhomes.family.FindFamilyByAddressIdCommand;
-import com.everhomes.family.GetFamilyCommand;
-import com.everhomes.family.GetOwningFamilyByIdCommand;
-import com.everhomes.family.JoinFamilyCommand;
-import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.family.ListAllFamilyMembersCommand;
 import com.everhomes.family.ListAllFamilyMembersCommandResponse;
-import com.everhomes.family.ListFamilyByKeywordCommand;
-import com.everhomes.family.ListFamilyRequestsCommand;
-import com.everhomes.family.ListFamilyRequestsCommandResponse;
-import com.everhomes.family.ListNearbyNeighborUserCommand;
-import com.everhomes.family.ListNeighborUsersCommand;
-import com.everhomes.family.ListNeighborUsersCommandResponse;
-import com.everhomes.family.ListOwningFamilyMembersCommand;
 import com.everhomes.family.ListWaitApproveFamilyCommand;
-import com.everhomes.family.NeighborUserDTO;
+import com.everhomes.family.ListWaitApproveFamilyCommandResponse;
 import com.everhomes.family.RejectMemberCommand;
-import com.everhomes.family.RevokeMemberCommand;
-import com.everhomes.family.SetCurrentFamilyCommand;
-import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.search.CommunitySearcher;
-import com.everhomes.util.Tuple;
 
 @RestDoc(value="Family admin controller", site="core")
 @RestController
@@ -58,11 +36,11 @@ public class FamilyAdminController extends ControllerBase {
      * <p>查询等待审核的地址列表</p>
      */
     @RequestMapping("listWaitApproveFamily")
-    @RestReturn(value=FamilyDTO.class, collection=true)
+    @RestReturn(value=ListWaitApproveFamilyCommandResponse.class, collection=true)
     public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyCommand cmd) {
-        List<FamilyDTO> results = this.familyService.listWaitApproveFamily(cmd);
+        ListWaitApproveFamilyCommandResponse cmdResponse = this.familyService.listWaitApproveFamily(cmd);
         
-        RestResponse response = new RestResponse(results);
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

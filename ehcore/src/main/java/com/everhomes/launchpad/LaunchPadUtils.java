@@ -3,10 +3,9 @@ package com.everhomes.launchpad;
 
 public class LaunchPadUtils {
     
-    public static String addParameterToLink(String link, String paramName, String paramValue)
-    {
-        if (link != null && paramName != null && paramValue != null)
-        {
+    public static String addParameterToLink(String link, String paramName, String paramValue){
+        if (link != null && paramName != null && paramValue != null){
+            
             StringBuilder strBuilder = new StringBuilder(link);
             boolean isFirstParam = false;
             if (strBuilder.indexOf("?") == -1){

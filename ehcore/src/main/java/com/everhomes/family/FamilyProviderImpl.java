@@ -50,7 +50,9 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
@@ -352,14 +354,11 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 
     @Override
-    public List<FamilyDTO> listWaitApproveFamily(Long comunityId, Long pageOffset, Long pageSize) {
-        pageOffset = pageOffset == null ? 1L : pageOffset;
+    public List<FamilyDTO> listWaitApproveFamily(Long comunityId, Long offset, Long pageSize) {
         
-        int size = (int) (pageSize == null ? this.configurationProvider.getIntValue("pagination.page.size", 
-                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : pageSize);
         List<FamilyDTO> results = new ArrayList<FamilyDTO>();
-        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, size);
-        
+        long size = pageSize;
+        long offset_ = offset;
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     SelectConditionStep<Record> step = context.select().from(Tables.EH_GROUP_MEMBERS)
@@ -368,11 +367,11 @@ public class FamilyProviderImpl implements FamilyProvider {
                     .where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
                                 .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
                     
-                    if(comunityId != null){
+                    if(comunityId == null){
                         step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
                     }
                     step.orderBy(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL.desc())
-                    .limit(size).offset((int)offset)
+                    .limit((int)size).offset((int) offset_)
                     .fetch().map((r) ->{
                         
                             Address address = this.addressProvider.findAddressById(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
@@ -396,6 +395,14 @@ public class FamilyProviderImpl implements FamilyProvider {
                             f.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
                             f.setMembershipStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
                             f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL),"Family",r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
+                            List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+                            if(userIdentifiers != null && !userIdentifiers.isEmpty()){
+                                userIdentifiers.forEach((u) ->{
+                                    if(u.getIdentifierType().byteValue() == IdentifierType.MOBILE.getCode()){
+                                        f.setCellPhone(u.getIdentifierToken());
+                                    }
+                                 });
+                            }
                             results.add(f);
                             return null;
                         });

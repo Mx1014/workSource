@@ -419,9 +419,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     public void disclaimAddress(DisclaimAddressCommand cmd) {
+        if(cmd.getAddressId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid addressId parameter");
+        }
         Address address = this.addressProvider.findAddressById(cmd.getAddressId());
-        if(address == null)
-            return;
+        if(address == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid addressId parameter,address is not found");
+        }
 
         long uid = UserContext.current().getUser().getId();
         List<UserGroup> userGroups = this.userProvide.listUserGroups(uid, GroupDiscriminator.FAMILY.getCode());
