@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：group与成员关系ID</li>
  * <li>groupId：group ID</li>
+ * <li>groupName：group名称</li>
  * <li>memberType：成员类型，参考{@link com.everhomes.entity.EntityType}</li>
  * <li>memberId：成员ID</li>
  * <li>memberRole：成员在group内的角色</li>
@@ -30,6 +31,7 @@ import com.everhomes.util.StringHelper;
 public class GroupMemberDTO {
     private Long id;
     private Long groupId;
+    private String groupName;
     private String memberType;
     private Long memberId;
     private Long memberRole;
@@ -65,6 +67,14 @@ public class GroupMemberDTO {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getMemberType() {

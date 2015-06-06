@@ -564,7 +564,7 @@ CREATE TABLE `eh_user_likes` (
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
     `target_type` VARCHAR(32),
     `target_id` BIGINT,
-    `like_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: dislike, 1: like',
+    `like_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: dislike, 2: like',
     `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
 
     PRIMARY KEY (`id`),
@@ -809,13 +809,14 @@ CREATE TABLE `eh_forums` (
 #
 # key table of forum post sharding group
 # forum posts form its own sharding group, due to nature of timely content
+# delete column `dislike_count` BIGINT NOT NULL DEFAULT 0,
 #
 DROP TABLE IF EXISTS `eh_forum_posts`;
 CREATE TABLE `eh_forum_posts` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
     `forum_id` BIGINT NOT NULL COMMENT 'forum that it belongs',
-    `parent_post_id` BIGINT COMMENT 'replied post id',
+    `parent_post_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'replied post id',
     `creator_uid` BIGINT NOT NULL COMMENT 'post creator uid',
     `creator_tag` VARCHAR(128) COMMENT 'post creator tag',
 	`target_tag` VARCHAR(128) COMMENT 'post target tag',
@@ -835,7 +836,6 @@ CREATE TABLE `eh_forum_posts` (
     `child_count` BIGINT NOT NULL DEFAULT 0,
     `forward_count` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
-    `dislike_count` BIGINT NOT NULL DEFAULT 0,
 
     `subject` VARCHAR(512),
     `content_type` VARCHAR(32) COMMENT 'object content type',
@@ -857,6 +857,7 @@ CREATE TABLE `eh_forum_posts` (
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
     
+	`floor_number` BIGINT NOT NULL DEFAULT 0 COMMENT '',
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
     `update_time` DATETIME NOT NULL,
     `create_time` DATETIME NOT NULL,
