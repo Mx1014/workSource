@@ -17,9 +17,15 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
 
     @Override
-    public String renderEmbeddedObject(Post post) {
+    public String renderEmbeddedObjectSnapshot(Post post) {
         ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
         return StringHelper.toJsonString(result);
+    }
+
+    @Override
+    public String renderEmbeddedObjectDetails(Post post) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
