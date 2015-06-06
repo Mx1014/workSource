@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 885536669;
+	private static final long serialVersionUID = 992680996;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -120,11 +120,6 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.like_count</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> LIKE_COUNT = createField("like_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_forum_posts.dislike_count</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Long> DISLIKE_COUNT = createField("dislike_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.subject</code>.

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 473421787;
+	private static final long serialVersionUID = 341703843;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -32,7 +32,6 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Long     childCount;
 	private java.lang.Long     forwardCount;
 	private java.lang.Long     likeCount;
-	private java.lang.Long     dislikeCount;
 	private java.lang.String   subject;
 	private java.lang.String   contentType;
 	private java.lang.String   content;
@@ -78,7 +77,6 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Long     childCount,
 		java.lang.Long     forwardCount,
 		java.lang.Long     likeCount,
-		java.lang.Long     dislikeCount,
 		java.lang.String   subject,
 		java.lang.String   contentType,
 		java.lang.String   content,
@@ -121,7 +119,6 @@ public class EhForumPosts implements java.io.Serializable {
 		this.childCount = childCount;
 		this.forwardCount = forwardCount;
 		this.likeCount = likeCount;
-		this.dislikeCount = dislikeCount;
 		this.subject = subject;
 		this.contentType = contentType;
 		this.content = content;
@@ -296,14 +293,6 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setLikeCount(java.lang.Long likeCount) {
 		this.likeCount = likeCount;
-	}
-
-	public java.lang.Long getDislikeCount() {
-		return this.dislikeCount;
-	}
-
-	public void setDislikeCount(java.lang.Long dislikeCount) {
-		this.dislikeCount = dislikeCount;
 	}
 
 	public java.lang.String getSubject() {

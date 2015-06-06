@@ -809,6 +809,7 @@ CREATE TABLE `eh_forums` (
 #
 # key table of forum post sharding group
 # forum posts form its own sharding group, due to nature of timely content
+# delete column `dislike_count` BIGINT NOT NULL DEFAULT 0,
 #
 DROP TABLE IF EXISTS `eh_forum_posts`;
 CREATE TABLE `eh_forum_posts` (
@@ -835,7 +836,6 @@ CREATE TABLE `eh_forum_posts` (
     `child_count` BIGINT NOT NULL DEFAULT 0,
     `forward_count` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
-    `dislike_count` BIGINT NOT NULL DEFAULT 0,
 
     `subject` VARCHAR(512),
     `content_type` VARCHAR(32) COMMENT 'object content type',

@@ -174,13 +174,6 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>dislike_count IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByDislikeCount(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.DISLIKE_COUNT, values);
-	}
-
-	/**
 	 * Fetch records that have <code>subject IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchBySubject(java.lang.String... values) {
