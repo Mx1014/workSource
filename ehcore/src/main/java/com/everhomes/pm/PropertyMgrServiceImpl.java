@@ -417,12 +417,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     public void assignPMTopics(AssginPmTopicCommand cmd) {
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        if(cmd.getTopicIds() == null || cmd.getTopicIds().isEmpty())
+        if(cmd.getTopicId() == null || cmd.getTopicId() == 0)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid topicIds paramter.");
-        if(cmd.getStatus() == PmTaskStatus.TREATED.getCode())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid status paramter.");
         if(cmd.getCommunityId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId paramter.");
@@ -431,47 +428,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
         		PmMemberTargetType.USER.getCode(), cmd.getUserId());
         if(pmMemberList == null || pmMemberList.isEmpty()){
-            LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId());
+            LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId()+",communityId=" + communityId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid userId paramter,user is not the community pm member.");
         }
         
-        for(Long topicId : cmd.getTopicIds()){
-            List<CommunityPmTasks> pmTaskList = this.propertyMgrProvider.findPmTaskEntityIdAndTargetId(communityId, topicId, 
-                    EntityType.TOPIC.getCode(), cmd.getUserId(),EntityType.USER.getCode(),null,cmd.getStatus());
-            //任务已存在跳过
-            if(pmTaskList != null && !pmTaskList.isEmpty()){
-                LOGGER.error("Pm task is exists.");
-                continue;
-            }
-            
-            Post topic = this.forumProvider.findPostById(topicId);
-            if(topic == null){
-                LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
-                continue;
-            }
-            
-            dbProvider.execute((status) -> {
-                CommunityPmTasks task = new CommunityPmTasks();
-                task.setCommunityId(communityId);
-                task.setEntityId(topicId);
-                task.setEntityType(EntityType.TOPIC.getCode());
-                task.setTargetId(cmd.getUserId());
-                task.setTaskType(EntityType.USER.getCode());
-                task.setTaskStatus(cmd.getStatus());
-                this.propertyMgrProvider.createPmTask(task);
-                
-                if(cmd.getStatus() == PmTaskStatus.TREATING.getCode()){
-                  //发送评论
-                    sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
-                    //发送短信
-                    sendMSMToUser(topicId,cmd.getUserId(),topic.getCreatorUid(),cmd.getStatus(),topic.getCategoryId());
-                }
-                
-                return null;
-            });
-           
+        long topicId = cmd.getTopicId();
+        
+        Post topic = this.forumProvider.findPostById(topicId);
+        if(topic == null){
+        	 LOGGER.error("Unable to find the topic.topicId=" + topicId+",communityId=" + communityId);
+             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TOPIC, 
+                     "Unable to find the topic.");
         }
+        
+        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskEntityId(communityId, topicId, 
+                EntityType.TOPIC.getCode());
+        if(task == null){
+        	 LOGGER.error("Unable to find the topic task.topicId=" + topicId +",communityId=" + communityId);
+             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK, 
+                     "Unable to find the topic task.");
+        }
+        
+        dbProvider.execute((status) -> {
+        	task.setTaskStatus(PmTaskStatus.TREATING.getCode());
+            this.propertyMgrProvider.updatePmTask(task);
+        
+            //发送评论
+            sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
+            //发送短信
+            sendMSMToUser(topicId,cmd.getUserId(),topic.getCreatorUid(),topic.getCategoryId());
+        
+            return null;
+        });
+           
+       
     }
 
     private void sendComment(long topicId, long forumId, long userId, long category) {
@@ -482,7 +473,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         comment.setCreatorUid(userId);
         comment.setContentType(PostContentType.TEXT.getCode());
         String template = configProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
-
+        if(StringUtils.isEmpty(template)){
+        	template = "该物业已在处理";
+        }
         if (!StringUtils.isEmpty(template)) {
             comment.setContent(template);
             forumProvider.createPost(comment);
@@ -495,10 +488,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
      * @param topicId
      * @param userId 维修人员id
      * @param owerId 业主id
-     * @param status 状态
      * @param category 分类
      */
-    private void sendMSMToUser(long topicId, long userId, long owerId,byte status, long category) {
+    private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
         //给维修人员发送短信是否显示业主地址
         String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
         List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
@@ -509,39 +501,55 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         });
         if(userList == null || userList.isEmpty()) return ;
         String cellPhone = userList.get(0).getIdentifierToken();
-        if(template == null){
+        if(StringUtils.isEmpty(template)){
         	template = "该物业已在处理";
         }
-        this.smsProvider.sendSms(cellPhone, template);
-        
+        if (!StringUtils.isEmpty(template)) {
+        	this.smsProvider.sendSms(cellPhone, template);
+        }
     }
     
     @Override
     public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
-        if(cmd.getTopicIds() == null || cmd.getStatus() == null || cmd.getCommunityId() == null){
+    	User user  = UserContext.current().getUser();
+    	long userId = user.getId();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+        if(cmd.getTopicId() == null || cmd.getStatus() == null ){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid topicIds or status or communityId paramter.");
+                    "Invalid topicIds or status  paramter.");
+        }
+        if(cmd.getStatus() == PmTaskStatus.TREATING.getCode()){
+        	 throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK_STATUS, 
+                     "Invalid topic task status  paramter. please assign task");
+        }
+        long topicId = cmd.getTopicId();
+        Post topic = this.forumProvider.findPostById(topicId);
+        if(topic == null){ 
+            LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
+         }
+        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskEntityId(cmd.getCommunityId(), 
+                topicId, EntityType.TOPIC.getCode());
+        if(task == null){
+            LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
+        }
+        task.setTaskStatus(cmd.getStatus());
+        this.propertyMgrProvider.updatePmTask(task);
+        if(cmd.getStatus() == PmTaskStatus.TREATED.getCode()){
+        	//发送评论
+            sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
         }
         
-        User user = UserContext.current().getUser();
-        long userId = user.getId();
-        
-        for(long topicId : cmd.getTopicIds()){
-            Post topic = this.forumProvider.findPostById(topicId);
-            if(topic == null){ 
-                LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
-                continue;
-            }
-            CommunityPmTasks task = this.propertyMgrProvider.findPmTaskEntityId(cmd.getCommunityId(), 
-                    topicId, EntityType.TOPIC.getCode());
-            if(task == null){
-                LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
-                continue;
-            }
-            task.setTaskStatus(cmd.getStatus());
-            this.propertyMgrProvider.updatePmTask(task);
-            
-        }
     }
 
     @Override
@@ -1180,21 +1188,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	if(bill == null)
     	{
     		LOGGER.error("Unable to find the bill." );
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_BILL, 
+    		throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE,PropertyServiceErrorCode.ERROR_INVALID_BILL, 
                      "Unable to find the bill.");
     	}
     	Address address = addressProvider.findAddressById(bill.getEntityId());
     	if(address == null)
     	{
     		LOGGER.error("Unable to find the address.addressId=" + bill.getEntityId());
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_ADDRESS, 
+    		throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE,PropertyServiceErrorCode.ERROR_INVALID_ADDRESS, 
                      "Unable to find the address.");
     	}
     	Family family = familyProvider.findFamilyByAddressId(address.getId());
     	if(family == null)
     	{
     		LOGGER.error("Unable to find the family.familyId=" +address.getId());
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,PropertyServiceErrorCode.ERROR_INVALID_FAMILY, 
+    		throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE,PropertyServiceErrorCode.ERROR_INVALID_FAMILY, 
                      "Unable to find the family.");
     	}
     	String message = buildBillMessage(bill);
@@ -1221,7 +1229,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	List<Long> addressIds = cmd.getAddressIds();
     	
     	//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。
-    	//已注册的user 分两种： 1-已加入家庭，发家庭消息。 2-还未加入家庭，发个人信息。
+    	//已注册的user 分三种： 1-已加入家庭，发家庭消息。 2-还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
     	List<CommunityPmOwner> owners  = new ArrayList<CommunityPmOwner>();
      	List<Long> familyIds = new ArrayList<Long>();
     	
@@ -1281,7 +1289,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
     	}
     	
-    	//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息。 3-不是user，发短信。
+    	//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-不是user，发短信。  4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
     	processCommunityPmOwner(communityId,owners,cmd.getMessage());
     }
     
@@ -1292,6 +1300,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			for (CommunityPmOwner communityPmOwner : owners) {
 				User userPhone = userService.findUserByIndentifier(communityPmOwner.getContactToken());
 				if(userPhone == null){
+					// 3-不是user，发短信
 					phones.add(communityPmOwner.getContactToken());
 				}
 				else{
@@ -1299,8 +1308,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     				if(family != null){
     					GroupMember member = groupProvider.findGroupMemberByMemberInfo(family.getId(), GroupDiscriminator.FAMILY.getCode(), userPhone.getId());
     					if(member == null){
+    						// 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。
     						userIds.add(userPhone.getId());
     					}
+    					//1- 是user，已加入家庭，发家庭消息已包含该user。 已经发过family。
+    				}
+    				else{
+    					//4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
+    					userIds.add(userPhone.getId());
     				}
 					
 				}
@@ -1372,16 +1387,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	if(cmd.getCreatorTag() == null){
+    	if(cmd.getCreatorTag() == null || "".equals(cmd.getCreatorTag())){
     		cmd.setCreatorTag(PostEntityTag.PM.getCode());
     	}
-    	if(cmd.getPrivateFlag() == null){
+    	if(cmd.getPrivateFlag() == null|| "".equals(cmd.getCreatorTag())){
     		cmd.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
     	}
-    	if(cmd.getVisibleRegionType() == null){
+    	if(cmd.getVisibleRegionType() == null || cmd.getVisibleRegionType() == 0){
     		cmd.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
     	}
-    	if(cmd.getTargetTag() == null ){
+    	if(cmd.getTargetTag() == null || "".equals(cmd.getCreatorTag())){
     		cmd.setTargetTag(PostEntityTag.USER.getCode());
     	}
     	PostDTO post = forumService.createTopic(cmd);

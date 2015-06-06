@@ -15,23 +15,24 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class SetPmTopicStatusCommand {
-    @ItemType(Long.class)
-    private List<Long> topicIds;
+	private Long topicId;
     private Byte status;
     private Long communityId;
     
     public SetPmTopicStatusCommand() {
     }
+    
+    public Long getTopicId() {
+		return topicId;
+	}
 
-    public List<Long> getTopicIds() {
-        return topicIds;
-    }
 
-    public void setTopicIds(List<Long> topicIds) {
-        this.topicIds = topicIds;
-    }
+	public void setTopicId(Long topicId) {
+		this.topicId = topicId; 
+	}
 
-    public Byte getStatus() {
+
+	public Byte getStatus() {
         return status;
     }
 

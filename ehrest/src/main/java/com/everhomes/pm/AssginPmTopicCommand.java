@@ -13,50 +13,31 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区Id</li>
  * <li>topicIds: 帖子ID列表</li>
  * <li>userId: 接收任务的用户Id</li>
- * <li>status: 任务状态，0-未处理，1-处理中，2-已处理，参考{@link com.everhomes.pm.PmTaskStatus}</li>
  * </ul>
  */
 public class AssginPmTopicCommand {
-    private Long forumId;
-    private Long communityId;
-    @ItemType(Long.class)
-    private List<Long> topicIds;
+	private Long communityId;
+	private Long topicId;
     private Long userId;
-    private Byte status;
+   
     
     public AssginPmTopicCommand() {
     }
 
-    public Long getForumId() {
-        return forumId;
-    }
+    public Long getTopicId() {
+		return topicId;
+	}
 
-    public void setForumId(Long forumId) {
-        this.forumId = forumId;
-    }
+	public void setTopicId(Long topicId) {
+		this.topicId = topicId;
+	}
 
-    public List<Long> getTopicIds() {
-        return topicIds;
-    }
-
-    public void setTopicIds(List<Long> topicIds) {
-        this.topicIds = topicIds;
-    }
-
-    public Long getUserId() {
+	public Long getUserId() {
         return userId;
     }
 
     public void setUserId(Long userId) {
         this.userId = userId;
-    }
-
-    public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
     }
 
     public Long getCommunityId() {
