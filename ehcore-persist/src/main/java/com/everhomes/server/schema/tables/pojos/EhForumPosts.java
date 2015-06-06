@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1324989707;
+	private static final long serialVersionUID = 473421787;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -50,6 +50,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Long     floorNumber;
 	private java.lang.Byte     status;
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
@@ -95,6 +96,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
+		java.lang.Long     floorNumber,
 		java.lang.Byte     status,
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
@@ -137,6 +139,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.floorNumber = floorNumber;
 		this.status = status;
 		this.updateTime = updateTime;
 		this.createTime = createTime;
@@ -437,6 +440,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Long getFloorNumber() {
+		return this.floorNumber;
+	}
+
+	public void setFloorNumber(java.lang.Long floorNumber) {
+		this.floorNumber = floorNumber;
 	}
 
 	public java.lang.Byte getStatus() {

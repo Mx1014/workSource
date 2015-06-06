@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLikes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserLikesRecord> {
 
-	private static final long serialVersionUID = 1974252212;
+	private static final long serialVersionUID = 130240412;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_likes</code>
@@ -47,9 +47,9 @@ public class EhUserLikes extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLikesRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_user_likes.like_type</code>. 0: dislike, 1: like
+	 * The column <code>ehcore.eh_user_likes.like_type</code>. 0:none, 1: dislike, 2: like
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLikesRecord, java.lang.Byte> LIKE_TYPE = createField("like_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: dislike, 1: like");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLikesRecord, java.lang.Byte> LIKE_TYPE = createField("like_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0:none, 1: dislike, 2: like");
 
 	/**
 	 * The column <code>ehcore.eh_user_likes.create_time</code>. remove-deletion policy, user directly managed data
