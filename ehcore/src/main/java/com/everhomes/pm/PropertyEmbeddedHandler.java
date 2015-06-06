@@ -9,7 +9,6 @@ import com.everhomes.category.CategoryConstants;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
-import com.everhomes.util.StringHelper;
 
 @Component(PropertyEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_PM)
 public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
@@ -21,10 +20,16 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
     private PropertyMgrProvider propertyMgrProvider;
     
     @Override
-    public String renderEmbeddedObject(Post post) {
+    public String renderEmbeddedObjectSnapshot(Post post) {
 //        ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
 //        return StringHelper.toJsonString(result);
     	  return null;
+    }
+
+    @Override
+    public String renderEmbeddedObjectDetails(Post post) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
