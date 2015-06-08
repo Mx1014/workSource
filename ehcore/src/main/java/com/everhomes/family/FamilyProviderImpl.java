@@ -105,7 +105,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
-    @Cacheable(value="Family", key="#addressId")
+    @Cacheable(value="Family", key="#addressId" ,unless="#result==null")
     @Override
     public Family findFamilyByAddressId(long addressId) {
         final Family[] result = new Family[1];

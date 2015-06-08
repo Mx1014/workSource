@@ -96,7 +96,7 @@ public class AddressProviderImpl implements AddressProvider {
             self.deleteAddress(address);
     }
 
-    @Cacheable(value="Address", key="#id")
+    @Cacheable(value="Address", key="#id",unless="#result==null")
     @Override
     public Address findAddressById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id));
@@ -104,7 +104,7 @@ public class AddressProviderImpl implements AddressProvider {
         return ConvertHelper.convert(dao.findById(id), Address.class);
     }
     
-    @Cacheable(value="Apartment", key="{#communityId, #buildingName, #apartmentName}")
+    @Cacheable(value="Apartment", key="{#communityId, #buildingName, #apartmentName}" ,unless="#result==null")
     @Override
     public Address findApartmentAddress(long communityId, String buildingName, String apartmentName) {
         final Address[] result = new Address[1];
