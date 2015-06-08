@@ -7,26 +7,42 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  */
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>namespaceId:default 0</li>
+ *<li>subject:主题</li>
+ *<li>description:描述</li>
+ *<li>location:位置</li>
+ *<li>contactPerson:联系人</li>
+ *<li>startTime:开始时间，时间格式为:YYYY-MM-DDThh:mm:ss</li>
+ *<li>endTime:结束时间,时间格式为:YYYY-MM-DDThh:mm:ss</li>
+ *<li>signupFlag:签到标签</li>
+ *<li>confirmFlag:回复标签</li>
+ *<li>maxAttendeeCount:最大邀请人数</li>
+ *<li>creatorFamilyId:创建者家庭ID</li>
+ *<li>groupId:组ID</li>
+ *<li>status:状态</li>
+ *<li>changeVersion:版本</li>
+ *</ul>
+ */
 public class ActivityPostCommand{
     private Integer  namespaceId;
     private String   subject;
     private String   description;
     private String   location;
     private String   contactPerson;
-    private String   contactNumber;
-    private Long     startTimeMs;
-    private Long     endTimeMs;
+    private String contactNumber;
+    private String startTime;
+    private String endTime;
     private Byte     signupFlag;
     private Byte     confirmFlag;
     private Integer  maxAttendeeCount;
-    private Long     creatorUid;
     private Long     creatorFamilyId;
-    private String   groupDiscriminator;
     private Long     groupId;
     private Byte     status;
     private Integer  changeVersion;
-    private Long createTime;
-    private Long deleteTime;
     
     public ActivityPostCommand() {
     }
@@ -82,6 +98,9 @@ public class ActivityPostCommand{
     }
 
 
+
+
+
     public String getContactNumber() {
         return contactNumber;
     }
@@ -92,24 +111,6 @@ public class ActivityPostCommand{
     }
 
 
-    public Long getStartTimeMs() {
-        return startTimeMs;
-    }
-
-
-    public void setStartTimeMs(Long startTimeMs) {
-        this.startTimeMs = startTimeMs;
-    }
-
-
-    public Long getEndTimeMs() {
-        return endTimeMs;
-    }
-
-
-    public void setEndTimeMs(Long endTimeMs) {
-        this.endTimeMs = endTimeMs;
-    }
 
 
     public Byte getSignupFlag() {
@@ -142,14 +143,6 @@ public class ActivityPostCommand{
     }
 
 
-    public Long getCreatorUid() {
-        return creatorUid;
-    }
-
-
-    public void setCreatorUid(Long creatorUid) {
-        this.creatorUid = creatorUid;
-    }
 
 
     public Long getCreatorFamilyId() {
@@ -161,15 +154,6 @@ public class ActivityPostCommand{
         this.creatorFamilyId = creatorFamilyId;
     }
 
-
-    public String getGroupDiscriminator() {
-        return groupDiscriminator;
-    }
-
-
-    public void setGroupDiscriminator(String groupDiscriminator) {
-        this.groupDiscriminator = groupDiscriminator;
-    }
 
 
     public Long getGroupId() {
@@ -202,23 +186,24 @@ public class ActivityPostCommand{
     }
 
 
-    public Long getCreateTime() {
-        return createTime;
+
+    public String getStartTime() {
+        return startTime;
     }
 
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
 
-    public Long getDeleteTime() {
-        return deleteTime;
+    public String getEndTime() {
+        return endTime;
     }
 
 
-    public void setDeleteTime(Long deleteTime) {
-        this.deleteTime = deleteTime;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
 
