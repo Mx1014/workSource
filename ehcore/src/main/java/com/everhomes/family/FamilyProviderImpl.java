@@ -372,7 +372,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                     .leftOuterJoin(Tables.EH_GROUPS)
                     .on(Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID))
                     .where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
-                                .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
+                                .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()))
+                                .and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()));
                     
                     if(comunityId == null){
                         step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
