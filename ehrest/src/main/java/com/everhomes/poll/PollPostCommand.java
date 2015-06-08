@@ -5,10 +5,19 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ * <li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ * <li>multiChoiceFlag:多选标记</li>
+ * <li>anonymousFlag:匿名标记</li>
+ *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *</li>
+ */
 public class PollPostCommand{
-    private Long startTime;
-    private Long stopTime;
+    private String startTime;
+    private String stopTime;
     private Integer multiChoiceFlag;
     private Integer anonymousFlag;
     
@@ -18,19 +27,19 @@ public class PollPostCommand{
     public PollPostCommand() {
     }
 
-    public Long getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Long getStopTime() {
+    public String getStopTime() {
         return stopTime;
     }
 
-    public void setStopTime(Long stopTime) {
+    public void setStopTime(String stopTime) {
         this.stopTime = stopTime;
     }
 

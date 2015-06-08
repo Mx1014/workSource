@@ -2,7 +2,17 @@
 package com.everhomes.poll;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>itemId:选项ID</li>
+ *<li>subject:主题</li>
+ *<li>coverUrl:选项路径</li>
+ *<li>voteCount:选项投票统计</li>
+ *<li>createTime:创建时间</li>
+ *</ul>
+ */
 public class PollItemDTO {
     private Long itemId;
     private String subject;
