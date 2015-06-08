@@ -90,6 +90,8 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
+        //status:状态，0-无效、1-草稿、2-已发布
+        activity.setStatus((byte)2);
         activity.setCheckinFamilyCount(0);
         activity.setConfirmAttendeeCount(0);
         activity.setConfirmFamilyCount(0);

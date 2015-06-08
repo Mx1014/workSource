@@ -17,12 +17,11 @@ import com.everhomes.util.StringHelper;
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
- *<li>signupFlag:签到标签</li>
- *<li>confirmFlag:回复标签</li>
+ *<li>signupFlag:签到标签，0-不需要签到、1-需要签到</li>
+ *<li>confirmFlag:确认标签，0-不需要确认、1-需要确认</li>
  *<li>maxAttendeeCount:最大邀请人数</li>
  *<li>creatorFamilyId:创建者家庭ID</li>
  *<li>groupId:组ID</li>
- *<li>status:状态</li>
  *<li>changeVersion:版本</li>
  *</ul>
  */
@@ -39,7 +38,6 @@ public class ActivityPostCommand{
     private Integer  maxAttendeeCount;
     private Long     creatorFamilyId;
     private Long     groupId;
-    private Byte     status;
     private Integer  changeVersion;
     
     public ActivityPostCommand() {
@@ -154,15 +152,6 @@ public class ActivityPostCommand{
         this.groupId = groupId;
     }
 
-
-    public Byte getStatus() {
-        return status;
-    }
-
-
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 
 
     public Integer getChangeVersion() {
