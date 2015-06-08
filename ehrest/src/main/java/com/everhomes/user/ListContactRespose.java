@@ -2,7 +2,10 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 public class ListContactRespose {
+    @ItemType(ContactDTO.class)
     private List<ContactDTO> contacts;
 
     private Long nextAnchor;

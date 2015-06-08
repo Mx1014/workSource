@@ -4,6 +4,7 @@ package com.everhomes.community;
 import java.util.List;
 
 import com.everhomes.address.CommunityDTO;
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,6 +18,7 @@ public class ListCommunitesByStatusCommandResponse {
     
     private Long nextPageAnchor;
     
+    @ItemType(CommunityDTO.class)
     private List<CommunityDTO> requests;
     
     public ListCommunitesByStatusCommandResponse() {

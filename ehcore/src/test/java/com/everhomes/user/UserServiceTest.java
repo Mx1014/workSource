@@ -79,7 +79,8 @@ public class UserServiceTest {
         identifier.setClaimStatus(IdentifierClaimStatus.CLAIMING.getCode());
         
         this.userProvider.createIdentifier(identifier);
-        
+
+/*        
         UserIdentifier foundIdentifier = this.userProvider.findClaimingIdentifierByToken("1234");
         if(foundIdentifier != null) {
             System.out.println("identifer: " + foundIdentifier.toString());
@@ -97,7 +98,7 @@ public class UserServiceTest {
         if(foundIdentifier != null) {
             System.out.println("identifer: " + foundIdentifier.toString());
         }
-        
+*/        
         this.userProvider.deleteIdentifier(identifier);
     }
     

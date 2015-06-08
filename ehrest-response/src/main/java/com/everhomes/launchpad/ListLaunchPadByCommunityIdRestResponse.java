@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-06-01 21:15:04
+// generated at 2015-06-07 22:21:19
 package com.everhomes.launchpad;
 
 import com.everhomes.rest.RestResponseBase;
