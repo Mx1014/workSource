@@ -271,4 +271,18 @@ public class ActivityProviderImpl implements ActivityProivider {
         EhActivityRosterDao dao = new EhActivityRosterDao(cxt.configuration());
         dao.delete(createRoster);
     }
+
+    @Override
+    public List<ActivityRoster> listRosters(Long activityId) {
+        List<ActivityRoster> rosters=new ArrayList<ActivityRoster>();
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,
+                (context, obj) -> {
+                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
+                            .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetch().forEach(item -> {
+                                rosters.add(ConvertHelper.convert(item, ActivityRoster.class));
+                            });
+                    return true;
+                });
+        return rosters;
+    }
 }
