@@ -19,6 +19,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.SearchSyncManager;
+import com.everhomes.search.SearchSyncType;
 
 @RestDoc(value="Community admin controller", site="core")
 @RestController
@@ -72,7 +73,7 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse syncIndex() {
 
-        this.searchSyncManager.SyncDb("community");
+        this.searchSyncManager.SyncDb(SearchSyncType.COMMUNITY);
         
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

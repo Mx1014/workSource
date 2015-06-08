@@ -28,9 +28,9 @@ public class SearchSyncManagerImpl implements SearchSyncManager {
     }
 
     @Override
-    public void SyncDb(String syncType) {
+    public void SyncDb(SearchSyncType syncType) {
         final Job job = new Job(SearchSyncAction.class.getName(),
-                new Object[]{ syncType });
+                new Object[]{ syncType.getCode() });
         
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
