@@ -24,8 +24,8 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public String renderEmbeddedObjectDetails(Post post) {
-        // TODO Auto-generated method stub
-        return null;
+        ActivityListResponse result = activityService.findActivityDetailsByPostId(post);
+        return StringHelper.toJsonString(result);
     }
 
     @Override

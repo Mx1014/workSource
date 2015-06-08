@@ -72,10 +72,10 @@ public class ActivityController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("list")
+    @RequestMapping("findActivityDetails")
     @RestReturn(value=ActivityListResponse.class)
     public RestResponse list(@Valid ActivityListCommand cmd) {
-        ActivityListResponse activities = activityService.listActivities(cmd);
+        ActivityListResponse activities = activityService.findActivityDetails(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
