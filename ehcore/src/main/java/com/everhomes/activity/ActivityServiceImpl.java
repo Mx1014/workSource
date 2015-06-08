@@ -359,6 +359,7 @@ public class ActivityServiceImpl implements ActivityService {
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID,
                     "cannnot find post record in database id=" + cmd.getActivityRosterId());
         }
+        
         User user = UserContext.current().getUser();
         if (post.getCreatorUid().longValue() != user.getId().longValue()) {
             LOGGER.error("the user is invalid.cannot confirm");
