@@ -82,8 +82,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
+        User user = UserContext.current().getUser();
         Activity activity = ConvertHelper.convert(cmd, Activity.class);
         activity.setPostId(postId);
+        activity.setCreatorUid(user.getId());
+        activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         activity.setCheckinFamilyCount(0);
@@ -91,11 +94,14 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setConfirmFamilyCount(0);
         activity.setSignupAttendeeCount(0);
         activity.setSignupFamilyCount(0);
+        
         activity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        activity.setStartTime(new Timestamp(cmd.getStartTimeMs()));
-        activity.setEndTime(new Timestamp(cmd.getEndTimeMs()));
-        if (cmd.getDeleteTime() != null)
-            activity.setDeleteTime(new Timestamp(cmd.getDeleteTime()));
+        long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DDThh:mm:ss").getTime();
+        long endTimeMs=DateHelper.parseDataString(cmd.getEndTime(), "YYYY-MM-DDThh:mm:ss").getTime();
+        activity.setStartTime(new Timestamp(startTimeMs));
+        activity.setEndTime(new Timestamp(endTimeMs));
+        activity.setStartTimeMs(startTimeMs);
+        activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         activityProvider.createActity(activity);
     }
@@ -205,6 +211,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         activityProvider.checkIn(activity, user.getId(), getFamilyId());
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
         return dto;
@@ -241,6 +248,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
