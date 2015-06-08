@@ -85,6 +85,7 @@ public class ActivityServiceImpl implements ActivityService {
         User user = UserContext.current().getUser();
         Activity activity = ConvertHelper.convert(cmd, Activity.class);
         activity.setPostId(postId);
+        activity.setNamespaceId(0);
         activity.setCreatorUid(user.getId());
         activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
         // avoid nullpoint
@@ -96,8 +97,8 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setSignupFamilyCount(0);
         
         activity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DDhh:mm:ss").getTime();
-        long endTimeMs=DateHelper.parseDataString(cmd.getEndTime(), "YYYY-MM-DDhh:mm:ss").getTime();
+        long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DD hh:mm:ss").getTime();
+        long endTimeMs=DateHelper.parseDataString(cmd.getEndTime(), "YYYY-MM-DD hh:mm:ss").getTime();
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
         activity.setStartTimeMs(startTimeMs);
