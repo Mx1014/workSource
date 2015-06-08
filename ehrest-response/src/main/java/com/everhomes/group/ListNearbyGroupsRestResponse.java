@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-06-01 21:15:04
+// generated at 2015-06-08 00:26:53
 package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.ListGroupCommandResponse;
+import com.everhomes.group.ListNearbyGroupCommandResponse;
 
 public class ListNearbyGroupsRestResponse extends RestResponseBase {
 
-    private ListGroupCommandResponse response;
+    private ListNearbyGroupCommandResponse response;
 
     public ListNearbyGroupsRestResponse () {
     }
 
-    public ListGroupCommandResponse getResponse() {
+    public ListNearbyGroupCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListGroupCommandResponse response) {
+    public void setResponse(ListNearbyGroupCommandResponse response) {
         this.response = response;
     }
 }

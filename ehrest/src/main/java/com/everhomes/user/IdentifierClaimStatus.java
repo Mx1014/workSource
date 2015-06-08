@@ -2,7 +2,7 @@
 package com.everhomes.user;
 
 public enum IdentifierClaimStatus {
-    FREE_STANDING((byte)0), CLAIMING((byte)1), VERIFYING((byte)2), CLAIMED((byte)3); 
+    FREE_STANDING((byte)0), CLAIMING((byte)1), VERIFYING((byte)2), CLAIMED((byte)3), TAKEN_OVER((byte)4); 
     
     private byte code;
     
@@ -30,6 +30,9 @@ public enum IdentifierClaimStatus {
             
         case 3 :
             return CLAIMED;
+            
+        case 4 :
+            return TAKEN_OVER;
             
         default :
             break;

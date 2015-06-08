@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
 import com.everhomes.acl.Role;
@@ -131,41 +132,47 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Override
     public void leaveFamilyAtAddress(Address address, UserGroup userGroup) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
-            Family family = findFamilyByAddressId(address.getId());
             
-            GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-            		EntityType.USER.getCode(), userGroup.getOwnerUid());
-            assert(m != null);
-            if(m != null) {
-                //this.groupProvider.deleteGroupMember(m);
-                //clear findFamilyByAddress cache
-                FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+            this.dbProvider.execute((TransactionStatus status) -> {
+                Family family = findFamilyByAddressId(address.getId());
                 
-                self.deleteFamilyMember(m);
-                
-                // retrieve family info after membership changes
-                
-                family = self.findFamilyByAddressId(address.getId());
-                
-                if(family.getMemberCount() == 0) {
-                    this.groupProvider.deleteGroup(family);
-                } else {
-                    if(m.getMemberRole() == Role.ResourceCreator) {
-                        // reassign resource creator to other member
-                        GroupMember newCreator = pickOneMemberToPromote(family);
-                        if(newCreator != null){
-                            newCreator.setMemberRole(Role.ResourceCreator);
-                            this.groupProvider.updateGroupMember(newCreator);
+                GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+                        EntityType.USER.getCode(), userGroup.getOwnerUid());
+                assert(m != null);
+                if(m != null) {
+                    //this.groupProvider.deleteGroupMember(m);
+                    //clear findFamilyByAddress cache
+                    
+                    FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
+                    
+                    self.deleteFamilyMember(m);
+                    
+                    // retrieve family info after membership changes
+                    
+                    family = self.findFamilyByAddressId(address.getId());
+                    
+                    if(family.getMemberCount() == 0) {
+                        this.groupProvider.deleteGroup(family);
+                    } else {
+                        if(m.getMemberRole() == Role.ResourceCreator) {
+                            // reassign resource creator to other member
+                            GroupMember newCreator = pickOneMemberToPromote(family);
+                            if(newCreator != null){
+                                newCreator.setMemberRole(Role.ResourceCreator);
+                                this.groupProvider.updateGroupMember(newCreator);
+                                
+                                family.setCreatorUid(newCreator.getMemberId());
+                            }
                             
-                            family.setCreatorUid(newCreator.getMemberId());
                         }
-                        
+                        this.groupProvider.updateGroup(family);
                     }
-                    this.groupProvider.updateGroup(family);
                 }
-            }
+                
+                this.userProvider.deleteUserGroup(userGroup);
+                return null;
+            });
             
-            this.userProvider.deleteUserGroup(userGroup);
             return null;
         });
 

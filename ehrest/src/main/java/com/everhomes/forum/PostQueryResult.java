@@ -2,9 +2,12 @@ package com.everhomes.forum;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 public class PostQueryResult {
     private Long pageAnchor;
     
+    @ItemType(Long.class)
     private List<Long> ids;
 
     public Long getPageAnchor() {

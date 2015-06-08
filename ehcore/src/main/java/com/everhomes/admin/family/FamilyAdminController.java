@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.Role;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -53,6 +54,7 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("adminApproveMember")
     @RestReturn(value=String.class)
     public RestResponse adminApproveMember(@Valid ApproveMemberCommand cmd) {
+        cmd.setOperatorRole(Role.ResourceAdmin);
         this.familyService.approveMember(cmd);
         
         RestResponse response = new RestResponse();
@@ -68,6 +70,7 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("adminRejectMember")
     @RestReturn(value=String.class)
     public RestResponse adminRejectMember(@Valid RejectMemberCommand cmd) {
+        cmd.setOperatorRole(Role.ResourceAdmin);
         this.familyService.rejectMember(cmd);
         
         RestResponse response = new RestResponse();

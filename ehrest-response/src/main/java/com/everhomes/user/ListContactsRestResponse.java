@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-06-01 21:15:04
+// generated at 2015-06-08 00:26:53
 package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.user.ContactDTO;
+import com.everhomes.user.ListContactRespose;
 
 public class ListContactsRestResponse extends RestResponseBase {
 
-    private List<ContactDTO> response;
+    private ListContactRespose response;
 
     public ListContactsRestResponse () {
     }
 
-    public List<ContactDTO> getResponse() {
+    public ListContactRespose getResponse() {
         return response;
     }
 
-    public void setResponse(List<ContactDTO> response) {
+    public void setResponse(ListContactRespose response) {
         this.response = response;
     }
 }

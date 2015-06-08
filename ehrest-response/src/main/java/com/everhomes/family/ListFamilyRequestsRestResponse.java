@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-06-01 21:15:04
+// generated at 2015-06-08 00:26:53
 package com.everhomes.family;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.family.FamilyMembershipRequestDTO;
+import com.everhomes.family.ListFamilyRequestsCommandResponse;
 
 public class ListFamilyRequestsRestResponse extends RestResponseBase {
 
-    private List<FamilyMembershipRequestDTO> response;
+    private ListFamilyRequestsCommandResponse response;
 
     public ListFamilyRequestsRestResponse () {
     }
 
-    public List<FamilyMembershipRequestDTO> getResponse() {
+    public ListFamilyRequestsCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<FamilyMembershipRequestDTO> response) {
+    public void setResponse(ListFamilyRequestsCommandResponse response) {
         this.response = response;
     }
 }
