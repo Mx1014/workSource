@@ -11,13 +11,12 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *<ul>
- *<li>namespaceId:default 0</li>
  *<li>subject:主题</li>
  *<li>description:描述</li>
  *<li>location:位置</li>
  *<li>contactPerson:联系人</li>
- *<li>startTime:开始时间，时间格式为:YYYY-MM-DDThh:mm:ss</li>
- *<li>endTime:结束时间,时间格式为:YYYY-MM-DDThh:mm:ss</li>
+ *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>signupFlag:签到标签</li>
  *<li>confirmFlag:回复标签</li>
  *<li>maxAttendeeCount:最大邀请人数</li>
@@ -28,7 +27,6 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ActivityPostCommand{
-    private Integer  namespaceId;
     private String   subject;
     private String   description;
     private String   location;
@@ -48,15 +46,6 @@ public class ActivityPostCommand{
     }
 
    
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
-
 
     public String getSubject() {
         return subject;
