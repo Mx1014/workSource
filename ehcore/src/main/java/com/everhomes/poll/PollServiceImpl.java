@@ -65,10 +65,12 @@ public class PollServiceImpl implements PollService {
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
-            poll.setStartTime(new Timestamp(cmd.getStartTime()));
-            poll.setStartTimeMs(cmd.getStartTime());
-            poll.setEndTimeMs(cmd.getStopTime());
-            poll.setEndTime(new Timestamp(cmd.getStopTime()));
+            long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "").getTime();
+            long endTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "").getTime();
+            poll.setStartTime(new Timestamp(startTimeMs));
+            poll.setStartTimeMs(startTimeMs);
+            poll.setEndTimeMs(endTimeMs);
+            poll.setEndTime(new Timestamp(endTimeMs));
             poll.setStatus(PollStatus.Published.getCode());
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
