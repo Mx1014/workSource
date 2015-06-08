@@ -51,7 +51,7 @@ public class PollServiceImpl implements PollService {
         Family[] families = new Family[1];
         if(user.getAddressId()!=null)
             families[0] = familyProvider.findFamilyByAddressId(user.getAddressId());
-        dbProvider.execute((status)->{
+        dbProvider.execute(status->{
             Poll poll=new Poll();
             poll.setPostId(postId);
             if(cmd.getAnonymousFlag()!=null)

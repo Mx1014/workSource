@@ -15,8 +15,10 @@ import org.springframework.util.StringUtils;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
@@ -65,6 +67,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Autowired
     private DbProvider dbProvider;
@@ -77,8 +82,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
+        User user = UserContext.current().getUser();
         Activity activity = ConvertHelper.convert(cmd, Activity.class);
         activity.setPostId(postId);
+        activity.setCreatorUid(user.getId());
+        activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         activity.setCheckinFamilyCount(0);
@@ -86,11 +94,14 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setConfirmFamilyCount(0);
         activity.setSignupAttendeeCount(0);
         activity.setSignupFamilyCount(0);
+        
         activity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        activity.setStartTime(new Timestamp(cmd.getStartTimeMs()));
-        activity.setEndTime(new Timestamp(cmd.getEndTimeMs()));
-        if (cmd.getDeleteTime() != null)
-            activity.setDeleteTime(new Timestamp(cmd.getDeleteTime()));
+        long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DDhh:mm:ss").getTime();
+        long endTimeMs=DateHelper.parseDataString(cmd.getEndTime(), "YYYY-MM-DDhh:mm:ss").getTime();
+        activity.setStartTime(new Timestamp(startTimeMs));
+        activity.setEndTime(new Timestamp(endTimeMs));
+        activity.setStartTimeMs(startTimeMs);
+        activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         activityProvider.createActity(activity);
     }
@@ -200,6 +211,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         activityProvider.checkIn(activity, user.getId(), getFamilyId());
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
         return dto;
@@ -210,7 +222,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityListResponse listActivities(ActivityListCommand cmd) {
+    public ActivityListResponse findActivityDetails(ActivityListCommand cmd) {
         User user = UserContext.current().getUser();
         Activity activity = activityProvider.findActivityById(cmd.getActivityId());
         if (activity == null) {
@@ -236,6 +248,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
@@ -257,7 +270,7 @@ public class ActivityServiceImpl implements ActivityService {
                 User currentUser = userProvider.findUserById(r.getUid());
                 d.setId(r.getId());
                 if (currentUser != null) {
-                    d.setUserAvatar(currentUser.getAvatar());
+                    d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
                     d.setUserName(currentUser.getAccountName());
                 }
 
@@ -296,6 +309,9 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     private ActivityStatus getActivityStatus(ActivityRoster userRoster) {
+        if(userRoster==null){
+            return ActivityStatus.UN_SIGNUP;
+        }
         if (userRoster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
             return ActivityStatus.CHECKEINED;
         }
@@ -457,5 +473,55 @@ public class ActivityServiceImpl implements ActivityService {
             //reject to join group
             groupService.rejectJoinGroupRequest(rejectCmd);
         }
+    }
+
+    @Override
+    public ActivityListResponse findActivityDetailsByPostId(Post post) {
+       User user=UserContext.current().getUser();
+        Activity activity = activityProvider.findSnapshotByPostId(post.getId());
+        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
+        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
+                .current().getUser().getId());
+        ActivityListResponse response = new ActivityListResponse();
+        ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setProcessStatus(getStatus(activity).getCode());
+        dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
+                userRoster).getCode());
+        response.setActivity(dto);
+        List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
+            ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
+            d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
+            if (user.getId().intValue() == post.getCreatorUid().intValue())
+                d.setCreatorFlag(1);
+            d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
+            d.setSignupFlag(ActivityStatus.SIGNUP.getCode());
+            d.setConfirmTime(r.getConfirmTime().toString());
+            if (r.getFamilyId() != null) {
+                FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
+                if (family != null) {
+                    d.setFamilyName(family.getName());
+                    d.setFamilyId(r.getFamilyId());
+                }
+                User currentUser = userProvider.findUserById(r.getUid());
+                d.setId(r.getId());
+                if (currentUser != null) {
+                    d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
+                    d.setUserName(currentUser.getAccountName());
+                }
+
+            }
+            d.setSignupTime(r.getCreateTime().toString());
+            return d;
+        }).collect(Collectors.toList());
+        response.setRoster(result);
+        response.setCreatorFlag(0);
+        // current user is sender?
+        if (user.getId() == activity.getCreatorUid()) {
+            // return url
+            String baseDir = configurationProvider.getValue(DEFAULT_HOME_URL, "");
+            response.setCheckinQRUrl(baseDir + "/activity/checkin?activityId=" + activity.getId());
+            response.setCreatorFlag(1);
+        }
+        return response;
     }
 }

@@ -1,9 +1,6 @@
 package com.everhomes.recommend;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-
-import net.greghaines.jesque.Job;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +14,12 @@ import com.everhomes.rest.RestResponse;
 
 @RestDoc(value="Recommendation", site="ehcore")
 @RestController
-@RequestMapping("/recommend")
-public class RecommendationController extends ControllerBase {
+@RequestMapping("/admin/recommend")
+public class RecommendationAdminController extends ControllerBase {
     @Autowired
     RecommendationService recommendationService;
     
-    @RequestMapping("/admin/recommend/createConfig")
+    @RequestMapping("createConfig")
     @RestReturn(value=String.class)
     public RestResponse createConfig(@Valid CreateRecommendConfig cmd) {
         RestResponse response = new RestResponse();

@@ -18,13 +18,26 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
-        ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
-        return StringHelper.toJsonString(result);
+        try{
+            ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
+            if(result!=null) return StringHelper.toJsonString(result);
+        }catch(Exception e){
+            
+        }
+        
+        return null;
     }
 
     @Override
     public String renderEmbeddedObjectDetails(Post post) {
-        // TODO Auto-generated method stub
+        try{
+            ActivityListResponse result = activityService.findActivityDetailsByPostId(post);
+            if(result!=null)
+                return StringHelper.toJsonString(result);
+        }catch(Exception e){
+            
+        }
+        
         return null;
     }
 

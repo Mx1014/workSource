@@ -22,8 +22,8 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public String renderEmbeddedObjectDetails(Post post) {
-        // TODO Auto-generated method stub
-        return null;
+        PollShowResultResponse poll = pollService.showResult(post.getParentPostId());
+        return StringHelper.toJsonString(poll);
     }
 
     @Override
