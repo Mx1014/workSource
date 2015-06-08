@@ -15,8 +15,10 @@ import org.springframework.util.StringUtils;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
@@ -65,6 +67,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Autowired
     private DbProvider dbProvider;
@@ -257,7 +262,7 @@ public class ActivityServiceImpl implements ActivityService {
                 User currentUser = userProvider.findUserById(r.getUid());
                 d.setId(r.getId());
                 if (currentUser != null) {
-                    d.setUserAvatar(currentUser.getAvatar());
+                    d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
                     d.setUserName(currentUser.getAccountName());
                 }
 
@@ -492,7 +497,7 @@ public class ActivityServiceImpl implements ActivityService {
                 User currentUser = userProvider.findUserById(r.getUid());
                 d.setId(r.getId());
                 if (currentUser != null) {
-                    d.setUserAvatar(currentUser.getAvatar());
+                    d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
                     d.setUserName(currentUser.getAccountName());
                 }
 
