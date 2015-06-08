@@ -296,6 +296,9 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     private ActivityStatus getActivityStatus(ActivityRoster userRoster) {
+        if(userRoster==null){
+            return ActivityStatus.UN_SIGNUP;
+        }
         if (userRoster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
             return ActivityStatus.CHECKEINED;
         }
@@ -461,7 +464,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityListResponse findActivityDetailsByPostId(Post post) {
-        user=UserContext.current().getUser();
+       User user=UserContext.current().getUser();
         Activity activity = activityProvider.findSnapshotByPostId(post.getId());
         List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
@@ -497,11 +500,6 @@ public class ActivityServiceImpl implements ActivityService {
             d.setSignupTime(r.getCreateTime().toString());
             return d;
         }).collect(Collectors.toList());
-        if(rosterList.size()<cmd.getPageSize()){
-            response.setNextAnchor(null);
-        }else{
-            response.setNextAnchor(locator.getAnchor());
-        }
         response.setRoster(result);
         response.setCreatorFlag(0);
         // current user is sender?
