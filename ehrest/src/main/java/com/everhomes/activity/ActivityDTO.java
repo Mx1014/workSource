@@ -2,7 +2,26 @@
 package com.everhomes.activity;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>activityId:活动ID</li>
+ *<li>startTime:开始时间<li>
+ *<li>stopTime:结束时间</li>
+ *<li>location:位置</li>
+ *<li>signupFlag:报名标签</li>
+ *<li>confirmFlag:确认</li>
+ *<li>enrollUserCount:报名人数</li>
+ *<li>enrollFamilyCount:报名家庭数</li>
+ *<li>checkinUserCount:签到人数</li>
+ *<li>checkinFamilyCount:签到家庭数</li>
+ *<li>confirmUserCount:确认人数</li>
+ *<li>confirmFamilyCount：确认家庭数</li>
+ *<li>userActivityStatus:活动状态</li>
+ *<li>processStatus：处理状态</li>
+ *</ul>
+ */
 public class ActivityDTO {
     private Long activityId;
     private Long startTime;
