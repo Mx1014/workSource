@@ -2,6 +2,7 @@
 package com.everhomes.messaging;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,13 +22,12 @@ import com.everhomes.util.StringHelper;
  * <li><p>metaAppId:消息模块的发送相关的应用ID</p></li>
  * <li><p>body:消息内容</p></li>
  * <li><p>senderTag:发送者标签</p></li>
- * <li><p>messageSequence:</p></li>
  * <li><p>storeSequence:消息体的位置游标</p></li>
  * <li><p>createTime:记录创建时间</p></li>
  * </ul>
  *
  */
-public class MessageDTO {
+public class MessageDTO implements Cloneable {
     private Long appId;
     private Long senderUid;
     
@@ -39,7 +39,7 @@ public class MessageDTO {
     private List<MessageChannel> channels;
     
     @ItemType(String.class)
-    private Map<String, String> meta;
+    private Map<String, String> meta = new HashMap<String, String>();
     
     private Long metaAppId;
     
@@ -47,9 +47,6 @@ public class MessageDTO {
 
     // used for sender to tag on a message
     private String senderTag;
-    
-    // unique message sequence number
-    private Long messageSequence;
     
     // used to indicate the message store(anchor) position in message responses
     private Long storeSequence;
@@ -148,14 +145,6 @@ public class MessageDTO {
         this.storeSequence = storeSequence;
     }
 
-    public Long getMessageSequence() {
-        return messageSequence;
-    }
-
-    public void setMessageSequence(Long messageSequence) {
-        this.messageSequence = messageSequence;
-    }
-
     public Long getCreateTime() {
         return createTime;
     }
@@ -170,5 +159,10 @@ public class MessageDTO {
     
     public static MessageDTO fromJson(String json) {
         return (MessageDTO)StringHelper.fromJsonString(json, MessageDTO.class);
+    }
+    
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
