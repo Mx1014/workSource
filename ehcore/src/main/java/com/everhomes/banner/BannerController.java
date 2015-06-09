@@ -32,7 +32,7 @@ public class BannerController extends ControllerBase {
      * <p>获取用户相关的banner</p>
      */
     @RequestMapping("listBannerByCommunityId")
-    @RestReturn(value=ListBannerByCommunityIdCommand.class)
+    @RestReturn(value=BannerDTO.class,collection=true)
     public RestResponse listLaunchPadByCommunityId(@Valid ListBannerByCommunityIdCommand cmd) {
         
         List<BannerDTO> result = bannerService.listBannerByCommuniyId(cmd);
@@ -51,6 +51,36 @@ public class BannerController extends ControllerBase {
     public RestResponse createBanner(@Valid CreateBannerCommand cmd) {
         
         bannerService.createBanner(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /banner/updateBanner</b>
+     * <p>更新banner</p>
+     */
+    @RequestMapping("updateBanner")
+    @RestReturn(value=String.class)
+    public RestResponse updateBanner(@Valid UpdateBannerCommand cmd) {
+        
+        bannerService.updateBanner(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /banner/deleteBanner</b>
+     * <p>删除banner</p>
+     */
+    @RequestMapping("deleteBanner")
+    @RestReturn(value=String.class)
+    public RestResponse deleteBanner(@Valid DeleteBannerCommand cmd) {
+        
+        bannerService.deleteBannerById(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
