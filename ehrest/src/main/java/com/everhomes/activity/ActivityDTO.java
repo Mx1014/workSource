@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
  *<li>checkinFamilyCount:签到家庭数</li>
  *<li>confirmUserCount:确认人数</li>
  *<li>confirmFamilyCount：确认家庭数</li>
+ *<li>familyId:家庭ID</li>
+ *<li>groupId:圈ID</li>
  *<li>userActivityStatus:活动状态</li>
  *<li>processStatus：处理状态</li>
  *</ul>
@@ -35,6 +37,8 @@ public class ActivityDTO {
     private Integer checkinFamilyCount;
     private Integer confirmUserCount;
     private Integer confirmFamilyCount;
+    private Long groupId;
+    private Long familyId;
    
     private Integer userActivityStatus;
     private Integer processStatus;
@@ -154,6 +158,24 @@ public class ActivityDTO {
         this.processStatus = processStatus;
     }
     
+    
+    
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
