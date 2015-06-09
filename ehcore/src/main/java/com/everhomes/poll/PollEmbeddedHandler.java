@@ -22,7 +22,7 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public String renderEmbeddedObjectDetails(Post post) {
-        PollShowResultResponse poll = pollService.showResult(post.getParentPostId());
+        PollShowResultResponse poll = pollService.showResult(post.getId());
         return StringHelper.toJsonString(poll);
     }
 
