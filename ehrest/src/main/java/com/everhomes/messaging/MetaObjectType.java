@@ -4,12 +4,10 @@ package com.everhomes.messaging;
 /**
  * <p>Meta对象类型</p>
  * <ul>
- * <li>USER: 普通用户</li>
- * <li>BIZ: 商家</li>
- * <li>PM: 物业</li>
- * <li>GARC: 业委，Government Agency - Resident Committee</li>
- * <li>GANC: 居委，Government Agency - Neighbor Committee</li>
- * <li>GAPS: 公安，Government Agency - Police Station</li>
+ * <li>GROUP_REQUEST_TO_JOIN: 用户主动请求加入group需要审核</li>
+ * <li>GROUP_INVITE_TO_JOIN: 邀请用户加入gropu需要被邀请者同意/拒绝</li>
+ * <li>GROUP_REQUEST_TO_BE_ADMIN: 用户主动申请成为group管理员需要审核</li>
+ * <li>GROUP_INVITE_TO_BE_ADMIN: 邀请用户成为group管理员需要被邀请者同意/拒绝</li>
  * </ul>
  */
 public enum MetaObjectType {
