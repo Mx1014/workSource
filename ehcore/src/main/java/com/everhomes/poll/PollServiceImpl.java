@@ -65,8 +65,8 @@ public class PollServiceImpl implements PollService {
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
-            long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "").getTime();
-            long endTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "").getTime();
+            long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DD hh:mm:ss").getTime();
+            long endTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DD hh:mm:ss").getTime();
             poll.setStartTime(new Timestamp(startTimeMs));
             poll.setStartTimeMs(startTimeMs);
             poll.setEndTimeMs(endTimeMs);
