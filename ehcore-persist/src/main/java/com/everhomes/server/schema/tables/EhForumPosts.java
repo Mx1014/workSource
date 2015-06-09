@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 992680996;
+	private static final long serialVersionUID = -1243725653;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -135,6 +135,11 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.content</code>. content data, depends on value of content_type
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "content data, depends on value of content_type");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.content_abstract</code>. abstract of content data
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> CONTENT_ABSTRACT = createField("content_abstract", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "abstract of content data");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.embedded_app_id</code>.

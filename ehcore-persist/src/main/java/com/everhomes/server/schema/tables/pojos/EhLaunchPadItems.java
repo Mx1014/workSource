@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1806191031;
+	private static final long serialVersionUID = -1877769493;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -26,6 +26,9 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.String  actionUri;
 	private java.lang.Integer defaultOrder;
 	private java.lang.Byte    applyPolicy;
+	private java.lang.Long    minVersion;
+	private java.lang.Byte    displayFlag;
+	private java.lang.String  displayLayout;
 
 	public EhLaunchPadItems() {}
 
@@ -42,7 +45,10 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.String  actionIcon,
 		java.lang.String  actionUri,
 		java.lang.Integer defaultOrder,
-		java.lang.Byte    applyPolicy
+		java.lang.Byte    applyPolicy,
+		java.lang.Long    minVersion,
+		java.lang.Byte    displayFlag,
+		java.lang.String  displayLayout
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -57,6 +63,9 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.actionUri = actionUri;
 		this.defaultOrder = defaultOrder;
 		this.applyPolicy = applyPolicy;
+		this.minVersion = minVersion;
+		this.displayFlag = displayFlag;
+		this.displayLayout = displayLayout;
 	}
 
 	public java.lang.Long getId() {
@@ -161,5 +170,29 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setApplyPolicy(java.lang.Byte applyPolicy) {
 		this.applyPolicy = applyPolicy;
+	}
+
+	public java.lang.Long getMinVersion() {
+		return this.minVersion;
+	}
+
+	public void setMinVersion(java.lang.Long minVersion) {
+		this.minVersion = minVersion;
+	}
+
+	public java.lang.Byte getDisplayFlag() {
+		return this.displayFlag;
+	}
+
+	public void setDisplayFlag(java.lang.Byte displayFlag) {
+		this.displayFlag = displayFlag;
+	}
+
+	public java.lang.String getDisplayLayout() {
+		return this.displayLayout;
+	}
+
+	public void setDisplayLayout(java.lang.String displayLayout) {
+		this.displayLayout = displayLayout;
 	}
 }

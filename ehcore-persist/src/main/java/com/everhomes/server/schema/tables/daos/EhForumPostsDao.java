@@ -195,6 +195,13 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>content_abstract IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByContentAbstract(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.CONTENT_ABSTRACT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>embedded_app_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEmbeddedAppId(java.lang.Long... values) {

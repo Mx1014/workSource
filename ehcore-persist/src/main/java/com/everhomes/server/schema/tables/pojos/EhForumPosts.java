@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 341703843;
+	private static final long serialVersionUID = -1392714503;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -35,6 +35,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.String   subject;
 	private java.lang.String   contentType;
 	private java.lang.String   content;
+	private java.lang.String   contentAbstract;
 	private java.lang.Long     embeddedAppId;
 	private java.lang.Long     embeddedId;
 	private java.lang.String   embeddedJson;
@@ -80,6 +81,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.String   subject,
 		java.lang.String   contentType,
 		java.lang.String   content,
+		java.lang.String   contentAbstract,
 		java.lang.Long     embeddedAppId,
 		java.lang.Long     embeddedId,
 		java.lang.String   embeddedJson,
@@ -122,6 +124,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.subject = subject;
 		this.contentType = contentType;
 		this.content = content;
+		this.contentAbstract = contentAbstract;
 		this.embeddedAppId = embeddedAppId;
 		this.embeddedId = embeddedId;
 		this.embeddedJson = embeddedJson;
@@ -317,6 +320,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setContent(java.lang.String content) {
 		this.content = content;
+	}
+
+	public java.lang.String getContentAbstract() {
+		return this.contentAbstract;
+	}
+
+	public void setContentAbstract(java.lang.String contentAbstract) {
+		this.contentAbstract = contentAbstract;
 	}
 
 	public java.lang.Long getEmbeddedAppId() {

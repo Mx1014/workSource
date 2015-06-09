@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 2072365081;
+	private static final long serialVersionUID = 1922935484;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -322,269 +322,283 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_forum_posts.content_abstract</code>. abstract of content data
+	 */
+	public void setContentAbstract(java.lang.String value) {
+		setValue(22, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_forum_posts.content_abstract</code>. abstract of content data
+	 */
+	public java.lang.String getContentAbstract() {
+		return (java.lang.String) getValue(22);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
 	public void setEmbeddedAppId(java.lang.Long value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
 	public java.lang.Long getEmbeddedAppId() {
-		return (java.lang.Long) getValue(22);
+		return (java.lang.Long) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_id</code>.
 	 */
 	public void setEmbeddedId(java.lang.Long value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_id</code>.
 	 */
 	public java.lang.Long getEmbeddedId() {
-		return (java.lang.Long) getValue(23);
+		return (java.lang.Long) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
 	public void setEmbeddedJson(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
 	public java.lang.String getEmbeddedJson() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_version</code>.
 	 */
 	public void setEmbeddedVersion(java.lang.Integer value) {
-		setValue(25, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_version</code>.
 	 */
 	public java.lang.Integer getEmbeddedVersion() {
-		return (java.lang.Integer) getValue(25);
+		return (java.lang.Integer) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag1</code>. user for action category id
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(26, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag1</code>. user for action category id
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(26);
+		return (java.lang.Long) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(27, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(27);
+		return (java.lang.Long) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(28, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(28);
+		return (java.lang.Long) getValue(29);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(29, value);
+		setValue(30, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(29);
+		return (java.lang.Long) getValue(30);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(30, value);
+		setValue(31, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(30);
+		return (java.lang.Long) getValue(31);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag1</code>. user for action category path
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(31, value);
+		setValue(32, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag1</code>. user for action category path
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(31);
+		return (java.lang.String) getValue(32);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(32, value);
+		setValue(33, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(32);
+		return (java.lang.String) getValue(33);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(33, value);
+		setValue(34, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(33);
+		return (java.lang.String) getValue(34);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(34, value);
+		setValue(35, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(34);
+		return (java.lang.String) getValue(35);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(35, value);
+		setValue(36, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(35);
+		return (java.lang.String) getValue(36);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.floor_number</code>.
 	 */
 	public void setFloorNumber(java.lang.Long value) {
-		setValue(36, value);
+		setValue(37, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.floor_number</code>.
 	 */
 	public java.lang.Long getFloorNumber() {
-		return (java.lang.Long) getValue(36);
+		return (java.lang.Long) getValue(37);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(37, value);
+		setValue(38, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(37);
+		return (java.lang.Byte) getValue(38);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.update_time</code>.
 	 */
 	public void setUpdateTime(java.sql.Timestamp value) {
-		setValue(38, value);
+		setValue(39, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.update_time</code>.
 	 */
 	public java.sql.Timestamp getUpdateTime() {
-		return (java.sql.Timestamp) getValue(38);
+		return (java.sql.Timestamp) getValue(39);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(39, value);
+		setValue(40, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(39);
+		return (java.sql.Timestamp) getValue(40);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(40, value);
+		setValue(41, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(40);
+		return (java.sql.Timestamp) getValue(41);
 	}
 
 	// -------------------------------------------------------------------------
@@ -613,7 +627,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhForumPostsRecord
 	 */
-	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
+	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS);
 
 		setValue(0, id);
@@ -638,24 +652,25 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		setValue(19, subject);
 		setValue(20, contentType);
 		setValue(21, content);
-		setValue(22, embeddedAppId);
-		setValue(23, embeddedId);
-		setValue(24, embeddedJson);
-		setValue(25, embeddedVersion);
-		setValue(26, integralTag1);
-		setValue(27, integralTag2);
-		setValue(28, integralTag3);
-		setValue(29, integralTag4);
-		setValue(30, integralTag5);
-		setValue(31, stringTag1);
-		setValue(32, stringTag2);
-		setValue(33, stringTag3);
-		setValue(34, stringTag4);
-		setValue(35, stringTag5);
-		setValue(36, floorNumber);
-		setValue(37, status);
-		setValue(38, updateTime);
-		setValue(39, createTime);
-		setValue(40, deleteTime);
+		setValue(22, contentAbstract);
+		setValue(23, embeddedAppId);
+		setValue(24, embeddedId);
+		setValue(25, embeddedJson);
+		setValue(26, embeddedVersion);
+		setValue(27, integralTag1);
+		setValue(28, integralTag2);
+		setValue(29, integralTag3);
+		setValue(30, integralTag4);
+		setValue(31, integralTag5);
+		setValue(32, stringTag1);
+		setValue(33, stringTag2);
+		setValue(34, stringTag3);
+		setValue(35, stringTag4);
+		setValue(36, stringTag5);
+		setValue(37, floorNumber);
+		setValue(38, status);
+		setValue(39, updateTime);
+		setValue(40, createTime);
+		setValue(41, deleteTime);
 	}
 }

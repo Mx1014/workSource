@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 498539667;
+	private static final long serialVersionUID = 159946569;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -90,6 +90,21 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_launch_pad_items.apply_policy</code>. 0: default, 1: override, 2: revert
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> APPLY_POLICY = createField("apply_policy", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: default, 1: override, 2: revert");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.min_version</code>. the min version of the item, it will be not supported if current version is less than this
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> MIN_VERSION = createField("min_version", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the min version of the item, it will be not supported if current version is less than this");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.display_flag</code>. default display on the pad, 0: hide, 1:display
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> DISPLAY_FLAG = createField("display_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "default display on the pad, 0: hide, 1:display");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.display_layout</code>. how many grids it takes at the layout, format: 2x3
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> DISPLAY_LAYOUT = createField("display_layout", org.jooq.impl.SQLDataType.VARCHAR.length(128).defaulted(true), this, "how many grids it takes at the layout, format: 2x3");
 
 	/**
 	 * Create a <code>ehcore.eh_launch_pad_items</code> table reference

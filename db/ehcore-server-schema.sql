@@ -256,6 +256,9 @@ CREATE TABLE `eh_launch_pad_items` (
     `action_uri` VARCHAR(128),
     `default_order` INTEGER NOT NULL DEFAULT 0,
     `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
+	`min_version` BIGINT NOT NULL DEFAULT 1 COMMENT 'the min version of the item, it will be not supported if current version is less than this',
+	`display_flag` TINYINT NOT NULL DEFAULT '1' COMMENT 'default display on the pad, 0: hide, 1:display',
+	`display_layout` VARCHAR(128) DEFAULT '1' COMMENT 'how many grids it takes at the layout, format: 2x3',
 
     PRIMARY KEY (`id`),
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
@@ -840,6 +843,7 @@ CREATE TABLE `eh_forum_posts` (
     `subject` VARCHAR(512),
     `content_type` VARCHAR(32) COMMENT 'object content type',
     `content` TEXT COMMENT 'content data, depends on value of content_type',
+	`content_abstract` TEXT COMMENT 'abstract of content data',
  
     `embedded_app_id` BIGINT,
     `embedded_id` BIGINT,
