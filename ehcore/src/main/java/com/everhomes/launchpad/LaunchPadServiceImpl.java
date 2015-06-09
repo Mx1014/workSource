@@ -188,6 +188,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             item.setScopeId(itemScope.getScopeId());
             item.setDefaultOrder(itemScope.getDefaultOrder() == null ? 0 : itemScope.getDefaultOrder());
             item.setApplyPolicy(itemScope.getApplyPolicy());
+            item.setDisplayFlag(cmd.getDisplayFlag() == null ? ItemDisplayFlag.DISPLAY.getCode() : cmd.getDisplayFlag());
+            item.setDisplayLayout(cmd.getDisplayLayout());
             items.add(item);
         });
         this.launchPadProvider.createLaunchPadItems(items);
@@ -228,6 +230,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 launchPadItem.setApplyPolicy(item.getApplyPolicy());
                 launchPadItem.setScopeType(LaunchPadScopeType.USERDEFINED.getCode());
                 launchPadItem.setScopeId(userId);
+                launchPadItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
                 
                 UserProfile userProfile = new UserProfile();
                 userProfile.setItemKind(ItemKind.JSON.getCode());

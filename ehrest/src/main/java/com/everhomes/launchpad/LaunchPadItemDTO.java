@@ -18,6 +18,9 @@ import com.everhomes.util.StringHelper;
  * <li>actionUri: 动作uri</li>
  * <li>defaultOrder: 默认顺序</li>
  * <li>applyPolicy: 应用策略{@link com.everhomes.launchpad.ApplyPolicy}</li>
+ * <li>minVersion: item 最小版本号</li>
+ * <li>displayFlag: 是否显示{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
+ * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * <li>jsonObj: json字符串，存储附加信息</li>
  * </ul>
  */
@@ -36,6 +39,9 @@ public class LaunchPadItemDTO {
 	private String  actionUri;
 	private Integer defaultOrder;
 	private Byte    applyPolicy;
+	private Long    minVersion;
+	private Byte    displayFlag;
+	private String  displayLayout;
 	private String  jsonObj;
     
 	public Long getId() {
@@ -142,6 +148,30 @@ public class LaunchPadItemDTO {
         this.applyPolicy = applyPolicy;
     }
     
+    public Long getMinVersion() {
+        return minVersion;
+    }
+
+    public void setMinVersion(Long minVersion) {
+        this.minVersion = minVersion;
+    }
+
+    public Byte getDisplayFlag() {
+        return displayFlag;
+    }
+
+    public void setDisplayFlag(Byte displayFlag) {
+        this.displayFlag = displayFlag;
+    }
+
+    public String getDisplayLayout() {
+        return displayLayout;
+    }
+
+    public void setDisplayLayout(String displayLayout) {
+        this.displayLayout = displayLayout;
+    }
+
     public String getJsonObj() {
         return jsonObj;
     }

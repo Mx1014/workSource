@@ -9,12 +9,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>
  * <ul>
- * <li>nextPageOffset：分页的锚点，下一页开始取数据的位置</li>
+ * <li>pageOffset：下一页取值</li>
  * <li>requests: 申请信息，参考{@link  com.everhomes.family.FamilyDTO}</li>
  * </ul>
  */
 public class ListWaitApproveFamilyCommandResponse {
-    private Long nextPageOffset;
+    private Long pageOffset;
     
     @ItemType(FamilyDTO.class)
     private List<FamilyDTO> requests;
@@ -22,12 +22,12 @@ public class ListWaitApproveFamilyCommandResponse {
     public ListWaitApproveFamilyCommandResponse() {
     }
 
-    public Long getNextPageOffset() {
-        return nextPageOffset;
+    public Long getPageOffset() {
+        return pageOffset;
     }
 
-    public void setNextPageOffset(Long nextPageOffset) {
-        this.nextPageOffset = nextPageOffset;
+    public void setPageOffset(Long pageOffset) {
+        this.pageOffset = pageOffset;
     }
 
     public List<FamilyDTO> getRequests() {

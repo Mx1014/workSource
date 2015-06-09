@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>actionName: 动作名称</li>
  * <li>actionIcon: 动作图标</li>
  * <li>actionUri: 动作uri</li>
+ * <li>displayFlag: 是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
+ * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * </ul>
  */
 public class CreateLaunchPadItemCommand {
@@ -38,6 +40,10 @@ public class CreateLaunchPadItemCommand {
     private String  actionIcon;
     @NotNull
     private String  actionUri;
+    
+    private Byte displayFlag;
+    
+    private String displayLayout;
 
     public CreateLaunchPadItemCommand() {
     }
@@ -112,6 +118,22 @@ public class CreateLaunchPadItemCommand {
 
     public void setActionUri(String actionUri) {
         this.actionUri = actionUri;
+    }
+
+    public Byte getDisplayFlag() {
+        return displayFlag;
+    }
+
+    public void setDisplayFlag(Byte displayFlag) {
+        this.displayFlag = displayFlag;
+    }
+
+    public String getDisplayLayout() {
+        return displayLayout;
+    }
+
+    public void setDisplayLayout(String displayLayout) {
+        this.displayLayout = displayLayout;
     }
 
     @Override

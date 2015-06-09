@@ -426,7 +426,7 @@ public class FamilyServiceImpl implements FamilyService {
             if(group != null){
 
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatarUrl((parserUri(group.getAvatar(),"Family",group.getCreatorUid())));
+                family.setAvatarUrl((parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid())));
                 family.setAvatarUri(group.getAvatar());
                 family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
@@ -963,7 +963,7 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
                 f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),"User",groupMember.getCreatorUid())));
+                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 UserIdentifier userIdentifier = getMobileOfUserIdentifier(groupMember.getMemberId());
                 if(userIdentifier != null)
@@ -1121,11 +1121,11 @@ public class FamilyServiceImpl implements FamilyService {
         listGroupMembers.forEach((r) ->{
             FamilyMembershipRequestDTO member = new FamilyMembershipRequestDTO();
             member.setFamilyId(familyId);
-            member.setFamilyAvatarUrl(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
+            member.setFamilyAvatarUrl(parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid()));
             member.setFamilyAvatarUri(group.getAvatar());
             member.setFamilyName(group.getName());
             member.setRequestorUid(r.getMemberId());
-            member.setRequestorAvatar(parserUri(r.getMemberAvatar(),"User",r.getCreatorUid()));
+            member.setRequestorAvatar(parserUri(r.getMemberAvatar(),EntityType.USER.getCode(),r.getCreatorUid()));
             member.setRequestorComment(r.getRequestorComment());
             member.setRequestingTime(r.getCreateTime().toString());
             
@@ -1192,7 +1192,7 @@ public class FamilyServiceImpl implements FamilyService {
                             User u = this.userProvider.findUserById(m.getMemberId());
                             n.setUserId(u.getId());
                             n.setUserName(m.getMemberNickName());
-                            n.setUserAvatarUrl(parserUri(m.getMemberAvatar(),"User",u.getId()));
+                            n.setUserAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),u.getId()));
                             n.setUserAvatarUri(m.getMemberAvatar());
                             n.setUserStatusLine(u.getStatusLine());
                             n.setBuildingName(address.getBuildingName());
@@ -1440,7 +1440,7 @@ public class FamilyServiceImpl implements FamilyService {
             
             familyDTO.setMemberUid(m.getMemberId());
             familyDTO.setMemberNickName(m.getMemberNickName());
-            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),"User",m.getCreatorUid()));
+            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),m.getCreatorUid()));
             familyDTO.setMemberAvatarUri(m.getMemberAvatar());
             familyDTO.setMembershipStatus(m.getMemberStatus());
             Address address = this.addressProvider.findAddressById(addressId);
@@ -1481,7 +1481,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(list != null && !list.isEmpty()){
             response.setRequests(list);
             if(list.size() == pageSize){
-                response.setNextPageOffset(pageOffset + 1);
+                response.setPageOffset(pageOffset + 1);
             }
         }
         return response;
