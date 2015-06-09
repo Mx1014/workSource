@@ -41,6 +41,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 帖子或评论创建时间</li>
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.forum.AttachmentDTO}</li>
  * <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostAssignedFlag}</li>
+ * <li>likeFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostLikeFlag}</li>
  * </ul>
  */
 public class PostDTO {
@@ -107,6 +108,10 @@ public class PostDTO {
     private List<AttachmentDTO> attachments;
     
     private Byte assignedFlag;
+    
+    private String forumName;
+    
+    private Byte likeFlag;
 
 	public Long getId() {
         return id;
@@ -354,6 +359,22 @@ public class PostDTO {
 
     public void setAssignedFlag(Byte assignedFlag) {
         this.assignedFlag = assignedFlag;
+    }
+
+    public String getForumName() {
+        return forumName;
+    }
+
+    public void setForumName(String forumName) {
+        this.forumName = forumName;
+    }
+
+    public Byte getLikeFlag() {
+        return likeFlag;
+    }
+
+    public void setLikeFlag(Byte likeFlag) {
+        this.likeFlag = likeFlag;
     }
 
     @Override

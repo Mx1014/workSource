@@ -351,6 +351,9 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`,`name`, `path`, `defaul
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`,`name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(3134, 10002, 13, '卖房', '应用/卖房', 0, 2, UTC_TIMESTAMP());
 
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', 1, 'zh_CN', '此帖已删除');	
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', 2, 'zh_CN', '此回复已删除');	
+	
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 1, 'zh_CN', '有人申请加入圈（圈不需要审批），通知申请者成功加入圈', '您已加入圈“${groupName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 2, 'zh_CN', '有人申请加入圈（圈不需要审批），通知圈管理员有新成员加入', '${userName}已加入圈“${groupName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 3, 'zh_CN', '有人申请加入圈（圈需要审批），通知申请者等待审核', '您已成功提交加入圈“${groupName}”的申请，请耐心等待审核通过。');
