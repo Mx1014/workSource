@@ -105,7 +105,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
-    @Cacheable(value="Family", key="#addressId" ,unless="#result==null")
+    //@Cacheable(value="Family", key="#addressId" ,unless="#result==null")
     @Override
     public Family findFamilyByAddressId(long addressId) {
         final Family[] result = new Family[1];
@@ -140,17 +140,11 @@ public class FamilyProviderImpl implements FamilyProvider {
                         EntityType.USER.getCode(), userGroup.getOwnerUid());
                 assert(m != null);
                 if(m != null) {
-                    //this.groupProvider.deleteGroupMember(m);
-                    //clear findFamilyByAddress cache
-                    
-                    FamilyProvider self = PlatformContext.getComponent(FamilyProvider.class);
-                    
-                    self.deleteFamilyMember(m);
                     
                     // retrieve family info after membership changes
                     
-                    family = self.findFamilyByAddressId(address.getId());
-                    
+                    this.groupProvider.deleteGroupMember(m);
+                    family = findFamilyByAddressId(address.getId());
                     if(family.getMemberCount() == 0) {
                         this.groupProvider.deleteGroup(family);
                     } else {
@@ -176,12 +170,6 @@ public class FamilyProviderImpl implements FamilyProvider {
             return null;
         });
 
-    }
-    
-    @CacheEvict(value="Family", key="#addressId")
-    @Override
-    public void deleteFamilyMember(GroupMember m){
-        this.groupProvider.deleteGroupMember(m);
     }
     
     private GroupMember pickOneMemberToPromote(Family family) {
