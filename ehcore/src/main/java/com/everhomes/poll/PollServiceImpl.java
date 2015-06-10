@@ -15,7 +15,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
@@ -40,6 +42,9 @@ public class PollServiceImpl implements PollService {
     
     @Autowired
     private FamilyProvider familyProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
     
     @Autowired
     private DbProvider dbProvider;
@@ -211,7 +216,13 @@ public class PollServiceImpl implements PollService {
         }
         List<PollItem> result = pollProvider.listPollItemByPollId(cmd.getPollId());
         PollShowResultResponse response = new PollShowResultResponse();
-        response.setItems(result.stream().map(r->ConvertHelper.convert(r, PollItemDTO.class)).collect(Collectors.toList()));
+        response.setItems(result.stream().map(r->{
+                PollItemDTO pollItem = ConvertHelper.convert(r, PollItemDTO.class);
+                pollItem.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
+                pollItem.setItemId(r.getResourceId());
+                pollItem.setCreateTime(r.getCreateTime().toString());
+                return pollItem;
+                }).collect(Collectors.toList()));
         PollDTO dto=new PollDTO();
         try{
             BeanUtils.copyProperties(poll, dto);
@@ -223,6 +234,7 @@ public class PollServiceImpl implements PollService {
         dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }
@@ -238,7 +250,7 @@ public class PollServiceImpl implements PollService {
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
             PollItemDTO item= ConvertHelper.convert(r, PollItemDTO.class);
-            item.setCoverUrl(r.getResourceUrl());
+            item.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
             item.setItemId(r.getResourceId());
             item.setCreateTime(r.getCreateTime().toString());
             return item;
