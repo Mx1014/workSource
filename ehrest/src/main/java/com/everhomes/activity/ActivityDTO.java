@@ -20,8 +20,8 @@ import com.everhomes.util.StringHelper;
  *<li>confirmFamilyCount：确认家庭数</li>
  *<li>familyId:家庭ID</li>
  *<li>groupId:圈ID</li>
- *<li>userActivityStatus:活动状态</li>
- *<li>processStatus：处理状态</li>
+ *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
+ *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *</ul>
  */
 public class ActivityDTO {
