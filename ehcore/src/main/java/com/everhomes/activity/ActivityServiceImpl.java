@@ -365,7 +365,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityDTO confirm(ActivityComfirmCommand cmd) {
+    public ActivityDTO confirm(ActivityConfirmCommand cmd) {
         ActivityRoster item = activityProvider.findRosterById(cmd.getActivityRosterId());
         if (item == null) {
             LOGGER.error("cannnot find roster record in database");

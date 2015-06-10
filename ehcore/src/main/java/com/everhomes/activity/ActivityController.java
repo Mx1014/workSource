@@ -85,7 +85,7 @@ public class ActivityController extends ControllerBase {
     
     @RequestMapping("confirm")
     @RestReturn(ActivityDTO.class)
-    public RestResponse confirm(@Valid ActivityComfirmCommand cmd){
+    public RestResponse confirm(@Valid ActivityConfirmCommand cmd){
         ActivityDTO confirm = activityService.confirm(cmd);
         return new RestResponse(confirm);
     }
