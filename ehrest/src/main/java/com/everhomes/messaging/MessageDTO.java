@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.math.NumberUtils;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -19,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>contextToken:上下文件token</li>
  * <li><p>channels:通道列表。参考{@link com.everhomes.messaging.MessageChannel}</p></li>
  * <li><p>meta:额外要添加的信息</p></li>
- * <li><p>metaAppId:消息模块的发送相关的应用ID</p></li>
+ * <li><p>bodyType:消息模块的发送相关的类型</p></li>
  * <li><p>body:消息内容</p></li>
  * <li><p>senderTag:发送者标签</p></li>
  * <li><p>storeSequence:消息体的位置游标</p></li>
@@ -34,6 +36,8 @@ public class MessageDTO implements Cloneable {
     private String contextType;
     private String contextToken;
     
+    private static final String META_APP_ID = "metaAppId"; 
+    
     @ItemType(MessageChannel.class)
     @NotNull
     private List<MessageChannel> channels;
@@ -41,7 +45,7 @@ public class MessageDTO implements Cloneable {
     @ItemType(String.class)
     private Map<String, String> meta = new HashMap<String, String>();
     
-    private Long metaAppId;
+    private String bodyType;
     
     private String body;
 
@@ -105,12 +109,12 @@ public class MessageDTO implements Cloneable {
         }
     }
 
-    public Long getMetaAppId() {
-        return metaAppId;
+    public String getBodyType() {
+        return bodyType;
     }
 
-    public void setMetaAppId(Long metaAppId) {
-        this.metaAppId = metaAppId;
+    public void setBodyType(String bodyType) {
+        this.bodyType = bodyType;
     }
 
     public Map<String, String> getMeta() {
@@ -118,6 +122,10 @@ public class MessageDTO implements Cloneable {
     }
 
     public void setMeta(Map<String, String> meta) {
+        String appId = null;
+        if(this.meta != null && null != (appId = this.meta.get("META_APP_ID"))) {
+              meta.put("META_APP_ID", appId);
+          }
         this.meta = meta;
     }
 
@@ -151,6 +159,24 @@ public class MessageDTO implements Cloneable {
 
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
+    }
+    
+    public void setMetaAppId(Long metaAppId) {
+        if(null == this.meta) {
+            this.meta = new HashMap<String, String>();
+        }
+        this.meta.put("META_APP_ID", metaAppId.toString());
+    }
+    
+    public Long getMetaAppId() {
+      if(null == this.meta) {
+            return 0l;
+        }
+      String appId = this.meta.get("META_APP_ID");
+      if(appId == null) {
+            return 0l;
+        }
+      return NumberUtils.toLong(appId, 0l);
     }
 
     public String toJson() {
