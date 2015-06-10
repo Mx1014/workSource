@@ -155,6 +155,9 @@ public class ContentServerServiceImpl implements ContentServerService {
 
     private static String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId,
             String token) {
+        if(StringUtils.isEmpty(uri)){
+            return null;
+        }
         if (!uri.contains("cs://")) {
             return uri;
         }

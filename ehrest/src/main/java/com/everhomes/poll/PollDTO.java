@@ -2,15 +2,31 @@
 package com.everhomes.poll;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>pollId:投票ID</li>
+ *<li>startTime:起始时间,格式:YYYY-MM-DD hh:mm:ss</li>
+ *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
+ *<li>pollCount:投票数</li>
+ *<li>pollVoterStatus:投票状态 ,1 未投票，2 已投票</li>
+ *<li>processStatus:处理状态，0 未知,1 未开始，2 进行中，3 已结束,</li>
+ *<li>anonymousFlag:匿名标记 0 不匿名,1 匿名</li>
+ *<li>multiChoiceFlag:多选标记</li>
+ *<ul>
+ */
 public class PollDTO {
     private Long pollId;
-    private Long startTime;
-    private Long stopTime;
+    private String startTime;
+    private String stopTime;
     private Integer pollCount;
+    private Integer anonymousFlag;
+    private Integer multiChoiceFlag;
     
     private Integer pollVoterStatus;
     private Integer processStatus;
+    
     
     public PollDTO() {
     }
@@ -23,19 +39,21 @@ public class PollDTO {
         this.pollId = pollId;
     }
 
-    public Long getStartTime() {
+
+
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Long getStopTime() {
+    public String getStopTime() {
         return stopTime;
     }
 
-    public void setStopTime(Long stopTime) {
+    public void setStopTime(String stopTime) {
         this.stopTime = stopTime;
     }
 
@@ -63,6 +81,23 @@ public class PollDTO {
         this.processStatus = processStatus;
     }
     
+    
+    public Integer getAnonymousFlag() {
+        return anonymousFlag;
+    }
+
+    public void setAnonymousFlag(Integer anonymousFlag) {
+        this.anonymousFlag = anonymousFlag;
+    }
+
+    public Integer getMultiChoiceFlag() {
+        return multiChoiceFlag;
+    }
+
+    public void setMultiChoiceFlag(Integer multiChoiceFlag) {
+        this.multiChoiceFlag = multiChoiceFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

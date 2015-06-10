@@ -65,7 +65,7 @@ CREATE TABLE `eh_devices` (
   	PRIMARY KEY (`id`),
     UNIQUE `u_eh_dev_id`(`device_id`),
     INDEX `u_eh_dev_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_certs`;
 
@@ -81,7 +81,7 @@ CREATE TABLE `ehcore`.`eh_certs` (
   
   PRIMARY KEY (`id`),
   UNIQUE `u_eh_certs_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
 #
 # member of global parition
@@ -97,7 +97,7 @@ CREATE TABLE `eh_locale_strings`(
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -114,7 +114,7 @@ CREATE TABLE `eh_locale_templates`(
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
@@ -133,7 +133,7 @@ CREATE TABLE `eh_categories`(
     INDEX `i_eh_category_path`(`path`),
     INDEX `i_eh_category_order`(`default_order`),
     INDEX `i_eh_category_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -150,7 +150,7 @@ CREATE TABLE `eh_state_triggers` (
     `create_time` DATETIME COMMENT 'remove-deletion policy, it is used to control program logic, makes more sense to just remove it',
     
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -172,7 +172,7 @@ CREATE TABLE `eh_search_keywords`(
     INDEX `i_kword_weight_frequency`(`weight`, `frequency`),
     INDEX `i_kword_update_time`(`update_time`),
     INDEX `i_kword_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -195,7 +195,7 @@ CREATE TABLE `eh_app_promotions` (
     PRIMARY KEY (`id`),
     INDEX `i_app_promo_create_time`(`create_time`),
     INDEX `i_app_promo_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -236,7 +236,7 @@ CREATE TABLE `eh_scoped_configurations`(
     INDEX `i_eh_scoped_cfg_itag2`(`integral_tag2`),
     INDEX `i_eh_scoped_cfg_stag1`(`string_tag1`),
     INDEX `i_eh_scoped_cfg_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global sharding group
@@ -264,7 +264,7 @@ CREATE TABLE `eh_launch_pad_items` (
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
     INDEX `i_eh_scoped_cfg_group`(`item_group`),
     INDEX `i_eh_scoped_cfg_group_order`(`item_group`, `default_order`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -291,7 +291,7 @@ CREATE TABLE `eh_stats_by_city` (
     PRIMARY KEY (`id`),
     UNIQUE `u_stats_city_report`(`city_id`, `stats_date`, `stats_type`),
     INDEX `u_stats_delete_time`(`delete_time`)    
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -305,7 +305,7 @@ CREATE TABLE `eh_templates`(
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_template_name`(`name`)    
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -323,7 +323,7 @@ CREATE TABLE `eh_feedbacks`(
     PRIMARY KEY (`id`),
     INDEX `i_eh_feedback_create_time`(`create_time`),
     INDEX `i_eh_feedback_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -364,7 +364,7 @@ CREATE TABLE `eh_audit_logs`(
     INDEX `i_eh_audit_itag2`(`integral_tag2`),
     INDEX `i_eh_audit_stag1`(`string_tag1`),
     INDEX `i_eh_audit_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of user-related sharding group
@@ -422,7 +422,7 @@ CREATE TABLE `eh_users` (
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_user_account_name`(`account_name`),
     INDEX `i_eh_user_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users partition
@@ -444,7 +444,7 @@ CREATE TABLE `eh_user_identifiers` (
     INDEX `i_eh_user_idf_type_token`(`identifier_type`, `identifier_token`),
     INDEX `i_eh_user_idf_create_time`(`create_time`),
     INDEX `i_eh_user_idf_notify_time`(`notify_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 # 
 # member of eh_users partition
@@ -468,7 +468,7 @@ CREATE TABLE `eh_user_groups` (
     UNIQUE `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
     INDEX `i_eh_usr_grp_owner`(`owner_uid`),
     INDEX `i_eh_usr_grp_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users sharding group
@@ -487,7 +487,7 @@ CREATE TABLE `eh_user_followed_families`(
     UNIQUE `i_eh_usr_ffmy_followed`(`owner_uid`, `followed_family`),
     INDEX `i_eh_usr_ffmy_owner`(`owner_uid`),
     INDEX `i_eh_usr_ffmy_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users partition
@@ -511,7 +511,7 @@ CREATE TABLE `eh_user_invitations` (
     INDEX `u_eh_invite_expiration`(`expiration`),
     INDEX `u_eh_invite_code_status`(`invite_code`, `status`),
     INDEX `u_eh_invite_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_invitation_roster`;
 CREATE TABLE `eh_user_invitation_roster` (
@@ -522,7 +522,7 @@ CREATE TABLE `eh_user_invitation_roster` (
     
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_invite_roster_invite_id`(`invite_id`) REFERENCES `eh_user_invitations`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users sharding group
@@ -539,7 +539,7 @@ CREATE TABLE `eh_user_blacklist` (
     UNIQUE `u_eh_usr_blk_owner_target`(`owner_uid`, `target_type`, `target_id`),
     INDEX `i_eh_usr_blk_owner`(`owner_uid`),
     INDEX `i_eh_usr_blk_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users sharding group
@@ -556,7 +556,7 @@ CREATE TABLE `eh_user_favorites` (
     UNIQUE `u_eh_usr_favorite_target`(`owner_uid`, `target_type`, `target_id`),
     INDEX `i_eh_usr_favorite_owner`(`owner_uid`),
     INDEX `i_eh_usr_favorite_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_user sharding group
@@ -574,7 +574,7 @@ CREATE TABLE `eh_user_likes` (
     UNIQUE `u_eh_usr_like_target`(`owner_uid`, `target_type`, `target_id`),
     INDEX `i_eh_usr_like_owner`(`owner_uid`),
     INDEX `i_eh_usr_like_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users sharding group
@@ -608,7 +608,7 @@ CREATE TABLE `eh_user_profiles`(
     INDEX `i_eh_uprof_itag2`(`integral_tag2`),
     INDEX `i_eh_uprof_stag1`(`string_tag1`),
     INDEX `i_eh_uprof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of grouping related sharding group
@@ -660,7 +660,7 @@ CREATE TABLE `eh_groups` (
     INDEX `i_eh_group_itag2`(`integral_tag2`),
     INDEX `i_eh_group_stag1`(`string_tag1`),
     INDEX `i_eh_group_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_groups sharding group
@@ -675,7 +675,7 @@ CREATE TABLE `eh_group_visible_scopes` (
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_grp_scope_owner`(`owner_id`) REFERENCES `eh_groups`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_grp_scope_target`(`scope_code`, `scope_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_groups sharding group
@@ -709,7 +709,7 @@ CREATE TABLE `eh_group_profiles` (
     INDEX `i_eh_gprof_itag2`(`integral_tag2`),
     INDEX `i_eh_gprof_stag1`(`string_tag1`),
     INDEX `i_eh_gprof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_groups sharding group
@@ -757,7 +757,7 @@ CREATE TABLE `eh_group_members` (
     INDEX `i_eh_gprof_itag2`(`integral_tag2`),
     INDEX `i_eh_gprof_stag1`(`string_tag1`),
     INDEX `i_eh_gprof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_groups sharding group
@@ -781,7 +781,7 @@ CREATE TABLE `eh_group_op_requests` (
     INDEX `i_eh_grp_op_requestor`(`requestor_uid`),
     INDEX `i_eh_grp_op_create_time`(`create_time`),
     INDEX `i_eh_grp_op_process_time`(`process_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table for forum sharding group
@@ -807,7 +807,7 @@ CREATE TABLE `eh_forums` (
     INDEX `i_eh_frm_modify_seq` (`modify_seq`),
     INDEX `i_eh_frm_update_time` (`update_time`),
     INDEX `i_eh_frm_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of forum post sharding group
@@ -877,7 +877,7 @@ CREATE TABLE `eh_forum_posts` (
     INDEX `i_eh_post_stag2`(`string_tag2`),
     INDEX `i_eh_post_update_time`(`update_time`),
     INDEX `i_eh_post_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of forum post sharding group
@@ -892,7 +892,7 @@ CREATE TABLE `eh_forum_visible_scopes` (
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of forum post sharding group
@@ -907,7 +907,7 @@ CREATE TABLE `eh_forum_assigned_scopes` (
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of forum post sharding group
@@ -922,7 +922,7 @@ CREATE TABLE `eh_forum_visible_scopes` (
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of forum post sharding group
@@ -937,7 +937,7 @@ CREATE TABLE `eh_forum_attachments` (
     `create_time` DATETIME NOT NULL,
     PRIMARY KEY (`id`),
     INDEX `i_eh_frmatt_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -955,7 +955,7 @@ CREATE TABLE `eh_borders` (
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_border_config_tag`(`config_tag`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -979,7 +979,7 @@ CREATE TABLE `eh_regions` (
     INDEX `i_eh_region_path`(`path`),
  	INDEX `i_eh_region_path_level`(`path`, `level`),   
  	INDEX `i_eh_region_parent`(`parent_id`)   
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -1000,7 +1000,7 @@ CREATE TABLE `eh_departments` (
     INDEX `i_eh_dept_path`(`path`),
     INDEX `i_eh_dept_path_level`(`path`, `level`),   
     INDEX `i_eh_dept_parent`(`parent_id`)   
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_department_members`;
 CREATE TABLE `eh_department_members` (
@@ -1014,7 +1014,7 @@ CREATE TABLE `eh_department_members` (
     FOREIGN KEY `fk_eh_deptm_owner`(`department_id`) REFERENCES `eh_departments`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_deptm_uid`(`member_uid`),
     INDEX `i_eh_deptm_group`(`member_group`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_department_communities`;
 CREATE TABLE `eh_department_communities` (
@@ -1024,7 +1024,7 @@ CREATE TABLE `eh_department_communities` (
     PRIMARY KEY (`id`),
     INDEX `i_eh_deptc_dept`(`department_id`),
     INDEX `i_eh_deptc_community`(`community_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of the sharding group
@@ -1079,7 +1079,7 @@ CREATE TABLE `eh_communities`(
     INDEX `i_eh_community_itag2`(`integral_tag2`),
     INDEX `i_eh_community_stag1`(`string_tag1`),
     INDEX `i_eh_community_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1096,7 +1096,7 @@ CREATE TABLE `eh_community_geopoints` (
     PRIMARY KEY (`id`),
     INDEX `i_eh_comm_description`(`description`),
 	INDEX `i_eh_comm_geopoints`(`geohash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1130,7 +1130,7 @@ CREATE TABLE `eh_community_profiles` (
     INDEX `i_eh_cprof_itag2`(`integral_tag2`),
     INDEX `i_eh_cprof_stag1`(`string_tag1`),
     INDEX `i_eh_cprof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1152,7 +1152,7 @@ CREATE TABLE `eh_community_pm_members` (
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
 	INDEX `i_eh_cpm_group`(`pm_group`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1171,7 +1171,7 @@ CREATE TABLE `eh_community_pm_tasks` (
 	
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1188,7 +1188,7 @@ CREATE TABLE `eh_community_address_mappings` (
     
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1211,7 +1211,7 @@ CREATE TABLE `eh_community_pm_bills` (
     `notify_time` DATETIME COMMENT 'the last time of notification for the bill',
 	
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1232,7 +1232,7 @@ CREATE TABLE `eh_community_pm_bill_items` (
     `create_time` DATETIME,
 	
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1252,7 +1252,7 @@ CREATE TABLE `eh_community_pm_owners` (
     `create_time` DATETIME,
 	
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1269,7 +1269,7 @@ CREATE TABLE `eh_community_pm_contacts` (
     `create_time` DATETIME,
 	
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
@@ -1289,7 +1289,7 @@ CREATE TABLE `eh_community_address_owners` (
 	
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cowner_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
-)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # Key table in address related sharding group
@@ -1341,7 +1341,7 @@ CREATE TABLE `eh_addresses` (
     INDEX `i_eh_addr_itag2`(`integral_tag2`),
     INDEX `i_eh_addr_stag1`(`string_tag1`),
     INDEX `i_eh_addr_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_groups(eh_families) sharding group
@@ -1358,7 +1358,7 @@ CREATE TABLE `eh_family_followers` (
     UNIQUE `i_fm_follower_follower`(`owner_family`, `follower_uid`),
     INDEX `i_eh_fm_follower_owner`(`owner_family`),
     INDEX `i_eh_fm_follower_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global partition
@@ -1394,7 +1394,7 @@ CREATE TABLE `eh_banners` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # Record banner clicks at per user basis, due to amount of potential users, may
@@ -1417,7 +1417,7 @@ CREATE TABLE `eh_banner_clicks`(
     UNIQUE `u_eh_banner_clk_user`(`banner_id`, `uid`),
     INDEX `i_eh_banner_clk_last_time`(`last_click_time`),
     INDEX `i_eh_banner_clk_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 # 
 # Record banner related user purchase, due to amount of potential users, may
@@ -1439,7 +1439,7 @@ CREATE TABLE `eh_banner_orders` (
     INDEX `i_eh_banner_order_user`(`uid`),
     INDEX `i_eh_banner_order_purchase_time`(`purchase_time`),
     INDEX `i_eh_banner_order_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # Resource management
@@ -1463,7 +1463,7 @@ CREATE TABLE `eh_binary_resources` (
     INDEX `i_eh_bin_res_checksum`(`checksum`),
     INDEX `i_eh_bin_res_create_time`(`create_time`),
     INDEX `i_eh_bin_res_access_time`(`access_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # Resource management
@@ -1491,7 +1491,7 @@ CREATE TABLE `eh_rtxt_resources`(
     INDEX `i_eh_rtxt_res_checksum`(`checksum`),
     INDEX `i_eh_rtxt_res_create_time`(`create_time`),
     INDEX `i_eh_rtxt_res_access_time`(`access_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of event sharding group
@@ -1537,7 +1537,7 @@ CREATE TABLE `eh_events`(
     INDEX `i_eh_evt_creator_uid`(`creator_uid`),
     INDEX `i_eh_evt_create_time`(`create_time`),
     INDEX `i_eh_evt_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of event sharding group
@@ -1561,7 +1561,7 @@ CREATE TABLE `eh_event_roster`(
     UNIQUE `u_eh_evt_roster_attendee`(`event_id`, `uid`),
     INDEX `i_eh_evt_roster_signup_time`(`signup_time`),
     INDEX `i_eh_evt_roster_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of event sharding group
@@ -1579,7 +1579,7 @@ CREATE TABLE `eh_event_ticket_groups`(
     UNIQUE `u_eh_evt_tg_name`(`event_id`, `name`),
     INDEX `i_eh_evt_tg_event_id`(`event_id`),
     INDEX `i_eh_evt_tg_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of event sharding group
@@ -1600,7 +1600,7 @@ CREATE TABLE `eh_event_tickets`(
     UNIQUE `u_eh_evt_ticket_ticket`(`ticket_group_id`, `ticket_number`),
     INDEX `i_eh_evt_ticket_event`(`event_id`),
     INDEX `i_eh_evt_ticket_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_events sharding group
@@ -1636,7 +1636,7 @@ CREATE TABLE `eh_event_profiles`(
     INDEX `i_eh_evt_prof_stag1`(`string_tag1`),
     INDEX `i_eh_evt_prof_stag2`(`string_tag2`)
     
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of activity sharding group
@@ -1647,7 +1647,8 @@ CREATE TABLE `eh_activities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `subject` VARCHAR(512),
-    `description` TEXT,
+    `description` TEXTi,
+    `tag` VARCHAR(32),
     `location` TEXT,
     `contact_person` VARCHAR(128),
     `contact_number` VARCHAR(64),
@@ -1682,7 +1683,7 @@ CREATE TABLE `eh_activities` (
     INDEX `i_eh_act_group`(`group_discriminator`, `group_id`),
     INDEX `i_eh_act_create_time`(`create_time`),
     INDEX `i_eh_act_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_activities sharding group
@@ -1711,7 +1712,7 @@ CREATE TABLE `eh_activity_roster`(
     UNIQUE `u_eh_act_roster_uuid`(`uuid`),
     UNIQUE `u_eh_act_roster_user`(`activity_id`, `uid`),
     INDEX `i_eh_act_roster_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of polling management sharding group
@@ -1745,7 +1746,7 @@ CREATE TABLE `eh_polls` (
     INDEX `i_eh_poll_post_id`(`post_id`),
     INDEX `i_eh_poll_create_time`(`create_time`),
     INDEX `i_eh_poll_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_polls partition
@@ -1765,7 +1766,7 @@ CREATE TABLE `eh_poll_items`(
     PRIMARY KEY (`id`),
     INDEX `i_eh_poll_item_poll`(`poll_id`),
     INDEX `i_eh_poll_item_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_polls partition
@@ -1784,7 +1785,7 @@ CREATE TABLE `eh_poll_votes`(
     UNIQUE `i_eh_poll_vote_voter`(`poll_id`, `item_id`, `voter_uid`),
     INDEX `i_eh_poll_vote_poll`(`poll_id`),
     INDEX `i_eh_poll_vote_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # key table of business management sharding group
@@ -1809,7 +1810,7 @@ CREATE TABLE `eh_business`(
     INDEX `i_eh_biz_geohash`(`geohash`),
     INDEX `i_eh_biz_create_time`(`create_time`),
     INDEX `i_eh_biz_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_business sharding group
@@ -1844,7 +1845,7 @@ CREATE TABLE `eh_business_profiles`(
     INDEX `i_eh_biz_prof_itag2`(`integral_tag2`),
     INDEX `i_eh_biz_prof_stag1`(`string_tag1`),
     INDEX `i_eh_biz_prof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_business sharding group
@@ -1871,7 +1872,7 @@ CREATE TABLE `eh_biz_coupon_groups`(
     INDEX `i_eh_biz_grp_start_time`(`start_time`),
     INDEX `i_eh_biz_grp_expire_time`(`expire_time`),
     INDEX `i_eh_biz_grp_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_business sharding group
@@ -1892,7 +1893,7 @@ CREATE TABLE `eh_biz_coupon`(
     INDEX `i_eh_biz_coupon_business_id`(`business_id`),    
     INDEX `i_eh_biz_coupon_number`(`coupon_group_id`, `coupon_number`),    
     INDEX `i_eh_biz_coupon_create_time`(`create_time`)    
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -1912,7 +1913,7 @@ CREATE TABLE `eh_client_packages`(
 	`creator_uid` BIGINT,
     `create_time` DATETIME,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -1929,7 +1930,7 @@ CREATE TABLE `eh_client_package_files`(
 	
     PRIMARY KEY (`id`),
     FOREIGN KEY `fk_eh_cpkg_file_package`(`package_id`) REFERENCES `eh_client_packages`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -1946,7 +1947,7 @@ CREATE TABLE `eh_user_locations`(
     `collect_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
     `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',   
     PRIMARY KEY  (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -1962,7 +1963,7 @@ CREATE TABLE `eh_user_behaviors`(
     `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
     `create_time` DATETIME DEFAULT NULL,
      PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -1977,7 +1978,7 @@ CREATE TABLE `eh_user_contacts`(
       `contact_name` VARCHAR(128) DEFAULT '',
       `create_time` DATETIME DEFAULT NULL,
       PRIMARY KEY  (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -1995,7 +1996,7 @@ CREATE TABLE `eh_user_installed_apps`(
       `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
       `create_time` DATETIME DEFAULT NULL,
       PRIMARY KEY  (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -2022,7 +2023,7 @@ CREATE TABLE if NOT exists `eh_user_activities` (
       `report_time_ms` BIGINT(20) NOT NULL DEFAULT '0',
       `create_time` DATETIME DEFAULT NULL,
       PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -2039,7 +2040,7 @@ CREATE  TABLE  `eh_content_server_resources` (
 	`resource_name` VARCHAR(128) NOT NULL, 
 	`metadata` text,
 	PRIMARY  KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -2055,7 +2056,7 @@ CREATE TABLE  `eh_content_server` (
         `public_address` VARCHAR(32) NOT NULL,
         `public_port` INT(11) NOT NULL,
         PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -2077,7 +2078,7 @@ CREATE TABLE `eh_suggestions` (
   PRIMARY KEY (`ID`),
   KEY `fk_eh_suggestions_user_idx` (`USER_ID`),
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_users partition
@@ -2100,7 +2101,7 @@ CREATE TABLE `eh_recommendations` (
   PRIMARY KEY (`id`),
   KEY `fk_eh_recommendations_user_idx` (`user_id`),
   CONSTRAINT `fk_eh_recommendations_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -2126,6 +2127,6 @@ CREATE TABLE `eh_recommendation_configs` (
   `embedded_json` TEXT,
   `description` varchar(1024) DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;

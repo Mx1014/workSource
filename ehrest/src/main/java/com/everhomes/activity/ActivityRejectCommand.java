@@ -7,7 +7,11 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * @author elians
- *
+ *<ul>
+ *<li>rosterId:登记ID</li>
+ *<li>familyId:家庭ID</li>
+ *<li>reason:原因</li>
+ *</ul>
  */
 public class ActivityRejectCommand {
 

@@ -2,21 +2,25 @@
 package com.everhomes.poll;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.poll.PollService;
 import com.everhomes.user.User;
@@ -34,13 +38,13 @@ public class PollServiceImpl implements PollService {
     private ForumProvider forumProvider;
 
     @Autowired
-    private ForumService forumService;
-
-    @Autowired
     private PollProvider pollProvider;
     
     @Autowired
     private FamilyProvider familyProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
     
     @Autowired
     private DbProvider dbProvider;
@@ -116,6 +120,7 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("can not vote again.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
+        List<PollVote> votes=new ArrayList<PollVote>();
         //do transaction
         if(Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)){
             dbProvider.execute(status->{ matchResult.forEach(item->{
@@ -124,6 +129,7 @@ public class PollServiceImpl implements PollService {
                 pollVote.setItemId(item.getId());
                 pollVote.setPollId(poll.getId());
                 pollVote.setVoterUid(user.getId());
+                votes.add(pollVote);
                 //if addresses is not empty
                 if(user.getAddressId()!=null)
                         //ensure all address is ok
@@ -138,10 +144,13 @@ public class PollServiceImpl implements PollService {
             });
             return true;
             });
-            
+            if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
+                autoComment(poll,post,votes);
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
+            dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+            dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
             return dto;
         }
         
@@ -154,6 +163,7 @@ public class PollServiceImpl implements PollService {
             pollVote.setItemId(item.getId());
             pollVote.setPollId(poll.getId());
             pollVote.setVoterUid(user.getId());
+            votes.add(pollVote);
             //if addresses is not empty
             if(user.getAddressId()!=null){
                 Family  family=familyProvider.findFamilyByAddressId(user.getAddressId());
@@ -169,12 +179,23 @@ public class PollServiceImpl implements PollService {
         pollProvider.updatePoll(poll);
         return status;
         });
+        if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
+            autoComment(poll,post,votes);
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
         return dto;
     }
     
+    
+    private void autoComment(Poll poll,Post post,List<PollVote> votes){
+        String subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+        Post comment=new Post();
+        comment.setSubject(subject);
+        comment.setForumId(post.getForumId());
+        comment.setParentPostId(post.getId());
+        forumProvider.createPost(post);
+    }
     
    private ProcessStatus getStatus(Poll poll){
       return StatusChecker.getProcessStatus(poll.getStartTimeMs(), poll.getStartTimeMs());
@@ -195,7 +216,13 @@ public class PollServiceImpl implements PollService {
         }
         List<PollItem> result = pollProvider.listPollItemByPollId(cmd.getPollId());
         PollShowResultResponse response = new PollShowResultResponse();
-        response.setItems(result.stream().map(r->ConvertHelper.convert(r, PollItemDTO.class)).collect(Collectors.toList()));
+        response.setItems(result.stream().map(r->{
+                PollItemDTO pollItem = ConvertHelper.convert(r, PollItemDTO.class);
+                pollItem.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
+                pollItem.setItemId(r.getResourceId());
+                pollItem.setCreateTime(r.getCreateTime().toString());
+                return pollItem;
+                }).collect(Collectors.toList()));
         PollDTO dto=new PollDTO();
         try{
             BeanUtils.copyProperties(poll, dto);
@@ -204,9 +231,10 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(poll.getStartTime().getTime());
-        dto.setStopTime(poll.getEndTime().getTime());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }
@@ -222,7 +250,7 @@ public class PollServiceImpl implements PollService {
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
             PollItemDTO item= ConvertHelper.convert(r, PollItemDTO.class);
-            item.setCoverUrl(r.getResourceUrl());
+            item.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
             item.setItemId(r.getResourceId());
             item.setCreateTime(r.getCreateTime().toString());
             return item;
@@ -235,8 +263,8 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(poll.getStartTime().getTime());
-        dto.setStopTime(poll.getEndTime().getTime());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());

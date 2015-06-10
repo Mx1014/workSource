@@ -4,9 +4,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.StringHelper;
-
 public class TemplatesConvert {
     public static String convert(String template, Map<String, String> variables, String defaultVal) {
         String pattern = "\\$\\{(.*?)\\}";
@@ -25,6 +22,5 @@ public class TemplatesConvert {
         }
         return map.get(key);
     }
-
 
 }

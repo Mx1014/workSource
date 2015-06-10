@@ -14,29 +14,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.address.ApartmentDTO;
 import com.everhomes.address.BuildingDTO;
 import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyMemberDTO;
-import com.everhomes.family.FindFamilyByAddressIdCommand;
-import com.everhomes.family.ListOwningFamilyMembersCommand;
+import com.everhomes.forum.CancelLikeTopicCommand;
+import com.everhomes.forum.DeleteCommentCommand;
+import com.everhomes.forum.DeleteTopicCommand;
+import com.everhomes.forum.ForwardTopicCommand;
+import com.everhomes.forum.GetTopicCommand;
+import com.everhomes.forum.LikeTopicCommand;
 import com.everhomes.forum.ListPostCommandResponse;
 import com.everhomes.forum.ListTopicCommand;
+import com.everhomes.forum.ListTopicCommentCommand;
+import com.everhomes.forum.MakeTopCommand;
+import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.PropertyPostDTO;
-import com.everhomes.forum.QueryTopicByCategoryCommand;
+import com.everhomes.forum.SearchTopicCommand;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 
 @RestController
@@ -747,4 +750,161 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /pm/getTopic</b>
+     * <p>获取指定论坛里的指定帖子内容</p>
+     */
+    @RequestMapping("getTopic")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse getTopic(GetTopicCommand cmd) {
+        PostDTO postDto = propertyMgrService.getTopic(cmd);
+        
+        RestResponse response = new RestResponse(postDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/likeTopic</b>
+     * <p>对指定论坛里的指定帖子点赞</p>
+     * @return 点赞的结果
+     */
+    @RequestMapping("likeTopic")
+    @RestReturn(value=String.class)
+    public RestResponse likeTopic(LikeTopicCommand cmd) {
+        propertyMgrService.likeTopic(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/cancelLikeTopic</b>
+     * <p>对指定论坛里的指定帖子取消赞</p>
+     * @return 取消赞的结果
+     */
+    @RequestMapping("cancelLikeTopic")
+    @RestReturn(value=String.class)
+    public RestResponse cancelLikeTopic(CancelLikeTopicCommand cmd) {
+        propertyMgrService.cancelLikeTopic(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/deleteTopic</b>
+     * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
+     * @return 删除结果
+     */
+    @RequestMapping("deleteTopic")
+    @RestReturn(value=String.class)
+    public RestResponse deleteTopic(DeleteTopicCommand cmd) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+//    /**
+//     * <b>URL: /pm/forwardTopic</b>
+//     * <p>转发帖子</p>
+//     * @return 转发结果
+//     */
+//    @RequestMapping("forwardTopic")
+//    @RestReturn(value=Long.class)
+//    public RestResponse forwardTopic(@Valid ForwardTopicCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
+//    /**
+//     * <b>URL: /pm/makeTop</b>
+//     * <p>置顶帖子</p>
+//     * @return 置顶结果
+//     */
+//    @RequestMapping("makeTop")
+//    @RestReturn(value=String.class)
+//    public RestResponse makeTop(@Valid MakeTopCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
+//    /**
+//     * <b>URL: /pm/search</b>
+//     * <p>按指定条件查询符合条件的帖子列表</p>
+//     */
+//    @RequestMapping("search")
+//    @RestReturn(value=ListPostCommandResponse.class)
+//    public RestResponse search(SearchTopicCommand cmd) {
+//        ListPostCommandResponse cmdResponse = postSearcher.query(cmd);
+//        
+//        RestResponse response = new RestResponse();
+//        response.setResponseObject(cmdResponse);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+   
+    /**
+     * <b>URL: /pm/listTopicComments</b>
+     * <p>获取指定论坛里指定帖子下的评论列表</p>
+     */
+    @RequestMapping("listTopicComments")
+    @RestReturn(value=PostDTO.class, collection=true)
+    public RestResponse listTopicComments(@Valid ListTopicCommentCommand cmd) {
+        ListPostCommandResponse cmdResponse = propertyMgrService.listTopicComments(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pm/newComment</b>
+     * <p>创建新评论</p>
+     */
+    @RequestMapping("newComment")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse newComment(@Valid NewCommentCommand cmd) {
+        PostDTO postDTO = propertyMgrService.createComment(cmd);
+        
+        RestResponse response = new RestResponse(postDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/deleteComment</b>
+     * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
+     * @return 删除结果
+     */
+    @RequestMapping("deleteComment")
+    @RestReturn(value=String.class)
+    public RestResponse deleteComment(DeleteCommentCommand cmd) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }    
 }

@@ -81,7 +81,7 @@ public class PollProviderImpl implements PollProvider {
        return values;
     }
 
-    @Cacheable(value="listPollVoteByPollId",key="#pollId")
+    @Cacheable(value="listPollVoteByPollId",key="#pollId",unless="#result.size()==0")
     @Override
     public List<PollVote> listPollVoteByPollId(Long pollId) {
         List<PollVote> pollVotes=new ArrayList<PollVote>();
@@ -95,7 +95,7 @@ public class PollProviderImpl implements PollProvider {
         return pollVotes;
     }
 
-    @Cacheable(value="listPollVoteByPollId",key="#pollId")
+    @Cacheable(value="listPollVoteByPollId",key="#pollId",unless="#result==null")
     @Override
     public Poll findPollById(Long pollId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPolls.class, pollId));
@@ -107,7 +107,7 @@ public class PollProviderImpl implements PollProvider {
         return ConvertHelper.convert(poll, Poll.class);
     }
 
-    @Cacheable(value="listPollVoteByPollId",key="{#uid,#pollId}")
+    @Cacheable(value="listPollVoteByPollId",key="{#uid,#pollId}",unless="#result==null")
     @Override
     public PollVote findPollVoteByUidAndPollId(Long uid, Long pollId) {
         PollVote[] pollVote = new PollVote[1];

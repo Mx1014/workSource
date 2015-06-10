@@ -168,6 +168,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.7</version>
 		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
+            <version>1.7.12</version>
+        </dependency>
 		<dependency>
         <groupId>net.greghaines</groupId>
         <artifactId>jesque</artifactId>

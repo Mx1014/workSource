@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class SendMessageCommand {
     @ItemType(String.class)
     private Map<String, String> meta;
     
-    private Long metaAppId;
+    private String bodyType;
     
     private String body;
 
@@ -99,12 +100,12 @@ public class SendMessageCommand {
         this.meta = meta;
     }
 
-    public Long getMetaAppId() {
-        return metaAppId;
+    public String getBodyType() {
+        return bodyType;
     }
 
-    public void setMetaAppId(Long metaAppId) {
-        this.metaAppId = metaAppId;
+    public void setBodyType(String bodyType) {
+        this.bodyType = bodyType;
     }
 
     public String getBody() {

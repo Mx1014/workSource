@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  * <li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  * <li>multiChoiceFlag:多选标记</li>
- * <li>anonymousFlag:匿名标记</li>
+ * <li>anonymousFlag:匿名标记,1 为匿名,0为公开</li>
  *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *</li>
  */

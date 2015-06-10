@@ -9,7 +9,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.hsr.geohash.GeoHash;
+
 import com.atomikos.datasource.ResourceException;
+import com.everhomes.address.AddressDataInfo;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDataInfo;
 import com.everhomes.community.CommunityGeoPoint;
@@ -292,7 +295,8 @@ public class DataFileHandler {
 			{
 				communityGeoPoint.setLongitude(longitude);
 			}
-
+			String geohash = GeoHash.geoHashStringWithCharacterPrecision(latitude, longitude, 12);
+			communityGeoPoint.setGeohash(geohash);
 			return communityGeoPoint;
 		}
 
@@ -313,13 +317,62 @@ public class DataFileHandler {
 				{
 					CommunityPmContact propContact = new CommunityPmContact();
 					propContact.setContactName("物业服务中心");
+					propContact.setCommunityId(communityData.getId());
 					propContact.setContactToken(phone);
 					propContact.setContactType(IdentifierType.MOBILE.getCode());
 					propContact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					propContact.setCreatorUid(user.getId());
+					propItems.add(propContact);
 				}
 
 			}
 			return propItems;
+		}
+		
+		/**
+		 * 读取每一行数据 生成 AddressDataInfo 公寓 实体
+		 * 
+		 * @param rowDatas[] 每一行数据数组 
+		 * @return AddressDataInfo 公寓 实体
+		 */
+		public static AddressDataInfo convertNeDataByRow(String rowDatas[])
+		{
+			AddressDataInfo addressDataInfo = new AddressDataInfo();
+			if (rowDatas.length == DataProcessConstants.DATA_LENGTH_ZISE_APARTMENT)
+			{
+			
+				// 第一列是序号，后台不作处理
+				String cityName = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_CITY];
+
+				addressDataInfo.setCityName(cityName);
+
+				String areaName = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_AREA];
+				// Area area = getAreaByData(city.getCityId(), areaName, areaList);
+				// communityData.setAreaId(area.getAreaId());
+				addressDataInfo.setAreaName(areaName);
+
+				String addrCommunityName = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_COMMUNITY_NAME];
+				addressDataInfo.setCommunityName(addrCommunityName);
+				String addrBuildingStr = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_BUILDING_STR];
+				addressDataInfo.setBuildingName(addrBuildingStr);
+
+				String addrApartmentStr = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_APARTMENT_STR];
+				addressDataInfo.setApartmentName(addrApartmentStr);
+
+//				String name = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_NAME];
+//				addressDataInfo.setAddress(name);
+
+				String addrStr = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_ADDR_STR];
+				addressDataInfo.setAddress(addrStr);
+				
+				String floor = rowDatas[DataProcessConstants.DATA_APARTMENT_INDEX_FLOOR];
+				addressDataInfo.setApartmentFloor(floor);
+
+			} else
+			{
+				LOGGER.error("公寓文件格式不正确。每行共"+ DataProcessConstants.DATA_LENGTH_ZISE_APARTMENT +"项。rowDatas = " + Arrays.toString(rowDatas));
+				throw new ResourceException("data format is not correct.rowDatas = " + Arrays.toString(rowDatas));
+			}
+			return addressDataInfo;
 		}
 }

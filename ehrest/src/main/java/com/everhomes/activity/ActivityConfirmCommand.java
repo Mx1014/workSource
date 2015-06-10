@@ -1,8 +1,18 @@
+
+
 package com.everhomes.activity;
 
 import javax.validation.constraints.NotNull;
-
-public class ActivityComfirmCommand {
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>activityRosterId:活动登记ID<li>
+ *<li>confirmFamilyId:确认家庭ID</li>
+ *<li>targetName：被确认对象</li>
+ *</ul>
+ */
+public class ActivityConfirmCommand {
     @NotNull
     private Long activityRosterId;
 

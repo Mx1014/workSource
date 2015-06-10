@@ -4,6 +4,7 @@ package com.everhomes.activity;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,8 @@ public class ActivityServiceImpl implements ActivityService {
     private static final String SIGNUP_AUTO_COMMENT = "signup.auto.comment";
 
     private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
+    
+    private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
 
     private static final String DEFAULT_HOME_URL = "default.server.url";
     @Autowired
@@ -159,6 +162,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setProcessStatus(getStatus(activity).getCode());
         return dto;
     }
@@ -201,6 +206,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         return dto;
     }
@@ -228,6 +235,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         return dto;
     }
@@ -267,6 +276,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
@@ -354,7 +365,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public ActivityDTO confirm(ActivityComfirmCommand cmd) {
+    public ActivityDTO confirm(ActivityConfirmCommand cmd) {
         ActivityRoster item = activityProvider.findRosterById(cmd.getActivityRosterId());
         if (item == null) {
             LOGGER.error("cannnot find roster record in database");
@@ -407,6 +418,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setUserActivityStatus(getActivityStatus(item).getCode());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         return dto;
     }
@@ -416,7 +429,7 @@ public class ActivityServiceImpl implements ActivityService {
         Post post = new Post();
         post.setParentPostId(p.getId());
         post.setForumId(p.getForumId());
-        String template = configurationProvider.getValue(CHECKIN_AUTO_COMMENT, "");
+        String template = configurationProvider.getValue(CONFIRM_AUTO_COMMENT, "");
         post.setContent(TemplatesConvert.convert(template, new HashMap<String, String>() {
             private static final long serialVersionUID = 1L;
 
@@ -446,6 +459,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         return dto;
     }
@@ -516,6 +531,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
