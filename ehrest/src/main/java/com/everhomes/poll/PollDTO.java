@@ -10,8 +10,8 @@ import com.everhomes.util.StringHelper;
  *<li>startTime:起始时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>pollCount:投票数</li>
- *<li>pollVoterStatus:投票状态</li>
- *<li>processStatus:处状态</li>
+ *<li>pollVoterStatus:投票状态 ,1 未投票，2 已投票</li>
+ *<li>processStatus:处理状态，0 未知,1 未开始，2 进行中，3 已结束,</li>
  *<ul>
  */
 public class PollDTO {
