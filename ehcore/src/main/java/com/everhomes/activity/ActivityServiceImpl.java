@@ -263,6 +263,7 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
         }
+        
         Post post = forumProvider.findPostById(activity.getPostId());
         if (post == null) {
             LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
