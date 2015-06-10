@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  *<li>pollCount:投票数</li>
  *<li>pollVoterStatus:投票状态 ,1 未投票，2 已投票</li>
  *<li>processStatus:处理状态，0 未知,1 未开始，2 进行中，3 已结束,</li>
+ *<li>anonymousFlag:匿名标记 0 不匿名,1 匿名</li>
+ *<li>multiChoiceFlag:多选标记</li>
  *<ul>
  */
 public class PollDTO {
@@ -24,6 +26,7 @@ public class PollDTO {
     
     private Integer pollVoterStatus;
     private Integer processStatus;
+    
     
     public PollDTO() {
     }
