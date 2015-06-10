@@ -5,6 +5,7 @@ public interface LaunchPadConstants {
     public static final String COMMUNITY_ID = "communityId";
     public static final String CITY_ID = "cityId";
     public static final String CATEGORY_ID = "categoryId"; 
+    public static final String TOKEN = "token"; 
     
 
 //    public static final String ITEM_NAME_NOTICE = "notice"; //公告

@@ -9,10 +9,12 @@ import com.everhomes.category.CategoryConstants;
  * <li>ADVISE: 建议-3092</li>
  * <li>HELP: 求助-3093</li>
  * <li>REPAIR: 维修-3094</li>
+ * <li>HOTLINE: 热线</li>
+ * <li>HOTLINE: 热线</li>
  * </ul>
  */
 public enum CategoryType {
-	NOTICE("notice"), ADVISE("advise"), HELP("help"), REPAIR("repair");
+	NOTICE("notice"), ADVISE("advise"), HELP("help"), REPAIR("repair"), HOTLINE("hotline"), PAYMENT("payment") ;
     
     private String code;
     private CategoryType(String code) {

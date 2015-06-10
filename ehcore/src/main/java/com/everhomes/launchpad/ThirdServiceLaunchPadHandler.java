@@ -23,7 +23,7 @@ public class ThirdServiceLaunchPadHandler implements LaunchPadHandler {
     }
     
     private String parserUri(String userToken, long commnunityId,String actionUri) {
-        actionUri = LaunchPadUtils.addParameterToLink(actionUri, "token", userToken);
+        actionUri = LaunchPadUtils.addParameterToLink(actionUri, LaunchPadConstants.TOKEN, userToken);
         actionUri = LaunchPadUtils.addParameterToLink(actionUri, LaunchPadConstants.COMMUNITY_ID, String.valueOf(commnunityId));
         return actionUri;
         
