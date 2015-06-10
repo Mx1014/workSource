@@ -2,11 +2,22 @@
 package com.everhomes.poll;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>pollId:投票ID</li>
+ *<li>startTime:起始时间,格式:YYYY-MM-DD hh:mm:ss</li>
+ *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
+ *<li>pollCount:投票数</li>
+ *<li>pollVoterStatus:投票状态</li>
+ *<li>processStatus:处状态</li>
+ *<ul>
+ */
 public class PollDTO {
     private Long pollId;
-    private Long startTime;
-    private Long stopTime;
+    private String startTime;
+    private String stopTime;
     private Integer pollCount;
     
     private Integer pollVoterStatus;
@@ -23,19 +34,21 @@ public class PollDTO {
         this.pollId = pollId;
     }
 
-    public Long getStartTime() {
+
+
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Long getStopTime() {
+    public String getStopTime() {
         return stopTime;
     }
 
-    public void setStopTime(Long stopTime) {
+    public void setStopTime(String stopTime) {
         this.stopTime = stopTime;
     }
 

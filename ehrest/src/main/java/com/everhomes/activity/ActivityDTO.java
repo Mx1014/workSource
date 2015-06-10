@@ -7,8 +7,8 @@ import com.everhomes.util.StringHelper;
  * @author elians
  *<ul>
  *<li>activityId:活动ID</li>
- *<li>startTime:开始时间<li>
- *<li>stopTime:结束时间</li>
+ *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
+ *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>
  *<li>signupFlag:报名标签</li>
  *<li>confirmFlag:确认</li>
@@ -26,8 +26,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ActivityDTO {
     private Long activityId;
-    private Long startTime;
-    private Long stopTime;
+    private String startTime;
+    private String stopTime;
     private String location;
     private Integer signupFlag;
     private Integer confirmFlag;
@@ -54,19 +54,21 @@ public class ActivityDTO {
         this.activityId = activityId;
     }
 
-    public Long getStartTime() {
+
+
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Long getStopTime() {
+    public String getStopTime() {
         return stopTime;
     }
 
-    public void setStopTime(Long stopTime) {
+    public void setStopTime(String stopTime) {
         this.stopTime = stopTime;
     }
 
