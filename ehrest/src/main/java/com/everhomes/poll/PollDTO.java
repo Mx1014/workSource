@@ -19,6 +19,8 @@ public class PollDTO {
     private String startTime;
     private String stopTime;
     private Integer pollCount;
+    private Integer anonymousFlag;
+    private Integer multiChoiceFlag;
     
     private Integer pollVoterStatus;
     private Integer processStatus;
@@ -76,6 +78,23 @@ public class PollDTO {
         this.processStatus = processStatus;
     }
     
+    
+    public Integer getAnonymousFlag() {
+        return anonymousFlag;
+    }
+
+    public void setAnonymousFlag(Integer anonymousFlag) {
+        this.anonymousFlag = anonymousFlag;
+    }
+
+    public Integer getMultiChoiceFlag() {
+        return multiChoiceFlag;
+    }
+
+    public void setMultiChoiceFlag(Integer multiChoiceFlag) {
+        this.multiChoiceFlag = multiChoiceFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
