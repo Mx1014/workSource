@@ -162,8 +162,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setProcessStatus(getStatus(activity).getCode());
         return dto;
     }
@@ -206,8 +206,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         return dto;
     }
@@ -241,8 +241,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         return dto;
     }
@@ -282,8 +282,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
@@ -424,8 +424,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setUserActivityStatus(getActivityStatus(item).getCode());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         return dto;
     }
@@ -465,8 +465,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         return dto;
     }
@@ -537,8 +537,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
+        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), activity.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
         dto.setGroupId(activity.getGroupId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
