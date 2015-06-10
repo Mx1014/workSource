@@ -695,8 +695,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	@Override
 	public void importCommunityInfos(MultipartFile[] files) {
 		User user  = UserContext.current().getUser();
-		List<Region> cityList = regionProvider.listActiveRegion(RegionScope.CITY);
-		List<Region> areaList = regionProvider.listActiveRegion(RegionScope.AREA);
+		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		
 		try {
 			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), "#@");
 			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
@@ -707,45 +708,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			}
 			else{
 				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
-		                    "can not to import the community.parse file error.");
+			                "can not to import the community.parse file error.");
 			}
-			
 		} catch (ResourceException e) {
-			
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+	                "can not to import the community.resource is not found.");
 		} catch (IOException e) {
-		
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+	                "can not to import the community.io error.");
 		}
-		
 	}
 
-	@Override
-	public void importCommunityInfos(File file) {
-//		User user  = UserContext.current().getUser();
-		User user  = new User();
-		user.setId(10017l);
-		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
-		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
-		try {
-			List<String[]> dataList =FileHelper.getDataArrayByInputStream(new FileInputStream(file), "#@");
-			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
-			
-			if(communityList != null && communityList.size() > 0){
-				//事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目 
-				txImportCommunity(user, communityList);
-			}
-			else{
-				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
-		                    "can not to import the community.parse file error.");
-			}
-			
-		} catch (ResourceException e) {
-			
-		} catch (IOException e) {
-		
-		}
-		
-	}
-	
 	private void txImportCommunity(User user,List<CommunityDataInfo> communityList) {
 		this.dbProvider.execute((status) ->{
 			
@@ -807,7 +780,29 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
 	@Override
 	public void importAddressInfos(MultipartFile[] files) {
+		User user  = UserContext.current().getUser();
+		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
+		try {
+			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), "#@");
+			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
+			
+			if(communityList != null && communityList.size() > 0){
+				//事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目 
+				txImportCommunity(user, communityList);
+			}
+			else{
+				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+			                "can not to import the community.parse file error.");
+			}
+		} catch (ResourceException e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+	                "can not to import the community.resource is not found.");
+		} catch (IOException e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+	                "can not to import the community.io error.");
+		}
 		
 		
 	}

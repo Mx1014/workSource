@@ -176,9 +176,11 @@ public class PropertyTest {
     
     @Test
     public void testImprotAdddressMapping () {
+    	System.out.println("=================");
     	PropCommunityIdCommand cmd = new PropCommunityIdCommand();
     	cmd.setCommunityId(9l);
 		ps.importPMAddressMapping(cmd);
+		System.out.println("++++++++++++++++++");
 //		if(addresses != null && addresses.size() > 0)
 //		{
 //			System.out.println();

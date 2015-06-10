@@ -313,8 +313,9 @@ public class AddressTest extends TestCase {
     public void testAdminImportCommunity(){
     	
        File f = new File("e://communities0602103742.txt");
+       System.out.println("=====================");
        addressService.importCommunityInfos(f);
-       
+       System.out.println("+++++++++++++++");
 //       List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
 //       for (Region region : cityList) {
 //		System.out.println(region);
