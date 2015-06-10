@@ -49,10 +49,11 @@ public class BannerProviderImpl implements BannerProvider {
         InsertQuery<EhBannersRecord> query = context.insertQuery(Tables.EH_BANNERS);
         banner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         query.setRecord(ConvertHelper.convert(banner, EhBannersRecord.class));
-        query.setReturning(Tables.EH_BORDERS.ID);
-        if(query.execute() > 0) {
-            banner.setId(query.getReturnedRecord().getId());
-        }
+        query.setReturning(Tables.EH_BANNERS.ID);
+        query.execute();
+//        if(query.execute() > 0) {
+//            banner.setId(query.getReturnedRecord().getId());
+//        }
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBanners.class, null);
         
     }
@@ -86,8 +87,8 @@ public class BannerProviderImpl implements BannerProvider {
     @Override
     public Banner findBannerById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUsersDao dao = new EhUsersDao(context.configuration());
-        EhUsers banner = dao.findById(id);
+        EhBannersDao dao = new EhBannersDao(context.configuration());
+        EhBanners banner = dao.findById(id);
         return ConvertHelper.convert(banner, Banner.class);
     }
     

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -8,13 +10,17 @@ import com.everhomes.util.StringHelper;
  * <li>id: itemId</li>
  * <li>orderIndex: 自定义item位置</li>
  * <li>applyPolicy: 自定义item策略，参考{@link com.everhomes.launchpad.ApplyPolicy}</li>
+ * <li>displayFlag: 自定义item是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * </ul>
  */
 public class Item {
-
+    @NotNull
 	private Long    id;
 	private Integer orderIndex;
+	@NotNull
 	private Byte    applyPolicy;
+	@NotNull
+	private Byte    displayFlag;
     
 	public Long getId() {
         return id;
@@ -40,6 +46,14 @@ public class Item {
         this.applyPolicy = applyPolicy;
     }
     
+    public Byte getDisplayFlag() {
+        return displayFlag;
+    }
+
+    public void setDisplayFlag(Byte displayFlag) {
+        this.displayFlag = displayFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -155,6 +155,7 @@ public class BannerServiceImpl implements BannerService {
         }
         User user = UserContext.current().getUser();
         long userId = user.getId();
+        
         BannerClick bannerClick = bannerProvider.findBannerClickByBannerIdAndUserId(cmd.getBannerId(),userId);
         if(bannerClick == null){
             bannerClick = new BannerClick();
@@ -166,6 +167,7 @@ public class BannerServiceImpl implements BannerService {
             bannerClick.setUuid(UUID.randomUUID().toString());
             bannerClick.setLastClickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             bannerClick.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            bannerProvider.createBannerClick(bannerClick);
             
         }else {
             bannerClick.setClickCount(bannerClick.getClickCount().longValue() + 1);
