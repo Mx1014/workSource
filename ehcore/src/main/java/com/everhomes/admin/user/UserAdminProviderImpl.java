@@ -147,7 +147,7 @@ public class UserAdminProviderImpl implements UserAdminProvider {
     public List<UserIdentifier> listAllVerifyCode(CrossShardListingLocator locator, int count,
             ListingQueryBuilderCallback callback) {
         return listUserIdentifiersByOrder(locator, count, callback,
-                Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()),Tables.EH_USER_IDENTIFIERS.VERIFICATION_CODE.notEqual((String)null));
+                Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()),Tables.EH_USER_IDENTIFIERS.VERIFICATION_CODE.ne(""));
     }
 
 }
