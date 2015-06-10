@@ -42,11 +42,16 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.family.RevokeMemberCommand;
+import com.everhomes.forum.CancelLikeTopicCommand;
 import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
+import com.everhomes.forum.GetTopicCommand;
+import com.everhomes.forum.LikeTopicCommand;
 import com.everhomes.forum.ListPostCommandResponse;
 import com.everhomes.forum.ListTopicCommand;
+import com.everhomes.forum.ListTopicCommentCommand;
+import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
@@ -813,7 +818,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		if(family != null )
     		{
     			dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
-        		dto.setName(family.getDisplayName());
+        		dto.setName(apartmentDTO.getApartmentName());
         		dto.setAddressId(family.getAddressId());
         		dto.setId(family.getId());
         		dto.setMemberCount(family.getMemberCount());
@@ -1465,4 +1470,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	//权限控制
 		return forumService.listTopics(cmd);
 	}
+	
+	@Override
+	public PostDTO getTopic(GetTopicCommand cmd) {
+		
+		//权限控制
+		return forumService.getTopic(cmd);
+	}
+	
+	@Override
+	public PostDTO createComment(NewCommentCommand cmd) {
+		
+		//权限控制
+		return forumService.createComment(cmd);
+	}
+	
+	@Override
+	public ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd) {
+		
+		//权限控制
+		return forumService.listTopicComments(cmd);
+	}
+	
+	@Override
+	public void likeTopic(LikeTopicCommand cmd) {
+		
+		//权限控制
+		forumService.likeTopic(cmd);
+	}
+	
+	@Override
+	public void cancelLikeTopic(CancelLikeTopicCommand cmd) {
+		
+		//权限控制
+		forumService.cancelLikeTopic(cmd);
+	}
+	
+	
 }
