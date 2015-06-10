@@ -234,6 +234,7 @@ public class ActivityServiceImpl implements ActivityService {
             activityProvider.checkIn(activity, user.getId(), getFamilyId());
             Post p = createPost(user.getId(),post,null,"");
             p.setSubject(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
+            forumProvider.createPost(p);
             return status;
         });
         
