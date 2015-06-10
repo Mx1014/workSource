@@ -15,11 +15,15 @@ import org.springframework.stereotype.Component;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+
+import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -31,7 +35,8 @@ public class BannerServiceImpl implements BannerService {
     private BannerProvider bannerProvider;
     @Autowired
     private CommunityProvider communityProvider;
-    
+    @Autowired
+    private ContentServerService contentServerService;
     @Override
     public List<BannerDTO> listBannerByCommuniyId(ListBannerByCommunityIdCommand cmd){
         if(cmd.getCommunityId() == null){
@@ -46,6 +51,8 @@ public class BannerServiceImpl implements BannerService {
         }
         long startTime = System.currentTimeMillis();
         long cityId = community.getCityId();
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.listBannersByScopeTypeAndScopeId(BannerScopeType.COUNTRY.getCode(), 0L);
         List<Banner> cityBanners = bannerProvider.listBannersByScopeTypeAndScopeId(BannerScopeType.CITY.getCode(), cityId);
@@ -58,13 +65,26 @@ public class BannerServiceImpl implements BannerService {
         if(communityBanners != null)
             allBanners.addAll(communityBanners);
         List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
-           return ConvertHelper.convert(r, BannerDTO.class); 
+           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
+           dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
+           return dto;
         }).collect(Collectors.toList());
         
         long endTime = System.currentTimeMillis();
         int size = result == null ? 0 : result.size();
         LOGGER.info("Query banner by communityId complete,communityId=" + communityId + ",size=" + size + ",esplse=" + (endTime - startTime));
         return result;
+    }
+    private String parserUri(String uri,String ownerType, long ownerId){
+        try {
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+                return contentServerService.parserUri(uri,ownerType,ownerId);
+            
+        } catch (Exception e) {
+            LOGGER.error("Parser uri is error." + e.getMessage());
+        }
+        return null;
+
     }
     
     @Override
