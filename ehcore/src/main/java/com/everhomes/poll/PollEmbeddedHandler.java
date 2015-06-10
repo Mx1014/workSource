@@ -17,12 +17,18 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
         PollShowResultResponse result = pollService.showResult(post.getId());
+        if (result == null) {
+            return null;
+        }
         return StringHelper.toJsonString(result);
     }
 
     @Override
     public String renderEmbeddedObjectDetails(Post post) {
         PollShowResultResponse poll = pollService.showResult(post.getId());
+        if (poll == null) {
+            return null;
+        }
         return StringHelper.toJsonString(poll);
     }
 
