@@ -17,4 +17,7 @@ public interface GroupServiceErrorCode {
     static final int ERROR_GROUP_CREATOR_REVOKED_NOT_ALLOW = 10011;
     static final int ERROR_GROUP_OP_REQUEST_NOT_FOUND = 10012;
     static final int ERROR_GROUP_OP_REQUEST_NOT_IN_REQUESTING_STATE = 10013;
+    static final int ERROR_GROUP_PHONE_USER_NOT_FOUND = 10014;
+    static final int ERROR_GROUP_FAMILY_NOT_FOUND = 10015;
+    static final int ERROR_GROUP_FAMILY_MEMBER_NOT_FOUND = 10016;
 }
