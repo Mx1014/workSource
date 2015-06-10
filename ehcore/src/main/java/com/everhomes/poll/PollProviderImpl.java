@@ -104,6 +104,7 @@ public class PollProviderImpl implements PollProvider {
         if (poll == null) {
             return null;
         }
+        
         return ConvertHelper.convert(poll, Poll.class);
     }
 
