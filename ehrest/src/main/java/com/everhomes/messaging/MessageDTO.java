@@ -123,10 +123,15 @@ public class MessageDTO implements Cloneable {
 
     public void setMeta(Map<String, String> meta) {
         String appId = null;
-        if(this.meta != null && null != (appId = this.meta.get("META_APP_ID"))) {
-              meta.put("META_APP_ID", appId);
+        Map<String, String> newMeta = meta;
+        if(null == meta) {
+            newMeta = new HashMap<String, String>();
+        }
+        
+        if(null == newMeta.get(META_APP_ID) && this.meta != null && null != (appId = this.meta.get(META_APP_ID))) {
+              newMeta.put(META_APP_ID, appId);
           }
-        this.meta = meta;
+        this.meta = newMeta;
     }
 
     public String getBody() {
@@ -165,14 +170,14 @@ public class MessageDTO implements Cloneable {
         if(null == this.meta) {
             this.meta = new HashMap<String, String>();
         }
-        this.meta.put("META_APP_ID", metaAppId.toString());
+        this.meta.put(META_APP_ID, metaAppId.toString());
     }
     
     public Long getMetaAppId() {
       if(null == this.meta) {
             return 0l;
         }
-      String appId = this.meta.get("META_APP_ID");
+      String appId = this.meta.get(META_APP_ID);
       if(appId == null) {
             return 0l;
         }
