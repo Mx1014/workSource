@@ -69,8 +69,8 @@ public class PollServiceImpl implements PollService {
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
-            long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DD hh:mm:ss").getTime();
-            long endTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DD hh:mm:ss").getTime();
+            long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
+            long endTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
             poll.setStartTime(new Timestamp(startTimeMs));
             poll.setStartTimeMs(startTimeMs);
             poll.setEndTimeMs(endTimeMs);
@@ -246,6 +246,9 @@ public class PollServiceImpl implements PollService {
     @Override
     public PollShowResultResponse showResult(Long postId) {
         Poll poll=pollProvider.findByPostId(postId);
+        if(poll==null){
+            return null;
+        }
         List<PollItem> result = pollProvider.listPollItemByPollId(poll.getId());
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
@@ -273,6 +276,4 @@ public class PollServiceImpl implements PollService {
         response.setPoll(dto);
         return response;
     }
-    
-    
 }
