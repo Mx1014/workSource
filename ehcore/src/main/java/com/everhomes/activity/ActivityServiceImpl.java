@@ -102,8 +102,8 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setSignupFamilyCount(0);
         
         activity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "YYYY-MM-DD hh:mm:ss").getTime();
-        long endTimeMs=DateHelper.parseDataString(cmd.getEndTime(), "YYYY-MM-DD hh:mm:ss").getTime();
+        long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
+        long endTimeMs=DateHelper.parseDataString(cmd.getEndTime(), "yyyy-mm-dd hh:mm:ss").getTime();
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
         activity.setStartTimeMs(startTimeMs);
@@ -227,7 +227,13 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
-        activityProvider.checkIn(activity, user.getId(), getFamilyId());
+        dbProvider.execute(status->{
+            activityProvider.checkIn(activity, user.getId(), getFamilyId());
+            Post p = createPost(user.getId(),post,null,"");
+            p.setSubject(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
+            return status;
+        });
+        
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
