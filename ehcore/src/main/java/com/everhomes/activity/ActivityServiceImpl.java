@@ -49,6 +49,8 @@ public class ActivityServiceImpl implements ActivityService {
     private static final String SIGNUP_AUTO_COMMENT = "signup.auto.comment";
 
     private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
+    
+    private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
 
     private static final String DEFAULT_HOME_URL = "default.server.url";
     @Autowired
@@ -427,7 +429,7 @@ public class ActivityServiceImpl implements ActivityService {
         Post post = new Post();
         post.setParentPostId(p.getId());
         post.setForumId(p.getForumId());
-        String template = configurationProvider.getValue(CHECKIN_AUTO_COMMENT, "");
+        String template = configurationProvider.getValue(CONFIRM_AUTO_COMMENT, "");
         post.setContent(TemplatesConvert.convert(template, new HashMap<String, String>() {
             private static final long serialVersionUID = 1L;
 

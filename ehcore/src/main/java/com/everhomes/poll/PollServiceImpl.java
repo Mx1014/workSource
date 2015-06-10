@@ -2,11 +2,13 @@
 package com.everhomes.poll;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -17,7 +19,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.poll.PollService;
 import com.everhomes.user.User;
@@ -33,9 +34,6 @@ public class PollServiceImpl implements PollService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PollServiceImpl.class);
     @Autowired
     private ForumProvider forumProvider;
-
-    @Autowired
-    private ForumService forumService;
 
     @Autowired
     private PollProvider pollProvider;
@@ -117,6 +115,7 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("can not vote again.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
+        List<PollVote> votes=new ArrayList<PollVote>();
         //do transaction
         if(Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)){
             dbProvider.execute(status->{ matchResult.forEach(item->{
@@ -125,6 +124,7 @@ public class PollServiceImpl implements PollService {
                 pollVote.setItemId(item.getId());
                 pollVote.setPollId(poll.getId());
                 pollVote.setVoterUid(user.getId());
+                votes.add(pollVote);
                 //if addresses is not empty
                 if(user.getAddressId()!=null)
                         //ensure all address is ok
@@ -139,7 +139,8 @@ public class PollServiceImpl implements PollService {
             });
             return true;
             });
-            
+            if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
+                autoComment(poll,post,votes);
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
@@ -157,6 +158,7 @@ public class PollServiceImpl implements PollService {
             pollVote.setItemId(item.getId());
             pollVote.setPollId(poll.getId());
             pollVote.setVoterUid(user.getId());
+            votes.add(pollVote);
             //if addresses is not empty
             if(user.getAddressId()!=null){
                 Family  family=familyProvider.findFamilyByAddressId(user.getAddressId());
@@ -172,12 +174,23 @@ public class PollServiceImpl implements PollService {
         pollProvider.updatePoll(poll);
         return status;
         });
+        if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
+            autoComment(poll,post,votes);
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
         return dto;
     }
     
+    
+    private void autoComment(Poll poll,Post post,List<PollVote> votes){
+        String subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+        Post comment=new Post();
+        comment.setSubject(subject);
+        comment.setForumId(post.getForumId());
+        comment.setParentPostId(post.getId());
+        forumProvider.createPost(post);
+    }
     
    private ProcessStatus getStatus(Poll poll){
       return StatusChecker.getProcessStatus(poll.getStartTimeMs(), poll.getStartTimeMs());

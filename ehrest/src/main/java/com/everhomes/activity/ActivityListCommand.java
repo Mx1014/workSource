@@ -4,7 +4,15 @@ package com.everhomes.activity;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>activityId:活动Id</li>
+ *<li>anchor:锚点</li>
+ *<li>pageSize:每页的个数<li>
+ *</ul>
+ */
 public class ActivityListCommand {
     @NotNull
     private Long activityId;

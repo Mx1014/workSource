@@ -2,7 +2,25 @@
 package com.everhomes.activity;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>id:登记ID</li>
+ *<li>userName:用户名</li>
+ *<li>userAvatar:用户头像</li>
+ *<li>familyName:家庭名</li>
+ *<li>familyId:家庭id</li>
+ *<li>adultCount:成人数</li>
+ *<li>childCount:小孩数</li>
+ *<li>signupFlag:签到标记</li>
+ *<li>signupTime:签到时间</li>
+ *<li>confirmFlag:确认标记</li>
+ *<li>creatorFlag:创建人标识</li>
+ *<li>lotteryWinnerFlag:中奖标识</li>
+ *<li>lotteryWonTime:中奖时间</li>
+ *</ul>
+ */
 public class ActivityMemberDTO {
     private Long id;
     private String userName;
