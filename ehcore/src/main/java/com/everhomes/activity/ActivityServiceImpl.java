@@ -105,8 +105,8 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setSignupFamilyCount(0);
         
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        long startTimeMs=convert(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
-        long endTimeMs=convert(cmd.getEndTime(), "yyyy-mm-dd hh:mm:ss").getTime();
+        long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+        long endTimeMs=convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss").getTime();
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
         activity.setStartTimeMs(startTimeMs);
