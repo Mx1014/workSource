@@ -2,9 +2,11 @@
 package com.everhomes.poll;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -69,8 +71,8 @@ public class PollServiceImpl implements PollService {
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
-            long startTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
-            long endTimeMs=DateHelper.parseDataString(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
+            long startTimeMs=convert(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
+            long endTimeMs=convert(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
             poll.setStartTime(new Timestamp(startTimeMs));
             poll.setStartTimeMs(startTimeMs);
             poll.setEndTimeMs(endTimeMs);
@@ -149,8 +151,8 @@ public class PollServiceImpl implements PollService {
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
-            dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
-            dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+            dto.setStartTime(poll.getStartTime().toString());
+            dto.setStopTime(poll.getEndTime().toString());
             return dto;
         }
         
@@ -231,8 +233,8 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStartTime(poll.getStartTime().toString());
+        dto.setStopTime(poll.getEndTime().toString());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         
         if(votes==null){
@@ -266,8 +268,8 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "yyyy-mm-dd hh:mm:ss"));
-        dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "yyyy-mm-dd hh:mm:ss"));
+        dto.setStartTime(poll.getStartTime().toString());
+        dto.setStopTime(poll.getEndTime().toString());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
@@ -275,5 +277,14 @@ public class PollServiceImpl implements PollService {
         dto.setProcessStatus(getStatus(poll).getCode());
         response.setPoll(dto);
         return response;
+    }
+    
+    private static Date convert(String time,String format){
+        SimpleDateFormat f=new SimpleDateFormat(format);
+        try {
+            return f.parse(time);
+        } catch (ParseException e) {
+            return new Date();
+        }
     }
 }
