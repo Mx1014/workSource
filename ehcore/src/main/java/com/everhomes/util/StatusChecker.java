@@ -10,7 +10,7 @@ public class StatusChecker {
                 return ProcessStatus.UNKNOWN;
             return ProcessStatus.END;
         }
-        if (current <= startTime)
+        if (current <= endTime)
             return ProcessStatus.UNDERWAY;
         return ProcessStatus.END;
     }

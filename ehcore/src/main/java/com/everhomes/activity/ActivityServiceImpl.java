@@ -104,7 +104,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setSignupAttendeeCount(0);
         activity.setSignupFamilyCount(0);
         
-        activity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         long startTimeMs=convert(cmd.getStartTime(), "yyyy-mm-dd hh:mm:ss").getTime();
         long endTimeMs=convert(cmd.getEndTime(), "yyyy-mm-dd hh:mm:ss").getTime();
         activity.setStartTime(new Timestamp(startTimeMs));
@@ -591,4 +591,5 @@ public class ActivityServiceImpl implements ActivityService {
             return new Date();
         }
     }
+    
 }
