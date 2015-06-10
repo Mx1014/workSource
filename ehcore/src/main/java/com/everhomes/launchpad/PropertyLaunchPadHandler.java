@@ -16,16 +16,16 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Override
-    public LaunchPadItem accesProcessLaunchPadItem(long userId, long commnunityId, LaunchPadItem launchPadItem) {
+    public LaunchPadItem accesProcessLaunchPadItem(String userToken, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
-        launchPadItem.setJsonObj(parserJson(userId,commnunityId,launchPadItem));
+        launchPadItem.setJsonObj(parserJson(userToken,commnunityId,launchPadItem));
         
         return launchPadItem;
     }
     
     @SuppressWarnings("unchecked")
-    private String parserJson(long userId, long commnunityId,LaunchPadItem launchPadItem) {
+    private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
         JSONObject jsonObject = new JSONObject();
         String itemName = launchPadItem.getItemName();
         if(itemName.equals(CategoryType.ADVISE.getCode())){

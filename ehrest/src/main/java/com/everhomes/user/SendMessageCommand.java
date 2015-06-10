@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

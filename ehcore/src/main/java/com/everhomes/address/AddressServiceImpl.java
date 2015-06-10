@@ -584,9 +584,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 address.setStatus(AddressAdminStatus.ACTIVE.getCode());
                 this.addressProvider.updateAddress(address);
                 //approve members of this address
-                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-                if(family != null)
-                    this.familyService.approveMembersByFamily(family);
+//                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+//                if(family != null)
+//                    this.familyService.approveMembersByFamily(family);
                 
             }else {
                 Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
@@ -597,7 +597,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 Group group = ConvertHelper.convert(family, Group.class); 
                 group.setIntegralTag1(addr.getId());
                 this.groupProvider.updateGroup(group);
-                this.familyService.approveMembersByFamily(family);
+                //this.familyService.approveMembersByFamily(family);
                 this.addressProvider.deleteAddress(address);
             }
             return null;

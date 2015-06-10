@@ -8,6 +8,7 @@ import java.util.List;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -60,6 +62,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
+        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
         List<LaunchPadItem> defaultItems = launchPadProvider.listLaunchPadItemsByScopeTypeAndScopeId(LaunchPadScopeType.COUNTRY.getCode(), 0L);
         List<LaunchPadItem> cityItems = launchPadProvider.listLaunchPadItemsByScopeTypeAndScopeId(LaunchPadScopeType.CITY.getCode(), community.getCityId());
         List<LaunchPadItem> communityItems = launchPadProvider.listLaunchPadItemsByScopeTypeAndScopeId(LaunchPadScopeType.COMMUNITY.getCode(), communityId);
@@ -90,8 +93,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             if(handler == null)
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Unable to find launch pad handler.");
-            LaunchPadItemDTO itemDTO = ConvertHelper.convert(handler.accesProcessLaunchPadItem(user.getId(), communityId, r), LaunchPadItemDTO.class);
-            itemDTO.setActionIcon(parserUri(itemDTO.getActionIcon(),"user",user.getId()));
+            LaunchPadItemDTO itemDTO = ConvertHelper.convert(handler.accesProcessLaunchPadItem(token, communityId, r), LaunchPadItemDTO.class);
+            itemDTO.setActionIcon(parserUri(itemDTO.getActionIcon(),EntityType.USER.getCode(),user.getId()));
             result.add(itemDTO);
         });
 
@@ -230,7 +233,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 launchPadItem.setApplyPolicy(item.getApplyPolicy());
                 launchPadItem.setScopeType(LaunchPadScopeType.USERDEFINED.getCode());
                 launchPadItem.setScopeId(userId);
-                launchPadItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+                launchPadItem.setDisplayFlag(item.getDisplayFlag());
                 
                 UserProfile userProfile = new UserProfile();
                 userProfile.setItemKind(ItemKind.JSON.getCode());

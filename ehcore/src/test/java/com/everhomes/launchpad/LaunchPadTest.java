@@ -62,12 +62,13 @@ public class LaunchPadTest extends TestCase {
     public void testCreateLaunchPadItems() {
         CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
         
-        cmd.setItemGroup(ItemGroup.PROPERTY.getCode());
-        cmd.setItemLabel("物业公告");
-        cmd.setItemName(CategoryType.NOTICE.getCode());
-        cmd.setAppId(AppConstants.APPID_PM);
+        cmd.setItemGroup(ItemGroup.THIRDSERVICE.getCode());
+        cmd.setItemLabel("谷歌");
+        cmd.setItemName("google");
+        cmd.setAppId(AppConstants.APPID_THIRD_SERVICE);
         cmd.setDisplayFlag((byte)1);
-        
+        cmd.setActionName("google");
+        cmd.setActionUri("www.google.com");
         
         List<ItemScope> itemScopes = new ArrayList<ItemScope>();
         ItemScope scope1 = new ItemScope();
@@ -94,7 +95,7 @@ public class LaunchPadTest extends TestCase {
         UserDefinedLaunchPadCommand cmd = new UserDefinedLaunchPadCommand();
         Item item1  = new Item();
         item1.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-        item1.setId(1L);
+        item1.setId(4L);
         item1.setOrderIndex(0);
         
 //        Item item2  = new Item();
@@ -104,8 +105,9 @@ public class LaunchPadTest extends TestCase {
         
         Item item3  = new Item();
         item3.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-        item3.setId(6L);
+        item3.setId(5L);
         item3.setOrderIndex(0);
+        item3.setDisplayFlag((byte)0);
         
 //        Item item4  = new Item();
 //        item4.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
@@ -126,8 +128,8 @@ public class LaunchPadTest extends TestCase {
         List<Item> items = new ArrayList<Item>();
         items.add(item1);
         items.add(item3);
-        items.add(item5);
-        items.add(item6);
+//        items.add(item5);
+//        items.add(item6);
         cmd.setItems(items);
         
         
