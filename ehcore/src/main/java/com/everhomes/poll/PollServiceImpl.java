@@ -234,6 +234,7 @@ public class PollServiceImpl implements PollService {
         dto.setStartTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getStartTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setStopTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"), poll.getEndTimeMs(), "YYYY-MM-DD hh:mm:ss"));
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }
