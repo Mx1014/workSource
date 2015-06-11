@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -167,6 +168,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(createRoster);
     }
 
+    @Caching(evict = { @CacheEvict(key="findRosterByUidAndActivityId",value="{#roster.activityId,#roster.uid}"),@CacheEvict(key="findRosterById",value="#roster.id")})
     @Override
     public void updateRoster(ActivityRoster roster) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class, roster.getId()));
@@ -263,7 +265,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         return activity[0];
     }
 
-    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id")})
+    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id"),@CacheEvict(value="findRosterByUidAndActivityId",key="#createRoster.activityId,#roster.uid")})
     @Override
     public void deleteRoster(ActivityRoster createRoster) {
         DSLContext cxt = dbProvider
@@ -284,5 +286,42 @@ public class ActivityProviderImpl implements ActivityProivider {
                     return true;
                 });
         return rosters;
+    }
+
+    @Override
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition... conditions) {
+        List<Activity> activities=new ArrayList<Activity>();
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            if (conditions != null) {
+                query.addConditions(conditions);
+            }
+            query.addLimit(count - activities.size());
+
+            query.fetch().map((r) -> {
+                activities.add(ConvertHelper.convert(r, Activity.class));
+                return null;
+            });
+
+            if (activities.size() >= count) {
+                locator.setAnchor(activities.get(activities.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if (activities.size() > 0) {
+            locator.setAnchor(activities.get(activities.size() - 1).getId());
+        }
+
+        return activities;
     }
 }

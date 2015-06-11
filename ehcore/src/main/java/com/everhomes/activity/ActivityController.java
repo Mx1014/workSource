@@ -24,6 +24,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 
 @RestController
 @RequestMapping("/activity")
@@ -59,6 +60,18 @@ public class ActivityController extends ControllerBase {
         response.setResponseObject(result);
         return response;
     }
+    
+    /**
+     * 
+     * @return {@link }
+     */
+    @RequestMapping("list")
+    @RestReturn(value=ListActivitiesReponse.class)
+   public RestResponse list(@Valid ListActivitiesCommand cmd){
+        Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivities(cmd);
+        ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
+       return new RestResponse(rsp);
+   }
     
     /**
      * 取消报名

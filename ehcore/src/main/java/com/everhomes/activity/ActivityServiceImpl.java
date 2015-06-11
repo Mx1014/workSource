@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.poll.ProcessStatus;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -45,6 +47,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StatusChecker;
+import com.everhomes.util.Tuple;
 
 
 @Component
@@ -296,6 +299,7 @@ public class ActivityServiceImpl implements ActivityService {
                 activity.getId());
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
                 .current().getUser().getId());
+        LOGGER.info("find roster {}",userRoster);
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
@@ -368,6 +372,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     private ActivityStatus getActivityStatus(ActivityRoster userRoster) {
+        LOGGER.info("check roster the current roster is {}",userRoster);
         if(userRoster==null){
             return ActivityStatus.UN_SIGNUP;
         }
@@ -479,12 +484,13 @@ public class ActivityServiceImpl implements ActivityService {
     public ActivityDTO findSnapshotByPostId(Long postId) {
         Activity activity = activityProvider.findSnapshotByPostId(postId);
         if (activity == null) {
-            LOGGER.error("cannot find activity for post");
+            LOGGER.error("cannot find activity for post.postId={}",postId);
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "cannot find activity");
         }
         User user = UserContext.current().getUser();
         ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        LOGGER.info("find roster {}",roster);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
@@ -626,6 +632,38 @@ public class ActivityServiceImpl implements ActivityService {
     public List<Category> listActivityCategories() {
         List<Category> result = categoryProvider.listChildCategories(10001L, CategoryAdminStatus.ACTIVE);
         return result;
+    }
+
+    @Override
+    public Tuple<Long,List<ActivityDTO>>  listActivities(ListActivitiesCommand cmd) {
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        if(cmd.getAnchor()!=null){
+            locator.setAnchor(cmd.getAnchor());
+        }
+        Condition condtion=null;
+        if(!StringUtils.isEmpty(cmd.getTag())){
+            condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
+        }
+        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion);
+        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
+            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+            dto.setActivityId(activity.getId());
+            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+            dto.setSignupFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
+            dto.setProcessStatus(getStatus(activity).getCode());
+            dto.setFamilyId(activity.getCreatorFamilyId());
+            dto.setStartTime(activity.getStartTime().toString());
+            dto.setStopTime(activity.getEndTime().toString());
+            dto.setGroupId(activity.getGroupId());
+            return dto;
+        }).collect(Collectors.toList());
+        if(activityDtos.size()<value){
+            locator.setAnchor(null);
+        }
+        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
     }
     
 }
