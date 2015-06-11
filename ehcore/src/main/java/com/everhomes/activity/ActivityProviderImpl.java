@@ -69,7 +69,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         return ConvertHelper.convert(result, Activity.class);
     }
-
+    @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#activity.id,#uid}")})
     @Override
     public ActivityRoster cancelSignup(Activity activity, Long uid, Long familyId) {
         ActivityRoster[] rosters = new ActivityRoster[1];
@@ -171,7 +171,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(createRoster);
     }
 
-    @Caching(evict = { @CacheEvict(key="findRosterByUidAndActivityId",value="{#roster.activityId,#roster.uid}"),@CacheEvict(key="findRosterById",value="#roster.id")})
+    @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#roster.activityId,#roster.uid}"),@CacheEvict(value="findRosterById",key="#roster.id")})
     @Override
     public void updateRoster(ActivityRoster roster) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class, roster.getId()));
