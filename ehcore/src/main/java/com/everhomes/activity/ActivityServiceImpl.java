@@ -162,6 +162,10 @@ public class ActivityServiceImpl implements ActivityService {
                 joinCmd.setRequestText("request to join activity group");
                 groupService.requestToJoinGroup(joinCmd);
             }
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+cmd.getAdultCount()+cmd.getChildCount());
+            if(user.getAddressId()!=null){
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+            }
             activityProvider.createActivityRoster(roster);
             activityProvider.updateActivity(activity);
             return status;

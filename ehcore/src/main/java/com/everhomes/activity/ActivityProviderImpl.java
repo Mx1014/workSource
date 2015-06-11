@@ -269,7 +269,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         return activity[0];
     }
 
-    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id"),@CacheEvict(value="findRosterByUidAndActivityId",key="#createRoster.activityId,#roster.uid")})
+    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id"),@CacheEvict(value="findRosterByUidAndActivityId",key="{#createRoster.activityId,#roster.uid}")})
     @Override
     public void deleteRoster(ActivityRoster createRoster) {
         DSLContext cxt = dbProvider

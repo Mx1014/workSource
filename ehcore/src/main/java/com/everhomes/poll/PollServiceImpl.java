@@ -151,6 +151,8 @@ public class PollServiceImpl implements PollService {
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
+            dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
+            dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
             dto.setStartTime(poll.getStartTime().toString());
             dto.setStopTime(poll.getEndTime().toString());
             return dto;
@@ -186,6 +188,8 @@ public class PollServiceImpl implements PollService {
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
         return dto;
     }
     
@@ -225,6 +229,7 @@ public class PollServiceImpl implements PollService {
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
                 PollItemDTO pollItem = ConvertHelper.convert(r, PollItemDTO.class);
+                pollItem.setItemId(r.getId());
                 pollItem.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
                 pollItem.setItemId(r.getResourceId());
                 pollItem.setCreateTime(r.getCreateTime().toString());
@@ -241,6 +246,8 @@ public class PollServiceImpl implements PollService {
         dto.setStartTime(poll.getStartTime().toString());
         dto.setPollId(poll.getId());
         dto.setStopTime(poll.getEndTime().toString());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         
         if(votes==null){
@@ -261,6 +268,7 @@ public class PollServiceImpl implements PollService {
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
             PollItemDTO item= ConvertHelper.convert(r, PollItemDTO.class);
+            item.setItemId(r.getId());
             item.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
             item.setItemId(r.getResourceId());
             item.setCreateTime(r.getCreateTime().toString());
@@ -276,6 +284,8 @@ public class PollServiceImpl implements PollService {
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         dto.setStartTime(poll.getStartTime().toString());
         dto.setStopTime(poll.getEndTime().toString());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setPollId(poll.getId());
         if(votes==null){
