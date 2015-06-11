@@ -239,6 +239,7 @@ public class PollServiceImpl implements PollService {
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         dto.setStartTime(poll.getStartTime().toString());
+        dto.setPollId(poll.getId());
         dto.setStopTime(poll.getEndTime().toString());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         
@@ -276,6 +277,7 @@ public class PollServiceImpl implements PollService {
         dto.setStartTime(poll.getStartTime().toString());
         dto.setStopTime(poll.getEndTime().toString());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        dto.setPollId(poll.getId());
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }

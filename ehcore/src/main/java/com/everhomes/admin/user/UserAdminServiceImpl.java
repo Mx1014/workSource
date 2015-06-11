@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +24,7 @@ import com.everhomes.user.UserAdminService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 
@@ -35,6 +35,9 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     @Autowired
     private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     @Autowired
     private ContentServerService contentServerService;
@@ -52,20 +55,23 @@ public class UserAdminServiceImpl implements UserAdminService {
         User user = UserContext.current().getUser();
         List<UserInfo> userInfos = userAdminProvider.listRegisterByOrder(locator, pageNum + 1, null);
         if (CollectionUtils.isEmpty(userInfos)) {
-            return new Tuple<Long, List<UserInfo>>(null,null);
+            return new Tuple<Long, List<UserInfo>>(null, null);
         }
         Map<Long, UserInfo> cache = new HashMap<Long, UserInfo>();
-        List<Long> uids = userInfos.stream().map(r -> {
-            cache.put(r.getId(), r);
-            r.setEmails(new ArrayList<String>());
-            r.setPhones(new ArrayList<String>());
-            try{
-                r.setAvatarUrl(contentServerService.parserUri(r.getAvatarUri(), EntityType.USER.getCode(), user.getId()));
-            }catch(Exception e){}
-           
+        List<Long> uids = userInfos
+                .stream()
+                .map(r -> {
+                    cache.put(r.getId(), r);
+                    r.setEmails(new ArrayList<String>());
+                    r.setPhones(new ArrayList<String>());
+                    try {
+                        r.setAvatarUrl(contentServerService.parserUri(r.getAvatarUri(), EntityType.USER.getCode(),
+                                user.getId()));
+                    } catch (Exception e) {
+                    }
 
-            return r.getId();
-        }).collect(Collectors.toList());
+                    return r.getId();
+                }).collect(Collectors.toList());
         List<UserIdentifier> identifiers = userAdminProvider.listUserIdentifiers(uids);
         identifiers.forEach(identifier -> {
             UserInfo userInfo = cache.get(identifier.getOwnerUid());
@@ -74,12 +80,12 @@ public class UserAdminServiceImpl implements UserAdminService {
             }
         });
         Long nextAnchor = null;
-        List<UserInfo> values=userInfos;
+        List<UserInfo> values = userInfos;
         if (userInfos.size() > pageNum) {
-            values=userInfos.subList(0, userInfos.size()-1);
+            values = userInfos.subList(0, userInfos.size() - 1);
             nextAnchor = locator.getAnchor();
         }
-        return new Tuple<Long, List<UserInfo>>(nextAnchor,values);
+        return new Tuple<Long, List<UserInfo>>(nextAnchor, values);
     }
 
     @Override
@@ -93,7 +99,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         Long nextAnchor = null;
         List<UserIdentifier> values = identifiers;
         if (identifiers.size() > pageNum) {
-            values=identifiers.subList(1, identifiers.size());
+            values = identifiers.subList(1, identifiers.size());
             nextAnchor = locator.getAnchor();
         }
         return new Tuple<Long, List<UserIdentifier>>(nextAnchor, values);
@@ -101,7 +107,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     @Override
     public Tuple<Long, List<UserInfo>> listVets(PaginationCommand cmd) {
-        User user=UserContext.current().getUser();
+        User user = UserContext.current().getUser();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         if (cmd.getAnchor() != null) {
             locator.setAnchor(cmd.getAnchor());
@@ -114,22 +120,26 @@ public class UserAdminServiceImpl implements UserAdminService {
             cache.put(identifier.getOwnerUid(), identifier.getIdentifierToken());
         });
         List<User> users = userActivityProvider.listUsers(new ArrayList<Long>(cache.keySet()));
-        List<UserInfo> userInfos = users.stream().map(r -> {
-            UserInfo info = ConvertHelper.convert(r, UserInfo.class);
-            if (CollectionUtils.isEmpty(info.getPhones())) {
-                info.setPhones(new ArrayList<String>());
-            }
-            info.getPhones().add(cache.get(r.getId()));
-            info.setAvatarUri(r.getAvatar());
-            try{
-                info.setAvatarUrl(contentServerService.parserUri(r.getAvatar(), EntityType.USER.getCode(), user.getId()));
-            }catch(Exception e){}
-            return info;
-        }).collect(Collectors.toList());
+        List<UserInfo> userInfos = users
+                .stream()
+                .map(r -> {
+                    UserInfo info = ConvertHelper.convert(r, UserInfo.class);
+                    if (CollectionUtils.isEmpty(info.getPhones())) {
+                        info.setPhones(new ArrayList<String>());
+                    }
+                    info.getPhones().add(cache.get(r.getId()));
+                    info.setAvatarUri(r.getAvatar());
+                    try {
+                        info.setAvatarUrl(contentServerService.parserUri(r.getAvatar(), EntityType.USER.getCode(),
+                                user.getId()));
+                    } catch (Exception e) {
+                    }
+                    return info;
+                }).collect(Collectors.toList());
         List<UserInfo> values = userInfos;
-        Long nextAnchor=null;
+        Long nextAnchor = null;
         if (identifiers.size() > pageNum) {
-            values=userInfos.subList(1, identifiers.size());
+            values = userInfos.subList(1, identifiers.size());
             nextAnchor = locator.getAnchor();
         }
         return new Tuple<Long, List<UserInfo>>(nextAnchor, values);
@@ -146,10 +156,21 @@ public class UserAdminServiceImpl implements UserAdminService {
         Long nextAnchor = null;
         List<UserIdentifier> values = userIdentifiers;
         if (userIdentifiers.size() > pageNum) {
-            values=userIdentifiers.subList(1, userIdentifiers.size());
+            values = userIdentifiers.subList(1, userIdentifiers.size());
             nextAnchor = locator.getAnchor();
         }
         return new Tuple<Long, List<UserIdentifier>>(nextAnchor, values);
+    }
+
+    @Override
+    public UserInfo findUserByIdentifier(String identifier) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(identifier);
+        User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+        UserInfo info = ConvertHelper.convert(user, UserInfo.class);
+        List<String> phones=new ArrayList<String>();
+        phones.add(userIdentifier.getIdentifierToken());
+        info.setPhones(phones);
+        return info;
     }
 
 }

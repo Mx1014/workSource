@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
@@ -62,6 +63,13 @@ public class UserAdminController extends ControllerBase {
         object.setValues(result.second());
         object.setNextAnchor(result.first());
         return new RestResponse(object);
+    }
+
+    @RequestMapping("getUserByIdentifier")
+    @RestReturn(UserInfo.class)
+    public RestResponse getUserByIdentifier(@RequestParam String identifier) {
+        UserInfo result = userAdminService.findUserByIdentifier(identifier);
+        return new RestResponse(result);
     }
 
 }
