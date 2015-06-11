@@ -214,7 +214,8 @@ public class ActivityServiceImpl implements ActivityService {
         if (activity.getGroupId() != null) {
             LeaveGroupCommand leaveCmd = new LeaveGroupCommand();
             leaveCmd.setGroupId(activity.getGroupId());
-            groupService.leaveGroup(leaveCmd);
+            //remove from group or not
+           // groupService.leaveGroup(leaveCmd);
         }
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
