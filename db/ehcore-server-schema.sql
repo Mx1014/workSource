@@ -1647,7 +1647,7 @@ CREATE TABLE `eh_activities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `subject` VARCHAR(512),
-    `description` TEXTi,
+    `description` TEXT,
     `tag` VARCHAR(32),
     `location` TEXT,
     `contact_person` VARCHAR(128),

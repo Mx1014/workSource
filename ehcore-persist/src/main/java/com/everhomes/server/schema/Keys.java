@@ -20,6 +20,7 @@ public class Keys {
 
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> IDENTITY_EH_APP_PROMOTIONS = Identities0.IDENTITY_EH_APP_PROMOTIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAuditLogsRecord, java.lang.Long> IDENTITY_EH_AUDIT_LOGS = Identities0.IDENTITY_EH_AUDIT_LOGS;
+	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> IDENTITY_EH_BANNERS = Identities0.IDENTITY_EH_BANNERS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = Identities0.IDENTITY_EH_BORDERS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCertsRecord, java.lang.Integer> IDENTITY_EH_CERTS = Identities0.IDENTITY_EH_CERTS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhClientPackagesRecord, java.lang.Long> IDENTITY_EH_CLIENT_PACKAGES = Identities0.IDENTITY_EH_CLIENT_PACKAGES;
@@ -189,6 +190,7 @@ public class Keys {
 	private static class Identities0 extends org.jooq.impl.AbstractKeys {
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAppPromotionsRecord, java.lang.Long> IDENTITY_EH_APP_PROMOTIONS = createIdentity(com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS, com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhAuditLogsRecord, java.lang.Long> IDENTITY_EH_AUDIT_LOGS = createIdentity(com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS, com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS.ID);
+		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> IDENTITY_EH_BANNERS = createIdentity(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS, com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBordersRecord, java.lang.Integer> IDENTITY_EH_BORDERS = createIdentity(com.everhomes.server.schema.tables.EhBorders.EH_BORDERS, com.everhomes.server.schema.tables.EhBorders.EH_BORDERS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCertsRecord, java.lang.Integer> IDENTITY_EH_CERTS = createIdentity(com.everhomes.server.schema.tables.EhCerts.EH_CERTS, com.everhomes.server.schema.tables.EhCerts.EH_CERTS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhClientPackagesRecord, java.lang.Long> IDENTITY_EH_CLIENT_PACKAGES = createIdentity(com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES, com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES.ID);
