@@ -624,7 +624,7 @@ public class ActivityServiceImpl implements ActivityService {
     @SuppressWarnings("unchecked")
     @Override
     public List<Category> listActivityCategories() {
-        List<Category> result = categoryProvider.listChildCategories(10003L, CategoryAdminStatus.ACTIVE);
+        List<Category> result = categoryProvider.listChildCategories(10001L, CategoryAdminStatus.ACTIVE);
         return result;
     }
     
