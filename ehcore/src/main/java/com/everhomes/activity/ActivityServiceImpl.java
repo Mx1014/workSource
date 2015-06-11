@@ -588,7 +588,7 @@ public class ActivityServiceImpl implements ActivityService {
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
             d.setSignupFlag(ActivityStatus.SIGNUP.getCode());
-            d.setConfirmTime(r.getConfirmTime().toString());
+            d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
                 if (family != null) {
