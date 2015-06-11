@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -57,7 +58,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(activity);
     }
 
-    @Cacheable(value = "findActivityById", key = "#id")
+    @Cacheable(value = "findActivityById", key = "#id",unless="#result==null")
     @Override
     public Activity findActivityById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class, id));
@@ -111,6 +112,7 @@ public class ActivityProviderImpl implements ActivityProivider {
                 ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is checkin,cannot cancel");
     }
 
+    @Caching(evict={@CacheEvict(key="findActivityById",value="#activity.id")})
     @Override
     public void updateActivity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, activity.getId()));
@@ -119,7 +121,6 @@ public class ActivityProviderImpl implements ActivityProivider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
     }
 
-    @Cacheable(value = "checkIn", key = "{#activity.id,#familyId}")
     @Override
     public void checkIn(Activity activity, Long uid, Long familyId) {
 
@@ -155,7 +156,9 @@ public class ActivityProviderImpl implements ActivityProivider {
                 + (activityRosters[0].getAdultCount() + activityRosters[0].getChildCount()));
         if (familyId != null)
             activity.setCheckinFamilyCount(activity.getConfirmAttendeeCount() + 1);
-        updateActivity(activity);
+        //special method
+        ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
+        self.updateActivity(activity);
 
     }
 
@@ -187,7 +190,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         return result == null ? null : ConvertHelper.convert(result, ActivityRoster.class);
     }
 
-    @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}")
+    @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}",unless="#result==null")
     @Override
     public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid) {
         ActivityRoster[] rosters = new ActivityRoster[1];
