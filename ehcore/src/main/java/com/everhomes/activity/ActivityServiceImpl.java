@@ -328,7 +328,7 @@ public class ActivityServiceImpl implements ActivityService {
             if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
-            d.setCheckinFlag(ActivityStatus.SIGNUP.getCode());
+            d.setCheckinFlag(r.getCheckinFlag()==null?0:1);
             d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
@@ -589,10 +589,10 @@ public class ActivityServiceImpl implements ActivityService {
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
             d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
-            if (user.getId().intValue() == post.getCreatorUid().intValue())
+            if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
-            d.setCheckinFlag(ActivityStatus.SIGNUP.getCode());
+            d.setCheckinFlag(r.getCheckinFlag()==null?0:1);
             d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
