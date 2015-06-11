@@ -92,17 +92,17 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class,
                 rosters[0].getId()));
-        if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())) {
+        if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())||rosters[0].getCheckinFlag()==null) {
             LOGGER.warn("the user does not signin,can cancel the operation");
-            context.delete(Tables.EH_ACTIVITY_ROSTER).where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
-                    .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid))
-                    .and(Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(rosters[0].getCheckinFlag()));
+            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
+            dao.delete(rosters[0]);
             // decrease count
             activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
                     - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
             if (familyId != null)
                 activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
-            updateActivity(activity);
+            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
+            self.updateActivity(activity);
             // update dao and push event
             DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
             return rosters[0];

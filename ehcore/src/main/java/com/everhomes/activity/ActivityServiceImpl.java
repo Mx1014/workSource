@@ -60,6 +60,7 @@ public class ActivityServiceImpl implements ActivityService {
     private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
     
     private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
+    private static final String CANCEL_AUTO_COMMENT="cancel.auot.comment";
 
     private static final String DEFAULT_HOME_URL = "default.server.url";
     @Autowired
@@ -210,13 +211,16 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
-        activityProvider.cancelSignup(activity, user.getId(), getFamilyId());
+         activityProvider.cancelSignup(activity, user.getId(), getFamilyId());
         if (activity.getGroupId() != null) {
             LeaveGroupCommand leaveCmd = new LeaveGroupCommand();
             leaveCmd.setGroupId(activity.getGroupId());
             //remove from group or not
            // groupService.leaveGroup(leaveCmd);
         }
+        Post p = createPost(user.getId(), post, null, "");
+        p.setSubject(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+        forumProvider.createPost(p);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
