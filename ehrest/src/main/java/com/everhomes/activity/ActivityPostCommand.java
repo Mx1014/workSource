@@ -33,7 +33,7 @@ public class ActivityPostCommand{
     private String contactNumber;
     private String startTime;
     private String endTime;
-    private Byte     checkInFlag;
+    private Byte     checkinFlag;
     private Byte     confirmFlag;
     private Integer  maxAttendeeCount;
     private Long     creatorFamilyId;
@@ -87,8 +87,6 @@ public class ActivityPostCommand{
 
 
 
-
-
     public String getContactNumber() {
         return contactNumber;
     }
@@ -100,15 +98,16 @@ public class ActivityPostCommand{
 
 
 
-
-    public Byte getCheckInFlag() {
-        return checkInFlag;
+    public Byte getCheckinFlag() {
+        return checkinFlag;
     }
 
 
-    public void setCheckInFlag(Byte signupFlag) {
-        this.checkInFlag = signupFlag;
+
+    public void setCheckinFlag(Byte checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
+
 
 
     public Byte getConfirmFlag() {

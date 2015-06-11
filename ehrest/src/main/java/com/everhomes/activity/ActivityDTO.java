@@ -29,7 +29,7 @@ public class ActivityDTO {
     private String startTime;
     private String stopTime;
     private String location;
-    private Integer checkInFlag;
+    private Integer checkinFlag;
     private Integer confirmFlag;
     private Integer enrollUserCount;
     private Integer enrollFamilyCount;
@@ -81,12 +81,13 @@ public class ActivityDTO {
         this.location = location;
     }
 
-    public Integer getCheckInFlag() {
-        return checkInFlag;
+
+    public Integer getCheckinFlag() {
+        return checkinFlag;
     }
 
-    public void setCheckInFlag(Integer checkInFlag) {
-        this.checkInFlag = checkInFlag;
+    public void setCheckinFlag(Integer checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
 
     public Integer getConfirmFlag() {

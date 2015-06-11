@@ -29,8 +29,8 @@ public class ActivityMemberDTO {
     private Long familyId;
     private Integer adultCount;
     private Integer childCount;
-    private Integer checkInFlag;
-    private String checkInTime;
+    private Integer checkinFlag;
+    private String checkinTime;
     private Integer confirmFlag;
     private String confirmTime;
     private Integer creatorFlag;
@@ -96,20 +96,21 @@ public class ActivityMemberDTO {
         this.childCount = childCount;
     }
 
-    public Integer getCheckInFlag() {
-        return checkInFlag;
+
+    public Integer getCheckinFlag() {
+        return checkinFlag;
     }
 
-    public void setCheckInFlag(Integer checkInFlag) {
-        this.checkInFlag = checkInFlag;
+    public void setCheckinFlag(Integer checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
 
-    public String getCheckInTime() {
-        return checkInTime;
+    public String getCheckinTime() {
+        return checkinTime;
     }
 
-    public void setCheckInTime(String signupTime) {
-        this.checkInTime = signupTime;
+    public void setCheckinTime(String checkinTime) {
+        this.checkinTime = checkinTime;
     }
 
     public Integer getConfirmFlag() {
