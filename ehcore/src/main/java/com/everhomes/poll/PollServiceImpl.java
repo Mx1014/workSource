@@ -147,7 +147,7 @@ public class PollServiceImpl implements PollService {
             return true;
             });
             if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
-                autoComment(poll,post,votes);
+                autoComment(poll,post,votes,result);
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
@@ -182,7 +182,7 @@ public class PollServiceImpl implements PollService {
         return status;
         });
         if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
-            autoComment(poll,post,votes);
+            autoComment(poll,post,votes,result);
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
@@ -190,8 +190,13 @@ public class PollServiceImpl implements PollService {
     }
     
     
-    private void autoComment(Poll poll,Post post,List<PollVote> votes){
-        String subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+    private void autoComment(Poll poll,Post post,List<PollVote> votes, List<PollItem> result){
+        String subject="";
+        if(result.size()==1){
+            subject=poll.getSubject()==null?"1":poll.getSubject();
+        }else{
+            subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+        }
         Post comment=new Post();
         comment.setSubject(subject);
         comment.setForumId(post.getForumId());
