@@ -122,7 +122,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public void checkIn(Activity activity, Long uid, Long familyId) {
+    public ActivityRoster checkIn(Activity activity, Long uid, Long familyId) {
 
         ActivityRoster[] activityRosters = new ActivityRoster[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(Void.class),null,
@@ -151,14 +151,15 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         activityRosters[0].setCheckinFlag(CheckInStatus.CHECKIN.getCode());
         activityRosters[0].setCheckinUid(uid);
-        updateRoster(activityRosters[0]);
+        ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
+        self.updateRoster(activityRosters[0]);
         activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
                 + (activityRosters[0].getAdultCount() + activityRosters[0].getChildCount()));
         if (familyId != null)
             activity.setCheckinFamilyCount(activity.getConfirmAttendeeCount() + 1);
         //special method
-        ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
         self.updateActivity(activity);
+        return activityRosters[0];
 
     }
 

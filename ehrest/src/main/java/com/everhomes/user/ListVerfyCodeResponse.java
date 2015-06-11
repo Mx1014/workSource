@@ -8,14 +8,14 @@ public class ListVerfyCodeResponse {
     @ItemType(UserIdentifierDTO.class)
     private List<UserIdentifierDTO> values;
 
-    private Long nextAnchor;
+    private Long pageAnchor;
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     public List<UserIdentifierDTO> getValues() {
