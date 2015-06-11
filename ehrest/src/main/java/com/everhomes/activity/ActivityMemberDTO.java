@@ -104,11 +104,11 @@ public class ActivityMemberDTO {
         this.checkInFlag = checkInFlag;
     }
 
-    public String getSignupTime() {
+    public String getCheckInTime() {
         return checkInTime;
     }
 
-    public void setSignupTime(String signupTime) {
+    public void setCheckInTime(String signupTime) {
         this.checkInTime = signupTime;
     }
 

@@ -14,18 +14,18 @@ import javax.validation.constraints.NotNull;
  */
 public class ActivityConfirmCommand {
     @NotNull
-    private Long activityRosterId;
+    private Long rosterId;
 
     private Long confirmFamilyId;
 
     private String targetName;
 
-    public Long getActivityRosterId() {
-        return activityRosterId;
+    public Long getRosterId() {
+        return rosterId;
     }
 
-    public void setActivityRosterId(Long activityRosterId) {
-        this.activityRosterId = activityRosterId;
+    public void setRosterId(Long rosterId) {
+        this.rosterId = rosterId;
     }
 
     public String getTargetName() {

@@ -344,7 +344,6 @@ public class ActivityServiceImpl implements ActivityService {
                 }
 
             }
-            d.setSignupTime(r.getCreateTime().toString());
             return d;
         }).collect(Collectors.toList());
         if(rosterList.size()<cmd.getPageSize()){
@@ -406,12 +405,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDTO confirm(ActivityConfirmCommand cmd) {
-        ActivityRoster item = activityProvider.findRosterById(cmd.getActivityRosterId());
+        ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
         if (item == null) {
             LOGGER.error("cannnot find roster record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
-                    "cannnot find roster record in database id=" + cmd.getActivityRosterId());
+                    "cannnot find roster record in database id=" + cmd.getRosterId());
         }
         Activity activity = activityProvider.findActivityById(item.getActivityId());
         if (activity == null) {
@@ -419,7 +418,7 @@ public class ActivityServiceImpl implements ActivityService {
             // TODO
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "cannnot find activity record in database id="
-                            + cmd.getActivityRosterId());
+                            + cmd.getRosterId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         //validate post status
@@ -427,7 +426,7 @@ public class ActivityServiceImpl implements ActivityService {
             LOGGER.error("cannnot find post record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID,
-                    "cannnot find post record in database id=" + cmd.getActivityRosterId());
+                    "cannnot find post record in database id=" + cmd.getRosterId());
         }
         
         User user = UserContext.current().getUser();
@@ -435,7 +434,7 @@ public class ActivityServiceImpl implements ActivityService {
             LOGGER.error("the user is invalid.cannot confirm");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_USER,
-                    "the user is invalid.cannot confirm id=" + cmd.getActivityRosterId());
+                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
         }
         dbProvider.execute(status -> {
             forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
@@ -609,7 +608,6 @@ public class ActivityServiceImpl implements ActivityService {
                 }
 
             }
-            d.setSignupTime(r.getCreateTime().toString());
             return d;
         }).collect(Collectors.toList());
         response.setRoster(result);
