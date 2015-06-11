@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.everhomes.app.AppConstants;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryAdminStatus;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -85,6 +88,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private GroupService groupService;
+    
+    @Autowired
+    private CategoryProvider categoryProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -105,6 +111,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setSignupFamilyCount(0);
         
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        //if date time format is not ok,return now
         long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
         long endTimeMs=convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss").getTime();
         activity.setStartTime(new Timestamp(startTimeMs));
@@ -160,6 +167,7 @@ public class ActivityServiceImpl implements ActivityService {
             return status;
         });
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
@@ -204,6 +212,7 @@ public class ActivityServiceImpl implements ActivityService {
             groupService.leaveGroup(leaveCmd);
         }
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
@@ -283,6 +292,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setActivityId(activity.getId());
@@ -424,6 +434,7 @@ public class ActivityServiceImpl implements ActivityService {
         });
 
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setUserActivityStatus(getActivityStatus(item).getCode());
@@ -465,6 +476,7 @@ public class ActivityServiceImpl implements ActivityService {
         User user = UserContext.current().getUser();
         ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
@@ -538,6 +550,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
@@ -592,6 +605,13 @@ public class ActivityServiceImpl implements ActivityService {
         } catch (ParseException e) {
             return new Date();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Category> listActivityCategories() {
+        List<Category> result = categoryProvider.listChildCategories(10003L, CategoryAdminStatus.ACTIVE);
+        return result;
     }
     
 }
