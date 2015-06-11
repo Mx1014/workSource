@@ -302,8 +302,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         List<ActivityRoster> rosterList = activityProvider.listRosterPagination(locator, cmd.getPageSize(),
                 activity.getId());
-        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
-                .current().getUser().getId());
+        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         LOGGER.info("find roster {}",userRoster);
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
@@ -384,7 +383,7 @@ public class ActivityServiceImpl implements ActivityService {
         if (userRoster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
             return ActivityStatus.CHECKEINED;
         }
-        if (userRoster.getConfirmFlag() != null) {
+        if (userRoster.getConfirmFlag() != null&&userRoster.getConfirmFlag()!=0) {
             return ActivityStatus.CONFIRMED;
         }
         return ActivityStatus.SIGNUP;
