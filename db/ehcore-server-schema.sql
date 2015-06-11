@@ -1375,7 +1375,7 @@ CREATE TABLE `eh_family_followers` (
 #
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `appId` BIGINT,
     `scope_type` VARCHAR(32),
