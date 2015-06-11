@@ -112,7 +112,7 @@ public class ActivityProviderImpl implements ActivityProivider {
                 ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is checkin,cannot cancel");
     }
 
-    @Caching(evict={@CacheEvict(key="findActivityById",value="#activity.id")})
+    @Caching(evict={@CacheEvict(value="findActivityById",key="#activity.id")})
     @Override
     public void updateActivity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, activity.getId()));
