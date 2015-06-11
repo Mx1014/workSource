@@ -39,6 +39,7 @@ public class ActivityPostCommand{
     private Long     creatorFamilyId;
     private Long     groupId;
     private Integer  changeVersion;
+    private String tag;
     
     public ActivityPostCommand() {
     }
@@ -183,6 +184,18 @@ public class ActivityPostCommand{
     public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
+    
+
+    public String getTag() {
+        return tag;
+    }
+
+
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
 
 
     @Override

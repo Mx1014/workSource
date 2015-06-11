@@ -39,6 +39,7 @@ public class ActivityDTO {
     private Integer confirmFamilyCount;
     private Long groupId;
     private Long familyId;
+    private String tag;
    
     private Integer userActivityStatus;
     private Integer processStatus;
@@ -162,6 +163,14 @@ public class ActivityDTO {
     
     
     
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     public Long getGroupId() {
         return groupId;
     }
