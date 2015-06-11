@@ -219,7 +219,7 @@ public class ActivityServiceImpl implements ActivityService {
            // groupService.leaveGroup(leaveCmd);
         }
         Post p = createPost(user.getId(), post, null, "");
-        p.setSubject(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
         forumProvider.createPost(p);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
@@ -479,7 +479,7 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }, ""));
         post.setCreatorUid(uid);
-        post.setContent(PostContentType.TEXT.getCode());
+        post.setContentType(PostContentType.TEXT.getCode());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         return post;
     }
