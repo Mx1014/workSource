@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import ch.hsr.geohash.GeoHash;
 
 import com.atomikos.datasource.ResourceException;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressDataInfo;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDataInfo;
@@ -303,7 +305,7 @@ public class DataFileHandler {
 		/**
 		 * 将文本导入的 小区信息 转化成物业条目 : 必须是有物业电话的小区
 		 * 
-		 * @param CommunityDataInfo 参数 Data导入的 小区信息,NEDBModel nedbModel 生成的小区物业信息
+		 * @param CommunityDataInfo 参数 Data导入的 小区信息,NEDBModel address 生成的小区物业信息
 		 * @return NEDBModel ne的数据库实体
 		 */
 		public static List<CommunityPmContact> getPropItemsByData(User user, CommunityDataInfo communityData)
@@ -335,7 +337,7 @@ public class DataFileHandler {
 		 * @param rowDatas[] 每一行数据数组 
 		 * @return AddressDataInfo 公寓 实体
 		 */
-		public static AddressDataInfo convertNeDataByRow(String rowDatas[])
+		public static AddressDataInfo convertAddressDataByRow(String rowDatas[])
 		{
 			AddressDataInfo addressDataInfo = new AddressDataInfo();
 			if (rowDatas.length == DataProcessConstants.DATA_LENGTH_ZISE_APARTMENT)
@@ -374,5 +376,28 @@ public class DataFileHandler {
 				throw new ResourceException("data format is not correct.rowDatas = " + Arrays.toString(rowDatas));
 			}
 			return addressDataInfo;
+		}
+		
+		public static Address convertNEDBModelDataInfo(Community community, CommunityGeoPoint communityGeoPoint,AddressDataInfo addressDataInfo, User user)
+		{
+			Address address = null ;
+			if(addressDataInfo != null && community != null){
+				address =  ConvertHelper.convert(addressDataInfo, Address.class);
+				address.setCityId(community.getCityId());
+				address.setCommunityId(community.getId());
+				address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				address.setCreatorUid(user.getId());
+				address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+				
+				//添加address 的经纬度
+				if(communityGeoPoint != null){
+					address.setLatitude(communityGeoPoint.getLatitude());
+					address.setLongitude(communityGeoPoint.getLongitude());
+					address.setGeohash(communityGeoPoint.getGeohash());
+				}
+			}
+			
+			
+			return address;
 		}
 }
