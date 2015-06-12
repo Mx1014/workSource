@@ -112,7 +112,7 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("cannot find poll item.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ITEMS, "poll items cannot be empty");
         }
-        List<PollItem> matchResult = result.stream().filter(r->result.contains(r)).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
+        List<PollItem> matchResult = result.stream().filter(r->cmd.getItemIds().contains(r.getResourceId())).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(matchResult)) {
             LOGGER.error("cannot find any match item.{}", cmd.getItemIds());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
