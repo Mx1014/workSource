@@ -8,14 +8,14 @@ public class ListVestResponse {
     @ItemType(UserInfo.class)
     private List<UserInfo> values;
 
-    private Long nextAnchor;
+    private Long pageAnchor;
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     public List<UserInfo> getValues() {

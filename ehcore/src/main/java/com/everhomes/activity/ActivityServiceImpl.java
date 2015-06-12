@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.everhomes.app.AppConstants;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryAdminStatus;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -35,6 +39,7 @@ import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.poll.ProcessStatus;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -42,6 +47,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StatusChecker;
+import com.everhomes.util.Tuple;
 
 
 @Component
@@ -54,7 +60,10 @@ public class ActivityServiceImpl implements ActivityService {
     private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
     
     private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
-
+    
+    private static final String CANCEL_AUTO_COMMENT="cancel.auto.comment";
+    
+    private static final String REJECT_AUTO_COMMENT="reject.auto.comment";
     private static final String DEFAULT_HOME_URL = "default.server.url";
     @Autowired
     private ForumService forumService;
@@ -85,6 +94,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private GroupService groupService;
+    
+    @Autowired
+    private CategoryProvider categoryProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -103,8 +115,10 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setConfirmFamilyCount(0);
         activity.setSignupAttendeeCount(0);
         activity.setSignupFamilyCount(0);
+        activity.setSignupFlag(cmd.getCheckinFlag());
         
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        //if date time format is not ok,return now
         long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
         long endTimeMs=convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss").getTime();
         activity.setStartTime(new Timestamp(startTimeMs));
@@ -150,16 +164,18 @@ public class ActivityServiceImpl implements ActivityService {
                 joinCmd.setRequestText("request to join activity group");
                 groupService.requestToJoinGroup(joinCmd);
             }
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+cmd.getAdultCount()+cmd.getChildCount());
+            if(user.getAddressId()!=null){
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+            }
             activityProvider.createActivityRoster(roster);
-            Long familyId = getFamilyId();
-            if (familyId != null)
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
-                    + (cmd.getAdultCount() + cmd.getChildCount()));
             activityProvider.updateActivity(activity);
             return status;
         });
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
@@ -197,13 +213,20 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
-        activityProvider.cancelSignup(activity, user.getId(), getFamilyId());
+         activityProvider.cancelSignup(activity, user.getId(), getFamilyId());
         if (activity.getGroupId() != null) {
             LeaveGroupCommand leaveCmd = new LeaveGroupCommand();
             leaveCmd.setGroupId(activity.getGroupId());
-            groupService.leaveGroup(leaveCmd);
+            //remove from group or not
+           // groupService.leaveGroup(leaveCmd);
         }
+        Post p = createPost(user.getId(), post, null, "");
+        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+        forumProvider.createPost(p);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
@@ -231,9 +254,15 @@ public class ActivityServiceImpl implements ActivityService {
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         dbProvider.execute(status->{
-            activityProvider.checkIn(activity, user.getId(), getFamilyId());
+            ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
             Post p = createPost(user.getId(),post,null,"");
-            p.setSubject(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
+            p.setContent(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
+            Long familyId = getFamilyId();
+            if (familyId != null)
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
+                    + (roster.getAdultCount() + roster.getChildCount()));
+            roster.setCheckinFlag((byte)1);
             forumProvider.createPost(p);
             return status;
         });
@@ -242,6 +271,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
@@ -279,12 +310,15 @@ public class ActivityServiceImpl implements ActivityService {
         }
         List<ActivityRoster> rosterList = activityProvider.listRosterPagination(locator, cmd.getPageSize(),
                 activity.getId());
-        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
-                .current().getUser().getId());
+        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        LOGGER.info("find roster {}",userRoster);
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setActivityId(activity.getId());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setStartTime(activity.getStartTime().toString());
@@ -297,10 +331,10 @@ public class ActivityServiceImpl implements ActivityService {
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
             d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
-            if (user.getId().intValue() == post.getCreatorUid().intValue())
+            if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
-            d.setSignupFlag(ActivityStatus.SIGNUP.getCode());
+            d.setCheckinFlag(r.getCheckinFlag()==null?0:1);
             d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
@@ -316,7 +350,6 @@ public class ActivityServiceImpl implements ActivityService {
                 }
 
             }
-            d.setSignupTime(r.getCreateTime().toString());
             return d;
         }).collect(Collectors.toList());
         if(rosterList.size()<cmd.getPageSize()){
@@ -350,13 +383,14 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     private ActivityStatus getActivityStatus(ActivityRoster userRoster) {
+        LOGGER.info("check roster the current roster is {}",userRoster);
         if(userRoster==null){
             return ActivityStatus.UN_SIGNUP;
         }
         if (userRoster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
             return ActivityStatus.CHECKEINED;
         }
-        if (userRoster.getConfirmFlag() != null) {
+        if (userRoster.getConfirmFlag() != null&&userRoster.getConfirmFlag()!=0) {
             return ActivityStatus.CONFIRMED;
         }
         return ActivityStatus.SIGNUP;
@@ -377,12 +411,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityDTO confirm(ActivityConfirmCommand cmd) {
-        ActivityRoster item = activityProvider.findRosterById(cmd.getActivityRosterId());
+        ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
         if (item == null) {
             LOGGER.error("cannnot find roster record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
-                    "cannnot find roster record in database id=" + cmd.getActivityRosterId());
+                    "cannnot find roster record in database id=" + cmd.getRosterId());
         }
         Activity activity = activityProvider.findActivityById(item.getActivityId());
         if (activity == null) {
@@ -390,7 +424,7 @@ public class ActivityServiceImpl implements ActivityService {
             // TODO
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "cannnot find activity record in database id="
-                            + cmd.getActivityRosterId());
+                            + cmd.getRosterId());
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         //validate post status
@@ -398,7 +432,7 @@ public class ActivityServiceImpl implements ActivityService {
             LOGGER.error("cannnot find post record in database");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID,
-                    "cannnot find post record in database id=" + cmd.getActivityRosterId());
+                    "cannnot find post record in database id=" + cmd.getRosterId());
         }
         
         User user = UserContext.current().getUser();
@@ -406,7 +440,7 @@ public class ActivityServiceImpl implements ActivityService {
             LOGGER.error("the user is invalid.cannot confirm");
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_USER,
-                    "the user is invalid.cannot confirm id=" + cmd.getActivityRosterId());
+                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
         }
         dbProvider.execute(status -> {
             forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
@@ -424,8 +458,11 @@ public class ActivityServiceImpl implements ActivityService {
         });
 
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setUserActivityStatus(getActivityStatus(item).getCode());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
@@ -449,7 +486,7 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }, ""));
         post.setCreatorUid(uid);
-        post.setContent(PostContentType.TEXT.getCode());
+        post.setContentType(PostContentType.TEXT.getCode());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         return post;
     }
@@ -458,13 +495,17 @@ public class ActivityServiceImpl implements ActivityService {
     public ActivityDTO findSnapshotByPostId(Long postId) {
         Activity activity = activityProvider.findSnapshotByPostId(postId);
         if (activity == null) {
-            LOGGER.error("cannot find activity for post");
+            LOGGER.error("cannot find activity for post.postId={}",postId);
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "cannot find activity");
         }
         User user = UserContext.current().getUser();
         ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        LOGGER.info("find roster {}",roster);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
@@ -509,24 +550,48 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         int total = roster.getAdultCount() + roster.getChildCount();
-        activityProvider.deleteRoster(roster);
-        if (roster.getConfirmFlag() == Long.valueOf(ConfirmStatus.CONFIRMED.getCode())) {
-            int result = activity.getCheckinAttendeeCount() - total;
-            activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
-        }
-        if (roster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
-            int result = activity.getCheckinAttendeeCount() - total;
-            activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
-        }
-        activityProvider.updateActivity(activity);
+        dbProvider.execute(status->{
+            //need lock
+            activityProvider.deleteRoster(roster);
+            if (roster.getConfirmFlag() == Long.valueOf(ConfirmStatus.CONFIRMED.getCode())) {
+                int result = activity.getCheckinAttendeeCount() - total;
+                activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
+                if(roster.getConfirmFamilyId()!=null)
+                    activity.setConfirmFamilyCount(activity.getConfirmFamilyCount()-1);
+            }
+            if (roster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
+                int result = activity.getCheckinAttendeeCount() - total;
+                activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
+                if(roster.getConfirmFamilyId()!=null)
+                    activity.setCheckinFamilyCount(activity.getCheckinFamilyCount()-1);
+            }
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()-total);
+            if(roster.getConfirmFamilyId()!=null)
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
+            activityProvider.updateActivity(activity);
+            return status;
+        });
+        User queryUser = userProvider.findUserById(roster.getUid());
         if (activity.getGroupId() != null) {
             RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
             rejectCmd.setGroupId(activity.getGroupId());
             rejectCmd.setUserId(roster.getUid());
             rejectCmd.setRejectText(cmd.getReason());
             //reject to join group
-            groupService.rejectJoinGroupRequest(rejectCmd);
+            //groupService.rejectJoinGroupRequest(rejectCmd);
         }
+        Post comment = createPost(user.getId(), post, null, "");
+        String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
+        comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
+             * 
+             */
+            private static final long serialVersionUID = 8928858603520552572L;
+
+        {
+            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            put("reason",cmd.getReason());
+        }}, ""));
+        forumProvider.createPost(comment);
     }
 
     @Override
@@ -538,6 +603,9 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setActivityId(activity.getId());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
@@ -551,11 +619,11 @@ public class ActivityServiceImpl implements ActivityService {
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
             d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
-            if (user.getId().intValue() == post.getCreatorUid().intValue())
+            if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
-            d.setSignupFlag(ActivityStatus.SIGNUP.getCode());
-            d.setConfirmTime(r.getConfirmTime().toString());
+            d.setCheckinFlag(r.getCheckinFlag()==null?0:1);
+            d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
                 if (family != null) {
@@ -570,7 +638,6 @@ public class ActivityServiceImpl implements ActivityService {
                 }
 
             }
-            d.setSignupTime(r.getCreateTime().toString());
             return d;
         }).collect(Collectors.toList());
         response.setRoster(result);
@@ -592,6 +659,45 @@ public class ActivityServiceImpl implements ActivityService {
         } catch (ParseException e) {
             return new Date();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Category> listActivityCategories() {
+        List<Category> result = categoryProvider.listChildCategories(10001L, CategoryAdminStatus.ACTIVE);
+        return result;
+    }
+
+    @Override
+    public Tuple<Long,List<ActivityDTO>>  listActivities(ListActivitiesCommand cmd) {
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        if(cmd.getAnchor()!=null){
+            locator.setAnchor(cmd.getAnchor());
+        }
+        Condition condtion=null;
+        if(!StringUtils.isEmpty(cmd.getTag())){
+            condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
+        }
+        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion);
+        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
+            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+            dto.setActivityId(activity.getId());
+            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+            dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
+            dto.setProcessStatus(getStatus(activity).getCode());
+            dto.setFamilyId(activity.getCreatorFamilyId());
+            dto.setStartTime(activity.getStartTime().toString());
+            dto.setStopTime(activity.getEndTime().toString());
+            dto.setGroupId(activity.getGroupId());
+            return dto;
+        }).collect(Collectors.toList());
+        if(activityDtos.size()<value){
+            locator.setAnchor(null);
+        }
+        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
     }
     
 }

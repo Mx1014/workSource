@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,7 @@ import com.everhomes.util.StringHelper;
 @Component(ActivityEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_ACTIVITY)
 public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
+    private static final Logger LOGGER=LoggerFactory.getLogger(ActivityEmbeddedHandler.class);
     @Autowired
     private ActivityService activityService;
 
@@ -22,7 +25,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
             if(result!=null) return StringHelper.toJsonString(result);
         }catch(Exception e){
-            
+            LOGGER.error("handle snapshot error",e);
         }
         
         return null;
@@ -35,7 +38,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             if(result!=null)
                 return StringHelper.toJsonString(result);
         }catch(Exception e){
-            
+            LOGGER.error("handle details error",e);
         }
         
         return null;

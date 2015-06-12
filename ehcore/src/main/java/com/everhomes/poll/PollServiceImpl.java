@@ -24,6 +24,7 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.forum.PostContentType;
 import com.everhomes.poll.PollService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -72,7 +73,7 @@ public class PollServiceImpl implements PollService {
             poll.setPollCount(0);
             poll.setPostId(postId);
             long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-            long endTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+            long endTimeMs=convert(cmd.getStopTime(), "yyyy-MM-dd HH:mm:ss").getTime();
             poll.setStartTime(new Timestamp(startTimeMs));
             poll.setStartTimeMs(startTimeMs);
             poll.setEndTimeMs(endTimeMs);
@@ -112,7 +113,7 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("cannot find poll item.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ITEMS, "poll items cannot be empty");
         }
-        List<PollItem> matchResult = result.stream().filter(r->result.contains(r)).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
+        List<PollItem> matchResult = result.stream().filter(r->cmd.getItemIds().contains(r.getResourceId())).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(matchResult)) {
             LOGGER.error("cannot find any match item.{}", cmd.getItemIds());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
@@ -147,10 +148,12 @@ public class PollServiceImpl implements PollService {
             return true;
             });
             if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
-                autoComment(poll,post,votes);
+                autoComment(poll,post,votes,result);
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
+            dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+            dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
             dto.setStartTime(poll.getStartTime().toString());
             dto.setStopTime(poll.getEndTime().toString());
             return dto;
@@ -182,21 +185,32 @@ public class PollServiceImpl implements PollService {
         return status;
         });
         if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
-            autoComment(poll,post,votes);
+            autoComment(poll,post,votes,result);
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         return dto;
     }
     
     
-    private void autoComment(Poll poll,Post post,List<PollVote> votes){
-        String subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+    private void autoComment(Poll poll,Post post,List<PollVote> votes, List<PollItem> result){
+        String subject="";
+        if(result.size()==1){
+            subject=poll.getSubject()==null?"1":poll.getSubject();
+        }else{
+            subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+        }
         Post comment=new Post();
-        comment.setSubject(subject);
+        User user = UserContext.current().getUser();
+        comment.setContent("我已投 ”"+subject+"“!");
+        comment.setCreatorUid(user.getId());
         comment.setForumId(post.getForumId());
         comment.setParentPostId(post.getId());
-        forumProvider.createPost(post);
+        comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        comment.setContentType(PostContentType.TEXT.getCode());
+        forumProvider.createPost(comment);
     }
     
    private ProcessStatus getStatus(Poll poll){
@@ -234,7 +248,10 @@ public class PollServiceImpl implements PollService {
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         dto.setStartTime(poll.getStartTime().toString());
+        dto.setPollId(poll.getId());
         dto.setStopTime(poll.getEndTime().toString());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         
         if(votes==null){
@@ -270,7 +287,10 @@ public class PollServiceImpl implements PollService {
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         dto.setStartTime(poll.getStartTime().toString());
         dto.setStopTime(poll.getEndTime().toString());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        dto.setPollId(poll.getId());
         if(votes==null){
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }

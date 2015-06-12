@@ -241,6 +241,24 @@ CREATE TABLE `eh_scoped_configurations`(
 #
 # member of global sharding group
 #
+DROP TABLE IF EXISTS `eh_launch_pad_layouts`;
+CREATE TABLE `eh_launch_pad_layouts` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `namespace_id` INTEGER,
+    `app_id` BIGINT,
+    `name` VARCHAR(32),
+    `layout_json` TEXT,
+    `version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current version code',    
+    `min_version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the minmum version code which is compatible',    
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+    `create_time` DATETIME,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global sharding group
+#
 DROP TABLE IF EXISTS `eh_launch_pad_items`;
 CREATE TABLE `eh_launch_pad_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
@@ -863,8 +881,9 @@ CREATE TABLE `eh_forum_posts` (
     
 	`floor_number` BIGINT NOT NULL DEFAULT 0 COMMENT '',
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
-    `update_time` DATETIME NOT NULL,
+    `update_time` DATETIME,
     `create_time` DATETIME NOT NULL,
+	`deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
     `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
     
     PRIMARY KEY (`id`),
@@ -1375,7 +1394,7 @@ CREATE TABLE `eh_family_followers` (
 #
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `appId` BIGINT,
     `scope_type` VARCHAR(32),
@@ -1647,7 +1666,7 @@ CREATE TABLE `eh_activities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `subject` VARCHAR(512),
-    `description` TEXTi,
+    `description` TEXT,
     `tag` VARCHAR(32),
     `location` TEXT,
     `contact_person` VARCHAR(128),
@@ -2126,6 +2145,30 @@ CREATE TABLE `eh_recommendation_configs` (
   `expire_time` datetime DEFAULT NULL,
   `embedded_json` TEXT,
   `description` varchar(1024) DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_links`;
+CREATE TABLE `eh_links` (
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`appId` BIGINT,
+	`owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+	`source_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the source type who refers the link, 0: none, 1: post',
+	`source_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the source id depends on source type',
+    `title` VARCHAR(1024),
+    `author` VARCHAR(128),
+    `cover_uri` VARCHAR(1024) COMMENT 'cover image uri',
+    `content_type` VARCHAR(32) COMMENT 'object content type, 0:link url, 1-rich text',
+    `content` TEXT COMMENT 'content data, depends on value of content_type',
+	`content_abstract` TEXT COMMENT 'abstract of content data',
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+    `create_time` DATETIME,
+	`deleter_uid` BIGINT NOT NULL COMMENT 'deleter id',
+    `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

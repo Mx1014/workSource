@@ -17,7 +17,7 @@ public class SearchGroupCommand {
     
     private Long pageAnchor;
     
-    private int pageSize;
+    private Integer pageSize;
     
     public SearchGroupCommand() {
     }
@@ -30,11 +30,11 @@ public class SearchGroupCommand {
         this.pageAnchor = pageAnchor;
     }
 
-    public int getPageSize() {
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 

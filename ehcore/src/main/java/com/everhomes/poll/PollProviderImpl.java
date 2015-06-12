@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -25,7 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhPolls;
 import com.everhomes.server.schema.tables.records.EhPollVotesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-
+//poll data small enough ,so remove all cache
 @Component
 public class PollProviderImpl implements PollProvider {
 
@@ -66,7 +65,6 @@ public class PollProviderImpl implements PollProvider {
         dao.insert(pollVote);
     }
 
-    @Cacheable(value="listPollItemByPollId",key="#pollId")
     @Override
     public List<PollItem> listPollItemByPollId(Long pollId) {
         List<PollItem> values=new ArrayList<PollItem>();
@@ -81,7 +79,6 @@ public class PollProviderImpl implements PollProvider {
        return values;
     }
 
-    @Cacheable(value="listPollVoteByPollId",key="#pollId",unless="#result.size()==0")
     @Override
     public List<PollVote> listPollVoteByPollId(Long pollId) {
         List<PollVote> pollVotes=new ArrayList<PollVote>();
@@ -95,7 +92,6 @@ public class PollProviderImpl implements PollProvider {
         return pollVotes;
     }
 
-    @Cacheable(value="listPollVoteByPollId",key="#pollId",unless="#result==null")
     @Override
     public Poll findPollById(Long pollId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPolls.class, pollId));
@@ -108,7 +104,6 @@ public class PollProviderImpl implements PollProvider {
         return ConvertHelper.convert(poll, Poll.class);
     }
 
-    @Cacheable(value="listPollVoteByPollId",key="{#uid,#pollId}",unless="#result==null")
     @Override
     public PollVote findPollVoteByUidAndPollId(Long uid, Long pollId) {
         PollVote[] pollVote = new PollVote[1];

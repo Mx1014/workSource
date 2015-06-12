@@ -69,6 +69,13 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.TAG, values);
+	}
+
+	/**
 	 * Fetch records that have <code>location IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByLocation(java.lang.String... values) {

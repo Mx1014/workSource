@@ -328,6 +328,13 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>deleter_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByDeleterUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.DELETER_UID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>delete_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByDeleteTime(java.sql.Timestamp... values) {

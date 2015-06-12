@@ -1,13 +1,20 @@
 package com.everhomes.recommend;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import net.greghaines.jesque.Job;
 
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.taskqueue.CommonWorkerPool;
 import com.everhomes.taskqueue.JesqueClientFactory;
 import com.everhomes.util.ConvertHelper;
@@ -47,5 +54,21 @@ public class RecommendationServiceImpl implements RecommendationService {
        }
        
        return config;
+    }
+    
+    public List<Recommendation> getRecommendsByUserId(Long userId, int sourceType, int pageSize) {
+        ListingLocator locator = new ListingLocator();
+        locator.setEntityId(userId);
+        return recommendationProvider.queryRecommendsByUserId(userId, locator, pageSize, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType));
+                return query;
+            }
+            
+        });
     }
 }

@@ -274,6 +274,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLaunchPadItems EH_LAUNCH_PAD_ITEMS = com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS;
 
 	/**
+	 * The table ehcore.eh_launch_pad_layouts
+	 */
+	public static final com.everhomes.server.schema.tables.EhLaunchPadLayouts EH_LAUNCH_PAD_LAYOUTS = com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS;
+
+	/**
+	 * The table ehcore.eh_links
+	 */
+	public static final com.everhomes.server.schema.tables.EhLinks EH_LINKS = com.everhomes.server.schema.tables.EhLinks.EH_LINKS;
+
+	/**
 	 * The table ehcore.eh_locale_strings
 	 */
 	public static final com.everhomes.server.schema.tables.EhLocaleStrings EH_LOCALE_STRINGS = com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS;

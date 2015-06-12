@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = 1689796453;
+	private static final long serialVersionUID = 1162199176;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -131,6 +131,14 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 
 	private EhBanners(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhBannersRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> getIdentity() {
+		return com.everhomes.server.schema.Keys.IDENTITY_EH_BANNERS;
 	}
 
 	/**

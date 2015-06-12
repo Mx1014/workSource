@@ -16,11 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.SearchGroupCommand;
+import com.everhomes.settings.PaginationConfigHelper;
 
 @Service
 public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSearcher {
@@ -28,6 +30,9 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
    
     @Autowired
     private GroupProvider groupProvider;
+    
+    @Autowired
+    private ConfigurationProvider  configProvider;
     
     @Override
     public String getIndexName() {
@@ -164,7 +169,8 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         if(cmd.getPageAnchor() != null) {
             pageNum = cmd.getPageAnchor().intValue();
         }
-        filter.setPageInfo(pageNum, cmd.getPageSize());
+
+        filter.setPageInfo(pageNum, PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
         filter.setQueryString(cmd.getQueryString());
         return this.query(filter);
     }

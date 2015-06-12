@@ -14,7 +14,7 @@ public class InvitationCommandResponse {
     @ItemType(InvitationDTO.class)
     private List<InvitationDTO> recipientList;
 
-    private Long nextAnchor;
+    private Long pageAnchor;
 
     public List<InvitationDTO> getRecipientList() {
         return recipientList;
@@ -24,12 +24,12 @@ public class InvitationCommandResponse {
         this.recipientList = recipientList;
     }
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long nextAnchor) {
+        this.pageAnchor = nextAnchor;
     }
 
     @Override

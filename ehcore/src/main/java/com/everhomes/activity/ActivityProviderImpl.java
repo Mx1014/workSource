@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -27,6 +28,7 @@ import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -56,7 +58,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(activity);
     }
 
-    @Cacheable(value = "findActivityById", key = "#id")
+    @Cacheable(value = "findActivityById", key = "#id",unless="#result==null")
     @Override
     public Activity findActivityById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class, id));
@@ -67,7 +69,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         return ConvertHelper.convert(result, Activity.class);
     }
-
+    @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#activity.id,#uid}")})
     @Override
     public ActivityRoster cancelSignup(Activity activity, Long uid, Long familyId) {
         ActivityRoster[] rosters = new ActivityRoster[1];
@@ -90,17 +92,17 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class,
                 rosters[0].getId()));
-        if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())) {
+        if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())||rosters[0].getCheckinFlag()==null) {
             LOGGER.warn("the user does not signin,can cancel the operation");
-            context.delete(Tables.EH_ACTIVITY_ROSTER).where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
-                    .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid))
-                    .and(Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(rosters[0].getCheckinFlag()));
+            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
+            dao.delete(rosters[0]);
             // decrease count
             activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
                     - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
             if (familyId != null)
                 activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
-            updateActivity(activity);
+            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
+            self.updateActivity(activity);
             // update dao and push event
             DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
             return rosters[0];
@@ -110,6 +112,7 @@ public class ActivityProviderImpl implements ActivityProivider {
                 ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is checkin,cannot cancel");
     }
 
+    @Caching(evict={@CacheEvict(value="findActivityById",key="#activity.id")})
     @Override
     public void updateActivity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, activity.getId()));
@@ -118,9 +121,8 @@ public class ActivityProviderImpl implements ActivityProivider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
     }
 
-    @Cacheable(value = "checkIn", key = "{#activity.id,#familyId}")
     @Override
-    public void checkIn(Activity activity, Long uid, Long familyId) {
+    public ActivityRoster checkIn(Activity activity, Long uid, Long familyId) {
 
         ActivityRoster[] activityRosters = new ActivityRoster[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(Void.class),null,
@@ -149,12 +151,15 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         activityRosters[0].setCheckinFlag(CheckInStatus.CHECKIN.getCode());
         activityRosters[0].setCheckinUid(uid);
-        updateRoster(activityRosters[0]);
+        ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
+        self.updateRoster(activityRosters[0]);
         activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
                 + (activityRosters[0].getAdultCount() + activityRosters[0].getChildCount()));
         if (familyId != null)
             activity.setCheckinFamilyCount(activity.getConfirmAttendeeCount() + 1);
-        updateActivity(activity);
+        //special method
+        self.updateActivity(activity);
+        return activityRosters[0];
 
     }
 
@@ -167,6 +172,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(createRoster);
     }
 
+    @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#roster.activityId,#roster.uid}"),@CacheEvict(value="findRosterById",key="#roster.id")})
     @Override
     public void updateRoster(ActivityRoster roster) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class, roster.getId()));
@@ -185,7 +191,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         return result == null ? null : ConvertHelper.convert(result, ActivityRoster.class);
     }
 
-    @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}")
+    @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}",unless="#result==null")
     @Override
     public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid) {
         ActivityRoster[] rosters = new ActivityRoster[1];
@@ -263,7 +269,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         return activity[0];
     }
 
-    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id")})
+    @Caching(evict={@CacheEvict(value="findRosterById",key="#createRoster.id"),@CacheEvict(value="findRosterByUidAndActivityId",key="{#createRoster.activityId,#createRoster.uid}")})
     @Override
     public void deleteRoster(ActivityRoster createRoster) {
         DSLContext cxt = dbProvider
@@ -284,5 +290,42 @@ public class ActivityProviderImpl implements ActivityProivider {
                     return true;
                 });
         return rosters;
+    }
+
+    @Override
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition... conditions) {
+        List<Activity> activities=new ArrayList<Activity>();
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            if (conditions != null) {
+                query.addConditions(conditions);
+            }
+            query.addLimit(count - activities.size());
+
+            query.fetch().map((r) -> {
+                activities.add(ConvertHelper.convert(r, Activity.class));
+                return null;
+            });
+
+            if (activities.size() >= count) {
+                locator.setAnchor(activities.get(activities.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if (activities.size() > 0) {
+            locator.setAnchor(activities.get(activities.size() - 1).getId());
+        }
+
+        return activities;
     }
 }

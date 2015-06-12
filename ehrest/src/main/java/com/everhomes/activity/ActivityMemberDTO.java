@@ -13,8 +13,8 @@ import com.everhomes.util.StringHelper;
  *<li>familyId:家庭id</li>
  *<li>adultCount:成人数</li>
  *<li>childCount:小孩数</li>
- *<li>signupFlag:签到标记</li>
- *<li>signupTime:签到时间</li>
+ *<li>checkInFlag:签到标记</li>
+ *<li>checkInTime:签到时间</li>
  *<li>confirmFlag:确认标记</li>
  *<li>creatorFlag:创建人标识</li>
  *<li>lotteryWinnerFlag:中奖标识</li>
@@ -29,8 +29,8 @@ public class ActivityMemberDTO {
     private Long familyId;
     private Integer adultCount;
     private Integer childCount;
-    private Integer signupFlag;
-    private String signupTime;
+    private Integer checkinFlag;
+    private String checkinTime;
     private Integer confirmFlag;
     private String confirmTime;
     private Integer creatorFlag;
@@ -96,20 +96,21 @@ public class ActivityMemberDTO {
         this.childCount = childCount;
     }
 
-    public Integer getSignupFlag() {
-        return signupFlag;
+
+    public Integer getCheckinFlag() {
+        return checkinFlag;
     }
 
-    public void setSignupFlag(Integer signupFlag) {
-        this.signupFlag = signupFlag;
+    public void setCheckinFlag(Integer checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
 
-    public String getSignupTime() {
-        return signupTime;
+    public String getCheckinTime() {
+        return checkinTime;
     }
 
-    public void setSignupTime(String signupTime) {
-        this.signupTime = signupTime;
+    public void setCheckinTime(String checkinTime) {
+        this.checkinTime = checkinTime;
     }
 
     public Integer getConfirmFlag() {
