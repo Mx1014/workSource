@@ -548,23 +548,26 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         int total = roster.getAdultCount() + roster.getChildCount();
-        activityProvider.deleteRoster(roster);
-        if (roster.getConfirmFlag() == Long.valueOf(ConfirmStatus.CONFIRMED.getCode())) {
-            int result = activity.getCheckinAttendeeCount() - total;
-            activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
-        }
-        if (roster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
-            int result = activity.getCheckinAttendeeCount() - total;
-            activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
-        }
-        activityProvider.updateActivity(activity);
+        dbProvider.execute(status->{
+            activityProvider.deleteRoster(roster);
+            if (roster.getConfirmFlag() == Long.valueOf(ConfirmStatus.CONFIRMED.getCode())) {
+                int result = activity.getCheckinAttendeeCount() - total;
+                activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
+            }
+            if (roster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
+                int result = activity.getCheckinAttendeeCount() - total;
+                activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
+            }
+            activityProvider.updateActivity(activity);
+            return status;
+        });
         if (activity.getGroupId() != null) {
             RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
             rejectCmd.setGroupId(activity.getGroupId());
             rejectCmd.setUserId(roster.getUid());
             rejectCmd.setRejectText(cmd.getReason());
             //reject to join group
-            groupService.rejectJoinGroupRequest(rejectCmd);
+            //groupService.rejectJoinGroupRequest(rejectCmd);
         }
     }
 
