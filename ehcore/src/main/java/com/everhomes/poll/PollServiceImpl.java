@@ -24,6 +24,7 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.forum.PostContentType;
 import com.everhomes.poll.PollService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -174,10 +175,10 @@ public class PollServiceImpl implements PollService {
                 if(family!=null)
                 pollVote.setVoterFamilyId(family.getId());
             }
-            pollProvider.createPollVote(pollVote);
+            //pollProvider.createPollVote(pollVote);
             item.setVoteCount(item.getVoteCount()+1);
             //update poll item
-            pollProvider.updatePollItem(item);
+            //pollProvider.updatePollItem(item);
             
         poll.setPollCount(poll.getPollCount()+1);
         pollProvider.updatePoll(poll);
@@ -205,6 +206,8 @@ public class PollServiceImpl implements PollService {
         comment.setContent("我已投 ”"+subject+"“!");
         comment.setForumId(post.getForumId());
         comment.setParentPostId(post.getId());
+        comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        comment.setContentType(PostContentType.TEXT.getCode());
         forumProvider.createPost(post);
     }
     
