@@ -708,13 +708,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/createTopic</b>
+     * <b>URL: /pm/newPmTopic</b>
      * <p>物业人员发帖</p>
      * @return 发帖的内容
      */
-    @RequestMapping("createTopic")
+    @RequestMapping("newPmTopic")
     @RestReturn(value=PostDTO.class)
-    public RestResponse createTopic(@Valid NewTopicCommand cmd) {
+    public RestResponse newPmTopic(@Valid NewTopicCommand cmd) {
     	PostDTO postDto = propertyMgrService.createTopic(cmd);
     	RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -723,12 +723,12 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/queryTopicsByCategory</b>
+     * <b>URL: /pm/queryPmTopicsByCategory</b>
      * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
      */
-    @RequestMapping("queryTopicsByCategory")
+    @RequestMapping("queryPmTopicsByCategory")
     @RestReturn(value=PropertyPostDTO.class)
-    public RestResponse queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+    public RestResponse queryPmTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
     	List<PropertyPostDTO>  cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -737,12 +737,12 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/listTopics</b>
+     * <b>URL: /pm/listPmTopics</b>
      * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
      */
-    @RequestMapping("listTopics")
+    @RequestMapping("listPmTopics")
     @RestReturn(value=ListPostCommandResponse.class)
-    public RestResponse listTopics(ListTopicCommand cmd) {
+    public RestResponse listPmTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = propertyMgrService.listTopics(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -752,12 +752,12 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/getTopic</b>
+     * <b>URL: /pm/getPmTopic</b>
      * <p>获取指定论坛里的指定帖子内容</p>
      */
-    @RequestMapping("getTopic")
+    @RequestMapping("getPmTopic")
     @RestReturn(value=PostDTO.class)
-    public RestResponse getTopic(GetTopicCommand cmd) {
+    public RestResponse getPmTopic(GetTopicCommand cmd) {
         PostDTO postDto = propertyMgrService.getTopic(cmd);
         
         RestResponse response = new RestResponse(postDto);
@@ -767,13 +767,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/likeTopic</b>
+     * <b>URL: /pm/likePmTopic</b>
      * <p>对指定论坛里的指定帖子点赞</p>
      * @return 点赞的结果
      */
-    @RequestMapping("likeTopic")
+    @RequestMapping("likePmTopic")
     @RestReturn(value=String.class)
-    public RestResponse likeTopic(LikeTopicCommand cmd) {
+    public RestResponse likePmTopic(LikeTopicCommand cmd) {
         propertyMgrService.likeTopic(cmd);
         
         RestResponse response = new RestResponse();
@@ -783,13 +783,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/cancelLikeTopic</b>
+     * <b>URL: /pm/cancelLikePmTopic</b>
      * <p>对指定论坛里的指定帖子取消赞</p>
      * @return 取消赞的结果
      */
-    @RequestMapping("cancelLikeTopic")
+    @RequestMapping("cancelLikePmTopic")
     @RestReturn(value=String.class)
-    public RestResponse cancelLikeTopic(CancelLikeTopicCommand cmd) {
+    public RestResponse cancelLikePmTopic(CancelLikeTopicCommand cmd) {
         propertyMgrService.cancelLikeTopic(cmd);
         
         RestResponse response = new RestResponse();
@@ -799,11 +799,11 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/deleteTopic</b>
+     * <b>URL: /pm/deletePmTopic</b>
      * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
      * @return 删除结果
      */
-    @RequestMapping("deleteTopic")
+    @RequestMapping("deletePmTopic")
     @RestReturn(value=String.class)
     public RestResponse deleteTopic(DeleteTopicCommand cmd) {
         
@@ -863,12 +863,12 @@ public class PropertyMgrController extends ControllerBase {
 //    }
    
     /**
-     * <b>URL: /pm/listTopicComments</b>
+     * <b>URL: /pm/listPmTopicComments</b>
      * <p>获取指定论坛里指定帖子下的评论列表</p>
      */
-    @RequestMapping("listTopicComments")
+    @RequestMapping("listPmTopicComments")
     @RestReturn(value=PostDTO.class, collection=true)
-    public RestResponse listTopicComments(@Valid ListTopicCommentCommand cmd) {
+    public RestResponse listPmTopicComments(@Valid ListTopicCommentCommand cmd) {
         ListPostCommandResponse cmdResponse = propertyMgrService.listTopicComments(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -878,12 +878,12 @@ public class PropertyMgrController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /pm/newComment</b>
+     * <b>URL: /pm/newPmComment</b>
      * <p>创建新评论</p>
      */
-    @RequestMapping("newComment")
+    @RequestMapping("newPmComment")
     @RestReturn(value=PostDTO.class)
-    public RestResponse newComment(@Valid NewCommentCommand cmd) {
+    public RestResponse newPmComment(@Valid NewCommentCommand cmd) {
         PostDTO postDTO = propertyMgrService.createComment(cmd);
         
         RestResponse response = new RestResponse(postDTO);
@@ -893,13 +893,13 @@ public class PropertyMgrController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /pm/deleteComment</b>
+     * <b>URL: /pm/deletePmComment</b>
      * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
      * @return 删除结果
      */
-    @RequestMapping("deleteComment")
+    @RequestMapping("deletePmComment")
     @RestReturn(value=String.class)
-    public RestResponse deleteComment(DeleteCommentCommand cmd) {
+    public RestResponse deletePmComment(DeleteCommentCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
