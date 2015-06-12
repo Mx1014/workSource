@@ -245,7 +245,6 @@ DROP TABLE IF EXISTS `eh_launch_pad_layouts`;
 CREATE TABLE `eh_launch_pad_layouts` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `namespace_id` INTEGER,
-    `app_id` BIGINT,
     `name` VARCHAR(32),
     `layout_json` TEXT,
     `version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current version code',    
@@ -2155,7 +2154,6 @@ CREATE TABLE `eh_recommendation_configs` (
 DROP TABLE IF EXISTS `eh_links`;
 CREATE TABLE `eh_links` (
 	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`appId` BIGINT,
 	`owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
 	`source_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the source type who refers the link, 0: none, 1: post',
 	`source_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the source id depends on source type',
@@ -2163,7 +2161,7 @@ CREATE TABLE `eh_links` (
     `author` VARCHAR(128),
     `cover_uri` VARCHAR(1024) COMMENT 'cover image uri',
     `content_type` VARCHAR(32) COMMENT 'object content type, 0:link url, 1-rich text',
-    `content` TEXT COMMENT 'content data, depends on value of content_type',
+    `content` LONGTEXT COMMENT 'content data, depends on value of content_type',
 	`content_abstract` TEXT COMMENT 'abstract of content data',
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
     `create_time` DATETIME,

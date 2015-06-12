@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLinksRecord> {
 
-	private static final long serialVersionUID = 1366076840;
+	private static final long serialVersionUID = 1752491830;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_links</code>
@@ -30,11 +30,6 @@ public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_links.id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_links.appId</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_links.owner_uid</code>. owner user id
@@ -74,7 +69,7 @@ public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	/**
 	 * The column <code>ehcore.eh_links.content</code>. content data, depends on value of content_type
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "content data, depends on value of content_type");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.String> CONTENT = createField("content", org.jooq.impl.SQLDataType.CLOB, this, "content data, depends on value of content_type");
 
 	/**
 	 * The column <code>ehcore.eh_links.content_abstract</code>. abstract of content data

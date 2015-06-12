@@ -11,11 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadLayouts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2018862262;
+	private static final long serialVersionUID = 1167764474;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
-	private java.lang.Long     appId;
 	private java.lang.String   name;
 	private java.lang.String   layoutJson;
 	private java.lang.Long     versionCode;
@@ -28,7 +27,6 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 	public EhLaunchPadLayouts(
 		java.lang.Long     id,
 		java.lang.Integer  namespaceId,
-		java.lang.Long     appId,
 		java.lang.String   name,
 		java.lang.String   layoutJson,
 		java.lang.Long     versionCode,
@@ -38,7 +36,6 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
-		this.appId = appId;
 		this.name = name;
 		this.layoutJson = layoutJson;
 		this.versionCode = versionCode;
@@ -61,14 +58,6 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
-	}
-
-	public java.lang.Long getAppId() {
-		return this.appId;
-	}
-
-	public void setAppId(java.lang.Long appId) {
-		this.appId = appId;
 	}
 
 	public java.lang.String getName() {
