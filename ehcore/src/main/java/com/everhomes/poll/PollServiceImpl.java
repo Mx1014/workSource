@@ -175,10 +175,10 @@ public class PollServiceImpl implements PollService {
                 if(family!=null)
                 pollVote.setVoterFamilyId(family.getId());
             }
-            //pollProvider.createPollVote(pollVote);
+            pollProvider.createPollVote(pollVote);
             item.setVoteCount(item.getVoteCount()+1);
             //update poll item
-            //pollProvider.updatePollItem(item);
+            pollProvider.updatePollItem(item);
             
         poll.setPollCount(poll.getPollCount()+1);
         pollProvider.updatePoll(poll);
