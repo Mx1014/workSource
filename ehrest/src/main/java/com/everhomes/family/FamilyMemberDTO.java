@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.family;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 
@@ -13,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberAvatarUri: 家庭头像Id，图片上传到ContentServer得到的ID</li>
  * <li>memberAvatarUrl: 家庭头像url</li>
  * <li>cellPhone:用户电话号码</li>
+ * <li>createTime:用户加入时间</li>
  * </ul>
  */
 public class FamilyMemberDTO {
@@ -23,6 +26,7 @@ public class FamilyMemberDTO {
     private String memberAvatarUri;
     private String memberAvatarUrl;
     private String cellPhone;
+    private Timestamp createTime;
     
     public FamilyMemberDTO() {
     }
@@ -81,6 +85,14 @@ public class FamilyMemberDTO {
 
     public void setCellPhone(String cellPhone) {
         this.cellPhone = cellPhone;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     @Override
