@@ -203,7 +203,9 @@ public class PollServiceImpl implements PollService {
             subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
         }
         Post comment=new Post();
+        User user = UserContext.current().getUser();
         comment.setContent("我已投 ”"+subject+"“!");
+        comment.setCreatorUid(user.getId());
         comment.setForumId(post.getForumId());
         comment.setParentPostId(post.getId());
         comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
