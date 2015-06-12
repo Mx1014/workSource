@@ -229,7 +229,6 @@ public class PollServiceImpl implements PollService {
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
                 PollItemDTO pollItem = ConvertHelper.convert(r, PollItemDTO.class);
-                pollItem.setItemId(r.getId());
                 pollItem.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
                 pollItem.setItemId(r.getResourceId());
                 pollItem.setCreateTime(r.getCreateTime().toString());
@@ -268,7 +267,6 @@ public class PollServiceImpl implements PollService {
         PollShowResultResponse response = new PollShowResultResponse();
         response.setItems(result.stream().map(r->{
             PollItemDTO item= ConvertHelper.convert(r, PollItemDTO.class);
-            item.setItemId(r.getId());
             item.setCoverUrl(contentServerService.parserUri(r.getResourceUrl(), EntityType.POST.getCode(), postId));
             item.setItemId(r.getResourceId());
             item.setCreateTime(r.getCreateTime().toString());
