@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1392714503;
+	private static final long serialVersionUID = -69588263;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appId;
@@ -54,6 +54,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
 
 	public EhForumPosts() {}
@@ -100,6 +101,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Byte     status,
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
+		java.lang.Long     deleterUid,
 		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
@@ -143,6 +145,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.status = status;
 		this.updateTime = updateTime;
 		this.createTime = createTime;
+		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
 	}
 
@@ -472,6 +475,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Long getDeleterUid() {
+		return this.deleterUid;
+	}
+
+	public void setDeleterUid(java.lang.Long deleterUid) {
+		this.deleterUid = deleterUid;
 	}
 
 	public java.sql.Timestamp getDeleteTime() {

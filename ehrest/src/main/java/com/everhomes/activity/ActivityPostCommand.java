@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
- *<li>signupFlag:签到标签，0-不需要签到、1-需要签到</li>
+ *<li>checkInFlag:签到标签，0-不需要签到、1-需要签到</li>
  *<li>confirmFlag:确认标签，0-不需要确认、1-需要确认</li>
  *<li>maxAttendeeCount:最大邀请人数</li>
  *<li>creatorFamilyId:创建者家庭ID</li>
@@ -33,7 +33,7 @@ public class ActivityPostCommand{
     private String contactNumber;
     private String startTime;
     private String endTime;
-    private Byte     signupFlag;
+    private Byte     checkinFlag;
     private Byte     confirmFlag;
     private Integer  maxAttendeeCount;
     private Long     creatorFamilyId;
@@ -87,8 +87,6 @@ public class ActivityPostCommand{
 
 
 
-
-
     public String getContactNumber() {
         return contactNumber;
     }
@@ -100,15 +98,16 @@ public class ActivityPostCommand{
 
 
 
-
-    public Byte getSignupFlag() {
-        return signupFlag;
+    public Byte getCheckinFlag() {
+        return checkinFlag;
     }
 
 
-    public void setSignupFlag(Byte signupFlag) {
-        this.signupFlag = signupFlag;
+
+    public void setCheckinFlag(Byte checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
+
 
 
     public Byte getConfirmFlag() {

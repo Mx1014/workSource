@@ -5,13 +5,13 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 
 public class ListActivitiesReponse {
-    private Long nextAnchor;
+    private Long pageAnchor;
     @ItemType(value = ActivityDTO.class)
     private List<ActivityDTO> activities;
 
-    public ListActivitiesReponse(Long nextAnchor, List<ActivityDTO> activities) {
+    public ListActivitiesReponse(Long pageAnchor, List<ActivityDTO> activities) {
         super();
-        this.nextAnchor = nextAnchor;
+        this.pageAnchor = pageAnchor;
         this.activities = activities;
     }
 
@@ -23,12 +23,12 @@ public class ListActivitiesReponse {
         this.activities = activities;
     }
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
 }

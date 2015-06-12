@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
  *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>
- *<li>signupFlag:报名标签</li>
+ *<li>checkInFlag:报名标签</li>
  *<li>confirmFlag:确认</li>
  *<li>enrollUserCount:报名人数</li>
  *<li>enrollFamilyCount:报名家庭数</li>
@@ -29,7 +29,7 @@ public class ActivityDTO {
     private String startTime;
     private String stopTime;
     private String location;
-    private Integer signupFlag;
+    private Integer checkinFlag;
     private Integer confirmFlag;
     private Integer enrollUserCount;
     private Integer enrollFamilyCount;
@@ -81,12 +81,13 @@ public class ActivityDTO {
         this.location = location;
     }
 
-    public Integer getSignupFlag() {
-        return signupFlag;
+
+    public Integer getCheckinFlag() {
+        return checkinFlag;
     }
 
-    public void setSignupFlag(Integer signupFlag) {
-        this.signupFlag = signupFlag;
+    public void setCheckinFlag(Integer checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
 
     public Integer getConfirmFlag() {

@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
@@ -40,7 +41,7 @@ public class UserAdminController extends ControllerBase {
         Tuple<Long, List<UserIdentifier>> result = userAdminService.listVerifyCode(cmd);
         object.setValues(result.second().stream().map(r -> ConvertHelper.convert(r, UserIdentifierDTO.class))
                 .collect(Collectors.toList()));
-        object.setNextAnchor(result.first());
+        object.setPageAnchor(result.first());
         return new RestResponse(object);
     }
 
@@ -50,7 +51,7 @@ public class UserAdminController extends ControllerBase {
         ListVestResponse object = new ListVestResponse();
         Tuple<Long, List<UserInfo>> result = userAdminService.listVets(cmd);
         object.setValues(result.second());
-        object.setNextAnchor(result.first());
+        object.setPageAnchor(result.first());
         return new RestResponse(object);
     }
 
@@ -60,8 +61,15 @@ public class UserAdminController extends ControllerBase {
         ListRegisterUsersResponse object = new ListRegisterUsersResponse();
         Tuple<Long, List<UserInfo>> result = userAdminService.listRegisterUsers(cmd);
         object.setValues(result.second());
-        object.setNextAnchor(result.first());
+        object.setPageAnchor(result.first());
         return new RestResponse(object);
+    }
+
+    @RequestMapping("getUserByIdentifier")
+    @RestReturn(UserInfo.class)
+    public RestResponse getUserByIdentifier(@RequestParam String identifier) {
+        UserInfo result = userAdminService.findUserByIdentifier(identifier);
+        return new RestResponse(result);
     }
 
 }

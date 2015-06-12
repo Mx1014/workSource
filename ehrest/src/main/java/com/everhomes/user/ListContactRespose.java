@@ -8,7 +8,7 @@ public class ListContactRespose {
     @ItemType(ContactDTO.class)
     private List<ContactDTO> contacts;
 
-    private Long nextAnchor;
+    private Long pageAnchor;
 
     public ListContactRespose() {
     }
@@ -16,7 +16,7 @@ public class ListContactRespose {
     public ListContactRespose(List<ContactDTO> contacts, Long nextAnchor) {
         super();
         this.contacts = contacts;
-        this.nextAnchor = nextAnchor;
+        this.pageAnchor = nextAnchor;
     }
 
     public List<ContactDTO> getContacts() {
@@ -27,12 +27,12 @@ public class ListContactRespose {
         this.contacts = contacts;
     }
 
-    public Long getNextAnchor() {
-        return nextAnchor;
+    public Long getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setNextAnchor(Long nextAnchor) {
-        this.nextAnchor = nextAnchor;
+    public void setPageAnchor(Long nextAnchor) {
+        this.pageAnchor = nextAnchor;
     }
 
 }
