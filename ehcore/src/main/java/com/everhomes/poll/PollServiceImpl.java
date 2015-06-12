@@ -208,7 +208,7 @@ public class PollServiceImpl implements PollService {
         comment.setParentPostId(post.getId());
         comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         comment.setContentType(PostContentType.TEXT.getCode());
-        forumProvider.createPost(post);
+        forumProvider.createPost(comment);
     }
     
    private ProcessStatus getStatus(Poll poll){
