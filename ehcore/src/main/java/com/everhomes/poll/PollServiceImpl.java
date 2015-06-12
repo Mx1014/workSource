@@ -72,7 +72,7 @@ public class PollServiceImpl implements PollService {
             poll.setPollCount(0);
             poll.setPostId(postId);
             long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-            long endTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+            long endTimeMs=convert(cmd.getStopTime(), "yyyy-MM-dd HH:mm:ss").getTime();
             poll.setStartTime(new Timestamp(startTimeMs));
             poll.setStartTimeMs(startTimeMs);
             poll.setEndTimeMs(endTimeMs);
@@ -151,8 +151,8 @@ public class PollServiceImpl implements PollService {
             PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
             dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
             dto.setProcessStatus(getStatus(poll).getCode());
-            dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
-            dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
+            dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+            dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
             dto.setStartTime(poll.getStartTime().toString());
             dto.setStopTime(poll.getEndTime().toString());
             return dto;
@@ -188,8 +188,8 @@ public class PollServiceImpl implements PollService {
         PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setProcessStatus(getStatus(poll).getCode());
-        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
-        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         return dto;
     }
     
@@ -202,7 +202,7 @@ public class PollServiceImpl implements PollService {
             subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
         }
         Post comment=new Post();
-        comment.setSubject(subject);
+        comment.setContent("我已投 ”"+subject+"“!");
         comment.setForumId(post.getForumId());
         comment.setParentPostId(post.getId());
         forumProvider.createPost(post);
@@ -245,8 +245,8 @@ public class PollServiceImpl implements PollService {
         dto.setStartTime(poll.getStartTime().toString());
         dto.setPollId(poll.getId());
         dto.setStopTime(poll.getEndTime().toString());
-        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
-        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         
         if(votes==null){
@@ -282,8 +282,8 @@ public class PollServiceImpl implements PollService {
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         dto.setStartTime(poll.getStartTime().toString());
         dto.setStopTime(poll.getEndTime().toString());
-        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:1);
-        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:1);
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setPollId(poll.getId());
         if(votes==null){

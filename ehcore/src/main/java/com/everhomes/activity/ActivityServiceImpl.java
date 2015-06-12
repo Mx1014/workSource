@@ -549,15 +549,23 @@ public class ActivityServiceImpl implements ActivityService {
 
         int total = roster.getAdultCount() + roster.getChildCount();
         dbProvider.execute(status->{
+            //need lock
             activityProvider.deleteRoster(roster);
             if (roster.getConfirmFlag() == Long.valueOf(ConfirmStatus.CONFIRMED.getCode())) {
                 int result = activity.getCheckinAttendeeCount() - total;
                 activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
+                if(roster.getConfirmFamilyId()!=null)
+                    activity.setConfirmFamilyCount(activity.getConfirmFamilyCount()-1);
             }
             if (roster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
                 int result = activity.getCheckinAttendeeCount() - total;
                 activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
+                if(roster.getConfirmFamilyId()!=null)
+                    activity.setCheckinFamilyCount(activity.getCheckinFamilyCount()-1);
             }
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()-total);
+            if(roster.getConfirmFamilyId()!=null)
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
             activityProvider.updateActivity(activity);
             return status;
         });
