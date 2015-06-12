@@ -488,6 +488,7 @@ public class ActivityServiceImpl implements ActivityService {
         post.setCreatorUid(uid);
         post.setContentType(PostContentType.TEXT.getCode());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        post.setCreatorUid(UserContext.current().getUser().getId());
         return post;
     }
 
