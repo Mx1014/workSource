@@ -60,8 +60,10 @@ public class ActivityServiceImpl implements ActivityService {
     private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
     
     private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
-    private static final String CANCEL_AUTO_COMMENT="cancel.auot.comment";
-
+    
+    private static final String CANCEL_AUTO_COMMENT="cancel.auto.comment";
+    
+    private static final String REJECT_AUTO_COMMENT="reject.auto.comment";
     private static final String DEFAULT_HOME_URL = "default.server.url";
     @Autowired
     private ForumService forumService;
@@ -569,6 +571,7 @@ public class ActivityServiceImpl implements ActivityService {
             activityProvider.updateActivity(activity);
             return status;
         });
+        User queryUser = userProvider.findUserById(roster.getUid());
         if (activity.getGroupId() != null) {
             RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
             rejectCmd.setGroupId(activity.getGroupId());
@@ -577,6 +580,18 @@ public class ActivityServiceImpl implements ActivityService {
             //reject to join group
             //groupService.rejectJoinGroupRequest(rejectCmd);
         }
+        Post comment = createPost(user.getId(), post, null, "");
+        String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
+        comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
+             * 
+             */
+            private static final long serialVersionUID = 8928858603520552572L;
+
+        {
+            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            put("reason",cmd.getReason());
+        }}, ""));
+        forumProvider.createPost(comment);
     }
 
     @Override
