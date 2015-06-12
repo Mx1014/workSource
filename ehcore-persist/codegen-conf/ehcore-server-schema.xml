@@ -47,8 +47,9 @@
         eh_client_package_files | eh_client_packages | 
         eh_user_locations | eh_user_behaviors | eh_user_contacts | eh_user_installed_apps | eh_user_activities |
         eh_content_server_resources | eh_content_server |
-        eh_launch_pad_items | eh_recommendations | eh_recommendation_configs |
-        eh_departments | eh_department_members | eh_department_communities
+        eh_launch_pad_layouts | eh_launch_pad_items | eh_recommendations | eh_recommendation_configs |
+        eh_departments | eh_department_members | eh_department_communities |
+        eh_links
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 1922935484;
+	private static final long serialVersionUID = -693899074;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -588,17 +588,31 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_forum_posts.deleter_uid</code>. deleter id
+	 */
+	public void setDeleterUid(java.lang.Long value) {
+		setValue(41, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_forum_posts.deleter_uid</code>. deleter id
+	 */
+	public java.lang.Long getDeleterUid() {
+		return (java.lang.Long) getValue(41);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(41, value);
+		setValue(42, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(41);
+		return (java.sql.Timestamp) getValue(42);
 	}
 
 	// -------------------------------------------------------------------------
@@ -627,7 +641,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhForumPostsRecord
 	 */
-	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
+	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS);
 
 		setValue(0, id);
@@ -671,6 +685,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		setValue(38, status);
 		setValue(39, updateTime);
 		setValue(40, createTime);
-		setValue(41, deleteTime);
+		setValue(41, deleterUid);
+		setValue(42, deleteTime);
 	}
 }
