@@ -202,7 +202,7 @@ public class PollServiceImpl implements PollService {
             subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
         }
         Post comment=new Post();
-        comment.setSubject(subject);
+        comment.setContent("我已投 ”"+subject+"“!");
         comment.setForumId(post.getForumId());
         comment.setParentPostId(post.getId());
         forumProvider.createPost(post);
