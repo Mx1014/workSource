@@ -76,6 +76,27 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.LATITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>geohash IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByGeohash(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.GEOHASH, values);
+	}
+
+	/**
 	 * Fetch records that have <code>location IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByLocation(java.lang.String... values) {
