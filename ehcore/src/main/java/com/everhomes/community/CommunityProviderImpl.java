@@ -402,4 +402,32 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         return communities;
     }
+    
+    @Override
+    public Community findCommunityByAreaIdAndName(Long areaId, String name) {
+    	 final Community[] result = new Community[1];
+
+         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
+             (DSLContext context, Object reducingContext) -> {
+            	 context.select().from(Tables.EH_COMMUNITIES)
+        		 .where(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId))
+        		.and(Tables.EH_COMMUNITIES.NAME.eq(name)).fetch().map(r ->{
+        			return result[0] = ConvertHelper.convert(r,Community.class);
+        		});
+            	 return true;
+        				 
+        				 
+//                 result[0] = ConvertHelper.convert(context.select().from(Tables.EH_COMMUNITIES)
+//                		 .where(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId))
+//                 		.and(Tables.EH_COMMUNITIES.NAME.eq(name)).fetch(), Community.class);
+//             
+//                 if(result[0] != null) {
+//                     return false;
+//                 }
+//                 
+//                 return true;
+             });
+         
+         return result[0];
+    }
 }

@@ -55,13 +55,6 @@ public class EhLaunchPadLayoutsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>app_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByAppId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.APP_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByName(java.lang.String... values) {

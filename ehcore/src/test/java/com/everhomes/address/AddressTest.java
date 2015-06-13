@@ -311,7 +311,10 @@ public class AddressTest extends TestCase {
     
     @Test
     public void testAdminImportCommunity(){
-    	
+    	Community community  = communityProvider.findCommunityByAreaIdAndName(2897l, "丰盛华庭");
+    	System.out.println(community);
+     	Community community2  = communityProvider.findCommunityByAreaIdAndName(4150l, "荟芳园");
+    	System.out.println(community2);
     }
     
 }

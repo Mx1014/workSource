@@ -187,8 +187,7 @@ public class FileHelper {
 		 * 
 		 * @return List<String[]> 数据对应的 String 数组
 		 */
-		public static List<String[]> getDataArrayByFile(File file, String dataSeperator) throws IOException,
-				ResourceException
+		public static List<String[]> getDataArrayByFile(File file, String dataSeperator)
 		{
 			List<String[]> dataList = new ArrayList<String[]>();
 
@@ -233,8 +232,7 @@ public class FileHelper {
 		 * 
 		 * @return List<String[]> 数据对应的 String 数组
 		 */
-		public static List<String[]> getDataArrayByInputStream(InputStream is, String dataSeperator) throws IOException,
-				ResourceException
+		public static List<String[]> getDataArrayByInputStream(InputStream is, String dataSeperator)
 		{
 			List<String[]> dataList = new ArrayList<String[]>();
 

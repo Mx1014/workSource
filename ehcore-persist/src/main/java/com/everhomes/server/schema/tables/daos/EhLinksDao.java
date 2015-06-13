@@ -48,13 +48,6 @@ public class EhLinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
-	 * Fetch records that have <code>appId IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLinks> fetchByAppid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLinks.EH_LINKS.APPID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>owner_uid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLinks> fetchByOwnerUid(java.lang.Long... values) {

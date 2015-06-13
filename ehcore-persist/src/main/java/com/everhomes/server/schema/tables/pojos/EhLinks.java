@@ -11,10 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLinks implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1306106794;
+	private static final long serialVersionUID = 1393386170;
 
 	private java.lang.Long     id;
-	private java.lang.Long     appid;
 	private java.lang.Long     ownerUid;
 	private java.lang.Byte     sourceType;
 	private java.lang.Long     sourceId;
@@ -33,7 +32,6 @@ public class EhLinks implements java.io.Serializable {
 
 	public EhLinks(
 		java.lang.Long     id,
-		java.lang.Long     appid,
 		java.lang.Long     ownerUid,
 		java.lang.Byte     sourceType,
 		java.lang.Long     sourceId,
@@ -49,7 +47,6 @@ public class EhLinks implements java.io.Serializable {
 		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
-		this.appid = appid;
 		this.ownerUid = ownerUid;
 		this.sourceType = sourceType;
 		this.sourceId = sourceId;
@@ -71,14 +68,6 @@ public class EhLinks implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.Long getAppid() {
-		return this.appid;
-	}
-
-	public void setAppid(java.lang.Long appid) {
-		this.appid = appid;
 	}
 
 	public java.lang.Long getOwnerUid() {

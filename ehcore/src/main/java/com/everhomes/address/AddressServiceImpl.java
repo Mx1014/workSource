@@ -1,11 +1,13 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.atomikos.datasource.ResourceException;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
@@ -60,15 +61,20 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.file.DataFileHandler;
+import com.everhomes.util.file.DataProcessConstants;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddressServiceImpl.class);
+    
+    private static final String ADMIN_IMPORT_DATA_SEPERATOR = "admin.import.data.seperator";
+    private static final String ADMIN_IMPORT_ADDRESS_ALLOW_MAX_COUNT = "admin.import.address.allow.max.count";
     
     @Autowired
     private DbProvider dbProvider;
@@ -694,12 +700,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
 	@Override
 	public void importCommunityInfos(MultipartFile[] files) {
+		long startTime = System.currentTimeMillis();
 		User user  = UserContext.current().getUser();
 		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
 		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
 		try {
-			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), "#@");
+			String seperator = configurationProvider.getValue(ADMIN_IMPORT_DATA_SEPERATOR, "#@");
+			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), seperator);
 			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
 			
 			if(communityList != null && communityList.size() > 0){
@@ -710,28 +718,40 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
 			                "can not to import the community.parse file error.");
 			}
-		} catch (ResourceException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
-	                "can not to import the community.resource is not found.");
-		} catch (IOException e) {
+			long endTime = System.currentTimeMillis();
+            LOGGER.info("success to import address ,elapse=" + (endTime - startTime));
+		}  catch (IOException e) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
 	                "can not to import the community.io error.");
 		}
 	}
 
 	private void txImportCommunity(User user,List<CommunityDataInfo> communityList) {
-		this.dbProvider.execute((status) ->{
-			
-			// 导入小区信息 和小区坐标
-			importCommunityInfo(user,communityList);
+	
+		// 导入小区信息 和小区坐标
+		importCommunityInfo(user,communityList);
 
-			// 导入小区物业条目
-			importCommunityProperty(user, communityList);
+		// 导入小区物业条目
+		importCommunityProperty(user, communityList);
+		
+		//生成小区时，创建小区的索引
+		List<Community> communities = createCommunities(communityList);
+		communitySearcher.bulkUpdate(communities);
 			
-			return status;
-		});
 	}
 
+	private List<Community> createCommunities(List<CommunityDataInfo> communityList)
+	{
+		List<Community> communities = new ArrayList<Community>();
+		if(communityList != null && communityList.size() > 0){
+			for (CommunityDataInfo communityDataInfo : communityList) {
+				Community community = DataFileHandler.getCommunityByData(communityDataInfo);
+				communities.add(community);
+			}
+		}
+		return communities;
+	}
+	
 	private void importCommunityProperty(User user,List<CommunityDataInfo> communityList) {
 		for (CommunityDataInfo communityDataInfo : communityList) {
 			List<CommunityPmContact> contacts = DataFileHandler.getPropItemsByData(user, communityDataInfo);
@@ -744,67 +764,228 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	}
 
 	private void importCommunityInfo(User user,List<CommunityDataInfo> communityList) {
-		for (int i = 0; i < communityList.size(); i++)
-		{
-			CommunityDataInfo communityDataInfo = communityList.get(i);
-			Community community = DataFileHandler.getCommunityByData(communityDataInfo);
-			CommunityGeoPoint communityGeoPoint = DataFileHandler.getCommunityPosByData(communityDataInfo);
-			if (!isCommunityExit(community.getAreaId(), community.getName()))
+		this.dbProvider.execute((TransactionStatus status) ->  {
+			for (int i = 0; i < communityList.size(); i++)
 			{
-				communityProvider.createCommunity(user.getId(), community);
-				communityGeoPoint.setCommunityId(community.getId());
-				communityProvider.createCommunityGeoPoint(communityGeoPoint);
-				communityDataInfo.setId(community.getId());
-			} else
-			{
-				LOGGER.error("community  duplicate .community = " + community);
-				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
-		                    "the community is existed.");
+				CommunityDataInfo communityDataInfo = communityList.get(i);
+				Community community = DataFileHandler.getCommunityByData(communityDataInfo);
+				CommunityGeoPoint communityGeoPoint = DataFileHandler.getCommunityPosByData(communityDataInfo);
+				if (!isCommunityExit(community.getAreaId(), community.getName()))
+				{
+					communityProvider.createCommunity(user.getId(), community);
+					communityGeoPoint.setCommunityId(community.getId());
+					communityProvider.createCommunityGeoPoint(communityGeoPoint);
+					communityDataInfo.setId(community.getId());
+				} else
+				{
+					LOGGER.error("community  duplicate .community = " + community);
+					 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+			                    "the community is existed.");
+				}
 			}
-		}
+		  return null;
+        });
+		
 	}
 	
 	// 判断小区是否重复 : 和数据库中已存在的小区比较 重复返回true 不重复返回false
 	public boolean isCommunityExit(long areaId, String communityName)
 	{
-//		Community community = communityProvider.getCommunityByAreaIdAndName(areaId, communityName);
-//		if (community != null)
-//		{
-//			return true;
-//		} else
-//		{
-//			return false;
-//		}
-		return false;
+		Community community = communityProvider.findCommunityByAreaIdAndName(areaId, communityName);
+		if (community != null)
+		{
+			return true;
+		} else
+		{
+			return false;
+		}
 	}
 
 	@Override
 	public void importAddressInfos(MultipartFile[] files) {
+		long startTime =  System.currentTimeMillis();
+		
 		User user  = UserContext.current().getUser();
 		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
 		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
+	
 		try {
-			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), "#@");
-			List<CommunityDataInfo> communityList = DataFileHandler.getComunityDataByFile(dataList, cityList, areaList, user);
+			String seperator = configurationProvider.getValue(ADMIN_IMPORT_DATA_SEPERATOR, "#@");
+			List<String[]> dataList =FileHelper.getDataArrayByInputStream(files[0].getInputStream(), seperator);
 			
-			if(communityList != null && communityList.size() > 0){
+			if(dataList != null && dataList.size() > 0){
 				//事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目 
-				txImportCommunity(user, communityList);
+				txImportAddress(user,cityList,areaList,dataList);
 			}
 			else{
 				 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
 			                "can not to import the community.parse file error.");
 			}
-		} catch (ResourceException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
-	                "can not to import the community.resource is not found.");
+			long endTime = System.currentTimeMillis();
+            LOGGER.info("success to import address ,elapse=" + (endTime - startTime));
 		} catch (IOException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
-	                "can not to import the community.io error.");
+			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE, 
+		                "can not to import the community.IOException.");
 		}
 		
 		
+	}
+
+	private void txImportAddress(User user, List<Region> cityList,List<Region> areaList, List<String[]> dataList) {
+		List<Address> addressList = new ArrayList<Address>();
+		int maxCount =  configurationProvider.getIntValue(ADMIN_IMPORT_ADDRESS_ALLOW_MAX_COUNT, 0);
+
+		// 缓存list 匹配查找小区时 先从缓存list匹配小区 如果没有，再去数据库查找。然后加入到缓存list
+		List<Community> bufferCommunityList = new ArrayList<Community>(2048);
+		// 缓存map 查询小区公寓总数时 先从map中取小区id对应的总数 如果没有再去数据库查找。然后加入到缓存map 确保
+		// 每个小区的总数只查一次。
+		Map<Long, Integer> bufferAptCountMap = new HashMap<Long, Integer>();
+		// 查询小区公寓的标记状态 先从map中取小区id对应的以前公寓标记状态 如果是未标记状态 则先将以前所有小区标记
+		// 可能冲突重复状态 然后加入到缓存map
+		Map<Long, Boolean> flagMap = new HashMap<Long, Boolean>();// 未标记状态。
+																	// 每个小区只需要操作一次
+		for (String[] rowDatas : dataList)
+		{
+			if (rowDatas.length == DataProcessConstants.DATA_LENGTH_ZISE_APARTMENT)
+			{
+				AddressDataInfo address = DataFileHandler.convertAddressDataByRow(rowDatas);
+				Community community = getCommunityByList(address, bufferCommunityList, cityList, areaList);
+				CommunityGeoPoint communityGeoPoint  = communityProvider.findCommunityGeoPointById(community.getId());
+				Address ne = DataFileHandler.convertNEDBModelDataInfo(community, communityGeoPoint,address, user);
+
+				// 先查询该小区已存在的公寓总数。新增的小区公寓 理论上应该最多只可能有很少量的用户填写的公寓门牌号。
+				// 总数如果小于正常值（在系统配置项中配置）。1：标记已存在的公寓
+				// 为可能重复。需要人工去重。只进行一次操作 2：添加公寓ne
+				// 总数如果大于正常值。肯定有问题： 第一，可能一部分公寓已经导入。 第二。小区公寓以前导过。
+				// 则不属于新增操作。移至补充公寓。不进行数据库操作。抛出异常给据数组审核。
+				long communityId = community.getId();
+				int aptCount = getAptCountByCommunityId(community, bufferAptCountMap);
+				if (aptCount <= maxCount)
+				{
+					if (aptCount != 0)
+					{
+						if (flagMap.containsKey(communityId))
+						{
+							// 标记已存在的公寓 为可能重复
+							// 标记公寓： 应该是每一小区 只标记一次 map《id，flag》
+							// 1:map中包含该小区且 标记为false
+							// 标记并将false设置为true
+							// 2：map中 不包含该小区 标记并存入map中
+							if (!flagMap.get(communityId))
+							{
+//								updateAptConflictByCommunityId(communityId);
+								flagMap.put(communityId, true);
+							}
+						} else
+						{
+//							updateAptConflictByCommunityId(communityId);
+							flagMap.put(communityId, true);
+						}
+					}
+					addressList.add(ne);
+				} else
+				{
+					LOGGER.error("community apt is too much.community = " + community + ",aptCount = " + aptCount);
+					throw new RuntimeErrorException(community.getName() + "已经有 " + aptCount + "个公寓了。请请检查是否重复导入，并与后台人员联系核实。");
+				}
+			} else
+			{
+				LOGGER.error("data format is not correct.rowDatas = " + Arrays.toString(rowDatas));
+				throw new RuntimeErrorException("公寓文件格式不正确。每行共"+ DataProcessConstants.DATA_LENGTH_ZISE_APARTMENT +"项。数据 = " + Arrays.toString(rowDatas));
+			}
+		}
+		
+		txImportAddressList(addressList);
+		
+		//处理导入公寓后的小区公寓数。
+		if(bufferCommunityList != null && bufferCommunityList.size() > 0)
+		{
+			for (Community community : bufferCommunityList)
+			{
+				long communityId = community.getId();
+//				int aptCount = countAptByCommunityId(communityId);
+//				communityService.updateCommunityAptcountByIdAndCount(aptCount, communityId);
+			}
+		}
+		
+	}
+
+	public void txImportAddressList(List<Address> addressList) {
+		this.dbProvider.execute((TransactionStatus status) ->  {
+			for (Address address : addressList) {
+				addressProvider.createAddress(address);
+			}
+		    return null;
+        });
+	}
+
+	public Community getCommunityByList(AddressDataInfo address, List<Community> bufferCommunityList,
+			List<Region> cityList, List<Region> areaList) 
+	{
+
+		Region city = DataFileHandler.getCityByData(address.getCityName(), cityList);
+		if (city == null)
+		{
+			throw new RuntimeErrorException("数据文件的城市名字不正确。小区 = " + address.getCityName() + "\t"
+					+ address.getAreaName() + "\t" + address.getCommunityName());
+		}
+
+		Region area = DataFileHandler.getAreaByData(city.getId(), address.getAreaName(), areaList);
+		if (area == null)
+		{
+			throw new RuntimeErrorException("数据文件的区县名字不正确。小区 = " + address.getCityName() + "\t"
+					+ address.getAreaName() + "\t" + address.getCommunityName());
+		}
+		address.setAreaId(area.getId());
+		Community community = null;
+		if (address != null)
+		{
+			Long areaId = address.getAreaId();
+			String communityName = address.getCommunityName();
+			for (Community bufferCommunity : bufferCommunityList)
+			{
+				if (areaId == bufferCommunity.getAreaId() && communityName.equals(bufferCommunity.getName()))
+				{
+					community = bufferCommunity;
+					break;
+				}
+			}
+			if (community == null)
+			{
+				try
+				{
+					community = communityProvider.findCommunityByAreaIdAndName(areaId, communityName);
+				} catch (Exception e)
+				{
+					LOGGER.error("community duplicate . areaId = " + areaId + " , communityName =" + communityName, e);
+					throw new RuntimeErrorException("小区重复 . 区县id = " + areaId + " , 区县名字 =" + area.getName()
+							+ " , 小区名字 =" + communityName);
+				}
+				if (community == null)
+				{
+					throw new RuntimeErrorException("数据文件的小区未找到。小区 = " + address.getAreaName() + "\t"
+							+ address.getCommunityName());
+				}
+				bufferCommunityList.add(community);
+			}
+		}
+		return community;
+	}
+	
+	public int getAptCountByCommunityId(Community community, Map<Long, Integer> map)
+	{
+		int count = 0;
+		Long communityId = community.getId();
+		if (map.containsKey(communityId))
+		{
+			count = map.get(communityId);
+		} else
+		{
+			count =  community.getAptCount()==null ?0:community.getAptCount();  //countAptByCommunityId(communityId);
+			map.put(communityId, count);
+		}
+		return count;
 	}
 
 }
