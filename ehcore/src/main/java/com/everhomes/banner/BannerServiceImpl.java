@@ -23,7 +23,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
-import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -163,7 +162,7 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public void createOrUpdateBannerClick(CreateBannerClickCommand cmd){
+    public String createOrUpdateBannerClick(CreateBannerClickCommand cmd){
         if(cmd.getBannerId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerId paramter.");
@@ -194,6 +193,18 @@ public class BannerServiceImpl implements BannerService {
             bannerClick.setLastClickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             bannerProvider.updateBannerClick(bannerClick);
         }
+        return bannerClick.getUuid();
+    }
+    
+    @Override
+    public List<BannerDTO> listAllBanners(){
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         
+        return bannerProvider.listAllBanners().stream().map((Banner r) ->{
+            BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
+            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
+            return dto;
+         }).collect(Collectors.toList());
     }
 }

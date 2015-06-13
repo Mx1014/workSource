@@ -95,8 +95,8 @@ public class BannerController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse clickBanner(@Valid CreateBannerClickCommand cmd) {
         
-        bannerService.createOrUpdateBannerClick(cmd);
-        RestResponse response =  new RestResponse();
+        String token = bannerService.createOrUpdateBannerClick(cmd);
+        RestResponse response =  new RestResponse(token);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

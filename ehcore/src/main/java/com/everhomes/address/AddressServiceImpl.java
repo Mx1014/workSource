@@ -593,6 +593,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 //                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
 //                if(family != null)
 //                    this.familyService.approveMembersByFamily(family);
+                Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+                if(community != null){
+                    community.setAptCount(community.getAptCount() + 1);
+                    this.communityProvider.updateCommunity(community);
+                }
                 
             }else {
                 Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());

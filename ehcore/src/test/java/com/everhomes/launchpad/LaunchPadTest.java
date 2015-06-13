@@ -6,6 +6,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.json.simple.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -145,5 +146,27 @@ public class LaunchPadTest extends TestCase {
         this.launchPadService.deleteLaunchPadItem(cmd);
     }
     
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createLaunchPadLayout(){
+        CreateLaunchPadLayoutCommand cmd = new CreateLaunchPadLayoutCommand();
+        cmd.setMinVersionCode(3L);
+        cmd.setName("v3.0");
+        cmd.setNamespaceId(0);
+        cmd.setStatus((byte)2);
+        cmd.setVersionCode(3L);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", "group1");
+        jsonObject.put("type", "PM");
+        jsonObject.put("style", "Nav_Win8");
+        cmd.setLayoutJson(jsonObject.toJSONString());
+        this.launchPadService.createLaunchPadLayout(cmd);
+    }
+    @Test
+    public void findLaunchPadLayout(){
+        FindLaunchPadLayoutByVersionCodeCommand cmd = new FindLaunchPadLayoutByVersionCodeCommand();
+        cmd.setVersionCode(3L);
+        System.out.println(this.launchPadService.findLastLaunchPadLayoutByVersionCode(cmd));
+    }
    
 }

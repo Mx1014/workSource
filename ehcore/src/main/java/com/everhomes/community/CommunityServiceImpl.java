@@ -2,6 +2,7 @@
 package com.everhomes.community;
 
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,23 +27,30 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.family.FamilyNotificationTemplateCode;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.MetaObjectType;
+import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommunityServiceImpl.class);
+    private static final String COMMUNITY_NAME = "communityName";
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -57,7 +65,8 @@ public class CommunityServiceImpl implements CommunityService {
     private MessagingService messagingService;
     @Autowired
     private LocaleTemplateService localeTemplateService;
-    
+    @Autowired
+    private CommunitySearcher communitySearcher;
     
     
     @Override
@@ -93,7 +102,9 @@ public class CommunityServiceImpl implements CommunityService {
         return response;
     }
 
-    public void approveCommuniy(ApproveCommunityCommand cmd){
+
+    @Override
+    public void updateCommunity(UpdateCommunityCommand cmd) {
         if(cmd.getCommunityId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId parameter");
@@ -122,10 +133,9 @@ public class CommunityServiceImpl implements CommunityService {
        community.setAreaId(cmd.getAreaId());
        community.setCityId(cmd.getCityId());
        community.setOperatorUid(userId);
-       community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+       community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
        community.setAreaName(area.getName());
        community.setCityName(city.getName());
-       
        this.dbProvider.execute((TransactionStatus status) ->  {
            this.communityProvider.updateCommunity(community);
            if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
@@ -140,44 +150,118 @@ public class CommunityServiceImpl implements CommunityService {
            }
            return null;
        });
-       sendNotificationForCommunityByAdmin(userId,community.getCreatorUid(),community.getName());
+    }
+    @Override
+    public void approveCommuniy(ApproveCommunityCommand cmd){
+        if(cmd.getCommunityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId parameter");
+        }
+        
+       Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+       if(community == null){
+           LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+           throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                   "Community is not found.");
+       }
+       User user = UserContext.current().getUser();
+       long userId = user.getId();
+      
+       community.setOperatorUid(userId);
+       community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+       this.communityProvider.updateCommunity(community);
+       //create community index
+       this.communitySearcher.feedDoc(community);
+       
+       sendNotificationForApproveCommunityByAdmin(userId,community.getCreatorUid(),community.getName());
     }
     
-    private void sendNotificationForCommunityByAdmin(long operatorId, long memberId, String communityName) {
+    private void sendNotificationForApproveCommunityByAdmin(long operatorId, long memberId, String communityName) {
         // send notification to the applicant
         try {
             
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("communityName", communityName);
+            map.put(COMMUNITY_NAME, communityName);
             
             User user = userProvider.findUserById(memberId);
             String locale = user.getLocale();
             if(locale == null) locale = "zh_CN";
             
             // send notification member who applicant
-            String scope = FamilyNotificationTemplateCode.SCOPE;
-            int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
+            String scope = CommunityNotificationTemplateCode.SCOPE;
+            int code = CommunityNotificationTemplateCode.COMMUNITY_ADD_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
-            sendCommunityNotification(memberId, notifyTextForApplicant);
+            sendCommunityNotification(memberId, notifyTextForApplicant, null, null);
             
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, operatorId=" + operatorId + ", memberId=" + memberId, e);
         }
     }
-    private void sendCommunityNotification(long userId, String message) {
+    private void sendCommunityNotification(long userId, String message,MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message != null && message.length() != 0) {
-            if(message != null && message.length() != 0) {
-                MessageDTO messageDto = new MessageDTO();
-                messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                messageDto.setSenderUid(User.SYSTEM_UID);
-                messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
-                messageDto.setMetaAppId(AppConstants.APPID_ADDRESS);
-                messageDto.setBody(message);
-                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_ADDRESS, "user", 
-                    String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
+            messageDto.setMetaAppId(AppConstants.APPID_ADDRESS);
+            messageDto.setBody(message);
+            Map<String, String> metaMap = new HashMap<String, String>();
+            messageDto.setMeta(metaMap);
+            messageDto.getMeta().put("body-type", MessageBodyType.TEXT.getCode());
+            if(metaObjectType != null && metaObject != null) {
+                messageDto.getMeta().put("meta-object-type", metaObjectType.getCode());
+                messageDto.getMeta().put("meta-object", StringHelper.toJsonString(metaObject));
             }
+            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user", 
+                String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
         }
     }
    
+    @Override
+    public void rejectCommunity(RejectCommunityCommand cmd){
+        if(cmd.getCommunityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId parameter");
+        }
+        
+       Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+       if(community == null){
+           LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+           throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                   "Community is not found.");
+       }
+       User user = UserContext.current().getUser();
+       long userId = user.getId();
+       
+       community.setOperatorUid(userId);
+       community.setStatus(CommunityAdminStatus.INACTIVE.getCode());
+       community.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+       communityProvider.updateCommunity(community);
+       sendNotificationForRejectCommunityByAdmin(userId,community.getCreatorUid(),community.getName());
+    }
+    
+    private void sendNotificationForRejectCommunityByAdmin(long operatorId, long memberId, String communityName) {
+        // send notification to the applicant
+        try {
+            
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(COMMUNITY_NAME, communityName);
+            
+            User user = userProvider.findUserById(memberId);
+            String locale = user.getLocale();
+            if(locale == null) locale = "zh_CN";
+            
+            // send notification member who applicant
+            String scope = CommunityNotificationTemplateCode.SCOPE;
+            int code = CommunityNotificationTemplateCode.COMMUNITY_ADD_REJECT_FOR_APPLICANT;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            sendCommunityNotification(memberId, notifyTextForApplicant, null, null);
+            
+        } catch(Exception e) {
+            LOGGER.error("Failed to send notification, operatorId=" + operatorId + ", memberId=" + memberId, e);
+        }
+    }
+
 }

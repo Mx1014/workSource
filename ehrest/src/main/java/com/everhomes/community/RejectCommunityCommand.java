@@ -13,14 +13,14 @@ import com.everhomes.util.StringHelper;
  * <li>reason: 通过原因</li>
  * </ul>
  */
-public class ApproveCommunityCommand {
+public class RejectCommunityCommand {
     @NotNull
     private Long communityId;
     private Long operatorRole;
     
     private String reason;
     
-    public ApproveCommunityCommand() {
+    public RejectCommunityCommand() {
     }
 
     public Long getCommunityId() {
