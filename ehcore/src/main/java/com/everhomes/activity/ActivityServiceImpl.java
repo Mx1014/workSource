@@ -369,7 +369,7 @@ public class ActivityServiceImpl implements ActivityService {
         response.setRoster(result);
         response.setCreatorFlag(0);
         // current user is sender?
-        if (user.getId() == activity.getCreatorUid()) {
+        if (user.getId().equals(activity.getCreatorUid())) {
             // return url
             String baseDir = configurationProvider.getValue(DEFAULT_HOME_URL, "");
             response.setCheckinQRUrl(baseDir + "/activity/checkin?activityId=" + activity.getId());
@@ -653,7 +653,7 @@ public class ActivityServiceImpl implements ActivityService {
         response.setRoster(result);
         response.setCreatorFlag(0);
         // current user is sender?
-        if (user.getId() == activity.getCreatorUid()) {
+        if (user.getId().equals(activity.getCreatorUid())) {
             // return url
             String baseDir = configurationProvider.getValue(DEFAULT_HOME_URL, "");
             response.setCheckinQRUrl(baseDir + "/activity/checkin?activityId=" + activity.getId());
