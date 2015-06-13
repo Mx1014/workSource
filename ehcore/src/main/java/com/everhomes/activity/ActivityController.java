@@ -154,4 +154,10 @@ public class ActivityController extends ControllerBase {
         categories.setActivityCategories(result.stream().map(r->ConvertHelper.convert(r, CategoryDTO.class)).collect(Collectors.toList()));
         return new RestResponse(categories);
     }
+    
+    @RequestMapping("listNearbyActivities")
+    @RestReturn(ListNearbyActivitiesResponse.class)
+    public RestResponse listNearbyActivities(@Valid ListNearByActivitiesCommand cmd){
+        return new RestResponse("ok");
+    }
 }

@@ -41,8 +41,10 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
     public Post postProcessEmbeddedObject(Post post) {
 //        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
 //                ActivityPostCommand.class);
-    	CommunityPmTasks task = new CommunityPmTasks();
-    	if(post != null && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
+//		帖子post传过来的 appId 都是null。最后默认为2.    	
+//    	if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
+    	if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
+    		CommunityPmTasks task = new CommunityPmTasks();
     		task.setCommunityId(post.getVisibleRegionId());
     		task.setEntityType(EntityType.TOPIC.getCode());
     		task.setEntityId(post.getId());
@@ -50,9 +52,9 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
     		task.setTargetId(0l);
     		task.setTaskStatus(PmTaskStatus.UNTREATED.getCode());
     		task.setTaskType(PmTaskType.fromCode(post.getActionCategoryId()).getCode());
+    		propertyMgrProvider.createPmTask(task );
     	}
-		propertyMgrProvider.createPmTask(task );
-        return post;
+		return post;
     }
 
 }

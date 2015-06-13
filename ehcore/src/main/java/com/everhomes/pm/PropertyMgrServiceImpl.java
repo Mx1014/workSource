@@ -1410,7 +1410,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 	
 	@Override
-	public List<PropertyPostDTO>  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+	public ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
 		User user  = UserContext.current().getUser();
     	Long communityId = cmd.getCommunityId();
     	if(communityId == null){
@@ -1449,7 +1450,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				results.add(dto);
 			}
     	}
-    	return results;
+    	response.setPosts(results);
+    	return response;
 	}
 	
 	@Override
