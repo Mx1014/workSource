@@ -80,7 +80,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 //        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
 //                ActivityPostCommand.class);
     	User user = UserContext.current().getUser();
-    	if(post != null  && post.getAppId() == AppConstants.APPID_LINK){
+    	if(post != null ){
 	    	Link link = (Link)  StringHelper.fromJsonString(post.getEmbeddedJson(),Link.class);
 	    	link.setOwnerUid(user.getId());
 	    	link.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
