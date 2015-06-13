@@ -200,7 +200,7 @@ public class PollServiceImpl implements PollService {
         if(result.size()==1){
             subject=poll.getSubject()==null?"1":poll.getSubject();
         }else{
-            subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+            subject=StringUtils.join(votes.stream().map(r->r.getItemId()).collect(Collectors.toList()),",");
         }
         Post comment=new Post();
         User user = UserContext.current().getUser();

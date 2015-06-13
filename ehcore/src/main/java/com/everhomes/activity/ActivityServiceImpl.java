@@ -4,18 +4,23 @@ package com.everhomes.activity;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
+import org.jooq.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
@@ -116,6 +121,10 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setSignupAttendeeCount(0);
         activity.setSignupFamilyCount(0);
         activity.setSignupFlag(cmd.getCheckinFlag());
+        if(cmd.getLongitude()!=null&&cmd.getLatitude()!=null){
+            String geohash=GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
+            activity.setGeohash(geohash);
+            }
         
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         //if date time format is not ok,return now
@@ -334,7 +343,7 @@ public class ActivityServiceImpl implements ActivityService {
             if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
-            d.setCheckinFlag(r.getCheckinFlag()==null?0:1);
+            d.setCheckinFlag(r.getCheckinFlag()==null?0:r.getCheckinFlag().intValue());
             d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
@@ -488,6 +497,7 @@ public class ActivityServiceImpl implements ActivityService {
         post.setCreatorUid(uid);
         post.setContentType(PostContentType.TEXT.getCode());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        post.setCreatorUid(UserContext.current().getUser().getId());
         return post;
     }
 
@@ -622,7 +632,7 @@ public class ActivityServiceImpl implements ActivityService {
             if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
-            d.setCheckinFlag(r.getCheckinFlag()==null?0:1);
+            d.setCheckinFlag(r.getCheckinFlag()==null?0:r.getCheckinFlag().intValue());
             d.setConfirmTime(r.getConfirmTime()==null?null:r.getConfirmTime().toString());
             if (r.getFamilyId() != null) {
                 FamilyDTO family = familyProvider.getFamilyById(r.getFamilyId());
@@ -679,7 +689,7 @@ public class ActivityServiceImpl implements ActivityService {
             condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
         }
         int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion);
+        List<Activity> ret = activityProvider.listActivities(locator, value+1,Operator.AND, condtion);
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
             dto.setActivityId(activity.getId());
@@ -698,6 +708,42 @@ public class ActivityServiceImpl implements ActivityService {
             locator.setAnchor(null);
         }
         return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
+    }
+
+    @Override
+    public Tuple<Long, List<ActivityDTO>> listNearByActivities(ListNearByActivitiesCommand cmd) {
+       double latitude= cmd.getLatitude();
+       double longitude=cmd.getLongitude();
+       GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+       GeoHash[] adjacents = geo.getAdjacent();
+       List<String> geoHashCodes = new ArrayList<String>();
+       geoHashCodes.add(geo.toBase32());
+       for(GeoHash g : adjacents) {
+           geoHashCodes.add(g.toBase32());
+       }
+       CrossShardListingLocator locator=new CrossShardListingLocator();
+       locator.setAnchor(cmd.getAnchor());
+       int pageSize=configurationProvider.getIntValue("", 20);
+       List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+          ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+          dto.setActivityId(activity.getId());
+          dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+          dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+          dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
+          dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
+          dto.setProcessStatus(getStatus(activity).getCode());
+          dto.setFamilyId(activity.getCreatorFamilyId());
+          dto.setStartTime(activity.getStartTime().toString());
+          dto.setStopTime(activity.getEndTime().toString());
+          dto.setGroupId(activity.getGroupId());
+          return dto;
+       }).collect(Collectors.toList());
+       if(result.size()<pageSize)
+       {
+           locator.setAnchor(null);
+       }
+        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), result);
     }
     
 }
