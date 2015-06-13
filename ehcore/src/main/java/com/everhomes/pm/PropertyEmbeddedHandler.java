@@ -43,7 +43,7 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 //                ActivityPostCommand.class);
 //		帖子post传过来的 appId 都是null。最后默认为2.    	
 //    	if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
-    	if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
+    	if(post != null  && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
     		CommunityPmTasks task = new CommunityPmTasks();
     		task.setCommunityId(post.getVisibleRegionId());
     		task.setEntityType(EntityType.TOPIC.getCode());
