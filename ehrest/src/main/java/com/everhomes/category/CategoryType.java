@@ -10,7 +10,7 @@ import com.everhomes.category.CategoryConstants;
  * <li>HELP: 求助-3093</li>
  * <li>REPAIR: 维修-3094</li>
  * <li>HOTLINE: 热线</li>
- * <li>HOTLINE: 热线</li>
+ * <li>PAYMENT: 缴费</li>
  * </ul>
  */
 public enum CategoryType {
