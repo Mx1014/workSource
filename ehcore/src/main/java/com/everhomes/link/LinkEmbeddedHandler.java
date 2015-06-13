@@ -1,0 +1,94 @@
+// @formatter:off
+package com.everhomes.link;
+
+import java.sql.Timestamp;
+
+import org.jooq.tools.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.app.AppConstants;
+import com.everhomes.entity.EntityType;
+import com.everhomes.forum.ForumEmbeddedHandler;
+import com.everhomes.forum.Post;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
+
+@Component(LinkEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_LINK)
+public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
+
+    private static final Logger LOGGER=LoggerFactory.getLogger(LinkEmbeddedHandler.class);
+    
+    @Autowired
+    private LinkProvider linkProvider;
+
+
+    @Override
+    public String renderEmbeddedObjectSnapshot(Post post) {
+        try{
+            Link link = linkProvider.findLinkByPostId(post.getId());
+            if(link!=null) return StringHelper.toJsonString(link);
+        }catch(Exception e){
+            LOGGER.error("handle snapshot error",e);
+        }
+        
+        return null;
+    }
+
+    @Override
+    public String renderEmbeddedObjectDetails(Post post) {
+        try{
+        	Link link = linkProvider.findLinkByPostId(post.getId());
+            if(link!=null) return StringHelper.toJsonString(link);
+        }catch(Exception e){
+            LOGGER.error("handle details error",e);
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Post preProcessEmbeddedObject(Post post) {
+        return null;
+    }
+
+    @Override
+    public Post postProcessEmbeddedObject(Post post) {
+//    	JSONObject object = post.getEmbeddedJson();
+//    	Link link = new Link();
+//    	link.setAuthor(object.get(key));
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//    	link.set
+//        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+//                ActivityPostCommand.class);
+    	User user = UserContext.current().getUser();
+    	if(post != null  && post.getAppId() == AppConstants.APPID_LINK){
+	    	Link link = (Link)  StringHelper.fromJsonString(post.getEmbeddedJson(),Link.class);
+	    	link.setOwnerUid(user.getId());
+	    	link.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    	link.setSourceId(post.getId());
+	    	link.setSourceType(LinkSourceType.POST.getCode());
+	    	linkProvider.createLink(link);
+    	}
+        return post;
+    }
+
+}
