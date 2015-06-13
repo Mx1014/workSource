@@ -727,9 +727,9 @@ public class PropertyMgrController extends ControllerBase {
      * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
      */
     @RequestMapping("queryPmTopicsByCategory")
-    @RestReturn(value=PropertyPostDTO.class)
+    @RestReturn(value=ListPropPostCommandResponse.class)
     public RestResponse queryPmTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
-    	List<PropertyPostDTO>  cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
+    	ListPropPostCommandResponse  cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
