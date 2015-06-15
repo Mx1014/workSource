@@ -22,6 +22,8 @@ import com.everhomes.util.StringHelper;
  *<li>maxAttendeeCount:最大邀请人数</li>
  *<li>creatorFamilyId:创建者家庭ID</li>
  *<li>groupId:组ID</li>
+ *<li>longitude:经度</li>
+ *<li>latitude:纬度</li>
  *<li>changeVersion:版本</li>
  *</ul>
  */
@@ -39,6 +41,8 @@ public class ActivityPostCommand{
     private Long     creatorFamilyId;
     private Long     groupId;
     private Integer  changeVersion;
+    private Double longitude;
+    private Double latitude;
     private String tag;
     
     public ActivityPostCommand() {
@@ -193,6 +197,30 @@ public class ActivityPostCommand{
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
 

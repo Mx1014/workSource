@@ -27,7 +27,6 @@ public class CreatePropMemberCommand {
 
 	private String pmGroup;
 	private String contactName;
-	@NotNull
 	private Byte   contactType;
 	private String contactToken;
 	private String contactDescription;

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord> {
 
-	private static final long serialVersionUID = 1538566839;
+	private static final long serialVersionUID = -1424350121;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_layouts</code>
@@ -35,11 +35,6 @@ public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_launch_pad_layouts.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_launch_pad_layouts.app_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Long> APP_ID = createField("app_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_layouts.name</code>.

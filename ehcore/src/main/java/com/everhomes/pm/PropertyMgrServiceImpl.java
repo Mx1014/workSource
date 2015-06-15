@@ -992,6 +992,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		dto.setMemberUid(member.getMemberId());
     		dto.setMemberName(member.getMemberNickName());
     		dto.setMemberAvatarUri((member.getMemberAvatar()));
+    		
     		results.add(dto);
 		}
     	return results;
@@ -1409,7 +1410,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 	
 	@Override
-	public List<PropertyPostDTO>  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+	public ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
 		User user  = UserContext.current().getUser();
     	Long communityId = cmd.getCommunityId();
     	if(communityId == null){
@@ -1448,7 +1450,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				results.add(dto);
 			}
     	}
-    	return results;
+    	response.setPosts(results);
+    	return response;
 	}
 	
 	@Override

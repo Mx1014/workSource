@@ -40,6 +40,8 @@ public class ActivityDTO {
     private Long groupId;
     private Long familyId;
     private String tag;
+    private Double longitude;
+    private Double latitude;
    
     private Integer userActivityStatus;
     private Integer processStatus;
@@ -186,6 +188,28 @@ public class ActivityDTO {
 
     public void setFamilyId(Long familyId) {
         this.familyId = familyId;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
     @Override

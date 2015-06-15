@@ -11,13 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2088989898;
+	private static final long serialVersionUID = 2057862182;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
 	private java.lang.String   tag;
+	private java.lang.Double   longitude;
+	private java.lang.Double   latitude;
+	private java.lang.String   geohash;
 	private java.lang.String   location;
 	private java.lang.String   contactPerson;
 	private java.lang.String   contactNumber;
@@ -52,6 +55,9 @@ public class EhActivities implements java.io.Serializable {
 		java.lang.String   subject,
 		java.lang.String   description,
 		java.lang.String   tag,
+		java.lang.Double   longitude,
+		java.lang.Double   latitude,
+		java.lang.String   geohash,
 		java.lang.String   location,
 		java.lang.String   contactPerson,
 		java.lang.String   contactNumber,
@@ -83,6 +89,9 @@ public class EhActivities implements java.io.Serializable {
 		this.subject = subject;
 		this.description = description;
 		this.tag = tag;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.geohash = geohash;
 		this.location = location;
 		this.contactPerson = contactPerson;
 		this.contactNumber = contactNumber;
@@ -148,6 +157,30 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setTag(java.lang.String tag) {
 		this.tag = tag;
+	}
+
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public java.lang.String getGeohash() {
+		return this.geohash;
+	}
+
+	public void setGeohash(java.lang.String geohash) {
+		this.geohash = geohash;
 	}
 
 	public java.lang.String getLocation() {

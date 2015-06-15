@@ -78,7 +78,8 @@ public class CommunityProviderImpl implements CommunityProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCommunities.class, null);
     }
 
-    @Caching(evict = { @CacheEvict(value="Community", key="#community.id") } )
+    @Caching(evict = { @CacheEvict(value="Community", key="#community.id"),
+            @CacheEvict(value="Communities", key="#community.id")} )
     @Override
     public void updateCommunity(Community community) {
         assert(community.getId() != null);
@@ -90,7 +91,8 @@ public class CommunityProviderImpl implements CommunityProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunities.class, community.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Community", key="#community.id") } )
+    @Caching(evict = { @CacheEvict(value="Community", key="#community.id"),
+            @CacheEvict(value="Communities", key="#community.id")} )
     @Override
     public void deleteCommunity(Community community) {
         assert(community.getId() != null);
@@ -111,7 +113,7 @@ public class CommunityProviderImpl implements CommunityProvider {
             self.deleteCommunity(community);
     }
 
-    @Cacheable(value="Community", key="#id")
+    @Cacheable(value="Community", key="#id" , unless="#result == null")
     @Override
     public Community findCommunityById(long id) {
         final Community[] result = new Community[1];
@@ -131,7 +133,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         return result[0];
     }
     
-    @Cacheable(value="CommunityGeoList", key="#id")
+    @Cacheable(value="CommunityGeoList", key="#id" , unless="#result == null")
     @Override
     public List<CommunityGeoPoint> listCommunityGeoPoints(long id) {
         List<CommunityGeoPoint> l = new ArrayList<>();
@@ -212,7 +214,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         return result[0];
     }
-    
+    @Cacheable(value="Communities", key="#communityId" ,unless="#result.size() == 0")
     @Override
     public List<Community> findNearyByCommunityById(long communityId){
         long startTime = System.currentTimeMillis();
@@ -401,5 +403,33 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         
         return communities;
+    }
+    
+    @Override
+    public Community findCommunityByAreaIdAndName(Long areaId, String name) {
+    	 final Community[] result = new Community[1];
+
+         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
+             (DSLContext context, Object reducingContext) -> {
+            	 context.select().from(Tables.EH_COMMUNITIES)
+        		 .where(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId))
+        		.and(Tables.EH_COMMUNITIES.NAME.eq(name)).fetch().map(r ->{
+        			return result[0] = ConvertHelper.convert(r,Community.class);
+        		});
+            	 return true;
+        				 
+        				 
+//                 result[0] = ConvertHelper.convert(context.select().from(Tables.EH_COMMUNITIES)
+//                		 .where(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId))
+//                 		.and(Tables.EH_COMMUNITIES.NAME.eq(name)).fetch(), Community.class);
+//             
+//                 if(result[0] != null) {
+//                     return false;
+//                 }
+//                 
+//                 return true;
+             });
+         
+         return result[0];
     }
 }

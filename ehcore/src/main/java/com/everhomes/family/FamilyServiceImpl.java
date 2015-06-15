@@ -48,6 +48,10 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
 import javassist.runtime.DotClass;
 
 import org.apache.lucene.spatial.DistanceUtils;
@@ -69,7 +73,15 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
+
 import ch.hsr.geohash.GeoHash;
+
+
+
+
 
 
 
@@ -108,9 +120,12 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.MetaObjectType;
+import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -132,8 +147,13 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.mysql.fabric.xmlrpc.base.Array;
+
+
+
+
 
 
 
@@ -232,7 +252,7 @@ public class FamilyServiceImpl implements FamilyService {
                     
                     GroupMember m = new GroupMember();
                     m.setGroupId(f.getId());
-                    m.setMemberNickName(user.getNickName());
+                    m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
                     m.setMemberType(EntityType.USER.getCode());
                     m.setMemberId(uid);
                     m.setMemberAvatar(user.getAvatar());
@@ -261,11 +281,12 @@ public class FamilyServiceImpl implements FamilyService {
                 m.setGroupId(family.getId());
                 m.setMemberType(EntityType.USER.getCode());
                 m.setMemberId(uid);
-                m.setMemberNickName(user.getNickName());
+                m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
                 m.setMemberAvatar(user.getAvatar());
                 m.setMemberRole(Role.ResourceUser);
                 m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 m.setCreatorUid(uid);
+                m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 this.groupProvider.createGroupMember(m);
                 
                 UserGroup userGroup = new UserGroup();
@@ -305,17 +326,18 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
+            
             sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_OPERATOR;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
+            QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
             groupProvider.iterateGroupMembers(1000, group.getId(), null,
             (groupMember) -> {
                 if(groupMember.getMemberId() != member.getMemberId()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
+                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers,MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
+                    //sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
                 }
             });
         } catch(Exception e) {
@@ -330,17 +352,26 @@ public class FamilyServiceImpl implements FamilyService {
     }
     
     private void sendFamilyNotification(long userId, String message) {
+        sendFamilyNotification(userId, message, null, null);
+    }
+        
+    private void sendFamilyNotification(long userId, String message ,MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message != null && message.length() != 0) {
-            if(message != null && message.length() != 0) {
-                MessageDTO messageDto = new MessageDTO();
-                messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                messageDto.setSenderUid(User.SYSTEM_UID);
-                messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
-                messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
-                messageDto.setBody(message);
-                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "user", 
-                    String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+            messageDto.setBody(message);
+            Map<String, String> metaMap = new HashMap<String, String>();
+            messageDto.setMeta(metaMap);
+            messageDto.getMeta().put("body-type", MessageBodyType.TEXT.getCode());
+            if(metaObjectType != null && metaObject != null) {
+                messageDto.getMeta().put("meta-object-type", metaObjectType.getCode());
+                messageDto.getMeta().put("meta-object", StringHelper.toJsonString(metaObject));
             }
+            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user", 
+                String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
         }
     }
 
@@ -851,7 +882,7 @@ public class FamilyServiceImpl implements FamilyService {
         // send notification to the applicant
         try {
             
-            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceOperator);
+            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceAdmin);
             
             User user = userProvider.findUserById(member.getMemberId());
             String locale = user.getLocale();
@@ -1635,7 +1666,39 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
     }
-
+    
+    private QuestionMetaObject createGroupQuestionMetaObject(Group group, GroupMember requestor, GroupMember target) {
+        QuestionMetaObject metaObject = new QuestionMetaObject();
+        
+        if(group != null) {
+            metaObject.setResourceType(EntityType.FAMILY.getCode());
+            metaObject.setResourceId(group.getId());
+        }
+        
+        if(requestor != null) {
+            metaObject.setRequestorUid(requestor.getMemberId());
+            metaObject.setRequestTime(requestor.getCreateTime());
+            metaObject.setRequestorNickName(requestor.getMemberNickName());
+            String avatar = requestor.getMemberAvatar();
+            metaObject.setRequestorAvatar(avatar);
+            if(avatar != null && avatar.length() > 0) {
+                try{
+                    String url = contentServerService.parserUri(avatar, EntityType.FAMILY.getCode(), group.getId());
+                    metaObject.setRequestorAvatarUrl(url);
+                }catch(Exception e){
+                    LOGGER.error("Failed to parse avatar uri of group member, groupId=" + group.getId() 
+                        + ", memberId=" + requestor.getMemberId(), e);
+                }
+            }
+        }
+        
+        if(target != null) {
+            metaObject.setTargetType(EntityType.USER.getCode());
+            metaObject.setTargetId(target.getMemberId());
+        }
+        
+        return metaObject;
+    }
     @Override
     public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
         

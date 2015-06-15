@@ -9,10 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.banner.UpdateBannerCommand;
 import com.everhomes.community.ApproveCommunityCommand;
 import com.everhomes.community.CommunityService;
 import com.everhomes.community.ListCommunitesByStatusCommand;
 import com.everhomes.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.community.RejectCommunityCommand;
+import com.everhomes.community.UpdateCommunityCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -64,10 +67,42 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/community/rejectCommunity</b>
+     * <p>拒绝用户添加的小区</p>
+     */
+    @RequestMapping("rejectCommunity")
+    @RestReturn(value=String.class)
+    public RestResponse rejectCommunity(@Valid RejectCommunityCommand cmd) {
+        
+        this.communityService.rejectCommunity(cmd);
+        
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/updateCommunity</b>
+     * <p>更新小区信息</p>
+     */
+    @RequestMapping("updateCommunity")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunity(@Valid UpdateCommunityCommand cmd) {
+        
+        this.communityService.updateCommunity(cmd);
+        
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
    
     /**
      * <b>URL: /admin/community/syncIndex</b>
-     * <p>查询待审核小区列表</p>
+     * <p>同步小区索引</p>
      */
     @RequestMapping("syncIndex")
     @RestReturn(value=String.class)

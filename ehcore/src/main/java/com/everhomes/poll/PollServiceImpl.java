@@ -24,6 +24,7 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.forum.PostContentType;
 import com.everhomes.poll.PollService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -112,7 +113,7 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("cannot find poll item.pollId={}", cmd.getPollId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_ITEMS, "poll items cannot be empty");
         }
-        List<PollItem> matchResult = result.stream().filter(r->result.contains(r)).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
+        List<PollItem> matchResult = result.stream().filter(r->cmd.getItemIds().contains(r.getResourceId())).map(m->ConvertHelper.convert(m, PollItem.class)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(matchResult)) {
             LOGGER.error("cannot find any match item.{}", cmd.getItemIds());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
@@ -199,13 +200,17 @@ public class PollServiceImpl implements PollService {
         if(result.size()==1){
             subject=poll.getSubject()==null?"1":poll.getSubject();
         }else{
-            subject=StringUtils.join(votes.stream().map(r->r.getId()).collect(Collectors.toList()),",");
+            subject=StringUtils.join(votes.stream().map(r->r.getItemId()).collect(Collectors.toList()),",");
         }
         Post comment=new Post();
+        User user = UserContext.current().getUser();
         comment.setContent("我已投 ”"+subject+"“!");
+        comment.setCreatorUid(user.getId());
         comment.setForumId(post.getForumId());
         comment.setParentPostId(post.getId());
-        forumProvider.createPost(post);
+        comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        comment.setContentType(PostContentType.TEXT.getCode());
+        forumProvider.createPost(comment);
     }
     
    private ProcessStatus getStatus(Poll poll){

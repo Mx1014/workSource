@@ -21,7 +21,9 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
+import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
+import com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -163,6 +165,47 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         dao.insert(items.stream().map(r->ConvertHelper.convert(r, EhLaunchPadItems.class)).collect(Collectors.toList()));
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadItems.class, null); 
         
+    }
+    
+    @Override
+    public void createLaunchPadLayout(LaunchPadLayout launchPadLayout){
+        assert(launchPadLayout != null);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration()); 
+        dao.insert(launchPadLayout);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadLayouts.class, null); 
+    }
+    
+    @Override
+    public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(long versionCode) {
+        List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
+        Condition condition = Tables.EH_LAUNCH_PAD_LAYOUTS.MIN_VERSION_CODE.lessOrEqual(versionCode);
+        condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
+        
+        step.where(condition).orderBy(Tables.EH_LAUNCH_PAD_LAYOUTS.VERSION_CODE.desc()).fetch().map((r) ->{
+            layouts.add(ConvertHelper.convert(r, LaunchPadLayout.class));
+            return null;
+        });
+        
+        return layouts;
+    }
+    @Override
+    public List<LaunchPadItem> findLaunchPadItemsByServiceType(byte serviceType){
+        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+        //TODO
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq("");
+        
+        step.where(condition).fetch().map((r) ->{
+            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
     }
 
 }
