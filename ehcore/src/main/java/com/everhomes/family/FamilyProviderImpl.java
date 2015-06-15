@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -105,7 +106,7 @@ public class FamilyProviderImpl implements FamilyProvider {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
-    //@Cacheable(value="Family", key="#addressId" ,unless="#result==null")
+    @Cacheable(value="Family", key="#addressId" ,unless="#result==null")
     @Override
     public Family findFamilyByAddressId(long addressId) {
         final Family[] result = new Family[1];
@@ -129,6 +130,8 @@ public class FamilyProviderImpl implements FamilyProvider {
         return result[0];
     }
     
+    @Caching(evict = { @CacheEvict(value="Family", key="#address.id"), 
+             @CacheEvict(value="FamiliesOfUser", key="#userGroup.ownerUid"), @CacheEvict(value="FamilyOfId", key="#userGroup.groupId")} )
     @Override
     public void leaveFamilyAtAddress(Address address, UserGroup userGroup) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
@@ -231,7 +234,7 @@ public class FamilyProviderImpl implements FamilyProvider {
             if(group != null){
 
                 FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatarUrl(parserUri(group.getAvatar(),"Family",group.getCreatorUid()));
+                family.setAvatarUrl(parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid()));
                 family.setAvatarUri(group.getAvatar());
                 family.setAddressId(group.getIntegralTag1());
                 long communityId = group.getIntegralTag2();
@@ -249,9 +252,9 @@ public class FamilyProviderImpl implements FamilyProvider {
                         EntityType.USER.getCode(), userId);
                 if(member != null){
                     family.setMembershipStatus(member.getMemberStatus());
-                    family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), "User", member.getCreatorUid()));
+                    family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
                     family.setMemberAvatarUri(member.getMemberAvatar());
-                    family.setProofResourceUrl(parserUri(member.getProofResourceUrl(), "User", member.getCreatorUid()));
+                    family.setProofResourceUrl(parserUri(member.getProofResourceUrl(), EntityType.USER.getCode(), member.getCreatorUid()));
                 }
                 
                 Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
@@ -270,7 +273,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         return familyList;
     }
-    
+    @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
     @Override
     public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
         
@@ -390,7 +393,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             f.setMemberUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                             f.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
                             f.setMembershipStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
-                            f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL),"Family",r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
+                            f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL),EntityType.FAMILY.getCode(),
+                                    r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
                             List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                             if(userIdentifiers != null && !userIdentifiers.isEmpty()){
                                 userIdentifiers.forEach((u) ->{
@@ -490,6 +494,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                 });
         return count[0];
     }
+    
+    @Cacheable(value="FamilyOfId", key="#familyId", unless="#result == null")
     @Override
     public FamilyDTO getFamilyById(Long familyId) {
 

@@ -346,7 +346,11 @@ public class FamilyServiceImpl implements FamilyService {
     }
     private String fullAddress(long communityId , String buildingName, String apartmentName){
         Community community = communityProvider.findCommunityById(communityId);
-        assert(community != null);
+        if(community == null){
+            LOGGER.error("Community is not found.communityId=" + communityId);
+            return null;
+        }
+        
         return FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), buildingName, apartmentName);
         
     }

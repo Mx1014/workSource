@@ -12,36 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.pm.CommunityPmMember;
-import com.everhomes.pm.CommunityPmTasks;
-import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmMembersDao;
 import com.everhomes.server.schema.tables.daos.EhLinksDao;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers;
 import com.everhomes.server.schema.tables.pojos.EhLinks;
-import com.everhomes.server.schema.tables.records.EhAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord;
 import com.everhomes.server.schema.tables.records.EhLinksRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-
 @Component
 public class LinkProviderImpl implements LinkProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(LinkProviderImpl.class);
@@ -101,7 +82,7 @@ public class LinkProviderImpl implements LinkProvider {
         return ConvertHelper.convert(dao.findById(id), Link.class);
     }
     
-    @Cacheable(value="Link", key="#id")
+    @Cacheable(value="Link-post", key="#postId")
     @Override
     public Link findLinkByPostId(Long postId) {
     	final Link[] result = new Link[1];

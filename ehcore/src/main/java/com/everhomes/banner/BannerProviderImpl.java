@@ -10,6 +10,9 @@ import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -49,13 +52,12 @@ public class BannerProviderImpl implements BannerProvider {
         query.setRecord(ConvertHelper.convert(banner, EhBannersRecord.class));
         query.setReturning(Tables.EH_BANNERS.ID);
         query.execute();
-//        if(query.execute() > 0) {
-//            banner.setId(query.getReturnedRecord().getId());
-//        }
+
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBanners.class, null);
         
     }
-
+    @Caching(evict = { @CacheEvict(value="Banner", key="#banner.id"),
+            @CacheEvict(value="BannerList", key="#banner.id") } )
     @Override
     public void updateBanner(Banner banner) {
         assert(banner != null);
@@ -64,7 +66,8 @@ public class BannerProviderImpl implements BannerProvider {
         dao.update(banner);
         
     }
-
+    @Caching(evict = { @CacheEvict(value="Banner", key="#banner.id"),
+            @CacheEvict(value="BannerList", key="#banner.id") } )
     @Override
     public void deleteBanner(Banner banner) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -81,7 +84,8 @@ public class BannerProviderImpl implements BannerProvider {
             self.deleteBanner(banner);
         
     }
-
+    
+    @Cacheable(value="Banner", key="#id", unless="#result == null")
     @Override
     public Banner findBannerById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -90,6 +94,7 @@ public class BannerProviderImpl implements BannerProvider {
         return ConvertHelper.convert(banner, Banner.class);
     }
     
+    @Cacheable(value="BannerList", key="{#scopeType,#scopeId}", unless="#result.size() == 0")
     @Override
     public List<Banner> listBannersByScopeTypeAndScopeId(String scopeType, long scopeId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -131,7 +136,10 @@ public class BannerProviderImpl implements BannerProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBannerClicks.class, null);
     }
-
+    
+    @Caching(evict = { @CacheEvict(value="BannerClick", key="#bannerClick.id"),
+            @CacheEvict(value="BannerClick-userId", key="{#bannerClick.bannerId, #bannerClick.uid}"),
+            @CacheEvict(value="BannerClick-token", key="#bannerClick.uuid")} )
     @Override
     public void updateBannerClick(BannerClick bannerClick) {
         assert(bannerClick != null);
@@ -140,7 +148,10 @@ public class BannerProviderImpl implements BannerProvider {
         dao.update(bannerClick);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBannerClicks.class, bannerClick.getUid());
     }
-
+    
+    @Caching(evict = { @CacheEvict(value="BannerClick", key="#bannerClick.id"),
+            @CacheEvict(value="BannerClick-userId", key="{#bannerClick.bannerId, #bannerClick.uid}"),
+            @CacheEvict(value="BannerClick-token", key="#bannerClick.uuid")} )
     @Override
     public void deleteBannerClick(BannerClick bannerClick) {
         assert(bannerClick != null);
@@ -159,6 +170,7 @@ public class BannerProviderImpl implements BannerProvider {
         
     }
 
+    @Cacheable(value="BannerClick", key="#id", unless="#result == null")
     @Override
     public BannerClick findBannerClickById(long id) {
         final BannerClick[] result = new BannerClick[1];
@@ -188,7 +200,8 @@ public class BannerProviderImpl implements BannerProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBannerOrders.class, null);
     }
-
+    
+    @Caching(evict = { @CacheEvict(value="BannerOrder", key="#bannerOrder.id")} )
     @Override
     public void updateBannerOrder(BannerOrder bannerOrder) {
         assert(bannerOrder != null);
@@ -197,7 +210,7 @@ public class BannerProviderImpl implements BannerProvider {
         dao.update(bannerOrder);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBannerOrders.class, bannerOrder.getUid());
     }
-
+    @Caching(evict = { @CacheEvict(value="BannerOrder", key="#bannerOrder.id")} )
     @Override
     public void deleteBannerOrder(BannerOrder bannerOrder) {
         assert(bannerOrder != null);
@@ -215,7 +228,8 @@ public class BannerProviderImpl implements BannerProvider {
             self.deleteBannerOrder(bannerOrder);
         
     }
-
+    
+    @Cacheable(value="BannerOrder", key="id", unless="#result == null")
     @Override
     public BannerOrder findBannerOrderById(long id) {
         final BannerOrder[] result = new BannerOrder[1];
@@ -232,7 +246,8 @@ public class BannerProviderImpl implements BannerProvider {
 
         return result[0];
     }
-
+    
+    @Cacheable(value="BannerClick-userId", key="{#bannerId, #userId}", unless="#result == null")
     @Override
     public BannerClick findBannerClickByBannerIdAndUserId(long bannerId, long userId) {
         final BannerClick[] result = new BannerClick[1];
@@ -241,6 +256,24 @@ public class BannerProviderImpl implements BannerProvider {
             context.select().from(Tables.EH_BANNER_CLICKS)
             .where(Tables.EH_BANNER_CLICKS.BANNER_ID.eq(bannerId))
             .and(Tables.EH_BANNER_CLICKS.UID.eq(userId))
+            .fetch().map((r) ->{
+                result[0] = ConvertHelper.convert(r, BannerClick.class);
+                return null;
+            });
+           return true;
+        });
+
+        return result[0];
+    }
+    
+    @Cacheable(value="BannerClick-token", key="{#token}", unless="#result == null")
+    @Override
+    public BannerClick findBannerClickByToken(String token){
+        final BannerClick[] result = new BannerClick[1];
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(Tables.EH_BANNER_CLICKS)
+            .where(Tables.EH_BANNER_CLICKS.UUID.eq(token))
             .fetch().map((r) ->{
                 result[0] = ConvertHelper.convert(r, BannerClick.class);
                 return null;

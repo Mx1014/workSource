@@ -40,9 +40,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhLaunchPadItems.class, null); 
         
     }
-//    @Caching(evict = { @CacheEvict(value="LaunchPadItem", key="#item.id"), 
-//        @CacheEvict(value="LaunchPadItemList", key="{#item.scopeType, #item.scopeId}"),
-//        @CacheEvict(value="LaunchPadItemByItemGroupList", key="#item.itemGroup")})
+    @Caching(evict = { @CacheEvict(value="LaunchPadItem", key="#item.id"), 
+        @CacheEvict(value="LaunchPadItemList", key="{#item.scopeType, #item.scopeId}"),
+        @CacheEvict(value="LaunchPadItemByItemGroupList", key="#item.itemGroup")})
     @Override
     public void updateLaunchPadItem(LaunchPadItem item) {
         
@@ -54,9 +54,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadItems.class, null);
         
     }
-//    @Caching(evict = { @CacheEvict(value="LaunchPadItem", key="#item.id"), 
-//            @CacheEvict(value="LaunchPadItemList", key="{#item.scopeType, #item.scopeId}"),
-//            @CacheEvict(value="LaunchPadItemByItemGroupList", key="#item.itemGroup") })
+    @Caching(evict = { @CacheEvict(value="LaunchPadItem", key="#item.id"), 
+            @CacheEvict(value="LaunchPadItemList", key="{#item.scopeType, #item.scopeId}"),
+            @CacheEvict(value="LaunchPadItemByItemGroupList", key="#item.itemGroup") })
     @Override
     public void deleteLaunchPadItem(LaunchPadItem item) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -67,9 +67,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadItems.class, null);
         
     }
-//    @Caching(evict = { @CacheEvict(value="LaunchPadItem", key="#id"), 
-//            @CacheEvict(value="LaunchPadItemList", key="{#item.scopeType, #item.scopeId}"),
-//            @CacheEvict(value="LaunchPadItemByItemGroupList", key="#item.itemGroup") })
+    @Caching(evict = { @CacheEvict(value="LaunchPadItem", key="#id"), 
+            @CacheEvict(value="LaunchPadItemList", key="{#item.scopeType, #item.scopeId}"),
+            @CacheEvict(value="LaunchPadItemByItemGroupList", key="#item.itemGroup") })
     @Override
     public void deleteLaunchPadItem(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -80,7 +80,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadItems.class, null);
         
     }
-    //@Cacheable(value="LaunchPadItem", key="#id" unless="#result == null")
+    @Cacheable(value="LaunchPadItem", key="#id", unless="#result == null")
     @Override
     public LaunchPadItem findLaunchPadItemById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(LaunchPadItem.class, id));
@@ -88,7 +88,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         return ConvertHelper.convert(dao.findById(id), LaunchPadItem.class);
     }
 
-    //@Cacheable(value="LaunchPadItemList", key="{#scopeType, #scopeId}" unless="#result.size() == 0")
+    @Cacheable(value="LaunchPadItemList", key="{#scopeType, #scopeId}", unless="#result.size() == 0")
     @Override
     public List<LaunchPadItem> listLaunchPadItemsByScopeTypeAndScopeId(String scopeType, long scopeId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
@@ -105,7 +105,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         return items;
     }
 
-    //@Cacheable(value="LaunchPadItemByItemGroupList", key="#itemGroup" unless="#result.size() == 0")
+    @Cacheable(value="LaunchPadItemByItemGroupList", key="#itemGroup", unless="#result.size() == 0")
     @Override
     public List<LaunchPadItem> listLaunchPadItemsByItemGroup(String itemGroup) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
@@ -120,6 +120,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
+    
     @Override
     public List<LaunchPadItem> listLaunchPadItemsByAppId(long appId, String scopeType, long scopeId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
@@ -128,10 +129,6 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.APP_ID.eq(appId);
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType));
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
-//        if(scopeType != null && !scopeType.trim().equals(""))
-//            condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType));
-//        if(scopeId != 0)
-//            condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
         
         step.where(condition).fetch().map((r) ->{
             items.add(ConvertHelper.convert(r, LaunchPadItem.class));
@@ -140,6 +137,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
+    
     @Override
     public List<LaunchPadItem> listLaunchPadItemsByScopeTypeAndItemNameItemGroup(
             String scopeType, String itemName, String itemGroup) {
@@ -157,6 +155,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
+    
     @Override
     public void createLaunchPadItems(List<LaunchPadItem> items) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

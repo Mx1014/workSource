@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.app.AppConstants;
-import com.everhomes.entity.EntityType;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.user.User;
@@ -22,15 +22,19 @@ import com.everhomes.util.StringHelper;
 public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 
     private static final Logger LOGGER=LoggerFactory.getLogger(LinkEmbeddedHandler.class);
+    private static final String HOME_URL = "home.url";
     
     @Autowired
     private LinkProvider linkProvider;
-
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
         try{
             Link link = linkProvider.findLinkByPostId(post.getId());
+            String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            post.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
             if(link!=null) return StringHelper.toJsonString(link);
         }catch(Exception e){
             LOGGER.error("handle snapshot error",e);
@@ -43,6 +47,8 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
     public String renderEmbeddedObjectDetails(Post post) {
         try{
         	Link link = linkProvider.findLinkByPostId(post.getId());
+        	 String homeUrl = configurationProvider.getValue(HOME_URL, "");
+             post.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
             if(link!=null) return StringHelper.toJsonString(link);
         }catch(Exception e){
             LOGGER.error("handle details error",e);

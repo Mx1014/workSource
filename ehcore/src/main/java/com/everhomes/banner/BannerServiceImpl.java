@@ -207,4 +207,12 @@ public class BannerServiceImpl implements BannerService {
             return dto;
          }).collect(Collectors.toList());
     }
+    
+    @Override
+    public BannerClickDTO findBannerClickByToken(String token){
+        BannerClick bannerClick = this.bannerProvider.findBannerClickByToken(token);
+        BannerClickDTO dto = ConvertHelper.convert(bannerClick, BannerClickDTO.class);
+        return dto;
+        
+    }
 }
