@@ -130,8 +130,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         return result[0];
     }
     
-    @Caching(evict = { @CacheEvict(value="Family", key="#address.id"), 
-             @CacheEvict(value="FamiliesOfUser", key="#userGroup.ownerUid"), @CacheEvict(value="FamilyOfId", key="#userGroup.groupId")} )
+    @Caching(evict = { @CacheEvict(value="Family", key="#address.id")} )
     @Override
     public void leaveFamilyAtAddress(Address address, UserGroup userGroup) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
@@ -273,7 +272,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         return familyList;
     }
-    @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
+   // @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
     @Override
     public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
         
@@ -495,7 +494,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         return count[0];
     }
     
-    @Cacheable(value="FamilyOfId", key="#familyId", unless="#result == null")
+    //@Cacheable(value="FamilyOfId", key="#familyId", unless="#result == null")
     @Override
     public FamilyDTO getFamilyById(Long familyId) {
 
