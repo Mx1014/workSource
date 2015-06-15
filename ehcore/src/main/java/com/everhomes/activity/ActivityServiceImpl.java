@@ -171,7 +171,12 @@ public class ActivityServiceImpl implements ActivityService {
                 RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
                 joinCmd.setGroupId(activity.getGroupId());
                 joinCmd.setRequestText("request to join activity group");
-                groupService.requestToJoinGroup(joinCmd);
+                try{
+                    groupService.requestToJoinGroup(joinCmd);
+                }catch(Exception e){
+                    LOGGER.error("join to group failed",e);
+                }
+               
             }
             activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+cmd.getAdultCount()+cmd.getChildCount());
             if(user.getAddressId()!=null){
@@ -340,6 +345,7 @@ public class ActivityServiceImpl implements ActivityService {
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
             d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
+            d.setCreatorFlag(0);
             if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
@@ -629,6 +635,7 @@ public class ActivityServiceImpl implements ActivityService {
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
             d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
+            d.setCreatorFlag(0);
             if (r.getUid().longValue() == post.getCreatorUid().longValue())
                 d.setCreatorFlag(1);
             d.setLotteryWinnerFlag(convertToInt(r.getLotteryFlag()));
