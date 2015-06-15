@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import javassist.runtime.DotClass;
 
 import org.apache.lucene.spatial.DistanceUtils;
@@ -75,7 +76,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
 import ch.hsr.geohash.GeoHash;
+
 
 
 
@@ -147,6 +150,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.mysql.fabric.xmlrpc.base.Array;
+
 
 
 
@@ -322,17 +326,18 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
+            
             sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_OPERATOR;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
+            QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
             groupProvider.iterateGroupMembers(1000, group.getId(), null,
             (groupMember) -> {
                 if(groupMember.getMemberId() != member.getMemberId()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
+                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers,MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
+                    //sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
                 }
             });
         } catch(Exception e) {
@@ -1661,7 +1666,39 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
     }
-
+    
+    private QuestionMetaObject createGroupQuestionMetaObject(Group group, GroupMember requestor, GroupMember target) {
+        QuestionMetaObject metaObject = new QuestionMetaObject();
+        
+        if(group != null) {
+            metaObject.setResourceType(EntityType.FAMILY.getCode());
+            metaObject.setResourceId(group.getId());
+        }
+        
+        if(requestor != null) {
+            metaObject.setRequestorUid(requestor.getMemberId());
+            metaObject.setRequestTime(requestor.getCreateTime());
+            metaObject.setRequestorNickName(requestor.getMemberNickName());
+            String avatar = requestor.getMemberAvatar();
+            metaObject.setRequestorAvatar(avatar);
+            if(avatar != null && avatar.length() > 0) {
+                try{
+                    String url = contentServerService.parserUri(avatar, EntityType.FAMILY.getCode(), group.getId());
+                    metaObject.setRequestorAvatarUrl(url);
+                }catch(Exception e){
+                    LOGGER.error("Failed to parse avatar uri of group member, groupId=" + group.getId() 
+                        + ", memberId=" + requestor.getMemberId(), e);
+                }
+            }
+        }
+        
+        if(target != null) {
+            metaObject.setTargetType(EntityType.USER.getCode());
+            metaObject.setTargetId(target.getMemberId());
+        }
+        
+        return metaObject;
+    }
     @Override
     public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
         
