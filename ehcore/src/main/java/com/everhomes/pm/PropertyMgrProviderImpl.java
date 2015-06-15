@@ -620,7 +620,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
         if(taskType != null && !taskType .equals(""))
             query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
-        if(status != null && status > 0)
+        if(status != null && status >= 0)
             query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
         
         query.fetch().map((r) -> {

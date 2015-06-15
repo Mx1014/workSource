@@ -13,6 +13,8 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -418,6 +420,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return pageCount;
     }
     
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
     @Override
     public void assignPMTopics(AssginPmTopicCommand cmd) {
         User user = UserContext.current().getUser();
@@ -470,6 +473,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
        
     }
 
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
     private void sendComment(long topicId, long forumId, long userId, long category) {
         Post comment = new Post();
         comment.setParentPostId(topicId);
@@ -514,6 +518,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
     }
     
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
     @Override
     public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
     	User user  = UserContext.current().getUser();
@@ -1409,6 +1414,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	return post;
 	}
 	
+	@Caching(evict={@CacheEvict(value="ForumPostById", key="#task.entityId")})
 	@Override
 	public ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
 		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
@@ -1438,7 +1444,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	List<CommunityPmTasks> tasks = propertyMgrProvider.findPmTaskEntityIdAndTargetId(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
     	if(tasks != null && tasks.size() > 0){
     		for (CommunityPmTasks task : tasks) {
-				Post post = forumProvider.findPostById(task.getEntityId());
+    			GetTopicCommand command = new GetTopicCommand();
+    			command.setForumId(1l);
+    			command.setTopicId(task.getEntityId());
+				PostDTO post = forumService.getTopic(command);		
 				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
 				dto.setCommunityId(task.getCommunityId());
 				dto.setEntityType(task.getEntityType());
