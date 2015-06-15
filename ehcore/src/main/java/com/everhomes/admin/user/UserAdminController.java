@@ -39,8 +39,11 @@ public class UserAdminController extends ControllerBase {
         // check acl
         ListVerfyCodeResponse object = new ListVerfyCodeResponse();
         Tuple<Long, List<UserIdentifier>> result = userAdminService.listVerifyCode(cmd);
-        object.setValues(result.second().stream().map(r -> ConvertHelper.convert(r, UserIdentifierDTO.class))
-                .collect(Collectors.toList()));
+        object.setValues(result.second().stream().map(r -> {
+            UserIdentifierDTO userIdentfier = ConvertHelper.convert(r, UserIdentifierDTO.class);
+            userIdentfier.setVerifyCode(r.getVerificationCode());
+            return userIdentfier;
+        }).collect(Collectors.toList()));
         object.setPageAnchor(result.first());
         return new RestResponse(object);
     }
