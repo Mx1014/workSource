@@ -67,6 +67,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -1358,7 +1359,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         messageDto.setBody(message);
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "group", 
-       		 String.valueOf(familyId), messageDto, MessagingService.MSG_FLAG_STORED);
+       		 String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
     }
 	
 	public void sendNoticeToUserById(Long userId,String message){
@@ -1370,7 +1371,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         messageDto.setBody(message);
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, "user", 
-       		 String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+       		 String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
     }
 	
 	@Override

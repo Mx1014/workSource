@@ -30,6 +30,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
@@ -214,7 +215,7 @@ public class CommunityServiceImpl implements CommunityService {
                 messageDto.getMeta().put("meta-object", StringHelper.toJsonString(metaObject));
             }
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user", 
-                String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+                String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
     }
    
