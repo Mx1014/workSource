@@ -688,8 +688,21 @@ public class ActivityServiceImpl implements ActivityService {
         if(!StringUtils.isEmpty(cmd.getTag())){
             condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
         }
+        List<Condition> conditions =null;
+        if(cmd.getLatitude()!=null&&cmd.getLongitude()!=null){     
+            double latitude= cmd.getLatitude();
+            double longitude=cmd.getLongitude();
+            GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+            GeoHash[] adjacents = geo.getAdjacent();
+            List<String> geoHashCodes = new ArrayList<String>();
+            geoHashCodes.add(geo.toBase32());
+            for(GeoHash g : adjacents) {
+                geoHashCodes.add(g.toBase32());
+            }
+            conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+        }
         int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        List<Activity> ret = activityProvider.listActivities(locator, value+1,Operator.AND, condtion);
+        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
             dto.setActivityId(activity.getId());
@@ -723,9 +736,9 @@ public class ActivityServiceImpl implements ActivityService {
        }
        CrossShardListingLocator locator=new CrossShardListingLocator();
        locator.setAnchor(cmd.getAnchor());
-       int pageSize=configurationProvider.getIntValue("", 20);
+       int pageSize=configurationProvider.getIntValue("pagination.page.size", 20);
        List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
-       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
           ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
           dto.setActivityId(activity.getId());
           dto.setEnrollFamilyCount(activity.getSignupFamilyCount());

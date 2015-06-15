@@ -1,10 +1,20 @@
 package com.everhomes.activity;
 
+/**
+ * 
+ * @author elians
+ *         <ul>
+ *         *
+ *         <li>longitude:经度</li>
+ *         <li>latitude:纬度</li>
+ *         <li>anchor:分页</li>
+ *         </ul>
+ */
 public class ListNearByActivitiesCommand {
     private Double longitude;
 
     private Double latitude;
-    
+
     private Long anchor;
 
     public Double getLongitude() {
@@ -30,6 +40,5 @@ public class ListNearByActivitiesCommand {
     public void setAnchor(Long anchor) {
         this.anchor = anchor;
     }
-    
 
 }
