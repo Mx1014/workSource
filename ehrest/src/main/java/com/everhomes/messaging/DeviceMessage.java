@@ -29,6 +29,8 @@ public class DeviceMessage {
     private Date createTime;
     private Long timeLive;
     private String action;
+    private Long appId;
+    private Integer badge;
     
     @ItemType(String.class)
     private Map<String, String> extra;
@@ -86,6 +88,18 @@ public class DeviceMessage {
     }
     public void setAction(String action) {
         this.action = action;
+    }
+    public Long getAppId() {
+        return appId;
+    }
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+    public Integer getBadge() {
+        return badge;
+    }
+    public void setBadge(Integer badge) {
+        this.badge = badge;
     }
     
 }
