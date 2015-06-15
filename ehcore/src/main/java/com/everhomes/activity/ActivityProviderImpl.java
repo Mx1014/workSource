@@ -4,7 +4,6 @@ package com.everhomes.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.OpenAttrs;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
