@@ -1,7 +1,11 @@
 package com.everhomes.activity;
 
 import java.util.List;
-
+/**
+ * 
+ * @author elians
+ *pageAnchor:分页参数
+ */
 public class ListNearbyActivitiesResponse {
     private List<ActivityDTO> activities;
     private Long pageAnchor;

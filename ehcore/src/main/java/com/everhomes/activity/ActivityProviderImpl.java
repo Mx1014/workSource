@@ -4,7 +4,6 @@ package com.everhomes.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.OpenAttrs;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
@@ -295,7 +294,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Operator op,Condition... conditions) {
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition1,Operator op,Condition... conditions) {
         List<Activity> activities=new ArrayList<Activity>();
         if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
@@ -307,6 +306,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 
             if (locator.getAnchor() != null)
                 query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            if(condition1!=null){
+                query.addConditions(condition1);
+            }
             if (conditions != null) {
                 query.addConditions(op,conditions);
             }
