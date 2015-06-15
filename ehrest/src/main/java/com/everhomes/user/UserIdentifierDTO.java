@@ -16,6 +16,8 @@ public class UserIdentifierDTO {
     private java.lang.Byte     identifierType;
     private java.lang.String   identifierToken;
     private java.lang.Byte     claimStatus;
+    //just for management
+    private String verifyCode;
 
     public UserIdentifierDTO() {
     }
@@ -52,6 +54,15 @@ public class UserIdentifierDTO {
         this.claimStatus = claimStatus;
     }
     
+    
+    public String getVerifyCode() {
+        return verifyCode;
+    }
+
+    public void setVerifyCode(String verifyCode) {
+        this.verifyCode = verifyCode;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
