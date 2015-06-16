@@ -13,13 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.address.CommunityDTO;
-import com.everhomes.address.ListApartmentByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.search.SearchSyncManager;
 
 @RestDoc(value="Community controller", site="core")
 @RestController
@@ -67,7 +65,7 @@ public class CommunityController extends ControllerBase {
      */
     @RequestMapping("updateCommunityRequestStatus")
     @RestReturn(value=String.class)
-    public RestResponse find(@Valid UpdateCommunityRequestStatusCommand cmd) {
+    public RestResponse updateCommunityRequestStatus(@Valid UpdateCommunityRequestStatusCommand cmd) {
         this.communityService.updateCommunityRequestStatus(cmd);
         RestResponse response =  new RestResponse();
 
