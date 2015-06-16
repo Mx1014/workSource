@@ -37,8 +37,8 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse findCommunitiesByNameAndCityId(@Valid FindCommunitiesByNameAndCityIdCommand cmd) {
         List<CommunityDTO> results = this.communityService.findCommunitiesByNameAndCityId(cmd);
-        RestResponse response =  new RestResponse(results);
 
+        RestResponse response =  new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -61,7 +61,7 @@ public class CommunityController extends ControllerBase {
 
     /**
      * <b>URL: /community/updateCommunityRequestStatus</b>
-     * <p>根据小区id列表查询小区列表</p>
+     * <p>根据小区id更新小区收集状态</p>
      */
     @RequestMapping("updateCommunityRequestStatus")
     @RestReturn(value=String.class)
