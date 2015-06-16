@@ -406,10 +406,10 @@ public class ActivityServiceImpl implements ActivityService {
         if(userRoster==null){
             return ActivityStatus.UN_SIGNUP;
         }
-        if (userRoster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
+        if (CheckInStatus.CHECKIN.getCode().equals(userRoster.getCheckinFlag())) {
             return ActivityStatus.CHECKEINED;
         }
-        if (userRoster.getConfirmFlag() != null&&userRoster.getConfirmFlag()!=0) {
+        if (userRoster.getConfirmFlag() != null&&userRoster.getConfirmFlag().longValue()!=0L) {
             return ActivityStatus.CONFIRMED;
         }
         return ActivityStatus.SIGNUP;
@@ -582,7 +582,7 @@ public class ActivityServiceImpl implements ActivityService {
                 if(roster.getConfirmFamilyId()!=null)
                     activity.setConfirmFamilyCount(activity.getConfirmFamilyCount()-1);
             }
-            if (roster.getCheckinFlag() == CheckInStatus.CHECKIN.getCode()) {
+            if (CheckInStatus.CHECKIN.getCode().equals(roster.getCheckinFlag())) {
                 int result = activity.getCheckinAttendeeCount() - total;
                 activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
                 if(roster.getConfirmFamilyId()!=null)
