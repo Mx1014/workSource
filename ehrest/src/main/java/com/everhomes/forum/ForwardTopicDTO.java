@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>contentUrl: 内容图片URL</li>
  * </ul>
  */
-public class ForwardTopicCommand {
+public class ForwardTopicDTO {
     private Long topicId;
     
     private Long targetForumId;
@@ -20,7 +20,7 @@ public class ForwardTopicCommand {
     
     private String contentUrl;
     
-    public ForwardTopicCommand() {
+    public ForwardTopicDTO() {
     }
 
     public Long getTopicId() {
