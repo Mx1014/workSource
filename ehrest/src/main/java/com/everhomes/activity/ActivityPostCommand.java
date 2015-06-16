@@ -44,6 +44,7 @@ public class ActivityPostCommand{
     private Double longitude;
     private Double latitude;
     private String tag;
+    private transient Long id;
     
     public ActivityPostCommand() {
     }
@@ -221,6 +222,18 @@ public class ActivityPostCommand{
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+
+
+    public Long getId() {
+        return id;
+    }
+
+
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 
