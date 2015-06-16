@@ -30,13 +30,13 @@ public class CommunityController extends ControllerBase {
     
     
     /**
-     * <b>URL: /community/findCommunitiesByNameAndCityId</b>
+     * <b>URL: /community/getCommunitiesByNameAndCityId</b>
      * <p>根据小区名称和城市id搜索小区</p>
      */
-    @RequestMapping("findCommunitiesByNameAndCityId")
+    @RequestMapping("getCommunitiesByNameAndCityId")
     @RestReturn(value=CommunityDTO.class, collection=true)
-    public RestResponse findCommunitiesByNameAndCityId(@Valid FindCommunitiesByNameAndCityIdCommand cmd) {
-        List<CommunityDTO> results = this.communityService.findCommunitiesByNameAndCityId(cmd);
+    public RestResponse getCommunitiesByNameAndCityId(@Valid GetCommunitiesByNameAndCityIdCommand cmd) {
+        List<CommunityDTO> results = this.communityService.getCommunitiesByNameAndCityId(cmd);
 
         RestResponse response =  new RestResponse(results);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -45,13 +45,13 @@ public class CommunityController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /community/findCommunitiesByIds</b>
+     * <b>URL: /community/getCommunitiesByIds</b>
      * <p>根据小区id列表查询小区列表</p>
      */
-    @RequestMapping("findCommunitiesByIds")
+    @RequestMapping("getCommunitiesByIds")
     @RestReturn(value=CommunityDTO.class, collection=true)
-    public RestResponse findCommunitiesByIds(@Valid FindCommunitiesByIdsCommand cmd) {
-        List<CommunityDTO> results = this.communityService.findCommunitiesByIds(cmd);
+    public RestResponse getCommunitiesByIds(@Valid GetCommunitiesByIdsCommand cmd) {
+        List<CommunityDTO> results = this.communityService.getCommunitiesByIds(cmd);
         RestResponse response =  new RestResponse(results);
 
         response.setErrorCode(ErrorCodes.SUCCESS);

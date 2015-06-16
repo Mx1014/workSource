@@ -14,12 +14,12 @@ import com.everhomes.util.StringHelper;
  * <li>ids: 小区Id列表</li>
  * </ul>
  */
-public class FindCommunitiesByIdsCommand {
+public class GetCommunitiesByIdsCommand {
     @NotNull
     @ItemType(Long.class)
     private List<Long> ids;
     
-    public FindCommunitiesByIdsCommand() {
+    public GetCommunitiesByIdsCommand() {
     }
 
     public List<Long> getIds() {

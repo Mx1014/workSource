@@ -12,13 +12,13 @@ import com.everhomes.util.StringHelper;
  * <li>name: 小区名字</li>
  * </ul>
  */
-public class FindCommunitiesByNameAndCityIdCommand {
+public class GetCommunitiesByNameAndCityIdCommand {
     @NotNull
     private Long cityId;
     @NotNull
     private String name;
     
-    public FindCommunitiesByNameAndCityIdCommand() {
+    public GetCommunitiesByNameAndCityIdCommand() {
     }
 
     public Long getCityId() {

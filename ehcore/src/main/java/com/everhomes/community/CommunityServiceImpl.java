@@ -265,7 +265,7 @@ public class CommunityServiceImpl implements CommunityService {
     
     
     @Override
-    public List<CommunityDTO> findCommunitiesByNameAndCityId(FindCommunitiesByNameAndCityIdCommand cmd){
+    public List<CommunityDTO> getCommunitiesByNameAndCityId(GetCommunitiesByNameAndCityIdCommand cmd){
         if(cmd.getCityId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid cityId parameter");
@@ -284,7 +284,7 @@ public class CommunityServiceImpl implements CommunityService {
     }
     
     @Override
-    public List<CommunityDTO> findCommunitiesByIds(FindCommunitiesByIdsCommand cmd){
+    public List<CommunityDTO> getCommunitiesByIds(GetCommunitiesByIdsCommand cmd){
         if(cmd.getIds() == null || cmd.getIds().isEmpty()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid ids parameter");
