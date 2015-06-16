@@ -20,6 +20,8 @@ import com.everhomes.util.StringHelper;
  *<li>confirmFamilyCount：确认家庭数</li>
  *<li>familyId:家庭ID</li>
  *<li>groupId:圈ID</li>
+ *<li>forumId:论坛</li>
+ *<li>postId:帖子ID</li>
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *</ul>
@@ -27,6 +29,7 @@ import com.everhomes.util.StringHelper;
 public class ActivityDTO {
     private Long activityId;
     private Long postId;
+    private Long forumId;
     private String startTime;
     private String stopTime;
     private String location;
@@ -215,6 +218,15 @@ public class ActivityDTO {
 
     public void setPostId(Long postId) {
         this.postId = postId;
+    }
+
+    
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
     }
 
     public void setLatitude(Double latitude) {
