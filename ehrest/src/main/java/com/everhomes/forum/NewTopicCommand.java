@@ -53,10 +53,10 @@ public class NewTopicCommand {
     @NotNull
     private String subject;
     
-    @NotNull
+    //去掉非空验证
     private String contentType;
     
-    @NotNull
+    //去掉非空验证
     private String content;
     
     private Long embeddedAppId;

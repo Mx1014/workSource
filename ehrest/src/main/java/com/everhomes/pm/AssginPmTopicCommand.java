@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>forumId: 论坛Id</li>
  * <li>communityId: 小区Id</li>
- * <li>topicIds: 帖子ID列表</li>
+ * <li>topicId: 帖子ID</li>
  * <li>userId: 接收任务的用户Id</li>
  * </ul>
  */

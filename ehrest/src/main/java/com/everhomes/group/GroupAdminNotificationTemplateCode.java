@@ -25,5 +25,4 @@ public interface GroupAdminNotificationTemplateCode {
     static final int GROUP_ADMINROLE_INVOKE_FOR_APPLICANT = 19; // 某管理员被收回管理员权限，通知操作者
     static final int GROUP_ADMINROLE_INVOKE_FOR_OPERATOR = 20; // 某管理员被收回管理员权限，通知被收回权限的人
     static final int GROUP_ADMINROLE_INVOKE_FOR_OTHER = 21; // 某管理员被收回管理员权限，通知其它人
-
 }
