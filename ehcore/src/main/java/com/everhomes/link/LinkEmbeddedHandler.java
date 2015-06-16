@@ -34,7 +34,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
         try{
             Link link = linkProvider.findLinkByPostId(post.getId());
             String homeUrl = configurationProvider.getValue(HOME_URL, "");
-            post.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
+            link.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
             if(link!=null) return StringHelper.toJsonString(link);
         }catch(Exception e){
             LOGGER.error("handle snapshot error",e);
@@ -48,7 +48,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
         try{
         	Link link = linkProvider.findLinkByPostId(post.getId());
         	 String homeUrl = configurationProvider.getValue(HOME_URL, "");
-             post.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
+        	 link.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
             if(link!=null) return StringHelper.toJsonString(link);
         }catch(Exception e){
             LOGGER.error("handle details error",e);
@@ -64,27 +64,6 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public Post postProcessEmbeddedObject(Post post) {
-//    	JSONObject object = post.getEmbeddedJson();
-//    	Link link = new Link();
-//    	link.setAuthor(object.get(key));
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//    	link.set
-//        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
-//                ActivityPostCommand.class);
     	User user = UserContext.current().getUser();
     	if(post != null ){
 	    	Link link = (Link)  StringHelper.fromJsonString(post.getEmbeddedJson(),Link.class);

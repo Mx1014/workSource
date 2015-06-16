@@ -421,7 +421,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return pageCount;
     }
     
-    @Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
+   
     @Override
     public void assignPMTopics(AssginPmTopicCommand cmd) {
         User user = UserContext.current().getUser();
@@ -519,7 +519,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
     }
     
-    @Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
+    
     @Override
     public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
     	User user  = UserContext.current().getUser();
