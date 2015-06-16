@@ -703,7 +703,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(!StringUtils.isEmpty(cmd.getTag())){
             condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
         }
-        List<Condition> conditions =null;
+        List<Condition> conditions =new ArrayList<Condition>();
         if(cmd.getLatitude()!=null&&cmd.getLongitude()!=null){     
             double latitude= cmd.getLatitude();
             double longitude=cmd.getLongitude();
