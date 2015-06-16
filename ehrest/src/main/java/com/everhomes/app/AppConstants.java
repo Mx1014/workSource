@@ -24,6 +24,8 @@ public interface AppConstants {
     public static final long APPID_PM = 19;             // Property management
     public static final long APPID_THIRD_SERVICE = 20; //the third service
     public static final long APPID_LINK = 21;
+    public static final long APPID_TOPIC_SUMMARY = 22; // using in forwarding topic
+    public static final long APPID_GROUP_CARD = 23;    // using in sharing group info
     
     public static final int PAGINATION_DEFAULT_SIZE = 20;
     public static final int PAGINATION_MAX_SIZE = 2000;

@@ -10,51 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javassist.runtime.DotClass;
-
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -67,40 +22,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
-
-
-
-
-
-
-
-
-
-
-
-
 import ch.hsr.geohash.GeoHash;
 
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Privilege;
-import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.AppConstants;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -121,11 +49,11 @@ import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessageMetaConstant;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
@@ -136,9 +64,9 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
+import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
@@ -153,21 +81,6 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-import com.mysql.fabric.xmlrpc.base.Array;
-
-
-
-
-
-
-
-
-
-
-
-
-
-import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -282,29 +195,35 @@ public class FamilyServiceImpl implements FamilyService {
                     return f;
                 });
             } else {
-                GroupMember m = new GroupMember();
-                m.setGroupId(family.getId());
-                m.setMemberType(EntityType.USER.getCode());
-                m.setMemberId(uid);
-                m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
-                m.setMemberAvatar(user.getAvatar());
-                m.setMemberRole(Role.ResourceUser);
-                m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-                m.setCreatorUid(uid);
-                m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                this.groupProvider.createGroupMember(m);
-                
-                UserGroup userGroup = new UserGroup();
-                userGroup.setOwnerUid(uid);
-                userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-                userGroup.setGroupId(family.getId());
-                userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-                userGroup.setRegionScopeId(community.getId());
-                userGroup.setMemberRole(Role.ResourceUser);
-                userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-                this.userProvider.createUserGroup(userGroup);
-                
-                sendFamilyNotificationForReqJoinFamily(address,family,m);
+                final Family f = family;
+                // add transaction
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    GroupMember m = new GroupMember();
+                    m.setGroupId(f.getId());
+                    m.setMemberType(EntityType.USER.getCode());
+                    m.setMemberId(uid);
+                    m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
+                    m.setMemberAvatar(user.getAvatar());
+                    m.setMemberRole(Role.ResourceUser);
+                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    m.setCreatorUid(uid);
+                    m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    this.groupProvider.createGroupMember(m);
+                    
+                    UserGroup userGroup = new UserGroup();
+                    userGroup.setOwnerUid(uid);
+                    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+                    userGroup.setGroupId(f.getId());
+                    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+                    userGroup.setRegionScopeId(community.getId());
+                    userGroup.setMemberRole(Role.ResourceUser);
+                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    this.userProvider.createUserGroup(userGroup);
+                    
+                    sendFamilyNotificationForReqJoinFamily(address,f,m);
+                    return null;
+                });
+               
             }
             long lcEndTime = System.currentTimeMillis();
             LOGGER.info("create family in the lock,elapse=" + (lcEndTime - lcStartTime));
@@ -332,19 +251,16 @@ public class FamilyServiceImpl implements FamilyService {
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_OPERATOR;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId() != member.getMemberId()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers,MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
-                    //sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,
+                    MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -359,28 +275,31 @@ public class FamilyServiceImpl implements FamilyService {
         return FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), buildingName, apartmentName);
         
     }
-    
-    private void sendFamilyNotification(long userId, String message) {
-        sendFamilyNotification(userId, message, null, null);
-    }
         
-    private void sendFamilyNotification(long userId, String message ,MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
+    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+            String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message != null && message.length() != 0) {
+            String channelType = MessageChannelType.GROUP.getCode();
+            String channelToken = String.valueOf(familyId);
             MessageDTO messageDto = new MessageDTO();
             messageDto.setAppId(AppConstants.APPID_MESSAGING);
             messageDto.setSenderUid(User.SYSTEM_UID);
-            messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
-            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+            messageDto.setChannels(new MessageChannel(channelType, channelToken));
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
             messageDto.setBody(message);
-            Map<String, String> metaMap = new HashMap<String, String>();
-            messageDto.setMeta(metaMap);
-            messageDto.getMeta().put("body-type", MessageBodyType.TEXT.getCode());
-            if(metaObjectType != null && metaObject != null) {
-                messageDto.getMeta().put("meta-object-type", metaObjectType.getCode());
-                messageDto.getMeta().put("meta-object", StringHelper.toJsonString(metaObject));
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+            if(includeList != null && includeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.INCLUDE, StringHelper.toJsonString(includeList));
             }
-            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user", 
-                String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+            if(excludeList != null && excludeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.EXCLUDE, StringHelper.toJsonString(excludeList));
+            }
+            if(metaObjectType != null && metaObject != null) {
+                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
+                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+            }
+            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
+                channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
     }
 
@@ -555,19 +474,14 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_MEMBER_LEAVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_MEMBER_LEAVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId() != member.getMemberId()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -629,26 +543,20 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_MEMBER_REVOKE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_MEMBER_REVOKE_FOR_OPERATOR;
             String notifyTextForOpeator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(operatorId, notifyTextForOpeator);
+            sendFamilyNotificationToIncludeUser(group.getId(), operatorId, notifyTextForOpeator);
+            //sendFamilyNotification(operatorId, notifyTextForOpeator);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_MEMBER_LEAVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue() 
-                        && groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -720,19 +628,14 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            //sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -751,25 +654,20 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OPERATOR;
             String notifyTextForOpeator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
-            sendFamilyNotification(operatorId, notifyTextForOpeator);
+            sendFamilyNotificationToIncludeUser(group.getId(), operatorId, notifyTextForOpeator);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+           
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -862,26 +760,18 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getId(), notifyTextForApplicant);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_OPERATOR;
             String notifyTextForOpeator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(operatorId, notifyTextForOpeator);
+            sendFamilyNotificationToIncludeUser(group.getId(), operatorId, notifyTextForOpeator);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue() 
-                        && groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -901,20 +791,13 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue() 
-                        && groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -1476,8 +1359,6 @@ public class FamilyServiceImpl implements FamilyService {
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
                 EntityType.USER.getCode(), user.getId());
         if(m != null){
-            
-            
             familyDTO.setMemberUid(m.getMemberId());
             familyDTO.setMemberNickName(m.getMemberNickName());
             familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),m.getCreatorUid()));
@@ -1551,7 +1432,8 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.error("Community is not found.communityId=" + communityId);
         }
         List<Group> listGroup = this.familyProvider.listCommunityFamily(communityId);
-        if(listGroup == null || listGroup.isEmpty()) return null;
+        if(listGroup == null || listGroup.isEmpty()) 
+            return null;
         List<GroupMember> results = new ArrayList<GroupMember>();
         
         for(Group group : listGroup){
@@ -1657,23 +1539,40 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_CORRECT_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            sendFamilyNotification(member.getMemberId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_CORRECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-            groupProvider.iterateGroupMembers(1000, group.getId(), null,
-            (groupMember) -> {
-                if(groupMember.getMemberId().longValue() != member.getMemberId().longValue() 
-                        && groupMember.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
-                    sendFamilyNotification(groupMember.getMemberId(), notifyTextForOthers);
-                }
-            });
+            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
+    }
+    
+    private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message) {
+        List<Long> includeList = new ArrayList<Long>();
+        includeList.add(userId);
+        sendFamilyNotification(groupId, includeList, null, message, null, null);
+    }
+    
+    private List<Long> getFamilyIncludeList(Long groupId, Long operatorId, Long targetId) {
+        CrossShardListingLocator locator = new CrossShardListingLocator(groupId);
+        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, Integer.MAX_VALUE,(loc, query) -> {
+            Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode());
+            query.addConditions(c);
+            return query;
+        });
+        List<Long> includeList = new ArrayList<Long>();
+        for(GroupMember member : members) {
+            if(member.getMemberId().longValue() == targetId || member.getMemberId().longValue() == operatorId)
+                continue;
+            includeList.add(member.getMemberId());
+        }
+        
+        return includeList;
     }
     
     private QuestionMetaObject createGroupQuestionMetaObject(Group group, GroupMember requestor, GroupMember target) {

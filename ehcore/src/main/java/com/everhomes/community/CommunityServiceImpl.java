@@ -16,15 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.acl.Role;
-import com.everhomes.address.Address;
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.family.FamilyNotificationTemplateCode;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
@@ -36,6 +33,7 @@ import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.region.RegionServiceErrorCode;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -263,6 +261,58 @@ public class CommunityServiceImpl implements CommunityService {
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, operatorId=" + operatorId + ", memberId=" + memberId, e);
         }
+    }
+    
+    
+    @Override
+    public List<CommunityDTO> getCommunitiesByNameAndCityId(GetCommunitiesByNameAndCityIdCommand cmd){
+        if(cmd.getCityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid cityId parameter");
+        }
+        Region region = this.regionProvider.findRegionById(cmd.getCityId());
+        if(region == null){
+            throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+                    "City is not found");
+        }
+        List<Community> communities = this.communityProvider.findCommunitiesByNameAndCityId(cmd.getName(),cmd.getCityId());
+        List<CommunityDTO> result = communities.stream().map((r) ->{
+            return ConvertHelper.convert(r, CommunityDTO.class);
+        }).collect(Collectors.toList());
+        return result;
+        
+    }
+    
+    @Override
+    public List<CommunityDTO> getCommunitiesByIds(GetCommunitiesByIdsCommand cmd){
+        if(cmd.getIds() == null || cmd.getIds().isEmpty()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid ids parameter");
+        }
+        
+        List<Community> communities = this.communityProvider.findCommunitiesByIds(cmd.getIds());
+        List<CommunityDTO> result = communities.stream().map((r) ->{
+            return ConvertHelper.convert(r, CommunityDTO.class);
+        }).collect(Collectors.toList());
+        return result;
+        
+    }
+    
+    @Override
+    public void updateCommunityRequestStatus(UpdateCommunityRequestStatusCommand cmd){
+        if(cmd.getId() == null || cmd.getRequestStatus() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id or requestStatus parameter");
+        }
+        Community community = this.communityProvider.findCommunityById(cmd.getId());
+        if(community == null){
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                    "Community is not found.");
+        }
+
+        community.setRequestStatus(cmd.getRequestStatus());
+        this.communityProvider.updateCommunity(community);
+        
     }
 
 }

@@ -1,6 +1,7 @@
 package com.everhomes.messaging;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.everhomes.discover.ItemType;
@@ -34,6 +35,10 @@ public class DeviceMessage {
     
     @ItemType(String.class)
     private Map<String, String> extra;
+    
+    public DeviceMessage() {
+        extra = new HashMap<String, String>();
+    }
     
     public String getAlert() {
         return alert;

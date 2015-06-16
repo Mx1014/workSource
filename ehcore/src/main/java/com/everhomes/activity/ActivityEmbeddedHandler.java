@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.app.AppConstants;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.StringHelper;
 
 @Component(ActivityEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_ACTIVITY)
@@ -17,13 +19,17 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     private static final Logger LOGGER=LoggerFactory.getLogger(ActivityEmbeddedHandler.class);
     @Autowired
     private ActivityService activityService;
+    
+    @Autowired
+    private ShardingProvider shardingProvider;
 
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
         try{
             ActivityDTO result = activityService.findSnapshotByPostId(post.getId());
-            if(result!=null) return StringHelper.toJsonString(result);
+            if(result!=null) 
+                return StringHelper.toJsonString(result);
         }catch(Exception e){
             LOGGER.error("handle snapshot error",e);
         }
@@ -46,7 +52,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public Post preProcessEmbeddedObject(Post post) {
-        return null;
+        Long id=shardingProvider.allocShardableContentId(EhActivities.class).second();
+        post.setEmbeddedId(id);
+        return post;
     }
 
     @Override

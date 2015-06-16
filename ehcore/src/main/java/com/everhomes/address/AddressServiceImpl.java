@@ -498,19 +498,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
              });
              
              address = result.first();
-//            Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
-//                    cmd.getBuildingName(), cmd.getApartmentName());
-//            if(addr == null) {
-//                addr = new Address();
-//                addr.setCityId(community.getCityId());
-//                addr.setCommunityId(cmd.getCommunityId());
-//                addr.setBuildingName(cmd.getBuildingName());
-//                addr.setApartmentName(cmd.getApartmentName());
-//                addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
-//                addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
-//                this.addressProvider.createAddress(addr);
-//            }
-//            address = addr;
          }
          
          return address;

@@ -1,11 +1,10 @@
 package com.everhomes.messaging;
 
-public enum DeviceMessageType {
-    SIMPLE("simple"), Jump("jump");
+public enum PushJumpType {
+    USER("U"), POST("P"), ACTIVITY("A"), GROUP("G");
     
     private String code;
-    
-    private DeviceMessageType(String code) {
+    private PushJumpType(String code) {
         this.code = code;
     }
     
@@ -13,8 +12,8 @@ public enum DeviceMessageType {
         return this.code;
     }
     
-    public static DeviceMessageType fromCode(String code) {
-        for(DeviceMessageType t : DeviceMessageType.values()) {
+    public static PushJumpType fromCode(String code) {
+        for(PushJumpType t : PushJumpType.values()) {
             if (t.code.equals(code)) {
                 return t;
             }

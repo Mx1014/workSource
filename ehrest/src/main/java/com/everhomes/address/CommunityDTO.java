@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 小区状态，参考{@link com.everhomes.address.CommunityAdminStatus}</li>
  * <li>createTime: 创建时间</li>
  * <li>deleteTime: 删除时间</li>
+ * <li>requestStatus: 小区收集状态，参考{@link com.everhomes.community.RequestStatus}</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -46,6 +47,7 @@ public class CommunityDTO {
     private java.lang.Byte     status;
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
+    private java.lang.Long     requestStatus;
 
     public CommunityDTO() {
     }
@@ -226,6 +228,14 @@ public class CommunityDTO {
         this.deleteTime = deleteTime;
     }
     
+    public java.lang.Long getRequestStatus() {
+        return requestStatus;
+    }
+
+    public void setRequestStatus(java.lang.Long requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
