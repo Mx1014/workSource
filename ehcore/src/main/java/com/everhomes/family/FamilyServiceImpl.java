@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import javassist.runtime.DotClass;
 
 import org.apache.lucene.spatial.DistanceUtils;
@@ -77,7 +78,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
 import ch.hsr.geohash.GeoHash;
+
 
 
 
@@ -123,6 +126,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
@@ -150,6 +154,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.mysql.fabric.xmlrpc.base.Array;
+
 
 
 
@@ -375,7 +380,7 @@ public class FamilyServiceImpl implements FamilyService {
                 messageDto.getMeta().put("meta-object", StringHelper.toJsonString(metaObject));
             }
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, "user", 
-                String.valueOf(userId), messageDto, MessagingService.MSG_FLAG_STORED);
+                String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
     }
 

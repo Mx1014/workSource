@@ -1,5 +1,14 @@
 package com.everhomes.messaging;
 
+/**
+ * Message routing service
+ * <ul>
+ * <li>MSG_FLAG_STORED: 存储转发 </li>
+ * <li>MSG_FLAG_PUSH_ENABLED: 需推送消息</li>
+ * <li>MSG_FLAG_VOICE_ALERT: 语音消息</li>
+ * </ul>
+ * 
+ */
 public enum MessagingConstants {
     MSG_FLAG_STORED(0x1),
     MSG_FLAG_PUSH_ENABLED(0x2),
