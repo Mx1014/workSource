@@ -52,8 +52,6 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public void createActity(Activity activity) {
-        Long id = shardingProvider.allocShardableContentId(EhActivities.class).second();
-        activity.setId(id);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class));
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
