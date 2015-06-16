@@ -1415,7 +1415,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	return post;
 	}
 	
-	@Caching(evict={@CacheEvict(value="ForumPostById", key="#task.entityId")})
 	@Override
 	public ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
 		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
