@@ -347,8 +347,8 @@ public class PropertyMgrController extends ControllerBase {
     @RestReturn(value=ListPropTopicStatisticCommandResponse.class)
     public RestResponse getPMTopicStatistics(
     	@Valid ListPropTopicStatisticCommand  cmd) {
-    	
-        RestResponse response = new RestResponse();
+    	ListPropTopicStatisticCommandResponse result = propertyMgrService.getPMTopicStatistics(cmd);
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

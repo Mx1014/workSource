@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.activity.Activity;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 
@@ -33,11 +35,19 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
     public String renderEmbeddedObjectSnapshot(Post post) {
         try{
             Link link = linkProvider.findLinkByPostId(post.getId());
-            String homeUrl = configurationProvider.getValue(HOME_URL, "");
-            link.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
-            if(link!=null) return StringHelper.toJsonString(link);
+            if(link != null){
+            	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
+            		String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
+            	}
+            	return StringHelper.toJsonString(link);
+	        }
+            else {
+            	LOGGER.error("Unable to find the post link.postId=" + post.getId());
+            	
+            }
         }catch(Exception e){
-            LOGGER.error("handle snapshot error",e);
+            LOGGER.error("handle link post error.postId=" + post.getId(),e);
         }
         
         return null;
@@ -45,13 +55,21 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public String renderEmbeddedObjectDetails(Post post) {
-        try{
-        	Link link = linkProvider.findLinkByPostId(post.getId());
-        	 String homeUrl = configurationProvider.getValue(HOME_URL, "");
-        	 link.setContent(homeUrl + "/link/findLinkById?id=" + link.getId());
-            if(link!=null) return StringHelper.toJsonString(link);
+    	try{
+            Link link = linkProvider.findLinkByPostId(post.getId());
+            if(link != null){
+            	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
+            		String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
+            	}
+            	return StringHelper.toJsonString(link);
+	        }
+            else {
+            	LOGGER.error("Unable to find the post link.postId=" + post.getId());
+            	
+            }
         }catch(Exception e){
-            LOGGER.error("handle details error",e);
+            LOGGER.error("handle link post error.postId=" + post.getId(),e);
         }
         
         return null;
@@ -59,19 +77,31 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public Post preProcessEmbeddedObject(Post post) {
-        return null;
+    	//post还没有存数据库，还没有id，先存0，后面再update
+    	User user = UserContext.current().getUser();
+    	if(post != null ){
+    		CreateLinkCommand command = (CreateLinkCommand)  StringHelper.fromJsonString(post.getEmbeddedJson(),CreateLinkCommand.class);
+    		Link link =  ConvertHelper.convert(command, Link.class);
+	    	link.setOwnerUid(user.getId());
+	    	link.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    	link.setSourceId(-1L);
+	    	link.setSourceType(LinkSourceType.POST.getCode());
+	    	link.setStatus((byte)2);
+	    	link.setDeleterUid(0L);
+	    	linkProvider.createLink(link);
+	    	post.setEmbeddedId(link.getId());
+    	}
+        return post;
     }
 
     @Override
     public Post postProcessEmbeddedObject(Post post) {
-    	User user = UserContext.current().getUser();
-    	if(post != null ){
-	    	Link link = (Link)  StringHelper.fromJsonString(post.getEmbeddedJson(),Link.class);
-	    	link.setOwnerUid(user.getId());
-	    	link.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    	link.setSourceId(post.getId());
-	    	link.setSourceType(LinkSourceType.POST.getCode());
-	    	linkProvider.createLink(link);
+    	if(post != null){
+    		Link link = linkProvider.findLinkById(post.getEmbeddedId());
+    		if(link != null){
+    			link.setSourceId(post.getId());
+    			linkProvider.updateLink(link);
+    		}
     	}
         return post;
     }

@@ -171,7 +171,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     
     //@Cacheable(value = "CommunityPmMemberList", key="#communityId")
     @Override
-    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, String contactToken,Integer pageOffset,Integer pageSize) {
+    public List<CommunityPmMember> listCommunityPmMembers(Long communityId, String contactToken,Integer pageOffset,Integer pageSize) {  
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
@@ -183,7 +183,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         	query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
         }
         
-        Integer offset = (pageOffset - 1 ) * pageSize;
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
         query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
         query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
@@ -217,7 +217,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_MEMBERS);
         Condition condition = Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId);
         if(contactToken != null && !"".equals(contactToken)) {
-            condition.and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
         }
 
         return step.where(condition).fetchOneInto(Integer.class);
@@ -314,7 +314,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
          SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
          if(communityId != null)
             query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
-         Integer offset = (pageOffset - 1 ) * pageSize;
+         Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
          query.addOrderBy(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ID.asc());
          query.addLimit(offset, pageSize);
          query.fetch().map((r) -> {
@@ -325,13 +325,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
     
     @Override
-    public int countCommunityAddressMappings(long communityId) {
+    public int countCommunityAddressMappings(long communityId,Byte livingStatus) {
         
          DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
          SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
          Condition condition = Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId);
-         
+         if(livingStatus != null) {
+        	 condition = condition.and(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+         }
          return step.where(condition).fetchOneInto(Integer.class);
     }
     
@@ -425,7 +427,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         	query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
         }
         
-        Integer offset = (pageOffset - 1 ) * pageSize;
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
         query.addOrderBy(Tables.EH_COMMUNITY_PM_BILLS.ID.asc());
         query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
@@ -464,11 +466,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_BILLS);
         Condition condition = Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId);
         if(address != null && !"".equals(address)) {
-            condition.and(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
         }
         
         if(dateStr != null && !"".equals(dateStr)) {
-            condition.and(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
         }
         
         return step.where(condition).fetchOneInto(Integer.class);
@@ -578,12 +580,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_OWNERS);
         Condition condition = Tables.EH_COMMUNITY_PM_OWNERS.COMMUNITY_ID.eq(communityId);
         if(address != null && !"".equals(address)) {
-
-            condition.and(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS.eq(address));
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS.eq(address));
         }
        
         if(contactToken != null && !"".equals(contactToken)) {
-            condition.and(Tables.EH_COMMUNITY_PM_OWNERS.CONTACT_TOKEN.eq(contactToken));
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_OWNERS.CONTACT_TOKEN.eq(contactToken));
         }
         
         return step.where(condition).fetchOneInto(Integer.class);
@@ -601,6 +602,38 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
          DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmTasks.class, null);
     }
 
+    @Override
+    public List<CommunityPmTasks> listCommunityPmTasks(Long communityId, Long entityId,String entityType,
+            Long targetId, String targetType,String taskType, Byte status,Integer pageOffset,Integer pageSize) { 
+        final List<CommunityPmTasks> groups = new ArrayList<CommunityPmTasks>();
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
+        if(communityId != null && communityId > 0)
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
+        if(entityId != null && entityId > 0)
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        if(entityType != null && !entityType .equals(""))
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        if(targetType != null && !targetType .equals(""))
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        if(targetId != null && targetId > 0)
+        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        if(taskType != null && !taskType .equals(""))
+            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+        if(status != null && status >= 0)
+            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+        Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+        query.addOrderBy(Tables.EH_COMMUNITY_PM_TASKS.ID.asc());
+        query.addLimit(offset, pageSize);
+        query.fetch().map((r) -> {
+            groups.add(ConvertHelper.convert(r, CommunityPmTasks.class));
+            return null;
+        });
+        
+        return groups;
+    }
+    
     @Override
     public List<CommunityPmTasks> findPmTaskEntityIdAndTargetId(Long communityId, Long entityId,String entityType,
             Long targetId, String targetType,String taskType, Byte status) {
@@ -915,5 +948,27 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
             return null;
         });
         return result;
+    }
+    
+    @Override
+    public int countCommunityPmTasks(Long communityId, Long entityId,String entityType, Long targetId, String targetType,
+    		String taskType, Byte status) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_TASKS);
+        Condition condition = Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId);
+        if(entityId != null && entityId > 0)
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        if(entityType != null && !entityType .equals(""))
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        if(targetType != null && !targetType .equals(""))
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        if(targetId != null && targetId > 0)
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        if(taskType != null && !taskType .equals(""))
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+        if(status != null && status >= 0)
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+        return step.where(condition).fetchOneInto(Integer.class);
     }
 }

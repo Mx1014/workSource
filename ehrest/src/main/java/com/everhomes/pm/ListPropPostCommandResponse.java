@@ -8,41 +8,67 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>posts: 帖或评论信息，参考{@link com.everhomes.forum.PropertyPostDTO}</li>
+ * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
+ * <li>posts: 物业帖或评论信息，参考{@link com.everhomes.forum.PropertyPostDTO}</li>
+ * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropPostCommandResponse {
-    private Long nextPageAnchor;
+	private Integer nextPageOffset;
 
     @ItemType(PropertyPostDTO.class)
     private List<PropertyPostDTO> posts;
     
+    private Integer  totalCount; 
+    
     public ListPropPostCommandResponse() {
     }
     
-    public ListPropPostCommandResponse(Long nextPageAnchor, List<PropertyPostDTO> posts) {
-        this.nextPageAnchor = nextPageAnchor;
-        this.posts = posts;
-    }
-
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
-    }
-
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
-    }
     
-    public List<PropertyPostDTO> getPosts() {
+    
+    public ListPropPostCommandResponse(Integer nextPageOffset,
+			List<PropertyPostDTO> posts) {
+		super();
+		this.nextPageOffset = nextPageOffset;
+		this.posts = posts;
+	}
+
+
+
+	public List<PropertyPostDTO> getPosts() {
         return posts;
     }
 
     public void setPosts(List<PropertyPostDTO> posts) {
         this.posts = posts;
     }
+    
 
-    @Override
+    public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	}
+
+
+
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

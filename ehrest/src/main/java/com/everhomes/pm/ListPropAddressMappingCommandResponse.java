@@ -8,52 +8,52 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropAddressMappingDTO}</li>
- * <li>pageCount：总页数</li>
+ * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
+ * <li>members：物业地址映射信息，参考{@link com.everhomes.pm.PropAddressMappingDTO}</li>
+ * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropAddressMappingCommandResponse {
-    private Long nextPageAnchor;
+    private Integer nextPageOffset;
     
     @ItemType(PropAddressMappingDTO.class)
-    private List<PropAddressMappingDTO> mappings;
+    private List<PropAddressMappingDTO> members;
+    
+    private Integer  totalCount; 
     
     public ListPropAddressMappingCommandResponse() {
     }
     
-    private Integer pageCount;
-    
-    public ListPropAddressMappingCommandResponse(Long nextPageAnchor, List<PropAddressMappingDTO> mappings) {
-        this.nextPageAnchor = nextPageAnchor;
-        this.mappings = mappings;
-    }
-
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
-    }
-
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
-    }
-
-    public List<PropAddressMappingDTO> getMembers() {
-        return mappings;
-    }
-
-    public void setMembers(List<PropAddressMappingDTO> mappings) {
-        this.mappings = mappings;
+    public ListPropAddressMappingCommandResponse(Integer nextPageOffset, List<PropAddressMappingDTO> members) {
+        this.nextPageOffset = nextPageOffset;
+        this.members = members;
     }
     
-    public Integer getPageCount() {
-        return pageCount;
+    public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	}
+
+	public List<PropAddressMappingDTO> getMembers() {
+        return members;
     }
 
-    public void setPageCount(Integer pageCount) {
-        this.pageCount = pageCount;
+    public void setMembers(List<PropAddressMappingDTO> members) {
+        this.members = members;
     }
+    
+    public Integer getTotalCount() {
+		return totalCount;
+	}
 
-    @Override
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

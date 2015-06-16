@@ -9,41 +9,46 @@ import com.everhomes.util.StringHelper;
 /**
 /**
  * <ul>
- * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>members：pmMember成员信息，参考{@link com.everhomes.pm.PropBillDTO}</li>
- * <li>pageCount: 总页数</li>
+ * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
+ * <li>members：物业账单信息，参考{@link com.everhomes.pm.PropBillDTO}</li>
+ * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropBillCommandResponse {
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
 	
 	@ItemType(PropBillDTO.class)
-    private List<PropBillDTO> bills;
+    private List<PropBillDTO> members;
     
+	private Integer  totalCount; 
+	    
     public ListPropBillCommandResponse() {
     }
     
     private Integer pageCount;
     
-    public ListPropBillCommandResponse(Long nextPageAnchor, List<PropBillDTO> bills) {
-        this.nextPageAnchor = nextPageAnchor;
-        this.bills = bills;
+    public ListPropBillCommandResponse(Integer nextPageOffset, List<PropBillDTO> members) {
+        this.nextPageOffset = nextPageOffset;
+        this.members = members;
     }
 
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
+  
+    public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	}
+
+
+	public List<PropBillDTO> getMembers() {
+        return members;
     }
 
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
-    }
-
-    public List<PropBillDTO> getMembers() {
-        return bills;
-    }
-
-    public void setMembers(List<PropBillDTO> bills) {
-        this.bills = bills;
+    public void setMembers(List<PropBillDTO> members) {
+        this.members = members;
     }
     
     public Integer getPageCount() {
@@ -53,8 +58,18 @@ public class ListPropBillCommandResponse {
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
     }
+    
+    
 
-    @Override
+    public Integer getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

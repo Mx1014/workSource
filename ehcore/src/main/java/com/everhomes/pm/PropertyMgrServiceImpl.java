@@ -325,7 +325,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId());
+    	int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId(),(byte)0);
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	int pageCount = getPageCount(totalCount, pageSize);
@@ -339,7 +339,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 		 dto.setAddressName(address.getAddress());
                 	 return  dto;})
                  .collect(Collectors.toList()));
-    	commandResponse.setPageCount(pageCount);
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	commandResponse.setTotalCount(totalCount);
         return commandResponse;
     }
     
@@ -377,7 +378,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 	 dto.setItemList(itemDtoList);
                 	 return  dto;})
                  .collect(Collectors.toList()));
-    	commandResponse.setPageCount(pageCount);
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	commandResponse.setTotalCount(totalCount);
         return commandResponse;
     }
     
@@ -408,9 +410,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	commandResponse.setMembers( entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
                 .collect(Collectors.toList()));
-    	commandResponse.setPageCount(pageCount);
-   	
-       return commandResponse;
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	commandResponse.setTotalCount(totalCount);
+    	return commandResponse;
     }
     private int getPageCount(int totalCount, int pageSize){
         int pageCount = totalCount/pageSize;
@@ -897,7 +899,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	commandResponse.setMembers( entityResultList.stream()
                 .map(r->{ return r; })
                 .collect(Collectors.toList()));
-    	commandResponse.setPageCount(pageCount);
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	commandResponse.setTotalCount(totalCount);
     	return commandResponse;
     }
     
@@ -1433,15 +1436,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	//权限控制
-//    	ListPostCommandResponse  response= forumService.queryTopicsByCategory(cmd);
-//    	List<PostDTO> posts = response.getPosts();
-//    	if(posts != null && posts.size() > 0){
-//    		for (PostDTO postDTO : posts) {
-//    			CommunityPmTasks task = propertyMgrProvider.findPmTaskEntityId(communityId, postDTO.getId(), EntityType.TOPIC.getCode());
-//			}
-//    	}
+    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+    	if(totalCount == 0) return response;
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
     	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
-    	List<CommunityPmTasks> tasks = propertyMgrProvider.findPmTaskEntityIdAndTargetId(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
     	if(tasks != null && tasks.size() > 0){
     		for (CommunityPmTasks task : tasks) {
     			GetTopicCommand command = new GetTopicCommand();
@@ -1460,6 +1461,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
     	}
     	response.setPosts(results);
+    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	response.setTotalCount(totalCount);
     	return response;
 	}
 	
@@ -1518,5 +1521,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		forumService.cancelLikeTopic(cmd);
 	}
 	
-	
+	@Override
+	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(
+			ListPropTopicStatisticCommand cmd) {
+		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
+		/** 当天数量列表*/
+		List<Integer> todayList = new ArrayList<Integer>();
+		
+		/** z昨天数量列表*/
+		List<Integer> yesterdayList = new ArrayList<Integer>();
+		
+		/** 上周数量列表*/
+		List<Integer> weekList = new ArrayList<Integer>(); 
+		
+		/** 上月数量列表*/
+		List<Integer> monthList = new ArrayList<Integer>();
+		
+		/** 时间点数量列表*/
+		List<Integer> dateList = new ArrayList<Integer>();
+		return null;
+	}
 }

@@ -10,52 +10,70 @@ import com.everhomes.util.StringHelper;
 /**
 /**
  * <ul>
- * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
+ * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
  * <li>members：小区待审核家庭成员信息，参考{@link com.everhomes.family.FamilyDTO}</li>
- * <li>pageCount：总页数</li>
+ * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropFamilyWaitingMemberCommandResponse {
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
 	
 	@ItemType(FamilyDTO.class)
     private List<FamilyDTO> members;
     
-	private Integer pageCount;
+	private Integer  totalCount; 
 	
     public ListPropFamilyWaitingMemberCommandResponse() {
     }
     
-    public ListPropFamilyWaitingMemberCommandResponse(Long nextPageAnchor, List<FamilyDTO> members) {
-        this.nextPageAnchor = nextPageAnchor;
-        this.members = members;
-    }
-
-    public Long getNextPageAnchor() {
-        return nextPageAnchor;
-    }
-
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
-    }
-
-    public List<FamilyDTO> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<FamilyDTO> users) {
-        this.members = users;
-    }
     
-    public Integer getPageCount() {
-        return pageCount;
-    }
 
-    public void setPageCount(Integer pageCount) {
-        this.pageCount = pageCount;
-    }
+    public ListPropFamilyWaitingMemberCommandResponse(Integer nextPageOffset,
+			List<FamilyDTO> members) {
+		super();
+		this.nextPageOffset = nextPageOffset;
+		this.members = members;
+	}
 
-    @Override
+
+
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	}
+
+
+
+	public List<FamilyDTO> getMembers() {
+		return members;
+	}
+
+
+
+	public void setMembers(List<FamilyDTO> members) {
+		this.members = members;
+	}
+
+
+
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
