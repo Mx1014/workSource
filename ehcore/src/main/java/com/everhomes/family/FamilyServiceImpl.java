@@ -10,51 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javassist.runtime.DotClass;
-
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -67,40 +22,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
-
-
-
-
-
-
-
-
-
-
-
-
 import ch.hsr.geohash.GeoHash;
 
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Privilege;
-import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.AppConstants;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -121,7 +49,6 @@ import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
@@ -136,7 +63,6 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
@@ -153,21 +79,6 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-import com.mysql.fabric.xmlrpc.base.Array;
-
-
-
-
-
-
-
-
-
-
-
-
-
-import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -282,29 +193,35 @@ public class FamilyServiceImpl implements FamilyService {
                     return f;
                 });
             } else {
-                GroupMember m = new GroupMember();
-                m.setGroupId(family.getId());
-                m.setMemberType(EntityType.USER.getCode());
-                m.setMemberId(uid);
-                m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
-                m.setMemberAvatar(user.getAvatar());
-                m.setMemberRole(Role.ResourceUser);
-                m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-                m.setCreatorUid(uid);
-                m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                this.groupProvider.createGroupMember(m);
-                
-                UserGroup userGroup = new UserGroup();
-                userGroup.setOwnerUid(uid);
-                userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-                userGroup.setGroupId(family.getId());
-                userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-                userGroup.setRegionScopeId(community.getId());
-                userGroup.setMemberRole(Role.ResourceUser);
-                userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-                this.userProvider.createUserGroup(userGroup);
-                
-                sendFamilyNotificationForReqJoinFamily(address,family,m);
+                final Family f = family;
+                // add transaction
+                this.dbProvider.execute((TransactionStatus status) -> {
+                    GroupMember m = new GroupMember();
+                    m.setGroupId(f.getId());
+                    m.setMemberType(EntityType.USER.getCode());
+                    m.setMemberId(uid);
+                    m.setMemberNickName(user.getNickName() == null ? user.getAccountName() : user.getNickName());
+                    m.setMemberAvatar(user.getAvatar());
+                    m.setMemberRole(Role.ResourceUser);
+                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    m.setCreatorUid(uid);
+                    m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    this.groupProvider.createGroupMember(m);
+                    
+                    UserGroup userGroup = new UserGroup();
+                    userGroup.setOwnerUid(uid);
+                    userGroup.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+                    userGroup.setGroupId(f.getId());
+                    userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+                    userGroup.setRegionScopeId(community.getId());
+                    userGroup.setMemberRole(Role.ResourceUser);
+                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    this.userProvider.createUserGroup(userGroup);
+                    
+                    sendFamilyNotificationForReqJoinFamily(address,f,m);
+                    return null;
+                });
+               
             }
             long lcEndTime = System.currentTimeMillis();
             LOGGER.info("create family in the lock,elapse=" + (lcEndTime - lcStartTime));
