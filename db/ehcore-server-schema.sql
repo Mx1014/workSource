@@ -2173,4 +2173,24 @@ CREATE TABLE `eh_links` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# member of address partition
+# the message of this address
+#
+DROP TABLE IF EXISTS `eh_address_messages`;
+CREATE TABLE `eh_address_messages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `appId` BIGINT,
+  `sender_type` VARCHAR(32),
+  `sender_token` VARCHAR(32),
+  `address_id` bigint(11) NOT NULL,
+  `body` VARCHAR(256),
+  `meta` VARCHAR(512),
+  `extra` VARCHAR(512),
+  `sender_tag` VARCHAR(32),
+  `body_type` VARCHAR(32),
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET foreign_key_checks = 1;

@@ -12,7 +12,7 @@ package com.everhomes.user;
  *
  */
 public enum MessageChannelType {
-    USER("user"), GROUP("group");
+    USER("user"), GROUP("group"), ADDRESS("address");
     
     private String code;
     
