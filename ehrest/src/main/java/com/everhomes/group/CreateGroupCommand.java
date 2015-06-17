@@ -12,9 +12,10 @@ import com.everhomes.util.StringHelper;
  * <li>avatar：group头像ID，图片上传到ContentServer得到的ID</li>
  * <li>visibilityScope：group可见性类型，参考{@link com.everhomes.visibility.VisibilityScope}</li>
  * <li>visibilityScopeId：根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
- * <li>privateFlag：公私有标志，兴趣圈为公有、私有邻居圈为私有，{@link com.everhomes.group.GroupPrivacy}</li>
+ * <li>privateFlag：公私有标志，兴趣圈为公有、私有邻居圈为私有，参考{@link com.everhomes.group.GroupPrivacy}</li>
  * <li>categoryId：group类型ID</li>
  * <li>tag：标签，用于搜索</li>
+ * <li>postFlag：是否只有管理员可以发帖，参考{@link com.everhomes.group.GroupPostFlag}</li>
  * <li>explicitRegionDescriptorsJson：暂不使用</li>
  * </ul>
  */
@@ -28,6 +29,7 @@ public class CreateGroupCommand {
     private Byte privateFlag;
     private Long categoryId;
     private String tag;
+    private Byte postFlag;
 
     // json of List<RegionDescriptor>
     private String explicitRegionDescriptorsJson;
@@ -97,6 +99,14 @@ public class CreateGroupCommand {
 
     public void setVisibilityScopeId(Long visibilityScopeId) {
         this.visibilityScopeId = visibilityScopeId;
+    }
+
+    public Byte getPostFlag() {
+        return postFlag;
+    }
+
+    public void setPostFlag(Byte postFlag) {
+        this.postFlag = postFlag;
     }
 
     public String getExplicitRegionDescriptorsJson() {

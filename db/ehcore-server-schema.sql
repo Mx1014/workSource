@@ -655,6 +655,9 @@ CREATE TABLE `eh_groups` (
     
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
     `member_count` BIGINT NOT NULL DEFAULT 0,
+	`share_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'How many times the group card is shared',
+    `post_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: admin only',
+	`tag` VARCHAR(256),
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,

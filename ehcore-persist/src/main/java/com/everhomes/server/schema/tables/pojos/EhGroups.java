@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1484101541;
+	private static final long serialVersionUID = 1340739543;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -29,6 +29,9 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.String   categoryPath;
 	private java.lang.Byte     status;
 	private java.lang.Long     memberCount;
+	private java.lang.Long     shareCount;
+	private java.lang.Byte     postFlag;
+	private java.lang.String   tag;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -61,6 +64,9 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.String   categoryPath,
 		java.lang.Byte     status,
 		java.lang.Long     memberCount,
+		java.lang.Long     shareCount,
+		java.lang.Byte     postFlag,
+		java.lang.String   tag,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -90,6 +96,9 @@ public class EhGroups implements java.io.Serializable {
 		this.categoryPath = categoryPath;
 		this.status = status;
 		this.memberCount = memberCount;
+		this.shareCount = shareCount;
+		this.postFlag = postFlag;
+		this.tag = tag;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -230,6 +239,30 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setMemberCount(java.lang.Long memberCount) {
 		this.memberCount = memberCount;
+	}
+
+	public java.lang.Long getShareCount() {
+		return this.shareCount;
+	}
+
+	public void setShareCount(java.lang.Long shareCount) {
+		this.shareCount = shareCount;
+	}
+
+	public java.lang.Byte getPostFlag() {
+		return this.postFlag;
+	}
+
+	public void setPostFlag(java.lang.Byte postFlag) {
+		this.postFlag = postFlag;
+	}
+
+	public java.lang.String getTag() {
+		return this.tag;
+	}
+
+	public void setTag(java.lang.String tag) {
+		this.tag = tag;
 	}
 
 	public java.lang.Long getIntegralTag1() {
