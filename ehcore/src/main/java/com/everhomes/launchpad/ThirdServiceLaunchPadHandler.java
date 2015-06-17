@@ -17,7 +17,7 @@ public class ThirdServiceLaunchPadHandler implements LaunchPadHandler {
     public LaunchPadItem accesProcessLaunchPadItem(String userToken, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
-        launchPadItem.setActionUri(parserUri(userToken,commnunityId,launchPadItem.getActionUri()));
+        launchPadItem.setActionData(parserUri(userToken,commnunityId,launchPadItem.getActionData()));
         
         return launchPadItem;
     }

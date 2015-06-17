@@ -11,12 +11,12 @@ import com.everhomes.util.StringHelper;
  * <li>versionCode: 当前版本号</li>
  * </ul>
  */
-public class FindLaunchPadLayoutByVersionCodeCommand {
+public class GetLaunchPadLayoutByVersionCodeCommand {
     
     @NotNull
     private Long     versionCode;
 
-    public FindLaunchPadLayoutByVersionCodeCommand() {
+    public GetLaunchPadLayoutByVersionCodeCommand() {
     }
     
     public Long getVersionCode() {

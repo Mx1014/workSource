@@ -8,26 +8,26 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>serviceType: </li>
+ * <li>tag: 标签类型</li>
  * <li>communityId: 小区id</li>
  * </ul>
  */
-public class FindLaunchPadItemsByServiceTypeCommand {
+public class GetLaunchPadItemsByTagCommand {
     
     @NotNull
-    private Byte    serviceType;
+    private String    tag;
     @NotNull
     private Long    communityId;
 
-    public FindLaunchPadItemsByServiceTypeCommand() {
+    public GetLaunchPadItemsByTagCommand() {
     }
 
-    public Byte getServiceType() {
-        return serviceType;
+    public String getTag() {
+        return tag;
     }
 
-    public void setServiceType(Byte serviceType) {
-        this.serviceType = serviceType;
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public Long getCommunityId() {

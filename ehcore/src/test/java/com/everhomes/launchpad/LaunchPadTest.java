@@ -164,9 +164,9 @@ public class LaunchPadTest extends TestCase {
     }
     @Test
     public void findLaunchPadLayout(){
-        FindLaunchPadLayoutByVersionCodeCommand cmd = new FindLaunchPadLayoutByVersionCodeCommand();
+        GetLaunchPadLayoutByVersionCodeCommand cmd = new GetLaunchPadLayoutByVersionCodeCommand();
         cmd.setVersionCode(3L);
-        System.out.println(this.launchPadService.findLastLaunchPadLayoutByVersionCode(cmd));
+        System.out.println(this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd));
     }
    
 }

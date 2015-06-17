@@ -182,11 +182,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         itemScopes.forEach((itemScope) ->{
             LaunchPadItem item = new LaunchPadItem();
-            item.setActionIcon(cmd.getActionIcon());
-            item.setActionName(cmd.getActionName());
-            item.setActionUri(cmd.getActionUri());
             item.setAppId(cmd.getAppId() == null ? 0 : cmd.getAppId());
-            item.setItemGroup(cmd.getItemGroup());
             item.setItemLabel(cmd.getItemLabel());
             item.setItemName(cmd.getItemName());
             item.setNamespaceId(cmd.getNamespaceId() == null ? 0 : cmd.getNamespaceId());
@@ -282,19 +278,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
-    public LaunchPadLayoutDTO findLastLaunchPadLayoutByVersionCode(FindLaunchPadLayoutByVersionCodeCommand cmd){
+    public LaunchPadLayoutDTO getLastLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd){
         if(cmd.getVersionCode() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid versionCode paramter.versionCode is null");
         }
-        List<LaunchPadLayoutDTO> results = findLaunchPadLayoutByVersionCode(cmd);
+        List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd);
         if(results != null && !results.isEmpty())
             return results.get(0);
         return null;
     }
     
     @Override
-    public List<LaunchPadLayoutDTO> findLaunchPadLayoutByVersionCode(FindLaunchPadLayoutByVersionCodeCommand cmd){
+    public List<LaunchPadLayoutDTO> getLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd){
         if(cmd.getVersionCode() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid versionCode paramter.versionCode is null");
@@ -308,8 +304,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
-    public List<LaunchPadItemDTO> findLaunchPadItemsByServiceType(FindLaunchPadItemsByServiceTypeCommand cmd){
-        if(cmd.getServiceType() == null){
+    public List<LaunchPadItemDTO> getLaunchPadItemsByTag(GetLaunchPadItemsByTagCommand cmd){
+        if(cmd.getTag() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid service type paramter,serviceType is null");
         }
@@ -323,7 +319,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         long userId = user.getId();
         String token = UserContext.current().getLogin().getLoginToken().getTokenString();
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        this.launchPadProvider.findLaunchPadItemsByServiceType(cmd.getServiceType())
+        this.launchPadProvider.findLaunchPadItemsByTag(cmd.getTag())
         .forEach((r) ->{
             LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getAppId());
             if(handler == null)

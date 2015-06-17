@@ -85,14 +85,14 @@ public class LaunchPadController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /launchpad/findLastLaunchPadLayoutByVersionCode</b>
+     * <b>URL: /launchpad/getLastLaunchPadLayoutByVersionCode</b>
      * <p>根据版本号获取可兼容的最新版本号</p>
      */
-    @RequestMapping("findLastLaunchPadLayoutByVersionCode")
+    @RequestMapping("getLastLaunchPadLayoutByVersionCode")
     @RestReturn(value=LaunchPadLayoutDTO.class)
-    public RestResponse findLastLaunchPadLayoutByVersionCode(@Valid FindLaunchPadLayoutByVersionCodeCommand cmd) {
+    public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd) {
         
-        LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.findLastLaunchPadLayoutByVersionCode(cmd);
+        LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
         
         RestResponse response =  new RestResponse(launchPadLayoutDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);

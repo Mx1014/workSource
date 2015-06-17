@@ -196,6 +196,11 @@ public class FamilyServiceImpl implements FamilyService {
                 });
             } else {
                 final Family f = family;
+                GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(f.getId(), EntityType.USER.getCode(), uid);
+                if(member != null){
+                    throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
+                            "User has in family,please don't join it again.");
+                }
                 // add transaction
                 this.dbProvider.execute((TransactionStatus status) -> {
                     GroupMember m = new GroupMember();
