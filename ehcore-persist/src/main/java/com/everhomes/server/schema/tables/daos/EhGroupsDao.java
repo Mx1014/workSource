@@ -153,6 +153,27 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
+	 * Fetch records that have <code>share_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByShareCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.SHARE_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>post_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByPostFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.POST_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.TAG, values);
+	}
+
+	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByIntegralTag1(java.lang.Long... values) {

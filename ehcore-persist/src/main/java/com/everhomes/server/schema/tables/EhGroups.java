@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 622853152;
+	private static final long serialVersionUID = 1192499820;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -105,6 +105,21 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.member_count</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> MEMBER_COUNT = createField("member_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_groups.share_count</code>. How many times the group card is shared
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> SHARE_COUNT = createField("share_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "How many times the group card is shared");
+
+	/**
+	 * The column <code>ehcore.eh_groups.post_flag</code>. 0: all, 1: admin only
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> POST_FLAG = createField("post_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: admin only");
+
+	/**
+	 * The column <code>ehcore.eh_groups.tag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> TAG = createField("tag", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_groups.integral_tag1</code>.

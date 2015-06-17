@@ -53,6 +53,7 @@ public class GroupDTO {
     private Long memberRole;
     private Byte phonePrivateFlag;
     private Byte muteNotificationFlag;
+    private Byte postFlag;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -237,6 +238,14 @@ public class GroupDTO {
 
     public void setMuteNotificationFlag(Byte muteNotificationFlag) {
         this.muteNotificationFlag = muteNotificationFlag;
+    }
+
+    public Byte getPostFlag() {
+        return postFlag;
+    }
+
+    public void setPostFlag(Byte postFlag) {
+        this.postFlag = postFlag;
     }
 
     @Override
