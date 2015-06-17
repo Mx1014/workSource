@@ -155,9 +155,17 @@ public class ActivityController extends ControllerBase {
         return new RestResponse(categories);
     }
     
+    /**
+     * 查询周边活动
+     * @return
+     */
     @RequestMapping("listNearbyActivities")
     @RestReturn(ListNearbyActivitiesResponse.class)
     public RestResponse listNearbyActivities(@Valid ListNearByActivitiesCommand cmd){
-        return new RestResponse("ok");
+        Tuple<Long, List<ActivityDTO>> ret = activityService.listNearByActivities(cmd);
+        ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
+        rsp.setActivities(ret.second());
+        rsp.setPageAnchor(ret.first());
+        return new RestResponse(rsp);
     }
 }

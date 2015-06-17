@@ -199,6 +199,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setForumId(post.getForumId());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         return dto;
     }
 
@@ -251,6 +252,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         return dto;
     }
 
@@ -296,6 +298,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
         dto.setForumId(post.getForumId());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         return dto;
     }
 
@@ -343,6 +346,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStopTime(activity.getEndTime().toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
         response.setActivity(dto);
@@ -479,6 +483,7 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
         dto.setForumId(post.getForumId());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
@@ -532,6 +537,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
@@ -636,6 +642,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
@@ -731,6 +738,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
             dto.setGroupId(activity.getGroupId());
+            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
             dto.setForumId(post.getForumId());
             return dto;
         }).collect(Collectors.toList());
@@ -765,6 +773,7 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
           dto.setProcessStatus(getStatus(activity).getCode());
           dto.setFamilyId(activity.getCreatorFamilyId());
+          dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
           dto.setStartTime(activity.getStartTime().toString());
           dto.setStopTime(activity.getEndTime().toString());
           dto.setGroupId(activity.getGroupId());

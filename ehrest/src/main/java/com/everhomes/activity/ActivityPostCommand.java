@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  *<li>longitude:经度</li>
  *<li>latitude:纬度</li>
  *<li>changeVersion:版本</li>
+ *<li>posterUri:海报</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -45,6 +46,7 @@ public class ActivityPostCommand{
     private Double latitude;
     private String tag;
     private transient Long id;
+    private String posterUri;
     
     public ActivityPostCommand() {
     }
@@ -204,6 +206,20 @@ public class ActivityPostCommand{
 
     public Double getLongitude() {
         return longitude;
+    }
+
+
+
+
+
+    public String getPosterUri() {
+        return posterUri;
+    }
+
+
+
+    public void setPosterUri(String posterUri) {
+        this.posterUri = posterUri;
     }
 
 

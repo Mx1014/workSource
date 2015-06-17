@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *<li>groupId:圈ID</li>
  *<li>forumId:论坛</li>
  *<li>postId:帖子ID</li>
+ *<li>posterUrl:海报链接</li>
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *</ul>
@@ -46,6 +47,8 @@ public class ActivityDTO {
     private String tag;
     private Double longitude;
     private Double latitude;
+    private String subject;
+    private String posterUrl;
    
     private Integer userActivityStatus;
     private Integer processStatus;
@@ -170,6 +173,22 @@ public class ActivityDTO {
     
     
     
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
     public String getTag() {
         return tag;
     }
