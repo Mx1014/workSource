@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -39,6 +40,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmOwners;
 import com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks;
+import com.everhomes.server.schema.tables.pojos.EhLinks;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmBillItemsRecord;
@@ -47,6 +49,7 @@ import com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmOwnersRecord;
 import com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord;
+import com.everhomes.server.schema.tables.records.EhLinksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.Tuple;
@@ -593,13 +596,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @CacheEvict(value="CommunityPmTasks", key="#task.id")
     @Override
     public void createPmTask(CommunityPmTasks task) {
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        
-        EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
-         dao.insert(task);
-         
-         DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmTasks.class, null);
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhCommunityPmTasksRecord record = ConvertHelper.convert(task, EhCommunityPmTasksRecord.class);
+		InsertQuery<EhCommunityPmTasksRecord> query = context.insertQuery(Tables.EH_COMMUNITY_PM_TASKS);
+		query.setRecord(record);
+		query.setReturning(Tables.EH_COMMUNITY_PM_TASKS.ID);
+		query.execute();
+		
+		task.setId(query.getReturnedRecord().getId());
+		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmTasks.class, null);
     }
 
     @Override
@@ -976,6 +981,19 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
         if(status != null && status >= 0)
         	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+        return step.where(condition).fetchOneInto(Integer.class);
+    }
+    @Override
+    public int countCommunityPmTasks(Long communityId,String taskType,String startTime,String endTime) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_TASKS);
+        Condition condition = Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId);
+        if(!StringUtils.isEmpty(taskType))
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(taskType));
+       
+//        if(!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime))
+//        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.CREATE_TIME.between(startTime, endTime));
         return step.where(condition).fetchOneInto(Integer.class);
     }
 }

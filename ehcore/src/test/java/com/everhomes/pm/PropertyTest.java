@@ -21,6 +21,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.sharding.ShardingProvider;
 
@@ -200,6 +201,20 @@ public class PropertyTest {
 				System.out.println(communityPmMember);
 			}
 		}
+    }
+    
+    @Test
+    public void testCreateTask () {
+    	CommunityPmTasks task = new CommunityPmTasks();
+    	task.setCommunityId(9L);
+		task.setEntityType("EhUsers");
+		task.setEntityId(0L);
+		task.setTargetType(EntityType.USER.getCode());
+		task.setTargetId(0L);
+		task.setTaskStatus(PmTaskStatus.UNTREATED.getCode());
+		task.setTaskType("help");
+		pp.createPmTask(task );
+		
     }
    
 }

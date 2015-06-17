@@ -43,12 +43,13 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 			CommunityPmTasks task = new CommunityPmTasks();
 			task.setCommunityId(post.getVisibleRegionId());
 			task.setEntityType(EntityType.TOPIC.getCode());
-			task.setEntityId(post.getId());
+			task.setEntityId(-1L);
 			task.setTargetType(EntityType.USER.getCode());
-			task.setTargetId(-1L);
+			task.setTargetId(0L);
 			task.setTaskStatus(PmTaskStatus.UNTREATED.getCode());
 			task.setTaskType(PmTaskType.fromCode(post.getActionCategoryId()).getCode());
 			propertyMgrProvider.createPmTask(task );
+			post.setEmbeddedId(task.getId());
 		}
 		return post;	
     }

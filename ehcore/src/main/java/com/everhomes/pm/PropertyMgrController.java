@@ -303,7 +303,7 @@ public class PropertyMgrController extends ControllerBase {
     @RestReturn(value=PropAptStatisticDTO.class)
     public RestResponse getApartmentStatistics(@Valid PropCommunityIdCommand cmd) {
     	PropAptStatisticDTO result = propertyMgrService.getApartmentStatistics(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

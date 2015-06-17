@@ -4,10 +4,10 @@ package com.everhomes.pm;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.crypto.spec.PSource;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -45,7 +45,6 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.family.RevokeMemberCommand;
 import com.everhomes.forum.CancelLikeTopicCommand;
-import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.GetTopicCommand;
@@ -61,7 +60,6 @@ import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.PropertyPostDTO;
-import com.everhomes.forum.QueryTopicByCategoryCommand;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
@@ -83,6 +81,7 @@ import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateStatisticHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -1522,8 +1521,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 	
 	@Override
-	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(
-			ListPropTopicStatisticCommand cmd) {
+	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
 		/** 当天数量列表*/
 		List<Integer> todayList = new ArrayList<Integer>();
@@ -1540,8 +1538,34 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		/** 时间点数量列表*/
 		List<Integer> dateList = new ArrayList<Integer>();
 		
+		Date date = DateStatisticHelper.getCurrentUTCTime();
+		Date currentStartDate = DateStatisticHelper.getCurrent0Hour();
+		Date weekStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 7, false);
+		Date yesterdayStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 1, false);
+		Date monthStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 30, false);
+//		createList(todayList,currentStartDate.getTime(), date.getTime());
+//		createList(yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
+//		createList(weekList,weekStartDate.getTime(), date.getTime());
+//		createList(monthList,monthStartDate.getTime(), date.getTime());
+//		if(!StringUtils.isEmpty(cmd.getStartStrTime()) && !StringUtils.isEmpty(cmd.getEndStrTime()))
+//		{
+//			Date startTime = PeachUtilities.parseDateStr(startStrTime);
+//			Date endTime = PeachUtilities.parseDateStr(endStrTime);
+//			createList(dateList,startTime.getTime(), endTime.getTime()+ PeachConstants.DATE_MILLISECONDS_OF_ONE_DATY);
+//		}
 		return null;
 	}
+	
+//	private void createList(List<Integer> todayList, long startTime, long endTime)
+//	{
+//		int todayCount = propertyMgrProvider.countCommunityPmTasks(communityId, entityId, entityType, targetId, targetType, taskType, status)
+//		todayList.add(todayCount);
+//		for (int i = 0; i <= PeachConstants.TOPIC_USER_FLAG_OTHER ; i++)
+//		{
+//			int count = getTopicService().countPropUserFlagTopicsByTime(forumId, categoryId, serviceTypeId, i, startTime, endTime);
+//			todayList.add(count);
+//		}
+//	}
 	
 	@Override
 	public PropAptStatisticDTO getApartmentStatistics(PropCommunityIdCommand cmd) {
