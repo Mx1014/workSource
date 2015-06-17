@@ -76,6 +76,13 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
+	 * Fetch records that have <code>item_tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByItemTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ITEM_TAG, values);
+	}
+
+	/**
 	 * Fetch records that have <code>item_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByItemName(java.lang.String... values) {
@@ -90,31 +97,38 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>item_group IN (values)</code>
+	 * Fetch records that have <code>icon_uri IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByItemGroup(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByIconUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ICON_URI, values);
 	}
 
 	/**
-	 * Fetch records that have <code>action_name IN (values)</code>
+	 * Fetch records that have <code>item_width IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByActionName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ACTION_NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByItemWidth(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ITEM_WIDTH, values);
 	}
 
 	/**
-	 * Fetch records that have <code>action_icon IN (values)</code>
+	 * Fetch records that have <code>item_height IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByActionIcon(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ACTION_ICON, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByItemHeight(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ITEM_HEIGHT, values);
 	}
 
 	/**
-	 * Fetch records that have <code>action_uri IN (values)</code>
+	 * Fetch records that have <code>action_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByActionUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ACTION_URI, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByActionType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ACTION_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>action_data IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByActionData(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.ACTION_DATA, values);
 	}
 
 	/**

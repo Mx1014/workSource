@@ -11,19 +11,21 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1877769493;
+	private static final long serialVersionUID = 361976845;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
 	private java.lang.Long    appId;
 	private java.lang.String  scopeType;
 	private java.lang.Long    scopeId;
+	private java.lang.String  itemTag;
 	private java.lang.String  itemName;
 	private java.lang.String  itemLabel;
-	private java.lang.String  itemGroup;
-	private java.lang.String  actionName;
-	private java.lang.String  actionIcon;
-	private java.lang.String  actionUri;
+	private java.lang.String  iconUri;
+	private java.lang.Integer itemWidth;
+	private java.lang.Integer itemHeight;
+	private java.lang.Byte    actionType;
+	private java.lang.String  actionData;
 	private java.lang.Integer defaultOrder;
 	private java.lang.Byte    applyPolicy;
 	private java.lang.Long    minVersion;
@@ -38,12 +40,14 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Long    appId,
 		java.lang.String  scopeType,
 		java.lang.Long    scopeId,
+		java.lang.String  itemTag,
 		java.lang.String  itemName,
 		java.lang.String  itemLabel,
-		java.lang.String  itemGroup,
-		java.lang.String  actionName,
-		java.lang.String  actionIcon,
-		java.lang.String  actionUri,
+		java.lang.String  iconUri,
+		java.lang.Integer itemWidth,
+		java.lang.Integer itemHeight,
+		java.lang.Byte    actionType,
+		java.lang.String  actionData,
 		java.lang.Integer defaultOrder,
 		java.lang.Byte    applyPolicy,
 		java.lang.Long    minVersion,
@@ -55,12 +59,14 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.appId = appId;
 		this.scopeType = scopeType;
 		this.scopeId = scopeId;
+		this.itemTag = itemTag;
 		this.itemName = itemName;
 		this.itemLabel = itemLabel;
-		this.itemGroup = itemGroup;
-		this.actionName = actionName;
-		this.actionIcon = actionIcon;
-		this.actionUri = actionUri;
+		this.iconUri = iconUri;
+		this.itemWidth = itemWidth;
+		this.itemHeight = itemHeight;
+		this.actionType = actionType;
+		this.actionData = actionData;
 		this.defaultOrder = defaultOrder;
 		this.applyPolicy = applyPolicy;
 		this.minVersion = minVersion;
@@ -108,6 +114,14 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.scopeId = scopeId;
 	}
 
+	public java.lang.String getItemTag() {
+		return this.itemTag;
+	}
+
+	public void setItemTag(java.lang.String itemTag) {
+		this.itemTag = itemTag;
+	}
+
 	public java.lang.String getItemName() {
 		return this.itemName;
 	}
@@ -124,36 +138,44 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.itemLabel = itemLabel;
 	}
 
-	public java.lang.String getItemGroup() {
-		return this.itemGroup;
+	public java.lang.String getIconUri() {
+		return this.iconUri;
 	}
 
-	public void setItemGroup(java.lang.String itemGroup) {
-		this.itemGroup = itemGroup;
+	public void setIconUri(java.lang.String iconUri) {
+		this.iconUri = iconUri;
 	}
 
-	public java.lang.String getActionName() {
-		return this.actionName;
+	public java.lang.Integer getItemWidth() {
+		return this.itemWidth;
 	}
 
-	public void setActionName(java.lang.String actionName) {
-		this.actionName = actionName;
+	public void setItemWidth(java.lang.Integer itemWidth) {
+		this.itemWidth = itemWidth;
 	}
 
-	public java.lang.String getActionIcon() {
-		return this.actionIcon;
+	public java.lang.Integer getItemHeight() {
+		return this.itemHeight;
 	}
 
-	public void setActionIcon(java.lang.String actionIcon) {
-		this.actionIcon = actionIcon;
+	public void setItemHeight(java.lang.Integer itemHeight) {
+		this.itemHeight = itemHeight;
 	}
 
-	public java.lang.String getActionUri() {
-		return this.actionUri;
+	public java.lang.Byte getActionType() {
+		return this.actionType;
 	}
 
-	public void setActionUri(java.lang.String actionUri) {
-		this.actionUri = actionUri;
+	public void setActionType(java.lang.Byte actionType) {
+		this.actionType = actionType;
+	}
+
+	public java.lang.String getActionData() {
+		return this.actionData;
+	}
+
+	public void setActionData(java.lang.String actionData) {
+		this.actionData = actionData;
 	}
 
 	public java.lang.Integer getDefaultOrder() {

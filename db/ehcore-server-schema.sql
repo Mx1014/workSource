@@ -262,6 +262,7 @@ DROP TABLE IF EXISTS `eh_launch_pad_items`;
 CREATE TABLE `eh_launch_pad_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `namespace_id` INTEGER,
+    `app_id` BIGINT,
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
     `item_tag` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
@@ -280,8 +281,7 @@ CREATE TABLE `eh_launch_pad_items` (
 
     PRIMARY KEY (`id`),
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
-    INDEX `i_eh_scoped_cfg_group`(`item_group`),
-    INDEX `i_eh_scoped_cfg_group_order`(`item_group`, `default_order`)
+    INDEX `i_eh_scoped_cfg_order`(`default_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #

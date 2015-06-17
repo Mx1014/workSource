@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLinksRecord> {
 
-	private static final long serialVersionUID = 1752491830;
+	private static final long serialVersionUID = 165711734;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_links</code>
@@ -62,9 +62,9 @@ public class EhLinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.String> COVER_URI = createField("cover_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "cover image uri");
 
 	/**
-	 * The column <code>ehcore.eh_links.content_type</code>. object content type, 0:link url, 1-rich text
+	 * The column <code>ehcore.eh_links.content_type</code>. object content type: link url、rich text
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.String> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "object content type, 0:link url, 1-rich text");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLinksRecord, java.lang.String> CONTENT_TYPE = createField("content_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "object content type: link url、rich text");
 
 	/**
 	 * The column <code>ehcore.eh_links.content</code>. content data, depends on value of content_type

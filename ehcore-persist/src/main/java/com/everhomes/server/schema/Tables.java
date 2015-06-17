@@ -29,6 +29,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAddresses EH_ADDRESSES = com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES;
 
 	/**
+	 * The table ehcore.eh_address_messages
+	 */
+	public static final com.everhomes.server.schema.tables.EhAddressMessages EH_ADDRESS_MESSAGES = com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES;
+
+	/**
 	 * The table ehcore.eh_app_promotions
 	 */
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
@@ -422,4 +427,9 @@ public class Tables {
 	 * The table ehcore.eh_user_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserProfiles EH_USER_PROFILES = com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES;
+
+	/**
+	 * The table ehcore.eh_user_scores
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserScores EH_USER_SCORES = com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES;
 }

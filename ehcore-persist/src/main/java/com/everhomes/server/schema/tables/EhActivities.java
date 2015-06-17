@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = 1641389729;
+	private static final long serialVersionUID = 601843823;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activities</code>
@@ -45,6 +45,11 @@ public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_activities.description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_activities.poster_uri</code>. poster uri
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> POSTER_URI = createField("poster_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "poster uri");
 
 	/**
 	 * The column <code>ehcore.eh_activities.tag</code>.

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLinksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhLinksRecord> implements org.jooq.Record14<java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Byte, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -101991148;
+	private static final long serialVersionUID = 475087116;
 
 	/**
 	 * Setter for <code>ehcore.eh_links.id</code>.
@@ -112,14 +112,14 @@ public class EhLinksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_links.content_type</code>. object content type, 0:link url, 1-rich text
+	 * Setter for <code>ehcore.eh_links.content_type</code>. object content type: link url、rich text
 	 */
 	public void setContentType(java.lang.String value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_links.content_type</code>. object content type, 0:link url, 1-rich text
+	 * Getter for <code>ehcore.eh_links.content_type</code>. object content type: link url、rich text
 	 */
 	public java.lang.String getContentType() {
 		return (java.lang.String) getValue(7);

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 159946569;
+	private static final long serialVersionUID = 127307091;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -52,6 +52,11 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_launch_pad_items.item_tag</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_TAG = createField("item_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS");
+
+	/**
 	 * The column <code>ehcore.eh_launch_pad_items.item_name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_NAME = createField("item_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
@@ -62,24 +67,29 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_LABEL = createField("item_label", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.item_group</code>.
+	 * The column <code>ehcore.eh_launch_pad_items.icon_uri</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_GROUP = createField("item_group", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ICON_URI = createField("icon_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.action_name</code>.
+	 * The column <code>ehcore.eh_launch_pad_items.item_width</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ACTION_NAME = createField("action_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Integer> ITEM_WIDTH = createField("item_width", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.action_icon</code>.
+	 * The column <code>ehcore.eh_launch_pad_items.item_height</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ACTION_ICON = createField("action_icon", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Integer> ITEM_HEIGHT = createField("item_height", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.action_uri</code>.
+	 * The column <code>ehcore.eh_launch_pad_items.action_type</code>. 0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ACTION_URI = createField("action_uri", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> ACTION_TYPE = createField("action_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.action_data</code>. the parameters depend on item_type, json format
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ACTION_DATA = createField("action_data", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "the parameters depend on item_type, json format");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_items.default_order</code>.

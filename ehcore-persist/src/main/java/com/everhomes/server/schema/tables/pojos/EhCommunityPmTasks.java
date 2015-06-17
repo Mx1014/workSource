@@ -11,28 +11,32 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1716940319;
+	private static final long serialVersionUID = -1755308769;
 
-	private java.lang.Long   id;
-	private java.lang.Long   communityId;
-	private java.lang.String entityType;
-	private java.lang.Long   entityId;
-	private java.lang.String targetType;
-	private java.lang.Long   targetId;
-	private java.lang.String taskType;
-	private java.lang.Byte   taskStatus;
+	private java.lang.Long     id;
+	private java.lang.Long     communityId;
+	private java.lang.String   entityType;
+	private java.lang.Long     entityId;
+	private java.lang.String   targetType;
+	private java.lang.Long     targetId;
+	private java.lang.String   taskType;
+	private java.lang.Byte     taskStatus;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
 
 	public EhCommunityPmTasks() {}
 
 	public EhCommunityPmTasks(
-		java.lang.Long   id,
-		java.lang.Long   communityId,
-		java.lang.String entityType,
-		java.lang.Long   entityId,
-		java.lang.String targetType,
-		java.lang.Long   targetId,
-		java.lang.String taskType,
-		java.lang.Byte   taskStatus
+		java.lang.Long     id,
+		java.lang.Long     communityId,
+		java.lang.String   entityType,
+		java.lang.Long     entityId,
+		java.lang.String   targetType,
+		java.lang.Long     targetId,
+		java.lang.String   taskType,
+		java.lang.Byte     taskStatus,
+		java.lang.Long     creatorUid,
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.communityId = communityId;
@@ -42,6 +46,8 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 		this.targetId = targetId;
 		this.taskType = taskType;
 		this.taskStatus = taskStatus;
+		this.creatorUid = creatorUid;
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +112,21 @@ public class EhCommunityPmTasks implements java.io.Serializable {
 
 	public void setTaskStatus(java.lang.Byte taskStatus) {
 		this.taskStatus = taskStatus;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }

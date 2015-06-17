@@ -95,4 +95,18 @@ public class EhCommunityPmTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByTaskStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.TASK_STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.CREATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS.CREATE_TIME, values);
+	}
 }

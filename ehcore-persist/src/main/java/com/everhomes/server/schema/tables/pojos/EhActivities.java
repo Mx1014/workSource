@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2057862182;
+	private static final long serialVersionUID = -1256788920;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
+	private java.lang.String   posterUri;
 	private java.lang.String   tag;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
@@ -54,6 +55,7 @@ public class EhActivities implements java.io.Serializable {
 		java.lang.Integer  namespaceId,
 		java.lang.String   subject,
 		java.lang.String   description,
+		java.lang.String   posterUri,
 		java.lang.String   tag,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
@@ -88,6 +90,7 @@ public class EhActivities implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.subject = subject;
 		this.description = description;
+		this.posterUri = posterUri;
 		this.tag = tag;
 		this.longitude = longitude;
 		this.latitude = latitude;
@@ -149,6 +152,14 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setDescription(java.lang.String description) {
 		this.description = description;
+	}
+
+	public java.lang.String getPosterUri() {
+		return this.posterUri;
+	}
+
+	public void setPosterUri(java.lang.String posterUri) {
+		this.posterUri = posterUri;
 	}
 
 	public java.lang.String getTag() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord> {
 
-	private static final long serialVersionUID = 1663905776;
+	private static final long serialVersionUID = 398501994;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_pm_tasks</code>
@@ -65,6 +65,16 @@ public class EhCommunityPmTasks extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_community_pm_tasks.task_status</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Byte> TASK_STATUS = createField("task_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_community_pm_tasks.creator_uid</code>. uid of the user who create the task
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "uid of the user who create the task");
+
+	/**
+	 * The column <code>ehcore.eh_community_pm_tasks.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_community_pm_tasks</code> table reference
