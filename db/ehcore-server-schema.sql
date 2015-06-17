@@ -262,19 +262,20 @@ DROP TABLE IF EXISTS `eh_launch_pad_items`;
 CREATE TABLE `eh_launch_pad_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `namespace_id` INTEGER,
-    `app_id` BIGINT,
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
+    `item_tag` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
     `item_name` VARCHAR(32),
     `item_label` VARCHAR(64),
-    `item_group` VARCHAR(32),
-    `action_name` VARCHAR(32),
-    `action_icon` VARCHAR(128),
-    `action_uri` VARCHAR(128),
+    `icon_uri` VARCHAR(1024),
+    `item_width` INTEGER NOT NULL DEFAULT 1,
+    `item_height` INTEGER NOT NULL DEFAULT 1,
+	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan',
+    `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
     `default_order` INTEGER NOT NULL DEFAULT 0,
     `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
 	`min_version` BIGINT NOT NULL DEFAULT 1 COMMENT 'the min version of the item, it will be not supported if current version is less than this',
-	`display_flag` TINYINT NOT NULL DEFAULT '1' COMMENT 'default display on the pad, 0: hide, 1:display',
+	`display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'default display on the pad, 0: hide, 1:display',
 	`display_layout` VARCHAR(128) DEFAULT '1' COMMENT 'how many grids it takes at the layout, format: 2x3',
 
     PRIMARY KEY (`id`),
@@ -1185,7 +1186,9 @@ CREATE TABLE `eh_community_pm_tasks` (
 	`target_type` VARCHAR(32),
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `task_type` VARCHAR(32) COMMENT 'task type assigned by pm',
-    `task_status` TINYINT NOT NULL,
+    `task_status` TINYINT NOT NULL,    
+	`creator_uid` BIGINT COMMENT 'uid of the user who create the task',
+    `create_time` DATETIME,
 	
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
@@ -1666,6 +1669,7 @@ CREATE TABLE `eh_activities` (
     `namespace_id` INTEGER,
     `subject` VARCHAR(512),
     `description` TEXT,
+    `poster_uri` VARCHAR(1024) COMMENT 'poster uri',
     `tag` VARCHAR(32),
     `longitude` DOUBLE,
     `latitude` DOUBLE,
@@ -2163,7 +2167,7 @@ CREATE TABLE `eh_links` (
     `title` VARCHAR(1024),
     `author` VARCHAR(128),
     `cover_uri` VARCHAR(1024) COMMENT 'cover image uri',
-    `content_type` VARCHAR(32) COMMENT 'object content type, 0:link url, 1-rich text',
+    `content_type` VARCHAR(32) COMMENT 'object content type: link url、rich text',
     `content` LONGTEXT COMMENT 'content data, depends on value of content_type',
 	`content_abstract` TEXT COMMENT 'abstract of content data',
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
@@ -2192,5 +2196,21 @@ CREATE TABLE `eh_address_messages` (
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_user_scores`;
+CREATE TABLE `eh_user_scores` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `owner_uid` BIGINT NOT NULL DEFAULT 0,
+  `score_type` VARCHAR(32) NOT NULL,
+  `score` INTEGER NOT NULL DEFAULT 0,
+  `operator_uid` BIGINT NOT NULL DEFAULT 0,
+  `operate_time` DATETIME,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) engine=innodb default charset=utf8mb4;
 
 SET foreign_key_checks = 1;
