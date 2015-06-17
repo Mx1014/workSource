@@ -53,15 +53,14 @@ public class RecommendationController {
         long ageSec = 30;
   
         RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
         
         if(profile == null || null == profile.getItemValue()) {
             return res;
             }
         String s = profile.getItemValue();
         long lastModify = Long.parseLong(s);
-        
-        res.setErrorCode(ErrorCodes.SUCCESS);
-        res.setErrorDescription("OK");
       
         if(EtagHelper.checkHeaderCache(ageSec, lastModify, request, response)) {
             RecommendUserResponse recommendRes = new RecommendUserResponse();
