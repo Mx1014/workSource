@@ -5,8 +5,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: id</li>
- * <li>communityId: 小区id</li>
  * <li>aptCount: 公寓总数</li>
  * <li>familyCount: 有用户入住的公寓总数</li>
  * <li>userCount: 小区入住的总用户总数</li>

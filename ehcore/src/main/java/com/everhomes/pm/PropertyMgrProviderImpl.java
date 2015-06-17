@@ -837,7 +837,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
     @Override
-    public CommunityPmTasks findPmTaskEntityId(long communityId, long entityId, String entityType) {
+    public CommunityPmTasks findPmTaskByEntityId(long communityId, long entityId, String entityType) {
     	final CommunityPmTasks[] result = new CommunityPmTasks[1];
     	
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -855,6 +855,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return result[0];
     }
 
+    @Override
+    public CommunityPmTasks findPmTaskById(long id) {
+    	  DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+          EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
+          return ConvertHelper.convert(dao.findById(id), CommunityPmTasks.class);
+    }
+    
     @Override
     public void updatePmTaskListStatus(List<CommunityPmTasks> tasks) {
         assert(tasks != null);

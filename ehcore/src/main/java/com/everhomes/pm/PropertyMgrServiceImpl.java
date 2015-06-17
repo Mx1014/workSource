@@ -154,12 +154,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
     	if(community == null){
     		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
     	if(!communityId .equals( cmd.getCommunityId())){
     		LOGGER.error("you not belong to the community.communityId=" + cmd.getCommunityId());
-   		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+   		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "you not belong to the community.");
     	}
     	CommunityPmMember communityPmMember = createCommunityPmMember(communityId,cmd.getContactDescription(),user);
@@ -453,7 +453,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the topic.");
         }
         
-        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskEntityId(communityId, topicId, 
+        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(communityId, topicId, 
                 EntityType.TOPIC.getCode());
         if(task == null){
         	 LOGGER.error("Unable to find the topic task.topicId=" + topicId +",communityId=" + communityId);
@@ -551,7 +551,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if(topic == null){ 
             LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
          }
-        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskEntityId(cmd.getCommunityId(), 
+        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(cmd.getCommunityId(), 
                 topicId, EntityType.TOPIC.getCode());
         if(task == null){
             LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
@@ -1001,7 +1001,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		dto.setMemberUid(member.getMemberId());
     		dto.setMemberName(member.getMemberNickName());
     		dto.setMemberAvatarUri((member.getMemberAvatar()));
-    		
+    		dto.setCreateTime(member.getCreateTime());
     		results.add(dto);
 		}
     	return results;
@@ -1539,6 +1539,45 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		/** 时间点数量列表*/
 		List<Integer> dateList = new ArrayList<Integer>();
+		
 		return null;
+	}
+	
+	@Override
+	public PropAptStatisticDTO getApartmentStatistics(PropCommunityIdCommand cmd) {
+		PropAptStatisticDTO dto = new PropAptStatisticDTO();
+		User user  = UserContext.current().getUser();
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	//权限控制
+    	int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
+    	int userCount = familyProvider.countUserByCommunityId(communityId);
+    	int defaultCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.DEFAULT.getCode());
+    	int liveCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.LIVING.getCode());
+    	int rentCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.RENT.getCode());
+    	int freeCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.FREE.getCode());
+    	int decorateCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.DECORATE.getCode());
+    	int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.UNSALE.getCode());
+		dto.setAptCount(community.getAptCount()==null ?0 : community.getAptCount());
+		dto.setFamilyCount(familyCount);
+		dto.setUserCount(userCount);
+		dto.setDefaultCount(defaultCount);
+		dto.setLiveCount(liveCount);
+		dto.setRentCount(rentCount);
+		dto.setFreeCount(freeCount);
+		dto.setDecorateCount(decorateCount);
+		dto.setUnsaleCount(unsaleCount);
+		return dto;
 	}
 }

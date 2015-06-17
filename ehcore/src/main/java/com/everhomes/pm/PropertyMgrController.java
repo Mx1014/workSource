@@ -302,7 +302,7 @@ public class PropertyMgrController extends ControllerBase {
     @RequestMapping("getApartmentStatistics")
     @RestReturn(value=PropAptStatisticDTO.class)
     public RestResponse getApartmentStatistics(@Valid PropCommunityIdCommand cmd) {
-    	
+    	PropAptStatisticDTO result = propertyMgrService.getApartmentStatistics(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -596,6 +596,7 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+   
     
     /**
      * <b>URL: /pm/listPropAppartmentsByKeyword</b>
