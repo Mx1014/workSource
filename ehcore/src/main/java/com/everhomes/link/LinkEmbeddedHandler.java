@@ -77,7 +77,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public Post preProcessEmbeddedObject(Post post) {
-    	//post还没有存数据库，还没有id，先存0，后面再update
+    	//post还没有存数据库，还没有id，先存-1，后面再update
     	User user = UserContext.current().getUser();
     	if(post != null ){
     		CreateLinkCommand command = (CreateLinkCommand)  StringHelper.fromJsonString(post.getEmbeddedJson(),CreateLinkCommand.class);
