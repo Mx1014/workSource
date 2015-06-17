@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
  * <li>members：物业地址映射信息，参考{@link com.everhomes.pm.PropAddressMappingDTO}</li>
- * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropAddressMappingCommandResponse {
@@ -19,7 +18,6 @@ public class ListPropAddressMappingCommandResponse {
     @ItemType(PropAddressMappingDTO.class)
     private List<PropAddressMappingDTO> members;
     
-    private Integer  totalCount; 
     
     public ListPropAddressMappingCommandResponse() {
     }
@@ -45,13 +43,6 @@ public class ListPropAddressMappingCommandResponse {
         this.members = members;
     }
     
-    public Integer getTotalCount() {
-		return totalCount;
-	}
-
-	public void setTotalCount(Integer totalCount) {
-		this.totalCount = totalCount;
-	}
 
 	@Override
     public String toString() {

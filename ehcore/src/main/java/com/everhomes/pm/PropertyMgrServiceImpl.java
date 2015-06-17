@@ -339,7 +339,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 	 return  dto;})
                  .collect(Collectors.toList()));
     	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-    	commandResponse.setTotalCount(totalCount);
         return commandResponse;
     }
     
@@ -378,7 +377,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 	 return  dto;})
                  .collect(Collectors.toList()));
     	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-    	commandResponse.setTotalCount(totalCount);
         return commandResponse;
     }
     
@@ -410,7 +408,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 .map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
                 .collect(Collectors.toList()));
     	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-    	commandResponse.setTotalCount(totalCount);
     	return commandResponse;
     }
     private int getPageCount(int totalCount, int pageSize){
@@ -899,7 +896,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 .map(r->{ return r; })
                 .collect(Collectors.toList()));
     	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-    	commandResponse.setTotalCount(totalCount);
     	return commandResponse;
     }
     
@@ -1461,7 +1457,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	response.setPosts(results);
     	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-    	response.setTotalCount(totalCount);
     	return response;
 	}
 	
@@ -1523,6 +1518,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
+		String taskType = PmTaskType.fromCode(cmd.getCategoryId()).getCode();
+		String startStrTime = cmd.getStartStrTime();
+		String endStrTime = cmd.getEndStrTime();
+		Long communityId = cmd.getCommunityId();
 		/** 当天数量列表*/
 		List<Integer> todayList = new ArrayList<Integer>();
 		
@@ -1543,29 +1542,36 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Date weekStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 7, false);
 		Date yesterdayStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 1, false);
 		Date monthStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 30, false);
-//		createList(todayList,currentStartDate.getTime(), date.getTime());
-//		createList(yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
-//		createList(weekList,weekStartDate.getTime(), date.getTime());
-//		createList(monthList,monthStartDate.getTime(), date.getTime());
-//		if(!StringUtils.isEmpty(cmd.getStartStrTime()) && !StringUtils.isEmpty(cmd.getEndStrTime()))
-//		{
-//			Date startTime = PeachUtilities.parseDateStr(startStrTime);
-//			Date endTime = PeachUtilities.parseDateStr(endStrTime);
-//			createList(dateList,startTime.getTime(), endTime.getTime()+ PeachConstants.DATE_MILLISECONDS_OF_ONE_DATY);
-//		}
-		return null;
+		createList(communityId,taskType,todayList,currentStartDate.getTime(), date.getTime());
+		createList(communityId,taskType,yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
+		createList(communityId,taskType,weekList,weekStartDate.getTime(), date.getTime());
+		createList(communityId,taskType,monthList,monthStartDate.getTime(), date.getTime());
+		
+		if(!StringUtils.isEmpty(startStrTime) && !StringUtils.isEmpty(endStrTime))
+		{
+			Long startTime = Date.parse(startStrTime);
+			Long endTime = Date.parse(endStrTime);
+			createList(communityId,taskType,monthList,startTime, endTime);
+		}
+		response.setDateList(dateList);
+		response.setMonthList(monthList);
+		response.setTodayList(todayList);
+		response.setWeekList(weekList);
+		response.setYesterdayList(yesterdayList);
+		return response;
 	}
 	
-//	private void createList(List<Integer> todayList, long startTime, long endTime)
-//	{
-//		int todayCount = propertyMgrProvider.countCommunityPmTasks(communityId, entityId, entityType, targetId, targetType, taskType, status)
-//		todayList.add(todayCount);
-//		for (int i = 0; i <= PeachConstants.TOPIC_USER_FLAG_OTHER ; i++)
-//		{
-//			int count = getTopicService().countPropUserFlagTopicsByTime(forumId, categoryId, serviceTypeId, i, startTime, endTime);
-//			todayList.add(count);
-//		}
-//	}
+	private void createList(Long communityId,String taskType,List<Integer> todayList, long startTime, long endTime)
+	{
+		int todayCount = propertyMgrProvider.countCommunityPmTasks(communityId, taskType,null,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+		todayList.add(todayCount);
+		int num = PmTaskStatus.TREATED.getCode();
+		for (int i = 0; i <= num ; i++)
+		{
+			int count = propertyMgrProvider.countCommunityPmTasks(communityId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+			todayList.add(count);
+		}
+	}
 	
 	@Override
 	public PropAptStatisticDTO getApartmentStatistics(PropCommunityIdCommand cmd) {

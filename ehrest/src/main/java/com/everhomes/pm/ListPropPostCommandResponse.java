@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
  * <li>posts: 物业帖或评论信息，参考{@link com.everhomes.forum.PropertyPostDTO}</li>
- * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropPostCommandResponse {
@@ -18,8 +17,6 @@ public class ListPropPostCommandResponse {
 
     @ItemType(PropertyPostDTO.class)
     private List<PropertyPostDTO> posts;
-    
-    private Integer  totalCount; 
     
     public ListPropPostCommandResponse() {
     }
@@ -53,19 +50,6 @@ public class ListPropPostCommandResponse {
 	public void setNextPageOffset(Integer nextPageOffset) {
 		this.nextPageOffset = nextPageOffset;
 	}
-
-
-
-	public Integer getTotalCount() {
-		return totalCount;
-	}
-
-
-
-	public void setTotalCount(Integer totalCount) {
-		this.totalCount = totalCount;
-	}
-
 
 
 	@Override

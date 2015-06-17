@@ -8,7 +8,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * /**
+ * 
  * <ul>
  * <li>todayList：当天数量列表</li>
  * <li>yesterdayList: 昨天数量列表</li>

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -217,4 +219,14 @@ public class PropertyTest {
 		
     }
    
+    @Test
+	public void testTopicStatistic() throws Exception {
+		 int todayCount = pp.countCommunityPmTasks(9L, "repair",null,"2015-06-03 00:00:00", "2015-06-17 00:00:00");
+		 System.out.println("总数"+todayCount);
+		 for (int i = 0; i <= 2 ; i++)
+			{
+				int count = pp.countCommunityPmTasks(9L, "repair",(byte)i,"2015-06-03 00:00:00", "2015-06-17 00:00:00");
+				System.out.println(count+"状态"+i);
+			}
+	}
 }

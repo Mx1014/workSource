@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.pm;
 
+import java.sql.Timestamp;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,7 @@ import com.everhomes.category.CategoryConstants;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
+import com.everhomes.util.DateHelper;
 
 @Component(PropertyEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_PM)
 public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
@@ -48,6 +51,7 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setTargetId(0L);
 			task.setTaskStatus(PmTaskStatus.UNTREATED.getCode());
 			task.setTaskType(PmTaskType.fromCode(post.getActionCategoryId()).getCode());
+			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			propertyMgrProvider.createPmTask(task );
 			post.setEmbeddedId(task.getId());
 		}

@@ -9,18 +9,14 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 帖子类型</li>
  * <li>startStrTime: 起始时间</li>
  * <li>endStrTime: 结束时间</li>
- * <li>pageOffset: 页码</li>
- * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListPropTopicStatisticCommand {
     private Long communityId;
-    private Byte categoryId;
+    private Long categoryId;
 	private String startStrTime;
 	private String endStrTime;
-    
-	private Integer pageOffset;
-    private Integer pageSize;
+ 
     
     public ListPropTopicStatisticCommand() {
     }
@@ -30,10 +26,10 @@ public class ListPropTopicStatisticCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	public Byte getCategoryId() {
+	public Long getCategoryId() {
 		return categoryId;
 	}
-	public void setCategoryId(Byte categoryId) {
+	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
 	public String getStartStrTime() {
@@ -48,18 +44,7 @@ public class ListPropTopicStatisticCommand {
 	public void setEndStrTime(String endStrTime) {
 		this.endStrTime = endStrTime;
 	}
-	public Integer getPageOffset() {
-		return pageOffset;
-	}
-	public void setPageOffset(Integer pageOffset) {
-		this.pageOffset = pageOffset;
-	}
-	public Integer getPageSize() {
-		return pageSize;
-	}
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

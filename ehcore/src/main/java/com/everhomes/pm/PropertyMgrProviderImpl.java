@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import static com.everhomes.server.schema.Tables.EH_COMMUNITY_PM_MEMBERS;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -984,16 +985,18 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         return step.where(condition).fetchOneInto(Integer.class);
     }
     @Override
-    public int countCommunityPmTasks(Long communityId,String taskType,String startTime,String endTime) {
+    public int countCommunityPmTasks(Long communityId,String taskType,Byte status,String startTime,String endTime) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_TASKS);
         Condition condition = Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId);
         if(!StringUtils.isEmpty(taskType))
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(taskType));
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
        
-//        if(!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime))
-//        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.CREATE_TIME.between(startTime, endTime));
+        if(!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime))
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.CREATE_TIME.between(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime)));
+        if(status != null && status >= 0)
+        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
         return step.where(condition).fetchOneInto(Integer.class);
     }
 }

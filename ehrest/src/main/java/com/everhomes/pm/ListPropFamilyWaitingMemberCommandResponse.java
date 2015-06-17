@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
  * <li>members：小区待审核家庭成员信息，参考{@link com.everhomes.family.FamilyDTO}</li>
- * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropFamilyWaitingMemberCommandResponse {
@@ -20,8 +19,7 @@ public class ListPropFamilyWaitingMemberCommandResponse {
 	
 	@ItemType(FamilyDTO.class)
     private List<FamilyDTO> members;
-    
-	private Integer  totalCount; 
+ 
 	
     public ListPropFamilyWaitingMemberCommandResponse() {
     }
@@ -58,19 +56,6 @@ public class ListPropFamilyWaitingMemberCommandResponse {
 	public void setMembers(List<FamilyDTO> members) {
 		this.members = members;
 	}
-
-
-
-	public Integer getTotalCount() {
-		return totalCount;
-	}
-
-
-
-	public void setTotalCount(Integer totalCount) {
-		this.totalCount = totalCount;
-	}
-
 
 
 	@Override

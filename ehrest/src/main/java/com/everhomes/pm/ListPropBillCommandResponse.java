@@ -11,7 +11,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
  * <li>members：物业账单信息，参考{@link com.everhomes.pm.PropBillDTO}</li>
- * <li>totalCount: 总数。（目前只对大多不分库分表的表有效）</li>
  * </ul>
  */
 public class ListPropBillCommandResponse {
@@ -19,8 +18,6 @@ public class ListPropBillCommandResponse {
 	
 	@ItemType(PropBillDTO.class)
     private List<PropBillDTO> members;
-    
-	private Integer  totalCount; 
 	    
     public ListPropBillCommandResponse() {
     }
@@ -58,17 +55,7 @@ public class ListPropBillCommandResponse {
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
     }
-    
-    
-
-    public Integer getTotalCount() {
-		return totalCount;
-	}
-
-	public void setTotalCount(Integer totalCount) {
-		this.totalCount = totalCount;
-	}
-
+   
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
