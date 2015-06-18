@@ -42,6 +42,7 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.forum.AttachmentDTO}</li>
  * <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostAssignedFlag}</li>
  * <li>likeFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostLikeFlag}</li>
+ * <li>shareUrl: 分享链接</li>
  * </ul>
  */
 public class PostDTO {
@@ -112,6 +113,8 @@ public class PostDTO {
     private String forumName;
     
     private Byte likeFlag;
+    
+    private String shareUrl;
 
 	public Long getId() {
         return id;
@@ -375,6 +378,14 @@ public class PostDTO {
 
     public void setLikeFlag(Byte likeFlag) {
         this.likeFlag = likeFlag;
+    }
+
+    public String getShareUrl() {
+        return shareUrl;
+    }
+
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
     }
 
     @Override
