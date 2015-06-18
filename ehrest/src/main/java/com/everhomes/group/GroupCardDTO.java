@@ -20,6 +20,7 @@ public class GroupCardDTO {
     private String avatar;
     private String avatarUrl;
     private String description;
+    private Long creatorUid;
     private String createTime;
     private Byte privateFlag;
     
@@ -64,6 +65,14 @@ public class GroupCardDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
 
     public String getCreateTime() {
