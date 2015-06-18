@@ -2190,12 +2190,15 @@ CREATE TABLE `eh_address_messages` (
   `appId` BIGINT,
   `sender_type` VARCHAR(32),
   `sender_token` VARCHAR(32),
+  `sender_login_id` int,
+  `sender_identify` VARCHAR(128),
   `address_id` bigint(11) NOT NULL,
   `body` VARCHAR(256),
   `meta` VARCHAR(512),
   `extra` VARCHAR(512),
   `sender_tag` VARCHAR(32),
   `body_type` VARCHAR(32),
+  `deliveryOption` INT NOT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
