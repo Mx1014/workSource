@@ -11,15 +11,17 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressMessages implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1590290567;
+	private static final long serialVersionUID = -421518775;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appid;
+	private java.lang.Long     addressId;
 	private java.lang.String   senderType;
 	private java.lang.String   senderToken;
 	private java.lang.Integer  senderLoginId;
 	private java.lang.String   senderIdentify;
-	private java.lang.Long     addressId;
+	private java.lang.String   destType;
+	private java.lang.String   destToken;
 	private java.lang.String   body;
 	private java.lang.String   meta;
 	private java.lang.String   extra;
@@ -33,11 +35,13 @@ public class EhAddressMessages implements java.io.Serializable {
 	public EhAddressMessages(
 		java.lang.Long     id,
 		java.lang.Long     appid,
+		java.lang.Long     addressId,
 		java.lang.String   senderType,
 		java.lang.String   senderToken,
 		java.lang.Integer  senderLoginId,
 		java.lang.String   senderIdentify,
-		java.lang.Long     addressId,
+		java.lang.String   destType,
+		java.lang.String   destToken,
 		java.lang.String   body,
 		java.lang.String   meta,
 		java.lang.String   extra,
@@ -48,11 +52,13 @@ public class EhAddressMessages implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.appid = appid;
+		this.addressId = addressId;
 		this.senderType = senderType;
 		this.senderToken = senderToken;
 		this.senderLoginId = senderLoginId;
 		this.senderIdentify = senderIdentify;
-		this.addressId = addressId;
+		this.destType = destType;
+		this.destToken = destToken;
 		this.body = body;
 		this.meta = meta;
 		this.extra = extra;
@@ -76,6 +82,14 @@ public class EhAddressMessages implements java.io.Serializable {
 
 	public void setAppid(java.lang.Long appid) {
 		this.appid = appid;
+	}
+
+	public java.lang.Long getAddressId() {
+		return this.addressId;
+	}
+
+	public void setAddressId(java.lang.Long addressId) {
+		this.addressId = addressId;
 	}
 
 	public java.lang.String getSenderType() {
@@ -110,12 +124,20 @@ public class EhAddressMessages implements java.io.Serializable {
 		this.senderIdentify = senderIdentify;
 	}
 
-	public java.lang.Long getAddressId() {
-		return this.addressId;
+	public java.lang.String getDestType() {
+		return this.destType;
 	}
 
-	public void setAddressId(java.lang.Long addressId) {
-		this.addressId = addressId;
+	public void setDestType(java.lang.String destType) {
+		this.destType = destType;
+	}
+
+	public java.lang.String getDestToken() {
+		return this.destToken;
+	}
+
+	public void setDestToken(java.lang.String destToken) {
+		this.destToken = destToken;
 	}
 
 	public java.lang.String getBody() {
