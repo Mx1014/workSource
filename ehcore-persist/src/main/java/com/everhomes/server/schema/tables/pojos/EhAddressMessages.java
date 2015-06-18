@@ -11,18 +11,23 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressMessages implements java.io.Serializable {
 
-	private static final long serialVersionUID = -603672517;
+	private static final long serialVersionUID = -421518775;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appid;
+	private java.lang.Long     addressId;
 	private java.lang.String   senderType;
 	private java.lang.String   senderToken;
-	private java.lang.Long     addressId;
+	private java.lang.Integer  senderLoginId;
+	private java.lang.String   senderIdentify;
+	private java.lang.String   destType;
+	private java.lang.String   destToken;
 	private java.lang.String   body;
 	private java.lang.String   meta;
 	private java.lang.String   extra;
 	private java.lang.String   senderTag;
 	private java.lang.String   bodyType;
+	private java.lang.Integer  deliveryoption;
 	private java.sql.Timestamp createTime;
 
 	public EhAddressMessages() {}
@@ -30,26 +35,36 @@ public class EhAddressMessages implements java.io.Serializable {
 	public EhAddressMessages(
 		java.lang.Long     id,
 		java.lang.Long     appid,
+		java.lang.Long     addressId,
 		java.lang.String   senderType,
 		java.lang.String   senderToken,
-		java.lang.Long     addressId,
+		java.lang.Integer  senderLoginId,
+		java.lang.String   senderIdentify,
+		java.lang.String   destType,
+		java.lang.String   destToken,
 		java.lang.String   body,
 		java.lang.String   meta,
 		java.lang.String   extra,
 		java.lang.String   senderTag,
 		java.lang.String   bodyType,
+		java.lang.Integer  deliveryoption,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.appid = appid;
+		this.addressId = addressId;
 		this.senderType = senderType;
 		this.senderToken = senderToken;
-		this.addressId = addressId;
+		this.senderLoginId = senderLoginId;
+		this.senderIdentify = senderIdentify;
+		this.destType = destType;
+		this.destToken = destToken;
 		this.body = body;
 		this.meta = meta;
 		this.extra = extra;
 		this.senderTag = senderTag;
 		this.bodyType = bodyType;
+		this.deliveryoption = deliveryoption;
 		this.createTime = createTime;
 	}
 
@@ -69,6 +84,14 @@ public class EhAddressMessages implements java.io.Serializable {
 		this.appid = appid;
 	}
 
+	public java.lang.Long getAddressId() {
+		return this.addressId;
+	}
+
+	public void setAddressId(java.lang.Long addressId) {
+		this.addressId = addressId;
+	}
+
 	public java.lang.String getSenderType() {
 		return this.senderType;
 	}
@@ -85,12 +108,36 @@ public class EhAddressMessages implements java.io.Serializable {
 		this.senderToken = senderToken;
 	}
 
-	public java.lang.Long getAddressId() {
-		return this.addressId;
+	public java.lang.Integer getSenderLoginId() {
+		return this.senderLoginId;
 	}
 
-	public void setAddressId(java.lang.Long addressId) {
-		this.addressId = addressId;
+	public void setSenderLoginId(java.lang.Integer senderLoginId) {
+		this.senderLoginId = senderLoginId;
+	}
+
+	public java.lang.String getSenderIdentify() {
+		return this.senderIdentify;
+	}
+
+	public void setSenderIdentify(java.lang.String senderIdentify) {
+		this.senderIdentify = senderIdentify;
+	}
+
+	public java.lang.String getDestType() {
+		return this.destType;
+	}
+
+	public void setDestType(java.lang.String destType) {
+		this.destType = destType;
+	}
+
+	public java.lang.String getDestToken() {
+		return this.destToken;
+	}
+
+	public void setDestToken(java.lang.String destToken) {
+		this.destToken = destToken;
 	}
 
 	public java.lang.String getBody() {
@@ -131,6 +178,14 @@ public class EhAddressMessages implements java.io.Serializable {
 
 	public void setBodyType(java.lang.String bodyType) {
 		this.bodyType = bodyType;
+	}
+
+	public java.lang.Integer getDeliveryoption() {
+		return this.deliveryoption;
+	}
+
+	public void setDeliveryoption(java.lang.Integer deliveryoption) {
+		this.deliveryoption = deliveryoption;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

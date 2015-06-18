@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressMessages extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord> {
 
-	private static final long serialVersionUID = -541826866;
+	private static final long serialVersionUID = -1811765027;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_address_messages</code>
@@ -37,6 +37,11 @@ public class EhAddressMessages extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_address_messages.address_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_address_messages.sender_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> SENDER_TYPE = createField("sender_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
@@ -47,9 +52,24 @@ public class EhAddressMessages extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> SENDER_TOKEN = createField("sender_token", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_address_messages.address_id</code>.
+	 * The column <code>ehcore.eh_address_messages.sender_login_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.Integer> SENDER_LOGIN_ID = createField("sender_login_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_address_messages.sender_identify</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> SENDER_IDENTIFY = createField("sender_identify", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_address_messages.dest_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> DEST_TYPE = createField("dest_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_address_messages.dest_token</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> DEST_TOKEN = createField("dest_token", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_address_messages.body</code>.
@@ -75,6 +95,11 @@ public class EhAddressMessages extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_address_messages.body_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> BODY_TYPE = createField("body_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_address_messages.deliveryOption</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.Integer> DELIVERYOPTION = createField("deliveryOption", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_address_messages.create_time</code>.

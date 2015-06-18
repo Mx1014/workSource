@@ -55,6 +55,13 @@ public class EhAddressMessagesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>address_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByAddressId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.ADDRESS_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>sender_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchBySenderType(java.lang.String... values) {
@@ -69,10 +76,31 @@ public class EhAddressMessagesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>address_id IN (values)</code>
+	 * Fetch records that have <code>sender_login_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByAddressId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.ADDRESS_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchBySenderLoginId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.SENDER_LOGIN_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>sender_identify IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchBySenderIdentify(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.SENDER_IDENTIFY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>dest_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByDestType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.DEST_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>dest_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByDestToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.DEST_TOKEN, values);
 	}
 
 	/**
@@ -108,6 +136,13 @@ public class EhAddressMessagesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByBodyType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.BODY_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>deliveryOption IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByDeliveryoption(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.DELIVERYOPTION, values);
 	}
 
 	/**

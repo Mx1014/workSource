@@ -192,13 +192,16 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         return layouts;
     }
     @Override
-    public List<LaunchPadItem> findLaunchPadItemsByTag(String tag){
+    public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(String tag,String scopeType,long scopeId){
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
-        //TODO
-        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_TAG.eq("");
-        
+
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_TAG.eq(tag);
+        if(scopeType != null){
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType));
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+        }
         step.where(condition).fetch().map((r) ->{
             items.add(ConvertHelper.convert(r, LaunchPadItem.class));
             return null;

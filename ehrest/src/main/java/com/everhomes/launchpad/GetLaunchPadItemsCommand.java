@@ -12,22 +12,22 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区id</li>
  * </ul>
  */
-public class GetLaunchPadItemsByTagCommand {
+public class GetLaunchPadItemsCommand {
     
     @NotNull
-    private String    tag;
+    private String    componentTag;
     @NotNull
     private Long    communityId;
 
-    public GetLaunchPadItemsByTagCommand() {
+    public GetLaunchPadItemsCommand() {
     }
 
-    public String getTag() {
-        return tag;
+    public String getComponentTag() {
+        return componentTag;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public void setComponentTag(String componentTag) {
+        this.componentTag = componentTag;
     }
 
     public Long getCommunityId() {

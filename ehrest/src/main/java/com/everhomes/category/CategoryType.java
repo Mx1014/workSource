@@ -14,7 +14,7 @@ import com.everhomes.category.CategoryConstants;
  * </ul>
  */
 public enum CategoryType {
-	NOTICE("notice"), ADVISE("advise"), HELP("help"), REPAIR("repair"), HOTLINE("hotline"), PAYMENT("payment") ;
+	NOTICE("NOTICE"), ADVISE("ADVISE"), HELP("HELP"), REPAIR("REPAIR"), HOTLINE("HOTLINE"), PAYMENT("PAYMENT") ;
     
     private String code;
     private CategoryType(String code) {

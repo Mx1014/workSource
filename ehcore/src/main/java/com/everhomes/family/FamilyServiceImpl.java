@@ -305,6 +305,7 @@ public class FamilyServiceImpl implements FamilyService {
             }
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+            System.out.println("messageDto=" + messageDto);
         }
     }
 
@@ -485,8 +486,8 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_MEMBER_LEAVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            //List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+            sendGroupNotificationToExcludeUsers(group.getId(),null,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -560,8 +561,9 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_MEMBER_LEAVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+//            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
+//            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            sendGroupNotificationToExcludeUsers(group.getId(),operatorId,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -639,8 +641,9 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+//            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+//            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            sendGroupNotificationToExcludeUsers(group.getId(),null,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -670,9 +673,9 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_REJECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
-           
+//            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
+//            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            sendGroupNotificationToExcludeUsers(group.getId(),operatorId,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -741,6 +744,7 @@ public class FamilyServiceImpl implements FamilyService {
             
             //通知小区用户(通知通讯录好友)有新用户入住
             sendNotifyToCommunityUserAndContactUser(memberUid, familyId, group.getIntegralTag2());
+            
             long endTime = System.currentTimeMillis();
             LOGGER.info("Approve family elapse=" + (endTime - startTime));
             return;
@@ -775,8 +779,9 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+//            List<Long> includeList = getFamilyIncludeList(group.getId(), operatorId, member.getMemberId());
+//            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            sendGroupNotificationToExcludeUsers(group.getId(),operatorId,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -801,8 +806,9 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+//            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+//            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            sendGroupNotificationToExcludeUsers(group.getId(),null,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -1550,11 +1556,23 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_CORRECT_FOR_OTHER;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+//            List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
+//            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,null,null);
+            sendGroupNotificationToExcludeUsers(group.getId(),null,member.getMemberId(),notifyTextForOthers);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
+    }
+    
+    private void sendGroupNotificationToExcludeUsers(Long groupId, Long operatorId, Long targetId, String message) {
+        List<Long> excludeList = new ArrayList<Long>();
+        if(operatorId != null) {
+            excludeList.add(operatorId);
+        }
+        if(targetId != null) {
+            excludeList.add(targetId);
+        }
+        sendFamilyNotification(groupId, null, excludeList, message, null, null);
     }
     
     private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message) {
