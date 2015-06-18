@@ -2,6 +2,7 @@
 package com.everhomes.department;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.family.FamilyDTO;
 import com.everhomes.pm.PmMemberStatus;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -28,6 +32,19 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private CommunityProvider communityProvider;
     
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    
+    
+    private int getPageCount(int totalCount, int pageSize){
+        int pageCount = totalCount/pageSize;
+        
+        if(totalCount % pageSize != 0){
+            pageCount ++;
+        }
+        return pageCount;
+    }
+    
     @Override
     public void createDepartment(CreateDepartmentCommand cmd) {
     	User user  = UserContext.current().getUser();
@@ -35,6 +52,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     	//权限控制
     	//先判断，后台管理员才能创建。状态直接设为正常
     	Department department  = ConvertHelper.convert(cmd, Department.class);
+    	if(cmd.getLevel() == null){
+    		department.setLevel(0);
+    	}
     	department.setStatus(DepartmentStatus.ACTIVE.getCode());
     	departmentProvider.createDepartment(department);
     	
@@ -85,5 +105,22 @@ public class DepartmentServiceImpl implements DepartmentService {
     	
     }
     
+    @Override
+    public ListDepartmentsCommandResponse listDepartments(ListDepartmentsCommand cmd) {
+    	User user  = UserContext.current().getUser();
+    	//权限控制
+    	ListDepartmentsCommandResponse response = new ListDepartmentsCommandResponse();
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+    	int totalCount = departmentProvider.countDepartments(cmd.getParentId(),cmd.getName());
+    	if(totalCount == 0) return response;
+    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	List<Department> result = departmentProvider.listDepartments(cmd.getParentId(), cmd.getName(), cmd.getPageOffset(), pageSize);
+    	response.setMembers( result.stream()
+                .map(r->{ return ConvertHelper.convert(r,DepartmentDTO.class); })
+                .collect(Collectors.toList()));
+    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	return response;
+    }
     
 }

@@ -1,16 +1,21 @@
 // @formatter:off
 package com.everhomes.department;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.Record1;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -271,5 +276,18 @@ public class DepartmentProviderImpl implements DepartmentProvider {
              return null;
          });
          return result;
+    }
+    
+    @Override
+    public int countDepartments(Long areaId, String name) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_DEPARTMENTS);
+        Condition condition = Tables.EH_DEPARTMENTS.ID.greaterOrEqual(0L);
+        if(areaId != null && areaId > 0)
+        	condition = condition.and(Tables.EH_DEPARTMENTS.PARENT_ID.eq(areaId));
+        if(!StringUtils.isEmpty(name))
+        	condition = condition.and(Tables.EH_DEPARTMENTS.NAME.eq(name));
+        return step.where(condition).fetchOneInto(Integer.class);
     }
 }

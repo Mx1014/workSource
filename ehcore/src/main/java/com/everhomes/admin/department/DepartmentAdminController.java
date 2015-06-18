@@ -1,4 +1,4 @@
-package com.everhomes.department;
+package com.everhomes.admin.department;
 
 import javax.validation.Valid;
 
@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.department.CreateDepartmentCommand;
+import com.everhomes.department.CreateDepartmentCommunityCommand;
+import com.everhomes.department.CreateDepartmentMemberCommand;
+import com.everhomes.department.DepartmentService;
+import com.everhomes.department.ListDepartmentsCommand;
+import com.everhomes.department.ListDepartmentsCommandResponse;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.pm.CreatePropMemberCommand;
 import com.everhomes.pm.ListPropAddressMappingCommand;
@@ -17,15 +23,15 @@ import com.everhomes.pm.ListPropAddressMappingCommandResponse;
 import com.everhomes.rest.RestResponse;
 
 @RestController
-@RequestMapping("/dpt")
-public class DepartmentController extends ControllerBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentController.class);
+@RequestMapping("/admin/dpt")
+public class DepartmentAdminController extends ControllerBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentAdminController.class);
 
 	@Autowired
 	DepartmentService departmentService;
 	
 	/**
-     * <b>URL: /dpt/createDepartment</b>
+     * <b>URL: /admin/dpt/createDepartment</b>
      * <p>创建政府机构</p>
      * @return 添加的结果
      */
@@ -40,7 +46,7 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/createDepartmentMember</b>
+     * <b>URL: /admin/dpt/createDepartmentMember</b>
      * <p>创建政府机构成员</p>
      * @return 添加的结果
      */
@@ -55,7 +61,7 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/createDepartmentCommunity</b>
+     * <b>URL: /admin/dpt/createDepartmentCommunity</b>
      * <p>创建政府机构对应的小区列表</p>
      * @return 添加的结果
      */
@@ -70,7 +76,7 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/listDepartments</b>
+     * <b>URL: /admin/dpt/listDepartments</b>
      * <p>列出政府机构表（）</p>
      */
     @RequestMapping("listDepartments")
