@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.department;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,21 +20,16 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.pm.CommunityPmMember;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhDepartmentCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhDepartmentMembersDao;
 import com.everhomes.server.schema.tables.daos.EhDepartmentsDao;
-import com.everhomes.server.schema.tables.daos.EhLinksDao;
 import com.everhomes.server.schema.tables.pojos.EhDepartmentCommunities;
 import com.everhomes.server.schema.tables.pojos.EhDepartmentMembers;
 import com.everhomes.server.schema.tables.pojos.EhDepartments;
-import com.everhomes.server.schema.tables.pojos.EhLinks;
-import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
 import com.everhomes.server.schema.tables.records.EhDepartmentCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhDepartmentMembersRecord;
 import com.everhomes.server.schema.tables.records.EhDepartmentsRecord;
-import com.everhomes.server.schema.tables.records.EhLinksRecord;
 import com.everhomes.util.ConvertHelper;
 @Component
 public class DepartmentProviderImpl implements DepartmentProvider {
@@ -101,14 +95,11 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     }
     
     @Override
-    public List<Department> listDepartments(Long areaId, String name,Integer pageOffset,Integer pageSize) {
+    public List<Department> listDepartments(String name,Integer pageOffset,Integer pageSize) {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<Department> result  = new ArrayList<Department>();
          SelectQuery<EhDepartmentsRecord> query = context.selectQuery(Tables.EH_DEPARTMENTS);
-         if(areaId != null)
-            query.addConditions(Tables.EH_DEPARTMENTS.PARENT_ID.eq(areaId));
-        
          if(name != null && !"".equals(name)) {
          	query.addConditions(Tables.EH_DEPARTMENTS.NAME.eq(name));
          }
@@ -203,6 +194,23 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     }
     
     @Override
+    public List<DepartmentMember> listDepartmentMembers(Long memberUid) {
+    	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+         List<DepartmentMember> result  = new ArrayList<DepartmentMember>();
+         SelectQuery<EhDepartmentMembersRecord> query = context.selectQuery(Tables.EH_DEPARTMENT_MEMBERS);
+         if(memberUid != null && memberUid > 0) {
+         	query.addConditions(Tables.EH_DEPARTMENT_MEMBERS.MEMBER_UID.eq(memberUid));
+         }
+         query.addOrderBy(Tables.EH_DEPARTMENT_MEMBERS.ID.desc());
+         query.fetch().map((r) -> {
+         	result.add(ConvertHelper.convert(r, DepartmentMember.class));
+             return null;
+         });
+         return result;
+    }
+    
+    @Override
     public void createDepartmentCommunity(DepartmentCommunity departmentCommunity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhDepartmentCommunitiesRecord record = ConvertHelper.convert(departmentCommunity, EhDepartmentCommunitiesRecord.class);
@@ -279,15 +287,24 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     }
     
     @Override
-    public int countDepartments(Long areaId, String name) {
+    public int countDepartments(String name) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_DEPARTMENTS);
         Condition condition = Tables.EH_DEPARTMENTS.ID.greaterOrEqual(0L);
-        if(areaId != null && areaId > 0)
-        	condition = condition.and(Tables.EH_DEPARTMENTS.PARENT_ID.eq(areaId));
         if(!StringUtils.isEmpty(name))
         	condition = condition.and(Tables.EH_DEPARTMENTS.NAME.eq(name));
         return step.where(condition).fetchOneInto(Integer.class);
+    }
+    
+   @Override
+    public int countDepartmentMembers(Long departmentId, Long memberUid) {
+	   DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+       SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_DEPARTMENT_MEMBERS);
+       Condition condition = Tables.EH_DEPARTMENT_MEMBERS.DEPARTMENT_ID.eq(departmentId);
+       if(memberUid != null && memberUid > 0)
+       		condition = condition.and(Tables.EH_DEPARTMENT_MEMBERS.MEMBER_UID.eq(memberUid));
+       return step.where(condition).fetchOneInto(Integer.class);
     }
 }

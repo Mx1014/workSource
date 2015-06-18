@@ -327,8 +327,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId(),(byte)0);
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-    	int pageCount = getPageCount(totalCount, pageSize);
     	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	int pageCount = getPageCount(totalCount, pageSize);
     	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
@@ -401,7 +401,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-    	
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
     	int pageCount = getPageCount(totalCount, pageSize);
     	List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
     	commandResponse.setMembers( entityResultList.stream()
@@ -886,10 +886,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
-    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+    	
     	int totalCount = familyProvider.countWaitApproveFamily(cmd.getCommunityId());
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
     	int pageCount = getPageCount(totalCount, pageSize);
     	List<FamilyDTO>  entityResultList = familyProvider.listWaitApproveFamily(cmd.getCommunityId(), new Long(cmd.getPageOffset()), new Long(pageSize));
     	commandResponse.setMembers( entityResultList.stream()

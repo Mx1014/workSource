@@ -13,15 +13,13 @@ import com.everhomes.util.StringHelper;
  * <li>memberGroup：成员类型。参考 {@link com.everhomes.department.DepartmentGroup}</li>
  * </ul>
  */
-public class CreateDepartmentMemberCommand {
-	@NotNull
+public class DepartmentMemberDTO {
+	
 	private Long   departmentId;
-	@NotNull
 	private Long   memberUid;
-	@NotNull
 	private String memberGroup;
 	
-	public CreateDepartmentMemberCommand() {
+	public DepartmentMemberDTO() {
     }
 	
 	

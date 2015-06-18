@@ -54,9 +54,9 @@ public class PropertyMgrController extends ControllerBase {
 	PropertyMgrProvider propertyMgrProvider;
 	
 	 /**
-     * <b>URL: /pm/getUserOwningProperties</b>
-     * <p>查询用户加入的物业</p>
-     */
+	 * <b>URL: /pm/getUserOwningProperties</b>
+	 * <p>查询用户加入的物业</p>
+	 */
     @RequestMapping("getUserOwningProperties")
     @RestReturn(value=ListPropMemberCommandResponse.class)
     public RestResponse getUserOwningProperties() {

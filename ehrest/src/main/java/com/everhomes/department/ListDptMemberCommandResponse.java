@@ -10,16 +10,16 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
- * <li>members：政府机构信息，参考{@link com.everhomes.department.DepartmentDTO}</li>
+ * <li>members：机构成员信息，参考{@link com.everhomes.department.DepartmentMemberDTO}</li>
  * </ul>
  */
-public class ListDepartmentsCommandResponse {
+public class ListDptMemberCommandResponse {
 	
 	private Integer nextPageOffset;
 	
-	@ItemType(DepartmentDTO.class)
-    private List<DepartmentDTO> members;
-	public ListDepartmentsCommandResponse() {
+	@ItemType(DepartmentMemberDTO.class)
+    private List<DepartmentMemberDTO> members;
+	public ListDptMemberCommandResponse() {
     }
 	
 	public Integer getNextPageOffset() {
@@ -30,11 +30,11 @@ public class ListDepartmentsCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	public List<DepartmentDTO> getMembers() {
+	public List<DepartmentMemberDTO> getMembers() {
 		return members;
 	}
 
-	public void setMembers(List<DepartmentDTO> members) {
+	public void setMembers(List<DepartmentMemberDTO> members) {
 		this.members = members;
 	}
 

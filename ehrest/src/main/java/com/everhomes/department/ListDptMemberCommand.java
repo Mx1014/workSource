@@ -1,30 +1,36 @@
 // @formatter:off
 package com.everhomes.department;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>name：名称</li>
+ * <li>departmentId：政府机构id</li>
  * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListDepartmentsCommand {
-	
-	private String  name;
+public class ListDptMemberCommand {
+	@NotNull
+	private Long    departmentId;
 	private Integer pageOffset;
 	private Integer pageSize;
 	
-	public ListDepartmentsCommand() {
+	public ListDptMemberCommand() {
     }
-	public String getName() {
-		return name;
+
+	
+	public Long getDepartmentId() {
+		return departmentId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+
+	public void setDepartmentId(Long departmentId) {
+		this.departmentId = departmentId;
 	}
+
 
 	public Integer getPageOffset() {
 		return pageOffset;

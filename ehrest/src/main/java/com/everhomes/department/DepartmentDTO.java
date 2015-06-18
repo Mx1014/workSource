@@ -6,10 +6,10 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id：主键id</li>
- * <li>parentId：所在的区域id</li>
+ * <li>parentId：父机构id。没有填0</li>
  * <li>name：名称</li>
  * <li>path：路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
- * <li>level：当前层级</li>
+ * <li>level：当前层级。没有填0</li>
  * <li>scopeCode：成员类型：参考{@link com.everhomes.department.DepartmentScopeCode}</li>
  * <li>status：状态：参考{@link com.everhomes.department.DepartmentStatus}</li>
  * </ul>
