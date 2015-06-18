@@ -2199,12 +2199,12 @@ CREATE TABLE `eh_address_messages` (
   `sender_tag` VARCHAR(32),
   `body_type` VARCHAR(32),
   `deliveryOption` INT NOT NULL,
-  `create_time` datetime DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of global parition
+# member of user-related sharding group
 # shared among namespaces, no application module specific information
 #
 DROP TABLE IF EXISTS `eh_user_scores`;
@@ -2218,5 +2218,23 @@ CREATE TABLE `eh_user_scores` (
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) engine=innodb default charset=utf8mb4;
+
+#
+# member of user-related sharding group
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_user_feedbacks`;
+CREATE TABLE `eh_user_feedbacks` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `owner_uid` BIGINT DEFAULT 0,
+  `contact` VARCHAR(128) DEFAULT '',
+  `content` TEXT,
+  `create_time` DATETIME,
+  `feedback_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: report, 2-complaint, 3-correct',
+  `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: post, 2: address, 3: forum', 
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `content_category` BIGINT NOT NULL DEFAULT 0 COMMENT '0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction',
+  PRIMARY KEY (`id`)
+) engine=innodb DEFAULT charset=utf8mb4;
 
 SET foreign_key_checks = 1;
