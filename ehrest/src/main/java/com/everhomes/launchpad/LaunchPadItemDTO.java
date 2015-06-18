@@ -10,12 +10,15 @@ import com.everhomes.util.StringHelper;
  * <li>appId: 应用Id</li>
  * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
  * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
+ * <li>itemTag: item 标签，用于过滤item</li>
  * <li>itemName: 名称</li>
  * <li>itemLabel: 显示标签</li>
- * <li>itemGroup: item归属某一组</li>
- * <li>actionName: 动作名称</li>
- * <li>actionIcon: 动作图标</li>
- * <li>actionUri: 动作uri</li>
+ * <li>iconUri: 图标uri</li>
+ * <li>iconUrl: 图标url</li>
+ * <li>itemWidth: 图标的宽</li>
+ * <li>itemHeight: 图标的高</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.launchpad.ActionType}</li>
+ * <li>actionData: 动作所需要的参数，由actionType决定</li>
  * <li>defaultOrder: 默认顺序</li>
  * <li>applyPolicy: 应用策略{@link com.everhomes.launchpad.ApplyPolicy}</li>
  * <li>minVersion: item 最小版本号</li>
@@ -26,128 +29,156 @@ import com.everhomes.util.StringHelper;
  */
 public class LaunchPadItemDTO {
 
-	private Long    id;
-	private Integer namespaceId;
-	private Long    appId;
-	private String  scopeType;
-	private Long    scopeId;
-	private String  itemName;
-	private String  itemLabel;
-	private String  itemGroup;
-	private String  actionName;
-	private String  actionIcon;
-	private String  actionUri;
-	private Integer defaultOrder;
-	private Byte    applyPolicy;
-	private Long    minVersion;
-	private Byte    displayFlag;
-	private String  displayLayout;
+    private Long    id;
+    private Integer namespaceId;
+    private Long    appId;
+    private String  scopeType;
+    private Long    scopeId;
+    private String  itemTag;
+    private String  itemName;
+    private String  itemLabel;
+    private String  iconUri;
+    private String  iconUrl;
+    private Integer itemWidth;
+    private Integer itemHeight;
+    private Byte    actionType;
+    private String  actionData;
+    private Integer defaultOrder;
+    private Byte    applyPolicy;
+    private Long    minVersion;
+    private Byte    displayFlag;
+    private String  displayLayout;
+	
 	private String  jsonObj;
-    
-	public Long getId() {
+
+    public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
-    
+
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
-    
+
     public Long getAppId() {
         return appId;
     }
-    
+
     public void setAppId(Long appId) {
         this.appId = appId;
     }
-    
+
     public String getScopeType() {
         return scopeType;
     }
-    
+
     public void setScopeType(String scopeType) {
         this.scopeType = scopeType;
     }
-    
+
     public Long getScopeId() {
         return scopeId;
     }
-    
+
     public void setScopeId(Long scopeId) {
         this.scopeId = scopeId;
     }
-    
+
+    public String getItemTag() {
+        return itemTag;
+    }
+
+    public void setItemTag(String itemTag) {
+        this.itemTag = itemTag;
+    }
+
     public String getItemName() {
         return itemName;
     }
-    
+
     public void setItemName(String itemName) {
         this.itemName = itemName;
     }
-    
+
     public String getItemLabel() {
         return itemLabel;
     }
-    
+
     public void setItemLabel(String itemLabel) {
         this.itemLabel = itemLabel;
     }
-    
-    public String getItemGroup() {
-        return itemGroup;
+
+    public String getIconUri() {
+        return iconUri;
     }
-    
-    public void setItemGroup(String itemGroup) {
-        this.itemGroup = itemGroup;
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
     }
-    
-    public String getActionName() {
-        return actionName;
+
+    public String getIconUrl() {
+        return iconUrl;
     }
-    
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
-    
-    public String getActionIcon() {
-        return actionIcon;
+
+    public Integer getItemWidth() {
+        return itemWidth;
     }
-    
-    public void setActionIcon(String actionIcon) {
-        this.actionIcon = actionIcon;
+
+    public void setItemWidth(Integer itemWidth) {
+        this.itemWidth = itemWidth;
     }
-    
-    public String getActionUri() {
-        return actionUri;
+
+    public Integer getItemHeight() {
+        return itemHeight;
     }
-    
-    public void setActionUri(String actionUri) {
-        this.actionUri = actionUri;
+
+    public void setItemHeight(Integer itemHeight) {
+        this.itemHeight = itemHeight;
     }
-    
+
+    public Byte getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getActionData() {
+        return actionData;
+    }
+
+    public void setActionData(String actionData) {
+        this.actionData = actionData;
+    }
+
     public Integer getDefaultOrder() {
         return defaultOrder;
     }
-    
+
     public void setDefaultOrder(Integer defaultOrder) {
         this.defaultOrder = defaultOrder;
     }
-    
+
     public Byte getApplyPolicy() {
         return applyPolicy;
     }
-    
+
     public void setApplyPolicy(Byte applyPolicy) {
         this.applyPolicy = applyPolicy;
     }
-    
+
     public Long getMinVersion() {
         return minVersion;
     }

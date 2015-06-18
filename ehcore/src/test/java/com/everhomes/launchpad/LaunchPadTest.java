@@ -27,6 +27,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.google.gson.JsonObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },
@@ -63,13 +64,15 @@ public class LaunchPadTest extends TestCase {
     public void testCreateLaunchPadItems() {
         CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
         
-        cmd.setItemGroup(ItemGroup.THIRDSERVICE.getCode());
-        cmd.setItemLabel("谷歌");
-        cmd.setItemName("google");
-        cmd.setAppId(AppConstants.APPID_THIRD_SERVICE);
+        cmd.setItemTag(ItemTag.SYS_BIZS.getCode());
+        cmd.setItemLabel("百度");
+        cmd.setItemName(ItemNameTag.BIZ.getCode());
+        cmd.setActionType(ActionType.NONE.getCode());
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("url", "www.baidu.com");
+        cmd.setActionData(jsonObject.toString());
         cmd.setDisplayFlag((byte)1);
-        cmd.setActionName("google");
-        cmd.setActionUri("www.google.com");
+        
         
         List<ItemScope> itemScopes = new ArrayList<ItemScope>();
         ItemScope scope1 = new ItemScope();

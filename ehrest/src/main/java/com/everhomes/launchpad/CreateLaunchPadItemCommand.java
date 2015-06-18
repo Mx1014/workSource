@@ -15,10 +15,12 @@ import com.everhomes.util.StringHelper;
  * <li>ItemScope: item可见范围列表， 参考{@link com.everhomes.launchpad.ItemScope}</li>
  * <li>itemName: 名称</li>
  * <li>itemLabel: 显示标签</li>
- * <li>itemGroup: item归属某一组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
- * <li>actionName: 动作名称</li>
- * <li>actionIcon: 动作图标</li>
- * <li>actionUri: 动作uri</li>
+ * <li>itemTag: item标签，标识该item属于哪一类型的</li>
+ * <li>itemWidth: 图标的宽</li>
+ * <li>itemHeight: 图标的高</li>
+ * <li>iconUri: 动作图标</li>
+ * <li>actionType: item的动作类型，参考{@link com.everhomes.launchpad.ActionType}</li>
+ * <li>actionData: 根据actionType不同的取值决定</li>
  * <li>displayFlag: 是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * </ul>
@@ -33,13 +35,17 @@ public class CreateLaunchPadItemCommand {
     @NotNull
     private String  itemLabel;
     @NotNull
-    private String  itemGroup;
+    private String  itemTag;
     @NotNull
-    private String  actionName;
+    private Integer  itemWidth;
     @NotNull
-    private String  actionIcon;
+    private Integer  itemHeight;
     @NotNull
-    private String  actionUri;
+    private String  iconUri;
+    @NotNull
+    private Byte actionType;
+    @NotNull
+    private String actionData;
     
     private Byte displayFlag;
     
@@ -88,36 +94,36 @@ public class CreateLaunchPadItemCommand {
         this.itemLabel = itemLabel;
     }
 
-    public String getItemGroup() {
-        return itemGroup;
+    public String getItemTag() {
+        return itemTag;
     }
 
-    public void setItemGroup(String itemGroup) {
-        this.itemGroup = itemGroup;
+    public void setItemTag(String itemTag) {
+        this.itemTag = itemTag;
     }
 
-    public String getActionName() {
-        return actionName;
+    public Integer getItemWidth() {
+        return itemWidth;
     }
 
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
+    public void setItemWidth(Integer itemWidth) {
+        this.itemWidth = itemWidth;
     }
 
-    public String getActionIcon() {
-        return actionIcon;
+    public Integer getItemHeight() {
+        return itemHeight;
     }
 
-    public void setActionIcon(String actionIcon) {
-        this.actionIcon = actionIcon;
+    public void setItemHeight(Integer itemHeight) {
+        this.itemHeight = itemHeight;
     }
 
-    public String getActionUri() {
-        return actionUri;
+    public String getIconUri() {
+        return iconUri;
     }
 
-    public void setActionUri(String actionUri) {
-        this.actionUri = actionUri;
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
     }
 
     public Byte getDisplayFlag() {
@@ -134,6 +140,22 @@ public class CreateLaunchPadItemCommand {
 
     public void setDisplayLayout(String displayLayout) {
         this.displayLayout = displayLayout;
+    }
+
+    public Byte getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getActionData() {
+        return actionData;
+    }
+
+    public void setActionData(String actionData) {
+        this.actionData = actionData;
     }
 
     @Override
