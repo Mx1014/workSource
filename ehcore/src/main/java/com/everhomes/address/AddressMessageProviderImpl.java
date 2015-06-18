@@ -7,6 +7,7 @@ import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -17,6 +18,7 @@ import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.records.EhAddressMessagesRecord;
 import com.everhomes.util.ConvertHelper;
 
+@Component
 public class AddressMessageProviderImpl implements AddressMessageProvider {
     @Autowired
     private DbProvider dbProvider;

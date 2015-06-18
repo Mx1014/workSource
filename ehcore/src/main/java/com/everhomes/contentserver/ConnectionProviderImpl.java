@@ -89,9 +89,9 @@ public class ConnectionProviderImpl implements ConnectionProvider {
             handlers.put(key, handler);
         }
         // create connection
-        //WebSocketSession session = wsClient.doHandshake(handlers.get(key), wsHeaders, uri).get();
-        //sessionCache.put(String.format("%s", key), session);
-        //LOGGER.info("Conennt to server.......uri={}", uri);
+        WebSocketSession session = wsClient.doHandshake(handlers.get(key), wsHeaders, uri).get();
+        sessionCache.put(String.format("%s", key), session);
+        LOGGER.info("Conennt to server.......uri={}", uri);
     }
 
     @Override
