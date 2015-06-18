@@ -16,6 +16,8 @@ public class ForwardTopicDTO {
     
     private Long targetForumId;
     
+    private String subject;
+    
     private String contentUri;
     
     private String contentUrl;
@@ -39,6 +41,14 @@ public class ForwardTopicDTO {
         this.targetForumId = targetForumId;
     }
     
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
     public String getContentUri() {
         return contentUri;
     }
