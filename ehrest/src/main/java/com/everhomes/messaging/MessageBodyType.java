@@ -1,7 +1,7 @@
 package com.everhomes.messaging;
 
 public enum MessageBodyType {
-    TEXT("TEXT"), IMAGE("IMAGE"), AUDIO("AUDIO"), VIDEO("VIDEO"), LINK("LINK");
+    TEXT("TEXT"), IMAGE("IMAGE"), AUDIO("AUDIO"), VIDEO("VIDEO"), LINK("LINK"), NOTIFY("NOTIFY");
     
     private String code;
     private MessageBodyType(String code) {
