@@ -44,32 +44,36 @@ public class UserPointServiceImpl implements UserPointService {
 
     @Override
     public void addPoint(AddUserPointCommand cmd) {
-        assert (cmd.getPoint() != null);
-        assert (cmd.getUid() != null);
-        UserScore userScore = ConvertHelper.convert(cmd, UserScore.class);
-        userScore.setOwnerUid(cmd.getUid());
-        PointType type = PointType.fromCode(cmd.getPointType());
-        // handle point type to validate
-        switch (type) {
-        case ADDRESS_APPROVAL:
-            handleAddressPass(userScore);
-            break;
-        case APP_OPENED:
-            handOpenApp(userScore);
-            break;
-        case CREATE_POST:
-        case CREATE_COMMENT:
-        case INVITED_USER:
-            handleRepeat(userScore);
-            break;
-        case AVATAR:
-            handleAvatarPass(userScore);
-            break;
-        case OTHER:
-            LOGGER.error("cannot known");
-            break;
-        default:
-            break;
+        try {
+            assert (cmd.getPoint() != null);
+            assert (cmd.getUid() != null);
+            UserScore userScore = ConvertHelper.convert(cmd, UserScore.class);
+            userScore.setOwnerUid(cmd.getUid());
+            PointType type = PointType.fromCode(cmd.getPointType());
+            // handle point type to validate
+            switch (type) {
+            case ADDRESS_APPROVAL:
+                handleAddressPass(userScore);
+                break;
+            case APP_OPENED:
+                handOpenApp(userScore);
+                break;
+            case CREATE_POST:
+            case CREATE_COMMENT:
+            case INVITED_USER:
+                handleRepeat(userScore);
+                break;
+            case AVATAR:
+                handleAvatarPass(userScore);
+                break;
+            case OTHER:
+                LOGGER.error("cannot known");
+                break;
+            default:
+                break;
+            }
+        } catch(Exception e) {
+            LOGGER.error("Failed to add the score, cmd=" + cmd);
         }
 
     }
