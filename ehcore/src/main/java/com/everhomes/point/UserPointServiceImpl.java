@@ -92,7 +92,6 @@ public class UserPointServiceImpl implements UserPointService {
 
     @Override
     public GetUserTreasureResponse getUserTreasure(GetUserTreasureCommand cmd) {
-        // TODO handle other info from other interface
         return null;
     }
 

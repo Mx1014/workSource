@@ -2,6 +2,9 @@ package com.everhomes.user;
 
 import java.util.List;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -32,10 +35,13 @@ import com.everhomes.util.StringHelper;
  *         <li>regionId:城市ID</li>
  *         <li>regionName:城市名</li>
  *         <li>regionPath:城市路径</li>
+ *         <li>couponCount:礼券数</li>
+ *         <li>topicFavoriteCount:帖子收藏数</li>
+ *         <li>sharedCount:分享数</li>
  *         </ul>
  **/
 public class UserInfo {
-    
+
     private Long id;
     private String accountName;
     private String nickName;
@@ -57,6 +63,9 @@ public class UserInfo {
     private String regionName;
     private String regionPath;
     private String avatarUri;
+    private Integer couponCount;
+    private Integer topicFavoriteCount;
+    private Integer sharedCount;
 
     @ItemType(String.class)
     private List<String> phones;
@@ -249,6 +258,40 @@ public class UserInfo {
 
     public void setAvatarUri(String avatarUri) {
         this.avatarUri = avatarUri;
+    }
+
+    public Integer getCouponCount() {
+        return couponCount;
+    }
+
+    public void setCouponCount(Integer couponCount) {
+        this.couponCount = couponCount;
+    }
+
+    public Integer getTopicFavoriteCount() {
+        return topicFavoriteCount;
+    }
+
+    public void setTopicFavoriteCount(Integer topicFavoriteCount) {
+        this.topicFavoriteCount = topicFavoriteCount;
+    }
+
+    public Integer getSharedCount() {
+        return sharedCount;
+    }
+
+    public void setSharedCount(Integer sharedCount) {
+        this.sharedCount = sharedCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
