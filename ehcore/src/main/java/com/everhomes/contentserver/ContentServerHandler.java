@@ -29,7 +29,6 @@ public class ContentServerHandler extends TextWebSocketHandler {
     public ContentServerHandler(WebSocketCallback callback) {
         this.callback = callback;
         subscriber = new WebSocketMessageSubscriber();
-        proxy = MessageQueue.getInstance();
     }
 
     @Override
@@ -40,8 +39,11 @@ public class ContentServerHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        if (!isSubscribe)
+        if (!isSubscribe) {
+            proxy = MessageQueue.getInstance();
             proxy.subscriber("contentstorage.", subscriber);
+            isSubscribe=true;
+        }
         LOGGER.info("handle text message from content server.payload={}", message.getPayload());
         PduFrame frame = PduFrame.fromJson(message.getPayload());
         if (StringUtils.isEmpty(frame.getName())) {
@@ -69,7 +71,7 @@ public class ContentServerHandler extends TextWebSocketHandler {
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
         if (LOGGER.isDebugEnabled())
-        super.handlePongMessage(session, message);
+            super.handlePongMessage(session, message);
     }
 
     @Override
