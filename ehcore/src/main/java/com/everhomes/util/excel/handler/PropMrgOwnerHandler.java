@@ -96,7 +96,7 @@ public class PropMrgOwnerHandler
 						owner.setContactType(processtype(RowResult.trimString(result.getB())));
 						owner.setCreatorUid(userId);
 						owner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						owner.setCommunityId(communityId);
+						owner.setOrganizationId(communityId);
 						
 						contactList.add(owner);
 				}

@@ -60,6 +60,23 @@ public class AddressProviderImpl implements AddressProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null); 
         
     }
+    
+    @Override
+    public void createAddress2(Address address) {
+    	long startTime = System.currentTimeMillis();
+        long id = shardingProvider.allocShardableContentId(EhAddresses.class).second(); 
+
+        address.setId(id); 
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id)); 
+
+        EhAddressesDao dao = new EhAddressesDao(context.configuration()); 
+        dao.insert(address); 
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddresses.class, null); 
+        long endTime = System.currentTimeMillis();
+		LOGGER.info("successed insert one record.time=" + (endTime - startTime));
+    }
 
     @Caching(evict = { @CacheEvict(value="Address", key="#address.id"),
             @CacheEvict(value="Apartment", key="{#address.communityId, #address.buildingName, #address.apartmentName}") })

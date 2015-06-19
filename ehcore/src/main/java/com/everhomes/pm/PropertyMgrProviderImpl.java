@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.pm;
 
-import static com.everhomes.server.schema.Tables.EH_COMMUNITY_PM_MEMBERS;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,31 +24,29 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhCommunityAddressMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmBillItemsDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmBillsDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmContactsDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmMembersDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhCommunityPmTasksDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationContactsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhCommunityAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmBillItems;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmBills;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmContacts;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmMembers;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmOwners;
-import com.everhomes.server.schema.tables.pojos.EhCommunityPmTasks;
-import com.everhomes.server.schema.tables.pojos.EhLinks;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillItems;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationContacts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhCommunityAddressMappingsRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmBillItemsRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmBillsRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmContactsRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmMembersRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhCommunityPmTasksRecord;
-import com.everhomes.server.schema.tables.records.EhLinksRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationBillItemsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationContactsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.Tuple;
@@ -71,11 +67,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
-        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS); 
         if(userId != null)
-           query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(userId));
+           query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
        
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
             return null;
@@ -88,9 +84,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	final List<CommunityPmMember> groups = new ArrayList<CommunityPmMember>();
     	
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
-        query.addConditions(EH_COMMUNITY_PM_MEMBERS.TARGET_TYPE.eq(targetType));
-        query.addConditions(EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(targetId));
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(targetType));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId));
         
         query.fetch().map((r) -> {
             groups.add(ConvertHelper.convert(r, CommunityPmMember.class));
@@ -105,10 +101,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	final List<CommunityPmMember> groups = new ArrayList<CommunityPmMember>();
     	
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
-        query.addConditions(EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
-        query.addConditions(EH_COMMUNITY_PM_MEMBERS.TARGET_TYPE.eq(targetType));
-        query.addConditions(EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(targetId));
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(targetType));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId));
         
         query.fetch().map((r) -> {
             groups.add(ConvertHelper.convert(r, CommunityPmMember.class));
@@ -124,10 +120,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropMember(CommunityPmMember communityPmMember) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCommunityPmMembersDao dao = new EhCommunityPmMembersDao(context.configuration());
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
         dao.insert(communityPmMember);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmMembers.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationMembers.class, null);
     }
     
     @CacheEvict(value="CommunityPmMember", key="#communityPmMember.id")
@@ -136,10 +132,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	assert(communityPmMember.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmMembersDao dao = new EhCommunityPmMembersDao(context.configuration());
+    	EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
     	dao.update(communityPmMember);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmMembers.class, communityPmMember.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, communityPmMember.getId());
     }
     
     @CacheEvict(value="CommunityPmMember", key="#communityPmMember.id")
@@ -147,10 +143,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropMember(CommunityPmMember communityPmMember){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmMembersDao dao = new EhCommunityPmMembersDao(context.configuration());
+    	EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
     	dao.deleteById(communityPmMember.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmMembers.class, communityPmMember.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, communityPmMember.getId());
     }
     
     //@CacheEvict(value="CommunityPmMember", key="#id")
@@ -159,17 +155,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropMember(long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmMembersDao dao = new EhCommunityPmMembersDao(context.configuration());
+    	EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmMembers.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
     }
      
     @Cacheable(value="CommunityPmMember", key="#id")
     @Override
     public CommunityPmMember findPropMemberById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmMembersDao dao = new EhCommunityPmMembersDao(context.configuration());
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CommunityPmMember.class);
     }
     
@@ -179,16 +175,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
-        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         if(communityId != null)
-           query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
+           query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId));
        
         if(contactToken != null && !"".equals(contactToken)) {
-        	query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+        	query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
         }
         
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc());
         query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
@@ -203,10 +199,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
-        SelectQuery<EhCommunityPmMembersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_MEMBERS);
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         if(communityId != null)
-           query.addConditions(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId));
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_MEMBERS.ID.asc());
+           query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId));
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmMember.class));
             return null;
@@ -218,10 +214,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public int countCommunityPmMembers(long communityId, String contactToken) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_MEMBERS);
-        Condition condition = Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId);
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS);
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId);
         if(contactToken != null && !"".equals(contactToken)) {
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+        	condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
         }
 
         return step.where(condition).fetchOneInto(Integer.class);
@@ -233,15 +229,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropAddressMapping(CommunityAddressMapping communityAddressMapping) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCommunityAddressMappingsRecord record = ConvertHelper.convert(communityAddressMapping, EhCommunityAddressMappingsRecord.class);
-        InsertQuery<EhCommunityAddressMappingsRecord> query = context.insertQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
+        EhOrganizationAddressMappingsRecord record = ConvertHelper.convert(communityAddressMapping, EhOrganizationAddressMappingsRecord.class);
+        InsertQuery<EhOrganizationAddressMappingsRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
         query.setRecord(record);
-        query.setReturning(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ID);
+        query.setReturning(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID);
         query.execute();
         
         communityAddressMapping.setId(query.getReturnedRecord().getId());
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityAddressMappingsRecord.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationAddressMappingsRecord.class, null);
     }
     
    
@@ -253,10 +249,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	assert(communityAddressMapping.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityAddressMappingsDao dao = new EhCommunityAddressMappingsDao(context.configuration());
+    	EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
     	dao.update(communityAddressMapping);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityAddressMappings.class, communityAddressMapping.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, communityAddressMapping.getId());
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
@@ -266,10 +262,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropAddressMapping(CommunityAddressMapping communityAddressMapping){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityAddressMappingsDao dao = new EhCommunityAddressMappingsDao(context.configuration());
+    	EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
     	dao.deleteById(communityAddressMapping.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityAddressMappings.class, communityAddressMapping.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, communityAddressMapping.getId());
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityAddressMapping", key="#communityAddressMapping.id"), 
@@ -279,17 +275,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropAddressMapping(long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityAddressMappingsDao dao = new EhCommunityAddressMappingsDao(context.configuration());
+    	EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityAddressMappings.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, id);
     }
      
     @Cacheable(value="CommunityAddressMapping", key="#id")
     @Override
     public CommunityAddressMapping findPropAddressMappingById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityAddressMappingsDao dao = new EhCommunityAddressMappingsDao(context.configuration());
+        EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CommunityAddressMapping.class);
     }
     
@@ -298,10 +294,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public CommunityAddressMapping findPropAddressMappingByAddressId(Long communityId,Long addressId){
         final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
+        SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
         if(communityId != null)
-            query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
-       query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId));
+       query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
        query.fetch().map((r) -> {
     	   if(r != null)
            result[0] = ConvertHelper.convert(r, CommunityAddressMapping.class);
@@ -315,11 +311,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
          List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
-         SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
+         SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
          if(communityId != null)
-            query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId));
          Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-         query.addOrderBy(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ID.asc());
+         query.addOrderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc());
          query.addLimit(offset, pageSize);
          query.fetch().map((r) -> {
          	result.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
@@ -333,10 +329,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         
          DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
-         Condition condition = Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId);
+         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
+         Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId);
          if(livingStatus != null) {
-        	 condition = condition.and(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
+        	 condition = condition.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
          }
          return step.where(condition).fetchOneInto(Integer.class);
     }
@@ -347,10 +343,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
          List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
-         SelectQuery<EhCommunityAddressMappingsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS);
+         SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
          if(communityId != null)
-            query.addConditions(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId));
-         query.addOrderBy(Tables.EH_COMMUNITY_ADDRESS_MAPPINGS.ID.asc());
+            query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId));
+         query.addOrderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc());
          query.fetch().map((r) -> {
          	result.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
              return null;
@@ -362,14 +358,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropBill(CommunityPmBill communityPmBill) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
     	
-    	EhCommunityPmBillsRecord record = ConvertHelper.convert(communityPmBill, EhCommunityPmBillsRecord.class);
-        InsertQuery<EhCommunityPmBillsRecord> query = context.insertQuery(Tables.EH_COMMUNITY_PM_BILLS);
+    	EhOrganizationBillsRecord record = ConvertHelper.convert(communityPmBill, EhOrganizationBillsRecord.class);
+        InsertQuery<EhOrganizationBillsRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_BILLS);
         query.setRecord(record);
-        query.setReturning(Tables.EH_COMMUNITY_PM_BILLS.ID);
+        query.setReturning(Tables.EH_ORGANIZATION_BILLS.ID);
         query.execute();
         
         communityPmBill.setId(query.getReturnedRecord().getId());
-        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmBills.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationBills.class, null);
     }
     
     @CacheEvict(value = "CommunityPmBill", key="#id")
@@ -378,10 +374,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	assert(communityPmBill.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillsDao dao = new EhCommunityPmBillsDao(context.configuration());
+    	EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
     	dao.update(communityPmBill);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBills.class, communityPmBill.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, communityPmBill.getId());
     }
     
     @CacheEvict(value = "CommunityPmBill", key="#communityPmBill.id")
@@ -389,10 +385,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropBill(CommunityPmBill communityPmBill){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillsDao dao = new EhCommunityPmBillsDao(context.configuration());
+    	EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
     	dao.deleteById(communityPmBill.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBills.class, communityPmBill.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, communityPmBill.getId());
     }
     
     @CacheEvict(value = "CommunityPmBill", key="#id")
@@ -400,17 +396,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropBill(long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillsDao dao = new EhCommunityPmBillsDao(context.configuration());
+    	EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBills.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, id);
     }
      
     @Cacheable(value = "CommunityPmBill", key="#id")
     @Override
     public CommunityPmBill findPropBillById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmBillsDao dao = new EhCommunityPmBillsDao(context.configuration());
+        EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CommunityPmBill.class);
     }
     
@@ -419,20 +415,20 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmBill> result  = new ArrayList<CommunityPmBill>();
-        SelectQuery<EhCommunityPmBillsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_BILLS);
+        SelectQuery<EhOrganizationBillsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_BILLS);
         if(communityId != null){
-           query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId));
+           query.addConditions(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(communityId));
         }
         if(dateStr != null && !"".equals(dateStr)) {
-            query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
+            query.addConditions(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(dateStr));
         }
        
         if(address != null && !"".equals(address)) {
-        	query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
+        	query.addConditions(Tables.EH_ORGANIZATION_BILLS.ADDRESS.eq(address));
         }
         
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_BILLS.ID.asc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_BILLS.ID.asc());
         query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmBill.class));
@@ -447,14 +443,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmBill> result  = new ArrayList<CommunityPmBill>();
-        SelectQuery<EhCommunityPmBillsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_BILLS);
+        SelectQuery<EhOrganizationBillsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_BILLS);
         if(communityId != null){
-           query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId));
+           query.addConditions(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(communityId));
         }
         if(dateStr != null && !"".equals(dateStr)) {
-            query.addConditions(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
+            query.addConditions(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(dateStr));
         }
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_BILLS.ID.asc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_BILLS.ID.asc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmBill.class));
             return null;
@@ -467,14 +463,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_BILLS);
-        Condition condition = Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId);
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_BILLS);
+        Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(communityId);
         if(address != null && !"".equals(address)) {
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_BILLS.ADDRESS.eq(address));
+        	condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.eq(address));
         }
         
         if(dateStr != null && !"".equals(dateStr)) {
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR.eq(dateStr));
+        	condition = condition.and(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(dateStr));
         }
         
         return step.where(condition).fetchOneInto(Integer.class);
@@ -484,10 +480,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropOwner(CommunityPmOwner communityPmOwner) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+        EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
         dao.insert(communityPmOwner);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmOwners.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationOwners.class, null);
     }
     
     @CacheEvict(value = "CommunityPmOwner", key="communityPmOwner.#id")
@@ -496,10 +492,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	assert(communityPmOwner.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+    	EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
     	dao.update(communityPmOwner);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, communityPmOwner.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, communityPmOwner.getId());
     }
     
     @CacheEvict(value = "CommunityPmOwner", key="#communityPmOwner.id")
@@ -507,10 +503,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropOwner(CommunityPmOwner communityPmOwner){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+    	EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
     	dao.deleteById(communityPmOwner.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, communityPmOwner.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, communityPmOwner.getId());
     }
     
     @CacheEvict(value="CommunityPmOwner", key="#id")
@@ -518,17 +514,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropOwner(long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+    	EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmOwners.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, id);
     }
      
     @Cacheable(value="CommunityPmOwner", key="#id")
     @Override
     public CommunityPmOwner findPropOwnerById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmOwnersDao dao = new EhCommunityPmOwnersDao(context.configuration());
+        EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CommunityPmOwner.class);
     }
     
@@ -537,19 +533,19 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
-        SelectQuery<EhCommunityPmOwnersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_OWNERS);
+        SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         if(communityId != null)
-           query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.COMMUNITY_ID.eq(communityId));
+           query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(communityId));
         if(address != null && !"".equals(address)) {
-            query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS.eq(address));
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS.eq(address));
         }
        
         if(contactToken != null && !"".equals(contactToken)) {
-        	query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.CONTACT_TOKEN.eq(contactToken));
+        	query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
         }
         
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_OWNERS.ID.asc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.asc());
         query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -563,13 +559,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
-        SelectQuery<EhCommunityPmOwnersRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_OWNERS);
+        SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         if(communityId != null)
-           query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.COMMUNITY_ID.eq(communityId));
+           query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(communityId));
         if(addressId != null && !"".equals(addressId)) {
-            query.addConditions(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS_ID.eq(addressId));
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
         }
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_OWNERS.ID.desc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
             return null;
@@ -581,14 +577,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public int countCommunityPmOwners(long communityId, String address, String contactToken) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_OWNERS);
-        Condition condition = Tables.EH_COMMUNITY_PM_OWNERS.COMMUNITY_ID.eq(communityId);
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_OWNERS);
+        Condition condition = Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(communityId);
         if(address != null && !"".equals(address)) {
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_OWNERS.ADDRESS.eq(address));
+        	condition = condition.and(Tables.EH_ORGANIZATION_OWNERS.ADDRESS.eq(address));
         }
        
         if(contactToken != null && !"".equals(contactToken)) {
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_OWNERS.CONTACT_TOKEN.eq(contactToken));
+        	condition = condition.and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
         }
         
         return step.where(condition).fetchOneInto(Integer.class);
@@ -598,14 +594,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Override
     public void createPmTask(CommunityPmTasks task) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmTasksRecord record = ConvertHelper.convert(task, EhCommunityPmTasksRecord.class);
-		InsertQuery<EhCommunityPmTasksRecord> query = context.insertQuery(Tables.EH_COMMUNITY_PM_TASKS);
+    	EhOrganizationTasksRecord record = ConvertHelper.convert(task, EhOrganizationTasksRecord.class);
+		InsertQuery<EhOrganizationTasksRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_TASKS);
 		query.setRecord(record);
-		query.setReturning(Tables.EH_COMMUNITY_PM_TASKS.ID);
+		query.setReturning(Tables.EH_ORGANIZATION_TASKS.ID);
 		query.execute();
 		
 		task.setId(query.getReturnedRecord().getId());
-		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmTasks.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationTasks.class, null);
     }
 
     @Override
@@ -614,23 +610,23 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         final List<CommunityPmTasks> groups = new ArrayList<CommunityPmTasks>();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
+        SelectQuery<EhOrganizationTasksRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_TASKS);
         if(communityId != null && communityId > 0)
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId));
         if(entityId != null && entityId > 0)
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
         if(entityType != null && !entityType .equals(""))
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
         if(targetType != null && !targetType .equals(""))
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.TARGET_TYPE.eq(targetType));
         if(targetId != null && targetId > 0)
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId));
         if(taskType != null && !taskType .equals(""))
-            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+            query.addConditions(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
         if(status != null && status >= 0)
-            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+            query.addConditions(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
         Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_TASKS.ID.asc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_TASKS.ID.asc());
         query.addLimit(offset, pageSize);
         query.fetch().map((r) -> {
             groups.add(ConvertHelper.convert(r, CommunityPmTasks.class));
@@ -646,21 +642,21 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         final List<CommunityPmTasks> groups = new ArrayList<CommunityPmTasks>();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
+        SelectQuery<EhOrganizationTasksRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_TASKS);
         if(communityId != null && communityId > 0)
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId));
         if(entityId != null && entityId > 0)
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
         if(entityType != null && !entityType .equals(""))
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
         if(targetType != null && !targetType .equals(""))
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.TARGET_TYPE.eq(targetType));
         if(targetId != null && targetId > 0)
-        	query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId));
         if(taskType != null && !taskType .equals(""))
-            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+            query.addConditions(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
         if(status != null && status >= 0)
-            query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+            query.addConditions(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
         
         query.fetch().map((r) -> {
             groups.add(ConvertHelper.convert(r, CommunityPmTasks.class));
@@ -684,13 +680,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
             this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
                     (DSLContext context, Object reducingContext)-> {
                         
-                    Long count = context.selectCount().from(Tables.EH_COMMUNITY_PM_MEMBERS)
+                    Long count = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
                             .leftOuterJoin(Tables.EH_USERS)
-                            .on(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
-                                    .and(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
-                                    .and(Tables.EH_COMMUNITY_PM_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
-                            .where(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId))
-                            .and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.like(likeVal)
+                            .on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
+                                    .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
+                                    .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
+                            .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId))
+                            .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(likeVal)
                                     .or(Tables.EH_USERS.ACCOUNT_NAME.like(likeVal)))
                             .fetchOne(0, Long.class);
                     
@@ -721,13 +717,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                 if(current[0] == fallingShard.first())
                     off = fallingShard.second();
                 
-                context.select().from(Tables.EH_COMMUNITY_PM_MEMBERS)
+                context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
                 .leftOuterJoin(Tables.EH_USERS)
-                .on(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.INVITOR_UID)
-                        .and(Tables.EH_COMMUNITY_PM_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
-                        .and(Tables.EH_COMMUNITY_PM_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
-                .where(Tables.EH_COMMUNITY_PM_MEMBERS.COMMUNITY_ID.eq(communityId))
-                .and(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN.like(likeVal)
+                .on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.INVITOR_UID)
+                        .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
+                        .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(likeVal)
                                     .or(Tables.EH_USERS.ACCOUNT_NAME.like(likeVal)))
                     .limit((int)size).offset((int)off)
                     .fetch().map((r) -> {
@@ -737,10 +733,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
                         user.setUserName(r.getValue(Tables.EH_USERS.ACCOUNT_NAME));
                         user.setInviteType(r.getValue(Tables.EH_USERS.INVITE_TYPE));
                         user.setRegisterTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
-                        user.setContactType(r.getValue(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TYPE));
-                        user.setContactToken(r.getValue(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_TOKEN));
+                        user.setContactType(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TYPE));
+                        user.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
                         user.setInvitorId(r.getValue(Tables.EH_USERS.INVITOR_UID));
-                        user.setInvitorName(r.getValue(Tables.EH_COMMUNITY_PM_MEMBERS.CONTACT_NAME));
+                        user.setInvitorName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
                         if(results.size() <= pageSize + 1)
                             results.add(user);
                         return null;
@@ -761,10 +757,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Override
     public void createPropBillItem(CommunityPmBillItem communityPmBillItem) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillItemsDao dao = new EhCommunityPmBillItemsDao(context.configuration());
+    	EhOrganizationBillItemsDao dao = new EhOrganizationBillItemsDao(context.configuration());
     	dao.insert(communityPmBillItem);
     	
-        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmBillItems.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationBillItems.class, null);
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#communityPmBillItem.id"),
@@ -774,10 +770,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	assert(communityPmBillItem.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillItemsDao dao = new EhCommunityPmBillItemsDao(context.configuration());
+    	EhOrganizationBillItemsDao dao = new EhOrganizationBillItemsDao(context.configuration());
     	dao.update(communityPmBillItem);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBillItems.class, communityPmBillItem.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBillItems.class, communityPmBillItem.getId());
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#communityPmBillItem.id"),
@@ -786,10 +782,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropBillItem(CommunityPmBillItem communityPmBillItem){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillItemsDao dao = new EhCommunityPmBillItemsDao(context.configuration());
+    	EhOrganizationBillItemsDao dao = new EhOrganizationBillItemsDao(context.configuration());
     	dao.deleteById(communityPmBillItem.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBillItems.class, communityPmBillItem.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBillItems.class, communityPmBillItem.getId());
     }
     
     @Caching(evict = { @CacheEvict(value="CommunityPmBillItem", key="#id"),
@@ -798,17 +794,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropBillItem(long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmBillItemsDao dao = new EhCommunityPmBillItemsDao(context.configuration());
+    	EhOrganizationBillItemsDao dao = new EhOrganizationBillItemsDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmBillItems.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBillItems.class, id);
     }
      
     @Cacheable(value = "CommunityPmBillItem", key="#id")
     @Override
     public CommunityPmBillItem findPropBillItemById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmBillItemsDao dao = new EhCommunityPmBillItemsDao(context.configuration());
+        EhOrganizationBillItemsDao dao = new EhOrganizationBillItemsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CommunityPmBillItem.class);
     }
     
@@ -818,9 +814,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmBillItem> result  = new ArrayList<CommunityPmBillItem>();
-        SelectQuery<EhCommunityPmBillItemsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_BILL_ITEMS);
-        query.addConditions(Tables.EH_COMMUNITY_PM_BILL_ITEMS.BILL_ID.eq(billId));
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_BILL_ITEMS.ID.asc());
+        SelectQuery<EhOrganizationBillItemsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_BILL_ITEMS);
+        query.addConditions(Tables.EH_ORGANIZATION_BILL_ITEMS.BILL_ID.eq(billId));
+        query.addOrderBy(Tables.EH_ORGANIZATION_BILL_ITEMS.ID.asc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmBillItem.class));
             return null;
@@ -832,10 +828,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	public List<String> listPropBillDateStr(Long communityId) {
 		List<String> dateList = new ArrayList<String>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		context.selectDistinct(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR).from(Tables.EH_COMMUNITY_PM_BILLS)
-			.where(Tables.EH_COMMUNITY_PM_BILLS.COMMUNITY_ID.eq(communityId))
+		context.selectDistinct(Tables.EH_ORGANIZATION_BILLS.DATE_STR).from(Tables.EH_ORGANIZATION_BILLS)
+			.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(communityId))
 			.fetch().map((r) -> {
-				 dateList.add(r.getValue(Tables.EH_COMMUNITY_PM_BILLS.DATE_STR));
+				 dateList.add(r.getValue(Tables.EH_ORGANIZATION_BILLS.DATE_STR));
 				 return null;
 		});
 		
@@ -847,10 +843,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	final CommunityPmTasks[] result = new CommunityPmTasks[1];
     	
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhCommunityPmTasksRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_TASKS);
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId));
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
-        query.addConditions(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        SelectQuery<EhOrganizationTasksRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_TASKS);
+        query.addConditions(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
+        query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
         
         query.fetch().map((r) -> {
      	   if(r != null)
@@ -864,7 +860,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     @Override
     public CommunityPmTasks findPmTaskById(long id) {
     	  DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-          EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
+          EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
           return ConvertHelper.convert(dao.findById(id), CommunityPmTasks.class);
     }
     
@@ -872,10 +868,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void updatePmTaskListStatus(List<CommunityPmTasks> tasks) {
         assert(tasks != null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
-        List<EhCommunityPmTasks> pmTasks = new ArrayList<EhCommunityPmTasks>();
+        EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
+        List<EhOrganizationTasks> pmTasks = new ArrayList<EhOrganizationTasks>();
         tasks.stream().map((r) ->{
-            pmTasks.add(ConvertHelper.convert(r, EhCommunityPmTasks.class));
+            pmTasks.add(ConvertHelper.convert(r, EhOrganizationTasks.class));
             return null;
         });
         dao.update(pmTasks);
@@ -886,10 +882,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void updatePmTask(CommunityPmTasks task) {
     	assert(task != null);
 	    DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmTasksDao dao = new EhCommunityPmTasksDao(context.configuration());
+        EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
         dao.update(task);
         
-        DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhCommunityPmContacts.class, task.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhOrganizationContacts.class, task.getId());
      }
 
     
@@ -897,10 +893,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void createPropContact(CommunityPmContact communityPmContact) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-        EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+        EhOrganizationContactsDao dao = new EhOrganizationContactsDao(context.configuration());
         dao.insert(communityPmContact);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhCommunityPmContacts.class, null);
+        DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationContacts.class, null);
     }
     
     @CacheEvict(value = "CommunityPmContact", key="#CommunityPmContact.id")
@@ -909,10 +905,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     	assert(communityPmContact.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+    	EhOrganizationContactsDao dao = new EhOrganizationContactsDao(context.configuration());
     	dao.update(communityPmContact);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmContacts.class, communityPmContact.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationContacts.class, communityPmContact.getId());
     }
     
     @CacheEvict(value = "CommunityPmContact", key="#CommunityPmContact.id")
@@ -920,10 +916,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropContact(CommunityPmContact communityPmContact){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+    	EhOrganizationContactsDao dao = new EhOrganizationContactsDao(context.configuration());
     	dao.deleteById(communityPmContact.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmContacts.class, communityPmContact.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationContacts.class, communityPmContact.getId());
     }
     
     @CacheEvict(value="CommunityPmContact", key="#id")
@@ -931,17 +927,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     public void deletePropContact(long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+    	EhOrganizationContactsDao dao = new EhOrganizationContactsDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCommunityPmContacts.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationContacts.class, id);
     }
      
     @Cacheable(value="CommunityPmContact", key="#id")
     @Override
     public CommunityPmContact findPropContactById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCommunityPmContactsDao dao = new EhCommunityPmContactsDao(context.configuration());
+        EhOrganizationContactsDao dao = new EhOrganizationContactsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), CommunityPmContact.class);
     }
     
@@ -951,11 +947,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         List<CommunityPmContact> result  = new ArrayList<CommunityPmContact>();
-        SelectQuery<EhCommunityPmContactsRecord> query = context.selectQuery(Tables.EH_COMMUNITY_PM_CONTACTS);
+        SelectQuery<EhOrganizationContactsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_CONTACTS);
         if(communityId != null)
-           query.addConditions(Tables.EH_COMMUNITY_PM_CONTACTS.COMMUNITY_ID.eq(communityId));
+           query.addConditions(Tables.EH_ORGANIZATION_CONTACTS.ORGANIZATION_ID.eq(communityId));
        
-        query.addOrderBy(Tables.EH_COMMUNITY_PM_CONTACTS.ID.desc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_CONTACTS.ID.desc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmContact.class));
             return null;
@@ -968,35 +964,35 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     		String taskType, Byte status) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_TASKS);
-        Condition condition = Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId);
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_TASKS);
+        Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId);
         if(entityId != null && entityId > 0)
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_ID.eq(entityId));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
         if(entityType != null && !entityType .equals(""))
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.ENTITY_TYPE.eq(entityType));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
         if(targetType != null && !targetType .equals(""))
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TARGET_TYPE.eq(targetType));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TARGET_TYPE.eq(targetType));
         if(targetId != null && targetId > 0)
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TARGET_ID.eq(targetId));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId));
         if(taskType != null && !taskType .equals(""))
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
         if(status != null && status >= 0)
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
         return step.where(condition).fetchOneInto(Integer.class);
     }
     @Override
     public int countCommunityPmTasks(Long communityId,String taskType,Byte status,String startTime,String endTime) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_COMMUNITY_PM_TASKS);
-        Condition condition = Tables.EH_COMMUNITY_PM_TASKS.COMMUNITY_ID.eq(communityId);
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_TASKS);
+        Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId);
         if(!StringUtils.isEmpty(taskType))
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_TYPE.eq(taskType));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
        
         if(!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime))
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.CREATE_TIME.between(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime)));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.between(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime)));
         if(status != null && status >= 0)
-        	condition = condition.and(Tables.EH_COMMUNITY_PM_TASKS.TASK_STATUS.eq(status));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
         return step.where(condition).fetchOneInto(Integer.class);
     }
 }

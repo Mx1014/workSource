@@ -171,7 +171,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 				}
 				DepartmentCommunity departmentCommunity = new DepartmentCommunity();
 				departmentCommunity.setCommunityId(id);
-				departmentCommunity.setDepartmentId(cmd.getDepartmentId());
+				departmentCommunity.setOrganizationId(cmd.getDepartmentId());
 				departmentProvider.createDepartmentCommunity(departmentCommunity);
 			}
     	}
@@ -304,7 +304,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     			command.setTopicId(task.getEntityId());
 				PostDTO post = forumService.getTopic(command);		
 				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
-				dto.setCommunityId(task.getCommunityId());
+				dto.setCommunityId(task.getOrganizationId());
 				dto.setEntityType(task.getEntityType());
 				dto.setEntityId(task.getEntityId());
 				dto.setTargetType(task.getTargetType());

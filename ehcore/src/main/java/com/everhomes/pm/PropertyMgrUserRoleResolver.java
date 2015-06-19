@@ -47,7 +47,7 @@ public class PropertyMgrUserRoleResolver implements ResourceUserRoleResolver {
         		PmTargetType.USER.getCode(), user.getId());
         if(members != null && members.size() > 0) {
         	for(CommunityPmMember member : members) {
-        		String group = member.getPmGroup();
+        		String group = member.getMemberGroup();
         		PmGroup pmGroup = PmGroup.fromCode(group);
         		switch(pmGroup) {
         		case MANAGER:

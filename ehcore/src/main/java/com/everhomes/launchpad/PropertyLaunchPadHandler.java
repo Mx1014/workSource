@@ -29,7 +29,7 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
     private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
         JSONObject jsonObject = new JSONObject();
         try{
-            if(launchPadItem.getItemTag().equals(ItemTag.SYS_PM_TOPICS.getCode())){
+            if(launchPadItem.getItemGroup().equals(ItemTag.SYS_PM_TOPICS.getCode())){
                 String itemName = launchPadItem.getItemName();
                 if(itemName.equals(CategoryType.ADVISE.getCode())){
                     jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_ADVISE);

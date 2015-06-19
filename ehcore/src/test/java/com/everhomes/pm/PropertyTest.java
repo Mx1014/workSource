@@ -93,7 +93,7 @@ public class PropertyTest {
     	CommunityAddressMapping mapping = new CommunityAddressMapping();
     	mapping.setAddressId(122356l);
     	mapping.setCommunityId(12l);
-    	mapping.setName("测试");
+    	mapping.setOrganizationAddress("测试");
     	mapping.setLivingStatus((byte)2);
     	pp.createPropAddressMapping(mapping);
     	System.out.println(mapping.getId());
@@ -208,7 +208,7 @@ public class PropertyTest {
     @Test
     public void testCreateTask () {
     	CommunityPmTasks task = new CommunityPmTasks();
-    	task.setCommunityId(9L);
+    	task.setOrganizationId(9l);
 		task.setEntityType("EhUsers");
 		task.setEntityId(0L);
 		task.setTargetType(EntityType.USER.getCode());

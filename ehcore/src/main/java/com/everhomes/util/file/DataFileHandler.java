@@ -319,7 +319,7 @@ public class DataFileHandler {
 				{
 					CommunityPmContact propContact = new CommunityPmContact();
 					propContact.setContactName("物业服务中心");
-					propContact.setCommunityId(communityData.getId());
+					propContact.setOrganizationId(communityData.getId());
 					propContact.setContactToken(phone);
 					propContact.setContactType(IdentifierType.MOBILE.getCode());
 					propContact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

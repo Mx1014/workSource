@@ -179,13 +179,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
     	}
     	CommunityPmMember communityPmMember = new CommunityPmMember();
-    	communityPmMember.setCommunityId(communityId);
+    	communityPmMember.setOrganizationId(communityId);
     	communityPmMember.setContactName(user.getNickName());
     	if(identifier != null){
 	    	communityPmMember.setContactToken(identifier.getIdentifierToken());
 	    	communityPmMember.setContactType(identifier.getIdentifierType());
     	}
-    	communityPmMember.setPmGroup(PmGroup.MANAGER.getCode());
+    	communityPmMember.setMemberGroup(PmGroup.MANAGER.getCode());
     	communityPmMember.setStatus(PmMemberStatus.CONFIRMING.getCode());
     	communityPmMember.setTargetType(PmMemberTargetType.USER.getCode());
     	communityPmMember.setTargetId(user.getId());
@@ -299,7 +299,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					CommunityAddressMapping m = new CommunityAddressMapping();
 					m.setAddressId(address.getId());
 					m.setCommunityId(cmd.getCommunityId());
-					m.setName(address.getAddress());
+					m.setOrganizationAddress(address.getAddress());
 					m.setLivingStatus((byte)0);
 					propertyMgrProvider.createPropAddressMapping(m);
 				}
@@ -1040,7 +1040,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				{
 					for (CommunityAddressMapping mapping : mappingList)
 					{
-						if(contact != null && contact.getAddress().equals(mapping.getName()))
+						if(contact != null && contact.getAddress().equals(mapping.getOrganizationAddress()))
 						{
 							addressId = mapping.getAddressId();
 							break;
@@ -1091,7 +1091,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				{
 					for (CommunityAddressMapping mapping : mappingList)
 					{
-						if(bill != null && bill.getAddress().equals(mapping.getName()))
+						if(bill != null && bill.getAddress().equals(mapping.getOrganizationAddress()));
 						{
 							addressId = mapping.getAddressId();
 							break;
@@ -1447,7 +1447,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     			command.setTopicId(task.getEntityId());
 				PostDTO post = forumService.getTopic(command);		
 				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
-				dto.setCommunityId(task.getCommunityId());
+				dto.setCommunityId(task.getOrganizationId());
 				dto.setEntityType(task.getEntityType());
 				dto.setEntityId(task.getEntityId());
 				dto.setTargetType(task.getTargetType());

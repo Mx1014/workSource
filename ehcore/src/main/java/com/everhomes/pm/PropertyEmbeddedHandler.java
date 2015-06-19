@@ -44,7 +44,7 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 		//if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
 		if(post != null  && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
 			CommunityPmTasks task = new CommunityPmTasks();
-			task.setCommunityId(post.getVisibleRegionId());
+			task.setOrganizationId(post.getVisibleRegionId());
 			task.setEntityType(EntityType.TOPIC.getCode());
 			task.setEntityId(-1L);
 			task.setTargetType(EntityType.USER.getCode());

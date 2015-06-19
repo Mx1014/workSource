@@ -21,15 +21,15 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhDepartmentCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhDepartmentMembersDao;
-import com.everhomes.server.schema.tables.daos.EhDepartmentsDao;
-import com.everhomes.server.schema.tables.pojos.EhDepartmentCommunities;
-import com.everhomes.server.schema.tables.pojos.EhDepartmentMembers;
-import com.everhomes.server.schema.tables.pojos.EhDepartments;
-import com.everhomes.server.schema.tables.records.EhDepartmentCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhDepartmentMembersRecord;
-import com.everhomes.server.schema.tables.records.EhDepartmentsRecord;
+import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
 @Component
 public class DepartmentProviderImpl implements DepartmentProvider {
@@ -41,14 +41,14 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     @Override
     public void createDepartment(Department department) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhDepartmentsRecord record = ConvertHelper.convert(department, EhDepartmentsRecord.class);
-        InsertQuery<EhDepartmentsRecord> query = context.insertQuery(Tables.EH_DEPARTMENTS);
+        EhOrganizationsRecord record = ConvertHelper.convert(department, EhOrganizationsRecord.class);
+        InsertQuery<EhOrganizationsRecord> query = context.insertQuery(Tables.EH_ORGANIZATIONS);
         query.setRecord(record);
-        query.setReturning(Tables.EH_DEPARTMENTS.ID);
+        query.setReturning(Tables.EH_ORGANIZATIONS.ID);
         query.execute();
         
         department.setId(query.getReturnedRecord().getId());
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDepartments.class, null); 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null); 
         
     }
 
@@ -58,10 +58,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	assert(department.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentsDao dao = new EhDepartmentsDao(context.configuration());
+    	EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
     	dao.update(department);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartments.class, department.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
     }
     
     
@@ -69,10 +69,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public void deleteDepartment(Department department){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentsDao dao = new EhDepartmentsDao(context.configuration());
+    	EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
     	dao.deleteById(department.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartments.class, department.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
     }
     
     
@@ -80,17 +80,17 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public void deleteDepartmentById(Long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentsDao dao = new EhDepartmentsDao(context.configuration());
+    	EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartments.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, id);
     }
      
 
     @Override
     public Department findDepartmentById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhDepartmentsDao dao = new EhDepartmentsDao(context.configuration());
+        EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Department.class);
     }
     
@@ -99,13 +99,13 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<Department> result  = new ArrayList<Department>();
-         SelectQuery<EhDepartmentsRecord> query = context.selectQuery(Tables.EH_DEPARTMENTS);
+         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
          if(name != null && !"".equals(name)) {
-         	query.addConditions(Tables.EH_DEPARTMENTS.NAME.eq(name));
+         	query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
          }
          
          Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-         query.addOrderBy(Tables.EH_DEPARTMENTS.ID.desc());
+         query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
          query.addLimit(offset, pageSize);
          query.fetch().map((r) -> {
          	result.add(ConvertHelper.convert(r, Department.class));
@@ -117,14 +117,14 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     @Override
     public void createDepartmentMember(DepartmentMember departmentMember) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhDepartmentMembersRecord record = ConvertHelper.convert(departmentMember, EhDepartmentMembersRecord.class);
-        InsertQuery<EhDepartmentMembersRecord> query = context.insertQuery(Tables.EH_DEPARTMENT_MEMBERS);
+        EhOrganizationMembersRecord record = ConvertHelper.convert(departmentMember, EhOrganizationMembersRecord.class);
+        InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.setRecord(record);
-        query.setReturning(Tables.EH_DEPARTMENTS.ID);
+        query.setReturning(Tables.EH_ORGANIZATIONS.ID);
         query.execute();
         
         departmentMember.setId(query.getReturnedRecord().getId());
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDepartmentMembers.class, null); 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, null); 
         
     }
 
@@ -134,10 +134,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	assert(departmentMember.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentMembersDao dao = new EhDepartmentMembersDao(context.configuration());
+    	EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
     	dao.update(departmentMember);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartmentMembers.class, departmentMember.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
     }
     
     
@@ -145,10 +145,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public void deleteDepartmentMember(DepartmentMember departmentMember){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentMembersDao dao = new EhDepartmentMembersDao(context.configuration());
+    	EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
     	dao.deleteById(departmentMember.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartmentMembers.class, departmentMember.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
     }
     
     
@@ -156,17 +156,17 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public void deleteDepartmentMemberById(Long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentMembersDao dao = new EhDepartmentMembersDao(context.configuration());
+    	EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartmentMembers.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
     }
      
 
     @Override
     public DepartmentMember findDepartmentMemberById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhDepartmentMembersDao dao = new EhDepartmentMembersDao(context.configuration());
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), DepartmentMember.class);
     }
     
@@ -175,16 +175,16 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<DepartmentMember> result  = new ArrayList<DepartmentMember>();
-         SelectQuery<EhDepartmentMembersRecord> query = context.selectQuery(Tables.EH_DEPARTMENT_MEMBERS);
+         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
          if(departmentId != null && departmentId > 0){
-            query.addConditions(Tables.EH_DEPARTMENT_MEMBERS.DEPARTMENT_ID.eq(departmentId));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId));
          }
          if(memberUid != null && memberUid > 0) {
-         	query.addConditions(Tables.EH_DEPARTMENT_MEMBERS.MEMBER_UID.eq(memberUid));
+         	query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
          }
          
          Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-         query.addOrderBy(Tables.EH_DEPARTMENT_MEMBERS.ID.desc());
+         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
          query.addLimit(offset, pageSize);
          query.fetch().map((r) -> {
          	result.add(ConvertHelper.convert(r, DepartmentMember.class));
@@ -198,11 +198,11 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<DepartmentMember> result  = new ArrayList<DepartmentMember>();
-         SelectQuery<EhDepartmentMembersRecord> query = context.selectQuery(Tables.EH_DEPARTMENT_MEMBERS);
+         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
          if(memberUid != null && memberUid > 0) {
-         	query.addConditions(Tables.EH_DEPARTMENT_MEMBERS.MEMBER_UID.eq(memberUid));
+         	query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
          }
-         query.addOrderBy(Tables.EH_DEPARTMENT_MEMBERS.ID.desc());
+         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
          query.fetch().map((r) -> {
          	result.add(ConvertHelper.convert(r, DepartmentMember.class));
              return null;
@@ -213,14 +213,14 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     @Override
     public void createDepartmentCommunity(DepartmentCommunity departmentCommunity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhDepartmentCommunitiesRecord record = ConvertHelper.convert(departmentCommunity, EhDepartmentCommunitiesRecord.class);
-        InsertQuery<EhDepartmentCommunitiesRecord> query = context.insertQuery(Tables.EH_DEPARTMENT_COMMUNITIES);
+        EhOrganizationCommunitiesRecord record = ConvertHelper.convert(departmentCommunity, EhOrganizationCommunitiesRecord.class);
+        InsertQuery<EhOrganizationCommunitiesRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
         query.setRecord(record);
-        query.setReturning(Tables.EH_DEPARTMENT_COMMUNITIES.ID);
+        query.setReturning(Tables.EH_ORGANIZATION_COMMUNITIES.ID);
         query.execute();
         
         departmentCommunity.setId(query.getReturnedRecord().getId());
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhDepartmentCommunities.class, null); 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationCommunities.class, null); 
         
     }
 
@@ -230,10 +230,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	assert(departmentCommunity.getId() == null);
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentCommunitiesDao dao = new EhDepartmentCommunitiesDao(context.configuration());
+    	EhOrganizationCommunitiesDao dao = new EhOrganizationCommunitiesDao(context.configuration());
     	dao.update(departmentCommunity);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartmentCommunities.class, departmentCommunity.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunities.class, departmentCommunity.getId());
     }
     
     
@@ -241,10 +241,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public void deleteDepartmentCommunity(DepartmentCommunity departmentCommunity){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentCommunitiesDao dao = new EhDepartmentCommunitiesDao(context.configuration());
+    	EhOrganizationCommunitiesDao dao = new EhOrganizationCommunitiesDao(context.configuration());
     	dao.deleteById(departmentCommunity.getId());
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartmentCommunities.class, departmentCommunity.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunities.class, departmentCommunity.getId());
     }
     
     
@@ -252,17 +252,17 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public void deleteDepartmentCommunityById(Long id){
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-    	EhDepartmentCommunitiesDao dao = new EhDepartmentCommunitiesDao(context.configuration());
+    	EhOrganizationCommunitiesDao dao = new EhOrganizationCommunitiesDao(context.configuration());
     	dao.deleteById(id);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDepartmentCommunities.class, id);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunities.class, id);
     }
      
 
     @Override
     public DepartmentCommunity findDepartmentCommunityById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhDepartmentCommunitiesDao dao = new EhDepartmentCommunitiesDao(context.configuration());
+        EhOrganizationCommunitiesDao dao = new EhOrganizationCommunitiesDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), DepartmentCommunity.class);
     }
     
@@ -271,13 +271,13 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<DepartmentCommunity> result  = new ArrayList<DepartmentCommunity>();
-         SelectQuery<EhDepartmentCommunitiesRecord> query = context.selectQuery(Tables.EH_DEPARTMENT_COMMUNITIES);
+         SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
          if(departmentId != null && departmentId > 0){
-             query.addConditions(Tables.EH_DEPARTMENT_COMMUNITIES.DEPARTMENT_ID.eq(departmentId));
+             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(departmentId));
           }
          
          Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-         query.addOrderBy(Tables.EH_DEPARTMENT_COMMUNITIES.ID.desc());
+         query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
          query.addLimit(offset, pageSize);
          query.fetch().map((r) -> {
          	result.add(ConvertHelper.convert(r, DepartmentCommunity.class));
@@ -290,10 +290,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public int countDepartments(String name) {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_DEPARTMENTS);
-        Condition condition = Tables.EH_DEPARTMENTS.ID.greaterOrEqual(0L);
+        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATIONS);
+        Condition condition = Tables.EH_ORGANIZATIONS.ID.greaterOrEqual(0L);
         if(!StringUtils.isEmpty(name))
-        	condition = condition.and(Tables.EH_DEPARTMENTS.NAME.eq(name));
+        	condition = condition.and(Tables.EH_ORGANIZATIONS.NAME.eq(name));
         return step.where(condition).fetchOneInto(Integer.class);
     }
     
@@ -301,10 +301,10 @@ public class DepartmentProviderImpl implements DepartmentProvider {
     public int countDepartmentMembers(Long departmentId, Long memberUid) {
 	   DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-       SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_DEPARTMENT_MEMBERS);
-       Condition condition = Tables.EH_DEPARTMENT_MEMBERS.DEPARTMENT_ID.eq(departmentId);
+       SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS);
+       Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId);
        if(memberUid != null && memberUid > 0)
-       		condition = condition.and(Tables.EH_DEPARTMENT_MEMBERS.MEMBER_UID.eq(memberUid));
+       		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
        return step.where(condition).fetchOneInto(Integer.class);
     }
 }

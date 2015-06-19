@@ -127,7 +127,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             item.setItemName(StringUtils.upperCase(cmd.getItemName()));
             item.setActionType(cmd.getActionType());
             item.setActionData(cmd.getActionData());
-            item.setItemTag(cmd.getItemTag());
+            item.setItemGroup(cmd.getItemTag());
             item.setIconUri(cmd.getIconUri());
             item.setItemWidth(cmd.getItemWidth() == null ? 1 : cmd.getItemWidth());
             item.setItemHeight(cmd.getItemHeight() == null ? 1 : cmd.getItemHeight());
@@ -289,7 +289,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
         allItems.forEach((r) ->{
-            LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getItemTag());
+            LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getItemGroup());
             if(handler == null)
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Unable to find launch pad handler.");

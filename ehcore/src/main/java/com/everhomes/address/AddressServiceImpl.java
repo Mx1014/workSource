@@ -905,9 +905,26 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
 	public void txImportAddressList(List<Address> addressList) {
 		this.dbProvider.execute((TransactionStatus status) ->  {
-			for (Address address : addressList) {
-				addressProvider.createAddress(address);
+			long startTime = System.currentTimeMillis();
+			LOGGER.info("======count=" + addressList.size() +",startTime=" + startTime);
+//			for (Address address : addressList) {
+//				addressProvider.createAddress(address);
+//			}
+			Long stime = System.currentTimeMillis();
+			Long etime = System.currentTimeMillis();
+			for (int i = 0; i < addressList.size(); i++) {
+				if(i%100 == 0 && i!= 0){
+					addressProvider.createAddress2(addressList.get(i));
+					etime = System.currentTimeMillis();
+					LOGGER.info("$$ successed to insert " +(i/100)+"个100行。time=======" + (etime-stime));
+					stime = etime;
+				}
+				else{
+					addressProvider.createAddress(addressList.get(i));
+				}
 			}
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("success.======count=" + addressList.size() +",totalTime=" + (endTime - startTime));
 		    return null;
         });
 	}
