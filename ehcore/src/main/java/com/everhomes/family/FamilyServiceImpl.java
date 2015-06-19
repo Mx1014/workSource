@@ -270,8 +270,9 @@ public class FamilyServiceImpl implements FamilyService {
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
             List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,
-                    MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
+            if(includeList != null && includeList.size() > 0)
+                sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,
+                        MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -1606,7 +1607,9 @@ public class FamilyServiceImpl implements FamilyService {
         });
         List<Long> includeList = new ArrayList<Long>();
         for(GroupMember member : members) {
-            if(member.getMemberId().longValue() == targetId || member.getMemberId().longValue() == operatorId)
+            if(targetId != null && member.getMemberId().longValue() == targetId)
+                continue;
+            if(operatorId != null && member.getMemberId().longValue() == operatorId)
                 continue;
             includeList.add(member.getMemberId());
         }
