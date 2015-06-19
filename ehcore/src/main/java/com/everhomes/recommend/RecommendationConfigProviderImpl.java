@@ -1,12 +1,18 @@
 package com.everhomes.recommend;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhRecommendationConfigsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -28,4 +34,35 @@ public class RecommendationConfigProviderImpl implements RecommendationConfigPro
             config.setId(item.getReturnedRecord().getId());
            }
     }
+    
+    public List<RecommendationConfig> listRecommendConfigs(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhRecommendationConfigsRecord> query = context.selectQuery(Tables.EH_RECOMMENDATION_CONFIGS);
+        query.addSelect(Tables.EH_RECOMMENDATION_CONFIGS.fields());
+        if(queryBuilderCallback != null) {
+            queryBuilderCallback.buildCondition(locator, query);
+            }
+        
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_RECOMMENDATION_CONFIGS.ID.gt(locator.getAnchor()));
+            }
+            
+        query.addOrderBy(Tables.EH_RECOMMENDATION_CONFIGS.CREATE_TIME.desc());
+        query.addLimit(count);
+        List<EhRecommendationConfigsRecord> records = query.fetch();
+        
+        List<RecommendationConfig> recommends = records.stream().map((r) -> {
+            return ConvertHelper.convert(r, RecommendationConfig.class);
+        }).collect(Collectors.toList());
+        
+        if(recommends.size() > 0) {
+            locator.setAnchor(recommends.get(recommends.size() -1).getId());
+            }
+        
+        return recommends;
+    }
+    
+//    public List<RecommendationConfig> listRecommendConfigsBySource(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+//        
+//    }
 }

@@ -34,4 +34,7 @@ public class RecommendationAdminController extends ControllerBase {
         
         return response;
     }
+    
+//    @RequestMapping("listConfig")
+//    @RestReturn(value=RecommendConfigResponse.class)
 }
