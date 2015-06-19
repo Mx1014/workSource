@@ -224,9 +224,20 @@ public class PropertyTest {
 		 int todayCount = pp.countCommunityPmTasks(9L, "repair",null,"2015-06-03 00:00:00", "2015-06-17 00:00:00");
 		 System.out.println("总数"+todayCount);
 		 for (int i = 0; i <= 2 ; i++)
-			{
-				int count = pp.countCommunityPmTasks(9L, "repair",(byte)i,"2015-06-03 00:00:00", "2015-06-17 00:00:00");
-				System.out.println(count+"状态"+i);
-			}
+		{
+			int count = pp.countCommunityPmTasks(9L, "repair",(byte)i,"2015-06-03 00:00:00", "2015-06-17 00:00:00");
+			System.out.println(count+"状态"+i);
+		}
+		 ListPropTopicStatisticCommand cmd =new ListPropTopicStatisticCommand();
+		 cmd.setCommunityId(9l);
+		 cmd.setCategoryId(3092l);
+		 cmd.setStartStrTime("2015-06-03");
+		 cmd.setEndStrTime("2015-06-17");
+		ListPropTopicStatisticCommandResponse response = ps.getPMTopicStatistics(cmd );
+		System.out.println(response.getDateList());
+		System.out.println(response.getMonthList());
+		System.out.println(response.getTodayList());
+		System.out.println(response.getYesterdayList());
+		System.out.println(response.getWeekList());
 	}
 }

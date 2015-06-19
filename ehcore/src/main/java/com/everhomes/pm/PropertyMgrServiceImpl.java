@@ -3,6 +3,7 @@ package com.everhomes.pm;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -1550,9 +1551,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		if(!StringUtils.isEmpty(startStrTime) && !StringUtils.isEmpty(endStrTime))
 		{
-			Long startTime = Date.parse(startStrTime);
-			Long endTime = Date.parse(endStrTime);
-			createList(communityId,taskType,monthList,startTime, endTime);
+			Date startTime;
+			Date endTime;
+			try {
+				startTime = DateStatisticHelper.parseDateStr(startStrTime);
+				endTime = DateStatisticHelper.parseDateStr(endStrTime);
+				createList(communityId,taskType,dateList,startTime.getTime(), endTime.getTime());
+			} catch (ParseException e) {
+				LOGGER.error("failed to parse date.startStrTime=" + startStrTime +",endStrTime=" + endStrTime);
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+	                    "failed to parse date");
+			}
+			
 		}
 		response.setDateList(dateList);
 		response.setMonthList(monthList);

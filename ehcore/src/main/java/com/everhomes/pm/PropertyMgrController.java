@@ -806,7 +806,7 @@ public class PropertyMgrController extends ControllerBase {
      */
     @RequestMapping("deletePmTopic")
     @RestReturn(value=String.class)
-    public RestResponse deleteTopic(DeleteTopicCommand cmd) {
+    public RestResponse deletePmTopic(DeleteTopicCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
