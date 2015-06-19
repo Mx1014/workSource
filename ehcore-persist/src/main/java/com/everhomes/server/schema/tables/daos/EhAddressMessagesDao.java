@@ -90,20 +90,6 @@ public class EhAddressMessagesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>dest_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByDestType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.DEST_TYPE, values);
-	}
-
-	/**
-	 * Fetch records that have <code>dest_token IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByDestToken(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES.DEST_TOKEN, values);
-	}
-
-	/**
 	 * Fetch records that have <code>body IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddressMessages> fetchByBody(java.lang.String... values) {

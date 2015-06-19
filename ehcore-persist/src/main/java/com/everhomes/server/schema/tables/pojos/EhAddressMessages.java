@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressMessages implements java.io.Serializable {
 
-	private static final long serialVersionUID = -421518775;
+	private static final long serialVersionUID = -1238378225;
 
 	private java.lang.Long     id;
 	private java.lang.Long     appid;
@@ -20,8 +20,6 @@ public class EhAddressMessages implements java.io.Serializable {
 	private java.lang.String   senderToken;
 	private java.lang.Integer  senderLoginId;
 	private java.lang.String   senderIdentify;
-	private java.lang.String   destType;
-	private java.lang.String   destToken;
 	private java.lang.String   body;
 	private java.lang.String   meta;
 	private java.lang.String   extra;
@@ -40,8 +38,6 @@ public class EhAddressMessages implements java.io.Serializable {
 		java.lang.String   senderToken,
 		java.lang.Integer  senderLoginId,
 		java.lang.String   senderIdentify,
-		java.lang.String   destType,
-		java.lang.String   destToken,
 		java.lang.String   body,
 		java.lang.String   meta,
 		java.lang.String   extra,
@@ -57,8 +53,6 @@ public class EhAddressMessages implements java.io.Serializable {
 		this.senderToken = senderToken;
 		this.senderLoginId = senderLoginId;
 		this.senderIdentify = senderIdentify;
-		this.destType = destType;
-		this.destToken = destToken;
 		this.body = body;
 		this.meta = meta;
 		this.extra = extra;
@@ -122,22 +116,6 @@ public class EhAddressMessages implements java.io.Serializable {
 
 	public void setSenderIdentify(java.lang.String senderIdentify) {
 		this.senderIdentify = senderIdentify;
-	}
-
-	public java.lang.String getDestType() {
-		return this.destType;
-	}
-
-	public void setDestType(java.lang.String destType) {
-		this.destType = destType;
-	}
-
-	public java.lang.String getDestToken() {
-		return this.destToken;
-	}
-
-	public void setDestToken(java.lang.String destToken) {
-		this.destToken = destToken;
 	}
 
 	public java.lang.String getBody() {
