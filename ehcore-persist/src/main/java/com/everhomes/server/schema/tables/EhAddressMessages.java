@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressMessages extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord> {
 
-	private static final long serialVersionUID = -1811765027;
+	private static final long serialVersionUID = -979136558;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_address_messages</code>
@@ -60,16 +60,6 @@ public class EhAddressMessages extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_address_messages.sender_identify</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> SENDER_IDENTIFY = createField("sender_identify", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_address_messages.dest_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> DEST_TYPE = createField("dest_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_address_messages.dest_token</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressMessagesRecord, java.lang.String> DEST_TOKEN = createField("dest_token", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_address_messages.body</code>.

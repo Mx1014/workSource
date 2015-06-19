@@ -2193,8 +2193,6 @@ CREATE TABLE `eh_address_messages` (
   `sender_token` VARCHAR(32),
   `sender_login_id` int,
   `sender_identify` VARCHAR(128),
-  `dest_type` VARCHAR(32),
-  `dest_token` VARCHAR(32),
   `body` VARCHAR(256),
   `meta` VARCHAR(512),
   `extra` VARCHAR(512),

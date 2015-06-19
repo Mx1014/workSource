@@ -44,13 +44,14 @@ public class UserPointServiceImpl implements UserPointService {
 
     @Override
     public void addPoint(AddUserPointCommand cmd) {
+        assert (cmd.getPoint() != null);
+        assert (cmd.getUid() != null);
+        UserScore userScore = ConvertHelper.convert(cmd, UserScore.class);
+        userScore.setOwnerUid(cmd.getUid());
+        userScore.setScore(cmd.getPoint());
+        PointType type = PointType.fromCode(cmd.getPointType());
+        // handle point type to validate
         try {
-            assert (cmd.getPoint() != null);
-            assert (cmd.getUid() != null);
-            UserScore userScore = ConvertHelper.convert(cmd, UserScore.class);
-            userScore.setOwnerUid(cmd.getUid());
-            PointType type = PointType.fromCode(cmd.getPointType());
-            // handle point type to validate
             switch (type) {
             case ADDRESS_APPROVAL:
                 handleAddressPass(userScore);
@@ -67,13 +68,12 @@ public class UserPointServiceImpl implements UserPointService {
                 handleAvatarPass(userScore);
                 break;
             case OTHER:
+            default:
                 LOGGER.error("cannot known");
                 break;
-            default:
-                break;
             }
-        } catch(Exception e) {
-            LOGGER.error("Failed to add the score, cmd=" + cmd);
+        } catch (Exception e) {
+            LOGGER.error("handle score error",e);
         }
 
     }
@@ -82,7 +82,7 @@ public class UserPointServiceImpl implements UserPointService {
     public GetUserPointResponse getUserPoint(GetUserPointCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getAnchor());
-        int pageSize = configrationProvider.getIntValue("", AppConstants.PAGINATION_DEFAULT_SIZE);
+        int pageSize = configrationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
         List<UserScore> result = userPointProvider.listUserScore(locator, pageSize + 1, Operator.AND,
                 Tables.EH_USER_SCORES.OWNER_UID.eq(cmd.getUid()));
         List<UserScoreDTO> dtos = result.stream().map(r -> ConvertHelper.convert(r, UserScoreDTO.class))
@@ -92,7 +92,6 @@ public class UserPointServiceImpl implements UserPointService {
 
     @Override
     public GetUserTreasureResponse getUserTreasure(GetUserTreasureCommand cmd) {
-        // TODO handle other info from other interface
         return null;
     }
 
@@ -112,7 +111,8 @@ public class UserPointServiceImpl implements UserPointService {
                 userPointProvider.addUserPoint(userScore);
 
                 User user = userProvider.findUserById(userScore.getOwnerUid());
-                user.setPoints(user.getPoints() + userScore.getScore());
+                int val = user.getPoints() == null ? 0 : user.getPoints().intValue();
+                user.setPoints(val + userScore.getScore());
                 user.setLevel(UserLevel.getLevel(user.getPoints()).getCode());
                 userProvider.updateUser(user);
                 return status;
@@ -142,7 +142,8 @@ public class UserPointServiceImpl implements UserPointService {
             userPointProvider.addUserPoint(userScore);
             return;
         }
-        user.setPoints(user.getPoints() + userScore.getScore());
+        int val = user.getPoints() == null ? 0 : user.getPoints().intValue();
+        user.setPoints(val + userScore.getScore());
         user.setLevel(UserLevel.getLevel(user.getPoints()).getCode());
         dbProvider.execute((status) -> {
             userProvider.updateUser(user);
@@ -164,7 +165,8 @@ public class UserPointServiceImpl implements UserPointService {
             userPointProvider.addUserPoint(userScore);
             return;
         }
-        user.setPoints(user.getPoints() + userScore.getScore());
+        int val = user.getPoints() == null ? 0 : user.getPoints().intValue();
+        user.setPoints(val + userScore.getScore());
         user.setLevel(UserLevel.getLevel(user.getPoints()).getCode());
         userProvider.updateUser(user);
         userPointProvider.addUserPoint(userScore);
