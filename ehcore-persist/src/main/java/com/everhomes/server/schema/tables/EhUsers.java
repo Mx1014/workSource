@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -744807103;
+	private static final long serialVersionUID = -1103031188;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -102,9 +102,9 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> HOME_TOWN_PATH = createField("home_town_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "redundant region path for recursive matching");
 
 	/**
-	 * The column <code>ehcore.eh_users.occupation_id</code>. id in category table
+	 * The column <code>ehcore.eh_users.occupation</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> OCCUPATION_ID = createField("occupation_id", org.jooq.impl.SQLDataType.BIGINT, this, "id in category table");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> OCCUPATION = createField("occupation", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.company</code>.

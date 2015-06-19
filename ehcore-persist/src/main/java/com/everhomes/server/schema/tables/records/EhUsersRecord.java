@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -1760198074;
+	private static final long serialVersionUID = -848767018;
 
 	/**
 	 * Setter for <code>ehcore.eh_users.id</code>. id of the record
@@ -224,17 +224,17 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_users.occupation_id</code>. id in category table
+	 * Setter for <code>ehcore.eh_users.occupation</code>.
 	 */
-	public void setOccupationId(java.lang.Long value) {
+	public void setOccupation(java.lang.String value) {
 		setValue(15, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_users.occupation_id</code>. id in category table
+	 * Getter for <code>ehcore.eh_users.occupation</code>.
 	 */
-	public java.lang.Long getOccupationId() {
-		return (java.lang.Long) getValue(15);
+	public java.lang.String getOccupation() {
+		return (java.lang.String) getValue(15);
 	}
 
 	/**
@@ -417,7 +417,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 	/**
 	 * Create a detached, initialised EhUsersRecord
 	 */
-	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long communityId, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.Long occupationId, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String salt, java.lang.String passwordHash) {
+	public EhUsersRecord(java.lang.Long id, java.lang.String accountName, java.lang.String nickName, java.lang.String avatar, java.lang.String statusLine, java.lang.Byte status, java.lang.Integer points, java.lang.Byte level, java.lang.Byte gender, java.sql.Date birthday, java.lang.Long addressId, java.lang.String address, java.lang.Long communityId, java.lang.Long homeTown, java.lang.String homeTownPath, java.lang.String occupation, java.lang.String company, java.lang.String school, java.lang.String locale, java.lang.Byte inviteType, java.lang.Long invitorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.sql.Timestamp lastLoginTime, java.lang.String lastLoginIp, java.lang.String salt, java.lang.String passwordHash) {
 		super(com.everhomes.server.schema.tables.EhUsers.EH_USERS);
 
 		setValue(0, id);
@@ -435,7 +435,7 @@ public class EhUsersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhom
 		setValue(12, communityId);
 		setValue(13, homeTown);
 		setValue(14, homeTownPath);
-		setValue(15, occupationId);
+		setValue(15, occupation);
 		setValue(16, company);
 		setValue(17, school);
 		setValue(18, locale);

@@ -11,34 +11,40 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1937070023;
+	private static final long serialVersionUID = -1581304091;
 
 	private java.lang.Long     id;
-	private java.lang.Long     uid;
-	private java.lang.Long     businessId;
-	private java.lang.String   subject;
+	private java.lang.Long     ownerUid;
+	private java.lang.String   contact;
 	private java.lang.String   content;
 	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp deleteTime;
+	private java.lang.Byte     feedbackType;
+	private java.lang.Byte     targetType;
+	private java.lang.Long     targetId;
+	private java.lang.Long     contentCategory;
 
 	public EhFeedbacks() {}
 
 	public EhFeedbacks(
 		java.lang.Long     id,
-		java.lang.Long     uid,
-		java.lang.Long     businessId,
-		java.lang.String   subject,
+		java.lang.Long     ownerUid,
+		java.lang.String   contact,
 		java.lang.String   content,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.lang.Byte     feedbackType,
+		java.lang.Byte     targetType,
+		java.lang.Long     targetId,
+		java.lang.Long     contentCategory
 	) {
 		this.id = id;
-		this.uid = uid;
-		this.businessId = businessId;
-		this.subject = subject;
+		this.ownerUid = ownerUid;
+		this.contact = contact;
 		this.content = content;
 		this.createTime = createTime;
-		this.deleteTime = deleteTime;
+		this.feedbackType = feedbackType;
+		this.targetType = targetType;
+		this.targetId = targetId;
+		this.contentCategory = contentCategory;
 	}
 
 	public java.lang.Long getId() {
@@ -49,28 +55,20 @@ public class EhFeedbacks implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getUid() {
-		return this.uid;
+	public java.lang.Long getOwnerUid() {
+		return this.ownerUid;
 	}
 
-	public void setUid(java.lang.Long uid) {
-		this.uid = uid;
+	public void setOwnerUid(java.lang.Long ownerUid) {
+		this.ownerUid = ownerUid;
 	}
 
-	public java.lang.Long getBusinessId() {
-		return this.businessId;
+	public java.lang.String getContact() {
+		return this.contact;
 	}
 
-	public void setBusinessId(java.lang.Long businessId) {
-		this.businessId = businessId;
-	}
-
-	public java.lang.String getSubject() {
-		return this.subject;
-	}
-
-	public void setSubject(java.lang.String subject) {
-		this.subject = subject;
+	public void setContact(java.lang.String contact) {
+		this.contact = contact;
 	}
 
 	public java.lang.String getContent() {
@@ -89,11 +87,35 @@ public class EhFeedbacks implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.sql.Timestamp getDeleteTime() {
-		return this.deleteTime;
+	public java.lang.Byte getFeedbackType() {
+		return this.feedbackType;
 	}
 
-	public void setDeleteTime(java.sql.Timestamp deleteTime) {
-		this.deleteTime = deleteTime;
+	public void setFeedbackType(java.lang.Byte feedbackType) {
+		this.feedbackType = feedbackType;
+	}
+
+	public java.lang.Byte getTargetType() {
+		return this.targetType;
+	}
+
+	public void setTargetType(java.lang.Byte targetType) {
+		this.targetType = targetType;
+	}
+
+	public java.lang.Long getTargetId() {
+		return this.targetId;
+	}
+
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public java.lang.Long getContentCategory() {
+		return this.contentCategory;
+	}
+
+	public void setContentCategory(java.lang.Long contentCategory) {
+		this.contentCategory = contentCategory;
 	}
 }

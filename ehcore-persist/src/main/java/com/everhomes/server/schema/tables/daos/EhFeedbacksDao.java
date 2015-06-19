@@ -48,24 +48,17 @@ public class EhFeedbacksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>uid IN (values)</code>
+	 * Fetch records that have <code>owner_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByOwnerUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.OWNER_UID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>business_id IN (values)</code>
+	 * Fetch records that have <code>contact IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByBusinessId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.BUSINESS_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>subject IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchBySubject(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.SUBJECT, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByContact(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.CONTACT, values);
 	}
 
 	/**
@@ -83,9 +76,30 @@ public class EhFeedbacksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>delete_time IN (values)</code>
+	 * Fetch records that have <code>feedback_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByDeleteTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.DELETE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByFeedbackType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.FEEDBACK_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByTargetType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.TARGET_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.TARGET_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>content_category IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByContentCategory(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.CONTENT_CATEGORY, values);
 	}
 }

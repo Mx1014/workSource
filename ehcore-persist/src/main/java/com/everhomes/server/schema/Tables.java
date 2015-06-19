@@ -114,44 +114,9 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunities EH_COMMUNITIES = com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES;
 
 	/**
-	 * The table ehcore.eh_community_address_mappings
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityAddressMappings EH_COMMUNITY_ADDRESS_MAPPINGS = com.everhomes.server.schema.tables.EhCommunityAddressMappings.EH_COMMUNITY_ADDRESS_MAPPINGS;
-
-	/**
 	 * The table ehcore.eh_community_geopoints
 	 */
 	public static final com.everhomes.server.schema.tables.EhCommunityGeopoints EH_COMMUNITY_GEOPOINTS = com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS;
-
-	/**
-	 * The table ehcore.eh_community_pm_bills
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityPmBills EH_COMMUNITY_PM_BILLS = com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS;
-
-	/**
-	 * The table ehcore.eh_community_pm_bill_items
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityPmBillItems EH_COMMUNITY_PM_BILL_ITEMS = com.everhomes.server.schema.tables.EhCommunityPmBillItems.EH_COMMUNITY_PM_BILL_ITEMS;
-
-	/**
-	 * The table ehcore.eh_community_pm_contacts
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityPmContacts EH_COMMUNITY_PM_CONTACTS = com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS;
-
-	/**
-	 * The table ehcore.eh_community_pm_members
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityPmMembers EH_COMMUNITY_PM_MEMBERS = com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS;
-
-	/**
-	 * The table ehcore.eh_community_pm_owners
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityPmOwners EH_COMMUNITY_PM_OWNERS = com.everhomes.server.schema.tables.EhCommunityPmOwners.EH_COMMUNITY_PM_OWNERS;
-
-	/**
-	 * The table ehcore.eh_community_pm_tasks
-	 */
-	public static final com.everhomes.server.schema.tables.EhCommunityPmTasks EH_COMMUNITY_PM_TASKS = com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS;
 
 	/**
 	 * The table ehcore.eh_community_profiles
@@ -167,21 +132,6 @@ public class Tables {
 	 * The table ehcore.eh_content_server_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhContentServerResources EH_CONTENT_SERVER_RESOURCES = com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES;
-
-	/**
-	 * The table ehcore.eh_departments
-	 */
-	public static final com.everhomes.server.schema.tables.EhDepartments EH_DEPARTMENTS = com.everhomes.server.schema.tables.EhDepartments.EH_DEPARTMENTS;
-
-	/**
-	 * The table ehcore.eh_department_communities
-	 */
-	public static final com.everhomes.server.schema.tables.EhDepartmentCommunities EH_DEPARTMENT_COMMUNITIES = com.everhomes.server.schema.tables.EhDepartmentCommunities.EH_DEPARTMENT_COMMUNITIES;
-
-	/**
-	 * The table ehcore.eh_department_members
-	 */
-	public static final com.everhomes.server.schema.tables.EhDepartmentMembers EH_DEPARTMENT_MEMBERS = com.everhomes.server.schema.tables.EhDepartmentMembers.EH_DEPARTMENT_MEMBERS;
 
 	/**
 	 * The table ehcore.eh_devices
@@ -299,6 +249,51 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_organizations
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizations EH_ORGANIZATIONS = com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS;
+
+	/**
+	 * The table ehcore.eh_organization_address_mappings
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationAddressMappings EH_ORGANIZATION_ADDRESS_MAPPINGS = com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS;
+
+	/**
+	 * The table ehcore.eh_organization_bills
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationBills EH_ORGANIZATION_BILLS = com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS;
+
+	/**
+	 * The table ehcore.eh_organization_bill_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationBillItems EH_ORGANIZATION_BILL_ITEMS = com.everhomes.server.schema.tables.EhOrganizationBillItems.EH_ORGANIZATION_BILL_ITEMS;
+
+	/**
+	 * The table ehcore.eh_organization_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationCommunities EH_ORGANIZATION_COMMUNITIES = com.everhomes.server.schema.tables.EhOrganizationCommunities.EH_ORGANIZATION_COMMUNITIES;
+
+	/**
+	 * The table ehcore.eh_organization_contacts
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationContacts EH_ORGANIZATION_CONTACTS = com.everhomes.server.schema.tables.EhOrganizationContacts.EH_ORGANIZATION_CONTACTS;
+
+	/**
+	 * The table ehcore.eh_organization_members
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationMembers EH_ORGANIZATION_MEMBERS = com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS;
+
+	/**
+	 * The table ehcore.eh_organization_owners
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationOwners EH_ORGANIZATION_OWNERS = com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS;
+
+	/**
+	 * The table ehcore.eh_organization_tasks
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
+
+	/**
 	 * The table ehcore.eh_polls
 	 */
 	public static final com.everhomes.server.schema.tables.EhPolls EH_POLLS = com.everhomes.server.schema.tables.EhPolls.EH_POLLS;
@@ -382,11 +377,6 @@ public class Tables {
 	 * The table ehcore.eh_user_contacts
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserContacts EH_USER_CONTACTS = com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS;
-
-	/**
-	 * The table ehcore.eh_user_feedbacks
-	 */
-	public static final com.everhomes.server.schema.tables.EhUserFeedbacks EH_USER_FEEDBACKS = com.everhomes.server.schema.tables.EhUserFeedbacks.EH_USER_FEEDBACKS;
 
 	/**
 	 * The table ehcore.eh_user_followed_families

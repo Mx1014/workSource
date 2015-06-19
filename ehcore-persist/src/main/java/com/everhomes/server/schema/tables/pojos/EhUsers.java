@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 731280651;
+	private static final long serialVersionUID = 847742891;
 
 	private java.lang.Long     id;
 	private java.lang.String   accountName;
@@ -28,7 +28,7 @@ public class EhUsers implements java.io.Serializable {
 	private java.lang.Long     communityId;
 	private java.lang.Long     homeTown;
 	private java.lang.String   homeTownPath;
-	private java.lang.Long     occupationId;
+	private java.lang.String   occupation;
 	private java.lang.String   company;
 	private java.lang.String   school;
 	private java.lang.String   locale;
@@ -59,7 +59,7 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.Long     communityId,
 		java.lang.Long     homeTown,
 		java.lang.String   homeTownPath,
-		java.lang.Long     occupationId,
+		java.lang.String   occupation,
 		java.lang.String   company,
 		java.lang.String   school,
 		java.lang.String   locale,
@@ -87,7 +87,7 @@ public class EhUsers implements java.io.Serializable {
 		this.communityId = communityId;
 		this.homeTown = homeTown;
 		this.homeTownPath = homeTownPath;
-		this.occupationId = occupationId;
+		this.occupation = occupation;
 		this.company = company;
 		this.school = school;
 		this.locale = locale;
@@ -221,12 +221,12 @@ public class EhUsers implements java.io.Serializable {
 		this.homeTownPath = homeTownPath;
 	}
 
-	public java.lang.Long getOccupationId() {
-		return this.occupationId;
+	public java.lang.String getOccupation() {
+		return this.occupation;
 	}
 
-	public void setOccupationId(java.lang.Long occupationId) {
-		this.occupationId = occupationId;
+	public void setOccupation(java.lang.String occupation) {
+		this.occupation = occupation;
 	}
 
 	public java.lang.String getCompany() {
