@@ -25,7 +25,6 @@ import com.everhomes.util.StringHelper;
  *         <li>company:公司</li>
  *         <li>school:学校</li>
  *         <li>occupation:职业</li>
- *         <li>occupationName:职业名称</li>
  *         <li>communityId:小区ID</li>
  *         <li>communityName:小区名</li>
  *         <li>addressId:地址id</li>
@@ -54,8 +53,7 @@ public class UserInfo {
     private String hometownName;
     private String company;
     private String school;
-    private Long occupation;
-    private String occupationName;
+    private String occupation;
     private Long communityId;
     private String communityName;
     private Long addressId;
@@ -68,6 +66,7 @@ public class UserInfo {
     private Integer topicFavoriteCount;
     private Integer sharedCount;
     private Integer points;
+    private String pointRuleUrl;
 
     @ItemType(String.class)
     private List<String> phones;
@@ -158,11 +157,11 @@ public class UserInfo {
         this.school = school;
     }
 
-    public Long getOccupation() {
+    public String getOccupation() {
         return occupation;
     }
 
-    public void setOccupation(Long occupation) {
+    public void setOccupation(String occupation) {
         this.occupation = occupation;
     }
 
@@ -172,14 +171,6 @@ public class UserInfo {
 
     public void setHometownName(String hometownName) {
         this.hometownName = hometownName;
-    }
-
-    public String getOccupationName() {
-        return occupationName;
-    }
-
-    public void setOccupationName(String occupationName) {
-        this.occupationName = occupationName;
     }
 
     public Long getCommunityId() {
@@ -285,7 +276,6 @@ public class UserInfo {
     public void setSharedCount(Integer sharedCount) {
         this.sharedCount = sharedCount;
     }
-    
 
     public Integer getPoints() {
         return points;
@@ -293,6 +283,14 @@ public class UserInfo {
 
     public void setPoints(Integer points) {
         this.points = points;
+    }
+
+    public String getPointRuleUrl() {
+        return pointRuleUrl;
+    }
+
+    public void setPointRuleUrl(String pointRuleUrl) {
+        this.pointRuleUrl = pointRuleUrl;
     }
 
     @Override

@@ -29,7 +29,7 @@ public class SetUserInfoCommand {
     private Long homeTown;
     private String company;
     private String school;
-    private Long occupation;
+    private String occupation;
 
     public SetUserInfoCommand() {
     }
@@ -106,11 +106,11 @@ public class SetUserInfoCommand {
         this.school = school;
     }
 
-    public Long getOccupation() {
+    public String getOccupation() {
         return occupation;
     }
 
-    public void setOccupation(Long occupation) {
+    public void setOccupation(String occupation) {
         this.occupation = occupation;
     }
 
