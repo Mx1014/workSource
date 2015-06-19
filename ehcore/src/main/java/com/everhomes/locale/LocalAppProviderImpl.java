@@ -17,10 +17,10 @@ import com.everhomes.local.GetAppVersion;
 import com.everhomes.schema.Tables;
 import com.everhomes.schema.tables.pojos.EhConfigurations;
 import com.everhomes.schema.tables.records.EhConfigurationsRecord;
+
 /**
  * 
- * @author elians
- * get app version from this code
+ * @author elians get app version from this code
  */
 @Component
 public class LocalAppProviderImpl implements LocalAppProvier {
@@ -67,24 +67,32 @@ public class LocalAppProviderImpl implements LocalAppProvier {
 
     private void updateCommonInfo(GetAppVersion version, String currentVersion, String os, Map<String, String> map) {
         String appVersion = map.get(os + "." + APP_VERSION);
-        String[] arr = appVersion.split("|");
         String v = "";
-        String name;
-        if (arr.length < 2) {
-            v = "";// version
-            name = "";// name
+        String name = "";
+        if (appVersion == null) {
+            v = "";
+            name = "";
+
         } else {
-            v = arr[0];
-            name = arr[1];
+            String[] arr = appVersion.split("|");
+
+            if (arr.length < 2) {
+                v = "";// version
+                name = "";// name
+            } else {
+                v = arr[0];
+                name = arr[1];
+            }
         }
+
         version.setVersionCode(v);
         version.setVersionName(name);
         String mini_version = map.get(os + "." + APP_MIN_VERSION);
         version.setOperation(NumberUtils.toInt(mini_version) >= NumberUtils.toInt(currentVersion) ? 0 : 1);
-        version.setMktDataVersion(NumberUtils.toInt(map.get(MKT_DATA_VERSION)));
-        version.setUserLocRptFreq(NumberUtils.toInt(map.get(USER_LOC_RPT_FREQ)));
-        version.setUserRptConfigVersion(NumberUtils.toInt(map.get(USER_RPT_CONFIG_VERSION)));
-        version.setUserContactRptFreq(NumberUtils.toInt(map.get(USER_CONTACT_RPT_FREQ)));
+        version.setMktDataVersion(NumberUtils.toInt(map.get(MKT_DATA_VERSION), 0));
+        version.setUserLocRptFreq(NumberUtils.toInt(map.get(USER_LOC_RPT_FREQ), 0));
+        version.setUserRptConfigVersion(NumberUtils.toInt(map.get(USER_RPT_CONFIG_VERSION), 0));
+        version.setUserContactRptFreq(NumberUtils.toInt(map.get(USER_CONTACT_RPT_FREQ), 0));
 
     }
 
