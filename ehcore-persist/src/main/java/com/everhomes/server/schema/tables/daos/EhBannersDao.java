@@ -62,6 +62,20 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>banner_location IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByBannerLocation(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.BANNER_LOCATION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>banner_group IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByBannerGroup(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.BANNER_GROUP, values);
+	}
+
+	/**
 	 * Fetch records that have <code>scope_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByScopeType(java.lang.String... values) {

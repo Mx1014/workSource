@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -690194700;
+	private static final long serialVersionUID = 270628494;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -54,20 +54,10 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES,
 			com.everhomes.server.schema.tables.EhClientPackageFiles.EH_CLIENT_PACKAGE_FILES,
 			com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES,
-			com.everhomes.server.schema.tables.EhCommunityAddressMappings.EH_COMMUNITY_ADDRESS_MAPPINGS,
 			com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS,
-			com.everhomes.server.schema.tables.EhCommunityPmBills.EH_COMMUNITY_PM_BILLS,
-			com.everhomes.server.schema.tables.EhCommunityPmBillItems.EH_COMMUNITY_PM_BILL_ITEMS,
-			com.everhomes.server.schema.tables.EhCommunityPmContacts.EH_COMMUNITY_PM_CONTACTS,
-			com.everhomes.server.schema.tables.EhCommunityPmMembers.EH_COMMUNITY_PM_MEMBERS,
-			com.everhomes.server.schema.tables.EhCommunityPmOwners.EH_COMMUNITY_PM_OWNERS,
-			com.everhomes.server.schema.tables.EhCommunityPmTasks.EH_COMMUNITY_PM_TASKS,
 			com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES,
 			com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER,
 			com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES,
-			com.everhomes.server.schema.tables.EhDepartments.EH_DEPARTMENTS,
-			com.everhomes.server.schema.tables.EhDepartmentCommunities.EH_DEPARTMENT_COMMUNITIES,
-			com.everhomes.server.schema.tables.EhDepartmentMembers.EH_DEPARTMENT_MEMBERS,
 			com.everhomes.server.schema.tables.EhDevices.EH_DEVICES,
 			com.everhomes.server.schema.tables.EhEvents.EH_EVENTS,
 			com.everhomes.server.schema.tables.EhEventProfiles.EH_EVENT_PROFILES,
@@ -91,6 +81,15 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhLinks.EH_LINKS,
 			com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS,
 			com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES,
+			com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS,
+			com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS,
+			com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS,
+			com.everhomes.server.schema.tables.EhOrganizationBillItems.EH_ORGANIZATION_BILL_ITEMS,
+			com.everhomes.server.schema.tables.EhOrganizationCommunities.EH_ORGANIZATION_COMMUNITIES,
+			com.everhomes.server.schema.tables.EhOrganizationContacts.EH_ORGANIZATION_CONTACTS,
+			com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS,
+			com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS,
+			com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
 			com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES,
@@ -108,7 +107,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhUserBehaviors.EH_USER_BEHAVIORS,
 			com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST,
 			com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS,
-			com.everhomes.server.schema.tables.EhUserFeedbacks.EH_USER_FEEDBACKS,
 			com.everhomes.server.schema.tables.EhUserFollowedFamilies.EH_USER_FOLLOWED_FAMILIES,
 			com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS,
 			com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS,

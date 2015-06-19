@@ -11,11 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 90025754;
+	private static final long serialVersionUID = 1206789910;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     appid;
+	private java.lang.String   bannerLocation;
+	private java.lang.String   bannerGroup;
 	private java.lang.String   scopeType;
 	private java.lang.Long     scopeId;
 	private java.lang.String   name;
@@ -37,6 +39,8 @@ public class EhBanners implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Integer  namespaceId,
 		java.lang.Long     appid,
+		java.lang.String   bannerLocation,
+		java.lang.String   bannerGroup,
 		java.lang.String   scopeType,
 		java.lang.Long     scopeId,
 		java.lang.String   name,
@@ -55,6 +59,8 @@ public class EhBanners implements java.io.Serializable {
 		this.id = id;
 		this.namespaceId = namespaceId;
 		this.appid = appid;
+		this.bannerLocation = bannerLocation;
+		this.bannerGroup = bannerGroup;
 		this.scopeType = scopeType;
 		this.scopeId = scopeId;
 		this.name = name;
@@ -93,6 +99,22 @@ public class EhBanners implements java.io.Serializable {
 
 	public void setAppid(java.lang.Long appid) {
 		this.appid = appid;
+	}
+
+	public java.lang.String getBannerLocation() {
+		return this.bannerLocation;
+	}
+
+	public void setBannerLocation(java.lang.String bannerLocation) {
+		this.bannerLocation = bannerLocation;
+	}
+
+	public java.lang.String getBannerGroup() {
+		return this.bannerGroup;
+	}
+
+	public void setBannerGroup(java.lang.String bannerGroup) {
+		this.bannerGroup = bannerGroup;
 	}
 
 	public java.lang.String getScopeType() {

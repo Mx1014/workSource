@@ -11,14 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = 361976845;
+	private static final long serialVersionUID = -325075723;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
 	private java.lang.Long    appId;
 	private java.lang.String  scopeType;
 	private java.lang.Long    scopeId;
-	private java.lang.String  itemTag;
+	private java.lang.String  itemLocation;
+	private java.lang.String  itemGroup;
 	private java.lang.String  itemName;
 	private java.lang.String  itemLabel;
 	private java.lang.String  iconUri;
@@ -40,7 +41,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Long    appId,
 		java.lang.String  scopeType,
 		java.lang.Long    scopeId,
-		java.lang.String  itemTag,
+		java.lang.String  itemLocation,
+		java.lang.String  itemGroup,
 		java.lang.String  itemName,
 		java.lang.String  itemLabel,
 		java.lang.String  iconUri,
@@ -59,7 +61,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.appId = appId;
 		this.scopeType = scopeType;
 		this.scopeId = scopeId;
-		this.itemTag = itemTag;
+		this.itemLocation = itemLocation;
+		this.itemGroup = itemGroup;
 		this.itemName = itemName;
 		this.itemLabel = itemLabel;
 		this.iconUri = iconUri;
@@ -114,12 +117,20 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.scopeId = scopeId;
 	}
 
-	public java.lang.String getItemTag() {
-		return this.itemTag;
+	public java.lang.String getItemLocation() {
+		return this.itemLocation;
 	}
 
-	public void setItemTag(java.lang.String itemTag) {
-		this.itemTag = itemTag;
+	public void setItemLocation(java.lang.String itemLocation) {
+		this.itemLocation = itemLocation;
+	}
+
+	public java.lang.String getItemGroup() {
+		return this.itemGroup;
+	}
+
+	public void setItemGroup(java.lang.String itemGroup) {
+		this.itemGroup = itemGroup;
 	}
 
 	public java.lang.String getItemName() {

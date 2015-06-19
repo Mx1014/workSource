@@ -153,10 +153,10 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
-	 * Fetch records that have <code>occupation_id IN (values)</code>
+	 * Fetch records that have <code>occupation IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByOccupationId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.OCCUPATION_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByOccupation(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.OCCUPATION, values);
 	}
 
 	/**

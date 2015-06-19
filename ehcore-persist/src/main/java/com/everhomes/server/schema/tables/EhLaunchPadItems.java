@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 127307091;
+	private static final long serialVersionUID = 330529968;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -52,9 +52,14 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.item_tag</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 * The column <code>ehcore.eh_launch_pad_items.item_location</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_TAG = createField("item_tag", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_LOCATION = createField("item_location", org.jooq.impl.SQLDataType.VARCHAR.length(2048), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.item_group</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> ITEM_GROUP = createField("item_group", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_items.item_name</code>.

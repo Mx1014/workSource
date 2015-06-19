@@ -265,7 +265,8 @@ CREATE TABLE `eh_launch_pad_items` (
     `app_id` BIGINT,
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
-    `item_tag` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
+	`item_location` VARCHAR(2048),
+    `item_group` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
     `item_name` VARCHAR(32),
     `item_label` VARCHAR(64),
     `icon_uri` VARCHAR(1024),
@@ -323,24 +324,6 @@ CREATE TABLE `eh_templates`(
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_template_name`(`name`)    
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of global partition
-#
-DROP TABLE IF EXISTS `eh_feedbacks`;
-CREATE TABLE `eh_feedbacks`(
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `uid` BIGINT,
-    `business_id` BIGINT,
-    `subject` VARCHAR(256),
-    `content` TEXT,
-    `create_time` DATETIME,
-    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_feedback_create_time`(`create_time`),
-    INDEX `i_eh_feedback_delete_time`(`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
@@ -418,10 +401,7 @@ CREATE TABLE `eh_users` (
     `home_town` BIGINT COMMENT 'region id',
     `home_town_path` VARCHAR(128) COMMENT 'redundant region path for recursive matching',
 
-    #
-    # for work/school based matching
-    #
-    `occupation_id` BIGINT COMMENT 'id in category table',
+    `occupation` VARCHAR(128),
     `company` VARCHAR(128),
     `school` VARCHAR(128),
     
@@ -1004,51 +984,6 @@ CREATE TABLE `eh_regions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of global partition
-#
-DROP TABLE IF EXISTS `eh_departments`;
-CREATE TABLE `eh_departments` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `parent_id` BIGINT COMMENT 'id of the parent region', 
-    `name` VARCHAR(64),
-    `path` VARCHAR(128) COMMENT 'path from the root',
-    `level` INTEGER NOT NULL DEFAULT 0,
-    `scope_code` TINYINT COMMENT '0: government, 1: public security(police), 2: decease control',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
-    
-    PRIMARY KEY(`id`),
-    UNIQUE `u_eh_dept_name`(`parent_id`, `name`),
-    INDEX `i_eh_dept_name_level`(`name`, `level`),   
-    INDEX `i_eh_dept_path`(`path`),
-    INDEX `i_eh_dept_path_level`(`path`, `level`),   
-    INDEX `i_eh_dept_parent`(`parent_id`)   
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-DROP TABLE IF EXISTS `eh_department_members`;
-CREATE TABLE `eh_department_members` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `department_id` BIGINT NOT NULL COMMENT 'owner community id',
-    `member_uid` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
-    `member_group` VARCHAR(32) COMMENT 'group that the member belongs to',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
-    
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_eh_deptm_owner`(`department_id`) REFERENCES `eh_departments`(`id`) ON DELETE CASCADE,
-    INDEX `i_eh_deptm_uid`(`member_uid`),
-    INDEX `i_eh_deptm_group`(`member_group`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-DROP TABLE IF EXISTS `eh_department_communities`;
-CREATE TABLE `eh_department_communities` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `department_id` BIGINT NOT NULL,
-    `community_id` BIGINT NOT NULL,
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_deptc_dept`(`department_id`),
-    INDEX `i_eh_deptc_community`(`community_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
 # key table of the sharding group
 # shared resource objects, custom fields may not really be needed
 #
@@ -1155,16 +1090,48 @@ CREATE TABLE `eh_community_profiles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information of community 
+# member of global partition
 #
-DROP TABLE IF EXISTS `eh_community_pm_members`;
-CREATE TABLE `eh_community_pm_members` (
+DROP TABLE IF EXISTS `eh_organizations`;
+CREATE TABLE `eh_organizations` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `parent_id` BIGINT COMMENT 'id of the parent region', 
+    `organization_type` VARCHAR(64) COMMENT 'NONE, PM(Property Management), GARC(Resident Committee), GANC(Neighbor Committee), GAPS(Police Station)',
+    `name` VARCHAR(64),
+    `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address for department', 
+    `path` VARCHAR(128) COMMENT 'path from the root',
+    `level` INTEGER NOT NULL DEFAULT 0,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
+    
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_org_name`(`parent_id`, `name`),
+    INDEX `i_eh_org_name_level`(`name`, `level`),   
+    INDEX `i_eh_org_path`(`path`),
+    INDEX `i_eh_org_path_level`(`path`, `level`),   
+    INDEX `i_eh_org_parent`(`parent_id`)   
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_organization_communities`;
+CREATE TABLE `eh_organization_communities` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `organization_id` BIGINT NOT NULL,
+    `community_id` BIGINT NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_org_community_id`(`organization_id`, `community_id`),
+    INDEX `i_eh_orgc_dept`(`organization_id`),
+    INDEX `i_eh_orgc_community`(`community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_organization_members`;
+CREATE TABLE `eh_organization_members` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `organization_id` BIGINT NOT NULL,
     `target_type` VARCHAR(32) COMMENT 'untrack, user',
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
-    `pm_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
+    `member_group` VARCHAR(32) COMMENT 'pm group the member belongs to',
 	`contact_name` VARCHAR(64),
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
 	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
@@ -1172,56 +1139,58 @@ CREATE TABLE `eh_community_pm_members` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: confirming, 2: active',
 	
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE,
-	INDEX `i_eh_cpm_group`(`pm_group`)
+    FOREIGN KEY `fk_eh_orgm_owner`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE,
+	INDEX `i_eh_corg_group`(`member_group`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
 # information of community 
 #
-DROP TABLE IF EXISTS `eh_community_pm_tasks`;
-CREATE TABLE `eh_community_pm_tasks` (
+DROP TABLE IF EXISTS `eh_organization_tasks`;
+CREATE TABLE `eh_organization_tasks` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
-	`entity_type` VARCHAR(32),
+    `organization_id` BIGINT NOT NULL DEFAULT 0,
+	`organization_type` VARCHAR(64) COMMENT 'NONE, PM(Property Management), GARC(Resident Committee), GANC(Neighbor Committee), GAPS(Police Station)',
+	`entity_type` VARCHAR(32) COMMENT 'TOPIC',
     `entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
-	`target_type` VARCHAR(32),
+	`target_type` VARCHAR(32) COMMENT 'user',
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
-    `task_type` VARCHAR(32) COMMENT 'task type assigned by pm',
+    `task_type` VARCHAR(32) COMMENT 'task type assigned by organization',
     `task_status` TINYINT NOT NULL,    
 	`creator_uid` BIGINT COMMENT 'uid of the user who create the task',
     `create_time` DATETIME,
 	
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cpm_owner`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+	FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
 # information about property name mapping
 #
-DROP TABLE IF EXISTS `eh_community_address_mappings`;
-CREATE TABLE `eh_community_address_mappings` (
+DROP TABLE IF EXISTS `eh_organization_address_mappings`;
+CREATE TABLE `eh_organization_address_mappings` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `organization_id` BIGINT NOT NULL DEFAULT 0,
     `community_id` BIGINT NOT NULL COMMENT 'community id',
     `address_id` BIGINT NOT NULL COMMENT 'address id',
     
-    `name` VARCHAR(128) COMMENT 'building name used in PM management',
+    `organization_address` VARCHAR(128) COMMENT 'organization address used in organization',
 	`living_status` TINYINT NOT NULL,
     
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cmap_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
+	FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
 # information of community 
 #
-DROP TABLE IF EXISTS `eh_community_pm_bills`;
-CREATE TABLE `eh_community_pm_bills` (
+DROP TABLE IF EXISTS `eh_organization_bills`;
+CREATE TABLE `eh_organization_bills` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `organization_id` BIGINT NOT NULL DEFAULT 0,
 	`entity_type` VARCHAR(32),
     `entity_id` BIGINT NOT NULL COMMENT 'target address id if target_type is a address',
     `address` VARCHAR(128),
@@ -1234,15 +1203,16 @@ CREATE TABLE `eh_community_pm_bills` (
 	`notify_count` INT COMMENT 'how many times of notification is sent for the bill',
     `notify_time` DATETIME COMMENT 'the last time of notification for the bill',
 	
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
 # information of community 
 #
-DROP TABLE IF EXISTS `eh_community_pm_bill_items`;
-CREATE TABLE `eh_community_pm_bill_items` (
+DROP TABLE IF EXISTS `eh_organization_bill_items`;
+CREATE TABLE `eh_organization_bill_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `bill_id` BIGINT NOT NULL,
 	`item_name` VARCHAR(128) COMMENT 'the tile of bill item',
@@ -1255,17 +1225,18 @@ CREATE TABLE `eh_community_pm_bill_items` (
     `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
     `create_time` DATETIME,
 	
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_organization_bill`(`bill_id`) REFERENCES `eh_organization_bills`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
 # information of community 
 #
-DROP TABLE IF EXISTS `eh_community_pm_owners`;
-CREATE TABLE `eh_community_pm_owners` (
+DROP TABLE IF EXISTS `eh_organization_owners`;
+CREATE TABLE `eh_organization_owners` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `organization_id` BIGINT NOT NULL DEFAULT 0,
 	`contact_name` VARCHAR(64),
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
 	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
@@ -1275,45 +1246,27 @@ CREATE TABLE `eh_community_pm_owners` (
     `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
     `create_time` DATETIME,
 	
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+	FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of eh_communities partition
 # information of community 
 #
-DROP TABLE IF EXISTS `eh_community_pm_contacts`;
-CREATE TABLE `eh_community_pm_contacts` (
+DROP TABLE IF EXISTS `eh_organization_contacts`;
+CREATE TABLE `eh_organization_contacts` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `community_id` BIGINT NOT NULL COMMENT 'owner community id',
+    `organization_id` BIGINT NOT NULL DEFAULT 0,
 	`contact_name` VARCHAR(64),
 	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
 	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
     `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
     `create_time` DATETIME,
 	
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of eh_communities partition
-# information about property owner info
-#
-DROP TABLE IF EXISTS `eh_community_address_owners`;
-CREATE TABLE `eh_community_address_owners` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `community_id` BIGINT NOT NULL COMMENT 'community id',
-    `address_id` BIGINT NOT NULL COMMENT 'address id',
-    
-	`contact_name` VARCHAR(64),
-	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
-	`contact_token` VARCHAR(128) COMMENT 'phone number or email address',
-	`contact_tag` VARCHAR(32), 
-	`contact_description` TEXT,
-	
     PRIMARY KEY (`id`),
-	FOREIGN KEY `fk_eh_cowner_community`(`community_id`) REFERENCES `eh_communities`(`id`) ON DELETE CASCADE
-)  ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+	FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # Key table in address related sharding group
@@ -1402,6 +1355,8 @@ CREATE TABLE `eh_banners` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `namespace_id` INTEGER,
     `appId` BIGINT,
+	`banner_location` VARCHAR(2048),
+    `banner_group` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
     `name` VARCHAR(128),
@@ -2223,8 +2178,8 @@ CREATE TABLE `eh_user_scores` (
 # member of user-related sharding group
 # shared among namespaces, no application module specific information
 #
-DROP TABLE IF EXISTS `eh_user_feedbacks`;
-CREATE TABLE `eh_user_feedbacks` (
+DROP TABLE IF EXISTS `eh_feedbacks`;
+CREATE TABLE `eh_feedbacks` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `owner_uid` BIGINT DEFAULT 0,
   `contact` VARCHAR(128) DEFAULT '',

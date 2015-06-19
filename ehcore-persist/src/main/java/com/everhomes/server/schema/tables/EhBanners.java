@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = 1162199176;
+	private static final long serialVersionUID = -1572529347;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -40,6 +40,16 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_banners.appId</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.banner_location</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> BANNER_LOCATION = createField("banner_location", org.jooq.impl.SQLDataType.VARCHAR.length(2048), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.banner_group</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> BANNER_GROUP = createField("banner_group", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS");
 
 	/**
 	 * The column <code>ehcore.eh_banners.scope_type</code>.
