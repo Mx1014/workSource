@@ -104,57 +104,6 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
-
-//    @Cacheable(value="LaunchPadItemByItemGroupList", key="#itemGroup", unless="#result.size() == 0")
-    @Override
-    public List<LaunchPadItem> listLaunchPadItemsByItemGroup(String itemGroup) {
-        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
-        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_TAG.eq("");;
-        
-        step.where(condition).fetch().map((r) ->{
-            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
-            return null;
-        });
-        
-        return items;
-    }
-    
-    @Override
-    public List<LaunchPadItem> listLaunchPadItemsByAppId(long appId, String scopeType, long scopeId) {
-        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
-        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.APP_ID.eq(appId);
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType));
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
-        
-        step.where(condition).fetch().map((r) ->{
-            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
-            return null;
-        });
-        
-        return items;
-    }
-    
-    @Override
-    public List<LaunchPadItem> listLaunchPadItemsByScopeTypeAndItemNameItemGroup(
-            String scopeType, String itemName, String itemGroup) {
-        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
-        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType);
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_TAG.eq(""));
-        
-        step.where(condition).fetch().map((r) ->{
-            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
-            return null;
-        });
-        
-        return items;
-    }
     
     @Override
     public void createLaunchPadItems(List<LaunchPadItem> items) {

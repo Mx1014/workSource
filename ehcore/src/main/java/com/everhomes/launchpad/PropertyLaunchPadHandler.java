@@ -11,7 +11,7 @@ import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryType;
 
 
-@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + "/System/Pm/Topics")
+@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.SYS_PM_TOPICS)
 public class PropertyLaunchPadHandler implements LaunchPadHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyLaunchPadHandler.class);
     @Autowired
