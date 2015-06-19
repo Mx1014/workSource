@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,5 +83,79 @@ public class DateStatisticHelper {
 		return calendar.getTime();
 	}
 	
-	
+	/**
+	 * 格式化日期时间。
+	 * 
+	 * @param date 要格式化的日期
+	 * @return 日期时间的格式化字符串
+	 */
+	public static String formatDateTime(Date date)
+	{
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATETIME);
+		return formater.format(date);
+	}
+
+	/**
+	 * 格式化日期。
+	 * 
+	 * @param dateTime 要格式化的long类型日期
+	 * @return 日期的格式化字符串
+	 */
+	public static String formatDateTime(long dateTime)
+	{
+		Date date = new Date(dateTime);
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATETIME);
+		return formater.format(date);
+	}
+
+	/**
+	 * 格式化日期。
+	 * 
+	 * @param date 要格式化的日期
+	 * @return 日期的格式化字符串
+	 */
+	public static String formatDate(Date date)
+	{
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATE);
+		return formater.format(date);
+	}
+
+	/**
+	 * 格式化日期。
+	 * 
+	 * @param dateTime 要格式化的long类型日期
+	 * @return 日期的格式化字符串
+	 */
+	public static String formatDate(long dateTime)
+	{
+		Date date = new Date(dateTime);
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATE);
+		return formater.format(date);
+	}
+
+	/**
+	 * 把日期时间字符串解释成为日期对象
+	 * 
+	 * @param datetimeStr 日期时间字符串
+	 * @return 日期对象
+	 * @throws ParseException
+	 */
+	public static Date parseDateTimeStr(String datetimeStr) throws ParseException
+	{
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATETIME);
+		return formater.parse(datetimeStr);
+	}
+
+	/**
+	 * 把日期字符串解释成为日期对象
+	 * 
+	 * @param dateStr 日期字符串
+	 * @return 日期对象
+	 * @throws ParseException
+	 */
+	public static Date parseDateStr(String dateStr) throws ParseException
+	{
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATE);
+		return formater.parse(dateStr);
+	}
 }

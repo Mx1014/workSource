@@ -98,13 +98,13 @@ public class DepartmentController extends ControllerBase {
     
     
     /**
-     * <b>URL: /dpt/newPmTopic</b>
+     * <b>URL: /dpt/newDptTopic</b>
      * <p>物业人员发帖</p>
      * @return 发帖的内容
      */
-    @RequestMapping("newPmTopic")
+    @RequestMapping("newDptTopic")
     @RestReturn(value=PostDTO.class)
-    public RestResponse newPmTopic(@Valid NewTopicCommand cmd) {
+    public RestResponse newDptTopic(@Valid NewTopicCommand cmd) {
     	PostDTO postDto = departmentService.createTopic(cmd);
     	RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -113,12 +113,12 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/queryPmTopicsByCategory</b>
+     * <b>URL: /dpt/queryDptTopicsByCategory</b>
      * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
      */
-    @RequestMapping("queryPmTopicsByCategory")
+    @RequestMapping("queryDptTopicsByCategory")
     @RestReturn(value=ListPropPostCommandResponse.class)
-    public RestResponse queryPmTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+    public RestResponse queryDptTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
     	ListPropPostCommandResponse  cmdResponse = departmentService.queryTopicsByCategory(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -127,12 +127,12 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/listPmTopics</b>
+     * <b>URL: /dpt/listDptTopics</b>
      * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
      */
-    @RequestMapping("listPmTopics")
+    @RequestMapping("listDptTopics")
     @RestReturn(value=ListPostCommandResponse.class)
-    public RestResponse listPmTopics(ListTopicCommand cmd) {
+    public RestResponse listDptTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = departmentService.listTopics(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -142,12 +142,12 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/getPmTopic</b>
+     * <b>URL: /dpt/getDptTopic</b>
      * <p>获取指定论坛里的指定帖子内容</p>
      */
-    @RequestMapping("getPmTopic")
+    @RequestMapping("getDptTopic")
     @RestReturn(value=PostDTO.class)
-    public RestResponse getPmTopic(GetTopicCommand cmd) {
+    public RestResponse getDptTopic(GetTopicCommand cmd) {
         PostDTO postDto = departmentService.getTopic(cmd);
         
         RestResponse response = new RestResponse(postDto);
@@ -157,13 +157,13 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/likePmTopic</b>
+     * <b>URL: /dpt/likeDptTopic</b>
      * <p>对指定论坛里的指定帖子点赞</p>
      * @return 点赞的结果
      */
-    @RequestMapping("likePmTopic")
+    @RequestMapping("likeDptTopic")
     @RestReturn(value=String.class)
-    public RestResponse likePmTopic(LikeTopicCommand cmd) {
+    public RestResponse likeDptTopic(LikeTopicCommand cmd) {
         departmentService.likeTopic(cmd);
         
         RestResponse response = new RestResponse();
@@ -173,13 +173,13 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/cancelLikePmTopic</b>
+     * <b>URL: /dpt/cancelLikeDptTopic</b>
      * <p>对指定论坛里的指定帖子取消赞</p>
      * @return 取消赞的结果
      */
-    @RequestMapping("cancelLikePmTopic")
+    @RequestMapping("cancelLikeDptTopic")
     @RestReturn(value=String.class)
-    public RestResponse cancelLikePmTopic(CancelLikeTopicCommand cmd) {
+    public RestResponse cancelLikeDptTopic(CancelLikeTopicCommand cmd) {
         departmentService.cancelLikeTopic(cmd);
         
         RestResponse response = new RestResponse();
@@ -189,13 +189,13 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/deletePmTopic</b>
+     * <b>URL: /dpt/deleteDptTopic</b>
      * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
      * @return 删除结果
      */
-    @RequestMapping("deletePmTopic")
+    @RequestMapping("deleteDptTopic")
     @RestReturn(value=String.class)
-    public RestResponse deleteTopic(DeleteTopicCommand cmd) {
+    public RestResponse deleteDptTopic(DeleteTopicCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -253,12 +253,12 @@ public class DepartmentController extends ControllerBase {
 //    }
    
     /**
-     * <b>URL: /dpt/listPmTopicComments</b>
+     * <b>URL: /dpt/listDptTopicComments</b>
      * <p>获取指定论坛里指定帖子下的评论列表</p>
      */
-    @RequestMapping("listPmTopicComments")
+    @RequestMapping("listDptTopicComments")
     @RestReturn(value=PostDTO.class, collection=true)
-    public RestResponse listPmTopicComments(@Valid ListTopicCommentCommand cmd) {
+    public RestResponse listDptTopicComments(@Valid ListTopicCommentCommand cmd) {
         ListPostCommandResponse cmdResponse = departmentService.listTopicComments(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -268,12 +268,12 @@ public class DepartmentController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /dpt/newPmComment</b>
+     * <b>URL: /dpt/newDptComment</b>
      * <p>创建新评论</p>
      */
-    @RequestMapping("newPmComment")
+    @RequestMapping("newDptComment")
     @RestReturn(value=PostDTO.class)
-    public RestResponse newPmComment(@Valid NewCommentCommand cmd) {
+    public RestResponse newDptComment(@Valid NewCommentCommand cmd) {
         PostDTO postDTO = departmentService.createComment(cmd);
         
         RestResponse response = new RestResponse(postDTO);
@@ -283,13 +283,13 @@ public class DepartmentController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /dpt/deletePmComment</b>
+     * <b>URL: /dpt/deleteDptComment</b>
      * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
      * @return 删除结果
      */
-    @RequestMapping("deletePmComment")
+    @RequestMapping("deleteDptComment")
     @RestReturn(value=String.class)
-    public RestResponse deletePmComment(DeleteCommentCommand cmd) {
+    public RestResponse deleteDptComment(DeleteCommentCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
