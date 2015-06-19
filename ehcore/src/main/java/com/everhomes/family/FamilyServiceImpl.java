@@ -474,7 +474,7 @@ public class FamilyServiceImpl implements FamilyService {
         
     }
     
-    private void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
+    public void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
         // send notification to the applicant
         try {
             Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0,Role.ResourceOperator);
@@ -779,7 +779,7 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendFamilyNotificationToIncludeUser(group.getId(), member.getId(), notifyTextForApplicant);
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_OPERATOR;
