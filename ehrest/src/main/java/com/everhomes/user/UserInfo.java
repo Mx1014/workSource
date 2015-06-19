@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  *         <li>couponCount:礼券数</li>
  *         <li>topicFavoriteCount:帖子收藏数</li>
  *         <li>sharedCount:分享数</li>
+ *         <li>points:用户积分</li>
  *         </ul>
  **/
 public class UserInfo {
@@ -66,6 +67,7 @@ public class UserInfo {
     private Integer couponCount;
     private Integer topicFavoriteCount;
     private Integer sharedCount;
+    private Integer points;
 
     @ItemType(String.class)
     private List<String> phones;
@@ -282,6 +284,15 @@ public class UserInfo {
 
     public void setSharedCount(Integer sharedCount) {
         this.sharedCount = sharedCount;
+    }
+    
+
+    public Integer getPoints() {
+        return points;
+    }
+
+    public void setPoints(Integer points) {
+        this.points = points;
     }
 
     @Override
