@@ -15,7 +15,7 @@ package com.everhomes.launchpad;
  */
 public enum ItemTag {
     SYS_BANNERS("/System/Banners"),SYS_GOVAGENCIES("/System/GovAgencies"), SYS_COUPONS("/System/Coupons"), 
-    SYS_BIZS("/System/bizs"),SYS_PM_BANNERS("/System/Pm/Banners"),SYS_PM_ACTIONS("/System/Pm/Actions"),
+    SYS_BIZS("/System/Bizs"),SYS_PM_BANNERS("/System/Pm/Banners"),SYS_PM_ACTIONS("/System/Pm/Actions"),
     SYS_PM_TOPICS("/System/Pm/Topics");
     
  private String code;

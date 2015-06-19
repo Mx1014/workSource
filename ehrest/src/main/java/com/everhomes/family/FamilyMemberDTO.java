@@ -14,8 +14,12 @@ import com.everhomes.util.StringHelper;
  * <li>memberName: 家庭成员名称</li>
  * <li>memberAvatarUri: 家庭头像Id，图片上传到ContentServer得到的ID</li>
  * <li>memberAvatarUrl: 家庭头像url</li>
- * <li>cellPhone:用户电话号码</li>
- * <li>createTime:用户加入时间</li>
+ * <li>cellPhone：用户电话号码</li>
+ * <li>statusLine：用户状态</li>
+ * <li>gender：用户性别.0代表未知，1为男性，2为女性</li>
+ * <li>birthday：用户生日</li>
+ * <li>occupation：职业名称</li>
+ * <li>createTime：用户加入时间</li>
  * </ul>
  */
 public class FamilyMemberDTO {
@@ -26,6 +30,10 @@ public class FamilyMemberDTO {
     private String memberAvatarUri;
     private String memberAvatarUrl;
     private String cellPhone;
+    private String statusLine;
+    private Byte gender;
+    private String birthday;
+    private String occupation;
     private Timestamp createTime;
     
     public FamilyMemberDTO() {
@@ -85,6 +93,38 @@ public class FamilyMemberDTO {
 
     public void setCellPhone(String cellPhone) {
         this.cellPhone = cellPhone;
+    }
+
+    public String getStatusLine() {
+        return statusLine;
+    }
+
+    public void setStatusLine(String statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
     }
 
     public Timestamp getCreateTime() {

@@ -115,7 +115,7 @@ public class RegionController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listRegionByKeyword")
     @RestReturn(value=RegionDTO.class, collection=true)
-    public RestResponse listRegionByKeyword(@Valid ListRegionCommand cmd) {
+    public RestResponse listRegionByKeyword(@Valid ListRegionByKeywordCommand cmd) {
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() == null)
             cmd.setSortBy("");

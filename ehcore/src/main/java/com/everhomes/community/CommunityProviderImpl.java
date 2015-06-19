@@ -440,7 +440,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                 (DSLContext context, Object reducingContext) -> {
                     context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId))
-                   .and(Tables.EH_COMMUNITIES.NAME.like(name + "%")).fetch().map(r ->{
+                   .and(Tables.EH_COMMUNITIES.NAME.like("%" + name + "%")).fetch().map(r ->{
                        result.add(ConvertHelper.convert(r,Community.class));
                        return null;
                    });

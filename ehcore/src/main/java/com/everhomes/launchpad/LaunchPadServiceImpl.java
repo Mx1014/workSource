@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     /**
-     * 1、applyPolicy=1(覆盖)，小范围覆盖大范围
+     * 1、applyPolicy=1(覆盖)，小范围覆盖大范围，
+     * 用户自定义的，直接根据itemId比较，系统配置的覆盖，根据itemName进行比较
      * 2、applyPolicy=2(恢复)，直接忽略即可
      * @param defalultItems
      * @param overrideItems
@@ -122,7 +124,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             LaunchPadItem item = new LaunchPadItem();
             item.setAppId(cmd.getAppId() == null ? 0 : cmd.getAppId());
             item.setItemLabel(cmd.getItemLabel());
-            item.setItemName(cmd.getItemName());
+            item.setItemName(StringUtils.upperCase(cmd.getItemName()));
             item.setActionType(cmd.getActionType());
             item.setActionData(cmd.getActionData());
             item.setItemTag(cmd.getItemTag());

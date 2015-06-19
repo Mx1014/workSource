@@ -59,6 +59,9 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.point.AddUserPointCommand;
+import com.everhomes.point.PointType;
+import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
@@ -133,6 +136,9 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private AclProvider aclProvider;
+    
+    @Autowired
+    private UserPointService userPointService;
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -350,7 +356,7 @@ public class FamilyServiceImpl implements FamilyService {
 		    
     		return true;
     	});
-        
+        LOGGER.info("User join in family success.userId=" + userId + ",familyId=" + familyId);
         if(flag)
             return;
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
@@ -450,7 +456,7 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "User not join in family.");
         }
-        
+        LOGGER.info("User leave family,userId=" + userId + ",familyId=" + familyId);
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
 
         UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, group.getId());
@@ -511,7 +517,7 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_REVOKE_SELF, 
                     "Invalid memberUid parameter,can not revoke self");
         
-        
+        LOGGER.info("User revoked family,operatorId=" + userId + ",memberId=" + memberUid + ",familyId=" + familyId);
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         
         UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(memberUid, group.getId());
@@ -584,7 +590,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(memberUid == userId)
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_REJECT_SELF, 
                     "User can not reject self.");
-        
+        LOGGER.info("User rejected family,operatorId=" + userId + ",memberId=" + memberUid + ",familyId=" + familyId);
         Group group = this.groupProvider.findGroupById(familyId);
         cmd.setOperatorRole((cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole()));
         //家庭成员拒绝
@@ -693,7 +699,7 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid memberUid parameter");
         Group group = this.groupProvider.findGroupById(familyId);
-        
+        LOGGER.info("User approved family,operatorId=" + userId + ",memberId=" + memberUid + ",familyId=" + familyId);
         long startTime = System.currentTimeMillis();
 
 //        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
@@ -744,7 +750,10 @@ public class FamilyServiceImpl implements FamilyService {
             
             //通知小区用户(通知通讯录好友)有新用户入住
             sendNotifyToCommunityUserAndContactUser(memberUid, familyId, group.getIntegralTag2());
-            
+            //积分
+            AddUserPointCommand pointCmd=new AddUserPointCommand(user.getId(), PointType.INVITED_USER.name(), 
+                    userPointService.getItemPoint(PointType.ADDRESS_APPROVAL), memberUid);  
+            userPointService.addPoint(pointCmd);
             long endTime = System.currentTimeMillis();
             LOGGER.info("Approve family elapse=" + (endTime - startTime));
             return;
@@ -899,10 +908,15 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setMemberName(groupMember.getMemberNickName());
                 f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
-                UserIdentifier userIdentifier = getMobileOfUserIdentifier(groupMember.getMemberId());
-                if(userIdentifier != null)
-                    f.setCellPhone(userIdentifier.getIdentifierToken());
-                
+                UserInfo userInfo = this.userService.getUserSnapshotInfo(member.getMemberId());
+                if(userInfo != null){
+                    f.setBirthday(userInfo.getBirthday());
+                    f.setGender(userInfo.getGender());
+                    f.setStatusLine(userInfo.getStatusLine());
+                    f.setOccupation(userInfo.getOccupation());
+                    if(userInfo.getPhones() != null && !userInfo.getPhones().isEmpty())
+                        f.setCellPhone(userInfo.getPhones().get(0));
+                }
                 results.add(f);
             }
         });
@@ -1097,7 +1111,7 @@ public class FamilyServiceImpl implements FamilyService {
                     context.select().from(Tables.EH_GROUPS)
                         .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
-                            //排除自己
+                            //排除自己家庭
                             if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != group.getIntegralTag1())
                                 familyList.add(ConvertHelper.convert(r,Family.class));
                             return null;
@@ -1116,11 +1130,13 @@ public class FamilyServiceImpl implements FamilyService {
                 List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
                 if(members != null && !members.isEmpty()){
                     for(GroupMember m : members){
+                        
                         if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
                                 && m.getMemberType().equals(EntityType.USER.getCode())
                                         && m.getMemberId().longValue() != user.getId().longValue()){
-                            
-                            if(neighborUserIds.contains(m.getMemberId())) return;
+                            //去重
+                            if(neighborUserIds.contains(m.getMemberId())) 
+                                return;
                             neighborUserIds.add(m.getMemberId());
                             NeighborUserDetailDTO n = new NeighborUserDetailDTO();
                             User u = this.userProvider.findUserById(m.getMemberId());
@@ -1249,7 +1265,7 @@ public class FamilyServiceImpl implements FamilyService {
                     n.setUserName(u.getNickName());
                     n.setUserAvatarUrl(u.getAvatarUrl());
                     n.setUserAvatarUri(u.getAvatarUri());
-                    n.setOccupation(u.getOccupationName());
+                    n.setOccupation(u.getOccupation());
                     //计算距离
                     double lat = userLocation.getLatitude();
                     double lon = userLocation.getLongitude();
