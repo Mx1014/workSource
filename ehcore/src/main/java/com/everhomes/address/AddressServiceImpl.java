@@ -2,7 +2,6 @@
 package com.everhomes.address;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +41,7 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
@@ -61,7 +61,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -446,7 +445,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }).collect(Collectors.toList());
         
         if(userGroups.size() > 0) {
-            this.familyProvider.leaveFamilyAtAddress(address, userGroups.get(0));
+            LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
+            leaveCmd.setId(userGroups.get(0).getGroupId());
+            familyService.leave(leaveCmd);
+            //this.familyProvider.leaveFamilyAtAddress(address, userGroups.get(0));
         }
     }
    
