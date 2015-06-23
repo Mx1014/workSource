@@ -39,14 +39,14 @@ public class ContentServerHandler extends TextWebSocketHandler {
             int index = 0;
             while (!isSubscribe && index < 10) {
                 proxy = MessageQueue.getInstance();
-                index += 1;
                 try {
                     proxy.subscriber("contentstorage.", subscriber);
                 } catch (Exception e) {
                     LOGGER.error("subsciber error", e);
                     isSubscribe = false;
+                    index += 1;
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(3000);
                     } catch (Exception e1) {
                     }
                     continue;
