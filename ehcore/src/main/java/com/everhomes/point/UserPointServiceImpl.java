@@ -18,6 +18,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserFavoriteDTO;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -41,6 +43,9 @@ public class UserPointServiceImpl implements UserPointService {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private UserActivityProvider userActivityProvider;
 
     @Override
     public void addPoint(AddUserPointCommand cmd) {
@@ -73,7 +78,7 @@ public class UserPointServiceImpl implements UserPointService {
                 break;
             }
         } catch (Exception e) {
-            LOGGER.error("handle score error",e);
+            LOGGER.error("handle score error", e);
         }
 
     }
@@ -92,7 +97,16 @@ public class UserPointServiceImpl implements UserPointService {
 
     @Override
     public GetUserTreasureResponse getUserTreasure(GetUserTreasureCommand cmd) {
-        return null;
+        GetUserTreasureResponse rsp = new GetUserTreasureResponse();
+        List<UserFavoriteDTO> result = userActivityProvider.findFavorite(cmd.getUid());
+        if (result == null) {
+            rsp.setTopicFavoriteCount(0);
+        } else {
+            int size = result.stream().filter(r -> "topic".equals(r.getTargetType())).collect(Collectors.toList())
+                    .size();
+            rsp.setTopicFavoriteCount(size);
+        }
+        return rsp;
     }
 
     private void handOpenApp(UserScore userScore) {

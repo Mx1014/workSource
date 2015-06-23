@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>couponCount:礼卷数</li>
  * <li>topicFavoriteCount:帖子收藏数</li>
- * <li>sharedCount:共享数</li>
+ * <li>sharedCount:分享数</li>
  * </ul>
  */
 public class GetUserTreasureResponse {

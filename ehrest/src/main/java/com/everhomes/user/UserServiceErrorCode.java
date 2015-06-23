@@ -22,4 +22,5 @@ public interface UserServiceErrorCode {
     static final int ERROR_INVITATION_CODE=100015;
     static final int ERROR_INVALID_PARAMS=100016;
     static final int ERROR_INVALID_PERMISSION=100017;
+    static final int ERROR_UNAUTHENTITICATION=401;
 }
