@@ -752,8 +752,8 @@ public class FamilyServiceImpl implements FamilyService {
             //通知小区用户(通知通讯录好友)有新用户入住
             sendNotifyToCommunityUserAndContactUser(memberUid, familyId, group.getIntegralTag2());
             //积分
-            AddUserPointCommand pointCmd=new AddUserPointCommand(user.getId(), PointType.INVITED_USER.name(), 
-                    userPointService.getItemPoint(PointType.ADDRESS_APPROVAL), memberUid);  
+            AddUserPointCommand pointCmd=new AddUserPointCommand(user.getId(), PointType.ADDRESS_APPROVAL.name(), 
+                    userPointService.getItemPoint(PointType.ADDRESS_APPROVAL), memberUid); 
             userPointService.addPoint(pointCmd);
             long endTime = System.currentTimeMillis();
             LOGGER.info("Approve family elapse=" + (endTime - startTime));

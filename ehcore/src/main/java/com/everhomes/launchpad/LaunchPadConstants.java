@@ -9,14 +9,12 @@ public interface LaunchPadConstants {
     public static final String POST_ENTITY_TAG = "postTag";
     public static final String COMPONENT_TAG = "componentTag";
 
-    //Item Tag
-    public static final String SYS_BANNERS = "/System/Banners";
-    public static final String SYS_GOVAGENCIES = "/System/GovAgencies";
-    public static final String SYS_COUPONS = "/System/Coupons";
-    public static final String SYS_BIZS = "/System/Bizs";
-    public static final String SYS_PM_BANNERS = "/System/Pm/Banners";
-    public static final String SYS_PM_ACTIONS = "/System/Pm/Actions";
-    public static final String SYS_PM_TOPICS = "/System/Pm/Topics";
+    //Item Group
+    public static final String DEFAULT = "Default";
+    public static final String BANNERS = "Banners";
+    public static final String GOVAGENCIES = "GovAgencies";
+    public static final String BIZS = "Bizs";
+    public static final String GAACTIONS = "GaActions";
 
     //Action Type
     public static final int NONE = 0;

@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.everhomes.pm.CommunityPmBill;
+import com.everhomes.organization.pm.CommunityPmBill;
 
 
 public class ProcessBillModel1

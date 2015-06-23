@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 
 
-@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.SYS_GOVAGENCIES)
+@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.GOVAGENCIES)
 public class GovAgenciesLaunchPadHandler implements LaunchPadHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GovAgenciesLaunchPadHandler.class);
     @Autowired

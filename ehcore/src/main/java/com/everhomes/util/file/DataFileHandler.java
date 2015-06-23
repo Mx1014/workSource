@@ -18,7 +18,7 @@ import com.everhomes.address.AddressDataInfo;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDataInfo;
 import com.everhomes.community.CommunityGeoPoint;
-import com.everhomes.pm.CommunityPmContact;
+import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionScope;
 import com.everhomes.user.IdentifierType;
