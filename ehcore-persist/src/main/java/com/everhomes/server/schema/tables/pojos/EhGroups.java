@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1340739543;
+	private static final long serialVersionUID = -1669907739;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -42,6 +42,7 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 
@@ -77,6 +78,7 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
+		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime
 	) {
@@ -109,6 +111,7 @@ public class EhGroups implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.updateTime = updateTime;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
 	}
@@ -343,6 +346,14 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

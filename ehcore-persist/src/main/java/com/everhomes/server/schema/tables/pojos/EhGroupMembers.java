@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -241013339;
+	private static final long serialVersionUID = 549267453;
 
 	private java.lang.Long     id;
 	private java.lang.Long     groupId;
@@ -32,6 +32,7 @@ public class EhGroupMembers implements java.io.Serializable {
 	private java.lang.Byte     operationType;
 	private java.lang.Long     inviterUid;
 	private java.sql.Timestamp inviteTime;
+	private java.sql.Timestamp updateTime;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -65,6 +66,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.Byte     operationType,
 		java.lang.Long     inviterUid,
 		java.sql.Timestamp inviteTime,
+		java.sql.Timestamp updateTime,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -95,6 +97,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.operationType = operationType;
 		this.inviterUid = inviterUid;
 		this.inviteTime = inviteTime;
+		this.updateTime = updateTime;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -257,6 +260,14 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setInviteTime(java.sql.Timestamp inviteTime) {
 		this.inviteTime = inviteTime;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 
 	public java.lang.Long getIntegralTag1() {
