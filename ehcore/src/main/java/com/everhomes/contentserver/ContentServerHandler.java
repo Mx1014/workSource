@@ -24,8 +24,6 @@ public class ContentServerHandler extends TextWebSocketHandler {
 
     private WebSocketMessageSubscriber subscriber;
 
-    private volatile boolean isSubscribe = false;
-
     public ContentServerHandler(WebSocketCallback callback) {
         this.callback = callback;
         subscriber = new WebSocketMessageSubscriber();
@@ -35,34 +33,17 @@ public class ContentServerHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
         LOGGER.info("connect to server,host={}", session.getRemoteAddress());
-        new Thread(() -> {
-            int index = 0;
-            while (!isSubscribe && index < 10) {
-                proxy = MessageQueue.getInstance();
-                try {
-                    proxy.subscriber("contentstorage.", subscriber);
-                } catch (Exception e) {
-                    LOGGER.error("subsciber error", e);
-                    isSubscribe = false;
-                    index += 1;
-                    try {
-                        Thread.sleep(3000);
-                    } catch (Exception e1) {
-                    }
-                    continue;
-                }
-                LOGGER.info("subsciber success");
-                isSubscribe = true;
-                break;
-
-            }
-        }).start();
-
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-
+        try {
+            proxy=MessageQueue.getInstance();
+            proxy.subscriber("contentstorage.", subscriber);
+        } catch (Exception e) {
+            LOGGER.error("subscriber error");
+            return;
+        }
         LOGGER.info("handle text message from content server.payload={}", message.getPayload());
         PduFrame frame = PduFrame.fromJson(message.getPayload());
         if (StringUtils.isEmpty(frame.getName())) {
