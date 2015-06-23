@@ -10,6 +10,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.user.LoginToken;
 import com.everhomes.user.UserService;
+import com.everhomes.user.UserServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -104,8 +105,8 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         LoginToken login = LoginToken.fromTokenString(request.getToken());
         if (!userService.isValidLoginToken(login)) {
             LOGGER.error("invalid login token.auth failed");
-            throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_SESSION, "invalid login token");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "INVALID LOGON TOKEN");
         }
         String md5 = "";
         switch (request.getAccessType()) {

@@ -15,7 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>ItemScope: item可见范围列表， 参考{@link com.everhomes.launchpad.ItemScope}</li>
  * <li>itemName: 名称</li>
  * <li>itemLabel: 显示标签</li>
- * <li>itemTag: item标签，标识该item属于哪一类型的</li>
+ * <li>itemGroup: item归属哪一个组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
+ * <li>itemLocation: item的路径，如/home,/home/Bizs</li>
  * <li>itemWidth: 图标的宽</li>
  * <li>itemHeight: 图标的高</li>
  * <li>iconUri: 动作图标</li>
@@ -35,7 +36,9 @@ public class CreateLaunchPadItemCommand {
     @NotNull
     private String  itemLabel;
     @NotNull
-    private String  itemTag;
+    private String  itemGroup;
+    @NotNull
+    private String itemLocation;
     @NotNull
     private Integer  itemWidth;
     @NotNull
@@ -94,12 +97,20 @@ public class CreateLaunchPadItemCommand {
         this.itemLabel = itemLabel;
     }
 
-    public String getItemTag() {
-        return itemTag;
+    public String getItemGroup() {
+        return itemGroup;
     }
 
-    public void setItemTag(String itemTag) {
-        this.itemTag = itemTag;
+    public void setItemGroup(String itemGroup) {
+        this.itemGroup = itemGroup;
+    }
+
+    public String getItemLocation() {
+        return itemLocation;
+    }
+
+    public void setItemLocation(String itemLocation) {
+        this.itemLocation = itemLocation;
     }
 
     public Integer getItemWidth() {

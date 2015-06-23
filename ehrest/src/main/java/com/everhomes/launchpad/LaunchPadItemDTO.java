@@ -10,7 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>appId: 应用Id</li>
  * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
  * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
- * <li>itemTag: item 标签，用于过滤item</li>
+ * <li>itemLocation: item 的路径</li>
+ * <li>itemGroup: 当前item归属的组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
  * <li>itemName: 名称</li>
  * <li>itemLabel: 显示标签</li>
  * <li>iconUri: 图标uri</li>
@@ -34,7 +35,8 @@ public class LaunchPadItemDTO {
     private Long    appId;
     private String  scopeType;
     private Long    scopeId;
-    private String  itemTag;
+    private String  itemLocation;
+    private String  itemGroup;
     private String  itemName;
     private String  itemLabel;
     private String  iconUri;
@@ -48,8 +50,6 @@ public class LaunchPadItemDTO {
     private Long    minVersion;
     private Byte    displayFlag;
     private String  displayLayout;
-	
-	private String  jsonObj;
 
     public Long getId() {
         return id;
@@ -91,12 +91,20 @@ public class LaunchPadItemDTO {
         this.scopeId = scopeId;
     }
 
-    public String getItemTag() {
-        return itemTag;
+    public String getItemLocation() {
+        return itemLocation;
     }
 
-    public void setItemTag(String itemTag) {
-        this.itemTag = itemTag;
+    public void setItemLocation(String itemLocation) {
+        this.itemLocation = itemLocation;
+    }
+
+    public String getItemGroup() {
+        return itemGroup;
+    }
+
+    public void setItemGroup(String itemGroup) {
+        this.itemGroup = itemGroup;
     }
 
     public String getItemName() {
@@ -201,14 +209,6 @@ public class LaunchPadItemDTO {
 
     public void setDisplayLayout(String displayLayout) {
         this.displayLayout = displayLayout;
-    }
-
-    public String getJsonObj() {
-        return jsonObj;
-    }
-
-    public void setJsonObj(String jsonObj) {
-        this.jsonObj = jsonObj;
     }
 
     @Override

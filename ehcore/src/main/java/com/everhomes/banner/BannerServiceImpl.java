@@ -37,7 +37,7 @@ public class BannerServiceImpl implements BannerService {
     @Autowired
     private ContentServerService contentServerService;
     @Override
-    public List<BannerDTO> listBannerByCommuniyId(ListBannerByCommunityIdCommand cmd){
+    public List<BannerDTO> getBanners(GetBannersCommand cmd){
         if(cmd.getCommunityId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
@@ -53,9 +53,10 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         //query user relate banners
-        List<Banner> countryBanners = bannerProvider.listBannersByScopeTypeAndScopeId(BannerScopeType.COUNTRY.getCode(), 0L);
-        List<Banner> cityBanners = bannerProvider.listBannersByScopeTypeAndScopeId(BannerScopeType.CITY.getCode(), cityId);
-        List<Banner> communityBanners = bannerProvider.listBannersByScopeTypeAndScopeId(BannerScopeType.COMMUNITY.getCode(), communityId);
+        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),
+                BannerScopeType.COUNTRY.getCode(), 0L);
+        List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),BannerScopeType.CITY.getCode(), cityId);
+        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),BannerScopeType.COMMUNITY.getCode(), communityId);
         List<Banner> allBanners = new ArrayList<Banner>();
         if(countryBanners != null)
             allBanners.addAll(countryBanners);
@@ -92,6 +93,14 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scopes paramter.");
         }
+        if(cmd.getBannerLocation() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerLocation paramter.");
+        }
+        if(cmd.getBannerGroup() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup paramter.");
+        }
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<BannerScope> scopes = cmd.getScopes();
@@ -101,6 +110,8 @@ public class BannerServiceImpl implements BannerService {
             banner.setActionUri(cmd.getActionUri());
             banner.setAppid(cmd.getAppid());
             banner.setCreatorUid(userId);
+            banner.setBannerLocation(cmd.getBannerLocation());
+            banner.setBannerGroup(cmd.getBannerGroup());
             banner.setName(cmd.getName());
             banner.setNamespaceId(cmd.getNamespaceId());
             banner.setStartTime(cmd.getStartTime());

@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>appId: 应用Id</li>
  * <li>scopes: 可见范围列表，参考 {@link com.everhomes.banner.BannerScope}</li>
  * <li>name: 名称</li>
+ * <li>bannerLocation: banner所在路径，如/home，/home/Pm</li>
+ * <li>bannerGroup: banner所在的组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
  * <li>vendorTag: 左邻系统或第三方服务标签标识</li>
  * <li>posterPath: 图片路径</li>
  * <li>actionName: 动作名称</li>
@@ -28,6 +30,10 @@ public class CreateBannerCommand {
     private Long     appid;
     @ItemType(BannerScope.class)
     private List<BannerScope> scopes;
+    @NotNull
+    private String   bannerLocation;
+    @NotNull
+    private String   bannerGroup;
     @NotNull
     private String   name;
     private String   vendorTag;
@@ -116,6 +122,19 @@ public class CreateBannerCommand {
     }
     public void setScopes(List<BannerScope> scopes) {
         this.scopes = scopes;
+    }
+    
+    public String getBannerLocation() {
+        return bannerLocation;
+    }
+    public void setBannerLocation(String bannerLocation) {
+        this.bannerLocation = bannerLocation;
+    }
+    public String getBannerGroup() {
+        return bannerGroup;
+    }
+    public void setBannerGroup(String bannerGroup) {
+        this.bannerGroup = bannerGroup;
     }
     @Override
     public String toString() {

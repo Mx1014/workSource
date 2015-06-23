@@ -12,12 +12,12 @@ import com.everhomes.util.StringHelper;
  * <li>launchPadItems: 服务市场信息，参考{@link com.everhomes.launchpad.LaunchPadItemDTO}</li>
  * </ul>
  */
-public class ListLaunchPadByCommunityIdCommandResponse {
+public class GetLaunchPadItemsCommandResponse {
     
     @ItemType(LaunchPadItemDTO.class)
     private List<LaunchPadItemDTO> launchPadItems;
     
-    public ListLaunchPadByCommunityIdCommandResponse() {
+    public GetLaunchPadItemsCommandResponse() {
     }
     public List<LaunchPadItemDTO> getLaunchPadItems() {
         return launchPadItems;

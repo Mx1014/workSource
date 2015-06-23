@@ -28,7 +28,7 @@
             (A Java regular expression. Use the pipe to separate several expressions)
             Watch out for case-sensitivity. Depending on your database, this might be important! -->
         <includes>
-        eh_users | eh_user_identifiers | eh_user_groups | eh_user_blacklist | eh_user_favorates | eh_user_profiles |
+        eh_users | eh_user_identifiers | eh_user_groups | eh_user_blacklist | eh_user_favorites | eh_user_profiles |
         eh_user_invitations | eh_user_invitation_roster | eh_user_followed_families | eh_user_likes |
         eh_groups | eh_group_members | eh_group_profiles | eh_group_op_requests | eh_group_visible_scopes |
         eh_forums | eh_forum_posts | eh_forum_attachments | eh_forum_visible_scopes | eh_forum_assigned_scopes |

@@ -542,7 +542,7 @@ CREATE TABLE `eh_user_blacklist` (
 #
 # member of eh_users sharding group
 #
-DROP TABLE IF EXISTS `eh_user_favorates`;
+DROP TABLE IF EXISTS `eh_user_favorites`;
 CREATE TABLE `eh_user_favorites` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
@@ -650,6 +650,7 @@ CREATE TABLE `eh_groups` (
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
     
+    `update_time` DATETIME NOT NULL,
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     
@@ -736,6 +737,7 @@ CREATE TABLE `eh_group_members` (
     `operation_type` TINYINT COMMENT '1: request to join, 2: invite to join',
     `inviter_uid` BIGINT COMMENT 'record inviter user id',
     `invite_time` DATETIME COMMENT 'the time the member is invited',
+    `update_time` DATETIME NOT NULL,
     
     `integral_tag1` BIGINT,
     `integral_tag2` BIGINT,

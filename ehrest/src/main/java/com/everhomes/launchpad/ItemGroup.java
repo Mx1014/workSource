@@ -3,14 +3,14 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>参数类型
- * <li>PROPERTY: 物业</li>
- * <li>COUPON: 优惠券</li>
- * <li>THIRDSERVICE: 第三方服务</li>
- * <li>FLEAMARKET: 市场动态</li>
+ * <li>DEFAULT：默认组</li>
+ * <li>GOVAGENCIES: 首页政府部门（物业，公安，居委等）</li>
+ * <li>BIZS: 商家</li>
+ * <li>GAACTIONS: 政府相关，发帖动作（报修，投诉，建议，缴费等）</li>
  * </ul>
  */
 public enum ItemGroup {
-    PROPERTY("property"),COUPON("coupon"),THIRDSERVICE("thirdService"),FLEAMARKET("fleaMarket");
+    DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions");
     
     private String code;
        
@@ -23,18 +23,13 @@ public enum ItemGroup {
        }
        
        public static ItemGroup fromCode(String code) {
-           if(code == null)
-               return null;
-
-           if(code.equalsIgnoreCase(PROPERTY.getCode()))
-               return PROPERTY;
-           else if(code.equalsIgnoreCase(COUPON.getCode()))
-               return COUPON;
-           else if(code.equalsIgnoreCase(THIRDSERVICE.getCode()))
-               return THIRDSERVICE;
-           else if(code.equalsIgnoreCase(FLEAMARKET.getCode()))
-               return FLEAMARKET;
-
+           ItemGroup[] values = ItemGroup.values();
+           for(ItemGroup value : values) {
+               if(value.code.equals(code)) {
+                   return value;
+               }
+           }
+           
            return null;
        }
 }

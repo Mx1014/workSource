@@ -70,8 +70,8 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
         taskPool.submitTask(new MessageTask() {
 
             @Override
-            protected void doRequest(ContentServerMananger fileHandlerProvider) throws Exception {
-                fileHandlerProvider.auth(request);
+            protected void doRequest(ContentServerMananger contentServerManager) throws Exception {
+                contentServerManager.auth(request);
             }
 
             @Override
