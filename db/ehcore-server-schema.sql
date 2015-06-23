@@ -542,7 +542,7 @@ CREATE TABLE `eh_user_blacklist` (
 #
 # member of eh_users sharding group
 #
-DROP TABLE IF EXISTS `eh_user_favorates`;
+DROP TABLE IF EXISTS `eh_user_favorites`;
 CREATE TABLE `eh_user_favorites` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',

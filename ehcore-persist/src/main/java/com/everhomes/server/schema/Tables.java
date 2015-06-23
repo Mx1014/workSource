@@ -379,6 +379,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserContacts EH_USER_CONTACTS = com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS;
 
 	/**
+	 * The table ehcore.eh_user_favorites
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserFavorites EH_USER_FAVORITES = com.everhomes.server.schema.tables.EhUserFavorites.EH_USER_FAVORITES;
+
+	/**
 	 * The table ehcore.eh_user_followed_families
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserFollowedFamilies EH_USER_FOLLOWED_FAMILIES = com.everhomes.server.schema.tables.EhUserFollowedFamilies.EH_USER_FOLLOWED_FAMILIES;
