@@ -64,7 +64,7 @@ public class UserPointServiceImpl implements UserPointService {
             case APP_OPENED:
                 handOpenApp(userScore);
                 break;
-            case CREATE_POST:
+            case CREATE_TOPIC:
             case CREATE_COMMENT:
             case INVITED_USER:
                 handleRepeat(userScore);
