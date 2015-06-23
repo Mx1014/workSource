@@ -28,14 +28,14 @@ public class BannerController extends ControllerBase {
     private BannerService bannerService;
 
     /**
-     * <b>URL: /banner/listBannerByCommunityId</b>
+     * <b>URL: /banner/getBanners</b>
      * <p>获取用户相关的banner</p>
      */
-    @RequestMapping("listBannerByCommunityId")
+    @RequestMapping("getBanners")
     @RestReturn(value=BannerDTO.class,collection=true)
-    public RestResponse listLaunchPadByCommunityId(@Valid ListBannerByCommunityIdCommand cmd) {
+    public RestResponse getBanners(@Valid GetBannersCommand cmd) {
         
-        List<BannerDTO> result = bannerService.listBannerByCommuniyId(cmd);
+        List<BannerDTO> result = bannerService.getBanners(cmd);
         RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

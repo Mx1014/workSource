@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.launchpad.ItemGroup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 
@@ -60,16 +61,18 @@ public class BannerTest extends TestCase {
     @Test
     public void testCreateBanner() {
         CreateBannerCommand cmd = new CreateBannerCommand();
-        cmd.setActionName("baidu");
-        cmd.setActionUri("www.baidu.com");
+        cmd.setBannerGroup(ItemGroup.BIZS.getCode());
+        cmd.setBannerLocation("/home");
+        cmd.setActionName("google");
+        cmd.setActionUri("www.google.com");
         cmd.setAppid(0L);
-        cmd.setName("baidu");
+        cmd.setName("谷歌");
         cmd.setNamespaceId(0);
         cmd.setOrder(0);
         BannerScope scope = new BannerScope();
         scope.setOrder(0);
-        scope.setScopeId(111L);
-        scope.setScopeType("city");
+        scope.setScopeId(0L);
+        scope.setScopeType(BannerScopeType.COUNTRY.getCode());
         List<BannerScope> scopes = new ArrayList<BannerScope>();
         scopes.add(scope);
         cmd.setScopes(scopes);

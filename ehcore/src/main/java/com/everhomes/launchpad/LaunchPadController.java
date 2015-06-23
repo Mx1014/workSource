@@ -26,13 +26,13 @@ public class LaunchPadController extends ControllerBase {
 
     /**
      * <b>URL: /launchpad/getLaunchPadItems</b>
-     * <p>根据小区id和标签tag获取item列表</p>
+     * <p>根据小区id、itemLocation、itemGroup获取item列表</p>
      */
     @RequestMapping("getLaunchPadItems")
-    @RestReturn(value=ListLaunchPadByCommunityIdCommandResponse.class)
+    @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd) {
         
-        ListLaunchPadByCommunityIdCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
+        GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
         RestResponse response =  new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

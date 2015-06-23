@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>appId: 应用Id</li>
  * <li>scopeType: banner可见范围类型 参考{@link com.everhomes.banner.BannerScopeType}</li>
  * <li>scopeId: 可见范围具体Id，全国为0,城市或小区Id</li>
+ * <li>bannerLocation: banner所在路径，如/home，/home/Pm</li>
+ * <li>bannerGroup: banner所在的组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
  * <li>name: 名称</li>
  * <li>vendorTag: 左邻系统或第三方服务标签标识</li>
  * <li>posterPath: 图片路径</li>
@@ -30,6 +32,8 @@ public class BannerDTO {
     private Long     appid;
     private String   scopeType;
     private Long     scopeId;
+    private String   bannerLocation;
+    private String   bannerGroup;
     private String   name;
     private String   vendorTag;
     private String   posterPath;
@@ -72,6 +76,19 @@ public class BannerDTO {
     }
     public void setScopeId(Long scopeId) {
         this.scopeId = scopeId;
+    }
+    
+    public String getBannerLocation() {
+        return bannerLocation;
+    }
+    public void setBannerLocation(String bannerLocation) {
+        this.bannerLocation = bannerLocation;
+    }
+    public String getBannerGroup() {
+        return bannerGroup;
+    }
+    public void setBannerGroup(String bannerGroup) {
+        this.bannerGroup = bannerGroup;
     }
     public String getName() {
         return name;

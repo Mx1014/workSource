@@ -127,7 +127,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             item.setItemName(StringUtils.upperCase(cmd.getItemName()));
             item.setActionType(cmd.getActionType());
             item.setActionData(cmd.getActionData());
-            item.setItemGroup(cmd.getItemTag());
+            item.setItemGroup(cmd.getItemGroup());
+            item.setItemLocation(cmd.getItemLocation());
             item.setIconUri(cmd.getIconUri());
             item.setItemWidth(cmd.getItemWidth() == null ? 1 : cmd.getItemWidth());
             item.setItemHeight(cmd.getItemHeight() == null ? 1 : cmd.getItemHeight());
@@ -250,11 +251,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
-    public ListLaunchPadByCommunityIdCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
-        if(cmd.getComponentTag() == null){
+    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
+        if(cmd.getItemLocation() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid service type paramter,serviceType is null");
+                    "Invalid itemLocation paramter,itemLocation is null");
         }
+        if(cmd.getItemGroup() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemGroup paramter,itemGroup is null");
+        }
+        
         long communityId = cmd.getCommunityId();
         Community community = communityProvider.findCommunityById(communityId);
         if(community == null){
@@ -266,9 +272,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         long userId = user.getId();
         String token = UserContext.current().getLogin().getLoginToken().getTokenString();
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getComponentTag(),LaunchPadScopeType.COUNTRY.getCode(),0L);
-        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getComponentTag(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
-        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getComponentTag(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
         List<LaunchPadItem> userItems = getUserItems(user.getId());
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
@@ -294,14 +300,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Unable to find launch pad handler.");
             LaunchPadItemDTO itemDTO = ConvertHelper.convert(handler.accesProcessLaunchPadItem(token, communityId, r), LaunchPadItemDTO.class);
+
             itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
             result.add(itemDTO);
         });
         long endTime = System.currentTimeMillis();
         
         LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
-                + ",tag=" + cmd.getComponentTag() + ",esplse=" + (endTime - startTime));
-        ListLaunchPadByCommunityIdCommandResponse response = new ListLaunchPadByCommunityIdCommandResponse();
+                + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
+        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
         response.setLaunchPadItems(result);
         
         return response;

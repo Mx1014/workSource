@@ -4,20 +4,20 @@ package com.everhomes.launchpad;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.launchpad.ListLaunchPadByCommunityIdCommandResponse;
+import com.everhomes.launchpad.GetLaunchPadItemsCommandResponse;
 
 public class ListLaunchPadByCommunityIdRestResponse extends RestResponseBase {
 
-    private ListLaunchPadByCommunityIdCommandResponse response;
+    private GetLaunchPadItemsCommandResponse response;
 
     public ListLaunchPadByCommunityIdRestResponse () {
     }
 
-    public ListLaunchPadByCommunityIdCommandResponse getResponse() {
+    public GetLaunchPadItemsCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListLaunchPadByCommunityIdCommandResponse response) {
+    public void setResponse(GetLaunchPadItemsCommandResponse response) {
         this.response = response;
     }
 }

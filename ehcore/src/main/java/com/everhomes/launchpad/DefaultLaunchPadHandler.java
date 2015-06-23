@@ -6,13 +6,12 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 
 
-@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_COUPON)
-public class CouponLaunchPadHandler implements LaunchPadHandler {
+@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.DEFAULT)
+public class DefaultLaunchPadHandler implements LaunchPadHandler {
     
     @Autowired
     private LaunchPadProvider launchPadProvider;
@@ -22,7 +21,7 @@ public class CouponLaunchPadHandler implements LaunchPadHandler {
     public LaunchPadItem accesProcessLaunchPadItem(String userToken, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
-        launchPadItem.setJsonObj(parserJson(userToken, commnunityId, launchPadItem));
+        launchPadItem.setActionData(parserJson(userToken, commnunityId, launchPadItem));
         
         return launchPadItem;
     }

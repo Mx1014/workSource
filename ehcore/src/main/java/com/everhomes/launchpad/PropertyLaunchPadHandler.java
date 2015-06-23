@@ -11,7 +11,7 @@ import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryType;
 
 
-@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.SYS_PM_TOPICS)
+@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.GAACTIONS)
 public class PropertyLaunchPadHandler implements LaunchPadHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyLaunchPadHandler.class);
     @Autowired
@@ -29,7 +29,7 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
     private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
         JSONObject jsonObject = new JSONObject();
         try{
-            if(launchPadItem.getItemGroup().equals(ItemTag.SYS_PM_TOPICS.getCode())){
+            if(launchPadItem.getItemGroup().equals(ItemGroup.GAACTIONS)){
                 String itemName = launchPadItem.getItemName();
                 if(itemName.equals(CategoryType.ADVISE.getCode())){
                     jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_ADVISE);

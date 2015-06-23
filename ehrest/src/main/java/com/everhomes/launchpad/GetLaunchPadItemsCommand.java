@@ -8,26 +8,37 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>tag: 标签类型</li>
+ * <li>itemLocation: item的路径</li>
+ *  <li>itemGroup: 当前item归属哪个组</li>
  * <li>communityId: 小区id</li>
  * </ul>
  */
 public class GetLaunchPadItemsCommand {
     
     @NotNull
-    private String    componentTag;
+    private String    itemLocation;
+    @NotNull
+    private String    itemGroup;
     @NotNull
     private Long    communityId;
 
     public GetLaunchPadItemsCommand() {
     }
 
-    public String getComponentTag() {
-        return componentTag;
+    public String getItemLocation() {
+        return itemLocation;
     }
 
-    public void setComponentTag(String componentTag) {
-        this.componentTag = componentTag;
+    public void setItemLocation(String itemLocation) {
+        this.itemLocation = itemLocation;
+    }
+
+    public String getItemGroup() {
+        return itemGroup;
+    }
+
+    public void setItemGroup(String itemGroup) {
+        this.itemGroup = itemGroup;
     }
 
     public Long getCommunityId() {
