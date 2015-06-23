@@ -1,5 +1,6 @@
 package com.everhomes.user;
 
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -24,10 +25,9 @@ public class CreateInvitationCommand {
 
     
     @NotNull
-    private String inviteType;
+    private Byte inviteType;
     @NotNull
     private String targetEntityType;
-    @NotNull
     private Long targetEntityId;
 
     private String identifiers;
@@ -39,11 +39,11 @@ public class CreateInvitationCommand {
 
     private String aptNumber;
 
-    public String getInviteType() {
+    public Byte getInviteType() {
         return inviteType;
     }
 
-    public void setInviteType(String inviteType) {
+    public void setInviteType(Byte inviteType) {
         this.inviteType = inviteType;
     }
 
