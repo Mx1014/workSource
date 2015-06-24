@@ -52,12 +52,12 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-	 * <b>URL: /org/listDptMembers</b>
+	 * <b>URL: /org/listOrgMembers</b>
      * <p>查询政府机构成员列表</p>
      */
-    @RequestMapping("listDptMembers")
+    @RequestMapping("listOrgMembers")
     @RestReturn(value=ListPropMemberCommandResponse.class)
-    public RestResponse listDptMembers(@Valid ListOrganizationMemberCommand cmd) {
+    public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
     	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrganizationMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -66,13 +66,13 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/addDptMemberByPhone</b>
+     * <b>URL: /org/addOrgMemberByPhone</b>
      * <p>通过手机添加府机构成员</p>
      * @return 添加的结果
      */
-    @RequestMapping("addDptMemberByPhone")
+    @RequestMapping("addOrgMemberByPhone")
     @RestReturn(value=String.class)
-    public RestResponse addDptMemberByPhone(@Valid CreateOrganizationMemberCommand cmd) {
+    public RestResponse addOrgMemberByPhone(@Valid CreateOrganizationMemberCommand cmd) {
     	
     	organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
@@ -98,13 +98,13 @@ public class OrganizationController extends ControllerBase {
     
     
     /**
-     * <b>URL: /org/newDptTopic</b>
+     * <b>URL: /org/newOrgTopic</b>
      * <p>物业人员发帖</p>
      * @return 发帖的内容
      */
-    @RequestMapping("newDptTopic")
+    @RequestMapping("newOrgTopic")
     @RestReturn(value=PostDTO.class)
-    public RestResponse newDptTopic(@Valid NewTopicCommand cmd) {
+    public RestResponse newOrgTopic(@Valid NewTopicCommand cmd) {
     	PostDTO postDto = organizationService.createTopic(cmd);
     	RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -113,12 +113,12 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/queryDptTopicsByCategory</b>
+     * <b>URL: /org/queryOrgTopicsByCategory</b>
      * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
      */
-    @RequestMapping("queryDptTopicsByCategory")
+    @RequestMapping("queryOrgTopicsByCategory")
     @RestReturn(value=ListPropPostCommandResponse.class)
-    public RestResponse queryDptTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
+    public RestResponse queryOrgTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
     	ListPropPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -127,12 +127,12 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/listDptTopics</b>
+     * <b>URL: /org/listOrgTopics</b>
      * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
      */
-    @RequestMapping("listDptTopics")
+    @RequestMapping("listOrgTopics")
     @RestReturn(value=ListPostCommandResponse.class)
-    public RestResponse listDptTopics(ListTopicCommand cmd) {
+    public RestResponse listOrgTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = organizationService.listTopics(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -142,12 +142,12 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/getDptTopic</b>
+     * <b>URL: /org/getOrgTopic</b>
      * <p>获取指定论坛里的指定帖子内容</p>
      */
-    @RequestMapping("getDptTopic")
+    @RequestMapping("getOrgTopic")
     @RestReturn(value=PostDTO.class)
-    public RestResponse getDptTopic(GetTopicCommand cmd) {
+    public RestResponse getOrgTopic(GetTopicCommand cmd) {
         PostDTO postDto = organizationService.getTopic(cmd);
         
         RestResponse response = new RestResponse(postDto);
@@ -157,13 +157,13 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/likeDptTopic</b>
+     * <b>URL: /org/likeOrgTopic</b>
      * <p>对指定论坛里的指定帖子点赞</p>
      * @return 点赞的结果
      */
-    @RequestMapping("likeDptTopic")
+    @RequestMapping("likeOrgTopic")
     @RestReturn(value=String.class)
-    public RestResponse likeDptTopic(LikeTopicCommand cmd) {
+    public RestResponse likeOrgTopic(LikeTopicCommand cmd) {
         organizationService.likeTopic(cmd);
         
         RestResponse response = new RestResponse();
@@ -173,13 +173,13 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/cancelLikeDptTopic</b>
+     * <b>URL: /org/cancelLikeOrgTopic</b>
      * <p>对指定论坛里的指定帖子取消赞</p>
      * @return 取消赞的结果
      */
-    @RequestMapping("cancelLikeDptTopic")
+    @RequestMapping("cancelLikeOrgTopic")
     @RestReturn(value=String.class)
-    public RestResponse cancelLikeDptTopic(CancelLikeTopicCommand cmd) {
+    public RestResponse cancelLikeOrgTopic(CancelLikeTopicCommand cmd) {
         organizationService.cancelLikeTopic(cmd);
         
         RestResponse response = new RestResponse();
@@ -189,13 +189,13 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/deleteDptTopic</b>
+     * <b>URL: /org/deleteOrgTopic</b>
      * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
      * @return 删除结果
      */
-    @RequestMapping("deleteDptTopic")
+    @RequestMapping("deleteOrgTopic")
     @RestReturn(value=String.class)
-    public RestResponse deleteDptTopic(DeleteTopicCommand cmd) {
+    public RestResponse deleteOrgTopic(DeleteTopicCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
@@ -253,12 +253,12 @@ public class OrganizationController extends ControllerBase {
 //    }
    
     /**
-     * <b>URL: /org/listDptTopicComments</b>
+     * <b>URL: /org/listOrgTopicComments</b>
      * <p>获取指定论坛里指定帖子下的评论列表</p>
      */
-    @RequestMapping("listDptTopicComments")
+    @RequestMapping("listOrgTopicComments")
     @RestReturn(value=PostDTO.class, collection=true)
-    public RestResponse listDptTopicComments(@Valid ListTopicCommentCommand cmd) {
+    public RestResponse listOrgTopicComments(@Valid ListTopicCommentCommand cmd) {
         ListPostCommandResponse cmdResponse = organizationService.listTopicComments(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -268,12 +268,12 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/newDptComment</b>
+     * <b>URL: /org/newOrgComment</b>
      * <p>创建新评论</p>
      */
-    @RequestMapping("newDptComment")
+    @RequestMapping("newOrgComment")
     @RestReturn(value=PostDTO.class)
-    public RestResponse newDptComment(@Valid NewCommentCommand cmd) {
+    public RestResponse newOrgComment(@Valid NewCommentCommand cmd) {
         PostDTO postDTO = organizationService.createComment(cmd);
         
         RestResponse response = new RestResponse(postDTO);
@@ -283,13 +283,13 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/deleteDptComment</b>
+     * <b>URL: /org/deleteOrgComment</b>
      * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
      * @return 删除结果
      */
-    @RequestMapping("deleteDptComment")
+    @RequestMapping("deleteOrgComment")
     @RestReturn(value=String.class)
-    public RestResponse deleteDptComment(DeleteCommentCommand cmd) {
+    public RestResponse deleteOrgComment(DeleteCommentCommand cmd) {
         
         // ???
         RestResponse response = new RestResponse();
