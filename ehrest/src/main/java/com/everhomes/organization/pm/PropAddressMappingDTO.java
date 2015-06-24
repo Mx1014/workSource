@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区id</li>
  * <li>addressId: 地址id</li>
  * <li>addressName:地址名称 </li>
- * <li>name:物业映射地址名称 </li>
+ * <li>organizationAddress:物业映射地址名称 </li>
  * </ul>
  */
 public class PropAddressMappingDTO {
@@ -17,8 +17,8 @@ public class PropAddressMappingDTO {
 	private Long   communityId;
 	private Long   addressId;
 	private String addressName;
-	private String name;
-    
+    private String organizationAddress;
+
     public PropAddressMappingDTO() {
     }
 
@@ -54,15 +54,6 @@ public class PropAddressMappingDTO {
 	}
 
 
-	public String getName() {
-		return name;
-	}
-
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 
 	public String getAddressName() {
 		return addressName;
@@ -71,6 +62,16 @@ public class PropAddressMappingDTO {
 
 	public void setAddressName(String addressName) {
 		this.addressName = addressName;
+	}
+
+
+	public String getOrganizationAddress() {
+		return organizationAddress;
+	}
+
+
+	public void setOrganizationAddress(String organizationAddress) {
+		this.organizationAddress = organizationAddress;
 	}
 
 

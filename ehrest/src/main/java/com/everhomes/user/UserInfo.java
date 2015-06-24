@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  *         <li>topicFavoriteCount:帖子收藏数</li>
  *         <li>sharedCount:分享数</li>
  *         <li>points:用户积分</li>
+ *         <li>level:用户级别</li>
  *         </ul>
  **/
 public class UserInfo {
@@ -67,6 +68,7 @@ public class UserInfo {
     private Integer sharedCount;
     private Integer points;
     private String pointRuleUrl;
+    private Byte level;
 
     @ItemType(String.class)
     private List<String> phones;
@@ -291,6 +293,15 @@ public class UserInfo {
 
     public void setPointRuleUrl(String pointRuleUrl) {
         this.pointRuleUrl = pointRuleUrl;
+    }
+    
+
+    public Byte getLevel() {
+        return level;
+    }
+
+    public void setLevel(Byte level) {
+        this.level = level;
     }
 
     @Override
