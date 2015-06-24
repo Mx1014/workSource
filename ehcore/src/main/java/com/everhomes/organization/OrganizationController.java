@@ -56,7 +56,7 @@ public class OrganizationController extends ControllerBase {
      * <p>查询政府机构成员列表</p>
      */
     @RequestMapping("listOrgMembers")
-    @RestReturn(value=ListPropMemberCommandResponse.class)
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
     	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrganizationMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -73,7 +73,6 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("addOrgMemberByPhone")
     @RestReturn(value=String.class)
     public RestResponse addOrgMemberByPhone(@Valid CreateOrganizationMemberCommand cmd) {
-    	
     	organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -81,6 +80,35 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /org/createOrganizationCommunity</b>
+     * <p>创建政府机构对应的小区列表</p>
+     * @return 添加的结果
+     */
+    @RequestMapping("createOrganizationCommunity")
+    @RestReturn(value=String.class)
+    public RestResponse createOrganizationCommunity(@Valid CreateOrganizationCommunityCommand cmd) {
+    	organizationService.createOrganizationCommunity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: org/listOrganizationCommunities</b>
+     * <p>列出政府机构表（）</p>
+     */
+    @RequestMapping("listOrganizationCommunities")
+    @RestReturn(value=ListOrganizationCommunityCommandResponse.class)
+    public RestResponse listOrganizationCommunities(@Valid ListOrganizationCommunityCommand cmd) {
+    	ListOrganizationCommunityCommandResponse commandResponse = organizationService.listOrganizationCommunities(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /org/findUserByIndentifier</b>
      * <p>根据用户token查询用户信息</p>

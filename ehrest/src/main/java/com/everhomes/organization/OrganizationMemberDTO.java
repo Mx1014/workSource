@@ -8,26 +8,41 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
 
- * <li>organizationId：政府id</li>
- * <li>memberUid：用户id</li>
- * <li>memberGroup：成员类型。参考 {@link com.everhomes.organization.OrganizationGroup}</li>
+ * <li>organizationId: 小区id</li>
+ * <li>targetType：成员是否注册 参考{@link com.everhomes.organization.pm.PmMemberTargetType}</li>
+ * <li>targetId：注册用户对应的userId，未注册填0</li>
+ * <li>memberGroup：组织角色类型 参考{@link com.everhomes.organization.pm.PmMemberGroup}</li>
+ * <li>contactName：成员名称</li>
+ * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
+ * <li>contactToken：成员标识</li>
+ * <li>contactDescription：描述</li>
+ * <li>status：状态</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
 	@NotNull
-	private Long   organizationId;
-	@NotNull
-	private Long   memberUid;
-	@NotNull
+    private Long   organizationId;
+   
+	private String targetType;
+    @NotNull
+	private Long   targetId;
+
 	private String memberGroup;
+	private String contactName;
+	private Byte   contactType;
+	private String contactToken;
+	private String contactDescription;
+	private Byte   status;
 	
 	public OrganizationMemberDTO() {
     }
 	
 	
+
 	public Long getOrganizationId() {
 		return organizationId;
 	}
+
 
 
 	public void setOrganizationId(Long organizationId) {
@@ -35,14 +50,29 @@ public class OrganizationMemberDTO {
 	}
 
 
-	public Long getMemberUid() {
-		return memberUid;
+
+	public String getTargetType() {
+		return targetType;
 	}
 
 
-	public void setMemberUid(Long memberUid) {
-		this.memberUid = memberUid;
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
+
+
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
 
 
 	public String getMemberGroup() {
@@ -50,9 +80,71 @@ public class OrganizationMemberDTO {
 	}
 
 
+
 	public void setMemberGroup(String memberGroup) {
 		this.memberGroup = memberGroup;
 	}
+
+
+
+	public String getContactName() {
+		return contactName;
+	}
+
+
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+
+
+	public Byte getContactType() {
+		return contactType;
+	}
+
+
+
+	public void setContactType(Byte contactType) {
+		this.contactType = contactType;
+	}
+
+
+
+	public String getContactToken() {
+		return contactToken;
+	}
+
+
+
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
+	}
+
+
+
+	public String getContactDescription() {
+		return contactDescription;
+	}
+
+
+
+	public void setContactDescription(String contactDescription) {
+		this.contactDescription = contactDescription;
+	}
+
+
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 
 
 	@Override
