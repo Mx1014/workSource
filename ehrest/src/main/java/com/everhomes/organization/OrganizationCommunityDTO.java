@@ -1,26 +1,20 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.address.CommunityDTO;
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>organization：机构详情</li>
- * <li>communityList：对应小区详情</li>
+ * <li>community：小区详情</li>
  * </ul>
  */
 public class OrganizationCommunityDTO {
 	
 	private OrganizationDTO organization;
 	
-	@ItemType(Long.class)
-	private List<CommunityDTO> communityList;
+	private CommunityDTO community;
 
 	
 	public OrganizationCommunityDTO() {
@@ -38,13 +32,13 @@ public class OrganizationCommunityDTO {
 	}
 
 
-	public List<CommunityDTO> getCommunityList() {
-		return communityList;
+	public CommunityDTO getCommunity() {
+		return community;
 	}
 
 
-	public void setCommunityList(List<CommunityDTO> communityList) {
-		this.communityList = communityList;
+	public void setCommunity(CommunityDTO community) {
+		this.community = community;
 	}
 
 

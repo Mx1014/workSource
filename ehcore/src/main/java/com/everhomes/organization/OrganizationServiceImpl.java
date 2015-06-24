@@ -14,6 +14,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.address.CommunityDTO;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -537,5 +538,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 	            sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
 	        }
 	        
+	    }
+	    
+	    @Override
+	    public ListOrganizationCommunityCommandResponse listOrganizationCommunities(ListOrganizationCommunityCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	ListOrganizationCommunityCommandResponse response = new ListOrganizationCommunityCommandResponse();
+	    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+	    	int totalCount = organizationProvider.countOrganizationCommunitys(cmd.getOrganizationId());
+	    	if(totalCount == 0) return response;
+	    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    	int pageCount = getPageCount(totalCount, pageSize);
+	    	List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId(),cmd.getPageOffset(),pageSize);
+	    	List<OrganizationCommunityDTO> members = new ArrayList<OrganizationCommunityDTO>();
+	    	if(result != null && result.size() > 0){
+	    		for (OrganizationCommunity organizationCommunity : result) {
+	    			OrganizationCommunityDTO dto = new OrganizationCommunityDTO();
+	    			Organization organization = organizationProvider.findOrganizationById(organizationCommunity.getOrganizationId());
+	    			Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+	    			dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
+	    			dto.setOrganization(ConvertHelper.convert(organization,OrganizationDTO.class));
+	    			members.add(dto);
+				}
+	    	}
+	    	response.setMembers(members);
+	    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+	    	return response;
 	    }
 }
