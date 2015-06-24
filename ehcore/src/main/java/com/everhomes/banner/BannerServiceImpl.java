@@ -42,6 +42,7 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
         }
+        
         long communityId = cmd.getCommunityId();
         Community community = communityProvider.findCommunityById(communityId);
         if(community == null){
