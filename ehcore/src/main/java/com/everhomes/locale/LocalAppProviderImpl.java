@@ -100,8 +100,9 @@ public class LocalAppProviderImpl implements LocalAppProvier {
     public Map<String, String> findAppInfos() {
         Map<String, String> map = new HashMap<String, String>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfigurations.class));
-        context.select().from(Tables.EH_CONFIGURATIONS).where(Tables.EH_CONFIGURATIONS.NAME.like("app.info.%")).fetch()
-                .stream().forEach(r -> {
+        context.select().from(Tables.EH_CONFIGURATIONS).where(Tables.EH_CONFIGURATIONS.NAME.like("android.%"))
+                .or(Tables.EH_CONFIGURATIONS.NAME.like("ios.%")).or(Tables.EH_CONFIGURATIONS.NAME.like("user.%"))
+                .or(Tables.EH_CONFIGURATIONS.NAME.eq(MKT_DATA_VERSION)).fetch().stream().forEach(r -> {
                     EhConfigurationsRecord record = (EhConfigurationsRecord) r;
                     map.put(record.getName(), record.getValue());
                 });

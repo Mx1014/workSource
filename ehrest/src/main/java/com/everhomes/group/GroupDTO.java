@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -60,6 +61,8 @@ public class GroupDTO {
     
     @ItemType(Long.class)
     private List<Long> memberForumPrivileges;
+    
+    private Timestamp updateTime;
     
     public GroupDTO() {
     }
@@ -246,6 +249,14 @@ public class GroupDTO {
 
     public void setPostFlag(Byte postFlag) {
         this.postFlag = postFlag;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     @Override

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.group;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberNickName：成员在group内的昵称</li>
  * <li>memberAvatar：成员在group内的头像URI</li>
  * <li>memberAvatarUrl：成员在group内的头像URL</li>
+ * <li>updateTime：更新时间</li>
  * </ul>
  */
 public class GroupMemberSnapshotDTO {
@@ -24,6 +27,7 @@ public class GroupMemberSnapshotDTO {
     private String memberNickName;
     private String memberAvatar;
     private String memberAvatarUrl;
+    private Timestamp updateTime;
     
     public GroupMemberSnapshotDTO() {
     }
@@ -92,6 +96,14 @@ public class GroupMemberSnapshotDTO {
         this.memberNickName = memberNickName;
     }
     
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -15,9 +15,7 @@ import com.everhomes.util.StringHelper;
 public class GetBannersCommand {
     @NotNull
     private Long communityId;
-    @NotNull
     private String bannerLocation;
-    @NotNull
     private String bannerGroup;
 
     public GetBannersCommand() {
