@@ -234,6 +234,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	    	if(list == null || list.size() == 0)
 	    	{
 	    		CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
+	    		communityPmMember.setOrganizationId(organizationId);
 	        	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
 	        	propertyMgrProvider.createPropMember(communityPmMember);
 	    	}

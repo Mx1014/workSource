@@ -14,6 +14,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.CreateOrganizationCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
+import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.ListOrganizationsCommand;
 import com.everhomes.organization.ListOrganizationsCommandResponse;
 import com.everhomes.organization.OrganizationService;
@@ -66,6 +67,21 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrganizationCommunity(@Valid CreateOrganizationCommunityCommand cmd) {
     	organizationService.createOrganizationCommunity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/createPropertyOrganization</b>
+     * <p>创建小区的物业机构</p>
+     * @return 添加的结果
+     */
+    @RequestMapping("createPropertyOrganization")
+    @RestReturn(value=String.class)
+    public RestResponse createPropertyOrganization(@Valid CreatePropertyOrganizationCommand cmd) {
+    	organizationService.createPropertyOrganization(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

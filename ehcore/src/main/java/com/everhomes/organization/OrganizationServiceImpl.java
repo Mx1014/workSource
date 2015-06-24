@@ -174,7 +174,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationProvider.createOrganizationCommunity(departmentCommunity);
 			}
     	}
-    	
+    }
+    
+    @Override
+    public void createPropertyOrganization(CreatePropertyOrganizationCommand cmd) {
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	Organization organization = new Organization();
+    	organization.setLevel(0);
+    	organization.setAddressId(0l);
+    	organization.setName(community.getName()+"物业");
+    	organization.setOrganizationType(OrganizationType.PM.getCode());
+    	organization.setParentId(0l);
+    	organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+    	organizationProvider.createOrganization(organization);
+    	OrganizationCommunity departmentCommunity = new OrganizationCommunity();
+		departmentCommunity.setCommunityId(community.getId());
+		departmentCommunity.setOrganizationId(organization.getId());
+		organizationProvider.createOrganizationCommunity(departmentCommunity);
     }
     
     @Override
