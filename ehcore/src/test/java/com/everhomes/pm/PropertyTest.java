@@ -1,9 +1,6 @@
 // @formatter:off
 package com.everhomes.pm;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -25,6 +22,27 @@ import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.CommunityPmBill;
+import com.everhomes.organization.pm.CommunityPmMember;
+import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.organization.pm.CommunityPmTasks;
+import com.everhomes.organization.pm.DeletePropMemberCommand;
+import com.everhomes.organization.pm.ListPropBillCommand;
+import com.everhomes.organization.pm.ListPropBillCommandResponse;
+import com.everhomes.organization.pm.ListPropOwnerCommand;
+import com.everhomes.organization.pm.ListPropOwnerCommandResponse;
+import com.everhomes.organization.pm.ListPropTopicStatisticCommand;
+import com.everhomes.organization.pm.ListPropTopicStatisticCommandResponse;
+import com.everhomes.organization.pm.PmTaskStatus;
+import com.everhomes.organization.pm.PropBillDTO;
+import com.everhomes.organization.pm.PropCommunityBillDateCommand;
+import com.everhomes.organization.pm.PropCommunityBillIdCommand;
+import com.everhomes.organization.pm.PropCommunityBuildAddessCommand;
+import com.everhomes.organization.pm.PropCommunityIdCommand;
+import com.everhomes.organization.pm.PropOwnerDTO;
+import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.sharding.ShardingProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 1743488679;
+	private static final long serialVersionUID = 485655064;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.id</code>. id of the record
@@ -280,143 +280,157 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_group_members.update_time</code>.
+	 */
+	public void setUpdateTime(java.sql.Timestamp value) {
+		setValue(19, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_group_members.update_time</code>.
+	 */
+	public java.sql.Timestamp getUpdateTime() {
+		return (java.sql.Timestamp) getValue(19);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(21);
+		return (java.lang.Long) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(22);
+		return (java.lang.Long) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(23);
+		return (java.lang.Long) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(24);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(25, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(25);
+		return (java.lang.String) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(26, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(26);
+		return (java.lang.String) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(27, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(27);
+		return (java.lang.String) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(28, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(28);
+		return (java.lang.String) getValue(29);
 	}
 
 	// -------------------------------------------------------------------------
@@ -445,7 +459,7 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	/**
 	 * Create a detached, initialised EhGroupMembersRecord
 	 */
-	public EhGroupMembersRecord(java.lang.Long id, java.lang.Long groupId, java.lang.String memberType, java.lang.Long memberId, java.lang.Long memberRole, java.lang.String memberAvatar, java.lang.String memberNickName, java.lang.Byte memberStatus, java.sql.Timestamp createTime, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.String proofResourceUrl, java.sql.Timestamp approveTime, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Long inviterUid, java.sql.Timestamp inviteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhGroupMembersRecord(java.lang.Long id, java.lang.Long groupId, java.lang.String memberType, java.lang.Long memberId, java.lang.Long memberRole, java.lang.String memberAvatar, java.lang.String memberNickName, java.lang.Byte memberStatus, java.sql.Timestamp createTime, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.String proofResourceUrl, java.sql.Timestamp approveTime, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Long inviterUid, java.sql.Timestamp inviteTime, java.sql.Timestamp updateTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS);
 
 		setValue(0, id);
@@ -467,15 +481,16 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 		setValue(16, operationType);
 		setValue(17, inviterUid);
 		setValue(18, inviteTime);
-		setValue(19, integralTag1);
-		setValue(20, integralTag2);
-		setValue(21, integralTag3);
-		setValue(22, integralTag4);
-		setValue(23, integralTag5);
-		setValue(24, stringTag1);
-		setValue(25, stringTag2);
-		setValue(26, stringTag3);
-		setValue(27, stringTag4);
-		setValue(28, stringTag5);
+		setValue(19, updateTime);
+		setValue(20, integralTag1);
+		setValue(21, integralTag2);
+		setValue(22, integralTag3);
+		setValue(23, integralTag4);
+		setValue(24, integralTag5);
+		setValue(25, stringTag1);
+		setValue(26, stringTag2);
+		setValue(27, stringTag3);
+		setValue(28, stringTag4);
+		setValue(29, stringTag5);
 	}
 }

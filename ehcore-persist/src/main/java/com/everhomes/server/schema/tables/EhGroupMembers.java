@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 2111166179;
+	private static final long serialVersionUID = -1477790378;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -120,6 +120,11 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_group_members.invite_time</code>. the time the member is invited
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> INVITE_TIME = createField("invite_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the time the member is invited");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.integral_tag1</code>.
