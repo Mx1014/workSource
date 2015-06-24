@@ -1,6 +1,8 @@
 package com.everhomes.admin.community;
 
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -9,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.CommunityDTO;
 import com.everhomes.banner.UpdateBannerCommand;
 import com.everhomes.community.ApproveCommunityCommand;
 import com.everhomes.community.CommunityService;
+import com.everhomes.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.community.ListCommunitesByStatusCommand;
 import com.everhomes.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.community.RejectCommunityCommand;
@@ -115,5 +119,22 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }    
+    
+    
+    /**
+     * <b>URL: /community/getNearbyCommunitiesById</b>
+     * <p>根据小区id查询该小区的周边小区列表</p>
+     */
+    @RequestMapping("getNearbyCommunitiesById")
+    @RestReturn(value=CommunityDTO.class, collection=true)
+    public RestResponse getNearbyCommunitiesById(@Valid GetNearbyCommunitiesByIdCommand cmd) {
+        List<CommunityDTO> results = this.communityService.getNearbyCommunityById(cmd);
+        RestResponse response =  new RestResponse(results);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 }
