@@ -45,6 +45,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
+import freemarker.core.ReturnInstruction.Return;
+
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
@@ -313,6 +315,23 @@ public class CommunityServiceImpl implements CommunityService {
         community.setRequestStatus(cmd.getRequestStatus());
         this.communityProvider.updateCommunity(community);
         
+    }
+    
+    @Override
+    public List<CommunityDTO> getNearbyCommunityById(GetNearbyCommunitiesByIdCommand cmd){
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+        }
+        Community community = this.communityProvider.findCommunityById(cmd.getId());
+        if(community == null){
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                    "Community is not found.");
+        }
+        List<CommunityDTO> result = this.communityProvider.findNearyByCommunityById(cmd.getId()).stream().map((r) ->{
+            return ConvertHelper.convert(r, CommunityDTO.class);
+        }).collect(Collectors.toList());
+        return result;
     }
 
 }
