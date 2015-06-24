@@ -20,6 +20,8 @@ import com.everhomes.util.StringHelper;
  * <li>posterPath: 图片路径</li>
  * <li>actionName: 动作名称</li>
  * <li>actionUri: 动作uri</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.launchpad.ActionType}</li>
+ * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
  * <li>endTime: banner结束时间</li>
  * </ul>
@@ -43,6 +45,10 @@ public class CreateBannerCommand {
     private String   actionName;
     @NotNull
     private String   actionUri;
+    @NotNull
+    private Byte    actionType;
+    @NotNull
+    private String  actionData;
     private Timestamp startTime;
     private Timestamp endTime;
     @NotNull
@@ -135,6 +141,19 @@ public class CreateBannerCommand {
     }
     public void setBannerGroup(String bannerGroup) {
         this.bannerGroup = bannerGroup;
+    }
+    
+    public Byte getActionType() {
+        return actionType;
+    }
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
+    }
+    public String getActionData() {
+        return actionData;
+    }
+    public void setActionData(String actionData) {
+        this.actionData = actionData;
     }
     @Override
     public String toString() {

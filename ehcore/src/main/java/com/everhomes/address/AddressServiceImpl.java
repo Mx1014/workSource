@@ -325,7 +325,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
-                    String likeVal = cmd.getKeyword() + "%";
+                    String likeVal = "%" + cmd.getKeyword() + "%";
                     context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
@@ -353,7 +353,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(cmd.getKeyword() == null)
             cmd.setKeyword("");
         List<ApartmentDTO> results = new ArrayList<>();
-        
+        String likeVal = "%" + cmd.getKeyword() + "%";
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
@@ -362,7 +362,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
-                        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(cmd.getKeyword() + "%"))
+                        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
                         .fetch().map((r) -> {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
