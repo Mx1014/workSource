@@ -68,6 +68,12 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -90,10 +96,12 @@ import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.visibility.VisibleRegionType;
-
-@Component
+/*
+ * //物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
+ */
+@Component 
 public class PropertyMgrServiceImpl implements PropertyMgrService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
     private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
     private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
     private static final String PROP_MESSAGE_BILL = "prop.message.bill";
@@ -142,6 +150,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Autowired
     private  ForumService forumService;
     
+    @Autowired
+    private  OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private  OrganizationService organizationService;
+    
     @Override
     public void applyPropertyMember(applyPropertyMemberCommand cmd) {
     	User user  = UserContext.current().getUser();
@@ -162,7 +176,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
    		 	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "you not belong to the community.");
     	}
-    	CommunityPmMember communityPmMember = createCommunityPmMember(communityId,cmd.getContactDescription(),user);
+    	//物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
+    	long organizationId = findPropertyOrganizationId(communityId);
+    	CommunityPmMember communityPmMember = createCommunityPmMember(organizationId,cmd.getContactDescription(),user);
     	propertyMgrProvider.createPropMember(communityPmMember);
     	
     }
@@ -185,7 +201,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	    	communityPmMember.setContactToken(identifier.getIdentifierToken());
 	    	communityPmMember.setContactType(identifier.getIdentifierType());
     	}
-    	communityPmMember.setMemberGroup(PmGroup.MANAGER.getCode());
+    	communityPmMember.setMemberGroup(PmMemberGroup.MANAGER.getCode());
     	communityPmMember.setStatus(PmMemberStatus.CONFIRMING.getCode());
     	communityPmMember.setTargetType(PmMemberTargetType.USER.getCode());
     	communityPmMember.setTargetId(user.getId());
@@ -208,6 +224,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	//先判断，如果不属于这个小区的物业，才添加物业成员。状态直接设为正常
     	Long addUserId =  cmd.getTargetId();
     	//添加已注册用户为管理员。
@@ -232,8 +250,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
                 	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
-                	 Community community = communityProvider.findCommunityById(dto.getCommunityId());
-                	 dto.setCommunityName(community.getName());
+                	 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
+                	 if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM ){
+                		 dto.setOrganizationName(organization.getName());
+                		 Community community = findPropertyOrganizationcommunity(organization.getId());
+                		 dto.setCommunityId(community.getId());
+                		 dto.setCommunityName(community.getName());
+                	 }
                 	 return dto; })
                  .collect(Collectors.toList()));
     	
@@ -256,8 +279,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-    	int totalCount = propertyMgrProvider.countCommunityPmMembers(cmd.getCommunityId(), null);
+    	int totalCount = propertyMgrProvider.countCommunityPmMembers(organizationId, null);
     	if(totalCount == 0) return commandResponse;
     	
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -267,7 +292,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	commandResponse.setMembers( entityResultList.stream()
                  .map(r->{ 
                 	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
-                	 dto.setCommunityName(community.getName());
+                	 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
+                	 dto.setOrganizationName(organization.getName());
+                	 if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM ){
+                		 dto.setOrganizationName(organization.getName());
+                		 dto.setCommunityId(community.getId());
+                		 dto.setCommunityName(community.getName());
+                	 }
                 	 return dto; })
                  .collect(Collectors.toList()));
     	commandResponse.setPageCount(pageCount);
@@ -284,7 +315,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	//只需要导入一次。先查询总数如果没有，继续导入。
     	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), 1, 10);
     	if(entityResultList == null || entityResultList.size() == 0)
@@ -325,6 +357,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId(),(byte)0);
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -359,6 +393,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	int totalCount = propertyMgrProvider.countCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress());
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -399,6 +435,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
     	if(totalCount == 0) return commandResponse;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -431,6 +469,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if(cmd.getCommunityId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId paramter.");
+        long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
         long communityId = cmd.getCommunityId();
         
         List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
@@ -915,17 +955,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
-    	
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
-    	if(mapping == null)
+    	if(mapping != null)
     	{
-    		PropCommunityIdCommand comand = new PropCommunityIdCommand();
-    		comand.setCommunityId(cmd.getCommunityId());
-    		importPMAddressMapping(comand);
-    		mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
+    		mapping.setLivingStatus(cmd.getStatus());
+        	propertyMgrProvider.updatePropAddressMapping(mapping);
     	}
-    	mapping.setLivingStatus(cmd.getStatus());
-    	propertyMgrProvider.updatePropAddressMapping(mapping);
+    	
     }
     
     @Override
@@ -1029,8 +1067,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		List<CommunityPmOwner> contactList = PropMrgOwnerHandler.processorPropMgrContact(user.getId(), communityId, resultList);
 		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
-		command.setCommunityId(communityId);
-		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(communityId);
+     	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+		
+		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(organizationId);
 		long addressId = 0;
 		if(contactList != null && contactList.size() > 0)
 		{
@@ -1048,6 +1087,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					}
 					
 				}
+				contact.setOrganizationId(organizationId);
 				contact.setAddressId(addressId);
 				propertyMgrProvider.createPropOwner(contact);
 				
@@ -1081,7 +1121,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<CommunityPmBill> billList = PropMgrBillHandler.processorPropBill(user.getId(), communityId, resultList, ProcessBillModel1.PROCESS_TO_OBJECT_PER_ROW, ProcessBillModel1.PROCESS_PREVIOUS_ROW_TITLE);
 		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
 		command.setCommunityId(communityId);
-		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(communityId);
+		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	
+		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(organizationId);
 		long addressId = 0;
 		if(billList != null && billList.size() > 0)
 		{
@@ -1099,6 +1141,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					}
 					
 				}
+				bill.setOrganizationId(organizationId);
 				bill.setEntityId(addressId);
 				bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
 				createPropBill(bill);
@@ -1158,6 +1201,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                      "Unable to find the community.");
     	}
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	List<CommunityPmBill> billList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr());
     	sendPropertyBills(billList);
     	
@@ -1376,6 +1421,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	
 	@Override
 	public void sendMsgToPMGroup(PropCommunityIdMessageCommand cmd) {
+		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
 		List<CommunityPmMember> memberList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId());
 		if(memberList != null && memberList.size() > 0){
 			for (CommunityPmMember communityPmMember : memberList) {
@@ -1433,6 +1480,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	}
     	
     	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
     	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
     	if(totalCount == 0) return response;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -1523,6 +1572,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		String taskType = PmTaskType.fromCode(cmd.getCategoryId()).getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
+		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
 		Long communityId = cmd.getCommunityId();
 		/** 当天数量列表*/
 		List<Integer> todayList = new ArrayList<Integer>();
@@ -1604,6 +1655,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	//权限控制
     	int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
     	int userCount = familyProvider.countUserByCommunityId(communityId);
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+    	communityId = cmd.getCommunityId();
     	int defaultCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.DEFAULT.getCode());
     	int liveCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.LIVING.getCode());
     	int rentCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.RENT.getCode());
@@ -1620,5 +1674,52 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setDecorateCount(decorateCount);
 		dto.setUnsaleCount(unsaleCount);
 		return dto;
+	}
+	
+	@Override
+	public OrganizationDTO findPropertyOrganization(PropCommunityIdCommand cmd) {
+		OrganizationDTO dto = new OrganizationDTO();
+		User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
+    	if(organizationCommunity != null){
+    		Organization organization  = organizationProvider.findOrganizationById(organizationCommunity.getOrganizationId());
+    		if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
+    			dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+    		}
+    	}
+    	return dto;
+	}
+	
+	@Override
+	public Long findPropertyOrganizationId(Long communityId) {
+		OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationProperty(communityId);
+    	if(organizationCommunity != null){
+    		return organizationCommunity.getOrganizationId();
+    	}
+    	else{
+    		return 0l;
+    	}
+	}
+	
+	@Override
+	public Community findPropertyOrganizationcommunity(Long organizationId) {
+		Community community = new Community();
+		OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationPropertyCommunity(organizationId);
+		if(organizationCommunity != null){
+			community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+		}
+		return community;
 	}
 }

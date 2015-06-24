@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区id</li>
  * <li>targetType：成员是否注册{@link com.everhomes.use.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
- * <li>pmGroup：物业角色类型 参考{@link com.everhomes.pm.PmGroup}</li>
+ * <li>pmGroup：物业角色类型 参考{@link com.everhomes.PmMemberGroup.PmGroup}</li>
  * <li>contactName：成员名称</li>
  * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
  * <li>contactToken：成员标识</li>

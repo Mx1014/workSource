@@ -32,6 +32,7 @@ import com.everhomes.forum.ListTopicCommentCommand;
 import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
+import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
@@ -48,6 +49,20 @@ public class PropertyMgrController extends ControllerBase {
 	
 	@Autowired
 	PropertyMgrProvider propertyMgrProvider;
+	
+	/**
+	 * <b>URL: /pm/findPropertyOrganization</b>
+     * <p>获取物业组织</p>
+     */
+    @RequestMapping("findPropertyOrganization")
+    @RestReturn(value=OrganizationDTO.class)
+    public RestResponse findPropertyOrganization(@Valid PropCommunityIdCommand  cmd) {
+    	OrganizationDTO commandResponse = propertyMgrService.findPropertyOrganization(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	
 	 /**
 	 * <b>URL: /pm/getUserOwningProperties</b>

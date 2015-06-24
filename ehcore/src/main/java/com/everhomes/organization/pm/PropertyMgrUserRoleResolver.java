@@ -48,7 +48,7 @@ public class PropertyMgrUserRoleResolver implements ResourceUserRoleResolver {
         if(members != null && members.size() > 0) {
         	for(CommunityPmMember member : members) {
         		String group = member.getMemberGroup();
-        		PmGroup pmGroup = PmGroup.fromCode(group);
+        		PmMemberGroup pmGroup = PmMemberGroup.fromCode(group);
         		switch(pmGroup) {
         		case MANAGER:
         			// TODO: add the specific role

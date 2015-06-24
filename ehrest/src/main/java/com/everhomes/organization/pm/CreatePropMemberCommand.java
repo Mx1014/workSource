@@ -8,13 +8,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>communityId: 小区id</li>
- * <li>targetType：成员是否注册 参考{@link com.everhomes.use.PmMemberTargetType}</li>
+ * <li>targetType：成员是否注册 参考{@link com.everhomes.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
- * <li>pmGroup：物业角色类型 参考{@link com.everhomes.pm.PmGroup}</li>
+ * <li>memberGroup：组织角色类型 参考{@link com.everhomes.organization.pm.PmMemberGroup}</li>
  * <li>contactName：成员名称</li>
  * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
+ * </ul>
  * </ul>
  */
 public class CreatePropMemberCommand {
@@ -25,7 +26,7 @@ public class CreatePropMemberCommand {
     @NotNull
 	private Long   targetId;
 
-	private String pmGroup;
+	private String memberGroup;
 	private String contactName;
 	private Byte   contactType;
 	private String contactToken;
@@ -52,12 +53,7 @@ public class CreatePropMemberCommand {
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
 	}
-	public String getPmGroup() {
-		return pmGroup;
-	}
-	public void setPmGroup(String pmGroup) {
-		this.pmGroup = pmGroup;
-	}
+	
 	public String getContactName() {
 		return contactName;
 	}
@@ -84,6 +80,14 @@ public class CreatePropMemberCommand {
 	}
 	
 	
+	public String getMemberGroup() {
+		return memberGroup;
+	}
+
+	public void setMemberGroup(String memberGroup) {
+		this.memberGroup = memberGroup;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

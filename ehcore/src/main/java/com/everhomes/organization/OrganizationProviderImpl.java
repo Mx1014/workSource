@@ -24,6 +24,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
@@ -31,6 +32,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
@@ -292,6 +294,72 @@ public class OrganizationProviderImpl implements OrganizationProvider {
          });
          return result;
     }
+    
+    @Override
+    public List<OrganizationCommunity> listOrganizationCommunities(Long departmentId) {
+    	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+         List<OrganizationCommunity> result  = new ArrayList<OrganizationCommunity>();
+         SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+         if(departmentId != null && departmentId > 0){
+             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(departmentId));
+          }
+         query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
+         query.fetch().map((r) -> {
+         	result.add(ConvertHelper.convert(r, OrganizationCommunity.class));
+             return null;
+         });
+         return result;
+    }
+    
+    @Override
+    public List<OrganizationCommunity> listOrganizationByCommunityId(Long communityId) {
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<OrganizationCommunity> result  = new ArrayList<OrganizationCommunity>();
+        SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+        if(communityId != null && communityId > 0){
+            query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+         }
+        query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
+        query.fetch().map((r) -> {
+        	result.add(ConvertHelper.convert(r, OrganizationCommunity.class));
+            return null;
+        });
+        return result;
+    }
+    
+    @Override
+	public OrganizationCommunity findOrganizationProperty(Long communityId) {
+	   final OrganizationCommunity[] result = new OrganizationCommunity[1];
+       DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+       SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+       if(communityId != null && communityId > 0){
+           query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+       }
+       query.fetch().map((r) -> {
+   	   if(r != null)
+   		   	result[0] = ConvertHelper.convert(r, OrganizationCommunity.class);
+   	   		return null;
+       });
+       return result[0];
+	}
+    
+    @Override
+	public OrganizationCommunity findOrganizationPropertyCommunity(Long organizationId) {
+	   final OrganizationCommunity[] result = new OrganizationCommunity[1];
+       DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+       SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+       if(organizationId != null && organizationId > 0){
+           query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId));
+       }
+       query.fetch().map((r) -> {
+   	   if(r != null)
+   		   	result[0] = ConvertHelper.convert(r, OrganizationCommunity.class);
+   	   		return null;
+       });
+       return result[0];
+	}
     
     @Override
     public int countOrganizations(String name) {
