@@ -323,7 +323,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	if(entityResultList == null || entityResultList.size() == 0)
     	{
     		ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
-    		comand.setCommunityId(cmd.getCommunityId());
+    		comand.setCommunityId(community.getId());
     		comand.setKeyword("");
     		List<Address> addresses= addressService.listAddressByKeyword(comand);
     		if(addresses != null && addresses.size() > 0)
@@ -331,7 +331,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     			for (Address address : addresses) {
 					CommunityAddressMapping m = new CommunityAddressMapping();
 					m.setAddressId(address.getId());
-					m.setCommunityId(cmd.getCommunityId());
+					m.setOrganizationId(organizationId);
+					m.setCommunityId(community.getId());
 					m.setOrganizationAddress(address.getAddress());
 					m.setLivingStatus((byte)0);
 					propertyMgrProvider.createPropAddressMapping(m);

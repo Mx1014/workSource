@@ -382,4 +382,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
        		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
        return step.where(condition).fetchOneInto(Integer.class);
     }
+   
+   @Override
+	public int countOrganizationCommunitys(Long organizationId) {
+	   DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+       SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_COMMUNITIES);
+       Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId);
+       return step.where(condition).fetchOneInto(Integer.class);
+	}
 }

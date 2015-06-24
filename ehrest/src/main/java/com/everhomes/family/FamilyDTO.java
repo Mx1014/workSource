@@ -290,15 +290,17 @@ public class FamilyDTO {
         this.cellPhone = cellPhone;
     }
 
+    @Override
     public boolean equals(Object obj){
         if (! (obj instanceof FamilyDTO)) {
             return false;
         }
-        return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj,new String[]{"adminStatus","primaryFlag"});
     }
     
+    @Override
     public int hashCode(){
-        return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this,new String[]{"adminStatus","primaryFlag"});
     }
 
     @Override
