@@ -65,7 +65,7 @@ public class LaunchPadTest extends TestCase {
         cmd.setItemLocation("/home");
         cmd.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
         cmd.setItemLabel("物业");
-        cmd.setItemName(ItemNameTag.PM.getCode());
+        cmd.setItemName("xx");
         cmd.setActionType(ActionType.APP.getCode());
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("itemLocation", "/home/Pm/");

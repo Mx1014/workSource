@@ -37,9 +37,7 @@ public class PollProviderImpl implements PollProvider {
 
     @Override
     public void createPoll(Poll poll) {
-        Long id = shardingProvider.allocShardableContentId(EhPolls.class).second();
-        poll.setId(id);
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, poll.getId()));
         EhPollsDao dao = new EhPollsDao(context.configuration());
         dao.insert(poll);
 

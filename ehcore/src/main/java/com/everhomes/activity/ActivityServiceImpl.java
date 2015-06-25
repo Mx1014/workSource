@@ -107,6 +107,7 @@ public class ActivityServiceImpl implements ActivityService {
     public void createPost(ActivityPostCommand cmd, Long postId) {
         User user = UserContext.current().getUser();
         Activity activity = ConvertHelper.convert(cmd, Activity.class);
+        activity.setId(cmd.getId());
         activity.setPostId(postId);
         activity.setNamespaceId(0);
         activity.setCreatorUid(user.getId());

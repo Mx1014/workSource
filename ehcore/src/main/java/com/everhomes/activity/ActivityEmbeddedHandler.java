@@ -61,6 +61,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     public Post postProcessEmbeddedObject(Post post) {
         ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                 ActivityPostCommand.class);
+        cmd.setId(post.getEmbeddedId());
         activityService.createPost(cmd, post.getId());
         return post;
     }

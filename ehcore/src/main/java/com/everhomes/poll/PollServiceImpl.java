@@ -79,6 +79,7 @@ public class PollServiceImpl implements PollService {
             poll.setEndTimeMs(endTimeMs);
             poll.setEndTime(new Timestamp(endTimeMs));
             poll.setStatus(PollStatus.Published.getCode());
+            poll.setId(cmd.getId());
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
                 PollItem item=ConvertHelper.convert(r, PollItem.class);

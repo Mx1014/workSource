@@ -9,7 +9,7 @@ package com.everhomes.launchpad;
  * <li>ZUOLIN_URL: 左邻官方url</li>
  * <li>THIRDPART_URL: 第三方url</li>
  * <li>YELLOW_PAGE: 黄页</li>
- * <li>POST: 提交动作</li>
+ * <li>POST: 帖子</li>
  * <li>MESSAGE: 消息</li>
  * <li>ACTIVITY: 活动</li>
  * <li>HOTLINE: 热线</li>
