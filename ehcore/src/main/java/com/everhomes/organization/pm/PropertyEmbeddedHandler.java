@@ -11,6 +11,7 @@ import com.everhomes.category.CategoryConstants;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
+import com.everhomes.organization.Organization;
 import com.everhomes.util.DateHelper;
 
 @Component(PropertyEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_PM)
@@ -44,7 +45,8 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 		//if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
 		if(post != null  && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
 			CommunityPmTasks task = new CommunityPmTasks();
-			task.setOrganizationId(post.getVisibleRegionId());
+			Long organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
+			task.setOrganizationId(organizationId);
 			task.setEntityType(EntityType.TOPIC.getCode());
 			task.setEntityId(-1L);
 			task.setTargetType(EntityType.USER.getCode());
