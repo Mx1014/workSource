@@ -25,7 +25,6 @@ import com.everhomes.util.StringHelper;
  * <li>minVersion: item 最小版本号</li>
  * <li>displayFlag: 是否显示{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
- * <li>jsonObj: json字符串，存储附加信息</li>
  * </ul>
  */
 public class LaunchPadItemDTO {

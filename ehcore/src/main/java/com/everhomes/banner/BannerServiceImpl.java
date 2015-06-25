@@ -115,8 +115,10 @@ public class BannerServiceImpl implements BannerService {
             banner.setBannerGroup(cmd.getBannerGroup());
             banner.setName(cmd.getName());
             banner.setNamespaceId(cmd.getNamespaceId());
-            banner.setStartTime(cmd.getStartTime());
-            banner.setEndTime(cmd.getEndTime());
+            if(cmd.getStartTime() != null && !cmd.getStartTime().trim().equals(""))
+                banner.setStartTime(Timestamp.valueOf(cmd.getStartTime()));
+            if(cmd.getEndTime() != null && !cmd.getEndTime().trim().equals(""))
+                banner.setEndTime(Timestamp.valueOf(cmd.getEndTime()));
             banner.setStatus(cmd.getStatus());
             banner.setPosterPath(cmd.getPosterPath());
             banner.setScopeType(scope.getScopeType());

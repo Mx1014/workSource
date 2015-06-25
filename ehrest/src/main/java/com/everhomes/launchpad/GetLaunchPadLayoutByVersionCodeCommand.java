@@ -2,7 +2,6 @@
 package com.everhomes.launchpad;
 
 
-import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
@@ -13,7 +12,6 @@ import com.everhomes.util.StringHelper;
  */
 public class GetLaunchPadLayoutByVersionCodeCommand {
     
-    @NotNull
     private Long     versionCode;
 
     public GetLaunchPadLayoutByVersionCodeCommand() {

@@ -49,8 +49,8 @@ public class CreateBannerCommand {
     private Byte    actionType;
     @NotNull
     private String  actionData;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private String  startTime;
+    private String endTime;
     @NotNull
     private Byte     status;
     private Integer  order;
@@ -98,16 +98,17 @@ public class CreateBannerCommand {
     public void setActionUri(String actionUri) {
         this.actionUri = actionUri;
     }
-    public Timestamp getStartTime() {
+
+    public String getStartTime() {
         return startTime;
     }
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
-    public Timestamp getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
     public Byte getStatus() {

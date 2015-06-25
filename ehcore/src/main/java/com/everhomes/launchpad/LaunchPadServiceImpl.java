@@ -226,10 +226,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     
     @Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd){
-        if(cmd.getVersionCode() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid versionCode paramter.versionCode is null");
-        }
+//        if(cmd.getVersionCode() == null){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                    "Invalid versionCode paramter.versionCode is null");
+//        }
+        if(cmd.getVersionCode() == null)
+            cmd.setVersionCode(0L);
         List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd);
         if(results != null && !results.isEmpty())
             return results.get(0);
