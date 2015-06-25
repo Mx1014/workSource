@@ -16,6 +16,8 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
 			"creatorUid":{"type":"long"},
             "visibilityScopeId":{"type":"long"},
             "visibilityScope":{"type":"long"},
+            "visibleRegionType":{"type":"long"},
+            "visibleRegionId":{"type":"long"},
 			"senderName":{"type":"string","index":"no", "store":"yes"},
 			"senderAvatar":{"type":"string", "index":"no", "store":"yes"},
 			"forumName":{"type":"string", "index":"no", "store":"yes"},
