@@ -20,6 +20,7 @@ public class PollPostCommand{
     private String stopTime;
     private Integer multiChoiceFlag;
     private Integer anonymousFlag;
+    private transient Long id;
     
     @ItemType(PollItemDTO.class)
     private List<PollItemDTO> itemList;
@@ -66,8 +67,18 @@ public class PollPostCommand{
     public void setItemList(List<PollItemDTO> itemList) {
         this.itemList = itemList;
     }
+    
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+    
 }
