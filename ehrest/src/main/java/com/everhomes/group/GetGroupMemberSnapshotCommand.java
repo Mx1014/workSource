@@ -6,13 +6,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId：group id</li>
- * <li>memberId：group成员id</li>
+ * <li>memberUuid：group成员UUID</li>
  * </ul>
  */
 public class GetGroupMemberSnapshotCommand {
     private Long groupId;
     
-    private Long memberId;
+    private String memberUuid;
 
     public GetGroupMemberSnapshotCommand() {
     }
@@ -25,12 +25,12 @@ public class GetGroupMemberSnapshotCommand {
         this.groupId = groupId;
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public String getMemberUuid() {
+        return memberUuid;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setMemberUuid(String memberUuid) {
+        this.memberUuid = memberUuid;
     }
 
     @Override

@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 847742891;
+	private static final long serialVersionUID = 1457202279;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.String   accountName;
 	private java.lang.String   nickName;
 	private java.lang.String   avatar;
@@ -45,6 +46,7 @@ public class EhUsers implements java.io.Serializable {
 
 	public EhUsers(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.String   accountName,
 		java.lang.String   nickName,
 		java.lang.String   avatar,
@@ -73,6 +75,7 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.String   passwordHash
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.accountName = accountName;
 		this.nickName = nickName;
 		this.avatar = avatar;
@@ -107,6 +110,14 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.String getAccountName() {

@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1256788920;
+	private static final long serialVersionUID = -1389520256;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
@@ -52,6 +53,7 @@ public class EhActivities implements java.io.Serializable {
 
 	public EhActivities(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Integer  namespaceId,
 		java.lang.String   subject,
 		java.lang.String   description,
@@ -87,6 +89,7 @@ public class EhActivities implements java.io.Serializable {
 		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.namespaceId = namespaceId;
 		this.subject = subject;
 		this.description = description;
@@ -128,6 +131,14 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Integer getNamespaceId() {

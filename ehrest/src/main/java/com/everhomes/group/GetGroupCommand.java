@@ -7,22 +7,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>groupId：group id</li>
+ * <li>groupUuid：group uuid</li>
  * </ul>
  */
 public class GetGroupCommand {
     @NotNull
-    private Long groupId;
+    private String groupUuid;
 
     public GetGroupCommand() {
     }
 
-    public Long getGroupId() {
-        return groupId;
+    public String getGroupUuid() {
+        return groupUuid;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setGroupUuid(String groupUuid) {
+        this.groupUuid = groupUuid;
     }
 
     @Override

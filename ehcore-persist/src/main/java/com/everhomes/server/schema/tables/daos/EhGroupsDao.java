@@ -48,6 +48,20 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhGroups fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>namespace_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByNamespaceId(java.lang.Integer... values) {

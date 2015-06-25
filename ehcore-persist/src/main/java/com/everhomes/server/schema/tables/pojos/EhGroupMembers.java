@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 549267453;
+	private static final long serialVersionUID = -751798095;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Long     groupId;
 	private java.lang.String   memberType;
 	private java.lang.Long     memberId;
@@ -48,6 +49,7 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public EhGroupMembers(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Long     groupId,
 		java.lang.String   memberType,
 		java.lang.Long     memberId,
@@ -79,6 +81,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   stringTag5
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.groupId = groupId;
 		this.memberType = memberType;
 		this.memberId = memberId;
@@ -116,6 +119,14 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Long getGroupId() {

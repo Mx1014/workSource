@@ -48,6 +48,20 @@ public class EhPollsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPolls.EH_POLLS.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhPolls fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhPolls.EH_POLLS.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>namespace_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPolls> fetchByNamespaceId(java.lang.Integer... values) {

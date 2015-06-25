@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: group ID</li>
+ * <li>uuid: group对应的UUID</li>
  * <li>owningForumId: 拥有的论坛ID</li>
  * <li>name: group名称</li>
  * <li>avatar: group头像URI</li>
@@ -35,6 +36,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GroupDTO {
     private Long id;
+    private String uuid;
     private Long owningForumId;
     private String name;
     private String avatar;
@@ -73,6 +75,14 @@ public class GroupDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {

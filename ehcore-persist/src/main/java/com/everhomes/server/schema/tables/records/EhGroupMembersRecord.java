@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 485655064;
+	private static final long serialVersionUID = 812540367;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.id</code>. id of the record
@@ -28,409 +28,423 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_group_members.uuid</code>.
+	 */
+	public void setUuid(java.lang.String value) {
+		setValue(1, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_group_members.uuid</code>.
+	 */
+	public java.lang.String getUuid() {
+		return (java.lang.String) getValue(1);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_group_members.group_id</code>.
 	 */
 	public void setGroupId(java.lang.Long value) {
-		setValue(1, value);
+		setValue(2, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.group_id</code>.
 	 */
 	public java.lang.Long getGroupId() {
-		return (java.lang.Long) getValue(1);
+		return (java.lang.Long) getValue(2);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.member_type</code>. member object type, for example, type could be User, Group, etc
 	 */
 	public void setMemberType(java.lang.String value) {
-		setValue(2, value);
+		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.member_type</code>. member object type, for example, type could be User, Group, etc
 	 */
 	public java.lang.String getMemberType() {
-		return (java.lang.String) getValue(2);
+		return (java.lang.String) getValue(3);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.member_id</code>.
 	 */
 	public void setMemberId(java.lang.Long value) {
-		setValue(3, value);
+		setValue(4, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.member_id</code>.
 	 */
 	public java.lang.Long getMemberId() {
-		return (java.lang.Long) getValue(3);
+		return (java.lang.Long) getValue(4);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.member_role</code>. Default to ResourceUser role
 	 */
 	public void setMemberRole(java.lang.Long value) {
-		setValue(4, value);
+		setValue(5, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.member_role</code>. Default to ResourceUser role
 	 */
 	public java.lang.Long getMemberRole() {
-		return (java.lang.Long) getValue(4);
+		return (java.lang.Long) getValue(5);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.member_avatar</code>. avatar image identifier in storage sub-system
 	 */
 	public void setMemberAvatar(java.lang.String value) {
-		setValue(5, value);
+		setValue(6, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.member_avatar</code>. avatar image identifier in storage sub-system
 	 */
 	public java.lang.String getMemberAvatar() {
-		return (java.lang.String) getValue(5);
+		return (java.lang.String) getValue(6);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.member_nick_name</code>. member nick name within the group
 	 */
 	public void setMemberNickName(java.lang.String value) {
-		setValue(6, value);
+		setValue(7, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.member_nick_name</code>. member nick name within the group
 	 */
 	public java.lang.String getMemberNickName() {
-		return (java.lang.String) getValue(6);
+		return (java.lang.String) getValue(7);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
 	public void setMemberStatus(java.lang.Byte value) {
-		setValue(7, value);
+		setValue(8, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
 	public java.lang.Byte getMemberStatus() {
-		return (java.lang.Byte) getValue(7);
+		return (java.lang.Byte) getValue(8);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(8, value);
+		setValue(9, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.create_time</code>. remove-deletion policy, user directly managed data
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(8);
+		return (java.sql.Timestamp) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.creator_uid</code>. record creator user id
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(9, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.creator_uid</code>. record creator user id
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(9);
+		return (java.lang.Long) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.operator_uid</code>. redundant auditing info
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(10, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.operator_uid</code>. redundant auditing info
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(10);
+		return (java.lang.Long) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.process_code</code>.
 	 */
 	public void setProcessCode(java.lang.Byte value) {
-		setValue(11, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.process_code</code>.
 	 */
 	public java.lang.Byte getProcessCode() {
-		return (java.lang.Byte) getValue(11);
+		return (java.lang.Byte) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.process_details</code>.
 	 */
 	public void setProcessDetails(java.lang.String value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.process_details</code>.
 	 */
 	public java.lang.String getProcessDetails() {
-		return (java.lang.String) getValue(12);
+		return (java.lang.String) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.proof_resource_url</code>.
 	 */
 	public void setProofResourceUrl(java.lang.String value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.proof_resource_url</code>.
 	 */
 	public java.lang.String getProofResourceUrl() {
-		return (java.lang.String) getValue(13);
+		return (java.lang.String) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
 	 */
 	public void setApproveTime(java.sql.Timestamp value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
 	 */
 	public java.sql.Timestamp getApproveTime() {
-		return (java.sql.Timestamp) getValue(14);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.requestor_comment</code>.
 	 */
 	public void setRequestorComment(java.lang.String value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.requestor_comment</code>.
 	 */
 	public java.lang.String getRequestorComment() {
-		return (java.lang.String) getValue(15);
+		return (java.lang.String) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.operation_type</code>. 1: request to join, 2: invite to join
 	 */
 	public void setOperationType(java.lang.Byte value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.operation_type</code>. 1: request to join, 2: invite to join
 	 */
 	public java.lang.Byte getOperationType() {
-		return (java.lang.Byte) getValue(16);
+		return (java.lang.Byte) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.inviter_uid</code>. record inviter user id
 	 */
 	public void setInviterUid(java.lang.Long value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.inviter_uid</code>. record inviter user id
 	 */
 	public java.lang.Long getInviterUid() {
-		return (java.lang.Long) getValue(17);
+		return (java.lang.Long) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.invite_time</code>. the time the member is invited
 	 */
 	public void setInviteTime(java.sql.Timestamp value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.invite_time</code>. the time the member is invited
 	 */
 	public java.sql.Timestamp getInviteTime() {
-		return (java.sql.Timestamp) getValue(18);
+		return (java.sql.Timestamp) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.update_time</code>.
 	 */
 	public void setUpdateTime(java.sql.Timestamp value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.update_time</code>.
 	 */
 	public java.sql.Timestamp getUpdateTime() {
-		return (java.sql.Timestamp) getValue(19);
+		return (java.sql.Timestamp) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(21);
+		return (java.lang.Long) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(22);
+		return (java.lang.Long) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(23, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(23);
+		return (java.lang.Long) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(24, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(24);
+		return (java.lang.Long) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(25, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(25);
+		return (java.lang.String) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(26, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(26);
+		return (java.lang.String) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(27, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(27);
+		return (java.lang.String) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(28, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(28);
+		return (java.lang.String) getValue(29);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(29, value);
+		setValue(30, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_group_members.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(29);
+		return (java.lang.String) getValue(30);
 	}
 
 	// -------------------------------------------------------------------------
@@ -459,38 +473,39 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	/**
 	 * Create a detached, initialised EhGroupMembersRecord
 	 */
-	public EhGroupMembersRecord(java.lang.Long id, java.lang.Long groupId, java.lang.String memberType, java.lang.Long memberId, java.lang.Long memberRole, java.lang.String memberAvatar, java.lang.String memberNickName, java.lang.Byte memberStatus, java.sql.Timestamp createTime, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.String proofResourceUrl, java.sql.Timestamp approveTime, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Long inviterUid, java.sql.Timestamp inviteTime, java.sql.Timestamp updateTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhGroupMembersRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long groupId, java.lang.String memberType, java.lang.Long memberId, java.lang.Long memberRole, java.lang.String memberAvatar, java.lang.String memberNickName, java.lang.Byte memberStatus, java.sql.Timestamp createTime, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.String proofResourceUrl, java.sql.Timestamp approveTime, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Long inviterUid, java.sql.Timestamp inviteTime, java.sql.Timestamp updateTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS);
 
 		setValue(0, id);
-		setValue(1, groupId);
-		setValue(2, memberType);
-		setValue(3, memberId);
-		setValue(4, memberRole);
-		setValue(5, memberAvatar);
-		setValue(6, memberNickName);
-		setValue(7, memberStatus);
-		setValue(8, createTime);
-		setValue(9, creatorUid);
-		setValue(10, operatorUid);
-		setValue(11, processCode);
-		setValue(12, processDetails);
-		setValue(13, proofResourceUrl);
-		setValue(14, approveTime);
-		setValue(15, requestorComment);
-		setValue(16, operationType);
-		setValue(17, inviterUid);
-		setValue(18, inviteTime);
-		setValue(19, updateTime);
-		setValue(20, integralTag1);
-		setValue(21, integralTag2);
-		setValue(22, integralTag3);
-		setValue(23, integralTag4);
-		setValue(24, integralTag5);
-		setValue(25, stringTag1);
-		setValue(26, stringTag2);
-		setValue(27, stringTag3);
-		setValue(28, stringTag4);
-		setValue(29, stringTag5);
+		setValue(1, uuid);
+		setValue(2, groupId);
+		setValue(3, memberType);
+		setValue(4, memberId);
+		setValue(5, memberRole);
+		setValue(6, memberAvatar);
+		setValue(7, memberNickName);
+		setValue(8, memberStatus);
+		setValue(9, createTime);
+		setValue(10, creatorUid);
+		setValue(11, operatorUid);
+		setValue(12, processCode);
+		setValue(13, processDetails);
+		setValue(14, proofResourceUrl);
+		setValue(15, approveTime);
+		setValue(16, requestorComment);
+		setValue(17, operationType);
+		setValue(18, inviterUid);
+		setValue(19, inviteTime);
+		setValue(20, updateTime);
+		setValue(21, integralTag1);
+		setValue(22, integralTag2);
+		setValue(23, integralTag3);
+		setValue(24, integralTag4);
+		setValue(25, integralTag5);
+		setValue(26, stringTag1);
+		setValue(27, stringTag2);
+		setValue(28, stringTag3);
+		setValue(29, stringTag4);
+		setValue(30, stringTag5);
 	}
 }

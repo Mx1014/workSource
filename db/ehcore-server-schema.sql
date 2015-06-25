@@ -373,6 +373,7 @@ CREATE TABLE `eh_audit_logs`(
 DROP TABLE IF EXISTS `eh_users`;
 CREATE TABLE `eh_users` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `account_name` VARCHAR(64) NOT NULL,
     `nick_name` VARCHAR(32),
     `avatar` VARCHAR(128),
@@ -418,6 +419,7 @@ CREATE TABLE `eh_users` (
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     UNIQUE `u_eh_user_account_name`(`account_name`),
     INDEX `i_eh_user_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -618,6 +620,7 @@ CREATE TABLE `eh_user_profiles`(
 DROP TABLE IF EXISTS `eh_groups`;
 CREATE TABLE `eh_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `namespace_id` INTEGER,
     `name` VARCHAR(128) NOT NULL,
     `display_name` VARCHAR(64),
@@ -655,6 +658,7 @@ CREATE TABLE `eh_groups` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_group_creator`(`creator_uid`),
     INDEX `i_eh_group_create_time` (`create_time`),
     INDEX `i_eh_group_delete_time` (`delete_time`),
@@ -719,6 +723,7 @@ CREATE TABLE `eh_group_profiles` (
 DROP TABLE IF EXISTS `eh_group_members`;
 CREATE TABLE `eh_group_members` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `group_id` BIGINT NOT NULL,
     `member_type` VARCHAR(32) NOT NULL COMMENT 'member object type, for example, type could be User, Group, etc',
     `member_id` BIGINT,
@@ -751,6 +756,7 @@ CREATE TABLE `eh_group_members` (
     `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     UNIQUE `u_eh_grp_member` (`group_id`, `member_type`, `member_id`),
     INDEX `i_eh_grp_member_group_id` (`group_id`),
     INDEX `i_eh_grp_member_member` (`member_type`, `member_id`),
@@ -792,6 +798,7 @@ CREATE TABLE `eh_group_op_requests` (
 DROP TABLE IF EXISTS `eh_forums`;
 CREATE TABLE `eh_forums` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
     `owner_type` VARCHAR(32) NOT NULL,
@@ -804,6 +811,7 @@ CREATE TABLE `eh_forums` (
     `create_time` DATETIME NOT NULL,
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_frm_namespace`(`namespace_id`),
     INDEX `i_eh_frm_owner`(`owner_type`, `owner_id`),
     INDEX `i_eh_frm_post_count` (`post_count`),
@@ -820,6 +828,7 @@ CREATE TABLE `eh_forums` (
 DROP TABLE IF EXISTS `eh_forum_posts`;
 CREATE TABLE `eh_forum_posts` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `app_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'default to forum application itself',
     `forum_id` BIGINT NOT NULL COMMENT 'forum that it belongs',
     `parent_post_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'replied post id',
@@ -872,6 +881,7 @@ CREATE TABLE `eh_forum_posts` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_post_seqs`(`modify_seq`),
     INDEX `i_eh_post_geohash`(`geohash`),
     INDEX `i_eh_post_creator`(`creator_uid`),
@@ -992,6 +1002,7 @@ CREATE TABLE `eh_regions` (
 DROP TABLE IF EXISTS `eh_communities`;
 CREATE TABLE `eh_communities`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `city_id` BIGINT NOT NULL COMMENT 'city id in region table',
     `city_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `area_id` BIGINT NOT NULL COMMENT 'area id in region table',
@@ -1027,6 +1038,7 @@ CREATE TABLE `eh_communities`(
     `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_community_area_name`(`area_name`),
     INDEX `i_eh_community_name`(`name`),
     INDEX `i_eh_community_alias_name`(`alias_name`),
@@ -1277,6 +1289,7 @@ CREATE TABLE `eh_organization_contacts` (
 DROP TABLE IF EXISTS `eh_addresses`;
 CREATE TABLE `eh_addresses` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `community_id` BIGINT COMMENT 'NULL: means it is an independent street address, otherwise, it is an appartment address',
     `city_id` BIGINT,
     `zipcode` VARCHAR(16),
@@ -1306,6 +1319,7 @@ CREATE TABLE `eh_addresses` (
     `string_tag5` VARCHAR(128),
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_addr_city`(`city_id`),
     INDEX `i_eh_addr_community`(`community_id`),
     INDEX `i_eh_addr_zipcode`(`zipcode`),
@@ -1626,6 +1640,7 @@ CREATE TABLE `eh_event_profiles`(
 DROP TABLE IF EXISTS `eh_activities`;
 CREATE TABLE `eh_activities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `namespace_id` INTEGER,
     `subject` VARCHAR(512),
     `description` TEXT,
@@ -1661,6 +1676,7 @@ CREATE TABLE `eh_activities` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_act_start_time_ms`(`start_time_ms`),
     INDEX `i_eh_act_end_time_ms`(`end_time_ms`),
     INDEX `i_eh_act_creator_uid`(`creator_uid`),
@@ -1706,6 +1722,7 @@ CREATE TABLE `eh_activity_roster`(
 DROP TABLE IF EXISTS `eh_polls`;
 CREATE TABLE `eh_polls` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `namespace_id` INTEGER,
     `subject` VARCHAR(512),
     `description` TEXT,
@@ -1725,6 +1742,7 @@ CREATE TABLE `eh_polls` (
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_uuid`(`uuid`),
     INDEX `i_eh_poll_start_time_ms`(`start_time_ms`),
     INDEX `i_eh_poll_end_time_ms`(`end_time_ms`),
     INDEX `i_eh_poll_creator_uid`(`creator_uid`),
