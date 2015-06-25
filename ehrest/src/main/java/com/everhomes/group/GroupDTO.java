@@ -41,7 +41,7 @@ public class GroupDTO {
     private String avatarUrl;
     private String description;
     private Long creatorUid;
-    private String createTime;
+    private Timestamp createTime;
     private Byte privateFlag;
     private Integer joinPolicy;
     private Long memberCount;
@@ -115,11 +115,11 @@ public class GroupDTO {
         this.creatorUid = creatorUid;
     }
 
-    public String getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
