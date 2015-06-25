@@ -42,6 +42,9 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
                 else if(itemName.equals(CategoryType.REPAIR.getCode())){
                     jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_REPAIR);
                 }
+                else if(itemName.equals(CategoryType.PAYMENT.getCode())){
+                    //jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_REPAIR);
+                }
             }
             jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
         }catch(Exception e){

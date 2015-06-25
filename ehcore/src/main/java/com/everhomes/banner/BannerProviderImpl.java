@@ -100,10 +100,10 @@ public class BannerProviderImpl implements BannerProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_BANNERS);
         Condition condition = Tables.EH_BANNERS.STATUS.eq(BannerStatus.ACTIVE.getCode());
-        if(bannerLocation != null){
+        if(bannerLocation != null && !bannerLocation.trim().equals("")){
             condition = condition.and(Tables.EH_BANNERS.BANNER_LOCATION.eq(bannerLocation));
         }
-        if(bannerGroup != null){
+        if(bannerGroup != null && !bannerGroup.trim().equals("")){
             condition = condition.and(Tables.EH_BANNERS.BANNER_GROUP.eq(bannerGroup));
         }
         if(scopeType != null)
