@@ -103,13 +103,19 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("getUserOwningFamilies")
     @RestReturn(value=FamilyDTO.class ,collection=true)
-    public RestResponse getUserOwningFamilies() {
+    public RestResponse getUserOwningFamilies(HttpServletRequest request,HttpServletResponse response) {
         
         List<FamilyDTO> results = familyService.getUserOwningFamilies();
-        RestResponse response = new RestResponse(results);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        RestResponse resp = new RestResponse();
+        if(results != null){
+            if(EtagHelper.checkHeaderEtagOnly(30,results.hashCode()+"", request, response)) {
+                resp.setResponseObject(results);
+            }
+        }
+        
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
     
     /**

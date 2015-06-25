@@ -178,10 +178,12 @@ public class FamilyProviderImpl implements FamilyProvider {
         CrossShardListingLocator locator = new CrossShardListingLocator(family.getId());
         
         List<GroupMember> members = this.groupProvider.listGroupMembers(locator, Integer.MAX_VALUE);
-        if(members == null || members.isEmpty()) return null;
+        if(members == null || members.isEmpty())
+            return null;
         return members.get(0);
     }
 
+    //接口暂时不用
     @Override
     public Tuple<Integer, List<FamilyDTO>> findFamilByKeyword(String keyword) {
     	if(StringUtils.isEmpty(keyword))
@@ -250,6 +252,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                 GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
                         EntityType.USER.getCode(), userId);
                 if(member != null){
+                    family.setMemberNickName(member.getMemberNickName());
                     family.setMembershipStatus(member.getMemberStatus());
                     family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
                     family.setMemberAvatarUri(member.getMemberAvatar());

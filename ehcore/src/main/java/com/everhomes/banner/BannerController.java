@@ -101,5 +101,17 @@ public class BannerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+    /**
+     * <b>URL: /banner/listAllBanners</b>
+     * <p>获取所有banner</p>
+     */
+    @RequestMapping("listAllBanners")
+    @RestReturn(value=BannerDTO.class,collection=true)
+    public RestResponse listAllBanners(){
+        List<BannerDTO> result = bannerService.listAllBanners();
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

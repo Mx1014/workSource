@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -208,6 +211,16 @@ public class LaunchPadItemDTO {
 
     public void setDisplayLayout(String displayLayout) {
         this.displayLayout = displayLayout;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override

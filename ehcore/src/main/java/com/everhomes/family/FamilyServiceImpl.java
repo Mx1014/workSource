@@ -1142,9 +1142,9 @@ public class FamilyServiceImpl implements FamilyService {
                             NeighborUserDetailDTO n = new NeighborUserDetailDTO();
                             User u = this.userProvider.findUserById(m.getMemberId());
                             n.setUserId(u.getId());
-                            n.setUserName(m.getMemberNickName());
-                            n.setUserAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),u.getId()));
-                            n.setUserAvatarUri(m.getMemberAvatar());
+                            n.setUserName(u.getNickName());
+                            n.setUserAvatarUrl(parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
+                            n.setUserAvatarUri(u.getAvatar());
                             n.setUserStatusLine(u.getStatusLine());
                             n.setBuildingName(address.getBuildingName());
                             n.setApartmentFloor(address.getApartmentFloor());
@@ -1254,15 +1254,14 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.info("Community neary by user,userIds=" + userIds);
 
             List<UserLocation> listUserLocations = listCommunityUserLocation(userIds,latitude,longitude);
-            
+            final double MILES_KILOMETRES_RATIO = 1.609344;
             if(listUserLocations != null && !listUserLocations.isEmpty()){
-                //User u = this.userProvider.findUserById(userLocation.getUid());
+                
                 listUserLocations.forEach((userLocation) ->{
                     UserInfo u = this.userService.getUserSnapshotInfo(userLocation.getUid());
                     NeighborUserDTO n = new NeighborUserDTO();
                     n.setUserId(u.getId());
                     n.setUserStatusLine(u.getStatusLine());
-                    //n.setUserName(u.getAccountName());
                     n.setUserName(u.getNickName());
                     n.setUserAvatarUrl(u.getAvatarUrl());
                     n.setUserAvatarUri(u.getAvatarUri());
@@ -1270,7 +1269,8 @@ public class FamilyServiceImpl implements FamilyService {
                     //计算距离
                     double lat = userLocation.getLatitude();
                     double lon = userLocation.getLongitude();
-                    double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon);
+                    //getDistanceMi计算的是英里
+                    double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon) * MILES_KILOMETRES_RATIO * 1000;
                     n.setDistance(distince);
                     results.add(n);
                 });
@@ -1288,7 +1288,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
     
     private List<UserLocation> listCommunityUserLocation(List<Long> userIds,double latitude,double longitude) {
-        
+        long startTime = System.currentTimeMillis();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
         
         final List<UserLocation> members = new ArrayList<UserLocation>();
@@ -1317,6 +1317,8 @@ public class FamilyServiceImpl implements FamilyService {
             members.add(ConvertHelper.convert(r, UserLocation.class));
             return null;
         });
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Query community user with latitude and longitude,esplse=" + (endTime - startTime));
         
         return members;
     }

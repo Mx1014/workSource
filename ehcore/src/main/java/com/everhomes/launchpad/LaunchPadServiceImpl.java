@@ -3,6 +3,8 @@ package com.everhomes.launchpad;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.banner.BannerDTO;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -233,8 +236,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         if(cmd.getVersionCode() == null)
             cmd.setVersionCode(0L);
         List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd);
-        if(results != null && !results.isEmpty())
-            return results.get(0);
+        if(results != null && !results.isEmpty()){
+            LaunchPadLayoutDTO dto =  results.get(0);
+            if(cmd.getVersionCode().longValue() == dto.getVersionCode())
+                return null;
+            return dto;
+        }
         return null;
     }
     
@@ -306,6 +313,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
             result.add(itemDTO);
         });
+        if(result != null && !result.isEmpty())
+            sortLaunchPadItems(result);
         long endTime = System.currentTimeMillis();
         
         LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
@@ -314,6 +323,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         response.setLaunchPadItems(result);
         
         return response;
+    }
+    
+    private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
+        Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+            @Override
+            public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+               return o1.getDefaultOrder().intValue() - o2.getDefaultOrder().intValue();
+            }
+        });
     }
    
 }

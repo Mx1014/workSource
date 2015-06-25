@@ -65,6 +65,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.visibility.VisibleRegionType;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @Component
 public class OrganizationServiceImpl implements OrganizationService {
@@ -160,6 +161,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     	
     	//权限控制
     	//先判断，后台管理员才能创建。状态直接设为正常
+    	Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+    	if(organization == null){
+    	    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Unable to find the organization.");
+    	}
     	List<Long> communityIds = cmd.getCommunityIds();
     	if(communityIds != null && communityIds.size() > 0){
     		for (Long id : communityIds) {
@@ -175,6 +181,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationProvider.createOrganizationCommunity(departmentCommunity);
 			}
     	}
+    }
+    
+    @Override
+    public void deleteOrganizationCommunity(DeleteOrganizationCommunityCommand cmd) {
+        // TODO 
+        if(cmd.getOrganizationId() == null || cmd.getCommunityIds() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid organizationId or communityIds paramter.");
+        }
+        try{
+            List<Long> communityIds = cmd.getCommunityIds();
+            communityIds.forEach(id ->{
+                OrganizationCommunity orgCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), id);
+                if(orgCommunity == null){
+                    LOGGER.error("OrganizationCommunity is not found,organizationId=" + cmd.getOrganizationId() + ",communityId=" + id);
+                    return;
+                }
+                organizationProvider.deleteOrganizationCommunity(orgCommunity);
+            });
+        }catch(Exception e){
+            LOGGER.error("Fail to delete OrganizationCommunity,organizationId=" + cmd.getOrganizationId() + "," + e.getMessage());
+        }
     }
     
     @Override

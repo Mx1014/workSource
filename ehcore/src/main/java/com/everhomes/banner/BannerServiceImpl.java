@@ -3,6 +3,8 @@ package com.everhomes.banner;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -70,11 +73,20 @@ public class BannerServiceImpl implements BannerService {
            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
            return dto;
         }).collect(Collectors.toList());
-        
+        if(result != null && !result.isEmpty())
+            sortBanner(result);
         long endTime = System.currentTimeMillis();
         int size = result == null ? 0 : result.size();
         LOGGER.info("Query banner by communityId complete,communityId=" + communityId + ",size=" + size + ",esplse=" + (endTime - startTime));
         return result;
+    }
+    private void sortBanner(List<BannerDTO> result){
+        Collections.sort(result, new Comparator<BannerDTO>(){
+            @Override
+            public int compare(BannerDTO o1, BannerDTO o2){
+               return o1.getOrder().intValue() - o2.getOrder().intValue();
+            }
+        });
     }
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
@@ -215,11 +227,14 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        return bannerProvider.listAllBanners().stream().map((Banner r) ->{
+        List<BannerDTO> result = bannerProvider.listAllBanners().stream().map((Banner r) ->{
             BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
             dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
             return dto;
          }).collect(Collectors.toList());
+        if(result != null && !result.isEmpty())
+            sortBanner(result);
+        return result;
     }
     
     @Override

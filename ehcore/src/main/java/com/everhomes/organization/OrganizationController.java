@@ -94,6 +94,20 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /org/deleteOrganizationCommunity</b>
+     * <p>删除政府机构管辖的小区列表</p>
+     * @return 
+     */
+    @RequestMapping("deleteOrganizationCommunity")
+    @RestReturn(value=String.class)
+    public RestResponse deleteOrganizationCommunity(@Valid DeleteOrganizationCommunityCommand cmd) {
+        organizationService.deleteOrganizationCommunity(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: org/listOrganizationCommunities</b>

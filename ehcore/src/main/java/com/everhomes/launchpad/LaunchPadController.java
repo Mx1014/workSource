@@ -1,6 +1,8 @@
 package com.everhomes.launchpad;
 
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.EtagHelper;
 
 @RestDoc(value="LaunchPad controller", site="core")
 @RestController
@@ -30,13 +33,16 @@ public class LaunchPadController extends ControllerBase {
      */
     @RequestMapping("getLaunchPadItems")
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
-    public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd) {
+    public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
-        RestResponse response =  new RestResponse(commandResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        RestResponse resp =  new RestResponse(commandResponse);
+        if(EtagHelper.checkHeaderEtagOnly(30,commandResponse.hashCode()+"", request, response)) {
+            resp.setResponseObject(commandResponse);
+        }
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
     
     /**
@@ -100,21 +106,4 @@ public class LaunchPadController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /launchpad/getLastLaunchPadLayoutByVersionCode</b>
-     * <p>根据版本号获取可兼容的最新版本号，只返回版本号</p>
-     */
-    @RequestMapping("getLastLayoutVersionByVersionCode")
-    @RestReturn(value=String.class)
-    public RestResponse getLastLayoutVersionByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd) {
-        long versionCode = 0;
-        LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
-        if(launchPadLayoutDTO != null){
-            versionCode = launchPadLayoutDTO.getVersionCode();
-        }
-        RestResponse response =  new RestResponse(versionCode);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 }
