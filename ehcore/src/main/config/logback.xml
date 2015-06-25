@@ -24,6 +24,26 @@
 
     </appender>
 
+    <appender name="restlog"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>core-server-rest.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd hh:MM:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] - %msg%n
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>core-server.%d{yyyy-MM-dd}.%i.log
+                        </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
@@ -31,6 +51,14 @@
             </Pattern>
         </layout>
     </appender>
+
+    <logger name="com.everhomes.controller.WebRequestInterceptor" level="DEBUG">
+        <appender-ref ref="restlog" />
+    </logger>
+
+    <logger name="com.everhomes.controller.ResponseLoggingFilter" level="DEBUG">
+        <appender-ref ref="restlog" />
+    </logger>
 
     <logger name="com.everhomes" level="DEBUG">
         <appender-ref ref="console" />
