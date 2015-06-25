@@ -22,6 +22,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.CancelLikeTopicCommand;
+import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.GetTopicCommand;
@@ -353,10 +354,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
     	if(tasks != null && tasks.size() > 0){
     		for (CommunityPmTasks task : tasks) {
-    			GetTopicCommand command = new GetTopicCommand();
-    			command.setForumId(1l);
-    			command.setTopicId(task.getEntityId());
-				PostDTO post = forumService.getTopic(command);		
+				PostDTO post = forumService.getTopicById(ForumConstants.SYSTEM_FORUM, task.getEntityId());		
 				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
 				dto.setCommunityId(task.getOrganizationId());
 				dto.setEntityType(task.getEntityType());
