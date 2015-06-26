@@ -1,5 +1,7 @@
 package com.everhomes.user;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * @author elians
@@ -12,7 +14,7 @@ package com.everhomes.user;
  *         -暴力色情、14-诈骗和虚假信息、15-骚扰</li>
  *         <li>contact:联系方式</li>
  *         <li>content:反馈内容</li>
- *
+ *          <li>proofResourceUri:图片链接</li>
  *         </ul>
  */
 public class FeedbackCommand {
@@ -22,6 +24,8 @@ public class FeedbackCommand {
     private Integer contentCategory;
     private String contact;
     private String content;
+
+    private String proofResourceUri;
 
     public Byte getFeedbackType() {
         return feedbackType;
@@ -71,4 +75,16 @@ public class FeedbackCommand {
         this.content = content;
     }
 
+    public String getProofResourceUri() {
+        return proofResourceUri;
+    }
+
+    public void setProofResourceUri(String proofResourceUri) {
+        this.proofResourceUri = proofResourceUri;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
