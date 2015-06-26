@@ -54,6 +54,7 @@ public class UserPointServiceImpl implements UserPointService {
         UserScore userScore = ConvertHelper.convert(cmd, UserScore.class);
         userScore.setOwnerUid(cmd.getUid());
         userScore.setScore(cmd.getPoint());
+        userScore.setScoreType(cmd.getPointType());
         PointType type = PointType.fromCode(cmd.getPointType());
         // handle point type to validate
         try {
