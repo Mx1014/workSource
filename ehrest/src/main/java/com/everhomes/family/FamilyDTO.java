@@ -305,12 +305,14 @@ public class FamilyDTO {
         if (! (obj instanceof FamilyDTO)) {
             return false;
         }
-        return EqualsBuilder.reflectionEquals(this, obj,new String[]{"adminStatus","primaryFlag"});
+        return EqualsBuilder.reflectionEquals(this, obj,new String[]{"adminStatus","primaryFlag","memberUid","memberNickName"
+                ,"memberAvatarUri","memberAvatarUrl","cellPhone","proofResourceUri","proofResourceUrl"});
     }
     
     @Override
     public int hashCode(){
-        return HashCodeBuilder.reflectionHashCode(this,new String[]{"adminStatus","primaryFlag"});
+        return HashCodeBuilder.reflectionHashCode(this,new String[]{"adminStatus","primaryFlag","memberUid","memberNickName"
+                ,"memberAvatarUri","memberAvatarUrl","cellPhone","proofResourceUri","proofResourceUrl"});
     }
 
     @Override

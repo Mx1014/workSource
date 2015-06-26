@@ -119,8 +119,8 @@ public class BannerServiceImpl implements BannerService {
         List<BannerScope> scopes = cmd.getScopes();
         scopes.forEach(scope ->{
             Banner banner = new Banner();
-//            banner.setActionName(cmd.getActionName());
-//            banner.setActionUri(cmd.getActionUri());
+            banner.setActionType(cmd.getActionType());
+            banner.setActionData(cmd.getActionData());
             banner.setAppid(cmd.getAppid());
             banner.setCreatorUid(userId);
             banner.setBannerLocation(cmd.getBannerLocation());
@@ -153,8 +153,10 @@ public class BannerServiceImpl implements BannerService {
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
         
-//        if(cmd.getActionUri() != null)
-//            banner.setActionUri(cmd.getActionUri());
+        if(cmd.getActionType() != null)
+            banner.setActionType(cmd.getActionType());
+        if(cmd.getActionData() != null)
+            banner.setActionData(cmd.getActionData());
         if(cmd.getEndTime() != null)
             banner.setEndTime(cmd.getEndTime());
         if(cmd.getStartTime() != null)

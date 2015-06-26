@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>posterPath: 图片路径</li>
  * <li>actionName: 动作名称</li>
  * <li>actionUri: 动作uri</li>
- * <li>actionType: 动作类型，参考{@link com.everhomes.launchpad.ActionType}</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.banner.ActionType}</li>
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
  * <li>endTime: banner结束时间</li>

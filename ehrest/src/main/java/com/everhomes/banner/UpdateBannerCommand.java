@@ -12,8 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>scopeType: banner可见范围类型</li>
  * <li>scopeId：banner可见范围的具体id</li>
  * <li>posterPath: 图片路径</li>
- * <li>actionName: 动作名称</li>
- * <li>actionUri: 动作uri</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.banner.ActionType}</li>
+ * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
  * <li>endTime: banner结束时间</li>
  * </ul>
@@ -22,17 +22,13 @@ public class UpdateBannerCommand {
 
     @NotNull
     private Long id;
-    @NotNull
     private String posterPath;
-    @NotNull
     private String scopeType;
-    @NotNull
     private Long scopeId;
-    @NotNull
-    private String   actionUri;
+    private Byte actionType;
+    private String actionData;
     private Timestamp startTime;
     private Timestamp endTime;
-    @NotNull
     private Byte     status;
     private Integer  order;
 
@@ -68,12 +64,20 @@ public class UpdateBannerCommand {
         this.scopeId = scopeId;
     }
 
-    public String getActionUri() {
-        return actionUri;
+    public Byte getActionType() {
+        return actionType;
     }
 
-    public void setActionUri(String actionUri) {
-        this.actionUri = actionUri;
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getActionData() {
+        return actionData;
+    }
+
+    public void setActionData(String actionData) {
+        this.actionData = actionData;
     }
 
     public Timestamp getStartTime() {

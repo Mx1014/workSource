@@ -909,7 +909,8 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setMemberName(groupMember.getMemberNickName());
                 f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
-                UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
+                //UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
+                UserInfo userInfo = this.userService.getUserInfo(groupMember.getMemberId());
                 if(userInfo != null){
                     f.setBirthday(userInfo.getBirthday());
                     f.setGender(userInfo.getGender());
