@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  *<li>posterUrl:海报链接</li>
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
+ *<li>uuid:活动唯一的标识</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -52,6 +53,7 @@ public class ActivityDTO {
    
     private Integer userActivityStatus;
     private Integer processStatus;
+    private String uuid;
     
     public ActivityDTO() {
     }
@@ -250,6 +252,15 @@ public class ActivityDTO {
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
+    }
+
+    
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override

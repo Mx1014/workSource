@@ -728,6 +728,9 @@ public class ActivityServiceImpl implements ActivityService {
         List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             Post post = forumProvider.findPostById(activity.getPostId());
+            if(post==null){
+                return null;
+            }
             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
@@ -742,7 +745,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
             dto.setForumId(post.getForumId());
             return dto;
-        }).collect(Collectors.toList());
+        }).filter(r->r!=null).collect(Collectors.toList());
         if(activityDtos.size()<value){
             locator.setAnchor(null);
         }

@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *<li>processStatus:处理状态，0 未知,1 未开始，2 进行中，3 已结束,</li>
  *<li>anonymousFlag:匿名标记 0 不匿名,1 匿名</li>
  *<li>multiChoiceFlag:多选标记</li>
+ *<li>uuid:投票唯一的标识</li>
  *<ul>
  */
 public class PollDTO {
@@ -26,6 +27,8 @@ public class PollDTO {
     
     private Integer pollVoterStatus;
     private Integer processStatus;
+    
+    private String uuid;
     
     
     public PollDTO() {
@@ -96,6 +99,15 @@ public class PollDTO {
 
     public void setMultiChoiceFlag(Integer multiChoiceFlag) {
         this.multiChoiceFlag = multiChoiceFlag;
+    }
+    
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override

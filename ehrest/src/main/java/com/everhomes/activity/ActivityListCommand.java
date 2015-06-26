@@ -11,11 +11,15 @@ import com.everhomes.util.StringHelper;
  *<li>activityId:活动Id</li>
  *<li>anchor:锚点</li>
  *<li>pageSize:每页的个数<li>
+ *<li>uuid:活动uuid</li>
  *</ul>
  */
 public class ActivityListCommand {
     @NotNull
     private Long activityId;
+    
+    //activity unique id
+    private String uuid;
 
     private Long anchor;
     
@@ -48,6 +52,15 @@ public class ActivityListCommand {
 
     public void setAnchor(Long anchor) {
         this.anchor = anchor;
+    }
+    
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override

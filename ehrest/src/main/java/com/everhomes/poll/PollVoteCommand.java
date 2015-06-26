@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
 public class PollVoteCommand {
     @NotNull
     private Long pollId;
+    private String uuid;
     
     @ItemType(Long.class)
     private List<Long> itemIds;
@@ -37,6 +38,15 @@ public class PollVoteCommand {
 
     public void setItemIds(List<Long> itemIds) {
         this.itemIds = itemIds;
+    }
+    
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override
