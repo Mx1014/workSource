@@ -10,7 +10,6 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
-import org.jooq.SelectWhereStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import org.springframework.util.StringUtils;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -49,7 +47,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.user.IdentifierType;
@@ -256,7 +253,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                     family.setMembershipStatus(member.getMemberStatus());
                     family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
                     family.setMemberAvatarUri(member.getMemberAvatar());
-                    family.setProofResourceUrl(parserUri(member.getProofResourceUrl(), EntityType.USER.getCode(), member.getCreatorUid()));
+                    family.setProofResourceUri(member.getProofResourceUri());
+                    family.setProofResourceUrl(parserUri(member.getProofResourceUri(), EntityType.USER.getCode(), member.getCreatorUid()));
                 }
                 
                 Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
@@ -371,7 +369,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                     if(comunityId == null){
                         step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
                     }
-                    step.orderBy(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL.desc())
+                    step.orderBy(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI.desc())
                     .limit((int)size).offset((int) offset_)
                     .fetch().map((r) ->{
                         
@@ -395,7 +393,8 @@ public class FamilyProviderImpl implements FamilyProvider {
                             f.setMemberUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                             f.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
                             f.setMembershipStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
-                            f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URL),EntityType.FAMILY.getCode(),
+                            f.setProofResourceUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI));
+                            f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI),EntityType.FAMILY.getCode(),
                                     r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
                             List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
                             if(userIdentifiers != null && !userIdentifiers.isEmpty()){

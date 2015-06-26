@@ -34,7 +34,8 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName: 家庭地址楼栋号</li>
  * <li>apartmentName: 家庭地址门牌号</li>
  * <li>addressStatus: 地址状态, {@link com.everhomes.address.AddressAdminStatus}</li>
- * <li>proofResourceUrl: 存在该字段有值表名是加速审核的</li>
+ * <li>proofResourceUri: 用于加速审核的图片URI</li>
+ * <li>proofResourceUrl: 用于加速审核的图片URI</li>
  * </ul>
  */
 public class FamilyDTO {
@@ -69,6 +70,7 @@ public class FamilyDTO {
     private String apartmentName;
     
     private Byte addressStatus;
+    private String proofResourceUri;
     private String proofResourceUrl;
     
     public FamilyDTO () {
@@ -273,6 +275,14 @@ public class FamilyDTO {
     public void setAddressStatus(Byte addressStatus) {
         this.addressStatus = addressStatus;
     }
+    
+    public String getProofResourceUri() {
+        return proofResourceUri;
+    }
+
+    public void setProofResourceUri(String proofResourceUri) {
+        this.proofResourceUri = proofResourceUri;
+    }
 
     public String getProofResourceUrl() {
         return proofResourceUrl;
@@ -281,7 +291,7 @@ public class FamilyDTO {
     public void setProofResourceUrl(String proofResourceUrl) {
         this.proofResourceUrl = proofResourceUrl;
     }
-    
+
     public String getCellPhone() {
         return cellPhone;
     }

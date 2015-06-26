@@ -1018,9 +1018,9 @@ public class FamilyServiceImpl implements FamilyService {
         if(!StringUtils.isEmpty(memberNickName)){
             member.setMemberNickName(memberNickName);
         }
-        String proofResourceUrl = cmd.getProofResourceUrl();
-        if(!StringUtils.isEmpty(proofResourceUrl)){
-            member.setProofResourceUrl(proofResourceUrl);
+        String proofResourceUri = cmd.getProofResourceUri();
+        if(!StringUtils.isEmpty(proofResourceUri)){
+            member.setProofResourceUri(proofResourceUri);
         }
         this.groupProvider.updateGroupMember(member);
         //更新之后，发送命令

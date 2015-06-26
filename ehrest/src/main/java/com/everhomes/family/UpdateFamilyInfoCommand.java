@@ -29,7 +29,7 @@ public class UpdateFamilyInfoCommand extends BaseCommand{
     private String memberAvatarUri;
     private String memberAvatarUrl;
     
-    private String proofResourceUrl;
+    private String proofResourceUri;
     
     public UpdateFamilyInfoCommand() {
     }
@@ -90,12 +90,12 @@ public class UpdateFamilyInfoCommand extends BaseCommand{
         this.memberAvatarUrl = memberAvatarUrl;
     }
 
-    public String getProofResourceUrl() {
-        return proofResourceUrl;
+    public String getProofResourceUri() {
+        return proofResourceUri;
     }
 
-    public void setProofResourceUrl(String proofResourceUrl) {
-        this.proofResourceUrl = proofResourceUrl;
+    public void setProofResourceUri(String proofResourceUri) {
+        this.proofResourceUri = proofResourceUri;
     }
 
     @Override
