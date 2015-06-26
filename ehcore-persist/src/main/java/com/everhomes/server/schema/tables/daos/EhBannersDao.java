@@ -111,17 +111,17 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>action_name IN (values)</code>
+	 * Fetch records that have <code>action_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>action_uri IN (values)</code>
+	 * Fetch records that have <code>action_data IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_URI, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionData(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_DATA, values);
 	}
 
 	/**

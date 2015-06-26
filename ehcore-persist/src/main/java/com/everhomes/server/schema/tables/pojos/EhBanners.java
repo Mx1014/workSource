@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1206789910;
+	private static final long serialVersionUID = -881566274;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -23,8 +23,8 @@ public class EhBanners implements java.io.Serializable {
 	private java.lang.String   name;
 	private java.lang.String   vendorTag;
 	private java.lang.String   posterPath;
-	private java.lang.String   actionName;
-	private java.lang.String   actionUri;
+	private java.lang.Byte     actionType;
+	private java.lang.String   actionData;
 	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp endTime;
 	private java.lang.Byte     status;
@@ -46,8 +46,8 @@ public class EhBanners implements java.io.Serializable {
 		java.lang.String   name,
 		java.lang.String   vendorTag,
 		java.lang.String   posterPath,
-		java.lang.String   actionName,
-		java.lang.String   actionUri,
+		java.lang.Byte     actionType,
+		java.lang.String   actionData,
 		java.sql.Timestamp startTime,
 		java.sql.Timestamp endTime,
 		java.lang.Byte     status,
@@ -66,8 +66,8 @@ public class EhBanners implements java.io.Serializable {
 		this.name = name;
 		this.vendorTag = vendorTag;
 		this.posterPath = posterPath;
-		this.actionName = actionName;
-		this.actionUri = actionUri;
+		this.actionType = actionType;
+		this.actionData = actionData;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.status = status;
@@ -157,20 +157,20 @@ public class EhBanners implements java.io.Serializable {
 		this.posterPath = posterPath;
 	}
 
-	public java.lang.String getActionName() {
-		return this.actionName;
+	public java.lang.Byte getActionType() {
+		return this.actionType;
 	}
 
-	public void setActionName(java.lang.String actionName) {
-		this.actionName = actionName;
+	public void setActionType(java.lang.Byte actionType) {
+		this.actionType = actionType;
 	}
 
-	public java.lang.String getActionUri() {
-		return this.actionUri;
+	public java.lang.String getActionData() {
+		return this.actionData;
 	}
 
-	public void setActionUri(java.lang.String actionUri) {
-		this.actionUri = actionUri;
+	public void setActionData(java.lang.String actionData) {
+		this.actionData = actionData;
 	}
 
 	public java.sql.Timestamp getStartTime() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = -1572529347;
+	private static final long serialVersionUID = 2107074337;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -77,14 +77,14 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> POSTER_PATH = createField("poster_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.action_name</code>.
+	 * The column <code>ehcore.eh_banners.action_type</code>. 0: none, 1: zuolin url, 2: thirdpart url, 3: post, 4: coupon
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> ACTION_NAME = createField("action_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> ACTION_TYPE = createField("action_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: zuolin url, 2: thirdpart url, 3: post, 4: coupon");
 
 	/**
-	 * The column <code>ehcore.eh_banners.action_uri</code>.
+	 * The column <code>ehcore.eh_banners.action_data</code>. the parameters depend on item_type, json format
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> ACTION_URI = createField("action_uri", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> ACTION_DATA = createField("action_data", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "the parameters depend on item_type, json format");
 
 	/**
 	 * The column <code>ehcore.eh_banners.start_time</code>.
