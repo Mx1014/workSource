@@ -147,4 +147,13 @@ public class PollProviderImpl implements PollProvider {
         dao.update(pollItem);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPollItems.class, pollItem.getId());
     }
+
+    @Override
+    public Poll findPollByUuid(String uuid) {
+        Poll[] polls=new Poll[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhPolls.class), null, (context,obj)->{
+            return true;
+        });
+        return polls[0];
+    }
 }

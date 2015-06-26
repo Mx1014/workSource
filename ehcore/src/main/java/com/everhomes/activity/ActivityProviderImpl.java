@@ -330,4 +330,13 @@ public class ActivityProviderImpl implements ActivityProivider {
 
         return activities;
     }
+
+    @Override
+    public Activity findActivityByUuid(String uuid) {
+        Activity[] activities=new Activity[0];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class), null,(context,objc)->{
+            return true;
+        });
+        return activities[0];
+    }
 }
