@@ -39,6 +39,7 @@ import com.everhomes.util.StringHelper;
  *         <li>sharedCount:分享数</li>
  *         <li>points:用户积分</li>
  *         <li>level:用户级别</li>
+ *         <li>uuid:用户唯一的标识</li>
  *         </ul>
  **/
 public class UserInfo {
@@ -69,6 +70,7 @@ public class UserInfo {
     private Integer points;
     private String pointRuleUrl;
     private Byte level;
+    private String uuid;
 
     @ItemType(String.class)
     private List<String> phones;
@@ -302,6 +304,16 @@ public class UserInfo {
 
     public void setLevel(Byte level) {
         this.level = level;
+    }
+    
+    
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override
