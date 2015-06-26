@@ -1,12 +1,16 @@
 // @formatter:off
 package com.everhomes.fleamarket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.app.AppConstants;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
@@ -16,6 +20,7 @@ import com.everhomes.util.StringHelper;
 
 @Component
 public class FleaMarketServiceImpl implements FleaMarketService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FleaMarketServiceImpl.class);
     
     @Autowired
     private AclProvider aclProvider;
@@ -25,6 +30,9 @@ public class FleaMarketServiceImpl implements FleaMarketService {
     
     @Autowired
     private ForumService forumService;
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
     
     @Override
     public Post postItemToForum(FleaMarketPostCommand cmd) {
@@ -77,6 +85,13 @@ public class FleaMarketServiceImpl implements FleaMarketService {
             post.setEmbeddedJson(StringHelper.toJsonString(fleaItem));
         }
         
-        this.forumProvider.updatePost(post);
+        try {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                this.forumProvider.updatePost(post);
+               return null;
+            });
+        } catch(Exception e) {
+            LOGGER.error("Failed to update the fleamarket item, postId=" + cmd.getTopicId(), e);
+        }
     }
 }

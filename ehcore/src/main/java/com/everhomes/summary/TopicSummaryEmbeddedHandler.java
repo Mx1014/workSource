@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
@@ -20,6 +22,9 @@ public class TopicSummaryEmbeddedHandler implements ForumEmbeddedHandler {
     private ForumProvider forumProvider;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -42,8 +47,15 @@ public class TopicSummaryEmbeddedHandler implements ForumEmbeddedHandler {
         if(embeddedObjId != null) {
             Post orgPost = this.forumProvider.findPostById(embeddedObjId);
             if(orgPost != null) {
-                orgPost.setForwardCount(orgPost.getForwardCount() + 1);
-                this.forumProvider.updatePost(orgPost);
+                try {
+                    this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                        orgPost.setForwardCount(orgPost.getForwardCount() + 1);
+                        this.forumProvider.updatePost(orgPost);
+                       return null;
+                    });
+                } catch(Exception e) {
+                    LOGGER.error("Failed to update the forward count of post, topicId=" + embeddedObjId, e);
+                }
             } else {
                 LOGGER.error("The original post is not found when forwarding, postId=" + post.getId() 
                     + ", embeddedObjId=" + embeddedObjId);
