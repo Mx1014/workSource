@@ -867,6 +867,7 @@ CREATE TABLE `eh_forum_posts` (
     `child_count` BIGINT NOT NULL DEFAULT 0,
     `forward_count` BIGINT NOT NULL DEFAULT 0,
     `like_count` BIGINT NOT NULL DEFAULT 0,
+	`view_count` BIGINT NOT NULL DEFAULT 0,
 
     `subject` VARCHAR(512),
     `content_type` VARCHAR(32) COMMENT 'object content type',
