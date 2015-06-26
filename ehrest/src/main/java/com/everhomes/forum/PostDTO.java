@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  * <li>forwardCount: 帖子或评论的转发数目</li>
  * <li>likeCount: 帖子或评论赞的数目</li>
  * <li>dislikeCount: 帖子或评论踩的数目</li>
+ * <li>viewCount: 浏览的数目</li>
  * <li>updateTime: 帖子或评论更新时间</li>
  * <li>createTime: 帖子或评论创建时间</li>
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.forum.AttachmentDTO}</li>
@@ -103,6 +104,8 @@ public class PostDTO {
     private Long likeCount;
     
     private Long dislikeCount;
+    
+    private Long viewCount;
     
     private Timestamp updateTime;
     
@@ -343,7 +346,15 @@ public class PostDTO {
 		this.dislikeCount = dislikeCount;
 	}
 
-	public Timestamp getUpdateTime() {
+	public Long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public Timestamp getUpdateTime() {
 		return updateTime;
 	}
 
