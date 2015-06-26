@@ -42,10 +42,6 @@ public class CreateBannerCommand {
     @NotNull
     private String   posterPath;
     @NotNull
-    private String   actionName;
-    @NotNull
-    private String   actionUri;
-    @NotNull
     private Byte    actionType;
     @NotNull
     private String  actionData;
@@ -85,18 +81,6 @@ public class CreateBannerCommand {
     }
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
-    }
-    public String getActionName() {
-        return actionName;
-    }
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
-    }
-    public String getActionUri() {
-        return actionUri;
-    }
-    public void setActionUri(String actionUri) {
-        this.actionUri = actionUri;
     }
 
     public String getStartTime() {

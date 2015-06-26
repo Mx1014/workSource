@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 小区Id</li>
+ * <li>uuid: 小区uuid，作为唯一标识</li>
  * <li>cityId: 城市Id</li>
  * <li>cityName: 城市名称</li>
  * <li>areaId: 区域Id</li>
@@ -26,6 +27,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CommunityDTO {
     private java.lang.Long     id;
+    private java.lang.String   uuid;
     private java.lang.Long     cityId;
     private java.lang.String   cityName;
     private java.lang.Long     areaId;
@@ -60,6 +62,14 @@ public class CommunityDTO {
         this.id = id;
     }
     
+    public java.lang.String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(java.lang.String uuid) {
+        this.uuid = uuid;
+    }
+
     public java.lang.Long getCityId() {
         return cityId;
     }

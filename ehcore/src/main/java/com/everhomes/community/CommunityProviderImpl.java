@@ -5,6 +5,7 @@ package com.everhomes.community;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
@@ -70,7 +71,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         community.setId(id);
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         community.setCreatorUid(creatorId);
-        
+        community.setUuid(UUID.randomUUID().toString());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));
         EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
         dao.insert(community);
@@ -463,5 +464,21 @@ public class CommunityProviderImpl implements CommunityProvider {
                     return true;
                 });
         return result;
+    }
+    
+    @Override
+    public Community getCommunityByUuid(String uuid) {
+        final Community[] result = new Community[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+                (DSLContext context, Object reducingContext) -> {
+                    context.select().from(Tables.EH_COMMUNITIES)
+                    .where(Tables.EH_COMMUNITIES.UUID.eq(uuid))
+                    .fetch().map(r ->{
+                       result[0] = ConvertHelper.convert(r,Community.class);
+                       return null;
+                   });
+                    return true;
+                });
+        return result[0];
     }
 }

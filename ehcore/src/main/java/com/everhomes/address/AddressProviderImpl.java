@@ -4,6 +4,7 @@ package com.everhomes.address;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -52,6 +53,7 @@ public class AddressProviderImpl implements AddressProvider {
 
         address.setId(id); 
         address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
+        address.setUuid(UUID.randomUUID().toString());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id)); 
 
         EhAddressesDao dao = new EhAddressesDao(context.configuration()); 
@@ -234,5 +236,22 @@ public class AddressProviderImpl implements AddressProvider {
                 });
         
         return count[0];
+    }
+    
+    //@Cacheable(value="Address", key="#id",unless="#result==null")
+    @Override
+    public Address findAddressByUuid(String uuid) {
+        final Address[] addresses = new Address[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                   context.select().from(Tables.EH_ADDRESSES)
+                   .where(Tables.EH_ADDRESSES.UUID.eq(uuid))
+                   .fetch().map(r ->{
+                       addresses[0] = ConvertHelper.convert(r, Address.class);
+                       return null;
+                   });
+                   return true; 
+                });
+        return addresses[0];
     }
 }
