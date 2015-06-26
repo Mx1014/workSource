@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 812540367;
+	private static final long serialVersionUID = -1716828523;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.id</code>. id of the record
@@ -210,16 +210,16 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_members.proof_resource_url</code>.
+	 * Setter for <code>ehcore.eh_group_members.proof_resource_uri</code>.
 	 */
-	public void setProofResourceUrl(java.lang.String value) {
+	public void setProofResourceUri(java.lang.String value) {
 		setValue(14, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_members.proof_resource_url</code>.
+	 * Getter for <code>ehcore.eh_group_members.proof_resource_uri</code>.
 	 */
-	public java.lang.String getProofResourceUrl() {
+	public java.lang.String getProofResourceUri() {
 		return (java.lang.String) getValue(14);
 	}
 
@@ -473,7 +473,7 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	/**
 	 * Create a detached, initialised EhGroupMembersRecord
 	 */
-	public EhGroupMembersRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long groupId, java.lang.String memberType, java.lang.Long memberId, java.lang.Long memberRole, java.lang.String memberAvatar, java.lang.String memberNickName, java.lang.Byte memberStatus, java.sql.Timestamp createTime, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.String proofResourceUrl, java.sql.Timestamp approveTime, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Long inviterUid, java.sql.Timestamp inviteTime, java.sql.Timestamp updateTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhGroupMembersRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long groupId, java.lang.String memberType, java.lang.Long memberId, java.lang.Long memberRole, java.lang.String memberAvatar, java.lang.String memberNickName, java.lang.Byte memberStatus, java.sql.Timestamp createTime, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte processCode, java.lang.String processDetails, java.lang.String proofResourceUri, java.sql.Timestamp approveTime, java.lang.String requestorComment, java.lang.Byte operationType, java.lang.Long inviterUid, java.sql.Timestamp inviteTime, java.sql.Timestamp updateTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
 		super(com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS);
 
 		setValue(0, id);
@@ -490,7 +490,7 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 		setValue(11, operatorUid);
 		setValue(12, processCode);
 		setValue(13, processDetails);
-		setValue(14, proofResourceUrl);
+		setValue(14, proofResourceUri);
 		setValue(15, approveTime);
 		setValue(16, requestorComment);
 		setValue(17, operationType);

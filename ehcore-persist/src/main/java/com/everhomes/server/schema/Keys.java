@@ -183,6 +183,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_PRIMARY = UniqueKeys0.KEY_EH_USER_LIKES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_U_EH_USR_LIKE_TARGET = UniqueKeys0.KEY_EH_USER_LIKES_U_EH_USR_LIKE_TARGET;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLocationsRecord> KEY_EH_USER_LOCATIONS_PRIMARY = UniqueKeys0.KEY_EH_USER_LOCATIONS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserPostsRecord> KEY_EH_USER_POSTS_PRIMARY = UniqueKeys0.KEY_EH_USER_POSTS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserPostsRecord> KEY_EH_USER_POSTS_U_EH_USR_POST_ID = UniqueKeys0.KEY_EH_USER_POSTS_U_EH_USR_POST_ID;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = UniqueKeys0.KEY_EH_USER_PROFILES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserScoresRecord> KEY_EH_USER_SCORES_PRIMARY = UniqueKeys0.KEY_EH_USER_SCORES_PRIMARY;
 
@@ -372,6 +374,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLikesRecord> KEY_EH_USER_LIKES_U_EH_USR_LIKE_TARGET = createUniqueKey(com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.OWNER_UID, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.TARGET_TYPE, com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES.TARGET_ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserLocationsRecord> KEY_EH_USER_LOCATIONS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS, com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserPostsRecord> KEY_EH_USER_POSTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS, com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserPostsRecord> KEY_EH_USER_POSTS_U_EH_USR_POST_ID = createUniqueKey(com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS, com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.OWNER_UID, com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.POST_ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserProfilesRecord> KEY_EH_USER_PROFILES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES, com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUserScoresRecord> KEY_EH_USER_SCORES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES, com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES.ID);
 	}

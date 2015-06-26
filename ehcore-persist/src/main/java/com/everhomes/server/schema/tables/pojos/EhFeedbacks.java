@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1581304091;
+	private static final long serialVersionUID = 843485523;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -22,6 +22,7 @@ public class EhFeedbacks implements java.io.Serializable {
 	private java.lang.Byte     targetType;
 	private java.lang.Long     targetId;
 	private java.lang.Long     contentCategory;
+	private java.lang.String   proofResourceUri;
 
 	public EhFeedbacks() {}
 
@@ -34,7 +35,8 @@ public class EhFeedbacks implements java.io.Serializable {
 		java.lang.Byte     feedbackType,
 		java.lang.Byte     targetType,
 		java.lang.Long     targetId,
-		java.lang.Long     contentCategory
+		java.lang.Long     contentCategory,
+		java.lang.String   proofResourceUri
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
@@ -45,6 +47,7 @@ public class EhFeedbacks implements java.io.Serializable {
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.contentCategory = contentCategory;
+		this.proofResourceUri = proofResourceUri;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhFeedbacks implements java.io.Serializable {
 
 	public void setContentCategory(java.lang.Long contentCategory) {
 		this.contentCategory = contentCategory;
+	}
+
+	public java.lang.String getProofResourceUri() {
+		return this.proofResourceUri;
+	}
+
+	public void setProofResourceUri(java.lang.String proofResourceUri) {
+		this.proofResourceUri = proofResourceUri;
 	}
 }

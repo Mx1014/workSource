@@ -424,6 +424,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserLocations EH_USER_LOCATIONS = com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS;
 
 	/**
+	 * The table ehcore.eh_user_posts
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserPosts EH_USER_POSTS = com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS;
+
+	/**
 	 * The table ehcore.eh_user_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserProfiles EH_USER_PROFILES = com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES;

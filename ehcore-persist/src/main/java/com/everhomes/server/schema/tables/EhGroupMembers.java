@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 649222818;
+	private static final long serialVersionUID = 563088651;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -97,9 +97,9 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROCESS_DETAILS = createField("process_details", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.proof_resource_url</code>.
+	 * The column <code>ehcore.eh_group_members.proof_resource_uri</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROOF_RESOURCE_URL = createField("proof_resource_url", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROOF_RESOURCE_URI = createField("proof_resource_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info

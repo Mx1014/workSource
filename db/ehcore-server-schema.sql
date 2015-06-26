@@ -470,6 +470,22 @@ CREATE TABLE `eh_user_groups` (
     INDEX `i_eh_usr_grp_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+# 
+# member of eh_users partition
+# Used for duplicated recording of post membership that user is involved in order to store 
+# it in the same shard as of its owner user
+#
+DROP TABLE IF EXISTS `eh_user_posts`;
+CREATE TABLE `eh_user_posts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `post_id` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_usr_post_id`(`owner_uid`, `post_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 #
 # member of eh_users sharding group
 # secondary resource objects (after eh_users)
@@ -736,7 +752,7 @@ CREATE TABLE `eh_group_members` (
     `operator_uid` BIGINT COMMENT 'redundant auditing info',
     `process_code` TINYINT,
     `process_details` TEXT,
-    `proof_resource_url` VARCHAR(128),
+    `proof_resource_uri` VARCHAR(1024),
     `approve_time` DATETIME COMMENT 'redundant auditing info',
     `requestor_comment` TEXT,
     `operation_type` TINYINT COMMENT '1: request to join, 2: invite to join',
@@ -2209,6 +2225,7 @@ CREATE TABLE `eh_feedbacks` (
   `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: post, 2: address, 3: forum', 
   `target_id` BIGINT NOT NULL DEFAULT 0,
   `content_category` BIGINT NOT NULL DEFAULT 0 COMMENT '0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction',
+  `proof_resource_uri` VARCHAR(1024),
   PRIMARY KEY (`id`)
 ) engine=innodb DEFAULT charset=utf8mb4;
 
