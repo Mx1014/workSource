@@ -14,10 +14,12 @@ public enum UserLikeType {
     }
    
     public static UserLikeType fromCode(Byte code) {
-        UserLikeType[] values = UserLikeType.values();
-        for(UserLikeType value : values) {
-            if(value == UserLikeType.fromCode(code)) {
-                return value;
+        if(code != null) {
+            UserLikeType[] values = UserLikeType.values();
+            for(UserLikeType value : values) {
+                if(value.equals(code)) {
+                    return value;
+                }
             }
         }
         
