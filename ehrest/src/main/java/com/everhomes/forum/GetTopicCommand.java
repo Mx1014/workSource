@@ -6,12 +6,12 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>forumId: 论坛ID</li>
- * <li>topicUuid: 帖子UUID</li>
+ * <li>topicId: 帖子ID</li>
  * </ul>
  */
 public class GetTopicCommand {
     private Long forumId;
-    private String topicUuid;
+    private Long topicId;
     
     public GetTopicCommand() {
     }
@@ -23,13 +23,13 @@ public class GetTopicCommand {
     public void setForumId(Long forumId) {
         this.forumId = forumId;
     }
-
-    public String getTopicUuid() {
-        return topicUuid;
+    
+    public Long getTopicId() {
+        return topicId;
     }
 
-    public void setTopicUuid(String topicUuid) {
-        this.topicUuid = topicUuid;
+    public void setTopicId(Long topicId) {
+        this.topicId = topicId;
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>topicId: 原帖子ID</li>
- * <li>topicUuid: 原帖子UUID</li>
  * <li>targetForumId: 原帖所在论坛ID</li>
  * <li>contentUri: 内容图片URI</li>
  * <li>contentUrl: 内容图片URL</li>
@@ -14,8 +13,6 @@ import com.everhomes.util.StringHelper;
  */
 public class ForwardTopicCommand {
     private Long topicId;
-    
-    private String topicUuid;
     
     private Long forumId;
     
@@ -32,14 +29,6 @@ public class ForwardTopicCommand {
 
     public void setTopicId(Long topicId) {
         this.topicId = topicId;
-    }
-    
-    public String getTopicUuid() {
-        return topicUuid;
-    }
-
-    public void setTopicUuid(String topicUuid) {
-        this.topicUuid = topicUuid;
     }
 
     public Long getForumId() {
