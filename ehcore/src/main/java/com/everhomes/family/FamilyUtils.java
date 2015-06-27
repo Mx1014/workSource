@@ -21,7 +21,8 @@ public class FamilyUtils {
         }
 
         if (!StringUtils.isEmpty(apartName)){
-           strBuilder.append(apartName);
+            strBuilder.append("-");
+            strBuilder.append(apartName);
         }
         return strBuilder.toString();
     }
