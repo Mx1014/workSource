@@ -17,7 +17,7 @@ public enum UserLikeType {
         if(code != null) {
             UserLikeType[] values = UserLikeType.values();
             for(UserLikeType value : values) {
-                if(value.equals(code)) {
+                if(value.getCode() == code.byteValue()) {
                     return value;
                 }
             }
