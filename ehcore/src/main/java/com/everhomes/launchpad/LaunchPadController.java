@@ -97,7 +97,8 @@ public class LaunchPadController extends ControllerBase {
     @RequestMapping("getLastLaunchPadLayoutByVersionCode")
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd) {
-        
+        if(cmd.getName() == null)
+        cmd.setName("/ServiceMarketLayout");
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
         
         RestResponse response =  new RestResponse(launchPadLayoutDTO);

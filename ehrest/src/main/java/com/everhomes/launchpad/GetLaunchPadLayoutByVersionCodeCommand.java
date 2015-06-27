@@ -16,7 +16,6 @@ import com.everhomes.util.StringHelper;
 public class GetLaunchPadLayoutByVersionCodeCommand {
     
     private Long     versionCode;
-    @NotNull
     private String   name;
 
     public GetLaunchPadLayoutByVersionCodeCommand() {

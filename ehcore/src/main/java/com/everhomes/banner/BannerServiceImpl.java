@@ -257,15 +257,22 @@ public class BannerServiceImpl implements BannerService {
     
     @Override
     public BannerDTO getBannerById(GetBannerByIdCommand cmd){
-        Banner banner = bannerProvider.findBannerById(cmd.getId());
-        if(banner == null)
-            return null;
+        
         User user = UserContext.current().getUser();
         long userId = user.getId();
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+        }
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null){
+            LOGGER.error("Banner is not exists,id=" + cmd.getId() + ",userId=" + userId);
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
         BannerDTO dto = ConvertHelper.convert(banner, BannerDTO.class); 
         dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
         return dto;
-        
         
     }
 }
