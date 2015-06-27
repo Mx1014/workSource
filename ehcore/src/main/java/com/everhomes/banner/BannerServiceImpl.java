@@ -114,6 +114,10 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup paramter.");
         }
+        if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
+        }
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<BannerScope> scopes = cmd.getScopes();
@@ -127,10 +131,10 @@ public class BannerServiceImpl implements BannerService {
             banner.setBannerGroup(cmd.getBannerGroup());
             banner.setName(cmd.getName());
             banner.setNamespaceId(cmd.getNamespaceId());
-            if(cmd.getStartTime() != null && !cmd.getStartTime().trim().equals(""))
-                banner.setStartTime(Timestamp.valueOf(cmd.getStartTime()));
-            if(cmd.getEndTime() != null && !cmd.getEndTime().trim().equals(""))
-                banner.setEndTime(Timestamp.valueOf(cmd.getEndTime()));
+            if(cmd.getStartTime() != null)
+                banner.setStartTime(new Timestamp(cmd.getStartTime()));
+            if(cmd.getEndTime() != null)
+                banner.setEndTime(new Timestamp(cmd.getEndTime()));
             banner.setStatus(cmd.getStatus());
             banner.setPosterPath(cmd.getPosterPath());
             banner.setScopeType(scope.getScopeType());
@@ -157,10 +161,14 @@ public class BannerServiceImpl implements BannerService {
             banner.setActionType(cmd.getActionType());
         if(cmd.getActionData() != null)
             banner.setActionData(cmd.getActionData());
+        if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
+        }
         if(cmd.getEndTime() != null)
-            banner.setEndTime(cmd.getEndTime());
+            banner.setEndTime(new Timestamp(cmd.getEndTime()));
         if(cmd.getStartTime() != null)
-            banner.setEndTime(cmd.getStartTime());
+            banner.setEndTime(new Timestamp(cmd.getStartTime()));
         if(cmd.getOrder() != null)
             banner.setOrder(cmd.getOrder());
         if(cmd.getPosterPath() != null)
@@ -244,6 +252,20 @@ public class BannerServiceImpl implements BannerService {
         BannerClick bannerClick = this.bannerProvider.findBannerClickByToken(token);
         BannerClickDTO dto = ConvertHelper.convert(bannerClick, BannerClickDTO.class);
         return dto;
+        
+    }
+    
+    @Override
+    public BannerDTO getBannerById(GetBannerByIdCommand cmd){
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null)
+            return null;
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        BannerDTO dto = ConvertHelper.convert(banner, BannerDTO.class); 
+        dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
+        return dto;
+        
         
     }
 }

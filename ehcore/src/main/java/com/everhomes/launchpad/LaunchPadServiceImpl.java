@@ -252,7 +252,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     "Invalid versionCode paramter.versionCode is null");
         }
         List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
-        this.launchPadProvider.findLaunchPadItemsByVersionCode(cmd.getVersionCode()).stream().map((r) ->{;
+        this.launchPadProvider.findLaunchPadItemsByVersionCode(cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
             results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));
             return null;
         }).collect(Collectors.toList());

@@ -42,8 +42,8 @@ public class CreateBannerCommand {
     private Byte    actionType;
     @NotNull
     private String  actionData;
-    private String  startTime;
-    private String endTime;
+    private Long  startTime;
+    private Long endTime;
     @NotNull
     private Byte     status;
     private Integer  order;
@@ -79,17 +79,16 @@ public class CreateBannerCommand {
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
     }
-
-    public String getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
-    public void setStartTime(String startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
-    public String getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
-    public void setEndTime(String endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
     public Byte getStatus() {

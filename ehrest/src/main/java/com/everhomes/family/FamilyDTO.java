@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 家庭Id</li>
+ * <li>uuid: 唯一标识</li>
  * <li>name: 家庭名称</li>
  * <li>displayName: 家庭显示名称，用于客户端显示</li>
  * <li>avatarUri: 家庭头像Id，图片上传到ContentServer得到的ID</li>
@@ -40,6 +41,7 @@ import com.everhomes.util.StringHelper;
  */
 public class FamilyDTO {
     private Long id;
+//    private String uuid;
     private String name;
     private String displayName;
     private String avatarUri;
@@ -73,6 +75,8 @@ public class FamilyDTO {
     private String proofResourceUri;
     private String proofResourceUrl;
     
+    
+    
     public FamilyDTO () {
     }
 
@@ -83,6 +87,14 @@ public class FamilyDTO {
     public void setId(Long id) {
         this.id = id;
     }
+
+//    public String getUuid() {
+//        return uuid;
+//    }
+//
+//    public void setUuid(String uuid) {
+//        this.uuid = uuid;
+//    }
 
     public String getName() {
         return name;

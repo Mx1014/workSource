@@ -1520,11 +1520,21 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public FamilyDTO getFamilyById(GetFamilyCommand cmd) {
-        
+        if(cmd == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id or type parameter");
+        }
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         Long familyId = cmd.getId();
-        
-        return this.familyProvider.getFamilyById(familyId);
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        FamilyDTO dto = this.familyProvider.getFamilyById(familyId);
+        if(dto == null){
+            LOGGER.error("Family is not exists,id=" + cmd.getId() + ",userId=" + userId);
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
+                    "Family is not exits.");
+        }
+        return dto;
     }
 
     @Override

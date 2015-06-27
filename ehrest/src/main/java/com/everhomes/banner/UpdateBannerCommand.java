@@ -27,8 +27,8 @@ public class UpdateBannerCommand {
     private Long scopeId;
     private Byte actionType;
     private String actionData;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private Long startTime;
+    private Long endTime;
     private Byte     status;
     private Integer  order;
 
@@ -80,19 +80,19 @@ public class UpdateBannerCommand {
         this.actionData = actionData;
     }
 
-    public Timestamp getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 

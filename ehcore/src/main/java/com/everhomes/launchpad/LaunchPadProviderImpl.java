@@ -126,19 +126,15 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
     }
     
     @Override
-    public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(long versionCode) {
+    public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(String name,long versionCode) {
         List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
-        Condition condition = null;
+        Condition condition = Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name);
         if(versionCode != 0){
-            condition = Tables.EH_LAUNCH_PAD_LAYOUTS.MIN_VERSION_CODE.lessOrEqual(versionCode);
+            condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.MIN_VERSION_CODE.lessOrEqual(versionCode));
         }
-        if(condition != null)
-            condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
-        else 
-            condition = Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode());
-        
+        condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
         step.where(condition).orderBy(Tables.EH_LAUNCH_PAD_LAYOUTS.VERSION_CODE.desc()).fetch().map((r) ->{
             layouts.add(ConvertHelper.convert(r, LaunchPadLayout.class));
             return null;
