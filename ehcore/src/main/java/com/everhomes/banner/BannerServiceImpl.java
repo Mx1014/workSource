@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.NeighborUserDTO;
+import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -56,6 +59,7 @@ public class BannerServiceImpl implements BannerService {
         long cityId = community.getCityId();
         User user = UserContext.current().getUser();
         long userId = user.getId();
+        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),
                 BannerScopeType.COUNTRY.getCode(), 0L);
@@ -69,7 +73,11 @@ public class BannerServiceImpl implements BannerService {
         if(communityBanners != null)
             allBanners.addAll(communityBanners);
         List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
-           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
+           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
+           //third url add user token
+           if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
+               dto.setActionData(parserJson(token,communityId,dto));
+           }
            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
            return dto;
         }).collect(Collectors.toList());
@@ -80,6 +88,7 @@ public class BannerServiceImpl implements BannerService {
         LOGGER.info("Query banner by communityId complete,communityId=" + communityId + ",size=" + size + ",esplse=" + (endTime - startTime));
         return result;
     }
+    //sort banner with banner order asc
     private void sortBanner(List<BannerDTO> result){
         Collections.sort(result, new Comparator<BannerDTO>(){
             @Override
@@ -98,6 +107,17 @@ public class BannerServiceImpl implements BannerService {
         }
         return null;
 
+    }
+    
+    @SuppressWarnings("unchecked")
+    private String parserJson(String userToken, long commnunityId,BannerDTO banner) {
+        
+        JSONObject jsonObject = new JSONObject();
+        if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
+            jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
+        }
+        jsonObject.put(LaunchPadConstants.TOKEN, userToken);
+        return jsonObject.toString();
     }
     
     @Override
