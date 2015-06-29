@@ -229,7 +229,7 @@ public class FamilyProviderImpl implements FamilyProvider {
         for(Long familyId : familyIds){
             Group group = this.groupProvider.findGroupById(familyId);
             if(group == null || !group.getDiscriminator().equals(GroupDiscriminator.FAMILY.getCode())){
-                LOGGER.error("Family is not exits.familyId=" + familyId);
+                LOGGER.error("Family is not exits or group is not family with the id.familyId=" + familyId);
                 return null;
             }
             FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);

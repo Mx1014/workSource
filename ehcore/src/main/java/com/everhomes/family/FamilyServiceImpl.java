@@ -402,7 +402,7 @@ public class FamilyServiceImpl implements FamilyService {
             if(group == null || !group.getDiscriminator().equals(GroupDiscriminator.FAMILY.getCode())){
                 LOGGER.error("Family is not exits.familyId=" + familyId);
                 throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
-                        "Family is not exits.familyId=" + familyId);
+                        "Family is not exitsor group is not family with the id.familyId=" + familyId);
             }
             FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
             family.setAvatarUrl((parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid())));
