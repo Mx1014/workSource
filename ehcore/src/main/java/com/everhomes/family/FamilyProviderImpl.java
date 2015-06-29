@@ -228,47 +228,47 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         for(Long familyId : familyIds){
             Group group = this.groupProvider.findGroupById(familyId);
-            
-            if(group != null){
-
-                FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatarUrl(parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid()));
-                family.setAvatarUri(group.getAvatar());
-                family.setAddressId(group.getIntegralTag1());
-                long communityId = group.getIntegralTag2();
-                Community community = this.communityProvider.findCommunityById(communityId);
-                if(community != null){
-                    family.setCommunityId(communityId);
-                    family.setCommunityName(community.getName());
-                    family.setCityId(community.getCityId());
-                    family.setCityName(community.getCityName());
-                }
-                if(group.getCreatorUid().longValue() == userId.longValue())
-                    family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
-                
-                GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-                        EntityType.USER.getCode(), userId);
-                if(member != null){
-                    family.setMemberNickName(member.getMemberNickName());
-                    family.setMembershipStatus(member.getMemberStatus());
-                    family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
-                    family.setMemberAvatarUri(member.getMemberAvatar());
-                    family.setProofResourceUri(member.getProofResourceUri());
-                    family.setProofResourceUrl(parserUri(member.getProofResourceUri(), EntityType.USER.getCode(), member.getCreatorUid()));
-                }
-                
-                Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
-                if(address != null){
-                    family.setBuildingName(address.getBuildingName());
-                    family.setApartmentName(address.getApartmentName());
-                    family.setAddressStatus(address.getStatus());
-                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
-                                    address.getBuildingName(), address.getApartmentName());
-                    family.setDisplayName(addrStr);
-                    family.setAddress(addrStr);
-                }
-                familyList.add(family);
+            if(group == null || !group.getDiscriminator().equals(GroupDiscriminator.FAMILY.getCode())){
+                LOGGER.error("Family is not exits.familyId=" + familyId);
+                return null;
             }
+            FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
+            family.setAvatarUrl(parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid()));
+            family.setAvatarUri(group.getAvatar());
+            family.setAddressId(group.getIntegralTag1());
+            long communityId = group.getIntegralTag2();
+            Community community = this.communityProvider.findCommunityById(communityId);
+            if(community != null){
+                family.setCommunityId(communityId);
+                family.setCommunityName(community.getName());
+                family.setCityId(community.getCityId());
+                family.setCityName(community.getCityName());
+            }
+            if(group.getCreatorUid().longValue() == userId.longValue())
+                family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+            
+            GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+                    EntityType.USER.getCode(), userId);
+            if(member != null){
+                family.setMemberNickName(member.getMemberNickName());
+                family.setMembershipStatus(member.getMemberStatus());
+                family.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
+                family.setMemberAvatarUri(member.getMemberAvatar());
+                family.setProofResourceUri(member.getProofResourceUri());
+                family.setProofResourceUrl(parserUri(member.getProofResourceUri(), EntityType.USER.getCode(), member.getCreatorUid()));
+            }
+            
+            Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+            if(address != null){
+                family.setBuildingName(address.getBuildingName());
+                family.setApartmentName(address.getApartmentName());
+                family.setAddressStatus(address.getStatus());
+                String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
+                                address.getBuildingName(), address.getApartmentName());
+                family.setDisplayName(addrStr);
+                family.setAddress(addrStr);
+            }
+            familyList.add(family);
         }
         
         return familyList;
