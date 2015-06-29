@@ -1,6 +1,8 @@
 package com.everhomes.organization;
+
+
 public enum OrganizationType {
-    PM("pm"),GARC("garc"),GANC("ganc"),GAPS("gaps");
+    PM("PM"),GARC("GARC"),GANC("GANC"),GAPS("GAPS");
     
     private String code;
     private OrganizationType(String code) {
@@ -12,28 +14,13 @@ public enum OrganizationType {
     }
     
     public static OrganizationType fromCode(String code) {
-    	if(code == null) {
-    		return null;
-    	}
-        
-        if(code.equalsIgnoreCase(PM.getCode())) {
-        	return PM;
+    	OrganizationType[] values = OrganizationType.values();
+        for(OrganizationType value : values) {
+            if(value.code.equals(code)) {
+                return value;
+            }
         }
         
-        if(code.equalsIgnoreCase(GARC.getCode())) {
-        	return GARC;
-        }
-
-
-        if(code.equalsIgnoreCase(GANC.getCode())) {
-        	return GANC;
-        }
-
-        if(code.equalsIgnoreCase(GAPS.getCode())) {
-        	return GAPS;
-        }
-        
-       
         return null;
     }
 }
