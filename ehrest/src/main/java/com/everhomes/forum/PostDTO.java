@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.visibility.VisibleRegionType}</li>
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>visibleRegionName: 区域范围对应的名称</li>
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
  * <li>subject: 帖子或评论标题</li>
@@ -77,6 +78,8 @@ public class PostDTO {
     private Byte visibleRegionType;
 
     private Long visibleRegionId;
+    
+    private String visibleRegionName;
     
     private Double longitude;
     
@@ -240,6 +243,14 @@ public class PostDTO {
 
     public void setVisibleRegionId(Long visibleRegionId) {
         this.visibleRegionId = visibleRegionId;
+    }
+
+    public String getVisibleRegionName() {
+        return visibleRegionName;
+    }
+
+    public void setVisibleRegionName(String visibleRegionName) {
+        this.visibleRegionName = visibleRegionName;
     }
 
     public Double getLongitude() {
