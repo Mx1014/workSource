@@ -328,7 +328,7 @@ public class ActivityProviderImpl implements ActivityProivider {
             locator.setAnchor(activities.get(activities.size() - 1).getId());
         }
 
-        return activities;
+        return activities.subList(0, activities.size()-1);
     }
 
     @Override
