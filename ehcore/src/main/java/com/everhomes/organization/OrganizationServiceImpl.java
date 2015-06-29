@@ -41,6 +41,7 @@ import com.everhomes.organization.pm.AssginPmTopicCommand;
 import com.everhomes.organization.pm.CommunityPmMember;
 import com.everhomes.organization.pm.CommunityPmTasks;
 import com.everhomes.organization.pm.ListPropPostCommandResponse;
+import com.everhomes.organization.pm.PmMemberGroup;
 import com.everhomes.organization.pm.PmMemberStatus;
 import com.everhomes.organization.pm.PmMemberTargetType;
 import com.everhomes.organization.pm.PmTaskStatus;
@@ -120,6 +121,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     	
     	//权限控制
     	//先判断，后台管理员才能创建。状态直接设为正常
+    	OrganizationType organizationType = OrganizationType.fromCode(cmd.getOrganizationType());
+    	cmd.setOrganizationType(organizationType.getCode());
     	Organization department  = ConvertHelper.convert(cmd, Organization.class);
     	if(cmd.getParentId() == null)
     	{
@@ -127,6 +130,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     	}
     	if(cmd.getLevel() == null){
     		department.setLevel(0);
+    	}
+    	if(cmd.getAddressId() == null){
+    		department.setAddressId(0L);
     	}
     	department.setStatus(OrganizationStatus.ACTIVE.getCode());
     	organizationProvider.createOrganization(department);
@@ -146,6 +152,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     		List<OrganizationMember> list = organizationProvider.listOrganizationMembers(cmd.getOrganizationId(), addUserId, 1, 20);
 	    	if(list == null || list.size() == 0)
 	    	{
+	    		PmMemberGroup memberGroup = PmMemberGroup.fromCode(cmd.getMemberGroup());
+	        	cmd.setMemberGroup(memberGroup.getCode());
 	    		OrganizationMember departmentMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 	    		departmentMember.setStatus(PmMemberStatus.ACTIVE.getCode());
 	    		organizationProvider.createOrganizationMember(departmentMember);

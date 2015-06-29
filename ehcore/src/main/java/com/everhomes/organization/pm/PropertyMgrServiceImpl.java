@@ -233,6 +233,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	    	List<CommunityPmMember> list = propertyMgrProvider.findPmMemberByCommunityAndTarget(cmd.getCommunityId(), cmd.getTargetType(), cmd.getTargetId());
 	    	if(list == null || list.size() == 0)
 	    	{
+	    		PmMemberGroup memberGroup = PmMemberGroup.fromCode(cmd.getMemberGroup());
+	        	cmd.setMemberGroup(memberGroup.getCode());
 	    		CommunityPmMember communityPmMember = ConvertHelper.convert(cmd, CommunityPmMember.class);
 	    		communityPmMember.setOrganizationId(organizationId);
 	        	communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
