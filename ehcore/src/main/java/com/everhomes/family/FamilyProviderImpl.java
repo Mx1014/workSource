@@ -139,12 +139,11 @@ public class FamilyProviderImpl implements FamilyProvider {
                         EntityType.USER.getCode(), userGroup.getOwnerUid());
                 assert(m != null);
                 if(m != null) {
-                    
                     // retrieve family info after membership changes
-                    
                     this.groupProvider.deleteGroupMember(m);
                     family = findFamilyByAddressId(address.getId());
-                    if(family.getMemberCount() == 0) {
+                    List<GroupMember> groupMembers = this.groupProvider.findGroupMemberByGroupId(family.getId());
+                    if(groupMembers == null || groupMembers.isEmpty()) {
                         this.groupProvider.deleteGroup(family);
                     } else {
                         if(m.getMemberRole() == Role.ResourceCreator) {
@@ -283,7 +282,11 @@ public class FamilyProviderImpl implements FamilyProvider {
             return null;
         List<Long> familyIds = new ArrayList<Long>();
         for(UserGroup u : list){
-            familyIds.add(u.getGroupId());
+            GroupMember groupMember = this.groupProvider.findGroupMemberByMemberInfo(u.getGroupId(), EntityType.USER.getCode(), userId);
+            if(groupMember != null){
+                familyIds.add(u.getGroupId());
+            }
+            
         }
        return getUserOwningFamiliesByIds(familyIds, userId);
     }
