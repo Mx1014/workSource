@@ -280,7 +280,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public List<ActivityRoster> listRosters(Long activityId) {
         List<ActivityRoster> rosters=new ArrayList<ActivityRoster>();
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
                 (context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetch().forEach(item -> {
@@ -327,8 +327,10 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (activities.size() > 0) {
             locator.setAnchor(activities.get(activities.size() - 1).getId());
         }
-
-        return activities.subList(0, activities.size()-1);
+       if(activities.size()>count){
+            return activities.subList(0, activities.size()-1);
+        }
+        return activities;
     }
 
     @Override
