@@ -75,8 +75,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             LOGGER.info("communities sync count= " + count);
         }
         
-        this.optimize(1);
-        this.refresh();
+        //this.optimize(1);
+        //this.refresh();
     }
    
     @Override
@@ -159,7 +159,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         qb = QueryBuilders.multiMatchQuery(queryString)
                 .field("name", 5.0f)
                 .field("name.pinyin_prefix", 2.0f)
-                .field("name.pinyin_gram", 1.0f).analyzer("simple");
+                .field("name.pinyin_gram", 1.0f);
         
         FilterBuilder fb = null;
         if((null != cityId) && (cityId > 0)) {
@@ -172,7 +172,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
-        builder.setFrom(pageNum).setSize(pageSize);
+        builder.setFrom(pageNum * pageSize).setSize(pageSize);
         
         builder.setQuery(qb);
         

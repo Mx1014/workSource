@@ -1,11 +1,13 @@
-ELASTIC=127.0.0.1:9200
+ELASTIC=elasticsearch:9200
 
+curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/community
 curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
 {
     "community": {
         "properties": {
             "name": {
                 "type": "multi_field", 
+                "analyzer":"simple",
                 "fields": {
                     "name": {
                         "type": "string", 
@@ -24,8 +26,8 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
             "cityId": {
                 "type": "long",
                 "index": "not_analyzed"
-            	}
-        	}
-    	}
+                }
+            }
+        }
 }
 '
