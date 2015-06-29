@@ -6,4 +6,4 @@ INSERT INTO `eh_servers` (`id`, `address_uri`, `server_type`, `status`, `config_
 INSERT INTO `eh_servers` (`id`, `address_uri`, `address_port`, `server_type`, `status`, `config_tag`, `description`) 
     VALUES(2, 'redis-server', 6379, 1, 1, 'RedisStorage', 'Redis Storage');
 INSERT INTO `eh_servers` (`id`, `address_uri`, `address_port`, `server_type`, `status`, `config_tag`, `description`) 
-    VALUES(3, 'redis-server', 6379, 2, 1, 'RedisCache', 'Redis Cache');
+    VALUES(3, 'redis-cache', 6379, 2, 1, 'RedisCache', 'Redis Cache');

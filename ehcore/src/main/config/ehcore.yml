@@ -78,7 +78,7 @@ web.location: /resources/
 #
 redis: 
     bus:
-        host: redis-cache
+        host: redis-server
         port: 6379
     store:
         master:
