@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberAvatar：成员在group内的头像URI</li>
  * <li>memberAvatarUrl：成员在group内的头像URL</li>
  * <li>updateTime：更新时间</li>
+ * <li>createTime：创建时间</li>
  * </ul>
  */
 public class GroupMemberSnapshotDTO {
@@ -28,6 +29,7 @@ public class GroupMemberSnapshotDTO {
     private String memberAvatar;
     private String memberAvatarUrl;
     private Timestamp updateTime;
+    private Timestamp createTime;
     
     public GroupMemberSnapshotDTO() {
     }
@@ -102,6 +104,14 @@ public class GroupMemberSnapshotDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     @Override

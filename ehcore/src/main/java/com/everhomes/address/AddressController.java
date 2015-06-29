@@ -3,6 +3,8 @@ package com.everhomes.address;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
 
 @RestController
@@ -205,13 +208,16 @@ public class AddressController extends ControllerBase {
      */
     @RequestMapping("listApartmentsByBuildingName")
     @RestReturn(value=ListApartmentByBuildingNameCommandResponse.class)
-    public RestResponse listApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd) {
+    public RestResponse listApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         ListApartmentByBuildingNameCommandResponse result = this.addressService.listApartmentsByBuildingName(cmd);
-        RestResponse response = new RestResponse(result);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
         
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
 
 }

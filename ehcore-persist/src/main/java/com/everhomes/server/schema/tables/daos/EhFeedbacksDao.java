@@ -102,4 +102,11 @@ public class EhFeedbacksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByContentCategory(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.CONTENT_CATEGORY, values);
 	}
+
+	/**
+	 * Fetch records that have <code>proof_resource_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByProofResourceUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.PROOF_RESOURCE_URI, values);
+	}
 }

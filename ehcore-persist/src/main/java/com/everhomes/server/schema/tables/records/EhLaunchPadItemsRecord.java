@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> implements org.jooq.Record19<java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Byte, java.lang.String, java.lang.Integer, java.lang.Byte, java.lang.Long, java.lang.Byte, java.lang.String> {
 
-	private static final long serialVersionUID = -1891174357;
+	private static final long serialVersionUID = 1448684509;
 
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.id</code>.
@@ -98,14 +98,14 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_launch_pad_items.item_group</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 * Setter for <code>ehcore.eh_launch_pad_items.item_group</code>. the type to filter item when querying: Default、GovAgencies、Bizs、GaActions
 	 */
 	public void setItemGroup(java.lang.String value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_launch_pad_items.item_group</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 * Getter for <code>ehcore.eh_launch_pad_items.item_group</code>. the type to filter item when querying: Default、GovAgencies、Bizs、GaActions
 	 */
 	public java.lang.String getItemGroup() {
 		return (java.lang.String) getValue(6);

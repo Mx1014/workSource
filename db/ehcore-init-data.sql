@@ -5,10 +5,10 @@ use ehcore;
 #
 # System forum
 #
-INSERT INTO `eh_forums`(`id`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(1, 0, 2, '', 0, '社区论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_forums`(`id`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(2, 0, 2, '', 0, '意见反馈论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());	
+INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(1, UUID(), 0, 2, '', 0, '社区论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(2, UUID(), 0, 2, '', 0, '意见反馈论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());	
 
 #
 # Root categories
@@ -426,7 +426,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'user.notification', 1, 'zh_CN', '新用户注册', '小左等您好久啦，已经为您准备好了精彩的社区生活…');
 
-
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
 	
 	
     

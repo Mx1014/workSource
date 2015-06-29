@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -336690964;
+	private static final long serialVersionUID = -758209047;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -30,6 +30,11 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_communities.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_communities.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.city_id</code>. city id in region table
@@ -226,7 +231,7 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_COMMUNITIES_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_COMMUNITIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_COMMUNITIES_U_EH_UUID);
 	}
 
 	/**

@@ -54,6 +54,7 @@ public class UserPointServiceImpl implements UserPointService {
         UserScore userScore = ConvertHelper.convert(cmd, UserScore.class);
         userScore.setOwnerUid(cmd.getUid());
         userScore.setScore(cmd.getPoint());
+        userScore.setScoreType(cmd.getPointType());
         PointType type = PointType.fromCode(cmd.getPointType());
         // handle point type to validate
         try {
@@ -113,7 +114,7 @@ public class UserPointServiceImpl implements UserPointService {
         // get today start time
         UserScore old = userPointProvider.findTodayRecord(Operator.AND,
                 Tables.EH_USER_SCORES.OWNER_UID.eq(userScore.getOwnerUid()),
-                Tables.EH_USER_SCORES.CREATE_TIME.le(getCurrentTime()),
+                Tables.EH_USER_SCORES.CREATE_TIME.lt(getCurrentTime()),
                 Tables.EH_USER_SCORES.CREATE_TIME.gt(getTodayStartTime()));
         if (old == null) {
             userScore.setCreateTime(getCurrentTime());

@@ -63,8 +63,8 @@ public class BannerTest extends TestCase {
         CreateBannerCommand cmd = new CreateBannerCommand();
         cmd.setBannerGroup(ItemGroup.BIZS.getCode());
         cmd.setBannerLocation("/home");
-        cmd.setActionName("google");
-        cmd.setActionUri("www.google.com");
+//        cmd.setActionName("google");
+//        cmd.setActionUri("www.google.com");
         cmd.setAppid(0L);
         cmd.setName("谷歌");
         cmd.setNamespaceId(0);

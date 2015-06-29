@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -25,7 +28,6 @@ import com.everhomes.util.StringHelper;
  * <li>minVersion: item 最小版本号</li>
  * <li>displayFlag: 是否显示{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
- * <li>jsonObj: json字符串，存储附加信息</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -209,6 +211,16 @@ public class LaunchPadItemDTO {
 
     public void setDisplayLayout(String displayLayout) {
         this.displayLayout = displayLayout;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override

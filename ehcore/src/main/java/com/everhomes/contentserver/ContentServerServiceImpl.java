@@ -132,15 +132,19 @@ public class ContentServerServiceImpl implements ContentServerService {
             return new ArrayList<String>();
         }
         Map<Long, ContentServer> cache = getServersHash();
-        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
-        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token))
+        final String token[] = new String[1];
+        if(UserContext.current().getLogin()!=null)
+            token[0] = UserContext.current().getLogin().getLoginToken().getTokenString();
+        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token[0]))
                 .collect(Collectors.toList());
     }
 
     @Override
     public String parserUri(String uri, String ownerType, Long ownerId) {
         Map<Long, ContentServer> cache = getServersHash();
-        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
+        String token =null;
+        if(UserContext.current().getLogin()!=null)
+            token = UserContext.current().getLogin().getLoginToken().getTokenString();
         return parserSingleUri(uri, cache, ownerType, ownerId, token);
     }
 
@@ -203,4 +207,5 @@ public class ContentServerServiceImpl implements ContentServerService {
         String resourceId = Generator.decodeUrl(arr[arr.length - 1]);
         return contentServerProvider.findByResourceId(resourceId);
     }
+    
 }

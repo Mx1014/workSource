@@ -2,6 +2,8 @@ package com.everhomes.family;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import com.everhomes.family.NeighborUserDTO;
 import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
 
 /**
@@ -100,13 +103,19 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("getUserOwningFamilies")
     @RestReturn(value=FamilyDTO.class ,collection=true)
-    public RestResponse getUserOwningFamilies() {
+    public RestResponse getUserOwningFamilies(HttpServletRequest request,HttpServletResponse response) {
         
         List<FamilyDTO> results = familyService.getUserOwningFamilies();
-        RestResponse response = new RestResponse(results);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        RestResponse resp = new RestResponse();
+        if(results != null){
+            if(EtagHelper.checkHeaderEtagOnly(30,results.hashCode()+"", request, response)) {
+                resp.setResponseObject(results);
+            }
+        }
+        
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
     
     /**
@@ -266,14 +275,16 @@ public class FamilyController extends ControllerBase {
      */
     @RequestMapping("listNeighborUsers")
     @RestReturn(value=ListNeighborUsersCommandResponse.class)
-    public RestResponse listNeighborUsers(@Valid ListNeighborUsersCommand cmd) {
+    public RestResponse listNeighborUsers(@Valid ListNeighborUsersCommand cmd,HttpServletRequest request, HttpServletResponse response) {
         
         ListNeighborUsersCommandResponse result = this.familyService.listNeighborUsers(cmd);
-
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
     
     /**

@@ -2,6 +2,7 @@ package com.everhomes.address;
 
 public class AddressDTO {
     private java.lang.Long     id;
+    private java.lang.String   uuid;
     private java.lang.Long     communityId;
     private java.lang.Long     cityId;
     private java.lang.String   zipcode;
@@ -28,6 +29,14 @@ public class AddressDTO {
 
     public void setId(java.lang.Long id) {
         this.id = id;
+    }
+
+    public java.lang.String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(java.lang.String uuid) {
+        this.uuid = uuid;
     }
 
     public java.lang.Long getCommunityId() {

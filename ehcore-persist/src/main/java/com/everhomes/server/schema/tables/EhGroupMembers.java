@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = -1477790378;
+	private static final long serialVersionUID = 563088651;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -30,6 +30,11 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_group_members.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.group_id</code>.
@@ -92,9 +97,9 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROCESS_DETAILS = createField("process_details", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.proof_resource_url</code>.
+	 * The column <code>ehcore.eh_group_members.proof_resource_uri</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROOF_RESOURCE_URL = createField("proof_resource_url", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROOF_RESOURCE_URI = createField("proof_resource_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
@@ -211,7 +216,7 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_U_EH_UUID, com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER);
 	}
 
 	/**

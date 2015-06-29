@@ -17,10 +17,11 @@ public class SearchTopicCommand {
     
     private String queryString;
     private Long forumId;
+    private Long communityId;
     private Long contentCategory;
     private Long actionCategory;
     
-    private int searchFlag;
+    private Integer searchFlag;
     private Long pageAnchor;
     
     private Integer pageSize;
@@ -85,11 +86,11 @@ public class SearchTopicCommand {
         this.actionCategory = actionCategory;
     }
 
-    public int getSearchFlag() {
+    public Integer getSearchFlag() {
         return searchFlag;
     }
 
-    public void setSearchFlag(int searchFlag) {
+    public void setSearchFlag(Integer searchFlag) {
         this.searchFlag = searchFlag;
     }
 
@@ -100,5 +101,12 @@ public class SearchTopicCommand {
     public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
-    
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 }

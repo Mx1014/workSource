@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -69588263;
+	private static final long serialVersionUID = 1458994649;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Long     appId;
 	private java.lang.Long     forumId;
 	private java.lang.Long     parentPostId;
@@ -32,6 +33,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.Long     childCount;
 	private java.lang.Long     forwardCount;
 	private java.lang.Long     likeCount;
+	private java.lang.Long     viewCount;
 	private java.lang.String   subject;
 	private java.lang.String   contentType;
 	private java.lang.String   content;
@@ -61,6 +63,7 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public EhForumPosts(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Long     appId,
 		java.lang.Long     forumId,
 		java.lang.Long     parentPostId,
@@ -79,6 +82,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.Long     childCount,
 		java.lang.Long     forwardCount,
 		java.lang.Long     likeCount,
+		java.lang.Long     viewCount,
 		java.lang.String   subject,
 		java.lang.String   contentType,
 		java.lang.String   content,
@@ -105,6 +109,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.appId = appId;
 		this.forumId = forumId;
 		this.parentPostId = parentPostId;
@@ -123,6 +128,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.childCount = childCount;
 		this.forwardCount = forwardCount;
 		this.likeCount = likeCount;
+		this.viewCount = viewCount;
 		this.subject = subject;
 		this.contentType = contentType;
 		this.content = content;
@@ -155,6 +161,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Long getAppId() {
@@ -299,6 +313,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setLikeCount(java.lang.Long likeCount) {
 		this.likeCount = likeCount;
+	}
+
+	public java.lang.Long getViewCount() {
+		return this.viewCount;
+	}
+
+	public void setViewCount(java.lang.Long viewCount) {
+		this.viewCount = viewCount;
 	}
 
 	public java.lang.String getSubject() {

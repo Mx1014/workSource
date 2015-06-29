@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 549267453;
+	private static final long serialVersionUID = 1318790161;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Long     groupId;
 	private java.lang.String   memberType;
 	private java.lang.Long     memberId;
@@ -26,7 +27,7 @@ public class EhGroupMembers implements java.io.Serializable {
 	private java.lang.Long     operatorUid;
 	private java.lang.Byte     processCode;
 	private java.lang.String   processDetails;
-	private java.lang.String   proofResourceUrl;
+	private java.lang.String   proofResourceUri;
 	private java.sql.Timestamp approveTime;
 	private java.lang.String   requestorComment;
 	private java.lang.Byte     operationType;
@@ -48,6 +49,7 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public EhGroupMembers(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Long     groupId,
 		java.lang.String   memberType,
 		java.lang.Long     memberId,
@@ -60,7 +62,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.Long     operatorUid,
 		java.lang.Byte     processCode,
 		java.lang.String   processDetails,
-		java.lang.String   proofResourceUrl,
+		java.lang.String   proofResourceUri,
 		java.sql.Timestamp approveTime,
 		java.lang.String   requestorComment,
 		java.lang.Byte     operationType,
@@ -79,6 +81,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		java.lang.String   stringTag5
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.groupId = groupId;
 		this.memberType = memberType;
 		this.memberId = memberId;
@@ -91,7 +94,7 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.processCode = processCode;
 		this.processDetails = processDetails;
-		this.proofResourceUrl = proofResourceUrl;
+		this.proofResourceUri = proofResourceUri;
 		this.approveTime = approveTime;
 		this.requestorComment = requestorComment;
 		this.operationType = operationType;
@@ -116,6 +119,14 @@ public class EhGroupMembers implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Long getGroupId() {
@@ -214,12 +225,12 @@ public class EhGroupMembers implements java.io.Serializable {
 		this.processDetails = processDetails;
 	}
 
-	public java.lang.String getProofResourceUrl() {
-		return this.proofResourceUrl;
+	public java.lang.String getProofResourceUri() {
+		return this.proofResourceUri;
 	}
 
-	public void setProofResourceUrl(java.lang.String proofResourceUrl) {
-		this.proofResourceUrl = proofResourceUrl;
+	public void setProofResourceUri(java.lang.String proofResourceUri) {
+		this.proofResourceUri = proofResourceUri;
 	}
 
 	public java.sql.Timestamp getApproveTime() {

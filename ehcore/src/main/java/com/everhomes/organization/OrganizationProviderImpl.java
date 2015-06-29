@@ -7,6 +7,7 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
@@ -267,6 +268,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationCommunities.class, id);
     }
      
+    @Override
+    public OrganizationCommunity findOrganizationCommunityByOrgIdAndCmmtyId(Long orgId, Long cmmtyId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES);
+        Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId.longValue());
+        condition = condition.and(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(cmmtyId.longValue()));
+        final OrganizationCommunity[] result = new OrganizationCommunity[1];
+        step.where(condition).fetch().map(r -> {
+            result[0] = ConvertHelper.convert(r,OrganizationCommunity.class);
+            return null;
+        });
+        return result[0];
+    }
 
     @Override
     public OrganizationCommunity findOrganizationCommunityById(Long id) {
@@ -391,4 +405,5 @@ public class OrganizationProviderImpl implements OrganizationProvider {
        Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId);
        return step.where(condition).fetchOneInto(Integer.class);
 	}
+
 }

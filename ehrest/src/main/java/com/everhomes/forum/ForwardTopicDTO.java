@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ForwardTopicDTO {
     private Long topicId;
+    //private String topicUuid;
     
     private Long forumId;
     
@@ -32,7 +33,7 @@ public class ForwardTopicDTO {
     public void setTopicId(Long topicId) {
         this.topicId = topicId;
     }
-    
+
     public Long getForumId() {
         return forumId;
     }

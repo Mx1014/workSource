@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFeedbacksRecord> {
 
-	private static final long serialVersionUID = -966353897;
+	private static final long serialVersionUID = 500060123;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_feedbacks</code>
@@ -70,6 +70,11 @@ public class EhFeedbacks extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_feedbacks.content_category</code>. 0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.Long> CONTENT_CATEGORY = createField("content_category", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction");
+
+	/**
+	 * The column <code>ehcore.eh_feedbacks.proof_resource_uri</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFeedbacksRecord, java.lang.String> PROOF_RESOURCE_URI = createField("proof_resource_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_feedbacks</code> table reference

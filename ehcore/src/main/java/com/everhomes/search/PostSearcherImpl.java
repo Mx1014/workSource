@@ -25,10 +25,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.everhomes.address.CommunityDTO;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.CommunityService;
+import com.everhomes.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.IteratePostCallback;
 import com.everhomes.forum.ListPostCommandResponse;
@@ -36,6 +40,8 @@ import com.everhomes.forum.Post;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.PostQueryResult;
 import com.everhomes.forum.SearchTopicCommand;
+import com.everhomes.group.GroupDTO;
+import com.everhomes.group.GroupService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
@@ -43,6 +49,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.visibility.VisibleRegionType;
 
 @Service
 public class PostSearcherImpl extends AbstractElasticSearch implements PostSearcher {
@@ -59,6 +66,12 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Autowired
     CategoryProvider categoryProvider;
+    
+    @Autowired
+    GroupService groupService;
+    
+    @Autowired
+    private CommunityService communityService;
     
     private final String contentcategory = "contentcategory";
     private final String actioncategory = "actioncategory";
@@ -94,6 +107,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("creatorUid", post.getCreatorUid());
             b.field("visibleRegionType", post.getVisibleRegionType());
             b.field("visibleRegionId", post.getVisibleRegionId().intValue());
+            b.field("visibleRegionType", post.getVisibleRegionType());
+            b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("senderName", u.getAccountName());
             b.field("senderAvatar", u.getAvatar());
             b.field("forumName", 0);
@@ -176,6 +191,61 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         this.refresh();
         
     }
+   
+    private FilterBuilder boolInFilter(String term, List<Long> values) {
+        List<FilterBuilder> ors = new ArrayList<FilterBuilder>();
+        for(Long l : values) {
+            ors.add(FilterBuilders.termFilter(term, l));
+        }
+        if(ors.size() == 1) {
+            return ors.get(0);
+        }
+        
+        return FilterBuilders.boolFilter().should(ors.toArray(new FilterBuilder[ors.size()]));
+    }
+    
+    private FilterBuilder getForumFilter(SearchTopicCommand cmd) {
+        FilterBuilder fb = null;
+        if(cmd.getSearchFlag() != null && cmd.getSearchFlag() == 1) {
+            GetNearbyCommunitiesByIdCommand nearCmd = new GetNearbyCommunitiesByIdCommand();
+            nearCmd.setId(cmd.getCommunityId());
+            List<CommunityDTO> coms = communityService.getNearbyCommunityById(nearCmd);
+            List<Long> comIds = new ArrayList<Long>();
+            for(CommunityDTO cDTO : coms) {
+                comIds.add(cDTO.getId());
+                }
+            
+            FilterBuilder comFilter = null;
+            if(comIds.size() > 0) {
+                FilterBuilder comIn = boolInFilter("visibleRegionId", comIds);
+                FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
+                FilterBuilder comForum = FilterBuilders.termFilter("forumId", ForumConstants.SYSTEM_FORUM);
+                comFilter = FilterBuilders.andFilter(comIn, comType, comForum);
+                }
+            
+            List<GroupDTO> groups = groupService.listUserRelatedGroups();
+            List<Long> groupIds = new ArrayList<Long>();
+            for(GroupDTO groupDTO : groups) {
+                groupIds.add(groupDTO.getId());
+                }
+            
+            if(groupIds.size() > 0) {
+                if(null == comFilter) {
+                    comFilter = boolInFilter("forumId", groupIds);
+                } else {
+                    comFilter = FilterBuilders.boolFilter().should(comFilter,boolInFilter("forumId", groupIds)); 
+                     }
+                 }
+            
+            fb = comFilter;
+        } else {
+            if(cmd.getForumId() != null) {
+                fb = FilterBuilders.termFilter("forumId", cmd.getForumId());    
+                }
+        }
+        
+        return fb;
+    }
 
     @Override
     public ListPostCommandResponse query(SearchTopicCommand cmd) {
@@ -218,10 +288,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             qb = QueryBuilders.boolQuery().should(qb).should(prefix_b);
            }
         
-        FilterBuilder fb = null;
-        if(cmd.getForumId() != null) {
-            fb = FilterBuilders.termFilter("forumId", cmd.getForumId());    
-            }           
+        FilterBuilder fb = getForumFilter(cmd);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;

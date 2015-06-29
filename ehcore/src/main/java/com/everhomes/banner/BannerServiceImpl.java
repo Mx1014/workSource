@@ -3,10 +3,14 @@ package com.everhomes.banner;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,8 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.NeighborUserDTO;
+import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -53,6 +59,7 @@ public class BannerServiceImpl implements BannerService {
         long cityId = community.getCityId();
         User user = UserContext.current().getUser();
         long userId = user.getId();
+        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),
                 BannerScopeType.COUNTRY.getCode(), 0L);
@@ -66,15 +73,29 @@ public class BannerServiceImpl implements BannerService {
         if(communityBanners != null)
             allBanners.addAll(communityBanners);
         List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
-           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
+           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
+           //third url add user token
+           if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
+               dto.setActionData(parserJson(token,communityId,dto));
+           }
            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
            return dto;
         }).collect(Collectors.toList());
-        
+        if(result != null && !result.isEmpty())
+            sortBanner(result);
         long endTime = System.currentTimeMillis();
         int size = result == null ? 0 : result.size();
         LOGGER.info("Query banner by communityId complete,communityId=" + communityId + ",size=" + size + ",esplse=" + (endTime - startTime));
         return result;
+    }
+    //sort banner with banner order asc
+    private void sortBanner(List<BannerDTO> result){
+        Collections.sort(result, new Comparator<BannerDTO>(){
+            @Override
+            public int compare(BannerDTO o1, BannerDTO o2){
+               return o1.getOrder().intValue() - o2.getOrder().intValue();
+            }
+        });
     }
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
@@ -86,6 +107,17 @@ public class BannerServiceImpl implements BannerService {
         }
         return null;
 
+    }
+    
+    @SuppressWarnings("unchecked")
+    private String parserJson(String userToken, long commnunityId,BannerDTO banner) {
+        
+        JSONObject jsonObject = new JSONObject();
+        if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
+            jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
+        }
+        jsonObject.put(LaunchPadConstants.TOKEN, userToken);
+        return jsonObject.toString();
     }
     
     @Override
@@ -102,21 +134,27 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid bannerGroup paramter.");
         }
+        if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
+        }
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<BannerScope> scopes = cmd.getScopes();
         scopes.forEach(scope ->{
             Banner banner = new Banner();
-            banner.setActionName(cmd.getActionName());
-            banner.setActionUri(cmd.getActionUri());
+            banner.setActionType(cmd.getActionType());
+            banner.setActionData(cmd.getActionData());
             banner.setAppid(cmd.getAppid());
             banner.setCreatorUid(userId);
             banner.setBannerLocation(cmd.getBannerLocation());
             banner.setBannerGroup(cmd.getBannerGroup());
             banner.setName(cmd.getName());
             banner.setNamespaceId(cmd.getNamespaceId());
-            banner.setStartTime(cmd.getStartTime());
-            banner.setEndTime(cmd.getEndTime());
+            if(cmd.getStartTime() != null)
+                banner.setStartTime(new Timestamp(cmd.getStartTime()));
+            if(cmd.getEndTime() != null)
+                banner.setEndTime(new Timestamp(cmd.getEndTime()));
             banner.setStatus(cmd.getStatus());
             banner.setPosterPath(cmd.getPosterPath());
             banner.setScopeType(scope.getScopeType());
@@ -139,12 +177,18 @@ public class BannerServiceImpl implements BannerService {
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
         
-        if(cmd.getActionUri() != null)
-            banner.setActionUri(cmd.getActionUri());
+        if(cmd.getActionType() != null)
+            banner.setActionType(cmd.getActionType());
+        if(cmd.getActionData() != null)
+            banner.setActionData(cmd.getActionData());
+        if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
+        }
         if(cmd.getEndTime() != null)
-            banner.setEndTime(cmd.getEndTime());
+            banner.setEndTime(new Timestamp(cmd.getEndTime()));
         if(cmd.getStartTime() != null)
-            banner.setEndTime(cmd.getStartTime());
+            banner.setEndTime(new Timestamp(cmd.getStartTime()));
         if(cmd.getOrder() != null)
             banner.setOrder(cmd.getOrder());
         if(cmd.getPosterPath() != null)
@@ -213,17 +257,41 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        return bannerProvider.listAllBanners().stream().map((Banner r) ->{
+        List<BannerDTO> result = bannerProvider.listAllBanners().stream().map((Banner r) ->{
             BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
             dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
             return dto;
          }).collect(Collectors.toList());
+        if(result != null && !result.isEmpty())
+            sortBanner(result);
+        return result;
     }
     
     @Override
     public BannerClickDTO findBannerClickByToken(String token){
         BannerClick bannerClick = this.bannerProvider.findBannerClickByToken(token);
         BannerClickDTO dto = ConvertHelper.convert(bannerClick, BannerClickDTO.class);
+        return dto;
+        
+    }
+    
+    @Override
+    public BannerDTO getBannerById(GetBannerByIdCommand cmd){
+        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
+        }
+        Banner banner = bannerProvider.findBannerById(cmd.getId());
+        if(banner == null){
+            LOGGER.error("Banner is not exists,id=" + cmd.getId() + ",userId=" + userId);
+            throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
+                    BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
+        }
+        BannerDTO dto = ConvertHelper.convert(banner, BannerDTO.class); 
+        dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
         return dto;
         
     }

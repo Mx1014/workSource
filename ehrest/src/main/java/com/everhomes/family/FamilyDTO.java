@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 家庭Id</li>
+ * <li>uuid: 唯一标识</li>
  * <li>name: 家庭名称</li>
  * <li>displayName: 家庭显示名称，用于客户端显示</li>
  * <li>avatarUri: 家庭头像Id，图片上传到ContentServer得到的ID</li>
@@ -34,11 +35,13 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName: 家庭地址楼栋号</li>
  * <li>apartmentName: 家庭地址门牌号</li>
  * <li>addressStatus: 地址状态, {@link com.everhomes.address.AddressAdminStatus}</li>
- * <li>proofResourceUrl: 存在该字段有值表名是加速审核的</li>
+ * <li>proofResourceUri: 用于加速审核的图片URI</li>
+ * <li>proofResourceUrl: 用于加速审核的图片URI</li>
  * </ul>
  */
 public class FamilyDTO {
     private Long id;
+//    private String uuid;
     private String name;
     private String displayName;
     private String avatarUri;
@@ -69,7 +72,10 @@ public class FamilyDTO {
     private String apartmentName;
     
     private Byte addressStatus;
+    private String proofResourceUri;
     private String proofResourceUrl;
+    
+    
     
     public FamilyDTO () {
     }
@@ -81,6 +87,14 @@ public class FamilyDTO {
     public void setId(Long id) {
         this.id = id;
     }
+
+//    public String getUuid() {
+//        return uuid;
+//    }
+//
+//    public void setUuid(String uuid) {
+//        this.uuid = uuid;
+//    }
 
     public String getName() {
         return name;
@@ -273,6 +287,14 @@ public class FamilyDTO {
     public void setAddressStatus(Byte addressStatus) {
         this.addressStatus = addressStatus;
     }
+    
+    public String getProofResourceUri() {
+        return proofResourceUri;
+    }
+
+    public void setProofResourceUri(String proofResourceUri) {
+        this.proofResourceUri = proofResourceUri;
+    }
 
     public String getProofResourceUrl() {
         return proofResourceUrl;
@@ -281,7 +303,7 @@ public class FamilyDTO {
     public void setProofResourceUrl(String proofResourceUrl) {
         this.proofResourceUrl = proofResourceUrl;
     }
-    
+
     public String getCellPhone() {
         return cellPhone;
     }
@@ -295,12 +317,14 @@ public class FamilyDTO {
         if (! (obj instanceof FamilyDTO)) {
             return false;
         }
-        return EqualsBuilder.reflectionEquals(this, obj,new String[]{"adminStatus","primaryFlag"});
+        return EqualsBuilder.reflectionEquals(this, obj,new String[]{"adminStatus","primaryFlag","memberUid","memberNickName"
+                ,"memberAvatarUri","memberAvatarUrl","cellPhone","proofResourceUri","proofResourceUrl"});
     }
     
     @Override
     public int hashCode(){
-        return HashCodeBuilder.reflectionHashCode(this,new String[]{"adminStatus","primaryFlag"});
+        return HashCodeBuilder.reflectionHashCode(this,new String[]{"adminStatus","primaryFlag","memberUid","memberNickName"
+                ,"memberAvatarUri","memberAvatarUrl","cellPhone","proofResourceUri","proofResourceUrl"});
     }
 
     @Override

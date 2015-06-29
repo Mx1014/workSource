@@ -48,6 +48,20 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhUsers fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhUsers.EH_USERS.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>account_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByAccountName(java.lang.String... values) {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = 2035953838;
+	private static final long serialVersionUID = 1456721248;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -30,6 +30,11 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_addresses.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.community_id</code>. NULL: means it is an independent street address, otherwise, it is an appartment address
@@ -196,7 +201,7 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAddressesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ADDRESSES_U_EH_UUID);
 	}
 
 	/**

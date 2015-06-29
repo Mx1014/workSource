@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = 601843823;
+	private static final long serialVersionUID = 634496338;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_activities</code>
@@ -30,6 +30,11 @@ public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_activities.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_activities.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhActivitiesRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_activities.namespace_id</code>.
@@ -231,7 +236,7 @@ public class EhActivities extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACTIVITIES_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACTIVITIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_ACTIVITIES_U_EH_UUID);
 	}
 
 	/**

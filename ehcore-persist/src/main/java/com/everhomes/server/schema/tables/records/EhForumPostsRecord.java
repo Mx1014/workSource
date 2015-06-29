@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -693899074;
+	private static final long serialVersionUID = 473587027;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -28,591 +28,619 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_forum_posts.uuid</code>.
+	 */
+	public void setUuid(java.lang.String value) {
+		setValue(1, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_forum_posts.uuid</code>.
+	 */
+	public java.lang.String getUuid() {
+		return (java.lang.String) getValue(1);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_forum_posts.app_id</code>. default to forum application itself
 	 */
 	public void setAppId(java.lang.Long value) {
-		setValue(1, value);
+		setValue(2, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.app_id</code>. default to forum application itself
 	 */
 	public java.lang.Long getAppId() {
-		return (java.lang.Long) getValue(1);
+		return (java.lang.Long) getValue(2);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.forum_id</code>. forum that it belongs
 	 */
 	public void setForumId(java.lang.Long value) {
-		setValue(2, value);
+		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.forum_id</code>. forum that it belongs
 	 */
 	public java.lang.Long getForumId() {
-		return (java.lang.Long) getValue(2);
+		return (java.lang.Long) getValue(3);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.parent_post_id</code>. replied post id
 	 */
 	public void setParentPostId(java.lang.Long value) {
-		setValue(3, value);
+		setValue(4, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.parent_post_id</code>. replied post id
 	 */
 	public java.lang.Long getParentPostId() {
-		return (java.lang.Long) getValue(3);
+		return (java.lang.Long) getValue(4);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.creator_uid</code>. post creator uid
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(4, value);
+		setValue(5, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.creator_uid</code>. post creator uid
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(4);
+		return (java.lang.Long) getValue(5);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.creator_tag</code>. post creator tag
 	 */
 	public void setCreatorTag(java.lang.String value) {
-		setValue(5, value);
+		setValue(6, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.creator_tag</code>. post creator tag
 	 */
 	public java.lang.String getCreatorTag() {
-		return (java.lang.String) getValue(5);
+		return (java.lang.String) getValue(6);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.target_tag</code>. post target tag
 	 */
 	public void setTargetTag(java.lang.String value) {
-		setValue(6, value);
+		setValue(7, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.target_tag</code>. post target tag
 	 */
 	public java.lang.String getTargetTag() {
-		return (java.lang.String) getValue(6);
+		return (java.lang.String) getValue(7);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.longitude</code>.
 	 */
 	public void setLongitude(java.lang.Double value) {
-		setValue(7, value);
+		setValue(8, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.longitude</code>.
 	 */
 	public java.lang.Double getLongitude() {
-		return (java.lang.Double) getValue(7);
+		return (java.lang.Double) getValue(8);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.latitude</code>.
 	 */
 	public void setLatitude(java.lang.Double value) {
-		setValue(8, value);
+		setValue(9, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.latitude</code>.
 	 */
 	public java.lang.Double getLatitude() {
-		return (java.lang.Double) getValue(8);
+		return (java.lang.Double) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.geohash</code>.
 	 */
 	public void setGeohash(java.lang.String value) {
-		setValue(9, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.geohash</code>.
 	 */
 	public java.lang.String getGeohash() {
-		return (java.lang.String) getValue(9);
+		return (java.lang.String) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.visible_region_type</code>. define the visible region type
 	 */
 	public void setVisibleRegionType(java.lang.Byte value) {
-		setValue(10, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.visible_region_type</code>. define the visible region type
 	 */
 	public java.lang.Byte getVisibleRegionType() {
-		return (java.lang.Byte) getValue(10);
+		return (java.lang.Byte) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.visible_region_id</code>. visible region id
 	 */
 	public void setVisibleRegionId(java.lang.Long value) {
-		setValue(11, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.visible_region_id</code>. visible region id
 	 */
 	public java.lang.Long getVisibleRegionId() {
-		return (java.lang.Long) getValue(11);
+		return (java.lang.Long) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.visible_region_path</code>. visible region path
 	 */
 	public void setVisibleRegionPath(java.lang.String value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.visible_region_path</code>. visible region path
 	 */
 	public java.lang.String getVisibleRegionPath() {
-		return (java.lang.String) getValue(12);
+		return (java.lang.String) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.category_id</code>.
 	 */
 	public void setCategoryId(java.lang.Long value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.category_id</code>.
 	 */
 	public java.lang.Long getCategoryId() {
-		return (java.lang.Long) getValue(13);
+		return (java.lang.Long) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.category_path</code>.
 	 */
 	public void setCategoryPath(java.lang.String value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.category_path</code>.
 	 */
 	public java.lang.String getCategoryPath() {
-		return (java.lang.String) getValue(14);
+		return (java.lang.String) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.modify_seq</code>.
 	 */
 	public void setModifySeq(java.lang.Long value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.modify_seq</code>.
 	 */
 	public java.lang.Long getModifySeq() {
-		return (java.lang.Long) getValue(15);
+		return (java.lang.Long) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.child_count</code>.
 	 */
 	public void setChildCount(java.lang.Long value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.child_count</code>.
 	 */
 	public java.lang.Long getChildCount() {
-		return (java.lang.Long) getValue(16);
+		return (java.lang.Long) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.forward_count</code>.
 	 */
 	public void setForwardCount(java.lang.Long value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.forward_count</code>.
 	 */
 	public java.lang.Long getForwardCount() {
-		return (java.lang.Long) getValue(17);
+		return (java.lang.Long) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.like_count</code>.
 	 */
 	public void setLikeCount(java.lang.Long value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.like_count</code>.
 	 */
 	public java.lang.Long getLikeCount() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(19);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_forum_posts.view_count</code>.
+	 */
+	public void setViewCount(java.lang.Long value) {
+		setValue(20, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_forum_posts.view_count</code>.
+	 */
+	public java.lang.Long getViewCount() {
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.subject</code>.
 	 */
 	public void setSubject(java.lang.String value) {
-		setValue(19, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.subject</code>.
 	 */
 	public java.lang.String getSubject() {
-		return (java.lang.String) getValue(19);
+		return (java.lang.String) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.content_type</code>. object content type
 	 */
 	public void setContentType(java.lang.String value) {
-		setValue(20, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.content_type</code>. object content type
 	 */
 	public java.lang.String getContentType() {
-		return (java.lang.String) getValue(20);
+		return (java.lang.String) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.content</code>. content data, depends on value of content_type
 	 */
 	public void setContent(java.lang.String value) {
-		setValue(21, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.content</code>. content data, depends on value of content_type
 	 */
 	public java.lang.String getContent() {
-		return (java.lang.String) getValue(21);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.content_abstract</code>. abstract of content data
 	 */
 	public void setContentAbstract(java.lang.String value) {
-		setValue(22, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.content_abstract</code>. abstract of content data
 	 */
 	public java.lang.String getContentAbstract() {
-		return (java.lang.String) getValue(22);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
 	public void setEmbeddedAppId(java.lang.Long value) {
-		setValue(23, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_app_id</code>.
 	 */
 	public java.lang.Long getEmbeddedAppId() {
-		return (java.lang.Long) getValue(23);
+		return (java.lang.Long) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_id</code>.
 	 */
 	public void setEmbeddedId(java.lang.Long value) {
-		setValue(24, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_id</code>.
 	 */
 	public java.lang.Long getEmbeddedId() {
-		return (java.lang.Long) getValue(24);
+		return (java.lang.Long) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
 	public void setEmbeddedJson(java.lang.String value) {
-		setValue(25, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
 	public java.lang.String getEmbeddedJson() {
-		return (java.lang.String) getValue(25);
+		return (java.lang.String) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.embedded_version</code>.
 	 */
 	public void setEmbeddedVersion(java.lang.Integer value) {
-		setValue(26, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.embedded_version</code>.
 	 */
 	public java.lang.Integer getEmbeddedVersion() {
-		return (java.lang.Integer) getValue(26);
+		return (java.lang.Integer) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag1</code>. user for action category id
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(27, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag1</code>. user for action category id
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(27);
+		return (java.lang.Long) getValue(29);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(28, value);
+		setValue(30, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(28);
+		return (java.lang.Long) getValue(30);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(29, value);
+		setValue(31, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(29);
+		return (java.lang.Long) getValue(31);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(30, value);
+		setValue(32, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(30);
+		return (java.lang.Long) getValue(32);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.integral_tag5</code>.
 	 */
 	public void setIntegralTag5(java.lang.Long value) {
-		setValue(31, value);
+		setValue(33, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.integral_tag5</code>.
 	 */
 	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(31);
+		return (java.lang.Long) getValue(33);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag1</code>. user for action category path
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(32, value);
+		setValue(34, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag1</code>. user for action category path
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(32);
+		return (java.lang.String) getValue(34);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(33, value);
+		setValue(35, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(33);
+		return (java.lang.String) getValue(35);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(34, value);
+		setValue(36, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(34);
+		return (java.lang.String) getValue(36);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag4</code>.
 	 */
 	public void setStringTag4(java.lang.String value) {
-		setValue(35, value);
+		setValue(37, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag4</code>.
 	 */
 	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(35);
+		return (java.lang.String) getValue(37);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.string_tag5</code>.
 	 */
 	public void setStringTag5(java.lang.String value) {
-		setValue(36, value);
+		setValue(38, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.string_tag5</code>.
 	 */
 	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(36);
+		return (java.lang.String) getValue(38);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.floor_number</code>.
 	 */
 	public void setFloorNumber(java.lang.Long value) {
-		setValue(37, value);
+		setValue(39, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.floor_number</code>.
 	 */
 	public java.lang.Long getFloorNumber() {
-		return (java.lang.Long) getValue(37);
+		return (java.lang.Long) getValue(39);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(38, value);
+		setValue(40, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(38);
+		return (java.lang.Byte) getValue(40);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.update_time</code>.
 	 */
 	public void setUpdateTime(java.sql.Timestamp value) {
-		setValue(39, value);
+		setValue(41, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.update_time</code>.
 	 */
 	public java.sql.Timestamp getUpdateTime() {
-		return (java.sql.Timestamp) getValue(39);
+		return (java.sql.Timestamp) getValue(41);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(40, value);
+		setValue(42, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(40);
+		return (java.sql.Timestamp) getValue(42);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.deleter_uid</code>. deleter id
 	 */
 	public void setDeleterUid(java.lang.Long value) {
-		setValue(41, value);
+		setValue(43, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.deleter_uid</code>. deleter id
 	 */
 	public java.lang.Long getDeleterUid() {
-		return (java.lang.Long) getValue(41);
+		return (java.lang.Long) getValue(43);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(42, value);
+		setValue(44, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(42);
+		return (java.sql.Timestamp) getValue(44);
 	}
 
 	// -------------------------------------------------------------------------
@@ -641,51 +669,53 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhForumPostsRecord
 	 */
-	public EhForumPostsRecord(java.lang.Long id, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime) {
+	public EhForumPostsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long viewCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS);
 
 		setValue(0, id);
-		setValue(1, appId);
-		setValue(2, forumId);
-		setValue(3, parentPostId);
-		setValue(4, creatorUid);
-		setValue(5, creatorTag);
-		setValue(6, targetTag);
-		setValue(7, longitude);
-		setValue(8, latitude);
-		setValue(9, geohash);
-		setValue(10, visibleRegionType);
-		setValue(11, visibleRegionId);
-		setValue(12, visibleRegionPath);
-		setValue(13, categoryId);
-		setValue(14, categoryPath);
-		setValue(15, modifySeq);
-		setValue(16, childCount);
-		setValue(17, forwardCount);
-		setValue(18, likeCount);
-		setValue(19, subject);
-		setValue(20, contentType);
-		setValue(21, content);
-		setValue(22, contentAbstract);
-		setValue(23, embeddedAppId);
-		setValue(24, embeddedId);
-		setValue(25, embeddedJson);
-		setValue(26, embeddedVersion);
-		setValue(27, integralTag1);
-		setValue(28, integralTag2);
-		setValue(29, integralTag3);
-		setValue(30, integralTag4);
-		setValue(31, integralTag5);
-		setValue(32, stringTag1);
-		setValue(33, stringTag2);
-		setValue(34, stringTag3);
-		setValue(35, stringTag4);
-		setValue(36, stringTag5);
-		setValue(37, floorNumber);
-		setValue(38, status);
-		setValue(39, updateTime);
-		setValue(40, createTime);
-		setValue(41, deleterUid);
-		setValue(42, deleteTime);
+		setValue(1, uuid);
+		setValue(2, appId);
+		setValue(3, forumId);
+		setValue(4, parentPostId);
+		setValue(5, creatorUid);
+		setValue(6, creatorTag);
+		setValue(7, targetTag);
+		setValue(8, longitude);
+		setValue(9, latitude);
+		setValue(10, geohash);
+		setValue(11, visibleRegionType);
+		setValue(12, visibleRegionId);
+		setValue(13, visibleRegionPath);
+		setValue(14, categoryId);
+		setValue(15, categoryPath);
+		setValue(16, modifySeq);
+		setValue(17, childCount);
+		setValue(18, forwardCount);
+		setValue(19, likeCount);
+		setValue(20, viewCount);
+		setValue(21, subject);
+		setValue(22, contentType);
+		setValue(23, content);
+		setValue(24, contentAbstract);
+		setValue(25, embeddedAppId);
+		setValue(26, embeddedId);
+		setValue(27, embeddedJson);
+		setValue(28, embeddedVersion);
+		setValue(29, integralTag1);
+		setValue(30, integralTag2);
+		setValue(31, integralTag3);
+		setValue(32, integralTag4);
+		setValue(33, integralTag5);
+		setValue(34, stringTag1);
+		setValue(35, stringTag2);
+		setValue(36, stringTag3);
+		setValue(37, stringTag4);
+		setValue(38, stringTag5);
+		setValue(39, floorNumber);
+		setValue(40, status);
+		setValue(41, updateTime);
+		setValue(42, createTime);
+		setValue(43, deleterUid);
+		setValue(44, deleteTime);
 	}
 }

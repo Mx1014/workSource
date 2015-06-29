@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <p>帖子或评论信息：</p>
  * <ul>
  * <li>id: 帖子或评论ID</li>
+ * <li>uuid: 帖子或评论UUID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorUid: 创建者ID</li>
@@ -24,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.visibility.VisibleRegionType}</li>
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>visibleRegionName: 区域范围对应的名称</li>
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
  * <li>subject: 帖子或评论标题</li>
@@ -37,6 +39,7 @@ import com.everhomes.util.StringHelper;
  * <li>forwardCount: 帖子或评论的转发数目</li>
  * <li>likeCount: 帖子或评论赞的数目</li>
  * <li>dislikeCount: 帖子或评论踩的数目</li>
+ * <li>viewCount: 浏览的数目</li>
  * <li>updateTime: 帖子或评论更新时间</li>
  * <li>createTime: 帖子或评论创建时间</li>
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.forum.AttachmentDTO}</li>
@@ -47,6 +50,8 @@ import com.everhomes.util.StringHelper;
  */
 public class PostDTO {
 	private Long id;
+	
+	private String uuid;
 	
 	private Long parentPostId;
 	
@@ -73,6 +78,8 @@ public class PostDTO {
     private Byte visibleRegionType;
 
     private Long visibleRegionId;
+    
+    private String visibleRegionName;
     
     private Double longitude;
     
@@ -101,6 +108,8 @@ public class PostDTO {
     
     private Long dislikeCount;
     
+    private Long viewCount;
+    
     private Timestamp updateTime;
     
     private Timestamp createTime;
@@ -122,6 +131,14 @@ public class PostDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Long getParentPostId() {
@@ -228,6 +245,14 @@ public class PostDTO {
         this.visibleRegionId = visibleRegionId;
     }
 
+    public String getVisibleRegionName() {
+        return visibleRegionName;
+    }
+
+    public void setVisibleRegionName(String visibleRegionName) {
+        this.visibleRegionName = visibleRegionName;
+    }
+
     public Double getLongitude() {
 		return longitude;
 	}
@@ -332,7 +357,15 @@ public class PostDTO {
 		this.dislikeCount = dislikeCount;
 	}
 
-	public Timestamp getUpdateTime() {
+	public Long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public Timestamp getUpdateTime() {
 		return updateTime;
 	}
 

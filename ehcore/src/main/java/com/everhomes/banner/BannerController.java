@@ -57,6 +57,16 @@ public class BannerController extends ControllerBase {
         return response;
     }
     
+    @RequestMapping("getBannerByIdCommand")
+    @RestReturn(value=BannerDTO.class)
+    public RestResponse getBannerById(@Valid GetBannerByIdCommand cmd){
+        BannerDTO bannerDto = bannerService.getBannerById(cmd);
+        RestResponse response = new RestResponse(bannerDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     /**
      * <b>URL: /banner/updateBanner</b>
      * <p>更新banner</p>
@@ -101,5 +111,17 @@ public class BannerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+    /**
+     * <b>URL: /banner/listAllBanners</b>
+     * <p>获取所有banner</p>
+     */
+    @RequestMapping("listAllBanners")
+    @RestReturn(value=BannerDTO.class,collection=true)
+    public RestResponse listAllBanners(){
+        List<BannerDTO> result = bannerService.listAllBanners();
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

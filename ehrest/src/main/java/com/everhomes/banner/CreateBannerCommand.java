@@ -1,6 +1,5 @@
 package com.everhomes.banner;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -18,8 +17,6 @@ import com.everhomes.util.StringHelper;
  * <li>bannerGroup: banner所在的组，参考{@link com.everhomes.launchpad.ItemGroup}</li>
  * <li>vendorTag: 左邻系统或第三方服务标签标识</li>
  * <li>posterPath: 图片路径</li>
- * <li>actionName: 动作名称</li>
- * <li>actionUri: 动作uri</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.launchpad.ActionType}</li>
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
@@ -42,15 +39,11 @@ public class CreateBannerCommand {
     @NotNull
     private String   posterPath;
     @NotNull
-    private String   actionName;
-    @NotNull
-    private String   actionUri;
-    @NotNull
     private Byte    actionType;
     @NotNull
     private String  actionData;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private Long  startTime;
+    private Long endTime;
     @NotNull
     private Byte     status;
     private Integer  order;
@@ -86,28 +79,16 @@ public class CreateBannerCommand {
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
     }
-    public String getActionName() {
-        return actionName;
-    }
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
-    }
-    public String getActionUri() {
-        return actionUri;
-    }
-    public void setActionUri(String actionUri) {
-        this.actionUri = actionUri;
-    }
-    public Timestamp getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
-    public Timestamp getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
     public Byte getStatus() {

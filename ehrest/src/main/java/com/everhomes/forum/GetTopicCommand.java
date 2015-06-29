@@ -23,7 +23,7 @@ public class GetTopicCommand {
     public void setForumId(Long forumId) {
         this.forumId = forumId;
     }
-
+    
     public Long getTopicId() {
         return topicId;
     }

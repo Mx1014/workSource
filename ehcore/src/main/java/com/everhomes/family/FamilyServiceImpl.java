@@ -370,7 +370,7 @@ public class FamilyServiceImpl implements FamilyService {
         
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         
-        long familyId = cmd.getId();
+        Long familyId = cmd.getId();
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
         
         if(m == null)
@@ -382,6 +382,10 @@ public class FamilyServiceImpl implements FamilyService {
         familyIds.add(familyId);
         
         List<FamilyDTO> dtos = getUserOwningFamiliesByIds(familyIds,user.getId());
+        if(dtos == null || dtos.isEmpty()){
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
+                    "Family is not exists.familyId=" + familyId);
+        }
         if(dtos != null && !dtos.isEmpty())
             results[0] = dtos.get(0);
         return results[0];
@@ -395,40 +399,42 @@ public class FamilyServiceImpl implements FamilyService {
         for(Long familyId : familyIds){
             Group group = this.groupProvider.findGroupById(familyId);
             
-            if(group != null){
-
-                FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatarUrl((parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid())));
-                family.setAvatarUri(group.getAvatar());
-                family.setAddressId(group.getIntegralTag1());
-                long communityId = group.getIntegralTag2();
-                Community community = this.communityProvider.findCommunityById(communityId);
-                if(community != null){
-                    family.setCommunityId(communityId);
-                    family.setCommunityName(community.getName());
-                    family.setCityId(community.getCityId());
-                    family.setCityName(community.getCityName());
-                }
-                if(group.getCreatorUid().longValue() == userId.longValue())
-                    family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
-                
-                GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-                        EntityType.USER.getCode(), userId);
-                if(member != null)
-                    family.setMembershipStatus(member.getMemberStatus());
-                
-                Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
-                if(address != null){
-                    family.setBuildingName(address.getBuildingName());
-                    family.setApartmentName(address.getApartmentName());
-                    family.setAddressStatus(address.getStatus());
-                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
-                                    address.getBuildingName(), address.getApartmentName());
-                    family.setDisplayName(addrStr);
-                    family.setAddress(addrStr);
-                }
-                familyList.add(family);
+            if(group == null || !group.getDiscriminator().equals(GroupDiscriminator.FAMILY.getCode())){
+                LOGGER.error("Family is not exits.familyId=" + familyId);
+                throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
+                        "Family is not exitsor group is not family with the id.familyId=" + familyId);
             }
+            FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
+            family.setAvatarUrl((parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid())));
+            family.setAvatarUri(group.getAvatar());
+            family.setAddressId(group.getIntegralTag1());
+            long communityId = group.getIntegralTag2();
+            Community community = this.communityProvider.findCommunityById(communityId);
+            if(community != null){
+                family.setCommunityId(communityId);
+                family.setCommunityName(community.getName());
+                family.setCityId(community.getCityId());
+                family.setCityName(community.getCityName());
+            }
+            if(group.getCreatorUid().longValue() == userId.longValue())
+                family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+            
+            GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+                    EntityType.USER.getCode(), userId);
+            if(member != null)
+                family.setMembershipStatus(member.getMemberStatus());
+            
+            Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+            if(address != null){
+                family.setBuildingName(address.getBuildingName());
+                family.setApartmentName(address.getApartmentName());
+                family.setAddressStatus(address.getStatus());
+                String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
+                                address.getBuildingName(), address.getApartmentName());
+                family.setDisplayName(addrStr);
+                family.setAddress(addrStr);
+            }
+            familyList.add(family);
         }
         
         return familyList;
@@ -909,7 +915,8 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setMemberName(groupMember.getMemberNickName());
                 f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
-                UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
+                //UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
+                UserInfo userInfo = this.userService.getUserInfo(groupMember.getMemberId());
                 if(userInfo != null){
                     f.setBirthday(userInfo.getBirthday());
                     f.setGender(userInfo.getGender());
@@ -1018,9 +1025,9 @@ public class FamilyServiceImpl implements FamilyService {
         if(!StringUtils.isEmpty(memberNickName)){
             member.setMemberNickName(memberNickName);
         }
-        String proofResourceUrl = cmd.getProofResourceUrl();
-        if(!StringUtils.isEmpty(proofResourceUrl)){
-            member.setProofResourceUrl(proofResourceUrl);
+        String proofResourceUri = cmd.getProofResourceUri();
+        if(!StringUtils.isEmpty(proofResourceUri)){
+            member.setProofResourceUri(proofResourceUri);
         }
         this.groupProvider.updateGroupMember(member);
         //更新之后，发送命令
@@ -1142,9 +1149,9 @@ public class FamilyServiceImpl implements FamilyService {
                             NeighborUserDetailDTO n = new NeighborUserDetailDTO();
                             User u = this.userProvider.findUserById(m.getMemberId());
                             n.setUserId(u.getId());
-                            n.setUserName(m.getMemberNickName());
-                            n.setUserAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),u.getId()));
-                            n.setUserAvatarUri(m.getMemberAvatar());
+                            n.setUserName(u.getNickName());
+                            n.setUserAvatarUrl(parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
+                            n.setUserAvatarUri(u.getAvatar());
                             n.setUserStatusLine(u.getStatusLine());
                             n.setBuildingName(address.getBuildingName());
                             n.setApartmentFloor(address.getApartmentFloor());
@@ -1254,15 +1261,14 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.info("Community neary by user,userIds=" + userIds);
 
             List<UserLocation> listUserLocations = listCommunityUserLocation(userIds,latitude,longitude);
-            
+            final double MILES_KILOMETRES_RATIO = 1.609344;
             if(listUserLocations != null && !listUserLocations.isEmpty()){
-                //User u = this.userProvider.findUserById(userLocation.getUid());
+                
                 listUserLocations.forEach((userLocation) ->{
                     UserInfo u = this.userService.getUserSnapshotInfo(userLocation.getUid());
                     NeighborUserDTO n = new NeighborUserDTO();
                     n.setUserId(u.getId());
                     n.setUserStatusLine(u.getStatusLine());
-                    //n.setUserName(u.getAccountName());
                     n.setUserName(u.getNickName());
                     n.setUserAvatarUrl(u.getAvatarUrl());
                     n.setUserAvatarUri(u.getAvatarUri());
@@ -1270,7 +1276,8 @@ public class FamilyServiceImpl implements FamilyService {
                     //计算距离
                     double lat = userLocation.getLatitude();
                     double lon = userLocation.getLongitude();
-                    double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon);
+                    //getDistanceMi计算的是英里
+                    double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon) * MILES_KILOMETRES_RATIO * 1000;
                     n.setDistance(distince);
                     results.add(n);
                 });
@@ -1288,7 +1295,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
     
     private List<UserLocation> listCommunityUserLocation(List<Long> userIds,double latitude,double longitude) {
-        
+        long startTime = System.currentTimeMillis();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
         
         final List<UserLocation> members = new ArrayList<UserLocation>();
@@ -1317,6 +1324,8 @@ public class FamilyServiceImpl implements FamilyService {
             members.add(ConvertHelper.convert(r, UserLocation.class));
             return null;
         });
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Query community user with latitude and longitude,esplse=" + (endTime - startTime));
         
         return members;
     }
@@ -1517,11 +1526,21 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public FamilyDTO getFamilyById(GetFamilyCommand cmd) {
-        
+        if(cmd == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id or type parameter");
+        }
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         Long familyId = cmd.getId();
-        
-        return this.familyProvider.getFamilyById(familyId);
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        FamilyDTO dto = this.familyProvider.getFamilyById(familyId);
+        if(dto == null){
+            LOGGER.error("Family is not exists,id=" + cmd.getId() + ",userId=" + userId);
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
+                    "Family is not exits.");
+        }
+        return dto;
     }
 
     @Override

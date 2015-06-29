@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 81203818;
+	private static final long serialVersionUID = 1556177156;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Long     cityId;
 	private java.lang.String   cityName;
 	private java.lang.Long     areaId;
@@ -51,6 +52,7 @@ public class EhCommunities implements java.io.Serializable {
 
 	public EhCommunities(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Long     cityId,
 		java.lang.String   cityName,
 		java.lang.Long     areaId,
@@ -85,6 +87,7 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.String   stringTag5
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.cityId = cityId;
 		this.cityName = cityName;
 		this.areaId = areaId;
@@ -125,6 +128,14 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Long getCityId() {

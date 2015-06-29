@@ -3,6 +3,9 @@ package com.everhomes.launchpad;
 
 import java.util.List;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -25,6 +28,16 @@ public class GetLaunchPadItemsCommandResponse {
 
     public void setLaunchPadItems(List<LaunchPadItemDTO> launchPadItems) {
         this.launchPadItems = launchPadItems;
+    }
+    
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override

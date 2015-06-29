@@ -30,7 +30,7 @@ public class ForwardTopicCommand {
     public void setTopicId(Long topicId) {
         this.topicId = topicId;
     }
-    
+
     public Long getForumId() {
         return forumId;
     }

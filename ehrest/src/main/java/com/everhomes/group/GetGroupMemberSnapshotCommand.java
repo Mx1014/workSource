@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId：group id</li>
- * <li>memberId：group成员id</li>
+ * <li>memberId：group成员ID</li>
  * </ul>
  */
 public class GetGroupMemberSnapshotCommand {

@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForums implements java.io.Serializable {
 
-	private static final long serialVersionUID = -537532549;
+	private static final long serialVersionUID = -84523771;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     appId;
 	private java.lang.String   ownerType;
@@ -29,6 +30,7 @@ public class EhForums implements java.io.Serializable {
 
 	public EhForums(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Integer  namespaceId,
 		java.lang.Long     appId,
 		java.lang.String   ownerType,
@@ -41,6 +43,7 @@ public class EhForums implements java.io.Serializable {
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.namespaceId = namespaceId;
 		this.appId = appId;
 		this.ownerType = ownerType;
@@ -59,6 +62,14 @@ public class EhForums implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Integer getNamespaceId() {

@@ -29,4 +29,6 @@ public interface AppConstants {
     
     public static final int PAGINATION_DEFAULT_SIZE = 20;
     public static final int PAGINATION_MAX_SIZE = 2000;
+    public static final String DEFAULT_ETAG_TIMEOUT_KEY = "etag.timeout";
+    public static final int DEFAULT_ETAG_TIMEOUT_SECONDS = 5;
 }
