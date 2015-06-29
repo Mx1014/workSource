@@ -49,6 +49,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rpc.server.PingRequestPdu;
 import com.everhomes.rpc.server.PingResponsePdu;
 import com.everhomes.sequence.LocalSequenceGenerator;
+import com.everhomes.sequence.SequenceService;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.sharding.Server;
 import com.everhomes.sharding.ShardingProvider;
@@ -93,6 +94,9 @@ public class AdminController extends ControllerBase {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private SequenceService sequenceService;
     
     @Value("#{T(java.util.Arrays).asList('${source.jars}')}")
     private List<String> jars;
@@ -230,6 +234,19 @@ public class AdminController extends ControllerBase {
             }
         }
         return false;
+    }
+    
+    @RequestMapping("syncSequence")
+    @RestReturn(String.class)
+    public RestResponse syncSequence() {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+
+         sequenceService.syncSequence();
+        return new RestResponse("OK");
     }
     
     @RequestMapping("addBorder")
