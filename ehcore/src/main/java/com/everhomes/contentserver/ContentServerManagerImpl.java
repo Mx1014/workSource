@@ -10,7 +10,6 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.user.LoginToken;
 import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -37,30 +36,37 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
-        LoginToken login = LoginToken.fromTokenString(request.getToken());
-        if (null == login) {
-            LOGGER.error("cannot find login information");
-            throw new RuntimeErrorException("token message is invalid");
+        Long[] ids=new Long[1];
+        LoginToken login;
+        try {
+             login = LoginToken.fromTokenString(request.getToken());
+            if (null != login) {
+                LOGGER.error("cannot find login information");
+                ids[0]=login.getUserId();
+            }
+        } catch (Exception e) {
+            // skip validate
         }
+
         ContentServer server = contentServerService.selectContentServer();
         if (server == null) {
-            LOGGER.error("cannot find server.userId={}", login.getUserId());
+            LOGGER.error("cannot find server.userId={}", ids[0]);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "cannot find server");
         }
-        ContentServerResource result = contentServerProvider.findByUidAndMD5(login.getUserId(), request.getMd5());
+        ContentServerResource result = contentServerProvider.findByUidAndMD5(ids[0], request.getMd5());
         if (result != null) {
             request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType()
                     .name()));
             request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
             return;
         }
-        //add transaction command
+        // add transaction command
         Tuple<ContentServerResource, Boolean> resource = coordinationProvider.getNamedLock(
                 CoordinationLocks.CREATE_RESOURCE.getCode()).enter(() -> {
-            ContentServerResource r = contentServerProvider.findByUidAndMD5(login.getUserId(), request.getMd5());
+            ContentServerResource r = contentServerProvider.findByUidAndMD5(ids[0], request.getMd5());
             if (r == null) {
-                r = createResource(server.getId(), login.getUserId(), request);
+                r = createResource(server.getId(), ids[0], request);
                 contentServerProvider.addResource(r);
             }
             return r;
@@ -101,13 +107,19 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     @Override
     public void auth(MessageHandleRequest request) {
-
-        LoginToken login = LoginToken.fromTokenString(request.getToken());
-        if (!userService.isValidLoginToken(login)) {
-            LOGGER.error("invalid login token.auth failed");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-                    UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "INVALID LOGON TOKEN");
+        LoginToken login = null;
+        try {
+            login = LoginToken.fromTokenString(request.getToken());
+        } catch (Exception e) {
+            // skip validate
         }
+
+        // if (!userService.isValidLoginToken(login)) {
+        // LOGGER.error("invalid login token.auth failed");
+        // throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+        // UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
+        // "INVALID LOGON TOKEN");
+        // }
         String md5 = "";
         switch (request.getAccessType()) {
         case LOOKUP:
@@ -146,7 +158,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "can not find the file");
         }
-        if (login.getUserId() != resource.getOwnerId()) {
+        if (login != null && login.getUserId() != resource.getOwnerId()) {
             LOGGER.error("cannot delete file.current user is not own.uid={},own={}", login.getUserId(),
                     resource.getOwnerId());
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
@@ -157,7 +169,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     }
 
     private String uploadInvoke(LoginToken login, String uniqueId) {
-        if (login.getUserId() == 0) {
+        if (login == null || login.getUserId() == 0) {
             LOGGER.info("can not access.userId is empty");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "user is invalid.userId=" + login.getUserId());

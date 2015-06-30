@@ -72,16 +72,11 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public ActivityRoster cancelSignup(Activity activity, Long uid, Long familyId) {
         ActivityRoster[] rosters = new ActivityRoster[1];
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,(context, obj) -> {
-                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
-                            .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
-                            .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(item -> {
-                                rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
-                            });
-                    if (rosters[0] != null) {
-                        return false;
-                    }
-                    return true;
+        DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class,activity.getId()));
+        cxt.select().from(Tables.EH_ACTIVITY_ROSTER)
+                .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
+                .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(item -> {
+                    rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
                 });
 
         if (rosters[0] == null) {
@@ -89,8 +84,8 @@ public class ActivityProviderImpl implements ActivityProivider {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid operation.the user is not signup");
         }
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class,
-                rosters[0].getId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class,
+                rosters[0].getActivityId()));
         if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())||rosters[0].getCheckinFlag()==null) {
             LOGGER.warn("the user does not signin,can cancel the operation");
             EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
@@ -124,17 +119,14 @@ public class ActivityProviderImpl implements ActivityProivider {
     public ActivityRoster checkIn(Activity activity, Long uid, Long familyId) {
 
         ActivityRoster[] activityRosters = new ActivityRoster[1];
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(Void.class),null,
-                (context, obj) -> {
-                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
-                            .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
-                            .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(roster -> {
-                                activityRosters[0] = ConvertHelper.convert(roster, ActivityRoster.class);
-                            });
-                    if (activityRosters[0] != null)
-                        return false;
-                    return true;
-                });
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class,activity.getId()));
+        context.select().from(Tables.EH_ACTIVITY_ROSTER)
+                    .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
+                    .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(roster -> {
+                        activityRosters[0] = ConvertHelper.convert(roster, ActivityRoster.class);
+                        return;
+                    });
+              
         if (activityRosters[0] == null) {
             // TODO internal error
             LOGGER.error("can not find the roster");
@@ -165,7 +157,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public void createActivityRoster(ActivityRoster createRoster) {
         Long id = shardingProvider.allocShardableContentId(EhActivityRoster.class).second();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, createRoster.getActivityId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
         createRoster.setId(id);
         dao.insert(createRoster);
@@ -174,7 +166,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#roster.activityId,#roster.uid}"),@CacheEvict(value="findRosterById",key="#roster.id")})
     @Override
     public void updateRoster(ActivityRoster roster) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityRoster.class, roster.getId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, roster.getActivityId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
         dao.update(roster);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivityRoster.class, roster.getId());
@@ -184,10 +176,18 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Cacheable(value = "findRosterById", key = "#rosterId")
     @Override
     public ActivityRoster findRosterById(Long rosterId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityRoster.class, rosterId));
-        EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
-        EhActivityRoster result = dao.findById(rosterId);
-        return result == null ? null : ConvertHelper.convert(result, ActivityRoster.class);
+        ActivityRoster[] rosters=new ActivityRoster[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class), null, (context,obj)->{
+            EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
+            EhActivityRoster result = dao.findById(rosterId);
+            if(result!=null){
+                rosters[0]=ConvertHelper.convert(result,ActivityRoster.class);
+                return false;
+            }
+            return true;
+        });
+        return rosters[0];
+      
     }
 
     @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}",unless="#result==null")
@@ -280,7 +280,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public List<ActivityRoster> listRosters(Long activityId) {
         List<ActivityRoster> rosters=new ArrayList<ActivityRoster>();
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
                 (context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetch().forEach(item -> {
@@ -295,7 +295,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition1,Operator op,Condition... conditions) {
         List<Activity> activities=new ArrayList<Activity>();
         if (locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             locator.setShardIterator(shardIterator);
         }
@@ -327,7 +327,9 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (activities.size() > 0) {
             locator.setAnchor(activities.get(activities.size() - 1).getId());
         }
-
+       if(activities.size()>count){
+            return activities.subList(0, activities.size()-1);
+        }
         return activities;
     }
 

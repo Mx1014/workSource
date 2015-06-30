@@ -42,21 +42,6 @@ public class BannerController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /banner/createBanner</b>
-     * <p>创建banner</p>
-     */
-    @RequestMapping("createBanner")
-    @RestReturn(value=String.class)
-    public RestResponse createBanner(@Valid CreateBannerCommand cmd) {
-        
-        bannerService.createBanner(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
     @RequestMapping("getBannerByIdCommand")
     @RestReturn(value=BannerDTO.class)
     public RestResponse getBannerById(@Valid GetBannerByIdCommand cmd){
@@ -66,37 +51,7 @@ public class BannerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /banner/updateBanner</b>
-     * <p>更新banner</p>
-     */
-    @RequestMapping("updateBanner")
-    @RestReturn(value=String.class)
-    public RestResponse updateBanner(@Valid UpdateBannerCommand cmd) {
-        
-        bannerService.updateBanner(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /banner/deleteBanner</b>
-     * <p>删除banner</p>
-     */
-    @RequestMapping("deleteBanner")
-    @RestReturn(value=String.class)
-    public RestResponse deleteBanner(@Valid DeleteBannerCommand cmd) {
-        
-        bannerService.deleteBannerById(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * <b>URL: /banner/clickBanner</b>
      * <p>点击banner</p>
@@ -111,17 +66,5 @@ public class BannerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    /**
-     * <b>URL: /banner/listAllBanners</b>
-     * <p>获取所有banner</p>
-     */
-    @RequestMapping("listAllBanners")
-    @RestReturn(value=BannerDTO.class,collection=true)
-    public RestResponse listAllBanners(){
-        List<BannerDTO> result = bannerService.listAllBanners();
-        RestResponse response =  new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+
 }

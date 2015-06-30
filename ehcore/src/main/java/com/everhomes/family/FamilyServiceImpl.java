@@ -370,10 +370,10 @@ public class FamilyServiceImpl implements FamilyService {
         
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         
-        long familyId = cmd.getId();
+        Long familyId = cmd.getId();
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
-        
-        if(m == null)
+        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(user.getId(), familyId);
+        if(m == null || userGroup == null)
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in family");
         
@@ -382,6 +382,10 @@ public class FamilyServiceImpl implements FamilyService {
         familyIds.add(familyId);
         
         List<FamilyDTO> dtos = getUserOwningFamiliesByIds(familyIds,user.getId());
+        if(dtos == null || dtos.isEmpty()){
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
+                    "Family is not exists.familyId=" + familyId);
+        }
         if(dtos != null && !dtos.isEmpty())
             results[0] = dtos.get(0);
         return results[0];
@@ -395,40 +399,42 @@ public class FamilyServiceImpl implements FamilyService {
         for(Long familyId : familyIds){
             Group group = this.groupProvider.findGroupById(familyId);
             
-            if(group != null){
-
-                FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
-                family.setAvatarUrl((parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid())));
-                family.setAvatarUri(group.getAvatar());
-                family.setAddressId(group.getIntegralTag1());
-                long communityId = group.getIntegralTag2();
-                Community community = this.communityProvider.findCommunityById(communityId);
-                if(community != null){
-                    family.setCommunityId(communityId);
-                    family.setCommunityName(community.getName());
-                    family.setCityId(community.getCityId());
-                    family.setCityName(community.getCityName());
-                }
-                if(group.getCreatorUid().longValue() == userId.longValue())
-                    family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
-                
-                GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-                        EntityType.USER.getCode(), userId);
-                if(member != null)
-                    family.setMembershipStatus(member.getMemberStatus());
-                
-                Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
-                if(address != null){
-                    family.setBuildingName(address.getBuildingName());
-                    family.setApartmentName(address.getApartmentName());
-                    family.setAddressStatus(address.getStatus());
-                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
-                                    address.getBuildingName(), address.getApartmentName());
-                    family.setDisplayName(addrStr);
-                    family.setAddress(addrStr);
-                }
-                familyList.add(family);
+            if(group == null || !group.getDiscriminator().equals(GroupDiscriminator.FAMILY.getCode())){
+                LOGGER.error("Family is not exits.familyId=" + familyId);
+                throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
+                        "Family is not exitsor group is not family with the id.familyId=" + familyId);
             }
+            FamilyDTO family = ConvertHelper.convert(group,FamilyDTO.class);
+            family.setAvatarUrl((parserUri(group.getAvatar(),EntityType.FAMILY.getCode(),group.getCreatorUid())));
+            family.setAvatarUri(group.getAvatar());
+            family.setAddressId(group.getIntegralTag1());
+            long communityId = group.getIntegralTag2();
+            Community community = this.communityProvider.findCommunityById(communityId);
+            if(community != null){
+                family.setCommunityId(communityId);
+                family.setCommunityName(community.getName());
+                family.setCityId(community.getCityId());
+                family.setCityName(community.getCityName());
+            }
+            if(group.getCreatorUid().longValue() == userId.longValue())
+                family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+            
+            GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+                    EntityType.USER.getCode(), userId);
+            if(member != null)
+                family.setMembershipStatus(member.getMemberStatus());
+            
+            Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+            if(address != null){
+                family.setBuildingName(address.getBuildingName());
+                family.setApartmentName(address.getApartmentName());
+                family.setAddressStatus(address.getStatus());
+                String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
+                                address.getBuildingName(), address.getApartmentName());
+                family.setDisplayName(addrStr);
+                family.setAddress(addrStr);
+            }
+            familyList.add(family);
         }
         
         return familyList;
@@ -893,6 +899,12 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.error("User not in family.familyId=" + familyId);
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in family.");
+        }
+        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, familyId);
+        if(userGroup == null){
+            LOGGER.error("User not in user group.userId=" + userId);
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+                    "User not in familly.");
         }
         ListingLocator locator = new ListingLocator();
         locator.setEntityId(familyId);

@@ -126,6 +126,23 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
     }
     
     @Override
+    public void updateLaunchPadLayout(LaunchPadLayout launchPadLayout){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration()); 
+        dao.update(launchPadLayout);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLaunchPadLayouts.class, null);
+    }
+    
+    @Override
+    public LaunchPadLayout findLaunchPadLayoutById(long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(LaunchPadLayout.class, id));
+        EhLaunchPadLayoutsDao dao = new EhLaunchPadLayoutsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), LaunchPadLayout.class);
+    }
+    
+    @Override
     public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(String name,long versionCode) {
         List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
@@ -161,5 +178,6 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
+
 
 }

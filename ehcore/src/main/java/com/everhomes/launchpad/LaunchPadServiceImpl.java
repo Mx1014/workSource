@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.index.query.IdsFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,81 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     @Autowired 
     private ContentServerService contentServerService;
 
+    @Override
+    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
+        if(cmd.getItemLocation() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemLocation paramter,itemLocation is null");
+        }
+        if(cmd.getItemGroup() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemGroup paramter,itemGroup is null");
+        }
+        
+        long communityId = cmd.getCommunityId();
+        Community community = communityProvider.findCommunityById(communityId);
+        if(community == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
+        }
+        long startTime = System.currentTimeMillis();
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
+        List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
+        List<LaunchPadItem> userItems = getUserItems(user.getId());
+        List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
+
+        if(defaultItems == null || defaultItems.isEmpty()){
+            defaultItems = cityItems;
+            if(defaultItems == null || defaultItems.isEmpty()){
+                defaultItems = communityItems;
+            }
+        }
+        if(defaultItems != null && !defaultItems.isEmpty()){
+            allItems = defaultItems;
+            if(cityItems != null && !cityItems.isEmpty()){
+                allItems = overrideOrRevertItems(allItems,cityItems);
+            }
+            if(communityItems != null && !communityItems.isEmpty())
+                allItems = overrideOrRevertItems(allItems, communityItems);
+            if(userItems != null && !userItems.isEmpty())
+                allItems = overrideOrRevertItems(allItems, userItems);
+        }
+        allItems.forEach((r) ->{
+            LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getItemGroup());
+            if(handler == null)
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "Unable to find launch pad handler.");
+            LaunchPadItemDTO itemDTO = ConvertHelper.convert(handler.accesProcessLaunchPadItem(token, communityId, r), LaunchPadItemDTO.class);
+
+            itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+            result.add(itemDTO);
+        });
+        if(result != null && !result.isEmpty())
+            sortLaunchPadItems(result);
+        long endTime = System.currentTimeMillis();
+        
+        LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
+                + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
+        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
+        response.setLaunchPadItems(result);
+        
+        return response;
+    }
+    
+    private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
+        Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+            @Override
+            public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+               return o1.getDefaultOrder().intValue() - o2.getDefaultOrder().intValue();
+            }
+        });
+    }
+   
     private String parserUri(String uri,String ownerType, long ownerId){
         try {
             if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
@@ -216,6 +292,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     
     @Override
     public void createLaunchPadLayout(CreateLaunchPadLayoutCommand cmd){
+        if(cmd.getLayoutJson() == null || cmd.getLayoutJson().trim().equals("")){
+          throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                  "Invalid layoutJson paramter.layoutJson is null");
+        }
+        if(cmd.getName() == null || cmd.getName().trim().equals("")){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid name paramter.name is null");
+          }
         LaunchPadLayout layout = new LaunchPadLayout();
         layout.setLayoutJson(cmd.getLayoutJson());
         layout.setName(cmd.getName());
@@ -228,6 +312,73 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
+    public void deleteLaunchPadLayout(DeleteLaunchPadLayoutCommand cmd){
+        if(cmd.getIds() == null || cmd.getIds().isEmpty()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid ids paramter.ids is null");
+        }
+        cmd.getIds().forEach(id ->{
+            LaunchPadLayout layout = this.launchPadProvider.findLaunchPadLayoutById(id);
+            if(layout == null){
+                LOGGER.error("LaunchPad is not exits,id=" + id);
+                return;
+            }
+            layout.setStatus(LaunchPadLayoutStatus.INACTIVE.getCode());
+            this.launchPadProvider.updateLaunchPadLayout(layout);
+        });
+    }
+    
+
+    @Override
+    public void updateLaunchPadLayout(UpdateLaunchPadLayoutCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid id paramter.id is null");
+        }
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        LaunchPadLayout layout = this.launchPadProvider.findLaunchPadLayoutById(cmd.getId());
+        if(layout == null){
+            throw RuntimeErrorException.errorWith(LaunchPadServiceErrorCode.SCOPE, LaunchPadServiceErrorCode.ERROR_LAUNCHPAD_LAYOUT_NOT_EXISTS,
+                    "LaunchPad layout is not exists,id=" + cmd.getId() + ",userId=" + userId);
+        }
+        if(cmd.getNamespaceId() != null){
+            layout.setNamespaceId(cmd.getNamespaceId());
+        }
+        if(cmd.getLayoutJson() != null && !cmd.getLayoutJson().trim().equals("")){
+            layout.setLayoutJson(cmd.getLayoutJson());
+        }
+        if(cmd.getMinVersionCode() != null){
+            layout.setMinVersionCode(cmd.getMinVersionCode());
+        }
+        if(cmd.getName() != null && !cmd.getName().trim().equals("")){
+            layout.setName(cmd.getName());
+        }
+        if(cmd.getVersionCode() != null){
+            layout.setVersionCode(cmd.getVersionCode());
+        }
+        if(cmd.getStatus() != null){
+            layout.setStatus(cmd.getStatus());
+        }
+        this.launchPadProvider.updateLaunchPadLayout(layout);
+        
+    }
+    
+    @Override
+    public LaunchPadLayoutDTO getLaunchPadLayout(GetLaunchPadLayoutCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid id paramter.id is null");
+        }
+        LaunchPadLayout launchPadLayout = this.launchPadProvider.findLaunchPadLayoutById(cmd.getId());
+        if(launchPadLayout == null){
+            LOGGER.error("LaunchPad layout is not exits,id=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(LaunchPadServiceErrorCode.SCOPE, LaunchPadServiceErrorCode.ERROR_LAUNCHPAD_LAYOUT_NOT_EXISTS,
+                    "LaunchPad layout is not exists,id=" + cmd.getId());
+        }
+        return ConvertHelper.convert(launchPadLayout, LaunchPadLayoutDTO.class);
+    }
+    @Override
     public LaunchPadLayoutDTO getLastLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd){
 //        if(cmd.getVersionCode() == null){
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -238,8 +389,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd);
         if(results != null && !results.isEmpty()){
             LaunchPadLayoutDTO dto =  results.get(0);
-            if(cmd.getVersionCode().longValue() == dto.getVersionCode())
-                return null;
             return dto;
         }
         return null;
@@ -258,80 +407,25 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }).collect(Collectors.toList());
         return results;
     }
-    
+
     @Override
-    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
-        if(cmd.getItemLocation() == null){
+    public LaunchPadItemDTO getLaunchPadItemById(GetLaunchPadItemByIdCommand cmd) {
+        if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid itemLocation paramter,itemLocation is null");
+                    "Invalid id paramter.id is null");
         }
-        if(cmd.getItemGroup() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid itemGroup paramter,itemGroup is null");
+        LaunchPadItem launchPadItem = this.launchPadProvider.findLaunchPadItemById(cmd.getId());
+        if(launchPadItem == null){
+            throw RuntimeErrorException.errorWith(LaunchPadServiceErrorCode.SCOPE, LaunchPadServiceErrorCode.ERROR_LAUNCHPAD_ITEM_NOT_EXISTS,
+                    "LaunchPad item is not exists,id=" + cmd.getId());
         }
-        
-        long communityId = cmd.getCommunityId();
-        Community community = communityProvider.findCommunityById(communityId);
-        if(community == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
-        }
-        long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
-        List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
-        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
-        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
-        List<LaunchPadItem> userItems = getUserItems(user.getId());
-        List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
-
-        if(defaultItems == null || defaultItems.isEmpty()){
-            defaultItems = cityItems;
-            if(defaultItems == null || defaultItems.isEmpty()){
-                defaultItems = communityItems;
-            }
-        }
-        if(defaultItems != null && !defaultItems.isEmpty()){
-            allItems = defaultItems;
-            if(cityItems != null && !cityItems.isEmpty()){
-                allItems = overrideOrRevertItems(allItems,cityItems);
-            }
-            if(communityItems != null && !communityItems.isEmpty())
-                allItems = overrideOrRevertItems(allItems, communityItems);
-            if(userItems != null && !userItems.isEmpty())
-                allItems = overrideOrRevertItems(allItems, userItems);
-        }
-        allItems.forEach((r) ->{
-            LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getItemGroup());
-            if(handler == null)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "Unable to find launch pad handler.");
-            LaunchPadItemDTO itemDTO = ConvertHelper.convert(handler.accesProcessLaunchPadItem(token, communityId, r), LaunchPadItemDTO.class);
-
-            itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
-            result.add(itemDTO);
-        });
-        if(result != null && !result.isEmpty())
-            sortLaunchPadItems(result);
-        long endTime = System.currentTimeMillis();
+        LaunchPadItemDTO itemDTO = ConvertHelper.convert(launchPadItem, LaunchPadItemDTO.class);
+        itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
         
-        LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
-                + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
-        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
-        response.setLaunchPadItems(result);
-        
-        return response;
+        return itemDTO;
     }
     
-    private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
-        Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
-            @Override
-            public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
-               return o1.getDefaultOrder().intValue() - o2.getDefaultOrder().intValue();
-            }
-        });
-    }
-   
+ 
 }
