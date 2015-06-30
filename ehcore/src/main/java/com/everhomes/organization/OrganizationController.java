@@ -339,4 +339,66 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }    
+    
+    //行政热线
+    /**
+     * <b>URL: /org/createOrgContact</b>
+     * <p>添加政府机构联系电话</p>
+     * @return 
+     */
+    @RequestMapping("createOrgContact")
+    @RestReturn(value=String.class)
+    public RestResponse createOrgContact(@Valid CreateOrganizationContactCommand cmd) {
+    	organizationService.createOrgContact(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/updateOrgContact</b>
+     * <p>修改政府机构联系电话</p>
+     * @return 
+     */
+    @RequestMapping("updateOrgContact")
+    @RestReturn(value=String.class)
+    public RestResponse updateOrgContact(@Valid UpdateOrganizationContactCommand cmd) {
+    	organizationService.updateOrgContact(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/deleteOrgContact</b>
+     * <p>删除府机构联系电话</p>
+     * @return 
+     */
+    @RequestMapping("deleteOrgContact")
+    @RestReturn(value=String.class)
+    public RestResponse deleteOrgContact(@Valid DeleteOrganizationIdCommand cmd) {
+    	organizationService.deleteOrgContact(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+	 * <b>URL: /org/listOrgContact</b>
+     * <p>查询政府机构联系电话列表</p>
+     */
+    @RequestMapping("listOrgContact")
+    @RestReturn(value=ListOrganizationContactCommandResponse.class)
+    public RestResponse listOrgContact(@Valid ListOrganizationContactCommand cmd) {
+    	ListOrganizationContactCommandResponse commandResponse = organizationService.listOrgContact(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }
