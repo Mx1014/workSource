@@ -15,6 +15,8 @@ import com.everhomes.address.CommunityDTO;
 import com.everhomes.banner.UpdateBannerCommand;
 import com.everhomes.community.ApproveCommunityCommand;
 import com.everhomes.community.CommunityService;
+import com.everhomes.community.GetCommunityByIdCommand;
+import com.everhomes.community.GetCommunityByUuidCommand;
 import com.everhomes.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.community.ListCommunitesByStatusCommand;
 import com.everhomes.community.ListCommunitesByStatusCommandResponse;
@@ -99,6 +101,38 @@ public class CommunityAdminController extends ControllerBase {
         this.communityService.updateCommunity(cmd);
         
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/getCommunityById</b>
+     * <p>根据小区id获取小区信息</p>
+     */
+    @RequestMapping("getCommunityById")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse getCommunityById(@Valid GetCommunityByIdCommand cmd) {
+        
+        CommunityDTO community = this.communityService.getCommunityById(cmd);
+        
+        RestResponse response =  new RestResponse(community);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/getCommunityByUuid</b>
+     * <p>根据小区uuId获取小区信息</p>
+     */
+    @RequestMapping("getCommunityByUuid")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse getCommunityByUuid(@Valid GetCommunityByUuidCommand cmd) {
+        
+        CommunityDTO community = this.communityService.getCommunityByUuid(cmd);
+        
+        RestResponse response =  new RestResponse(community);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

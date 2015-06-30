@@ -23,6 +23,8 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 创建时间</li>
  * <li>deleteTime: 删除时间</li>
  * <li>requestStatus: 小区收集状态，参考{@link com.everhomes.community.RequestStatus}</li>
+ * <li>longitude: 小区经度</li>
+ * <li>latitude: 小区纬度</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -50,6 +52,8 @@ public class CommunityDTO {
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
     private java.lang.Long     requestStatus;
+    private java.lang.Double   longitude;
+    private java.lang.Double   latitude;
 
     public CommunityDTO() {
     }
@@ -244,6 +248,22 @@ public class CommunityDTO {
 
     public void setRequestStatus(java.lang.Long requestStatus) {
         this.requestStatus = requestStatus;
+    }
+
+    public java.lang.Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(java.lang.Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public java.lang.Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(java.lang.Double latitude) {
+        this.latitude = latitude;
     }
 
     @Override
