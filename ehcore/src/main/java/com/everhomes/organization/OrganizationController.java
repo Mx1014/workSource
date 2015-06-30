@@ -24,6 +24,7 @@ import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.organization.pm.ListPropMemberCommandResponse;
 import com.everhomes.organization.pm.ListPropPostCommandResponse;
+import com.everhomes.organization.pm.PropCommunityBuildAddessCommand;
 import com.everhomes.organization.pm.QueryPropTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserTokenCommand;
@@ -74,6 +75,21 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse addOrgMemberByPhone(@Valid CreateOrganizationMemberCommand cmd) {
     	organizationService.createOrganizationMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/deleteOrganizationMember</b>
+     * <p>删除政府机构成员</p>
+     * @return 删除的结果
+     */
+    @RequestMapping("deleteOrganizationMember")
+    @RestReturn(value=String.class)
+    public RestResponse deleteOrganizationMember(@Valid DeleteOrganizationIdCommand cmd) {
+    	organizationService.deleteOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -141,7 +157,7 @@ public class OrganizationController extends ControllerBase {
     
     /**
      * <b>URL: /org/newOrgTopic</b>
-     * <p>物业人员发帖</p>
+     * <p>政府人员发帖</p>
      * @return 发帖的内容
      */
     @RequestMapping("newOrgTopic")
@@ -400,5 +416,19 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
     
+    /**
+	 * <b>URL: /pm/sendOrgMessage</b>
+	 * 发通知给所辖小区用户
+     * @return 发通知的结果
+     */
+	@RequestMapping("sendOrgMessage")
+	@RestReturn(value=String.class)
+    public RestResponse sendOrgMessage(SendOrganizationMessageCommand cmd) {
+		organizationService.sendOrgMessage(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }

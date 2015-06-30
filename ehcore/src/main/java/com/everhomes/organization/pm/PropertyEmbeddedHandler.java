@@ -12,7 +12,9 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationType;
 import com.everhomes.util.DateHelper;
+import com.everhomes.visibility.VisibleRegionType;
 
 @Component(PropertyEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_PM)
 public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
@@ -45,7 +47,11 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 		//if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
 		if(post != null  && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
 			CommunityPmTasks task = new CommunityPmTasks();
-			Long organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
+			Long organizationId = post.getVisibleRegionId();
+			//如果是物业或者业委会发帖 ，帖子可见范围id存的是小区id。组织任务表中应该存组织id。 需要把小区id转成 组织id。
+			if(VisibleRegionType.fromCode(post.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+				organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
+			}
 			task.setOrganizationId(organizationId);
 			task.setEntityType(EntityType.TOPIC.getCode());
 			task.setEntityId(-1L);
