@@ -22,10 +22,11 @@ import com.everhomes.launchpad.GetLaunchPadLayoutCommand;
 import com.everhomes.launchpad.LaunchPadItemDTO;
 import com.everhomes.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.launchpad.LaunchPadService;
+import com.everhomes.launchpad.UpdateLaunchPadItemCommand;
 import com.everhomes.launchpad.UpdateLaunchPadLayoutCommand;
 import com.everhomes.rest.RestResponse;
 
-@RestDoc(value="LaunchPad controller", site="core")
+@RestDoc(value="LaunchPad admin controller", site="core")
 @RestController
 @RequestMapping("/admin/launchpad")
 public class LaunchPadAdminController extends ControllerBase {
@@ -79,6 +80,21 @@ public class LaunchPadAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/launchpad/updateLaunchPadItem</b>
+     * <p>更新服务市场Item信息</p>
+     */
+    @RequestMapping("updateLaunchPadItem")
+    @RestReturn(value=String.class)
+    public RestResponse updateLaunchPadItem(@Valid UpdateLaunchPadItemCommand cmd) {
+        
+        this.launchPadService.updateLaunchPadItem(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /admin/launchpad/createLaunchPadLayout</b>
@@ -95,7 +111,7 @@ public class LaunchPadAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/launchpad/createLaunchPadLayout</b>
+     * <b>URL: /admin/launchpad/deleteLaunchPadLayout</b>
      * <p>删除服务市场样式，逻辑删除</p>
      */
     @RequestMapping("deleteLaunchPadLayout")

@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.index.query.IdsFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.banner.BannerDTO;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -425,6 +423,71 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
         
         return itemDTO;
+    }
+
+    @Override
+    public void updateLaunchPadItem(UpdateLaunchPadItemCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid id paramter.id is null");
+        }
+        LaunchPadItem launchPadItem = this.launchPadProvider.findLaunchPadItemById(cmd.getId());
+        if(launchPadItem == null){
+            throw RuntimeErrorException.errorWith(LaunchPadServiceErrorCode.SCOPE, LaunchPadServiceErrorCode.ERROR_LAUNCHPAD_ITEM_NOT_EXISTS,
+                    "LaunchPad item is not exists,id=" + cmd.getId());
+        }
+        if(cmd.getActionData() != null && !cmd.getActionData().trim().equals("")){
+            launchPadItem.setActionData(cmd.getActionData());
+        }
+        if(cmd.getActionType() != null){
+            launchPadItem.setActionType(cmd.getActionType());
+        }
+        if(cmd.getAppId() != null){
+            launchPadItem.setAppId(cmd.getAppId());
+        }
+        if(cmd.getApplyPolicy() != null){
+            launchPadItem.setApplyPolicy(cmd.getApplyPolicy());
+        }
+        if(cmd.getDefaultOrder() != null){
+            launchPadItem.setDefaultOrder(cmd.getDefaultOrder());
+        }
+        if(cmd.getDisplayFlag() != null){
+            launchPadItem.setDisplayFlag(cmd.getDisplayFlag());
+        }
+        if(cmd.getDisplayLayout() != null && !cmd.getDisplayLayout().trim().equals("")){
+            launchPadItem.setDisplayLayout(cmd.getDisplayLayout());
+        }
+        if(cmd.getIconUri() != null && !cmd.getIconUri().trim().equals("")){
+            launchPadItem.setIconUri(cmd.getIconUri());
+        }
+        if(cmd.getItemGroup() != null && !cmd.getItemGroup().trim().equals("")){
+            launchPadItem.setItemGroup(cmd.getItemGroup());
+        }
+        if(cmd.getItemHeight() != null){
+            launchPadItem.setItemHeight(cmd.getItemHeight());
+        }
+        if(cmd.getItemLabel() != null && !cmd.getItemLabel().trim().equals("")){
+            launchPadItem.setItemLabel(cmd.getItemLabel());
+        }
+        if(cmd.getItemLocation() != null && ! cmd.getItemLocation().trim().equals("")){
+            launchPadItem.setItemLocation(cmd.getItemLocation());
+        }
+        if(cmd.getItemName() != null && ! cmd.getItemName().trim().equals("")){
+            launchPadItem.setItemName(cmd.getItemName());
+        }
+        if(cmd.getItemWidth() != null){
+            launchPadItem.setItemWidth(cmd.getItemWidth());
+        }
+        if(cmd.getNamespaceId() != null){
+            launchPadItem.setNamespaceId(cmd.getNamespaceId());
+        }
+        if(cmd.getScopeId() != null){
+            launchPadItem.setScopeId(cmd.getScopeId());
+        }
+        if(cmd.getScopeType() != null && !cmd.getScopeType().trim().equals("")){
+            launchPadItem.setScopeType(cmd.getScopeType());
+        }
+        this.launchPadProvider.updateLaunchPadItem(launchPadItem);
     }
     
  
