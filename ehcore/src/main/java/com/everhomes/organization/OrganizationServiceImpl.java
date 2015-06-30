@@ -39,6 +39,7 @@ import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.PropertyPostDTO;
 import com.everhomes.organization.pm.AssginPmTopicCommand;
+import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.CommunityPmMember;
 import com.everhomes.organization.pm.CommunityPmTasks;
 import com.everhomes.organization.pm.ListPropPostCommandResponse;
@@ -194,7 +195,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Override
     public void deleteOrganizationCommunity(DeleteOrganizationCommunityCommand cmd) {
-        // TODO 
         if(cmd.getOrganizationId() == null || cmd.getCommunityIds() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid organizationId or communityIds paramter.");
@@ -600,4 +600,95 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 	    	return response;
 	    }
+	    
+	    
+	    @Override
+	    public void createOrgContact(CreateOrganizationContactCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	if(cmd.getContactType() == null){
+	    		cmd.setContactType(IdentifierType.MOBILE.getCode());
+	    	}
+	    	else{
+		    	IdentifierType type = IdentifierType.fromCode(cmd.getContactType());
+		    	cmd.setContactType(type.getCode());
+	    	}
+	    	CommunityPmContact contact = ConvertHelper.convert(cmd, CommunityPmContact.class);
+	    	propertyMgrProvider.createPropContact(contact);
+	    }
+	    
+	    @Override
+	    public void updateOrgContact(UpdateOrganizationContactCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	if(cmd.getContactType() == null){
+	    		cmd.setContactType(IdentifierType.MOBILE.getCode());
+	    	}
+	    	else{
+		    	IdentifierType type = IdentifierType.fromCode(cmd.getContactType());
+		    	cmd.setContactType(type.getCode());
+	    	}
+	    	CommunityPmContact contact = ConvertHelper.convert(cmd, CommunityPmContact.class);
+	    	propertyMgrProvider.updatePropContact(contact);
+	    }
+	    
+	    @Override
+	    public void deleteOrgContact(DeleteOrganizationIdCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	CommunityPmContact contact = propertyMgrProvider.findPropContactById(cmd.getId());
+	    	if(contact == null){ 
+	            LOGGER.error("contact is not found.contactId=" + cmd.getId() + ",userId=" + user.getId());
+	        }
+	    	else{
+	    		propertyMgrProvider.deletePropContact(cmd.getId());
+	    	}
+	    }
+	    
+	    @Override
+	    public ListOrganizationContactCommandResponse listOrgContact(ListOrganizationContactCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
+//	    	int totalCount = organizationProvider.countOrganizations(cmd.getName());
+//	    	if(totalCount == 0) return response;
+//	    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//	    	int pageCount = getPageCount(totalCount, pageSize);
+	    	
+	    	List<CommunityPmContact> result = propertyMgrProvider.listCommunityPmContacts(cmd.getOrganizationId());
+	    	response.setMembers( result.stream()
+	                .map(r->{ return ConvertHelper.convert(r,OrganizationContactDTO.class); })
+	                .collect(Collectors.toList()));
+	    	return response;
+	    }
+	    
+	    @Override
+	    public void deleteOrganization(DeleteOrganizationIdCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	Organization organization = organizationProvider.findOrganizationById(cmd.getId());
+	    	if(organization == null){ 
+	            LOGGER.error("organization is not found.organizationId=" + cmd.getId() + ",userId=" + user.getId());
+	        }
+	    	else{
+	    		organizationProvider.deleteOrganizationById(cmd.getId());
+	    	}
+	    	
+	    }
+	    
+	    @Override
+	    public void deleteOrganizationMember(DeleteOrganizationIdCommand cmd) {
+	    	User user  = UserContext.current().getUser();
+	    	//权限控制
+	    	OrganizationMember member = organizationProvider.findOrganizationMemberById(cmd.getId());
+	    	if(member == null){ 
+	            LOGGER.error("organization member is not found.contactId=" + cmd.getId() + ",userId=" + user.getId());
+	        }
+	    	else{
+	    		organizationProvider.deleteOrganizationMemberById(cmd.getId());
+	    	}
+	    	
+	    }
+	    
+	   
 }

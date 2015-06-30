@@ -15,6 +15,9 @@ import com.everhomes.organization.CreateOrganizationCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
 import com.everhomes.organization.CreatePropertyOrganizationCommand;
+import com.everhomes.organization.DeleteOrganizationIdCommand;
+import com.everhomes.organization.ListOrganizationMemberCommand;
+import com.everhomes.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.organization.ListOrganizationsCommand;
 import com.everhomes.organization.ListOrganizationsCommandResponse;
 import com.everhomes.organization.OrganizationService;
@@ -101,4 +104,52 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+    * <b>URL: /admin/org/listOrgMembers</b>
+    * <p>查询政府机构成员列表</p>
+    */
+    @RequestMapping("listOrgMembers")
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
+    public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
+    	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrganizationMembers(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/deleteOrganizationMember</b>
+     * <p>删除政府机构成员</p>
+     * @return 删除的结果
+     */
+    @RequestMapping("deleteOrganizationMember")
+    @RestReturn(value=String.class)
+    public RestResponse deleteOrganizationMember(@Valid DeleteOrganizationIdCommand cmd) {
+    	organizationService.deleteOrganizationMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/deleteOrganization</b>
+     * <p>删除政府机构</p>
+     * @return 删除的结果
+     */
+    @RequestMapping("deleteOrganization")
+    @RestReturn(value=String.class)
+    public RestResponse deleteOrganization(@Valid DeleteOrganizationIdCommand cmd) {
+    	organizationService.deleteOrganization(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+   
+   
+    
+    
 }

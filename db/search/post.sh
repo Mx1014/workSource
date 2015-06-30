@@ -1,4 +1,4 @@
-ELASTIC=127.0.0.1:9200
+ELASTIC=10.1.1.218:9200
 
 curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/topic
 
