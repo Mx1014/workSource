@@ -140,14 +140,25 @@ public class CommunityServiceImpl implements CommunityService {
        this.dbProvider.execute((TransactionStatus status) ->  {
            this.communityProvider.updateCommunity(community);
            if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
-               CommunityGeoPoint point = new CommunityGeoPoint();
-               point.setCommunityId(community.getId());
-               point.setDescription("central");
-               point.setLatitude(cmd.getLatitude());
-               point.setLongitude(cmd.getLongitude());
-               String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
-               point.setGeohash(geoHash);
-               this.communityProvider.createCommunityGeoPoint(point);
+               List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+               if(geoPoints == null || geoPoints.isEmpty()){
+                   CommunityGeoPoint point = new CommunityGeoPoint();
+                   point.setCommunityId(community.getId());
+                   point.setDescription("central");
+                   point.setLatitude(cmd.getLatitude());
+                   point.setLongitude(cmd.getLongitude());
+                   String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
+                   point.setGeohash(geoHash);
+                   this.communityProvider.createCommunityGeoPoint(point);
+               }
+               else{
+                   CommunityGeoPoint point = geoPoints.get(0);
+                   point.setLatitude(cmd.getLatitude());
+                   point.setLongitude(cmd.getLongitude());
+                   String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
+                   point.setGeohash(geoHash);
+                   this.communityProvider.updateCommunityGeoPoint(point);
+               }
            }
            return null;
        });
@@ -332,6 +343,57 @@ public class CommunityServiceImpl implements CommunityService {
             return ConvertHelper.convert(r, CommunityDTO.class);
         }).collect(Collectors.toList());
         return result;
+    }
+
+
+    @Override
+    public CommunityDTO getCommunityById(GetCommunityByIdCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+        }
+        
+        Community community = this.communityProvider.findCommunityById(cmd.getId());
+        if(community == null){
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                    "Community is not found.");
+        }
+        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+        List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getId());
+        if(geoPoints != null && !geoPoints.isEmpty()){
+            CommunityGeoPoint point = geoPoints.get(0);
+            if(point.getLatitude()  != null)
+                communityDTO.setLatitude(point.getLatitude());
+            if(point.getLongitude() != null)
+                communityDTO.setLongitude(point.getLongitude());
+        }
+        return communityDTO;
+    }
+
+
+    @Override
+    public CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd) {
+        if(cmd.getUuid() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+        }
+        
+        Community community = this.communityProvider.findCommunityByUuid(cmd.getUuid());
+        if(community == null){
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                    "Community is not found.");
+        }
+        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+        List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(communityDTO.getId());
+        if(geoPoints != null && !geoPoints.isEmpty()){
+            CommunityGeoPoint point = geoPoints.get(0);
+            if(point.getLatitude()  != null)
+                communityDTO.setLatitude(point.getLatitude());
+            if(point.getLongitude() != null)
+                communityDTO.setLongitude(point.getLongitude());
+        }
+        
+        return communityDTO;
     }
 
 }

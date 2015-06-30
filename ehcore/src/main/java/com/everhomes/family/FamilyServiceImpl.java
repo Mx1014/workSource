@@ -204,8 +204,11 @@ public class FamilyServiceImpl implements FamilyService {
                 final Family f = family;
                 GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(f.getId(), EntityType.USER.getCode(), uid);
                 if(member != null){
-                    throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
-                            "User has in family,please don't join it again.");
+//                    throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
+//                            "User has in family,please don't join it again.");
+                    LOGGER.error("User has in family,please don't join it again.userId=" + user.getId() + ",familyId=" + family.getId());
+                    
+                    return null;
                 }
                 // add transaction
                 this.dbProvider.execute((TransactionStatus status) -> {
@@ -232,7 +235,7 @@ public class FamilyServiceImpl implements FamilyService {
                     this.userProvider.createUserGroup(userGroup);
                     
                     sendFamilyNotificationForReqJoinFamily(address,f,m);
-                    return null;
+                    return f;
                 });
                
             }
@@ -241,8 +244,13 @@ public class FamilyServiceImpl implements FamilyService {
             return family;  
         });
         
-        if(result.second())
-            return result.first();
+        if(result.second()){
+            if(result.first() != null)
+                return result.first();
+            else
+              throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
+              "User has in family,please don't join it again.");
+        }
         
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                 "Unable to save into database, SQL exception or storage full?");
@@ -1111,7 +1119,7 @@ public class FamilyServiceImpl implements FamilyService {
         
         if(member == null || member.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode())
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "User not in family");
+                    "User not in family or user status is not active.");
         
         List<Family> familyList = new ArrayList<Family>();
         long communityId = group.getIntegralTag2();
