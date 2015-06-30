@@ -372,8 +372,8 @@ public class FamilyServiceImpl implements FamilyService {
         
         Long familyId = cmd.getId();
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
-        
-        if(m == null)
+        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(user.getId(), familyId);
+        if(m == null || userGroup == null)
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in family");
         
@@ -899,6 +899,12 @@ public class FamilyServiceImpl implements FamilyService {
             LOGGER.error("User not in family.familyId=" + familyId);
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in family.");
+        }
+        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, familyId);
+        if(userGroup == null){
+            LOGGER.error("User not in user group.userId=" + userId);
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+                    "User not in familly.");
         }
         ListingLocator locator = new ListingLocator();
         locator.setEntityId(familyId);

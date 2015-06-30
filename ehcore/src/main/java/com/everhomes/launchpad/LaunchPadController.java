@@ -46,19 +46,20 @@ public class LaunchPadController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /launchpad/createLaunchPadItem</b>
-     * <p>创建服务市场条目</p>
+     * <b>URL: /launchpad/getLaunchPadItemById</b>
+     * <p>根据id获取配置信息</p>
      */
-    @RequestMapping("createLaunchPadItem")
-    @RestReturn(value=String.class)
-    public RestResponse createLaunchPadItem(@Valid CreateLaunchPadItemCommand cmd) {
+    @RequestMapping("getLaunchPadItemById")
+    @RestReturn(value=LaunchPadItemDTO.class)
+    public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemByIdCommand cmd) {
         
-        launchPadService.createLaunchPadItem(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        LaunchPadItemDTO launchPadItem = launchPadService.getLaunchPadItemById(cmd);
+        RestResponse resp =  new RestResponse(launchPadItem);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
+
     
     /**
      * <b>URL: /launchpad/userDefinedLaunchPad</b>
@@ -76,29 +77,13 @@ public class LaunchPadController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /launchpad/deleteLaunchPadItem</b>
-     * <p>删除服务市场Item列表</p>
-     */
-    @RequestMapping("deleteLaunchPadItem")
-    @RestReturn(value=String.class)
-    public RestResponse deleteLaunchPadItem(@Valid DeleteLaunchPadItemCommand cmd) {
-        
-        this.launchPadService.deleteLaunchPadItem(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
      * <b>URL: /launchpad/getLastLaunchPadLayoutByVersionCode</b>
      * <p>根据版本号获取可兼容的最新版信息</p>
      */
     @RequestMapping("getLastLaunchPadLayoutByVersionCode")
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd) {
-        if(cmd.getName() == null)
-        cmd.setName("/ServiceMarketLayout");
+        
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
         
         RestResponse response =  new RestResponse(launchPadLayoutDTO);
@@ -107,4 +92,17 @@ public class LaunchPadController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /launchpad/getLaunchPadLayout</b>
+     * <p>根据id获取服务市场样式</p>
+     */
+    @RequestMapping("getLaunchPadLayout")
+    @RestReturn(value=LaunchPadLayoutDTO.class)
+    public RestResponse getLaunchPadLayout(@Valid GetLaunchPadLayoutCommand cmd) {
+        LaunchPadLayoutDTO dto = this.launchPadService.getLaunchPadLayout(cmd);
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
