@@ -30,7 +30,7 @@ public class JesqueClientTest extends LoginAuthTestCase {
     private static final Logger log = LoggerFactory.getLogger(JesqueClientTest.class);
     
     @Autowired
-    JesqueClientFactory jesqueClientFactory;
+    JesqueClientFactoryImpl jesqueClientFactory;
     
     @Autowired
     SpringWorkerFactory springWorkerFactory;

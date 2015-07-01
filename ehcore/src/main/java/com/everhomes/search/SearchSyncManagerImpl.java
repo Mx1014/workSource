@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.taskqueue.CommonWorkerPool;
-import com.everhomes.taskqueue.JesqueClientFactory;
+import com.everhomes.taskqueue.JesqueClientFactoryImpl;
 
 @Service
 public class SearchSyncManagerImpl implements SearchSyncManager {
@@ -18,7 +18,7 @@ public class SearchSyncManagerImpl implements SearchSyncManager {
     CommonWorkerPool workerPool;
     
     @Autowired
-    JesqueClientFactory jesqueClientFactory;
+    JesqueClientFactoryImpl jesqueClientFactory;
     
     private String queueName = "search-sync";
     
