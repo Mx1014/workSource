@@ -280,14 +280,15 @@ public class FamilyProviderImpl implements FamilyProvider {
         
         if(list == null || list.isEmpty())
             return null;
+        LOGGER.info("Get user families by userId,userGroups size=" + list.size());
         List<Long> familyIds = new ArrayList<Long>();
         for(UserGroup u : list){
             GroupMember groupMember = this.groupProvider.findGroupMemberByMemberInfo(u.getGroupId(), EntityType.USER.getCode(), userId);
             if(groupMember != null){
                 familyIds.add(u.getGroupId());
             }
-            
         }
+        LOGGER.info("Get user families by userId,familyIds size=" + familyIds.size());
        return getUserOwningFamiliesByIds(familyIds, userId);
     }
 
