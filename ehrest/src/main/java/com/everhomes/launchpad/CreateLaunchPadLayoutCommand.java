@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namespaceId: 命名空间</li>
- * <li>name: 名称</li>
+ * <li>name: 名称，取值为：ServiceMarketLayout（服务市场首页layout），PmLayout（物业首页layout）</li>
  * <li>layoutJson: 服务市场风格json</li>
  * <li>versionCode: 当前版本号</li>
  * <li>minVersionCode: 当前版本支持的最小版本号</li>
