@@ -467,7 +467,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
     
     @Override
-    public Community getCommunityByUuid(String uuid) {
+    public Community findCommunityByUuid(String uuid) {
         final Community[] result = new Community[1];
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
                 (DSLContext context, Object reducingContext) -> {
