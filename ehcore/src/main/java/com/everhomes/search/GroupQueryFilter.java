@@ -2,6 +2,7 @@ package com.everhomes.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,6 +225,16 @@ public class GroupQueryFilter implements QueryMaker {
     @Override
     public int getPageNumber() {
         return pageNumber;
+    }
+
+    @Override
+    public QueryMaker dateFrom(Date date) {
+        return this;
+    }
+
+    @Override
+    public QueryMaker dateTo(Date date) {
+        return this;
     }
     
 }

@@ -2,6 +2,7 @@ package com.everhomes.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,6 +52,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.visibility.VisibleRegionType;
 
 @Service
@@ -129,7 +131,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("lon", post.getLongitude());
             b.endObject();
             
-            b.field("createTime", post.getCreateTime());
+            b.field("createTime", new Date(post.getCreateTime().getTime()));
             b.endObject();
             return b;
         } catch (IOException ex) {
