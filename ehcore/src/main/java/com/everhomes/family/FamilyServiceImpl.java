@@ -320,6 +320,7 @@ public class FamilyServiceImpl implements FamilyService {
             }
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+
             LOGGER.info("Send family notification,familyId=" + familyId + ",includeList=" + includeList + ",exculdeList=" + excludeList);
         }
     }
@@ -491,7 +492,6 @@ public class FamilyServiceImpl implements FamilyService {
     public void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
         // send notification to the applicant
         try {
-            System.out.println("Begin send family notification fo leave family");
             Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0,Role.ResourceOperator);
             
             User user = userProvider.findUserById(member.getMemberId());
