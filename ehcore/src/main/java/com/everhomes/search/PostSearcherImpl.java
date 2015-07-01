@@ -46,7 +46,9 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.visibility.VisibleRegionType;
@@ -114,13 +116,20 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("forumName", 0);
             b.field("displayName", "");
             
+            //Sender's info
+            b.field("embeddedId", post.getEmbeddedId());
+            b.field("creatorNickName", post.getCreatorNickName());
+            
+            UserIdentifier identify = userProvider.findClaimedIdentifierByOwnerAndType(post.getCreatorUid(), IdentifierType.MOBILE.getCode());
+            b.field("identify", identify.getIdentifierToken());
+            
             //http://stackoverflow.com/questions/16113439/elasticsearch-geo-distance-filter-with-multiple-locations-in-array-possible
             b.startObject("location");
             b.field("lat", post.getLatitude());
             b.field("lon", post.getLongitude());
             b.endObject();
             
-            b.field("sendTime", post.getCreateTime());
+            b.field("createTime", post.getCreateTime());
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -322,4 +331,31 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         return listPost;
     }
+    
+    @Override
+   public ListPostCommandResponse query(QueryMaker filter) {
+       SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+       filter.makeQueryBuilder(builder);
+       
+       SearchResponse rsp = builder.execute().actionGet();
+       List<Long> ids = getIds(rsp);
+       
+       ListPostCommandResponse listPost = new ListPostCommandResponse();
+       if(ids.size() > filter.getPageSize()) {
+           listPost.setNextPageAnchor(new Long(filter.getPageNumber() + 1));
+           ids.remove(ids.size() - 1);
+        } else {
+           listPost.setNextPageAnchor(null);
+           }
+       
+       List<PostDTO> posts = new ArrayList<PostDTO>();
+       for(Long id : ids) {
+           PostDTO p =  ConvertHelper.convert(this.forumProvider.findPostById(id.longValue()), PostDTO.class);
+           if(p != null) {
+               posts.add(p);
+               }
+           }
+       
+       return listPost;
+   }
 }
