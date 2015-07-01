@@ -1,11 +1,6 @@
-ELASTIC=10.1.1.218:9200
+# -*- coding: UTF-8 -*-
 
-curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/topic
-
-curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
-{
-	"topic": {
-		"properties": {
+txt = '''
 			"subject":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
 			"content":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
             "creatorNickName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
@@ -25,14 +20,16 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
 			"senderAvatar":{"type":"string", "index":"no", "store":"yes"},
 			"forumName":{"type":"string", "index":"no", "store":"yes"},
 			"displayName":{"type":"string", "index":"no", "store":"yes"},
-            "location": {
-                "type": "geo_point",
-                "geohash": true,
-                "geohash_prefix": true,
-                "geohash_precision": "50m"
-            },
 			"createTime":{"type":"date"}
-		}
-	}
-}
-'
+'''
+
+for t1 in txt.split('\n'):
+    if t1:
+        n = ""
+        for t2 in t1.split('"'):
+            t3 = t2.replace('\n', '').replace('\t','').replace(' ', '')
+            if t3:
+                n = t3
+                break
+        if n:
+            print 'public static final String TERM_%s = "%s";' % (n.upper(), n)

@@ -16,27 +16,43 @@ import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 
 @SuppressWarnings("rawtypes")
-public class GroupQueryFilter implements QueryMaker {
+public class PostAdminQueryFilter implements QueryMaker {
     public static final String TERM_ID = "id";
-    public static final String TERM_NAME = "name";
-    public static final String TERM_TAG = "tags.tag.name";
-    public static final String TERM_TAG_UNTOUCH = "tags.tag.untouched";
-    public static final String TERM_CATEGORY_PATH = "category";
+    public static final String TERM_SUBJECT = "subject";
+    public static final String TERM_CONTENT = "content";
+    public static final String TERM_CREATORNICKNAME = "creatorNickName";
+    public static final String TERM_CONTENTCATEGORY = "contentcategory";
+    public static final String TERM_ACTIONCATEGORY = "actioncategory";
+    public static final String TERM_IDENTIFY = "identify";
+    public static final String TERM_APPID = "appId";
+    public static final String TERM_FORUMID = "forumId";
+    public static final String TERM_CATEGORYID = "categoryId";
     public static final String TERM_CREATORUID = "creatorUid";
-    public static final String TERM_CATEGORY_ID = "categoryId";
+    public static final String TERM_VISIBILITYSCOPEID = "visibilityScopeId";
+    public static final String TERM_VISIBILITYSCOPE = "visibilityScope";
+    public static final String TERM_VISIBLEREGIONTYPE = "visibleRegionType";
+    public static final String TERM_VISIBLEREGIONID = "visibleRegionId";
+    public static final String TERM_EMBEDDEDID = "embeddedId";
+    public static final String TERM_SENDERNAME = "senderName";
+    public static final String TERM_SENDERAVATAR = "senderAvatar";
+    public static final String TERM_FORUMNAME = "forumName";
+    public static final String TERM_DISPLAYNAME = "displayName";
+    public static final String TERM_CREATETIME = "createTime";
     
     private static final Map<String, Float> termQueryMap;
     static
     {
         termQueryMap = new HashMap<String, Float>();
-        termQueryMap.put(TERM_NAME, 1.2f);
-        termQueryMap.put(TERM_TAG, 1.0f);
-        termQueryMap.put(TERM_TAG_UNTOUCH, 1.1f);
-        //termQueryMap.put(TERM_CATEGORY_PATH, 1.0f);
+        termQueryMap.put(TERM_SUBJECT, 1.2f);
+        termQueryMap.put(TERM_CONTENT, 1.0f);
+        termQueryMap.put(TERM_CREATORNICKNAME, 1.1f);
     }
     
+    Date fromDate = null;
+    Date toDate = null;
     Map<String, List> inTerms = new HashMap<String, List>();
     Map<String, List> notTerms = new HashMap<String, List>();
     List<String> queryTerms = new ArrayList<String>();
@@ -44,16 +60,16 @@ public class GroupQueryFilter implements QueryMaker {
     int pageSize = 0;
     int pageNumber = 0;
     
-    public GroupQueryFilter() {
+    public PostAdminQueryFilter() {
         this(0, 30);
     }
     
-    public GroupQueryFilter(int pageNum, int pageSize) {
+    public PostAdminQueryFilter(int pageNum, int pageSize) {
         setPageInfo(pageNum, pageSize);
     }
     
     @Override
-    public GroupQueryFilter setPageInfo(int pageNum, int pageSize) {
+    public PostAdminQueryFilter setPageInfo(int pageNum, int pageSize) {
         this.pageSize = pageSize;
         this.pageNumber = pageNum;
         
@@ -61,7 +77,7 @@ public class GroupQueryFilter implements QueryMaker {
     }
     
     @Override
-    public GroupQueryFilter addQueryTerm(String term) {
+    public PostAdminQueryFilter addQueryTerm(String term) {
         if(!queryTerms.contains(term)) {
             queryTerms.add(term);
         }
@@ -75,19 +91,31 @@ public class GroupQueryFilter implements QueryMaker {
     }
 
     @Override
-    public GroupQueryFilter setQueryString(String queryString) {
+    public PostAdminQueryFilter setQueryString(String queryString) {
         this.queryString = queryString;
+        return this;
+    }
+    
+    public PostAdminQueryFilter dateFrom(Date date) {
+        this.fromDate = date;
+        
+        return this;
+    }
+    
+    public PostAdminQueryFilter dateTo(Date date) {
+        this.toDate = date;
+        
         return this;
     }
 
     @Override
-    public GroupQueryFilter includeFilter(String term, List objs) {
+    public PostAdminQueryFilter includeFilter(String term, List objs) {
         inTerms.put(term, objs);
         return this;
     }
     
     @Override
-    public GroupQueryFilter excludeFilter(String term, List objs) {
+    public PostAdminQueryFilter excludeFilter(String term, List objs) {
         notTerms.put(term, objs);
         return this;
     }
@@ -97,14 +125,9 @@ public class GroupQueryFilter implements QueryMaker {
         
         if((queryString) == null || (queryString.isEmpty()) || (queryTerms.size() == 0) ) {
             qb = QueryBuilders.matchAllQuery();
+        } else if(queryTerms.size() == 1) {
+            qb = QueryBuilders.queryString(queryString).field(queryTerms.get(0));
         } else {
-            
-            PrefixQueryBuilder prefix_b = null;
-            if(queryTerms.contains(TERM_CATEGORY_PATH)) {
-                prefix_b = QueryBuilders.prefixQuery(TERM_CATEGORY_PATH, queryString);
-                }
-            queryTerms.remove(TERM_CATEGORY_PATH);
-            
             MultiMatchQueryBuilder mqb = QueryBuilders.multiMatchQuery(queryString);
             for(String term : queryTerms) {
                 Float f = termQueryMap.get(term);
@@ -112,43 +135,10 @@ public class GroupQueryFilter implements QueryMaker {
                     mqb = mqb.field(term, f.floatValue());
                     }
                 }
-          
-            if(prefix_b != null) {
-                if(queryTerms.size() == 0) {
-                    qb = prefix_b;
-                } else {
-                    qb = QueryBuilders.boolQuery().should(mqb).should(prefix_b);     
-                    }
-            } else {
-                qb = mqb;   
-                }
+            qb = mqb;
             }
          
         return qb;
-    }
-    
-    private FilterBuilder boolInFilter(String term, List values) {
-        List<FilterBuilder> ors = new ArrayList<FilterBuilder>();
-        for(Object l : values) {
-            ors.add(FilterBuilders.termFilter(term, l));
-        }
-        if(ors.size() == 1) {
-            return ors.get(0);
-        }
-        
-        return FilterBuilders.boolFilter().should(ors.toArray(new FilterBuilder[ors.size()]));
-    }
-    
-    private FilterBuilder boolNotFilter(String term, List values) {
-        List<FilterBuilder> ors = new ArrayList<FilterBuilder>();
-        for(Object l : values) {
-            ors.add(FilterBuilders.termFilter(term, l));
-            }
-        if(ors.size() == 1) {
-            return ors.get(0);
-        }
-        
-        return FilterBuilders.notFilter(FilterBuilders.boolFilter().should(ors.toArray(new FilterBuilder[ors.size()])));
     }
     
     private FilterBuilder getCommonFilter() {
@@ -168,20 +158,49 @@ public class GroupQueryFilter implements QueryMaker {
         inTerms.remove(TERM_ID);
         notTerms.remove(TERM_ID);
         
+        List<FilterBuilder> andBuilders = new ArrayList<FilterBuilder>();
         for(Entry<String, List> entry: inTerms.entrySet()) {
             String term = entry.getKey();
             List v = entry.getValue();
-            if(v.size() > 0) {
-                allBuilders.add(boolInFilter(term,v));
+            for(Object ov : v) {
+                andBuilders.add(FilterBuilders.termFilter(term, ov));
                 }
            }
+        if(andBuilders.size() > 0) {
+            allBuilders.add(FilterBuilders.andFilter(andBuilders.toArray(new FilterBuilder[andBuilders.size()])));
+            }
         
+        RangeFilterBuilder dateFilter = null;
+        if((null == fromDate) && (null != toDate)) {
+            fromDate = new Date(0);
+            }
+  
+        if(null != fromDate) {
+            dateFilter = FilterBuilders.rangeFilter(TERM_CREATETIME).from(fromDate);
+            }
+        
+        if(null != toDate) {
+            if(null == dateFilter) {
+                dateFilter = FilterBuilders.rangeFilter(TERM_CREATETIME).from(fromDate);
+            } else {
+                dateFilter.to(toDate);
+                }
+          }
+        if(null != dateFilter) {
+            allBuilders.add(dateFilter);
+            }
+        
+        List<FilterBuilder> notBuilders = new ArrayList<FilterBuilder>();
         for(Entry<String, List> entry: notTerms.entrySet()){
             String term = entry.getKey();
             List v = entry.getValue();
-            if(v.size() > 0) {
-                allBuilders.add(boolNotFilter(term,v));
+            for(Object ov : v) {
+                notBuilders.add(FilterBuilders.termFilter(term, ov));
                 }
+            }
+        
+        if(notBuilders.size() > 0) {
+            allBuilders.add(FilterBuilders.notFilter(FilterBuilders.andFilter(notBuilders.toArray(new FilterBuilder[notBuilders.size()]))));
             }
         
         if(allBuilders.size() == 0) {
@@ -189,8 +208,8 @@ public class GroupQueryFilter implements QueryMaker {
         } else  if(allBuilders.size() == 1) {
             return allBuilders.get(0);
         } else {
-            return FilterBuilders.boolFilter().must(allBuilders.toArray(new FilterBuilder[allBuilders.size()])); 
-        }
+            return FilterBuilders.andFilter(allBuilders.toArray(new FilterBuilder[allBuilders.size()])); 
+            }
     }
     
     @Override
@@ -208,11 +227,11 @@ public class GroupQueryFilter implements QueryMaker {
             builder.setFrom(pageNumber * pageSize).setSize(pageSize + 1);
             }
         
-        if(!queryString.isEmpty()) {
-            builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name");//<font color="#1fa24d"></font>
-        }
+//        if(!queryString.isEmpty()) {
+//            builder.setHighlighterFragmentSize(60);
+//            builder.setHighlighterNumOfFragments(8);
+//            builder.addHighlightedField("name");
+//        }
         
         builder.setQuery(qb);
     }
@@ -225,16 +244,6 @@ public class GroupQueryFilter implements QueryMaker {
     @Override
     public int getPageNumber() {
         return pageNumber;
-    }
-
-    @Override
-    public QueryMaker dateFrom(Date date) {
-        return this;
-    }
-
-    @Override
-    public QueryMaker dateTo(Date date) {
-        return this;
     }
     
 }
