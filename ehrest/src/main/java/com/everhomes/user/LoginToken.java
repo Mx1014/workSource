@@ -3,6 +3,7 @@ package com.everhomes.user;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 
 /**
@@ -61,5 +62,10 @@ public class LoginToken {
     public static LoginToken fromTokenString(String tokenString) {
         String json = new String(Base64.decodeBase64(tokenString));
         return (LoginToken)new Gson().fromJson(json, LoginToken.class);
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
