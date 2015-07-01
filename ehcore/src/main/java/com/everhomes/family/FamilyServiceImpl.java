@@ -320,7 +320,8 @@ public class FamilyServiceImpl implements FamilyService {
             }
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
-            System.out.println("messageDto=" + messageDto);
+
+            LOGGER.info("Send family notification,familyId=" + familyId + ",includeList=" + includeList + ",exculdeList=" + excludeList);
         }
     }
 
@@ -1417,7 +1418,7 @@ public class FamilyServiceImpl implements FamilyService {
             familyDTO.setMembershipStatus(m.getMemberStatus());
             Address address = this.addressProvider.findAddressById(addressId);
             if(address != null){
-            familyDTO.setAddress(address.getAddress());
+                familyDTO.setAddress(address.getAddress());
                 familyDTO.setAddressId(address.getId());
                 familyDTO.setApartmentName(address.getApartmentName());
                 familyDTO.setBuildingName(address.getBuildingName());
