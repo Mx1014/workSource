@@ -320,7 +320,8 @@ public class FamilyServiceImpl implements FamilyService {
             }
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
-            System.out.println("messageDto=" + messageDto);
+
+            LOGGER.info("Send family notification,familyId=" + familyId + ",includeList=" + includeList + ",exculdeList=" + excludeList);
         }
     }
 
@@ -624,7 +625,10 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in familly.");
         }
-        
+        if(member.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
+                    "User has already join in family,fail to reject.");
+        }
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         
         UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(memberUid, group.getId());
@@ -730,7 +734,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(member == null){
             LOGGER.error("Invalid memberUid parameter,user has not apply join in family.memberUid=" + memberUid);
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "Invalid memberUid parameter,user has not apply join in family.");
+                    "User has not apply join in family, or other approve the user.");
         }
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
             
@@ -1417,7 +1421,7 @@ public class FamilyServiceImpl implements FamilyService {
             familyDTO.setMembershipStatus(m.getMemberStatus());
             Address address = this.addressProvider.findAddressById(addressId);
             if(address != null){
-            familyDTO.setAddress(address.getAddress());
+                familyDTO.setAddress(address.getAddress());
                 familyDTO.setAddressId(address.getId());
                 familyDTO.setApartmentName(address.getApartmentName());
                 familyDTO.setBuildingName(address.getBuildingName());

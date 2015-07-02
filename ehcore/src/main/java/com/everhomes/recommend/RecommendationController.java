@@ -26,6 +26,11 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
 
+/**
+ * <p>用户推荐</p>
+ * @author janson
+ *
+ */
 @RestDoc(value="Recommendation", site="ehcore")
 @RestController
 @RequestMapping("/recommend")
@@ -43,6 +48,10 @@ public class RecommendationController {
     private UserProvider userProvider;
    
     
+    /**
+     * <b>URL: /recommend/recommendUsers</b>
+     * <p>获取推荐的用户</p>
+     */
   @RequestMapping("recommendUsers")
   @RestReturn(RecommendUserResponse.class)
   public RestResponse getRecommendUsers(@RequestParam(value="userId")Long userId

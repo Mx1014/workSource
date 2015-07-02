@@ -16,7 +16,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.taskqueue.CommonWorkerPool;
-import com.everhomes.taskqueue.JesqueClientFactory;
+import com.everhomes.taskqueue.JesqueClientFactoryImpl;
 import com.everhomes.util.ConvertHelper;
 
 @Service
@@ -25,7 +25,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private CommonWorkerPool workerPool;
     
     @Autowired
-    JesqueClientFactory jesqueClientFactory;
+    JesqueClientFactoryImpl jesqueClientFactory;
     
     @Autowired
     RecommendationConfigProvider recommendationConfigProvider;

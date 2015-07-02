@@ -110,14 +110,37 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @SuppressWarnings("unchecked")
-    private String parserJson(String userToken, long commnunityId,BannerDTO banner) {
+    private String parserJson(String userToken,long commnunityId,BannerDTO banner) {
         
         JSONObject jsonObject = new JSONObject();
         if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
             jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
         }
         jsonObject.put(LaunchPadConstants.TOKEN, userToken);
+        
         return jsonObject.toString();
+    }
+    
+    private String addParameterToLink(String link, String paramName, String paramValue){
+        if (link != null && paramName != null && paramValue != null){
+            
+            StringBuilder strBuilder = new StringBuilder(link);
+            boolean isFirstParam = false;
+            if (strBuilder.indexOf("?") == -1){
+                strBuilder.append("?");
+                isFirstParam = true;
+            }
+            if (!isFirstParam){
+                strBuilder.append("&");
+            }
+            strBuilder.append(paramName);
+            strBuilder.append("=");
+            strBuilder.append(paramValue);
+
+            return strBuilder.toString();
+        } else{
+            return link;
+        }
     }
     
     @Override

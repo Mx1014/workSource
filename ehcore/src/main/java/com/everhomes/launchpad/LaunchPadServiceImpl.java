@@ -28,6 +28,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -61,6 +62,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid itemGroup paramter,itemGroup is null");
         }
+        if(cmd.getCommunityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId paramter,communityId is null");
+        }
         
         long communityId = cmd.getCommunityId();
         Community community = communityProvider.findCommunityById(communityId);
@@ -68,6 +73,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
         }
+        long cityId = community.getCityId();
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
         long userId = user.getId();
@@ -102,7 +108,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //                        "Unable to find launch pad handler.");
             
             LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
-            itemDTO.setActionData(parserJson(token,communityId,r));
+            itemDTO.setActionData(parserJson(token,userId,communityId,cityId,r));
             itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
             result.add(itemDTO);
         });
@@ -119,13 +125,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @SuppressWarnings("unchecked")
-    private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
+    private String parserJson(String userToken,long userId, long commnunityId,long cityId,LaunchPadItem launchPadItem) {
         
         JSONObject jsonObject = new JSONObject();
         if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
             jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
+            if(launchPadItem.getActionType() == ActionType.THIRDPART_URL.getCode()){
+              jsonObject.put(LaunchPadConstants.TOKEN, userToken);
+              String url = (String) jsonObject.get(LaunchPadConstants.URL);
+              if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
+                  url = url + "&userId=" + userId + "&cityId=" + cityId;
+              }
+              jsonObject.put(LaunchPadConstants.URL, url);
+            }
         }
-        //jsonObject.put(LaunchPadConstants.TOKEN, userToken);
+        
         jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
         return jsonObject.toString();
     }

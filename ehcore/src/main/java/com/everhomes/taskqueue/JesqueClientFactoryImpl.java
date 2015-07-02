@@ -10,8 +10,10 @@ import net.greghaines.jesque.utils.PoolUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
+
 @Component
-public class JesqueClientFactory {
+public class JesqueClientFactoryImpl implements JesqueClientFactory {
     
     private ClientPoolImpl jesqueClientPool;
     private Config config;
