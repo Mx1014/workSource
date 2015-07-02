@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionData: 根据actionType不同的取值决定，描述了该item后续的，json格式的字符串，如果item存在二级,如物业，则会有layoutName：PmLayout,itemLocation:/home/Pm</li>
  * <li>displayFlag: 是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
- * <li>bgcolor：item的背景颜色</li>
+ * <li>bgcolor：item的背景颜色，默认为0，1-10，每个数值对应一种颜色</li>
  * </ul>
  */
 public class CreateLaunchPadItemCommand {

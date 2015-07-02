@@ -4,13 +4,12 @@ package com.everhomes.launchpad;
 /**
  * <ul>组内控件风格
  * <li>DEFAULT：默认</li>
- * <li>WIN8: Win8</li>
  * <li>METRO: Metro</li>
  * <li>LIGHT: Light</li>
  * </ul>
  */
 public enum Style {
-    DEFAULT("Default"),WIN8("Win8"),METRO("Metro"),LIGHT("Light");
+    DEFAULT("Default"),METRO("Metro"),LIGHT("Light");
     
     private String code;
        

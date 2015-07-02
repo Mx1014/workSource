@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -17,13 +18,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -33,6 +38,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import freemarker.core.ReturnInstruction.Return;
+
 
 
 
@@ -51,6 +58,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private DbProvider dbProvider;
     @Autowired 
     private ContentServerService contentServerService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    @Autowired
+    private RegionProvider regionProvider;
 
     @Override
     public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
@@ -185,7 +196,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     allItems.add(o);
                 }
                 else if(o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode() 
-                        && (d.getId().longValue() == o.getId().longValue() || d.getItemName().equals(o.getItemName()))){
+                        && (d.getId().longValue() == o.getId().longValue() || 
+                        (d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())))){
                     allItems.add(o);
                     flag = true;
                     break;
@@ -444,8 +456,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         LaunchPadItem launchPadItem = this.launchPadProvider.findLaunchPadItemById(cmd.getId());
         if(launchPadItem == null){
+            LOGGER.error("LaunchPad item is not exists,id=" + cmd.getId());
             throw RuntimeErrorException.errorWith(LaunchPadServiceErrorCode.SCOPE, LaunchPadServiceErrorCode.ERROR_LAUNCHPAD_ITEM_NOT_EXISTS,
-                    "LaunchPad item is not exists,id=" + cmd.getId());
+                    "LaunchPad item is not exists.");
         }
         User user = UserContext.current().getUser();
         long userId = user.getId();
@@ -518,6 +531,31 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             launchPadItem.setScopeType(cmd.getScopeType());
         }
         this.launchPadProvider.updateLaunchPadItem(launchPadItem);
+    }
+
+    @Override
+    public GetLaunchPadItemsByKeywordCommandResponse getLaunchPadItemsByKeyword(GetLaunchPadItemsByKeywordCommand cmd) {
+        
+        final int size = this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
+        final int pageOffset = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
+        final int pageSize = cmd.getPageSize() == null ? size : cmd.getPageSize();
+        List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
+        List<LaunchPadItem> launchPadItems = this.launchPadProvider.getLaunchPadItemsByKeyword(cmd.getKeyword(),pageOffset,pageSize);
+        if(launchPadItems != null && !launchPadItems.isEmpty()){
+             launchPadItems.stream().map(r ->{
+                 result.add(ConvertHelper.convert(r, LaunchPadItemDTO.class));
+                 return null;
+            }).collect(Collectors.toList());
+        }
+      
+        GetLaunchPadItemsByKeywordCommandResponse response = new GetLaunchPadItemsByKeywordCommandResponse();
+        if(result.size() == pageSize){
+            response.setNextPageOffset(pageOffset + 1);
+        }
+        response.setLaunchPadItems(result);
+        
+        return response;
     }
     
  

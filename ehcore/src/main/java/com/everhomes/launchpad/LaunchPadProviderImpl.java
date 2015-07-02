@@ -178,6 +178,27 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
+    @Override
+    public List<LaunchPadItem> getLaunchPadItemsByKeyword(String keyword, int pageOffset, int pageSize) {
+        
+        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+        Condition condition = null;
+        if(keyword != null && !keyword.trim().equals("")){
+            condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.like("%" + keyword + "%");
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
+        }
+        if(condition != null)
+            step.where(condition);
+        
+        step.limit(pageSize).offset(pageOffset).fetch().map((r) ->{
+            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
+    }
 
 
 }
