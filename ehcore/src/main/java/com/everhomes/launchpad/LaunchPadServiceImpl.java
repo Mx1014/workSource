@@ -245,6 +245,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             item.setApplyPolicy(itemScope.getApplyPolicy());
             item.setDisplayFlag(cmd.getDisplayFlag() == null ? ItemDisplayFlag.DISPLAY.getCode() : cmd.getDisplayFlag());
             item.setDisplayLayout(cmd.getDisplayLayout());
+            item.setBgcolor(cmd.getBgcolor() == null ? 0 : cmd.getBgcolor());
             items.add(item);
         });
         this.launchPadProvider.createLaunchPadItems(items);
