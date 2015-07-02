@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = -1925772550;
+	private static final long serialVersionUID = 132832120;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -120,6 +120,11 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_launch_pad_items.display_layout</code>. how many grids it takes at the layout, format: 2x3
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> DISPLAY_LAYOUT = createField("display_layout", org.jooq.impl.SQLDataType.VARCHAR.length(128).defaulted(true), this, "how many grids it takes at the layout, format: 2x3");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.bgcolor</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Integer> BGCOLOR = createField("bgcolor", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_launch_pad_items</code> table reference

@@ -321,6 +321,13 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>hot_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByHotFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.HOT_FLAG, values);
+	}
+
+	/**
 	 * Fetch records that have <code>floor_number IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByFloorNumber(java.lang.Long... values) {

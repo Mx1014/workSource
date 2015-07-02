@@ -172,4 +172,11 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByDisplayLayout(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.DISPLAY_LAYOUT, values);
 	}
+
+	/**
+	 * Fetch records that have <code>bgcolor IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByBgcolor(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.BGCOLOR, values);
+	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1458994649;
+	private static final long serialVersionUID = -365163515;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -52,6 +52,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Byte     hotFlag;
 	private java.lang.Long     floorNumber;
 	private java.lang.Byte     status;
 	private java.sql.Timestamp updateTime;
@@ -101,6 +102,7 @@ public class EhForumPosts implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
+		java.lang.Byte     hotFlag,
 		java.lang.Long     floorNumber,
 		java.lang.Byte     status,
 		java.sql.Timestamp updateTime,
@@ -147,6 +149,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.hotFlag = hotFlag;
 		this.floorNumber = floorNumber;
 		this.status = status;
 		this.updateTime = updateTime;
@@ -465,6 +468,14 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Byte getHotFlag() {
+		return this.hotFlag;
+	}
+
+	public void setHotFlag(java.lang.Byte hotFlag) {
+		this.hotFlag = hotFlag;
 	}
 
 	public java.lang.Long getFloorNumber() {
