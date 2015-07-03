@@ -6,30 +6,34 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 通过标识验证并且登录
+ * 
  * @author elians
- *<ul>
- *<li>userIdentifier:用户标识</li>
- *<li>verificationCode:验证码</li>
- *<li>initialPassword:初始化密码</li>
- *<li>deviceIdentifier:设备标识</li>
- *<li>invitationCode:邀请码</li>
- *<li>namespaceId:名字空间</li>
- *</ul>
+ *         <ul>
+ *         <li>userIdentifier:用户标识</li>
+ *         <li>verificationCode:验证码</li>
+ *         <li>initialPassword:初始化密码</li>
+ *         <li>deviceIdentifier:设备标识</li>
+ *         <li>invitationCode:邀请码</li>
+ *         <li>namespaceId:名字空间</li>
+ *         <li>nickName:昵称</li>
+ *         </ul>
  */
 public class VerifyAndLogonByIdentifierCommand {
     @NotNull
     private String userIdentifier;
-    
+
     @NotNull
     private String verificationCode;
-    
+
     @NotNull
     private String initialPassword;
-    
+
+    private String nickName;
+
     private String invitationCode;
-    
+
     private String deviceIdentifier;
-    
+
     private Integer namespaceId;
 
     public VerifyAndLogonByIdentifierCommand() {
@@ -58,7 +62,7 @@ public class VerifyAndLogonByIdentifierCommand {
     public void setDeviceIdentifier(String deviceIdentifier) {
         this.deviceIdentifier = deviceIdentifier;
     }
-  
+
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -66,7 +70,7 @@ public class VerifyAndLogonByIdentifierCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
-    
+
     public String getInitialPassword() {
         return initialPassword;
     }
@@ -74,13 +78,21 @@ public class VerifyAndLogonByIdentifierCommand {
     public void setInitialPassword(String initialPassword) {
         this.initialPassword = initialPassword;
     }
-    
+
     public String getInvitationCode() {
         return invitationCode;
     }
 
     public void setInvitationCode(String invitationCode) {
         this.invitationCode = invitationCode;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     @Override

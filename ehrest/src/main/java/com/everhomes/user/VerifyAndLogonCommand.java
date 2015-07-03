@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *<li>deviceIdentifier:设备标识</li>
  *<li>invitationCode:邀请码</li>
  *<li>namespaceId:名字空间</li>
+ *<li>nickName:昵称</li>
  *</ul>
  */
 public class VerifyAndLogonCommand {
@@ -25,6 +26,8 @@ public class VerifyAndLogonCommand {
     
     @NotNull
     private String initialPassword;
+    
+    private String nickName;
     
     private String invitationCode;
     
@@ -82,6 +85,15 @@ public class VerifyAndLogonCommand {
 
     public void setInvitationCode(String invitationCode) {
         this.invitationCode = invitationCode;
+    }
+    
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     @Override
