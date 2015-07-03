@@ -390,7 +390,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
     	if(tasks != null && tasks.size() > 0){
     		for (CommunityPmTasks task : tasks) {
-				PostDTO post = forumService.getTopicById(task.getEntityId(), false);		
+				PostDTO post = forumService.getTopicById(task.getEntityId(), communityId, false);		
 				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
 				dto.setCommunityId(task.getOrganizationId());
 				dto.setEntityType(task.getEntityType());

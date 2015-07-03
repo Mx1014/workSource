@@ -7,11 +7,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>forumId: 论坛ID</li>
  * <li>topicId: 帖子ID</li>
+ * <li>communityId: 用户当前所在的小区ID，如果没有则不填</li>
  * </ul>
  */
 public class GetTopicCommand {
     private Long forumId;
     private Long topicId;
+    private Long communityId;
     
     public GetTopicCommand() {
     }
@@ -30,6 +32,14 @@ public class GetTopicCommand {
 
     public void setTopicId(Long topicId) {
         this.topicId = topicId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override
