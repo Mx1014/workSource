@@ -25,25 +25,13 @@ public enum VisibilityScope {
     }
     
     public static VisibilityScope fromCode(Byte code) {
-        if(code == null)
-            return null;
-        
-        switch(code.byteValue()) {
-        case 0 :
-            return ALL;
-            
-        case 1 :
-            return COMMUNITY;
-            
-        case 2 :
-            return NEARBY_COMMUNITIES;
-            
-        case 3 :
-            return CITY;
-            
-        default :
-            assert(false);
-            break;
+        if(code != null) {
+            VisibilityScope[] values = VisibilityScope.values();
+            for(VisibilityScope value : values) {
+                if(value.getCode() == code.byteValue()) {
+                    return value;
+                }
+            }
         }
         
         return null;
