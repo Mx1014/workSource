@@ -22,6 +22,8 @@ import com.everhomes.organization.ListOrganizationsCommand;
 import com.everhomes.organization.ListOrganizationsCommandResponse;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserTokenCommand;
+import com.everhomes.user.UserTokenCommandResponse;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -56,6 +58,21 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse createOrganizationMember(@Valid CreateOrganizationMemberCommand cmd) {
     	organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/findUserByIndentifier</b>
+     * <p>根据用户token查询用户信息</p>
+     */
+    @RequestMapping("findUserByIndentifier")
+    @RestReturn(value=UserTokenCommandResponse.class)
+    public RestResponse findUserByIndentifier(@Valid UserTokenCommand cmd) {
+        UserTokenCommandResponse commandResponse = organizationService.findUserByIndentifier(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

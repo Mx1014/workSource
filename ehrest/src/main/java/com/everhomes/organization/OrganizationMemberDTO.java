@@ -21,8 +21,10 @@ import com.everhomes.util.StringHelper;
  */
 public class OrganizationMemberDTO {
 	@NotNull
+    private Long   id;
+	@NotNull
     private Long   organizationId;
-   
+	private String   organizationName;
 	private String targetType;
     @NotNull
 	private Long   targetId;
@@ -143,6 +145,30 @@ public class OrganizationMemberDTO {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
 	}
 
 

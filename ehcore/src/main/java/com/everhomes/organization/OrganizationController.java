@@ -27,6 +27,7 @@ import com.everhomes.organization.pm.ListPropPostCommandResponse;
 import com.everhomes.organization.pm.PropCommunityBuildAddessCommand;
 import com.everhomes.organization.pm.QueryPropTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 
@@ -417,7 +418,7 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-	 * <b>URL: /pm/sendOrgMessage</b>
+	 * <b>URL: /org/sendOrgMessage</b>
 	 * 发通知给所辖小区用户
      * @return 发通知的结果
      */
@@ -426,6 +427,40 @@ public class OrganizationController extends ControllerBase {
     public RestResponse sendOrgMessage(SendOrganizationMessageCommand cmd) {
 		organizationService.sendOrgMessage(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+	/**
+     * <b>URL: /org/getCurrentOrganization</b>
+     * <p>设置政府用户当前政府（切换政府）</p>
+     * @param organizationId 小区ID
+     * @return 
+     */
+    @RequestMapping("getCurrentOrganization")
+    @RestReturn(OrganizationDTO.class)
+    public RestResponse getCurrentOrganization() throws Exception {
+    	OrganizationDTO  organization =  organizationService.getUserCurrentOrganization();
+        RestResponse response = new RestResponse(organization);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+	/**
+     * <b>URL: /org/setCurrentOrganization</b>
+     * <p>获得用户当前政府（切换政府）</p>
+     * @param organizationId 小区ID
+     * @return OK
+     */
+    @RequestMapping("setCurrentOrganization")
+    @RestReturn(String.class)
+    public RestResponse setCurrentOrganization(@Valid SetCurrentOrganizationCommand cmd) throws Exception {
+    	organizationService.setCurrentOrganization(cmd);
+        RestResponse response = new RestResponse();
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
