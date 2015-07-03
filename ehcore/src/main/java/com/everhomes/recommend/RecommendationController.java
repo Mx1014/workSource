@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -34,7 +35,7 @@ import com.everhomes.util.EtagHelper;
 @RestDoc(value="Recommendation", site="ehcore")
 @RestController
 @RequestMapping("/recommend")
-public class RecommendationController {
+public class RecommendationController extends ControllerBase{
     @Autowired
     private UserActivityProvider userActivityProvider;
     
