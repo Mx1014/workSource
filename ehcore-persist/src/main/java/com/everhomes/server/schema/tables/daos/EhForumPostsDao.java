@@ -321,10 +321,10 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>hot_flag IN (values)</code>
+	 * Fetch records that have <code>assigned_flag IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByHotFlag(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.HOT_FLAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByAssignedFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.ASSIGNED_FLAG, values);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = 945938162;
+	private static final long serialVersionUID = 2071223918;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_posts.id</code>. id of the record
@@ -560,16 +560,16 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_posts.hot_flag</code>. the flag indicate the topic is recommanded, 0: none, 1: manual recommand
+	 * Setter for <code>ehcore.eh_forum_posts.assigned_flag</code>. the flag indicate the topic is recommanded, 0: none, 1: manual recommand
 	 */
-	public void setHotFlag(java.lang.Byte value) {
+	public void setAssignedFlag(java.lang.Byte value) {
 		setValue(39, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_posts.hot_flag</code>. the flag indicate the topic is recommanded, 0: none, 1: manual recommand
+	 * Getter for <code>ehcore.eh_forum_posts.assigned_flag</code>. the flag indicate the topic is recommanded, 0: none, 1: manual recommand
 	 */
-	public java.lang.Byte getHotFlag() {
+	public java.lang.Byte getAssignedFlag() {
 		return (java.lang.Byte) getValue(39);
 	}
 
@@ -683,7 +683,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhForumPostsRecord
 	 */
-	public EhForumPostsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long viewCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Byte hotFlag, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime) {
+	public EhForumPostsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long appId, java.lang.Long forumId, java.lang.Long parentPostId, java.lang.Long creatorUid, java.lang.String creatorTag, java.lang.String targetTag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Byte visibleRegionType, java.lang.Long visibleRegionId, java.lang.String visibleRegionPath, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Long modifySeq, java.lang.Long childCount, java.lang.Long forwardCount, java.lang.Long likeCount, java.lang.Long viewCount, java.lang.String subject, java.lang.String contentType, java.lang.String content, java.lang.String contentAbstract, java.lang.Long embeddedAppId, java.lang.Long embeddedId, java.lang.String embeddedJson, java.lang.Integer embeddedVersion, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Byte assignedFlag, java.lang.Long floorNumber, java.lang.Byte status, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long deleterUid, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS);
 
 		setValue(0, id);
@@ -725,7 +725,7 @@ public class EhForumPostsRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		setValue(36, stringTag3);
 		setValue(37, stringTag4);
 		setValue(38, stringTag5);
-		setValue(39, hotFlag);
+		setValue(39, assignedFlag);
 		setValue(40, floorNumber);
 		setValue(41, status);
 		setValue(42, updateTime);

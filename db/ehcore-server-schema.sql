@@ -891,7 +891,7 @@ CREATE TABLE `eh_forum_posts` (
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
     
-	`hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'the flag indicate the topic is recommanded, 0: none, 1: manual recommand',
+	`assigned_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'the flag indicate the topic is recommanded, 0: none, 1: manual recommand',
 	`floor_number` BIGINT NOT NULL DEFAULT 0,
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
     `update_time` DATETIME,
@@ -934,26 +934,13 @@ DROP TABLE IF EXISTS `eh_forum_assigned_scopes`;
 CREATE TABLE `eh_forum_assigned_scopes` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_id` BIGINT NOT NULL COMMENT 'owner post id',
-    `scope_code` TINYINT,
+    `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city',
     `scope_id` BIGINT,
     
     PRIMARY KEY (`id`),
+	UNIQUE `u_eh_scope_owner_code_id`(`owner_id`, `scope_code`, `scope_id`),
     FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
-    INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of forum post sharding group
-#
-DROP TABLE IF EXISTS `eh_forum_visible_scopes`;
-CREATE TABLE `eh_forum_visible_scopes` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_id` BIGINT NOT NULL COMMENT 'owner post id',
-    `scope_code` TINYINT,
-    `scope_id` BIGINT,
-    
-    PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_eh_post_scope_owner`(`owner_id`) REFERENCES `eh_forum_posts`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_post_scope_owner_id`(`owner_id`),
     INDEX `i_eh_post_scope_target`(`scope_code`, `scope_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
