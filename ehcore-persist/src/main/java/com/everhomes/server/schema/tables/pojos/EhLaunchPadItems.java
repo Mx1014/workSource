@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -325075723;
+	private static final long serialVersionUID = 1621097573;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -32,6 +32,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.Long    minVersion;
 	private java.lang.Byte    displayFlag;
 	private java.lang.String  displayLayout;
+	private java.lang.Integer bgcolor;
 
 	public EhLaunchPadItems() {}
 
@@ -54,7 +55,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Byte    applyPolicy,
 		java.lang.Long    minVersion,
 		java.lang.Byte    displayFlag,
-		java.lang.String  displayLayout
+		java.lang.String  displayLayout,
+		java.lang.Integer bgcolor
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -75,6 +77,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.minVersion = minVersion;
 		this.displayFlag = displayFlag;
 		this.displayLayout = displayLayout;
+		this.bgcolor = bgcolor;
 	}
 
 	public java.lang.Long getId() {
@@ -227,5 +230,13 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setDisplayLayout(java.lang.String displayLayout) {
 		this.displayLayout = displayLayout;
+	}
+
+	public java.lang.Integer getBgcolor() {
+		return this.bgcolor;
+	}
+
+	public void setBgcolor(java.lang.Integer bgcolor) {
+		this.bgcolor = bgcolor;
 	}
 }

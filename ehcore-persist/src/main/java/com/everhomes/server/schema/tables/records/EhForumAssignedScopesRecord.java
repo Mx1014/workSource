@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAssignedScopesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord> implements org.jooq.Record4<java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.Long> {
 
-	private static final long serialVersionUID = 665859933;
+	private static final long serialVersionUID = -743976543;
 
 	/**
 	 * Setter for <code>ehcore.eh_forum_assigned_scopes.id</code>. id of the record
@@ -42,14 +42,14 @@ public class EhForumAssignedScopesRecord extends org.jooq.impl.UpdatableRecordIm
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_forum_assigned_scopes.scope_code</code>.
+	 * Setter for <code>ehcore.eh_forum_assigned_scopes.scope_code</code>. 0: all, 1: community, 2: city
 	 */
 	public void setScopeCode(java.lang.Byte value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_forum_assigned_scopes.scope_code</code>.
+	 * Getter for <code>ehcore.eh_forum_assigned_scopes.scope_code</code>. 0: all, 1: community, 2: city
 	 */
 	public java.lang.Byte getScopeCode() {
 		return (java.lang.Byte) getValue(2);

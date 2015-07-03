@@ -6,7 +6,6 @@ public interface LaunchPadConstants {
     public static final String CITY_ID = "cityId";
     public static final String CATEGORY_ID = "categoryId"; 
     public static final String TOKEN = "token"; 
-    public static final String POST_ENTITY_TAG = "postTag";
     public static final String URL = "url";
     
 
@@ -29,6 +28,7 @@ public interface LaunchPadConstants {
     public static final int ACTIVITY = 8;
     public static final int HOTLINE = 9;
     public static final int QRCODE_SCAN = 10;
+    public static final int POST_ACTION = 11;
     
     //收集地址
     public static final String USER_REQUEST_LIST = "userRequest_list";

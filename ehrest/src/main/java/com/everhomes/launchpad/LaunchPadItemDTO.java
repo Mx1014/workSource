@@ -28,6 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>minVersion: item 最小版本号</li>
  * <li>displayFlag: 是否显示{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
+ * <li>bgcolor: item的背景颜色</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -52,6 +53,7 @@ public class LaunchPadItemDTO {
     private Long    minVersion;
     private Byte    displayFlag;
     private String  displayLayout;
+    private Integer    bgcolor;
 
     public Long getId() {
         return id;
@@ -211,6 +213,14 @@ public class LaunchPadItemDTO {
 
     public void setDisplayLayout(String displayLayout) {
         this.displayLayout = displayLayout;
+    }
+
+    public Integer getBgcolor() {
+        return bgcolor;
+    }
+
+    public void setBgcolor(Integer bgcolor) {
+        this.bgcolor = bgcolor;
     }
 
     @Override

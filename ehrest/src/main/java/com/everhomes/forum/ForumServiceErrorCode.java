@@ -7,4 +7,8 @@ public interface ForumServiceErrorCode {
     static final int ERROR_FORUM_VISIBLE_REGION_NOT_FOUND = 10002;
     static final int ERROR_FORUM_COMMUNITY_NOT_FOUND = 10003;
     static final int ERROR_FORUM_TOPIC_NOT_FOUND = 10004;
+    
+
+    static final int ERROR_FORUM_TOPIC_NOT_ASSIGNED = 10011;
+    static final int ERROR_FORUM_TOPIC_ALREADY_ASSIGNED = 10012;
 }

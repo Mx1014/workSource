@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -2108005135;
+	private static final long serialVersionUID = 1934376646;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -220,6 +220,11 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.assigned_flag</code>. the flag indicate the topic is recommanded, 0: none, 1: manual recommand
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.Byte> ASSIGNED_FLAG = createField("assigned_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the flag indicate the topic is recommanded, 0: none, 1: manual recommand");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.floor_number</code>.

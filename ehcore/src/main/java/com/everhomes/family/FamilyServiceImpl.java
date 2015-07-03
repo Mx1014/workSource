@@ -625,7 +625,10 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User not in familly.");
         }
-        
+        if(member.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
+                    "User has already join in family,fail to reject.");
+        }
         Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
         
         UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(memberUid, group.getId());
@@ -731,7 +734,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(member == null){
             LOGGER.error("Invalid memberUid parameter,user has not apply join in family.memberUid=" + memberUid);
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "Invalid memberUid parameter,user has not apply join in family.");
+                    "User has not apply join in family, or other approve the user.");
         }
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
             

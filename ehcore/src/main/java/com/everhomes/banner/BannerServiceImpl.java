@@ -199,19 +199,18 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(BannerServiceErrorCode.SCOPE,
                     BannerServiceErrorCode.ERROR_BANNER_NOT_EXISTS, "Banner is not exists.");
         }
-        
-        if(cmd.getActionType() != null)
-            banner.setActionType(cmd.getActionType());
-        if(cmd.getActionData() != null)
-            banner.setActionData(cmd.getActionData());
         if(cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getStartTime() > cmd.getEndTime()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
         }
+        if(cmd.getActionType() != null)
+            banner.setActionType(cmd.getActionType());
+        if(cmd.getActionData() != null)
+            banner.setActionData(cmd.getActionData());
+        if(cmd.getStartTime() != null)
+            banner.setStartTime(new Timestamp(cmd.getStartTime()));
         if(cmd.getEndTime() != null)
             banner.setEndTime(new Timestamp(cmd.getEndTime()));
-        if(cmd.getStartTime() != null)
-            banner.setEndTime(new Timestamp(cmd.getStartTime()));
         if(cmd.getOrder() != null)
             banner.setOrder(cmd.getOrder());
         if(cmd.getPosterPath() != null)

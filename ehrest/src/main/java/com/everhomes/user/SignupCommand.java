@@ -8,7 +8,7 @@ import javax.validation.constraints.Pattern;
  * @author elians
  *<ul>
  *<li>type:标识类型,email或者mobile</li>
- *<li>token:手机号或者邮箱</li>
+ *<li>identifierToken:手机号或者邮箱</li>
  *<li>ifExistsThenOverride:如果identifier已经存在是否进行覆盖</li>
  *<ul>
  */

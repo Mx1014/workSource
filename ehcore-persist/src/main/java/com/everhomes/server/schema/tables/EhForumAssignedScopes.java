@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAssignedScopes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord> {
 
-	private static final long serialVersionUID = -1121563447;
+	private static final long serialVersionUID = -1730285413;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_assigned_scopes</code>
@@ -37,9 +37,9 @@ public class EhForumAssignedScopes extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner post id");
 
 	/**
-	 * The column <code>ehcore.eh_forum_assigned_scopes.scope_code</code>.
+	 * The column <code>ehcore.eh_forum_assigned_scopes.scope_code</code>. 0: all, 1: community, 2: city
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: community, 2: city");
 
 	/**
 	 * The column <code>ehcore.eh_forum_assigned_scopes.scope_id</code>.

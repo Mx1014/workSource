@@ -18,6 +18,8 @@ import com.everhomes.launchpad.CreateLaunchPadLayoutCommand;
 import com.everhomes.launchpad.DeleteLaunchPadItemCommand;
 import com.everhomes.launchpad.DeleteLaunchPadLayoutCommand;
 import com.everhomes.launchpad.GetLaunchPadItemByIdCommand;
+import com.everhomes.launchpad.GetLaunchPadItemsByKeywordCommand;
+import com.everhomes.launchpad.GetLaunchPadItemsByKeywordCommandResponse;
 import com.everhomes.launchpad.GetLaunchPadLayoutCommand;
 import com.everhomes.launchpad.LaunchPadItemDTO;
 import com.everhomes.launchpad.LaunchPadLayoutDTO;
@@ -35,6 +37,21 @@ public class LaunchPadAdminController extends ControllerBase {
     @Autowired
     private LaunchPadService launchPadService;
 
+    /**
+     * <b>URL: /admin/launchpad/getLaunchPadItemsByKeyword</b>
+     * <p>根据id获取配置信息</p>
+     */
+    @RequestMapping("getLaunchPadItemsByKeyword")
+    @RestReturn(value=GetLaunchPadItemsByKeywordCommandResponse.class)
+    public RestResponse getLaunchPadItemsByKeyword(@Valid GetLaunchPadItemsByKeywordCommand cmd) {
+        
+        GetLaunchPadItemsByKeywordCommandResponse cmdResponse = this.launchPadService.getLaunchPadItemsByKeyword(cmd);
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     /**
      * <b>URL: /admin/launchpad/getLaunchPadItemById</b>
      * <p>根据id获取配置信息</p>
