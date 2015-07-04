@@ -322,15 +322,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 					members.add(dto);
 				}
 			}
-	    	response.setMembers(members);
-	    	Long organizationId  = members.get(0).getOrganizationId();
-	    	Organization organization = organizationProvider.findOrganizationById(organizationId);
-	    	UserProfile userProfile = new UserProfile();
-	    	userProfile.setItemKind(ItemKind.ENTITY.getCode());
-	    	userProfile.setOwnerId(user.getId());
-	    	userProfile.setItemName("currentOrganizationName");
-	    	userProfile.setItemValue(String.valueOf(organization.getId()));
-	    	userActivityProvider.addUserProfile(userProfile);
+	    	if(members != null && members.size() > 0){
+		    	response.setMembers(members);
+		    	UserProfile userProfile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), "currentOrganizationName");
+		    	if(userProfile == null){
+			    	Long organizationId  = members.get(0).getOrganizationId();
+			    	Organization organization = organizationProvider.findOrganizationById(organizationId);
+			    	userProfile = new UserProfile();
+			    	userProfile.setItemKind(ItemKind.ENTITY.getCode());
+			    	userProfile.setOwnerId(user.getId());
+			    	userProfile.setItemName("currentOrganizationName");
+			    	userProfile.setItemValue(String.valueOf(organization.getId()));
+			    	userActivityProvider.addUserProfile(userProfile);
+		    	}
+	    	}
     	}
     	return response;
     }
