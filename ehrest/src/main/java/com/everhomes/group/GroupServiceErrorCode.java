@@ -20,4 +20,6 @@ public interface GroupServiceErrorCode {
     static final int ERROR_GROUP_PHONE_USER_NOT_FOUND = 10014;
     static final int ERROR_GROUP_FAMILY_NOT_FOUND = 10015;
     static final int ERROR_GROUP_FAMILY_MEMBER_NOT_FOUND = 10016;
+    static final int ERROR_GROUP_MEMBER_NOT_IN_APPROVAL_STATE = 10017;
+    static final int ERROR_USER_NO_IN_GROUP = 10018;
 }
