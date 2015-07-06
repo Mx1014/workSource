@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-06-01 21:15:04
+// generated at 2015-07-06 04:12:01
 package com.everhomes.activity;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.activity.ActivityListResponse;
+import com.everhomes.activity.ListActivitiesReponse;
 
 public class ListRestResponse extends RestResponseBase {
 
-    private ActivityListResponse response;
+    private ListActivitiesReponse response;
 
     public ListRestResponse () {
     }
 
-    public ActivityListResponse getResponse() {
+    public ListActivitiesReponse getResponse() {
         return response;
     }
 
-    public void setResponse(ActivityListResponse response) {
+    public void setResponse(ListActivitiesReponse response) {
         this.response = response;
     }
 }
