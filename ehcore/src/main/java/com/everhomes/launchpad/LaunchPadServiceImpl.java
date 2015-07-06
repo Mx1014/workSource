@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -36,8 +38,10 @@ import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import freemarker.core.ReturnInstruction.Return;
 
 
@@ -541,7 +545,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         final int pageOffset = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? size : cmd.getPageSize();
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        List<LaunchPadItem> launchPadItems = this.launchPadProvider.getLaunchPadItemsByKeyword(cmd.getKeyword(),pageOffset,pageSize);
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+        List<LaunchPadItem> launchPadItems = this.launchPadProvider.getLaunchPadItemsByKeyword(cmd.getKeyword(),offset,pageSize);
         if(launchPadItems != null && !launchPadItems.isEmpty()){
              launchPadItems.stream().map(r ->{
                  result.add(ConvertHelper.convert(r, LaunchPadItemDTO.class));
