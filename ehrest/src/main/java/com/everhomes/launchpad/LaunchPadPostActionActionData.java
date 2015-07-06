@@ -13,12 +13,8 @@ import com.everhomes.util.StringHelper;
 public class LaunchPadPostActionActionData {
     //{"contentCategory":3092,"actionCategory":9,"forumId":1} 
     private Long forumId;
-    private Integer actionCategory;
-    private Integer contentCategory;
-    
-    public Integer getActionCategory() {
-        return actionCategory;
-    }
+    private Long actionCategory;
+    private Long contentCategory;
 
     public Long getForumId() {
         return forumId;
@@ -28,15 +24,19 @@ public class LaunchPadPostActionActionData {
         this.forumId = forumId;
     }
 
-    public void setActionCategory(Integer actionCategory) {
+    public Long getActionCategory() {
+        return actionCategory;
+    }
+
+    public void setActionCategory(Long actionCategory) {
         this.actionCategory = actionCategory;
     }
 
-    public Integer getContentCategory() {
+    public Long getContentCategory() {
         return contentCategory;
     }
 
-    public void setContentCategory(Integer contentCategory) {
+    public void setContentCategory(Long contentCategory) {
         this.contentCategory = contentCategory;
     }
 
