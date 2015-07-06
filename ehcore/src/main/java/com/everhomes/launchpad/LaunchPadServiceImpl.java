@@ -562,6 +562,66 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         
         return response;
     }
+
+    @Override
+    public List<LaunchPadPostActionCategoryDTO> findLaunchPadPostActionCategories(FindLaunchPadPostActionItemCategoriesCommand cmd) {
+        if(cmd.getItemLocation() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemLocation paramter,itemLocation is null");
+        }
+        if(cmd.getItemGroup() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemGroup paramter,itemGroup is null");
+        }
+        if(cmd.getCommunityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId paramter,communityId is null");
+        }
+        
+        long communityId = cmd.getCommunityId();
+        Community community = communityProvider.findCommunityById(communityId);
+        if(community == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
+        }
+        long startTime = System.currentTimeMillis();
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        List<LaunchPadPostActionCategoryDTO> result = new ArrayList<LaunchPadPostActionCategoryDTO>();
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
+        List<LaunchPadItem> userItems = getUserItems(user.getId());
+        List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
+
+        if(defaultItems == null || defaultItems.isEmpty()){
+            defaultItems = cityItems;
+            if(defaultItems == null || defaultItems.isEmpty()){
+                defaultItems = communityItems;
+            }
+        }
+        if(defaultItems != null && !defaultItems.isEmpty()){
+            allItems = defaultItems;
+            if(cityItems != null && !cityItems.isEmpty()){
+                allItems = overrideOrRevertItems(allItems,cityItems);
+            }
+            if(communityItems != null && !communityItems.isEmpty())
+                allItems = overrideOrRevertItems(allItems, communityItems);
+            if(userItems != null && !userItems.isEmpty())
+                allItems = overrideOrRevertItems(allItems, userItems);
+        }
+        allItems.forEach((r) ->{
+            LaunchPadPostActionCategoryDTO dto = (LaunchPadPostActionCategoryDTO) StringHelper.fromJsonString(r.getActionData(), LaunchPadPostActionCategoryDTO.class);
+            dto.setItemLabel(r.getItemLabel());
+            dto.setItemName(r.getItemName());
+            result.add(dto);
+        });
+        long endTime = System.currentTimeMillis();
+        
+        LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
+                + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
+        return result;
+    }
     
  
 }
