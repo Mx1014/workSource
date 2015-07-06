@@ -1457,7 +1457,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(list != null && !list.isEmpty()){
             response.setRequests(list);
             if(list.size() == pageSize){
-                response.setPageOffset(pageOffset + 1);
+                response.setNextPageOffset(pageOffset + 1);
             }
         }
         return response;
