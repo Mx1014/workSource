@@ -1,0 +1,23 @@
+// @formatter:off
+// generated at 2015-07-05 23:21:21
+package com.everhomes.admin.launchpad;
+
+import com.everhomes.rest.RestResponseBase;
+
+import com.everhomes.launchpad.LaunchPadLayoutDTO;
+
+public class LaunchpadRestResponse extends RestResponseBase {
+
+    private LaunchPadLayoutDTO response;
+
+    public LaunchpadRestResponse () {
+    }
+
+    public LaunchPadLayoutDTO getResponse() {
+        return response;
+    }
+
+    public void setResponse(LaunchPadLayoutDTO response) {
+        this.response = response;
+    }
+}
