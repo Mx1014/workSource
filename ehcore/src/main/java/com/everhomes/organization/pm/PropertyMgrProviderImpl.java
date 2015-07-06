@@ -70,7 +70,6 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS); 
         if(userId != null)
            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
-       
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc());
         query.fetch().map((r) -> {
         	result.add(ConvertHelper.convert(r, CommunityPmMember.class));

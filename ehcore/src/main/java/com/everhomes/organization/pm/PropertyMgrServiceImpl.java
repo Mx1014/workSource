@@ -65,6 +65,7 @@ import com.everhomes.forum.PropertyPostDTO;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.launchpad.ItemKind;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
@@ -72,6 +73,8 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDTO;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationType;
@@ -83,6 +86,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
+import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserTokenCommand;
@@ -251,19 +255,33 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	
     	
     	List<CommunityPmMember> entityResultList = propertyMgrProvider.listUserCommunityPmMembers(user.getId());
-    	commandResponse.setMembers( entityResultList.stream()
-                 .map(r->{ 
-                	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
-                	 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
-                	 if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM ){
-                		 dto.setOrganizationName(organization.getName());
-                		 Community community = findPropertyOrganizationcommunity(organization.getId());
-                		 dto.setCommunityId(community.getId());
-                		 dto.setCommunityName(community.getName());
-                	 }
-                	 return dto; })
-                 .collect(Collectors.toList()));
-    	
+    	List<PropertyMemberDTO> members =  new ArrayList<PropertyMemberDTO>();
+//    	commandResponse.setMembers( entityResultList.stream()
+//                 .map(r->{ 
+//                	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
+//                	 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
+//                	 if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM ){
+//                		 dto.setOrganizationName(organization.getName());
+//                		 Community community = findPropertyOrganizationcommunity(organization.getId());
+//                		 dto.setCommunityId(community.getId());
+//                		 dto.setCommunityName(community.getName());
+//                	 }
+//                	 return dto; })
+//                 .collect(Collectors.toList()));
+    	if(entityResultList != null && entityResultList.size() > 0){
+    		for (CommunityPmMember communityPmMember : entityResultList) {
+	    		Organization organization = organizationProvider.findOrganizationById(communityPmMember.getOrganizationId());
+				if(OrganizationType.PM == OrganizationType.fromCode(organization.getOrganizationType())){
+					PropertyMemberDTO dto =ConvertHelper.convert(communityPmMember,PropertyMemberDTO.class);
+					dto.setOrganizationName(organization.getName());
+					Community community = findPropertyOrganizationcommunity(organization.getId());
+					dto.setCommunityId(community.getId());
+					dto.setCommunityName(community.getName());
+					members.add(dto);
+				}
+			}
+    	}
+    	commandResponse.setMembers(members);
         return commandResponse;
     }
     

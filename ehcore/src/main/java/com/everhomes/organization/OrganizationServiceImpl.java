@@ -789,18 +789,28 @@ public class OrganizationServiceImpl implements OrganizationService {
    		}
 	    List<Long> familyIds = new ArrayList<Long>();
 	    List<Long> communityIds = cmd.getCommunityIds();
-	    for (Long communityId : communityIds) {
-	    	OrganizationCommunity organizationCommunity =  organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), communityId);
-	    	if(organizationCommunity != null){
-		    	List<Group> familyList = familyProvider.listCommunityFamily(communityId);
-		    	addFamilyIds(familyIds,familyList);
+	    if(communityIds == null || communityIds.size() == 0){
+	    	List<OrganizationCommunity> organizationCommunityList =  organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+	    	if(organizationCommunityList != null && organizationCommunityList.size() > 0){
+	    		for (OrganizationCommunity organizationCommunity : organizationCommunityList) {
+	    			communityIds.add(organizationCommunity.getCommunityId());
+				}
 	    	}
-	    	else{
-	    		LOGGER.error("the community is not belong to the organization.communityId="+communityId+".organizationId="+cmd.getOrganizationId());
-	    	}
-		}
-		
-	    if(familyIds != null && familyIds.size() > 0){
+	    }
+	    if(communityIds != null && communityIds.size() > 0){
+	    	for (Long communityId : communityIds) {
+	 	    	OrganizationCommunity organizationCommunity =  organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), communityId);
+	 	    	if(organizationCommunity != null){
+	 		    	List<Group> familyList = familyProvider.listCommunityFamily(communityId);
+	 		    	addFamilyIds(familyIds,familyList);
+	 	    	}
+	 	    	else{
+	 	    		LOGGER.error("the community is not belong to the organization.communityId="+communityId+".organizationId="+cmd.getOrganizationId());
+	 	    	}
+	 		}
+	    }
+	    
+		if(familyIds != null && familyIds.size() > 0){
     		for (Long familyId : familyIds) {
     			sendNoticeToFamilyById(familyId, cmd.getMessage());
 			}
