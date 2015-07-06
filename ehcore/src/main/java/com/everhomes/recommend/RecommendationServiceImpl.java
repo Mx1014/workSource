@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import net.greghaines.jesque.Job;
 
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +67,15 @@ public class RecommendationServiceImpl implements RecommendationService {
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType));
+                query.addConditions(Tables.EH_RECOMMENDATIONS.STATUS.eq(RecommendStatus.OK.getCode()));
                 return query;
             }
             
         });
+    }
+
+    @Override
+    public void ignoreRecommend(Long userId, Integer suggestType, Long sourceId, Integer sourceType) {
+        recommendationProvider.ignoreRecommend(userId, suggestType, sourceId, sourceType);
     }
 }

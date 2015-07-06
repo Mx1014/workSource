@@ -83,5 +83,15 @@ public class RecommendationProviderImpl implements RecommendationProvider {
 //        return null;
 //    }
     
+    @Override
+    public void ignoreRecommend(Long userId, Integer suggestType, Long sourceId, Integer sourceType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userId));
+        context.update(Tables.EH_RECOMMENDATIONS).set(Tables.EH_RECOMMENDATIONS.STATUS, RecommendStatus.IGNORE.getCode())
+        .where(Tables.EH_RECOMMENDATIONS.SOURCE_ID.eq(sourceId))
+        .and(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType))
+        .and(Tables.EH_RECOMMENDATIONS.SUGGEST_TYPE.eq(suggestType))
+        .and(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId));
+        
+    }
     
 }
