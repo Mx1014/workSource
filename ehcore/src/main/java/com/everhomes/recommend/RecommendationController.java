@@ -95,7 +95,7 @@ public class RecommendationController extends ControllerBase{
                     , PaginationConfigHelper.getPageSize(configProvider, null));
             
             for(Recommendation rec : recommends) {
-                User userInfo = userProvider.findUserById(rec.getSourceId());
+                UserInfo userInfo = userService.getUserSnapshotInfo(rec.getUserId());
                 recommendRes.getUsers().add(ConvertHelper.convert(userInfo, UserInfo.class));
             }
             res.setResponseObject(recommendRes); 
