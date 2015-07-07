@@ -118,6 +118,10 @@ public class CommunityServiceImpl implements CommunityService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId parameter");
         }
+        if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid geoPointList parameter");
+        }
         
        Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
        if(community == null){
@@ -147,27 +151,22 @@ public class CommunityServiceImpl implements CommunityService {
        community.setCityName(city.getName());
        this.dbProvider.execute((TransactionStatus status) ->  {
            this.communityProvider.updateCommunity(community);
-           if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
-               List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
-               if(geoPoints == null || geoPoints.isEmpty()){
-                   CommunityGeoPoint point = new CommunityGeoPoint();
-                   point.setCommunityId(community.getId());
-                   point.setDescription("central");
-                   point.setLatitude(cmd.getLatitude());
-                   point.setLongitude(cmd.getLongitude());
-                   String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
-                   point.setGeohash(geoHash);
-                   this.communityProvider.createCommunityGeoPoint(point);
-               }
-               else{
-                   CommunityGeoPoint point = geoPoints.get(0);
-                   point.setLatitude(cmd.getLatitude());
-                   point.setLongitude(cmd.getLongitude());
-                   String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
-                   point.setGeohash(geoHash);
-                   this.communityProvider.updateCommunityGeoPoint(point);
-               }
+           
+           List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
+           if(geoList != null && geoList.size() > 0){
+        	   geoList.stream().map((r) -> {
+        		   CommunityGeoPoint point = new CommunityGeoPoint();
+        		   point.setCommunityId(cmd.getCommunityId());
+        		   point.setDescription(r.getDescription());
+        		   point.setLatitude(r.getLatitude());
+        		   point.setLongitude(r.getLongitude());
+        		   String geohash = GeoHashUtils.encode(r.getLatitude(), r.getLongitude());
+        		   point.setGeohash(geohash);
+        		   this.communityProvider.createCommunityGeoPoint(point);
+        		   return null;
+        	   });
            }
+           
            return null;
        });
     }
