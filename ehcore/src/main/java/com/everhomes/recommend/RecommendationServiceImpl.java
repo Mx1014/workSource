@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import net.greghaines.jesque.Job;
 
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.taskqueue.CommonWorkerPool;
 import com.everhomes.taskqueue.JesqueClientFactoryImpl;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
 
 @Service
@@ -32,6 +36,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     
     @Autowired
     RecommendationProvider recommendationProvider;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     
     private final String queueName = "recommend";
     
@@ -56,6 +63,31 @@ public class RecommendationServiceImpl implements RecommendationService {
        return config;
     }
     
+   @Override
+   public void createRecommendation(Recommendation recommend) {
+       recommendationProvider.createRecommendation(recommend);
+       
+       UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(recommend.getUserId(), UserProfileContstant.RecommendName);
+       if(null != profile) {
+           profile.setItemValue(Long.toString(System.currentTimeMillis()));
+       } else {
+           UserProfile p2 = new UserProfile();
+           p2.setItemName(UserProfileContstant.RecommendName);
+           p2.setItemKind((byte)0);
+           p2.setItemValue(Long.toString(System.currentTimeMillis()));
+           p2.setOwnerId(recommend.getUserId());
+           userActivityProvider.addUserProfile(p2);
+           }
+    }
+   
+   @Override
+   public void communityNotify(Long userId, Long communityId) {
+       final Job job = new Job(RecommendCommunityAction.class.getName(),
+               new Object[]{ userId, communityId });
+       
+       jesqueClientFactory.getClientPool().enqueue(queueName, job);
+   }
+    
     public List<Recommendation> getRecommendsByUserId(Long userId, int sourceType, int pageSize) {
         ListingLocator locator = new ListingLocator();
         locator.setEntityId(userId);
@@ -66,9 +98,15 @@ public class RecommendationServiceImpl implements RecommendationService {
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType));
+                query.addConditions(Tables.EH_RECOMMENDATIONS.STATUS.eq(RecommendStatus.OK.getCode()));
                 return query;
             }
             
         });
+    }
+
+    @Override
+    public void ignoreRecommend(Long userId, Integer suggestType, Long sourceId, Integer sourceType) {
+        recommendationProvider.ignoreRecommend(userId, suggestType, sourceId, sourceType);
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.address.CommunityDTO;
-import com.everhomes.banner.UpdateBannerCommand;
 import com.everhomes.community.ApproveCommunityCommand;
 import com.everhomes.community.CommunityService;
 import com.everhomes.community.GetCommunityByIdCommand;
@@ -20,6 +19,8 @@ import com.everhomes.community.GetCommunityByUuidCommand;
 import com.everhomes.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.community.ListCommunitesByStatusCommand;
 import com.everhomes.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.community.ListComunitiesByKeywordCommand;
 import com.everhomes.community.RejectCommunityCommand;
 import com.everhomes.community.UpdateCommunityCommand;
 import com.everhomes.constants.ErrorCodes;
@@ -168,6 +169,23 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/listCommunitiesByKeyword</b>
+     * <p>根据关键字查询待审核小区列表</p>
+     */
+    @RequestMapping("listCommunitiesByKeyword")
+    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordCommand cmd) {
+    	
+    	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
+    	
+    	RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
     }
 
 

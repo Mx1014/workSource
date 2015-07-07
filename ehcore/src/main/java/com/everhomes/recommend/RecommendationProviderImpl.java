@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.InsertQuery;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,18 +54,19 @@ public class RecommendationProviderImpl implements RecommendationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
         
         SelectQuery<EhRecommendationsRecord> query = context.selectQuery(Tables.EH_RECOMMENDATIONS);
-        query.addSelect(Tables.EH_RECOMMENDATIONS.fields());
+        query.addSelect(Tables.EH_RECOMMENDATIONS.USER_ID, Tables.EH_RECOMMENDATIONS.SOURCE_ID, Tables.EH_RECOMMENDATIONS.SOURCE_TYPE);
         query.setDistinct(true);
     
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
             
+        //query.addConditions(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId));
         if(locator.getAnchor() != null)
             query.addConditions(Tables.EH_RECOMMENDATIONS.ID.gt(locator.getAnchor()));
         query.addOrderBy(Tables.EH_RECOMMENDATIONS.CREATE_TIME.desc());
         query.addLimit(count);
         
-        List<EhRecommendationsRecord> records = query.fetch();
+        List<EhRecommendationsRecord> records = query.fetch().map(new RecommendationRecordMapper());
         List<Recommendation> recommends = records.stream().map((r) -> {
             return ConvertHelper.convert(r, Recommendation.class);
         }).collect(Collectors.toList());
@@ -83,5 +86,16 @@ public class RecommendationProviderImpl implements RecommendationProvider {
 //        return null;
 //    }
     
+    @Override
+    public void ignoreRecommend(Long userId, Integer suggestType, Long sourceId, Integer sourceType) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, userId));
+        context.update(Tables.EH_RECOMMENDATIONS).set(Tables.EH_RECOMMENDATIONS.STATUS, RecommendStatus.IGNORE.getCode())
+        .where(Tables.EH_RECOMMENDATIONS.SOURCE_ID.eq(sourceId))
+        .and(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType))
+        .and(Tables.EH_RECOMMENDATIONS.SUGGEST_TYPE.eq(suggestType))
+        .and(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId))
+        .and(Tables.EH_RECOMMENDATIONS.STATUS.eq(0));
+        
+    }
     
 }

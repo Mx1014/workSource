@@ -430,26 +430,34 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
         Address address = this.addressProvider.findAddressById(cmd.getAddressId());
         if(address == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
                     "Invalid addressId parameter,address is not found");
         }
 
-        long uid = UserContext.current().getUser().getId();
-        List<UserGroup> userGroups = this.userProvide.listUserGroups(uid, GroupDiscriminator.FAMILY.getCode());
-        userGroups = userGroups.stream().filter((userGroup)-> {
-            Group group = this.groupProvider.findGroupById(userGroup.getGroupId());
-            if(group != null){
-                return group.getIntegralTag1().longValue() == cmd.getAddressId().longValue();
-            }
-            return false;
-        }).collect(Collectors.toList());
-        
-        if(userGroups.size() > 0) {
-            LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
-            leaveCmd.setId(userGroups.get(0).getGroupId());
-            familyService.leave(leaveCmd);
-            //this.familyProvider.leaveFamilyAtAddress(address, userGroups.get(0));
+//        long uid = UserContext.current().getUser().getId();
+//        List<UserGroup> userGroups = this.userProvide.listUserGroups(uid, GroupDiscriminator.FAMILY.getCode());
+//        userGroups = userGroups.stream().filter((userGroup)-> {
+//            Group group = this.groupProvider.findGroupById(userGroup.getGroupId());
+//            if(group != null){
+//                return group.getIntegralTag1().longValue() == cmd.getAddressId().longValue();
+//            }
+//            return false;
+//        }).collect(Collectors.toList());
+//        
+//        if(userGroups.size() > 0) {
+//            LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
+//            leaveCmd.setId(userGroups.get(0).getGroupId());
+//            familyService.leave(leaveCmd);
+//            //this.familyProvider.leaveFamilyAtAddress(address, userGroups.get(0));
+//        }
+        Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+        if(family == null){
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
+                    "Invalid addressId parameter,address is not found");
         }
+        LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
+        leaveCmd.setId(family.getId());
+        familyService.leave(leaveCmd);
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {

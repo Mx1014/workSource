@@ -62,6 +62,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ReflectionHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 /**
  * Infrastructure Administration API controller
@@ -182,13 +183,13 @@ public class AdminController extends ControllerBase {
 
         GeneratorContext context = new GeneratorContext();
         context.setClassNamePrefix(this.classNamePrefix);
-        context.setDestinationDir(this.destinationDir);
+        context.setDestinationDir(StringHelper.interpolate(this.destinationDir));
         context.setHeaderFileExtention(this.headerFileExtention);
         context.setSerializable(this.serializable);
         context.setSerializationHelper(this.serializationHelper);
         context.setSourceFileExtention(this.sourceFileExtention);
         context.setRestResponseBase(restResponseBase);
-        context.setContextParam("dest.dir.java", this.destinationJavaDir);
+        context.setContextParam("dest.dir.java", StringHelper.interpolate(this.destinationJavaDir));
         
         if(language.equalsIgnoreCase("objc")) {
             ObjectiveCGenerator generator = new ObjectiveCGenerator();
@@ -197,7 +198,7 @@ public class AdminController extends ControllerBase {
             // generate REST POJO objects
             jars.stream().forEach((jar)-> {
                 try {
-                    Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(jar);
+                    Set<Class<?>> classes = ReflectionHelper.loadClassesInJar(StringHelper.interpolate(jar));
                     
                     for(Class<?> clz: classes) {
                         if(!shouldExclude(clz)) {

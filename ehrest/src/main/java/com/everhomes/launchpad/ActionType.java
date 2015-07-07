@@ -15,11 +15,12 @@ package com.everhomes.launchpad;
  * <li>HOTLINE: 热线</li>
  * <li>QRCODE_SCAN: 二维码扫描</li>
  * <li>POST_ACTION: 帖子动作</li>
+ * <li>COUPON: 优惠券</li>
  * </ul>
  */
 public enum ActionType {
     NONE((byte)0), MORE_BUTTON((byte)1), APP((byte)2),ZUOLIN_URL((byte)3), THIRDPART_URL((byte)4), YELLOW_PAGE((byte)5),
-    POST((byte)6), MESSAGE((byte)7), ACTIVITY((byte)8), HOTLINE((byte)9), QRCODE_SCAN((byte)10) ,POST_ACTION((byte)11);
+    POST((byte)6), MESSAGE((byte)7), ACTIVITY((byte)8), HOTLINE((byte)9), QRCODE_SCAN((byte)10) ,POST_ACTION((byte)11),COUPON((byte)12);
     
     private byte code;
     

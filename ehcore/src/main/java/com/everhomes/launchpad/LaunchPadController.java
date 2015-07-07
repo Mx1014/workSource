@@ -1,6 +1,8 @@
 package com.everhomes.launchpad;
 
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -36,7 +38,7 @@ public class LaunchPadController extends ControllerBase {
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
-        RestResponse resp =  new RestResponse(commandResponse);
+        RestResponse resp =  new RestResponse();
         if(EtagHelper.checkHeaderEtagOnly(30,commandResponse.hashCode()+"", request, response)) {
             resp.setResponseObject(commandResponse);
         }
@@ -106,5 +108,20 @@ public class LaunchPadController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /launchpad/findLaunchPadPostActionCategories</b>
+     * <p>根据小区id、itemLocation、itemGroup获取PostActionCategory列表</p>
+     */
+    @RequestMapping("findLaunchPadPostActionCategories")
+    @RestReturn(value=LaunchPadPostActionCategoryDTO.class,collection=true)
+    public RestResponse findLaunchPadPostActionCategories(@Valid FindLaunchPadPostActionItemCategoriesCommand cmd) {
+        
+        List<LaunchPadPostActionCategoryDTO> result = launchPadService.findLaunchPadPostActionCategories(cmd);
+        RestResponse resp =  new RestResponse(result);
+        
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
     
 }

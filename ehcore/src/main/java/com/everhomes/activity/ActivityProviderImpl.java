@@ -302,8 +302,9 @@ public class ActivityProviderImpl implements ActivityProivider {
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
 
-            if (locator.getAnchor() != null)
-                query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            if (locator.getAnchor() == null)
+                locator.setAnchor(0L);
+            query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
             if(condition1!=null){
                 query.addConditions(condition1);
             }
@@ -327,7 +328,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (activities.size() > 0) {
             locator.setAnchor(activities.get(activities.size() - 1).getId());
         }
-       if(activities.size()>count){
+       if(activities.size()>=count){
             return activities.subList(0, activities.size()-1);
         }
         return activities;

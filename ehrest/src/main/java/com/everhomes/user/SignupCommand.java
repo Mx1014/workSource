@@ -3,6 +3,8 @@ package com.everhomes.user;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+
+import com.everhomes.util.StringHelper;
 /**
  * 注册
  * @author elians
@@ -48,5 +50,10 @@ public class SignupCommand {
     
     public void setIfExistsThenOverride(Integer ifExistsThenOverride) {
         this.ifExistsThenOverride = ifExistsThenOverride;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAssignedScopes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord> {
 
-	private static final long serialVersionUID = -1730285413;
+	private static final long serialVersionUID = -694406195;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_assigned_scopes</code>
@@ -81,7 +81,7 @@ public class EhForumAssignedScopes extends org.jooq.impl.TableImpl<com.everhomes
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_FORUM_ASSIGNED_SCOPES_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhForumAssignedScopesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_FORUM_ASSIGNED_SCOPES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_FORUM_ASSIGNED_SCOPES_U_EH_SCOPE_OWNER_CODE_ID);
 	}
 
 	/**

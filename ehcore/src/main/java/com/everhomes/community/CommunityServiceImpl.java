@@ -23,6 +23,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
@@ -44,8 +45,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-
-import freemarker.core.ReturnInstruction.Return;
 
 
 @Component
@@ -96,7 +95,16 @@ public class CommunityServiceImpl implements CommunityService {
         response.setNextPageAnchor(nextPageAnchor);
         
         List<CommunityDTO> communityDTOs = communities.stream().map((c) ->{
-            return ConvertHelper.convert(c, CommunityDTO.class);
+            List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(c.getId());
+            List<CommunityGeoPointDTO> getPointDTOs = null;
+            if(geoPoints != null && !geoPoints.isEmpty()){
+                getPointDTOs = geoPoints.stream().map(r -> {
+                    return ConvertHelper.convert(r, CommunityGeoPointDTO.class);
+                }).collect(Collectors.toList());
+            }
+            CommunityDTO dto = ConvertHelper.convert(c, CommunityDTO.class);
+            dto.setGeoPointList(getPointDTOs);
+            return dto;
         }).collect(Collectors.toList());
         
         response.setRequests(communityDTOs);
@@ -109,6 +117,10 @@ public class CommunityServiceImpl implements CommunityService {
         if(cmd.getCommunityId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId parameter");
+        }
+        if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
+        	throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid geoPointList parameter");
         }
         
        Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
@@ -139,27 +151,22 @@ public class CommunityServiceImpl implements CommunityService {
        community.setCityName(city.getName());
        this.dbProvider.execute((TransactionStatus status) ->  {
            this.communityProvider.updateCommunity(community);
-           if(cmd.getLatitude() != null && cmd.getLongitude() != null) {
-               List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
-               if(geoPoints == null || geoPoints.isEmpty()){
-                   CommunityGeoPoint point = new CommunityGeoPoint();
-                   point.setCommunityId(community.getId());
-                   point.setDescription("central");
-                   point.setLatitude(cmd.getLatitude());
-                   point.setLongitude(cmd.getLongitude());
-                   String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
-                   point.setGeohash(geoHash);
-                   this.communityProvider.createCommunityGeoPoint(point);
-               }
-               else{
-                   CommunityGeoPoint point = geoPoints.get(0);
-                   point.setLatitude(cmd.getLatitude());
-                   point.setLongitude(cmd.getLongitude());
-                   String geoHash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
-                   point.setGeohash(geoHash);
-                   this.communityProvider.updateCommunityGeoPoint(point);
-               }
+           
+           List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
+           if(geoList != null && geoList.size() > 0){
+        	   geoList.stream().map((r) -> {
+        		   CommunityGeoPoint point = new CommunityGeoPoint();
+        		   point.setCommunityId(cmd.getCommunityId());
+        		   point.setDescription(r.getDescription());
+        		   point.setLatitude(r.getLatitude());
+        		   point.setLongitude(r.getLongitude());
+        		   String geohash = GeoHashUtils.encode(r.getLatitude(), r.getLongitude());
+        		   point.setGeohash(geohash);
+        		   this.communityProvider.createCommunityGeoPoint(point);
+        		   return null;
+        	   });
            }
+           
            return null;
        });
     }
@@ -360,13 +367,14 @@ public class CommunityServiceImpl implements CommunityService {
         }
         CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
         List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getId());
+        List<CommunityGeoPointDTO> getPointDTOs = null;
         if(geoPoints != null && !geoPoints.isEmpty()){
-            CommunityGeoPoint point = geoPoints.get(0);
-            if(point.getLatitude()  != null)
-                communityDTO.setLatitude(point.getLatitude());
-            if(point.getLongitude() != null)
-                communityDTO.setLongitude(point.getLongitude());
+            getPointDTOs = geoPoints.stream().map(r -> {
+                return ConvertHelper.convert(r, CommunityGeoPointDTO.class);
+            }).collect(Collectors.toList());
+            communityDTO.setGeoPointList(getPointDTOs);
         }
+        
         return communityDTO;
     }
 
@@ -385,15 +393,47 @@ public class CommunityServiceImpl implements CommunityService {
         }
         CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
         List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(communityDTO.getId());
+        List<CommunityGeoPointDTO> getPointDTOs = null;
         if(geoPoints != null && !geoPoints.isEmpty()){
-            CommunityGeoPoint point = geoPoints.get(0);
-            if(point.getLatitude()  != null)
-                communityDTO.setLatitude(point.getLatitude());
-            if(point.getLongitude() != null)
-                communityDTO.setLongitude(point.getLongitude());
+            getPointDTOs = geoPoints.stream().map(r -> {
+                return ConvertHelper.convert(r, CommunityGeoPointDTO.class);
+            }).collect(Collectors.toList());
+            communityDTO.setGeoPointList(getPointDTOs);
         }
         
         return communityDTO;
     }
+
+
+	@Override
+	public ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
+			ListComunitiesByKeywordCommand cmd) {
+		if(cmd.getKeyword() == null || cmd.getKeyword().equals("")){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+		}
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword());
+		
+		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> resultList = list.stream().map((c) -> {
+				return ConvertHelper.convert(c, CommunityDTO.class);
+			}).collect(Collectors.toList());
+			
+			response.setRequests(resultList);
+		}
+		
+		return response;
+	}
 
 }

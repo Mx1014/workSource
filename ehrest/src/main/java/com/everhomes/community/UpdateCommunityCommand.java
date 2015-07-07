@@ -1,8 +1,11 @@
 // @formatter:off
 package com.everhomes.community;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,9 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 被更新的小区Id</li>
  * <li>address: 小区地址</li>
  * <li>cityId: 小区所在城市IdId</li>
- * <li>areaId：小区所在城市区县Id</li>
- * <li>longitude: 小区经度</li>
- * <li>longitude: 小区纬度</li>
+ * <li>areaId: 小区所在城市区县Id</li>
+ * <li>geoPointList: 小区经纬度列表,参考{@link com.everhomes.community.CommunityGeoPointDTO}</li>
  * </ul>
  */
 public class UpdateCommunityCommand {
@@ -25,10 +27,10 @@ public class UpdateCommunityCommand {
     private Long cityId;
     @NotNull
     private Long areaId;
+    
     @NotNull
-    private Double longitude;
-    @NotNull
-    private Double latitude;
+    @ItemType(CommunityGeoPointDTO.class)
+    private List<CommunityGeoPointDTO> geoPointList;
     
     public UpdateCommunityCommand() {
     }
@@ -65,23 +67,16 @@ public class UpdateCommunityCommand {
         this.areaId = areaId;
     }
 
-    public Double getLongitude() {
-        return longitude;
-    }
+    
+    public List<CommunityGeoPointDTO> getGeoPointList() {
+		return geoPointList;
+	}
 
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
+	public void setGeoPointList(List<CommunityGeoPointDTO> geoPointList) {
+		this.geoPointList = geoPointList;
+	}
 
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

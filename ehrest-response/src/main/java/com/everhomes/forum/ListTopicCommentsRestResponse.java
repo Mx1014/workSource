@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-06-08 00:26:53
+// generated at 2015-07-06 04:12:01
 package com.everhomes.forum;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.ListPostCommandResponse;
 
 public class ListTopicCommentsRestResponse extends RestResponseBase {
 
-    private List<PostDTO> response;
+    private ListPostCommandResponse response;
 
     public ListTopicCommentsRestResponse () {
     }
 
-    public List<PostDTO> getResponse() {
+    public ListPostCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<PostDTO> response) {
+    public void setResponse(ListPostCommandResponse response) {
         this.response = response;
     }
 }
