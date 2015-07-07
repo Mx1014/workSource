@@ -38,7 +38,7 @@ import com.everhomes.util.EtagHelper;
  * @author janson
  *
  */
-@RestDoc(value="Recommendation", site="ehcore")
+@RestDoc(value="Recommendation", site="core")
 @RestController
 @RequestMapping("/recommend")
 public class RecommendationController extends ControllerBase{
