@@ -23,6 +23,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
@@ -44,8 +45,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-
-import freemarker.core.ReturnInstruction.Return;
 
 
 @Component
@@ -405,5 +404,37 @@ public class CommunityServiceImpl implements CommunityService {
         
         return communityDTO;
     }
+
+
+	@Override
+	public ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
+			ListComunitiesByKeywordCommand cmd) {
+		if(cmd.getKeyword() == null || cmd.getKeyword().equals("")){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid id parameter");
+		}
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword());
+		
+		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> resultList = list.stream().map((c) -> {
+				return ConvertHelper.convert(c, CommunityDTO.class);
+			}).collect(Collectors.toList());
+			
+			response.setRequests(resultList);
+		}
+		
+		return response;
+	}
 
 }

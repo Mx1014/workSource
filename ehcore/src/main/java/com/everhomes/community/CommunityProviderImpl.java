@@ -28,7 +28,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.group.GroupMember;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
@@ -39,11 +38,8 @@ import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -481,4 +477,30 @@ public class CommunityProviderImpl implements CommunityProvider {
                 });
         return result[0];
     }
+
+	@Override
+	public List<Community> listCommunitiesByKeyWord(ListingLocator locator,
+			int count, String keyword) {
+		
+		final List<Community> communities = new ArrayList<Community>();
+		
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					
+					context.select().from(Tables.EH_COMMUNITIES)
+					.where(
+							Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
+							.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.CONFIRMING.getCode()))
+							.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%'))))
+					.limit(count)
+					.fetch().map((r) -> {
+						communities.add(ConvertHelper.convert(r, Community.class));
+						return null;
+					});
+					
+					return true;
+				});
+		
+		return communities;
+	}
 }
