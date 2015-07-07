@@ -5,7 +5,7 @@ package com.everhomes.launchpad;
  * <ul>策略
  * <li>DEFAULT: 默认</li>
  * <li>OVERRIDE: 覆盖</li>
- * <li>OVERRIDE: 恢复</li>
+ * <li>REVERT: 恢复</li>
  * </ul>
  */
 public enum ApplyPolicy {
