@@ -1,6 +1,10 @@
 package com.everhomes.recommend;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
 
 /**
  * <ul>忽略某一类推荐
@@ -16,15 +20,6 @@ public class IgnoreRecommendCommand {
     @NotNull
     private Long userId;
     
-    @NotNull
-    private Long suggestType;
-    
-    @NotNull
-    private Long sourceId;
-    
-    @NotNull
-    private Long sourceType;
-
     public Long getUserId() {
         return userId;
     }
@@ -32,28 +27,17 @@ public class IgnoreRecommendCommand {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+    
+    @ItemType(IgnoreRecommandItem.class)
+    public List<IgnoreRecommandItem> recommandItems;
 
-    public Long getSuggestType() {
-        return suggestType;
+    public List<IgnoreRecommandItem> getRecommandItems() {
+        return recommandItems;
     }
 
-    public void setSuggestType(Long suggestType) {
-        this.suggestType = suggestType;
+    public void setRecommandItems(List<IgnoreRecommandItem> recommandItems) {
+        this.recommandItems = recommandItems;
     }
-
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
-    public Long getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(Long sourceType) {
-        this.sourceType = sourceType;
-    }
+    
+    
 }
