@@ -38,7 +38,7 @@ public class LaunchPadController extends ControllerBase {
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
-        RestResponse resp =  new RestResponse(commandResponse);
+        RestResponse resp =  new RestResponse();
         if(EtagHelper.checkHeaderEtagOnly(30,commandResponse.hashCode()+"", request, response)) {
             resp.setResponseObject(commandResponse);
         }

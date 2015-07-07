@@ -614,7 +614,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
         allItems.forEach((r) ->{
-            
+            if(r.getActionData() == null)
+                return;
             if(r.getActionData() != null && !r.getActionData().trim().equals("")){
                 JSONObject jsonObject = new JSONObject();
                 jsonObject = (JSONObject) JSONValue.parse(r.getActionData());

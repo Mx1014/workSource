@@ -1,13 +1,15 @@
 package com.everhomes.recommend;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
 
 /**
  * <ul>忽略某一类推荐
  * <li>userId: 用户ID </li>
- * <li>suggestType: 推荐类型 </li>
- * <li>sourceId: 忽略推荐的源ID </li>
- * <li>sourceType: 源类型 </li>
+ * <li>recommandItems: 忽略推荐的类型数组 参考 {@link com.everhomes.recommend.IgnoreRecommandItem} </li>
  * </ul>
  * @author janson
  *
@@ -16,15 +18,6 @@ public class IgnoreRecommendCommand {
     @NotNull
     private Long userId;
     
-    @NotNull
-    private Long suggestType;
-    
-    @NotNull
-    private Long sourceId;
-    
-    @NotNull
-    private Long sourceType;
-
     public Long getUserId() {
         return userId;
     }
@@ -32,28 +25,17 @@ public class IgnoreRecommendCommand {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+    
+    @ItemType(IgnoreRecommandItem.class)
+    public List<IgnoreRecommandItem> recommandItems;
 
-    public Long getSuggestType() {
-        return suggestType;
+    public List<IgnoreRecommandItem> getRecommandItems() {
+        return recommandItems;
     }
 
-    public void setSuggestType(Long suggestType) {
-        this.suggestType = suggestType;
+    public void setRecommandItems(List<IgnoreRecommandItem> recommandItems) {
+        this.recommandItems = recommandItems;
     }
-
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
-    public Long getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(Long sourceType) {
-        this.sourceType = sourceType;
-    }
+    
+    
 }

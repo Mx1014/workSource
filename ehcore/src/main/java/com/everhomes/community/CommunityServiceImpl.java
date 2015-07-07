@@ -96,7 +96,16 @@ public class CommunityServiceImpl implements CommunityService {
         response.setNextPageAnchor(nextPageAnchor);
         
         List<CommunityDTO> communityDTOs = communities.stream().map((c) ->{
-            return ConvertHelper.convert(c, CommunityDTO.class);
+            List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(c.getId());
+            List<CommunityGeoPointDTO> getPointDTOs = null;
+            if(geoPoints != null && !geoPoints.isEmpty()){
+                getPointDTOs = geoPoints.stream().map(r -> {
+                    return ConvertHelper.convert(r, CommunityGeoPointDTO.class);
+                }).collect(Collectors.toList());
+            }
+            CommunityDTO dto = ConvertHelper.convert(c, CommunityDTO.class);
+            dto.setGeoPointList(getPointDTOs);
+            return dto;
         }).collect(Collectors.toList());
         
         response.setRequests(communityDTOs);
@@ -360,13 +369,14 @@ public class CommunityServiceImpl implements CommunityService {
         }
         CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
         List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getId());
+        List<CommunityGeoPointDTO> getPointDTOs = null;
         if(geoPoints != null && !geoPoints.isEmpty()){
-            CommunityGeoPoint point = geoPoints.get(0);
-            if(point.getLatitude()  != null)
-                communityDTO.setLatitude(point.getLatitude());
-            if(point.getLongitude() != null)
-                communityDTO.setLongitude(point.getLongitude());
+            getPointDTOs = geoPoints.stream().map(r -> {
+                return ConvertHelper.convert(r, CommunityGeoPointDTO.class);
+            }).collect(Collectors.toList());
+            communityDTO.setGeoPointList(getPointDTOs);
         }
+        
         return communityDTO;
     }
 
@@ -385,12 +395,12 @@ public class CommunityServiceImpl implements CommunityService {
         }
         CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
         List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(communityDTO.getId());
+        List<CommunityGeoPointDTO> getPointDTOs = null;
         if(geoPoints != null && !geoPoints.isEmpty()){
-            CommunityGeoPoint point = geoPoints.get(0);
-            if(point.getLatitude()  != null)
-                communityDTO.setLatitude(point.getLatitude());
-            if(point.getLongitude() != null)
-                communityDTO.setLongitude(point.getLongitude());
+            getPointDTOs = geoPoints.stream().map(r -> {
+                return ConvertHelper.convert(r, CommunityGeoPointDTO.class);
+            }).collect(Collectors.toList());
+            communityDTO.setGeoPointList(getPointDTOs);
         }
         
         return communityDTO;
