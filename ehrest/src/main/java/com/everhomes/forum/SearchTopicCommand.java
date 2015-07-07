@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.forum;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>longitude: 请求人所在位置对应的经度</li>
@@ -44,7 +46,6 @@ public class SearchTopicCommand {
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
-    
 
     public Integer getPageSize() {
         return pageSize;
@@ -108,5 +109,10 @@ public class SearchTopicCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

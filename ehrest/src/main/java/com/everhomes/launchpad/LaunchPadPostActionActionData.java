@@ -6,19 +6,15 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>actionType为postAction时点击item需要的参数
  * <li>forumId: 论坛id</li>
- * <li>actionCategory: 发帖动作的大类，如物业，家政等</li>
- * <li>contentCategory: 发帖动作的小类，如投诉，建议等</li>
+ * <li>contentCategory: 发帖动作的大类，如物业，家政等</li>
+ * <li>actionCategory: 发帖动作的小类，如投诉，建议等</li>
  * </ul>
  */
 public class LaunchPadPostActionActionData {
-    //{"contentCategory":3092,"actionCategory":9,"forumId":1} 
+    //{"contentCategory":9,"actionCategory":3092,"forumId":1} 
     private Long forumId;
-    private Integer actionCategory;
-    private Integer contentCategory;
-    
-    public Integer getActionCategory() {
-        return actionCategory;
-    }
+    private Long actionCategory;
+    private Long contentCategory;
 
     public Long getForumId() {
         return forumId;
@@ -28,15 +24,19 @@ public class LaunchPadPostActionActionData {
         this.forumId = forumId;
     }
 
-    public void setActionCategory(Integer actionCategory) {
+    public Long getActionCategory() {
+        return actionCategory;
+    }
+
+    public void setActionCategory(Long actionCategory) {
         this.actionCategory = actionCategory;
     }
 
-    public Integer getContentCategory() {
+    public Long getContentCategory() {
         return contentCategory;
     }
 
-    public void setContentCategory(Integer contentCategory) {
+    public void setContentCategory(Long contentCategory) {
         this.contentCategory = contentCategory;
     }
 
