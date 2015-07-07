@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.jasper.tagplugins.jstl.core.If;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -611,7 +614,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
         allItems.forEach((r) ->{
+            
+            if(r.getActionData() != null && !r.getActionData().trim().equals("")){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject = (JSONObject) JSONValue.parse(r.getActionData());
+                if(jsonObject.get(LaunchPadConstants.CONTENT_CATEGORY) == null)
+                    return;
+            }
             LaunchPadPostActionCategoryDTO dto = (LaunchPadPostActionCategoryDTO) StringHelper.fromJsonString(r.getActionData(), LaunchPadPostActionCategoryDTO.class);
+            
             dto.setItemLabel(r.getItemLabel());
             dto.setItemName(r.getItemName());
             result.add(dto);

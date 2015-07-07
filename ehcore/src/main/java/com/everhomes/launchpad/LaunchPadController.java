@@ -113,7 +113,7 @@ public class LaunchPadController extends ControllerBase {
      * <p>根据小区id、itemLocation、itemGroup获取PostActionCategory列表</p>
      */
     @RequestMapping("findLaunchPadPostActionCategories")
-    @RestReturn(value=LaunchPadPostActionCategoryDTO.class)
+    @RestReturn(value=LaunchPadPostActionCategoryDTO.class,collection=true)
     public RestResponse findLaunchPadPostActionCategories(@Valid FindLaunchPadPostActionItemCategoriesCommand cmd) {
         
         List<LaunchPadPostActionCategoryDTO> result = launchPadService.findLaunchPadPostActionCategories(cmd);

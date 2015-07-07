@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id: if</li>
  * <li>itemName: 名称</li>
  * <li>itemLabel: 显示标签</li>
  * <li>forumId: 论坛id</li>
@@ -16,11 +17,20 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class LaunchPadPostActionCategoryDTO {
+    private Long    id;
     private String  itemName;
     private String  itemLabel;
     private Long    forumId;
     private Long    contentCategory;
     private Long    actionCategory;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getItemName() {
         return itemName;

@@ -7,6 +7,7 @@ public interface LaunchPadConstants {
     public static final String CATEGORY_ID = "categoryId"; 
     public static final String TOKEN = "token"; 
     public static final String URL = "url";
+    public static final String CONTENT_CATEGORY = "contentCategory"; 
     
 
     //Item Group
