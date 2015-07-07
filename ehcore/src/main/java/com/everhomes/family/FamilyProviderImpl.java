@@ -534,6 +534,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                             .leftOuterJoin(Tables.EH_GROUPS)
                             .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
                             .where(Tables.EH_GROUPS.INTEGRAL_TAG3.eq(cityId))
+                            .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
                             .limit(pageSize).offset(offset)
                             .fetch().map((r) -> {
                                 GroupMember member = new GroupMember();
@@ -563,6 +564,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                             .leftOuterJoin(Tables.EH_GROUPS)
                             .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
                             .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
+                            .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
                             .limit(pageSize).offset(offset)
                             .fetch().map((r) -> {
                                 GroupMember member = new GroupMember();
@@ -592,6 +594,7 @@ public class FamilyProviderImpl implements FamilyProvider {
                             .leftOuterJoin(Tables.EH_GROUPS)
                             .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
                             .where(Tables.EH_GROUPS.ID.eq(groupId))
+                            .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
                             .limit(pageSize).offset(offset)
                             .fetch().map((r) -> {
                                 GroupMember member = new GroupMember();
