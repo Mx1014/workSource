@@ -129,8 +129,16 @@ public class ActivityServiceImpl implements ActivityService {
         
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         //if date time format is not ok,return now
-        long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-        long endTimeMs=convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+        Date convertStartTime = convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss");
+        Date convertEndTime = convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss");
+        long endTimeMs=  DateHelper.currentGMTTime().getTime();
+        long startTimeMs = DateHelper.currentGMTTime().getTime();
+        if(convertStartTime!=null){
+            startTimeMs=convertStartTime.getTime();
+        }
+        if(convertEndTime!=null){
+            endTimeMs=convertEndTime.getTime();
+        }
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
         activity.setStartTimeMs(startTimeMs);
@@ -628,6 +636,9 @@ public class ActivityServiceImpl implements ActivityService {
     public ActivityListResponse findActivityDetailsByPostId(Post post) {
        User user=UserContext.current().getUser();
         Activity activity = activityProvider.findSnapshotByPostId(post.getId());
+        if(activity==null){
+            return null;
+        }
         List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
                 .current().getUser().getId());

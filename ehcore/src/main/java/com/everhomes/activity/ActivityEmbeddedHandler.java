@@ -59,10 +59,15 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public Post postProcessEmbeddedObject(Post post) {
-        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
-                ActivityPostCommand.class);
-        cmd.setId(post.getEmbeddedId());
-        activityService.createPost(cmd, post.getId());
+        try{
+            ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+                    ActivityPostCommand.class);
+            cmd.setId(post.getEmbeddedId());
+            activityService.createPost(cmd, post.getId()); 
+        }catch(Exception e){
+            LOGGER.error("create activity error",e);
+        }
+  
         return post;
     }
 
