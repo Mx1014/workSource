@@ -70,6 +70,7 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDTO;
@@ -77,6 +78,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDTO;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -611,6 +613,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if(topic == null){ 
             LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
          }
+        long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
         CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(cmd.getCommunityId(), 
                 topicId, EntityType.TOPIC.getCode());
         if(task == null){
@@ -1712,21 +1716,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                      "Unable to find the community.");
     	}
     	//权限控制
-    	OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationProperty(cmd.getCommunityId());
-    	if(organizationCommunity != null){
-    		Organization organization  = organizationProvider.findOrganizationById(organizationCommunity.getOrganizationId());
-    		if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
-    			dto = ConvertHelper.convert(organization, OrganizationDTO.class);
-    		}
+    	List<OrganizationCommunity>   organizationCommunityList = organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
+    	if(organizationCommunityList != null && organizationCommunityList.size() > 0){
+    		for (OrganizationCommunity organizationCommunity : organizationCommunityList) {
+    			Organization organization  = organizationProvider.findOrganizationById(organizationCommunity.getOrganizationId());
+        		if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
+        			dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+        			break;
+        		}
+			}
+    	}
+    	if(dto == null){
+    		Organization organization = new Organization();
+        	organization.setLevel(0);
+        	organization.setAddressId(0l);
+        	organization.setName(community.getName()+"物业");
+        	organization.setOrganizationType(OrganizationType.PM.getCode());
+        	organization.setParentId(0l);
+        	organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+        	organizationProvider.createOrganization(organization);
+        	OrganizationCommunity departmentCommunity = new OrganizationCommunity();
+    		departmentCommunity.setCommunityId(community.getId());
+    		departmentCommunity.setOrganizationId(organization.getId());
+    		organizationProvider.createOrganizationCommunity(departmentCommunity);
+    		dto = ConvertHelper.convert(organization, OrganizationDTO.class);
     	}
     	return dto;
 	}
 	
 	@Override
 	public Long findPropertyOrganizationId(Long communityId) {
-		OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationProperty(communityId);
-    	if(organizationCommunity != null){
-    		return organizationCommunity.getOrganizationId();
+		PropCommunityIdCommand command = new PropCommunityIdCommand();
+		command.setCommunityId(communityId);
+		OrganizationDTO dto = findPropertyOrganization(command);
+    	if(dto != null){
+    		return dto.getId();
     	}
     	else{
     		return 0l;
