@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.util.List;
+
+import com.everhomes.community.CommunityGeoPointDTO;
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -23,8 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 创建时间</li>
  * <li>deleteTime: 删除时间</li>
  * <li>requestStatus: 小区收集状态，参考{@link com.everhomes.community.RequestStatus}</li>
- * <li>longitude: 小区经度</li>
- * <li>latitude: 小区纬度</li>
+ * <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.community.CommunityGeoPointDTO}</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -52,8 +55,8 @@ public class CommunityDTO {
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
     private java.lang.Long     requestStatus;
-    private java.lang.Double   longitude;
-    private java.lang.Double   latitude;
+    @ItemType(CommunityGeoPointDTO.class)
+    private List<CommunityGeoPointDTO> geoPointList;
 
     public CommunityDTO() {
     }
@@ -250,20 +253,12 @@ public class CommunityDTO {
         this.requestStatus = requestStatus;
     }
 
-    public java.lang.Double getLongitude() {
-        return longitude;
+    public List<CommunityGeoPointDTO> getGeoPointList() {
+        return geoPointList;
     }
 
-    public void setLongitude(java.lang.Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public java.lang.Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(java.lang.Double latitude) {
-        this.latitude = latitude;
+    public void setGeoPointList(List<CommunityGeoPointDTO> geoPointList) {
+        this.geoPointList = geoPointList;
     }
 
     @Override
