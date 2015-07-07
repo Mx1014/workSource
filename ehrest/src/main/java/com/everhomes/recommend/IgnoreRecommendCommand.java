@@ -9,9 +9,7 @@ import com.everhomes.discover.ItemType;
 /**
  * <ul>忽略某一类推荐
  * <li>userId: 用户ID </li>
- * <li>suggestType: 推荐类型 </li>
- * <li>sourceId: 忽略推荐的源ID </li>
- * <li>sourceType: 源类型 </li>
+ * <li>recommandItems: 忽略推荐的类型数组 参考 {@link com.everhomes.recommend.IgnoreRecommandItem} </li>
  * </ul>
  * @author janson
  *

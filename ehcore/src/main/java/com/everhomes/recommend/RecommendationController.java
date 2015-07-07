@@ -69,9 +69,10 @@ public class RecommendationController extends ControllerBase{
      */
   @RequestMapping("recommendUsers")
   @RestReturn(RecommendUserResponse.class)
-  public RestResponse getRecommendUsers(@RequestParam(value="userId")Long userId
+  public RestResponse getRecommendUsers(@Valid GetUserRecommendCommand cmd
                       , HttpServletResponse response
                       , HttpServletRequest request) {
+      Long userId = cmd.getUserId();
       //userActivityProvider.updateUserProfile(userId, UserProfileContstant.RecommendName, content);
         UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
         long ageSec = 30;
@@ -103,6 +104,11 @@ public class RecommendationController extends ControllerBase{
         return res;
     }
   
+  /**
+   * 
+  * <b>URL: /recommend/ignoreRecommend</b>
+  * <p>忽略某一类用户的推荐</p>
+   */
   @RequestMapping("ignoreRecommend")
   @RestReturn(String.class)
   public RestResponse ignoreRecommend(@Valid IgnoreRecommendCommand cmd) {
