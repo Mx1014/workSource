@@ -136,31 +136,33 @@ public class RecommendationController extends ControllerBase{
   @RequestMapping("testAddUser")
   @RestReturn(String.class)
   public RestResponse testAddUser(@RequestParam(value="userId")Long userId, @RequestParam(value="sourceId")Long sourceId) {
-      Recommendation r = new Recommendation();
-      r.setAppid(0l);
-      r.setCreateTime(new Timestamp(System.currentTimeMillis()));
-      r.setExpireTime(new Timestamp(System.currentTimeMillis()+1000));
-      r.setMaxCount(1);
-      r.setScore(1.0);
-      r.setSourceId(sourceId);
-      r.setSourceType(RecommendSourceType.USER.getCode().intValue());
-      r.setStatus(RecommendStatus.OK.getCode());
-      r.setSuggestType(RecommendSourceType.USER.getCode().intValue());
-      r.setUserId(userId);
-      recommendationProvider.createRecommendation(r);
-      
-      //UserInfo user = userService.getUserInfo(userId);
-      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
-      if(null != profile) {
-          profile.setItemValue(Long.toString(System.currentTimeMillis()));
-      } else {
-          UserProfile p2 = new UserProfile();
-          p2.setItemName(UserProfileContstant.RecommendName);
-          p2.setItemKind((byte)0);
-          p2.setItemValue(Long.toString(System.currentTimeMillis()));
-          p2.setOwnerId(userId);
-          userActivityProvider.addUserProfile(p2);
-          }
+//      Recommendation r = new Recommendation();
+//      r.setAppid(0l);
+//      r.setCreateTime(new Timestamp(System.currentTimeMillis()));
+//      r.setExpireTime(new Timestamp(System.currentTimeMillis()+1000));
+//      r.setMaxCount(1);
+//      r.setScore(1.0);
+//      r.setSourceId(sourceId);
+//      r.setSourceType(RecommendSourceType.USER.getCode().intValue());
+//      r.setStatus(RecommendStatus.OK.getCode());
+//      r.setSuggestType(RecommendSourceType.USER.getCode().intValue());
+//      r.setUserId(userId);
+//      recommendationProvider.createRecommendation(r);
+//      
+//      //UserInfo user = userService.getUserInfo(userId);
+//      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
+//      if(null != profile) {
+//          profile.setItemValue(Long.toString(System.currentTimeMillis()));
+//      } else {
+//          UserProfile p2 = new UserProfile();
+//          p2.setItemName(UserProfileContstant.RecommendName);
+//          p2.setItemKind((byte)0);
+//          p2.setItemValue(Long.toString(System.currentTimeMillis()));
+//          p2.setOwnerId(userId);
+//          userActivityProvider.addUserProfile(p2);
+//          }
+//      
+      recommendationService.communityNotify(4l, 6l, 7l);
       
       RestResponse res = new RestResponse();
       res.setErrorCode(ErrorCodes.SUCCESS);

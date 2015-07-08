@@ -31,9 +31,9 @@ import com.sun.istack.FinalArrayList;
 public class RecommendCommunityAction implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RecommendCommunityAction.class);
 
-    private final Long userId;
-    private final Long communityId;
-    private final Long addressId;
+    private final long userId;
+    private final long communityId;
+    private final long addressId;
     @Autowired
     private FamilyProvider familyProvider;
     @Autowired
@@ -162,7 +162,7 @@ public class RecommendCommunityAction implements Runnable {
         }
     }
 
-    public RecommendCommunityAction(final Long userId, final Long addressId, final Long communityId) {
+    public RecommendCommunityAction(final long userId, final long addressId, final long communityId) {
         this.userId = userId;
         this.communityId = communityId;
         this.addressId = addressId;
