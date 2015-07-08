@@ -144,7 +144,7 @@ public class RecommendationController extends ControllerBase{
       r.setScore(1.0);
       r.setSourceId(sourceId);
       r.setSourceType(RecommendSourceType.USER.getCode().intValue());
-      r.setStatus(0);
+      r.setStatus(RecommendStatus.OK.getCode());
       r.setSuggestType(RecommendSourceType.USER.getCode().intValue());
       r.setUserId(userId);
       recommendationProvider.createRecommendation(r);

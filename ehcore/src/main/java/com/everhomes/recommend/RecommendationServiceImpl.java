@@ -81,9 +81,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
    
    @Override
-   public void communityNotify(Long userId, Long communityId) {
+   public void communityNotify(Long userId, Long addressId ,Long communityId) {
        final Job job = new Job(RecommendCommunityAction.class.getName(),
-               new Object[]{ userId, communityId });
+               new Object[]{ userId, addressId, communityId });
        
        jesqueClientFactory.getClientPool().enqueue(queueName, job);
    }

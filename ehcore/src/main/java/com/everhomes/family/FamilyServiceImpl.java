@@ -62,6 +62,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.point.AddUserPointCommand;
 import com.everhomes.point.PointType;
 import com.everhomes.point.UserPointService;
+import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
@@ -139,6 +140,8 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private UserPointService userPointService;
+    @Autowired
+    private RecommendationService recommendationService;
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -768,7 +771,7 @@ public class FamilyServiceImpl implements FamilyService {
             setCurrentFamilyAfterApproval(memberUid,familyId,0);
             
             //通知小区用户(通知通讯录好友)有新用户入住
-            sendNotifyToCommunityUserAndContactUser(memberUid, familyId, group.getIntegralTag2());
+            recommendationService.communityNotify(userId, group.getIntegralTag1() , group.getIntegralTag2());
             //积分
             AddUserPointCommand pointCmd=new AddUserPointCommand(user.getId(), PointType.ADDRESS_APPROVAL.name(), 
                     userPointService.getItemPoint(PointType.ADDRESS_APPROVAL), memberUid); 
