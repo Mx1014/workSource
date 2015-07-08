@@ -8,11 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.jasper.tagplugins.jstl.core.If;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -21,10 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-
-
-
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -34,18 +26,16 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-
-import freemarker.core.ReturnInstruction.Return;
 
 
 
@@ -634,6 +624,27 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
         return result;
     }
+
+	@Override
+	public ListLaunchPadLayoutCommandResponse listLaunchPadLayout(ListLaunchPadLayoutCommand cmd) {
+		if(cmd.getPageOffset() == null){
+			cmd.setPageOffset(1L);
+		}
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+		
+		List<LaunchPadLayoutDTO> list = this.launchPadProvider.listLaunchPadLayout(pageSize,offset);
+		
+		ListLaunchPadLayoutCommandResponse response = new ListLaunchPadLayoutCommandResponse();
+		if(list != null && !list.isEmpty()){
+			response.setRequests(list);
+			if(list.size() == pageSize){
+				response.setNextPageOffset(cmd.getPageOffset()+1);
+			}
+		}
+		
+		return response;
+	}
     
  
 }

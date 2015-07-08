@@ -24,6 +24,8 @@ import com.everhomes.launchpad.GetLaunchPadLayoutCommand;
 import com.everhomes.launchpad.LaunchPadItemDTO;
 import com.everhomes.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.launchpad.LaunchPadService;
+import com.everhomes.launchpad.ListLaunchPadLayoutCommand;
+import com.everhomes.launchpad.ListLaunchPadLayoutCommandResponse;
 import com.everhomes.launchpad.UpdateLaunchPadItemCommand;
 import com.everhomes.launchpad.UpdateLaunchPadLayoutCommand;
 import com.everhomes.rest.RestResponse;
@@ -164,6 +166,20 @@ public class LaunchPadAdminController extends ControllerBase {
     public RestResponse getLaunchPadLayout(@Valid GetLaunchPadLayoutCommand cmd) {
         LaunchPadLayoutDTO dto = this.launchPadService.getLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/launchpad/listLaunchPadLayout</b>
+     * <p>获取服务市场样式列表</p>
+     */
+    @RequestMapping("listLaunchPadLayout")
+    @RestReturn(value=LaunchPadLayoutDTO.class)
+    public RestResponse listLaunchPadLayout(@Valid ListLaunchPadLayoutCommand cmd) {
+    	ListLaunchPadLayoutCommandResponse result = this.launchPadService.listLaunchPadLayout(cmd);
+        RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
