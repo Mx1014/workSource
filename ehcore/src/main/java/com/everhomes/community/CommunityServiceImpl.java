@@ -131,7 +131,11 @@ public class CommunityServiceImpl implements CommunityService {
        }
        User user = UserContext.current().getUser();
        long userId = user.getId();
-       community.setAddress(cmd.getAddress());
+       
+       if(cmd.getAddress() != null && !cmd.getAddress().equals("")){
+    	   community.setAddress(cmd.getAddress());
+       }
+       
        Region city = regionProvider.findRegionById(cmd.getCityId());
        if(city == null){
            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -154,17 +158,19 @@ public class CommunityServiceImpl implements CommunityService {
            
            List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
            if(geoList != null && geoList.size() > 0){
-        	   geoList.stream().map((r) -> {
-        		   CommunityGeoPoint point = new CommunityGeoPoint();
-        		   point.setCommunityId(cmd.getCommunityId());
-        		   point.setDescription(r.getDescription());
-        		   point.setLatitude(r.getLatitude());
-        		   point.setLongitude(r.getLongitude());
-        		   String geohash = GeoHashUtils.encode(r.getLatitude(), r.getLongitude());
-        		   point.setGeohash(geohash);
-        		   this.communityProvider.createCommunityGeoPoint(point);
-        		   return null;
-        	   });
+        	   for(int i=0;i<geoList.size();i++){
+        		   CommunityGeoPointDTO geoDto= geoList.get(i);
+        		   if(geoDto.getLatitude() != null && geoDto.getLongitude() != null){
+        			   CommunityGeoPoint point = new CommunityGeoPoint();
+        			   point.setCommunityId(cmd.getCommunityId());
+        			   point.setDescription(geoDto.getDescription());
+        			   point.setLatitude(geoDto.getLatitude());
+        			   point.setLongitude(geoDto.getLongitude());
+        			   String geohash = GeoHashUtils.encode(geoDto.getLatitude(), geoDto.getLongitude());
+        			   point.setGeohash(geohash);
+        			   this.communityProvider.createCommunityGeoPoint(point);
+        		   }
+        	   }
            }
            
            return null;
