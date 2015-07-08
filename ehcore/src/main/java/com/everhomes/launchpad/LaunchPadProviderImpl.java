@@ -10,9 +10,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -199,6 +196,25 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
     }
+	@Override
+	public List<LaunchPadLayoutDTO> listLaunchPadLayout(int pageSize,long offset) {
+
+		List<LaunchPadLayoutDTO> list = new ArrayList<LaunchPadLayoutDTO>();
+		
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class), null, 
+				(DSLContext context,Object reducingContext) -> {
+					
+					context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS)
+					.limit(pageSize).offset((int)offset)
+					.fetch().map(r -> {
+						list.add(ConvertHelper.convert(r,LaunchPadLayoutDTO.class));
+						return null;
+					});
+					return true;
+				});
+		
+		return list;
+	}
 
 
 }

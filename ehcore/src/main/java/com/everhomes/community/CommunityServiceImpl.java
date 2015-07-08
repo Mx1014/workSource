@@ -416,7 +416,7 @@ public class CommunityServiceImpl implements CommunityService {
 			ListComunitiesByKeywordCommand cmd) {
 		if(cmd.getKeyword() == null || cmd.getKeyword().equals("")){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid id parameter");
+                    "Invalid keyword parameter");
 		}
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
