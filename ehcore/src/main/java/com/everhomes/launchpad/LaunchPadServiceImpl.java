@@ -31,6 +31,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -210,17 +211,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     
     public List<LaunchPadItem> getUserItems(long userId){
        List<LaunchPadItem> userItems = new ArrayList<LaunchPadItem>();
-        List<UserProfile> userProfiles = this.userActivityProvider.findProfileByUid(userId);
-        //UserProfile profile = this.userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.LaunchPadName);
-        if(userProfiles == null) return userItems;
-        
-        userProfiles.forEach((userProfile) ->{
-            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
-                String jsonString = userProfile.getItemValue();
-                userItems.add((LaunchPadItem) StringHelper.fromJsonString(jsonString, LaunchPadItem.class));
-            }
-            
-        });
+        //List<UserProfile> userProfiles = this.userActivityProvider.findProfileByUid(userId);
+        UserProfile profile = this.userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.LaunchPadName);
+        if(profile == null) return userItems;
+        if(profile.getItemKind() == ItemKind.JSON.getCode()){
+            String jsonString = profile.getItemValue();
+            userItems.add((LaunchPadItem) StringHelper.fromJsonString(jsonString, LaunchPadItem.class));
+        }
+//        userProfiles.forEach((userProfile) ->{
+//            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
+//                String jsonString = userProfile.getItemValue();
+//                userItems.add((LaunchPadItem) StringHelper.fromJsonString(jsonString, LaunchPadItem.class));
+//            }
+//            
+//        });
 
         return userItems;
     }
