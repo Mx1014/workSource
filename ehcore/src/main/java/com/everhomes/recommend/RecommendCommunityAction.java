@@ -109,6 +109,8 @@ public class RecommendCommunityAction implements Runnable {
                 r.setStatus(RecommendStatus.OK.getCode());
                 r.setSuggestType(RecommendSourceType.USER.getCode().intValue());
                 r.setUserId(m.getMemberId());
+                r.setMaxCount(1);
+                r.setScore(0.0);
                 User user = userProvider.findUserById(userId);
                 
                 JSONObject jsonObject = new JSONObject();
