@@ -17,7 +17,7 @@ public class GovAgenciesLaunchPadHandler implements LaunchPadHandler {
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Override
-    public LaunchPadItem accesProcessLaunchPadItem(String userToken, long commnunityId, LaunchPadItem launchPadItem) {
+    public LaunchPadItem accesProcessLaunchPadItem(String userToken,long userId, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
         launchPadItem.setActionData(parserJson(userToken,commnunityId,launchPadItem));
@@ -27,16 +27,6 @@ public class GovAgenciesLaunchPadHandler implements LaunchPadHandler {
     
     @SuppressWarnings("unchecked")
     private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
-        
-//        if(launchPadItem.getItemName().equals(ItemNameTag.GANC.getCode())){
-//            jsonObject.put(LaunchPadConstants.POST_ENTITY_TAG, ItemNameTag.GANC);
-//        }
-//        else if(launchPadItem.getItemName().equals(ItemNameTag.GAPS.getCode())){
-//            jsonObject.put(LaunchPadConstants.POST_ENTITY_TAG, ItemNameTag.GAPS.getCode());
-//        }
-//        else if(launchPadItem.getItemName().equals(ItemNameTag.GARC.getCode())){
-//            jsonObject.put(LaunchPadConstants.POST_ENTITY_TAG, ItemNameTag.GARC.getCode());
-//        }
         JSONObject jsonObject = new JSONObject();
         if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
             jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());

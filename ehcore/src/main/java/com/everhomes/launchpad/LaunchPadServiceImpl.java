@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -25,6 +28,9 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.organization.pm.PropCommunityContactDTO;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -60,6 +66,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private RegionProvider regionProvider;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
 
     @Override
     public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
@@ -82,7 +90,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
         }
-        long cityId = community.getCityId();
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
         long userId = user.getId();
@@ -110,27 +117,34 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             if(userItems != null && !userItems.isEmpty())
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
-        allItems.forEach((r) ->{
-//            LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getItemGroup());
-//            if(handler == null)
-//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//                        "Unable to find launch pad handler.");
+        try{
+            allItems.forEach((r) ->{
+                LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getAppId());
+                if(handler == null){
+                    LOGGER.error("Unable to find launch pad handler.appId=" + r.getAppId());
+//                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//                            "Unable to find launch pad handler.");
+                }
+                LaunchPadItem  item = handler.accesProcessLaunchPadItem(token, userId, communityId, r);
+                LaunchPadItemDTO itemDTO = ConvertHelper.convert(item, LaunchPadItemDTO.class);
+                itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+                result.add(itemDTO);
+            });
+            if(result != null && !result.isEmpty())
+                sortLaunchPadItems(result);
+            long endTime = System.currentTimeMillis();
             
-            LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
-            itemDTO.setActionData(parserJson(token,userId,communityId,cityId,r));
-            itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
-            result.add(itemDTO);
-        });
-        if(result != null && !result.isEmpty())
-            sortLaunchPadItems(result);
-        long endTime = System.currentTimeMillis();
+            LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
+                    + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
+            GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
+            response.setLaunchPadItems(result);
+            
+            return response;
+        }catch(Exception e){
+            LOGGER.error("Unable to find launch pad handler.",e);
+            return null;
+        }
         
-        LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
-                + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
-        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
-        response.setLaunchPadItems(result);
-        
-        return response;
     }
     
     @SuppressWarnings("unchecked")
@@ -146,6 +160,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                   url = url + "&userId=" + userId + "&cityId=" + cityId;
               }
               jsonObject.put(LaunchPadConstants.URL, url);
+            }
+            else if(launchPadItem.getActionType() == ActionType.APP.getCode()){
+                ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
+                cmd.setCommunityId(commnunityId);
+                List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
+                List<String> contacts = new ArrayList<String>();
+                        
             }
         }
         
@@ -630,12 +651,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
 
 	@Override
-	public ListLaunchPadLayoutCommandResponse listLaunchPadLayout(ListLaunchPadLayoutCommand cmd) {
+	public ListLaunchPadLayoutCommandResponse listLaunchPadLayoutByKeyword(ListLaunchPadLayoutCommand cmd) {
 		long pageOffset = cmd.getPageOffset() == null?1L:cmd.getPageOffset();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
 		
-		List<LaunchPadLayoutDTO> list = this.launchPadProvider.listLaunchPadLayout(pageSize,offset,cmd.getKeyword());
+		List<LaunchPadLayoutDTO> list = this.launchPadProvider.listLaunchPadLayoutByKeyword(pageSize,offset,cmd.getKeyword());
 		
 		ListLaunchPadLayoutCommandResponse response = new ListLaunchPadLayoutCommandResponse();
 		if(list != null && !list.isEmpty()){

@@ -10,9 +10,11 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class LaunchPadAppActionData {
-    //"itemLocation":"/home/Pm","layoutName":"PmLayout"} 
+    //"itemLocation":"/home/Pm","layoutName":"PmLayout","cellPhones":"[15875300001,15875300002]","title":"xx"} 
     private String itemLocation;
     private String layoutName;
+    private String cellPhones;
+    private String title;
     
     public String getItemLocation() {
         return itemLocation;
@@ -26,7 +28,18 @@ public class LaunchPadAppActionData {
     public void setLayoutName(String layoutName) {
         this.layoutName = layoutName;
     }
-    
+    public String getCellPhones() {
+        return cellPhones;
+    }
+    public void setCellPhones(String cellPhones) {
+        this.cellPhones = cellPhones;
+    }
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
