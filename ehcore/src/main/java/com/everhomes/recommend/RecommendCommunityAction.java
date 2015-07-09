@@ -83,7 +83,8 @@ public class RecommendCommunityAction implements Runnable {
             r.setStatus(RecommendStatus.OK.getCode());
             r.setSuggestType(RecommendSourceType.USER.getCode().intValue());
             r.setUserId(u.getUid());
-            
+            r.setMaxCount(1);
+            r.setScore(0.0);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("userName", u.getContactName());
             jsonObject.put("communityName", communityName);
