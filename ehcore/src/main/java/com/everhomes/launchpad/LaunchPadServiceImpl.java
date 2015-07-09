@@ -627,19 +627,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public ListLaunchPadLayoutCommandResponse listLaunchPadLayout(ListLaunchPadLayoutCommand cmd) {
-		if(cmd.getPageOffset() == null){
-			cmd.setPageOffset(1L);
-		}
+		long pageOffset = cmd.getPageOffset() == null?1L:cmd.getPageOffset();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+		long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
 		
-		List<LaunchPadLayoutDTO> list = this.launchPadProvider.listLaunchPadLayout(pageSize,offset);
+		List<LaunchPadLayoutDTO> list = this.launchPadProvider.listLaunchPadLayout(pageSize,offset,cmd.getKeyword());
 		
 		ListLaunchPadLayoutCommandResponse response = new ListLaunchPadLayoutCommandResponse();
 		if(list != null && !list.isEmpty()){
 			response.setRequests(list);
 			if(list.size() == pageSize){
-				response.setNextPageOffset(cmd.getPageOffset()+1);
+				response.setNextPageOffset(pageOffset+1);
 			}
 		}
 		
