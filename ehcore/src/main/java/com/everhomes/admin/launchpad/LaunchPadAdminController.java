@@ -172,13 +172,13 @@ public class LaunchPadAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/launchpad/listLaunchPadLayout</b>
+     * <b>URL: /admin/launchpad/listLaunchPadLayoutByKeyword</b>
      * <p>获取服务市场样式列表</p>
      */
-    @RequestMapping("listLaunchPadLayout")
+    @RequestMapping("listLaunchPadLayoutByKeyword")
     @RestReturn(value=LaunchPadLayoutDTO.class)
-    public RestResponse listLaunchPadLayout(@Valid ListLaunchPadLayoutCommand cmd) {
-    	ListLaunchPadLayoutCommandResponse result = this.launchPadService.listLaunchPadLayout(cmd);
+    public RestResponse listLaunchPadLayoutByKeyword(@Valid ListLaunchPadLayoutCommand cmd) {
+    	ListLaunchPadLayoutCommandResponse result = this.launchPadService.listLaunchPadLayoutByKeyword(cmd);
         RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -197,7 +197,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return items;
 	}
 	@Override
-	public List<LaunchPadLayoutDTO> listLaunchPadLayout(int pageSize,long offset,String keyword) {
+	public List<LaunchPadLayoutDTO> listLaunchPadLayoutByKeyword(int pageSize,long offset,String keyword) {
 
 		List<LaunchPadLayoutDTO> list = new ArrayList<LaunchPadLayoutDTO>();
 
