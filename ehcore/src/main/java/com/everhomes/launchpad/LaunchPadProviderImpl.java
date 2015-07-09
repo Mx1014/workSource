@@ -197,14 +197,22 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return items;
 	}
 	@Override
-	public List<LaunchPadLayoutDTO> listLaunchPadLayout(int pageSize,long offset) {
+	public List<LaunchPadLayoutDTO> listLaunchPadLayout(int pageSize,long offset,String keyword) {
 
 		List<LaunchPadLayoutDTO> list = new ArrayList<LaunchPadLayoutDTO>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
-
-		context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS)
-		.limit(pageSize).offset((int)offset)
+		SelectJoinStep<Record> query = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
+		
+		Condition condition = null;
+		if(keyword != null && !keyword.equals("")){
+			condition = Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.like("%" + keyword + "%");
+		}
+		if(condition != null){
+			query.where(condition);
+		}
+		
+		query.limit(pageSize).offset((int)offset)
 		.fetch().map(r -> {
 			list.add(ConvertHelper.convert(r,LaunchPadLayoutDTO.class));
 			return null;
