@@ -871,12 +871,6 @@ public class FamilyServiceImpl implements FamilyService {
        
         return map;
     }
-    
-    private void sendNotifyToCommunityUserAndContactUser(Long memberUid, Long familyId, Long communityId) {
-        // TODO send notify to relate user 
-        
-        
-    }
 
     private void setCurrentFamilyAfterApproval(long userId, long familyId, int status){
         //set with first pass
