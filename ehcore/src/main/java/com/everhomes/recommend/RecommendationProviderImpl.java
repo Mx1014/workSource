@@ -54,7 +54,13 @@ public class RecommendationProviderImpl implements RecommendationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
         
         SelectQuery<EhRecommendationsRecord> query = context.selectQuery(Tables.EH_RECOMMENDATIONS);
-        query.addSelect(Tables.EH_RECOMMENDATIONS.USER_ID, Tables.EH_RECOMMENDATIONS.SOURCE_ID, Tables.EH_RECOMMENDATIONS.SOURCE_TYPE);
+        query.addSelect(Tables.EH_RECOMMENDATIONS.USER_ID
+                , Tables.EH_RECOMMENDATIONS.SOURCE_ID
+                , Tables.EH_RECOMMENDATIONS.SOURCE_TYPE
+                , Tables.EH_RECOMMENDATIONS.APPID
+                , Tables.EH_RECOMMENDATIONS.SUGGEST_TYPE
+                , Tables.EH_RECOMMENDATIONS.EMBEDDED_JSON
+                , Tables.EH_RECOMMENDATIONS.STATUS);
         query.setDistinct(true);
     
         if(queryBuilderCallback != null)

@@ -13,14 +13,14 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class RecommendUserResponse {
-    @ItemType(UserInfo.class)
-    private List<UserInfo> users;
+    @ItemType(RecommendUserInfo.class)
+    private List<RecommendUserInfo> users;
     
-    public List<UserInfo> getUsers() {
+    public List<RecommendUserInfo> getUsers() {
         return users;
     }
 
-    public void setUsers(List<UserInfo> users) {
+    public void setUsers(List<RecommendUserInfo> users) {
         this.users = users;
     }
 
