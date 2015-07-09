@@ -73,6 +73,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationContactDTO;
 import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDTO;
@@ -1765,5 +1766,30 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
 		}
 		return community;
+	}
+	
+	public List<PropCommunityContactDTO> listPropertyCommunityContacts(ListPropCommunityContactCommand cmd){
+	    if(cmd.getCommunityId() == null){
+	        LOGGER.error("propterty communityId paramter can not be null or empty");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+	    }
+	        
+	    Long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+	    if(organizationId == 0L){
+	        LOGGER.error("Property organization is not exists.communityId="+ cmd.getCommunityId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Property organization is not exists.");
+	    }
+	    List<CommunityPmContact> communityPmContacts = propertyMgrProvider.listCommunityPmContacts(organizationId);
+	    if(communityPmContacts == null || communityPmContacts.isEmpty()){
+	        LOGGER.error("Property community contacts is not exists.communityId="+ cmd.getCommunityId());
+            return null;
+	    }
+	    List<PropCommunityContactDTO> propCommunityContactdtos = communityPmContacts.stream().map(r ->{
+	        return ConvertHelper.convert(r, PropCommunityContactDTO.class);
+	    }).collect(Collectors.toList());
+	    return propCommunityContactdtos;
+	    
 	}
 }

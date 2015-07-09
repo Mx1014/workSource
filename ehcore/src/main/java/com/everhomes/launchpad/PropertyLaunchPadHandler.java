@@ -1,23 +1,39 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javassist.expr.NewArray;
+
+import org.apache.jasper.tagplugins.jstl.core.If;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.app.AppConstants;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryType;
+import com.everhomes.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.organization.pm.PropCommunityContactDTO;
+import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.user.IdentifierType;
+import com.google.gson.JsonArray;
 
 
-@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.GAACTIONS)
+@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_PM)
 public class PropertyLaunchPadHandler implements LaunchPadHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyLaunchPadHandler.class);
     @Autowired
     private LaunchPadProvider launchPadProvider;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
     @Override
-    public LaunchPadItem accesProcessLaunchPadItem(String userToken, long commnunityId, LaunchPadItem launchPadItem) {
+    public LaunchPadItem accesProcessLaunchPadItem(String userToken, long userId,long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
         launchPadItem.setActionData(parserJson(userToken,commnunityId,launchPadItem));
@@ -29,21 +45,21 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
     private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
         JSONObject jsonObject = new JSONObject();
         try{
-            if(launchPadItem.getItemGroup().equals(ItemGroup.GAACTIONS)){
-                String itemName = launchPadItem.getItemName();
-                if(itemName.equals(CategoryType.ADVISE.getCode())){
-                    jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_ADVISE);
-                }else if(itemName.equals(CategoryType.HELP.getCode())){
-                    jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_HELP);
-                }
-                else if(itemName.equals(CategoryType.NOTICE.getCode())){
-                    jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_NOTICE);
-                }
-                else if(itemName.equals(CategoryType.REPAIR.getCode())){
-                    jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_REPAIR);
-                }
-                else if(itemName.equals(CategoryType.PAYMENT.getCode())){
-                    //jsonObject.put(LaunchPadConstants.CATEGORY_ID, CategoryConstants.CATEGORY_ID_GA_REPAIR);
+            if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
+                jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
+                if(jsonObject.get("cellPhones") != null){
+                    ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
+                    cmd.setCommunityId(commnunityId);
+                    List<String> contacts = new ArrayList<String>();
+                    List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
+                    if(dtos != null && !dtos.isEmpty()){
+                        dtos.forEach(r ->{
+                            if(r.getContactType() == IdentifierType.MOBILE.getCode()){
+                                contacts.add(r.getContactToken());
+                            }
+                        });
+                    }
+                    jsonObject.put("cellPhones",JSONArray.toJSONString(contacts));
                 }
             }
             jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);

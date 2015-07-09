@@ -3,22 +3,25 @@ package com.everhomes.launchpad;
 
 
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.community.Community;
+import com.everhomes.app.AppConstants;
 import com.everhomes.community.CommunityProvider;
 
 
-@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + LaunchPadConstants.DEFAULT)
+@Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_DEFAULT)
 public class DefaultLaunchPadHandler implements LaunchPadHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultLaunchPadHandler.class);
     
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
     private CommunityProvider communityProvider;
     @Override
-    public LaunchPadItem accesProcessLaunchPadItem(String userToken, long commnunityId, LaunchPadItem launchPadItem) {
+    public LaunchPadItem accesProcessLaunchPadItem(String userToken,long userId, long commnunityId, LaunchPadItem launchPadItem) {
 
         assert(launchPadItem != null);
         launchPadItem.setActionData(parserJson(userToken, commnunityId, launchPadItem));
@@ -29,16 +32,8 @@ public class DefaultLaunchPadHandler implements LaunchPadHandler {
     @SuppressWarnings("unchecked")
     private String parserJson(String userToken, long commnunityId,LaunchPadItem launchPadItem) {
         JSONObject jsonObject = new JSONObject();
-        
-        Community community = this.communityProvider.findCommunityById(commnunityId);
-        assert(community != null);
-        
         jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
-        jsonObject.put(LaunchPadConstants.CITY_ID, community.getCityId());
         return jsonObject.toJSONString();
     }
-    
 
-
-   
 }
