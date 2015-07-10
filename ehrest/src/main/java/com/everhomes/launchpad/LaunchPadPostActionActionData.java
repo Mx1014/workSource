@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>forumId: 论坛id</li>
  * <li>contentCategory: 发帖动作的大类，如物业，家政等</li>
  * <li>actionCategory: 发帖动作的小类，如投诉，建议等</li>
+ * <li>postEntityTag: 帖子标签</li>
  * </ul>
  */
 public class LaunchPadPostActionActionData {
@@ -15,6 +16,7 @@ public class LaunchPadPostActionActionData {
     private Long forumId;
     private Long actionCategory;
     private Long contentCategory;
+    private String postEntityTag;
 
     public Long getForumId() {
         return forumId;
@@ -38,6 +40,14 @@ public class LaunchPadPostActionActionData {
 
     public void setContentCategory(Long contentCategory) {
         this.contentCategory = contentCategory;
+    }
+
+    public String getPostEntityTag() {
+        return postEntityTag;
+    }
+
+    public void setPostEntityTag(String postEntityTag) {
+        this.postEntityTag = postEntityTag;
     }
 
     @Override
