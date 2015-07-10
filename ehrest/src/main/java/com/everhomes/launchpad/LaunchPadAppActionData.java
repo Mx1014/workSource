@@ -21,6 +21,7 @@ public class LaunchPadAppActionData {
     @ItemType(String.class)
     private List<String> cellPhones;
     private String title;
+    private String appId;
     
     public String getItemLocation() {
         return itemLocation;
@@ -46,6 +47,13 @@ public class LaunchPadAppActionData {
     }
     public void setTitle(String title) {
         this.title = title;
+    }
+    
+    public String getAppId() {
+        return appId;
+    }
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
     @Override
     public String toString() {
