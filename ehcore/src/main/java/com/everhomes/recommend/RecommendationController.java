@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
@@ -69,11 +72,9 @@ public class RecommendationController extends ControllerBase{
      */
   @RequestMapping("recommendUsers")
   @RestReturn(RecommendUserResponse.class)
-  public RestResponse getRecommendUsers(@Valid GetUserRecommendCommand cmd
-                      , HttpServletResponse response
+  public RestResponse getRecommendUsers(HttpServletResponse response
                       , HttpServletRequest request) {
-      Long userId = cmd.getUserId();
-      //userActivityProvider.updateUserProfile(userId, UserProfileContstant.RecommendName, content);
+      Long userId = UserContext.current().getUser().getId();
         UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
         long ageSec = 30;
   
@@ -89,14 +90,24 @@ public class RecommendationController extends ControllerBase{
       
         if(EtagHelper.checkHeaderCache(ageSec, lastModify, request, response)) {
             RecommendUserResponse recommendRes = new RecommendUserResponse();
-            recommendRes.setUsers(new ArrayList<UserInfo>());
+            recommendRes.setUsers(new ArrayList<RecommendUserInfo>());
             List<Recommendation> recommends = recommendationService.getRecommendsByUserId(userId
                     , RecommendSourceType.USER.getCode().intValue()
                     , PaginationConfigHelper.getPageSize(configProvider, null));
             
             for(Recommendation rec : recommends) {
-                UserInfo userInfo = userService.getUserSnapshotInfo(rec.getUserId());
-                recommendRes.getUsers().add(ConvertHelper.convert(userInfo, UserInfo.class));
+                RecommendUserInfo reUser = new RecommendUserInfo();
+                UserInfo userInfo = userService.getUserSnapshotInfo(rec.getSourceId());
+                reUser.setUserInfo(ConvertHelper.convert(userInfo, UserInfo.class));
+                
+                JSONObject jsonObject = (JSONObject) JSONValue.parse(rec.getEmbeddedJson());
+                if(jsonObject != null) {
+                    reUser.setUserName((String)jsonObject.get("userName"));
+                    reUser.setFloorRelation((String)jsonObject.get("floorRelation"));
+                    reUser.setUserSourceType((Long)jsonObject.get("userSourceType"));
+                    }
+                //jsonObject.put("userSourceType",RecommendUserSourceType.CONTACT_USER.getCode());
+                recommendRes.getUsers().add(reUser);
             }
             res.setResponseObject(recommendRes); 
         }
