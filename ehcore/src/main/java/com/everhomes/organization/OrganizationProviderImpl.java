@@ -3,6 +3,7 @@ package com.everhomes.organization;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -22,6 +23,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.forum.Post;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
@@ -111,9 +113,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
         query.setDistinct(true);
         
-        List<Organization> records = query.fetch().map(new EhOrganizationRecordMapper());
+        List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
+        List<Organization> organizations = records.stream().map((r) -> {
+            return ConvertHelper.convert(r, Organization.class);
+        }).collect(Collectors.toList());
         
-        return records;
+        return organizations;
     }
     
     @Override
