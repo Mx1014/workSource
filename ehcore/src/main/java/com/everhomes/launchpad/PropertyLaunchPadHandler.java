@@ -52,7 +52,7 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
                             }
                         });
                     }
-                    jsonObject.put("cellPhones",JSONArray.toJSONString(contacts));
+                    jsonObject.put("cellPhones",contacts);
                 }
             }
             jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);

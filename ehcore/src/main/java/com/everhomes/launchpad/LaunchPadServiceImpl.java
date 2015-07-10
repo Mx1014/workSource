@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -42,7 +44,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.StringHelper;import com.google.gson.Gson;
+
 
 
 
@@ -129,6 +132,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(item, LaunchPadItemDTO.class);
                 itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 result.add(itemDTO);
+               
             });
             if(result != null && !result.isEmpty())
                 sortLaunchPadItems(result);
