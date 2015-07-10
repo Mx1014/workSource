@@ -1,5 +1,6 @@
 package com.everhomes.launchpad;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -19,7 +20,7 @@ public class LaunchPadAppActionData {
     private String itemLocation;
     private String layoutName;
     @ItemType(String.class)
-    private List<String> cellPhones;
+    private ArrayList<String> cellPhones;
     private String title;
     private String appId;
     
@@ -36,10 +37,10 @@ public class LaunchPadAppActionData {
         this.layoutName = layoutName;
     }
 
-    public List<String> getCellPhones() {
+    public ArrayList<String> getCellPhones() {
         return cellPhones;
     }
-    public void setCellPhones(List<String> cellPhones) {
+    public void setCellPhones(ArrayList<String> cellPhones) {
         this.cellPhones = cellPhones;
     }
     public String getTitle() {
