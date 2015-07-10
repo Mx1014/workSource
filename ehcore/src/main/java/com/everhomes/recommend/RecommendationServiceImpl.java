@@ -1,6 +1,7 @@
 package com.everhomes.recommend;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
@@ -13,9 +14,11 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.taskqueue.CommonWorkerPool;
 import com.everhomes.taskqueue.JesqueClientFactoryImpl;
 import com.everhomes.user.UserActivityProvider;
@@ -39,6 +42,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     
     @Autowired
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private ConfigurationProvider  configProvider;
     
     private final String queueName = "recommend";
     
@@ -108,5 +114,44 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Override
     public void ignoreRecommend(Long userId, Integer suggestType, Long sourceId, Integer sourceType) {
         recommendationProvider.ignoreRecommend(userId, suggestType, sourceId, sourceType);
+    }
+    
+    @Override
+    public ListRecommendConfigResponse listRecommendConfigsBySource(ListRecommendConfigCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<RecommendationConfig> recs = recommendationConfigProvider.listRecommendConfigs(locator, pageSize, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                if(cmd.getSourceId() != null) {
+                    query.addConditions(Tables.EH_RECOMMENDATION_CONFIGS.SOURCE_ID.eq(cmd.getSourceId()));
+                    }
+                if(cmd.getSourceType() != null) {
+                    query.addConditions(Tables.EH_RECOMMENDATION_CONFIGS.SOURCE_TYPE.eq(cmd.getSourceType()));
+                    }
+                if(cmd.getTargetId() != null) {
+                    query.addConditions(Tables.EH_RECOMMENDATION_CONFIGS.TARGET_ID.eq(cmd.getTargetId()));
+                    }
+                if(cmd.getTargetType() != null) {
+                    query.addConditions(Tables.EH_RECOMMENDATION_CONFIGS.TARGET_TYPE.eq(cmd.getTargetType()));
+                    }
+                if(cmd.getSuggestType() != null) {
+                    query.addConditions(Tables.EH_RECOMMENDATION_CONFIGS.SUGGEST_TYPE.eq(cmd.getSuggestType()));
+                    }
+                return query;
+            }
+            
+        });
+        
+        ListRecommendConfigResponse resp = new ListRecommendConfigResponse();
+        resp.setNextPageAnchor(locator.getAnchor());
+        List<RecommendConfigDTO> dtos = recs.stream().map((r) -> {
+            return ConvertHelper.convert(r, RecommendConfigDTO.class);
+        }).collect(Collectors.toList());
+        resp.setRecommendConfigs(dtos);
+        return resp;
     }
 }

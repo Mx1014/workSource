@@ -35,10 +35,10 @@ public class RecommendationConfigProviderImpl implements RecommendationConfigPro
            }
     }
     
+    @Override
     public List<RecommendationConfig> listRecommendConfigs(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhRecommendationConfigsRecord> query = context.selectQuery(Tables.EH_RECOMMENDATION_CONFIGS);
-        query.addSelect(Tables.EH_RECOMMENDATION_CONFIGS.fields());
         if(queryBuilderCallback != null) {
             queryBuilderCallback.buildCondition(locator, query);
             }
@@ -49,11 +49,9 @@ public class RecommendationConfigProviderImpl implements RecommendationConfigPro
             
         query.addOrderBy(Tables.EH_RECOMMENDATION_CONFIGS.CREATE_TIME.desc());
         query.addLimit(count);
-        List<EhRecommendationConfigsRecord> records = query.fetch();
-        
-        List<RecommendationConfig> recommends = records.stream().map((r) -> {
+        List<RecommendationConfig> recommends = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, RecommendationConfig.class);
-        }).collect(Collectors.toList());
+        });
         
         if(recommends.size() > 0) {
             locator.setAnchor(recommends.get(recommends.size() -1).getId());
@@ -61,8 +59,4 @@ public class RecommendationConfigProviderImpl implements RecommendationConfigPro
         
         return recommends;
     }
-    
-//    public List<RecommendationConfig> listRecommendConfigsBySource(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-//        
-//    }
 }

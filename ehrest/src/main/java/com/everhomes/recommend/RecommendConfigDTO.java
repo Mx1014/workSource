@@ -2,6 +2,11 @@ package com.everhomes.recommend;
 
 import java.sql.Timestamp;
 
+/**
+ * 
+ * @author janson
+ *
+ */
 public class RecommendConfigDTO {
     private Long     id;
     private Long     appid;

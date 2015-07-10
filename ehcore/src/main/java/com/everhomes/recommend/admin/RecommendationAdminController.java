@@ -1,4 +1,4 @@
-package com.everhomes.recommend;
+package com.everhomes.recommend.admin;
 
 import javax.validation.Valid;
 
@@ -10,6 +10,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.recommend.CreateRecommendConfig;
+import com.everhomes.recommend.ListRecommendConfigCommand;
+import com.everhomes.recommend.ListRecommendConfigResponse;
+import com.everhomes.recommend.RecommendationConfig;
+import com.everhomes.recommend.RecommendationService;
 import com.everhomes.rest.RestResponse;
 
 @RestDoc(value="Recommendation", site="ehcore")
@@ -35,6 +40,12 @@ public class RecommendationAdminController extends ControllerBase {
         return response;
     }
     
-//    @RequestMapping("listConfig")
-//    @RestReturn(value=RecommendConfigResponse.class)
+    @RequestMapping("listConfig")
+    @RestReturn(value=ListRecommendConfigResponse.class)
+    public RestResponse listRecommendConfig(@Valid ListRecommendConfigCommand cmd) {
+        RestResponse response = new RestResponse(recommendationService.listRecommendConfigsBySource(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
