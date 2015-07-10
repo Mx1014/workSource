@@ -3,7 +3,9 @@ package com.everhomes.organization;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -882,5 +884,41 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 		}
 		return dto;
+	}
+	
+	public Map<String, Long> getOrganizationRegionMap(Long communityId) {
+	    Long userId = -1L;
+	    User user  = UserContext.current().getUser();
+	    if(user != null) {
+	        userId = user.getId();
+	    }
+	    
+        Map<String, Long> map = new HashMap<String, Long>();
+        
+	    List<Organization> list = this.organizationProvider.findOrganizationByCommunityId(communityId);
+	    for(Organization organization : list) {
+	        OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
+	        if(type != null) {
+	            // 对于物业和业委，其region为小区ID；对于居委和公安，其region为机构ID
+	            switch(type) {
+	            case PM:
+	            case GARC:
+	                map.put(type.getCode(), communityId);
+	                break;
+	            case GANC:
+	            case GAPS:
+	                map.put(type.getCode(), organization.getId());
+	                break;
+	            default:
+	                LOGGER.error("Organization type not supported, userId=" + userId + ", communityId=" + communityId 
+	                    + ", organizationId=" + organization.getId() + ", organizationType=" + organization.getOrganizationType());
+	            }
+	        } else {
+	            LOGGER.error("Organization type is null, userId=" + userId + ", communityId=" + communityId 
+                    + ", organizationId=" + organization.getId() + ", organizationType=" + organization.getOrganizationType());
+	        }
+	    }
+	    
+	    return map;
 	}
 }

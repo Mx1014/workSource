@@ -7,6 +7,7 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
@@ -99,6 +100,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Organization.class);
+    }
+    
+    @Override
+    public List<Organization> findOrganizationByCommunityId(Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, 
+            Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+        query.setDistinct(true);
+        
+        List<Organization> records = query.fetch().map(new EhOrganizationRecordMapper());
+        
+        return records;
     }
     
     @Override

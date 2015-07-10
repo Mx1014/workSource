@@ -5,7 +5,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communityId: 当前小区ID</li>
+ * <li>entityTag: 实体标签，与帖子里的creatorTag和targetTag匹配；当需要查物业/业委/居委/公安的帖时，必须指明该标签，否则默认只查普通用户的帖，参考{@link com.everhomes.forum.PostEntityTag}</li>
+ * <li>communityId: 用户当前小区ID</li>
  * <li>contentCategory: 内容类型</li>
  * <li>actionCategory: 动作类型，对应以前的serviceType</li>
  * <li>pageAnchor: 开始的锚点</li>
@@ -13,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class QueryTopicByCategoryCommand {
+    private String entityTag;
     private Long communityId;
     private Long contentCategory;
     private Long actionCategory;
@@ -20,6 +22,14 @@ public class QueryTopicByCategoryCommand {
     private Integer pageSize;
     
     public QueryTopicByCategoryCommand() {
+    }
+
+    public String getEntityTag() {
+        return entityTag;
+    }
+
+    public void setEntityTag(String entityTag) {
+        this.entityTag = entityTag;
     }
 
     public Long getCommunityId() {
