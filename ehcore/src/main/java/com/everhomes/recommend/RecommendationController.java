@@ -97,7 +97,7 @@ public class RecommendationController extends ControllerBase{
             
             for(Recommendation rec : recommends) {
                 RecommendUserInfo reUser = new RecommendUserInfo();
-                UserInfo userInfo = userService.getUserSnapshotInfo(rec.getUserId());
+                UserInfo userInfo = userService.getUserSnapshotInfo(rec.getSourceId());
                 reUser.setUserInfo(ConvertHelper.convert(userInfo, UserInfo.class));
                 
                 JSONObject jsonObject = (JSONObject) JSONValue.parse(rec.getEmbeddedJson());

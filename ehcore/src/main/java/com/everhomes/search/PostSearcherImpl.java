@@ -98,8 +98,6 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     private XContentBuilder createDoc(Post post) {
         try {
-            User u = userProvider.findUserById(post.getCreatorUid());
-            
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("subject", post.getSubject());
             b.field("content", post.getContent());
@@ -110,11 +108,19 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("categoryId", post.getCategoryId());
             b.field("creatorUid", post.getCreatorUid());
             b.field("visibleRegionType", post.getVisibleRegionType());
-            b.field("visibleRegionId", post.getVisibleRegionId().intValue());
+            b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("visibleRegionType", post.getVisibleRegionType());
             b.field("visibleRegionId", post.getVisibleRegionId());
-            b.field("senderName", u.getAccountName());
-            b.field("senderAvatar", u.getAvatar());
+            
+            User u = userProvider.findUserById(post.getCreatorUid());
+            if(null != u) {
+                b.field("senderName", u.getAccountName());
+                b.field("senderAvatar", u.getAvatar());      
+            } else {
+                b.field("senderName", "");
+                b.field("senderAvatar", "");    
+                }
+          
             b.field("forumName", 0);
             b.field("displayName", "");
             
@@ -123,7 +129,12 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("creatorNickName", post.getCreatorNickName());
             
             UserIdentifier identify = userProvider.findClaimedIdentifierByOwnerAndType(post.getCreatorUid(), IdentifierType.MOBILE.getCode());
-            b.field("identify", identify.getIdentifierToken());
+            if(null != identify) {
+                b.field("identify", identify.getIdentifierToken());    
+            } else {
+                b.field("identify", "");
+                }
+            
             
             //http://stackoverflow.com/questions/16113439/elasticsearch-geo-distance-filter-with-multiple-locations-in-array-possible
             b.startObject("location");
@@ -175,6 +186,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 
             @Override
             public void process(Post post) {
+                posts.add(post);
                 if(posts.size() >= pageSize) {
                     bulkUpdate(posts);
                     posts.clear();
