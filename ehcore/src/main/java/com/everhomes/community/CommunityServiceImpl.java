@@ -161,14 +161,26 @@ public class CommunityServiceImpl implements CommunityService {
         	   for(int i=0;i<geoList.size();i++){
         		   CommunityGeoPointDTO geoDto= geoList.get(i);
         		   if(geoDto.getLatitude() != null && geoDto.getLongitude() != null){
-        			   CommunityGeoPoint point = new CommunityGeoPoint();
-        			   point.setCommunityId(cmd.getCommunityId());
-        			   point.setDescription(geoDto.getDescription());
-        			   point.setLatitude(geoDto.getLatitude());
-        			   point.setLongitude(geoDto.getLongitude());
-        			   String geohash = GeoHashUtils.encode(geoDto.getLatitude(), geoDto.getLongitude());
-        			   point.setGeohash(geohash);
-        			   this.communityProvider.createCommunityGeoPoint(point);
+        			   
+        			   if(geoDto.getId() != null){
+        				   CommunityGeoPoint geo = communityProvider.findCommunityGeoPointById(geoDto.getId());
+        				   if(geo != null && geo.getCommunityId() == cmd.getCommunityId()){
+        					   geo.setLatitude(geoDto.getLatitude());
+        					   geo.setLongitude(geoDto.getLongitude());
+        					   geo.setGeohash(GeoHashUtils.encode(geoDto.getLatitude(), geoDto.getLongitude()));
+        					   this.communityProvider.updateCommunityGeoPoint(geo);
+        				   }
+        			   }
+        			   else{
+        				   CommunityGeoPoint point = new CommunityGeoPoint();
+            			   point.setCommunityId(cmd.getCommunityId());
+            			   point.setDescription(geoDto.getDescription());
+            			   point.setLatitude(geoDto.getLatitude());
+            			   point.setLongitude(geoDto.getLongitude());
+            			   String geohash = GeoHashUtils.encode(geoDto.getLatitude(), geoDto.getLongitude());
+            			   point.setGeohash(geohash);
+        				   this.communityProvider.createCommunityGeoPoint(point);
+        			   }
         		   }
         	   }
            }
