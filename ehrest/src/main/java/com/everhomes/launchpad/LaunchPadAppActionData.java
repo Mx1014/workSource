@@ -1,5 +1,8 @@
 package com.everhomes.launchpad;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -7,13 +10,16 @@ import com.everhomes.util.StringHelper;
  * <ul>actionType为app点击item需要的参数
  * <li>itemLocation: 获取下一级的item需要的路径</li>
  * <li>layoutName: 下一级使用的layout</li>
+ * <li>cellPhones: 下一级使用的电话列表</li>
+ * <li>title: 下一级电话列表前面的显示标题</li>
  * </ul>
  */
 public class LaunchPadAppActionData {
     //"itemLocation":"/home/Pm","layoutName":"PmLayout","cellPhones":"[15875300001,15875300002]","title":"xx"} 
     private String itemLocation;
     private String layoutName;
-    private String cellPhones;
+    @ItemType(String.class)
+    private List<String> cellPhones;
     private String title;
     
     public String getItemLocation() {
@@ -28,10 +34,11 @@ public class LaunchPadAppActionData {
     public void setLayoutName(String layoutName) {
         this.layoutName = layoutName;
     }
-    public String getCellPhones() {
+
+    public List<String> getCellPhones() {
         return cellPhones;
     }
-    public void setCellPhones(String cellPhones) {
+    public void setCellPhones(List<String> cellPhones) {
         this.cellPhones = cellPhones;
     }
     public String getTitle() {
