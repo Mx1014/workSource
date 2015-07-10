@@ -4,9 +4,6 @@ package com.everhomes.launchpad;
 import java.util.ArrayList;
 import java.util.List;
 
-import javassist.expr.NewArray;
-
-import org.apache.jasper.tagplugins.jstl.core.If;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -14,15 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.everhomes.app.AppConstants;
-import com.everhomes.category.CategoryConstants;
-import com.everhomes.category.CategoryType;
 import com.everhomes.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.organization.pm.PropCommunityContactDTO;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.user.IdentifierType;
-import com.google.gson.JsonArray;
 
 
 @Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_PM)
