@@ -1,7 +1,7 @@
 package com.everhomes.launchpad;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -15,14 +15,16 @@ import com.everhomes.util.StringHelper;
  * <li>title: 下一级电话列表前面的显示标题</li>
  * </ul>
  */
-public class LaunchPadAppActionData {
+public class LaunchPadAppActionData implements Serializable{
+    private static final long serialVersionUID = -8762650365959360709L;
     //"itemLocation":"/home/Pm","layoutName":"PmLayout","cellPhones":"[15875300001,15875300002]","title":"xx"} 
     private String itemLocation;
     private String layoutName;
     @ItemType(String.class)
     private ArrayList<String> cellPhones;
     private String title;
-    private String appId;
+    private Long appId;
+    private String postEntityTag;
     
     public String getItemLocation() {
         return itemLocation;
@@ -50,11 +52,17 @@ public class LaunchPadAppActionData {
         this.title = title;
     }
     
-    public String getAppId() {
+    public Long getAppId() {
         return appId;
     }
-    public void setAppId(String appId) {
+    public void setAppId(Long appId) {
         this.appId = appId;
+    }
+    public String getPostEntityTag() {
+        return postEntityTag;
+    }
+    public void setPostEntityTag(String postEntityTag) {
+        this.postEntityTag = postEntityTag;
     }
     @Override
     public String toString() {

@@ -1,5 +1,7 @@
 package com.everhomes.launchpad;
 
+import java.io.Serializable;
+
 import com.everhomes.util.StringHelper;
 
 
@@ -9,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>postId: 帖子id</li>
  * </ul>
  */
-public class LaunchPadPostActionData {
+public class LaunchPadPostActionData implements Serializable{
+    private static final long serialVersionUID = 2144378412966579860L;
     //{"postId": 1,"fourmId":1}  
     private Long forumId;
     private Long postId;

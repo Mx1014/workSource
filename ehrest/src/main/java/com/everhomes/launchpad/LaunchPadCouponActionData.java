@@ -1,5 +1,7 @@
 package com.everhomes.launchpad;
 
+import java.io.Serializable;
+
 import com.everhomes.util.StringHelper;
 
 
@@ -8,7 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 优惠券类型id</li>
  * </ul>
  */
-public class LaunchPadCouponActionData {
+public class LaunchPadCouponActionData implements Serializable{
+
+    private static final long serialVersionUID = 4810470677136730093L;
     //{"categoryId": 1}  
     private Integer categoryId;
     

@@ -1,5 +1,7 @@
 package com.everhomes.launchpad;
 
+import java.io.Serializable;
+
 import com.everhomes.util.StringHelper;
 
 
@@ -8,7 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>url: 左邻url</li>
  * </ul>
  */
-public class LaunchPadZuoLinActionData {
+public class LaunchPadZuoLinActionData implements Serializable{
+
+    private static final long serialVersionUID = -22341699932739557L;
     //{"url": "http://www.zuolin.com"}  
     private String url;
     
