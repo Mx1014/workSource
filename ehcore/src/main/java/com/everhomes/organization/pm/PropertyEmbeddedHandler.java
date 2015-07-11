@@ -58,7 +58,7 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setTargetType(EntityType.USER.getCode());
 			task.setTargetId(0L);
 			task.setTaskStatus(PmTaskStatus.UNTREATED.getCode());
-			task.setTaskType(PmTaskType.fromCode(post.getActionCategoryId()).getCode());
+			task.setTaskType(PmTaskType.fromCode(post.getActionCategory()).getCode());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			propertyMgrProvider.createPmTask(task );
 			post.setEmbeddedId(task.getId());
