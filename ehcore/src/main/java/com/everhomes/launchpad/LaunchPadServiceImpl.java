@@ -7,9 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-
-
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -18,9 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-
-
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -30,8 +24,6 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.organization.pm.ListPropCommunityContactCommand;
-import com.everhomes.organization.pm.PropCommunityContactDTO;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -44,7 +36,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;import com.google.gson.Gson;
+import com.everhomes.util.StringHelper;
 
 
 
@@ -151,32 +143,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         
     }
     
-    @SuppressWarnings("unchecked")
-    private String parserJson(String userToken,long userId, long commnunityId,long cityId,LaunchPadItem launchPadItem) {
-        
-        JSONObject jsonObject = new JSONObject();
-        if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
-            jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
-            if(launchPadItem.getActionType() == ActionType.THIRDPART_URL.getCode()){
-              jsonObject.put(LaunchPadConstants.TOKEN, userToken);
-              String url = (String) jsonObject.get(LaunchPadConstants.URL);
-              if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
-                  url = url + "&userId=" + userId + "&cityId=" + cityId;
-              }
-              jsonObject.put(LaunchPadConstants.URL, url);
-            }
-            else if(launchPadItem.getActionType() == ActionType.APP.getCode()){
-                ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
-                cmd.setCommunityId(commnunityId);
-                List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
-                List<String> contacts = new ArrayList<String>();
-                        
-            }
-        }
-        
-        jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
-        return jsonObject.toString();
-    }
     
     private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
         Collections.sort(result, new Comparator<LaunchPadItemDTO>(){

@@ -6,25 +6,39 @@ import com.everhomes.util.StringHelper;
 
 
 /**
- * <ul>actionType为post时点击item需要的参数
+ * <ul>actionType为postAction时点击item需要的参数
  * <li>forumId: 论坛id</li>
- * <li>postId: 帖子id</li>
+ * <li>contentCategory: 发帖动作的大类，如物业，家政等</li>
+ * <li>actionCategory: 发帖动作的小类，如投诉，建议等</li>
+ * <li>entityTag: 帖子标签</li>
+ * <li>entityTag: 普通用户/物业/业委等对应小区ID、居委/公安等对应片区ID</li> 
  * </ul>
  */
-public class LaunchPadPostActionActionData implements Serializable{
-    private static final long serialVersionUID = -4277718167680363828L;
-//{"contentCategory":9,"actionCategory":3092,"forumId":1,"entityTag":"PM"}  
+public class LaunchPadTopicByCategoryActionData implements Serializable{
+
+    private static final long serialVersionUID = 882096233068114981L;
+    //{"contentCategory":9,"actionCategory":3092,"forumId":1,"entityTag":"PM"} 
     private Long forumId;
     private Long actionCategory;
     private Long contentCategory;
     private String entityTag;
-    
+    private Long regionId;
+
+
     public Long getForumId() {
         return forumId;
     }
 
     public void setForumId(Long forumId) {
         this.forumId = forumId;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
     public Long getActionCategory() {

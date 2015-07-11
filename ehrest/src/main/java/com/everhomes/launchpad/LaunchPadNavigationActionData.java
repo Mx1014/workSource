@@ -13,9 +13,10 @@ import com.everhomes.util.StringHelper;
  * <li>layoutName: 下一级使用的layout</li>
  * <li>cellPhones: 下一级使用的电话列表</li>
  * <li>title: 下一级电话列表前面的显示标题</li>
+ * <li>entityTag: 帖子标签</li>
  * </ul>
  */
-public class LaunchPadAppActionData implements Serializable{
+public class LaunchPadNavigationActionData implements Serializable{
     private static final long serialVersionUID = -8762650365959360709L;
     //"itemLocation":"/home/Pm","layoutName":"PmLayout","cellPhones":"[15875300001,15875300002]","title":"xx"} 
     private String itemLocation;
@@ -24,7 +25,7 @@ public class LaunchPadAppActionData implements Serializable{
     private ArrayList<String> cellPhones;
     private String title;
     private Long appId;
-    private String postEntityTag;
+    private String entityTag;
     
     public String getItemLocation() {
         return itemLocation;
@@ -58,11 +59,12 @@ public class LaunchPadAppActionData implements Serializable{
     public void setAppId(Long appId) {
         this.appId = appId;
     }
-    public String getPostEntityTag() {
-        return postEntityTag;
+
+    public String getEntityTag() {
+        return entityTag;
     }
-    public void setPostEntityTag(String postEntityTag) {
-        this.postEntityTag = postEntityTag;
+    public void setEntityTag(String entityTag) {
+        this.entityTag = entityTag;
     }
     @Override
     public String toString() {
