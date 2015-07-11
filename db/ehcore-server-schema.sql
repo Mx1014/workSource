@@ -1164,8 +1164,7 @@ CREATE TABLE `eh_organization_members` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information of community 
+# member of global partition
 #
 DROP TABLE IF EXISTS `eh_organization_tasks`;
 CREATE TABLE `eh_organization_tasks` (
@@ -1186,8 +1185,7 @@ CREATE TABLE `eh_organization_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information about property name mapping
+# member of global partition
 #
 DROP TABLE IF EXISTS `eh_organization_address_mappings`;
 CREATE TABLE `eh_organization_address_mappings` (
@@ -1204,8 +1202,7 @@ CREATE TABLE `eh_organization_address_mappings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information of community 
+# member of global partition
 #
 DROP TABLE IF EXISTS `eh_organization_bills`;
 CREATE TABLE `eh_organization_bills` (
@@ -1216,20 +1213,20 @@ CREATE TABLE `eh_organization_bills` (
     `address` VARCHAR(128),
 	`name` VARCHAR(128) COMMENT 'the tile of bill',
 	`date_str` VARCHAR(128) COMMENT 'the date string in bill',
-	`total_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill',
 	`description` TEXT,
+	`due_amount` DECIMAL(10,2) COMMENT 'the money amount of the bill for the current month',
+	`paid_amount` DECIMAL(10,2) COMMENT 'the paid money amount of the paid bill',
     `creator_uid` BIGINT COMMENT 'uid of the user who has the bill',
-    `create_time` DATETIME,
 	`notify_count` INT COMMENT 'how many times of notification is sent for the bill',
     `notify_time` DATETIME COMMENT 'the last time of notification for the bill',
+    `create_time` DATETIME,
 	
     PRIMARY KEY (`id`),
 	FOREIGN KEY `fk_eh_organization`(`organization_id`) REFERENCES `eh_organizations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information of community 
+# member of global partition 
 #
 DROP TABLE IF EXISTS `eh_organization_bill_items`;
 CREATE TABLE `eh_organization_bill_items` (
@@ -1250,8 +1247,7 @@ CREATE TABLE `eh_organization_bill_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information of community 
+# member of global partition
 #
 DROP TABLE IF EXISTS `eh_organization_owners`;
 CREATE TABLE `eh_organization_owners` (
@@ -1271,8 +1267,7 @@ CREATE TABLE `eh_organization_owners` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_communities partition
-# information of community 
+# member of global partition
 #
 DROP TABLE IF EXISTS `eh_organization_contacts`;
 CREATE TABLE `eh_organization_contacts` (
