@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 import org.elasticsearch.cluster.routing.RotationShardShuffler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,9 +50,14 @@ public class LaunchPadTest extends TestCase {
     static class ContextConfiguration {
     }
     
-    //@Before
+    @Before
     public void setup() {
-        
+        User user = new User();
+        user.setId(10001L);
+        UserContext.current().setUser(user);
+        UserLogin login = new UserLogin();
+        login.setUserId(100001);
+        UserContext.current().setLogin(login);
     }
     
     //@After
@@ -93,18 +99,13 @@ public class LaunchPadTest extends TestCase {
     }
     @Test
     public void getItemList(){
-        User user = new User();
-        user.setId(10001L);
-        UserContext.current().setUser(user);
-        UserLogin login = new UserLogin();
-        login.setUserId(100001);
-        UserContext.current().setLogin(login);
+        
         
         UserContext.current().getLogin().getLoginToken().getTokenString();
         GetLaunchPadItemsCommand cmd = new GetLaunchPadItemsCommand();
         cmd.setCommunityId(8L);
-        cmd.setItemGroup(ItemGroup.CALLPHONES.getCode());
-        cmd.setItemLocation("/home/Pm");
+        cmd.setItemGroup(ItemGroup.BIZS.getCode());
+        cmd.setItemLocation("/home");
         GetLaunchPadItemsCommandResponse response = launchPadService.getLaunchPadItems(cmd);
         for(LaunchPadItemDTO dto : response.getLaunchPadItems()){
             System.out.println(dto);
@@ -183,7 +184,7 @@ public class LaunchPadTest extends TestCase {
     @SuppressWarnings("unchecked")
     private JSONObject createLayouts() {
         JSONObject root = new JSONObject();                                                                                                             
-        root.put("versionCode", "2015061701");                                                        
+        root.put("versionCode", "2015071301");                                                        
         root.put("versionName", "3.0.0");                                                         
         JSONArray layouts = new JSONArray();                                                                                                            
 
@@ -235,7 +236,7 @@ public class LaunchPadTest extends TestCase {
 
           JSONObject couponGroup = new JSONObject();                                                                                                    
           couponGroup.put("groupName", "");                                                                                                             
-          couponGroup.put("widget", "Coupons");                                                                                                         
+          couponGroup.put("widget", "Navigator");                                                                                                         
           JSONObject couponConfig = new JSONObject();                                                                                                   
           couponConfig.put("itemGroup", "Default");                                                                                                     
           couponGroup.put("instanceConfig", couponConfig);                                                                                              
@@ -268,14 +269,7 @@ public class LaunchPadTest extends TestCase {
           bizGroup.put("separatorFlag", 0); // no separator                                                                                           
           bizGroup.put("separatorHeight", 0);                                                                                                       
           marketGroups.add(bizGroup);
-          
-           
-
-
-//          JSONObject marketLayout = new JSONObject();                                                                                                   
-//          marketLayout.put("layoutName", "ServiceMarketLayout");                                                                                        
-//          marketLayout.put("groups", marketGroups);    
-//          marketLayout.put("displayName", "服务市场");                                                                                               
+                                                                                                        
 //          root.put("layoutName", "ServiceMarketLayout");                                                                                        
 //          root.put("groups", marketGroups);    
 //          root.put("displayName", "服务市场");
@@ -300,9 +294,9 @@ public class LaunchPadTest extends TestCase {
           
           JSONObject pmActionBarGroup = new JSONObject();                                                                                                  
           pmActionBarGroup.put("groupName", "actionBar");                                                                                                           
-          pmActionBarGroup.put("widget", "ActionBar");                                                                                                       
+          pmActionBarGroup.put("widget", "ActionBars");                                                                                                       
           JSONObject pmConfig = new JSONObject();                                                                                                       
-          pmConfig.put("itemGroup", "ActionBar");                                                                                                         
+          pmConfig.put("itemGroup", "ActionBars");                                                                                                         
           pmActionBarGroup.put("instanceConfig", pmConfig);                                                                                                
           pmActionBarGroup.put("style", "Default");                                                                                                        
           pmActionBarGroup.put("defaultOrder", 1);                                                                                                       
@@ -335,36 +329,209 @@ public class LaunchPadTest extends TestCase {
           pmGroups.add(gaPostGroup);
           
           JSONObject callPhoneGroup = new JSONObject();                                                                                                    
-          gaPostGroup.put("groupName", "CallPhone");                                                                                                             
-          gaPostGroup.put("widget", "CallPhones");                                                                                                           
+          callPhoneGroup.put("groupName", "CallPhone");                                                                                                             
+          callPhoneGroup.put("widget", "CallPhones");                                                                                                           
           JSONObject pmCallPhoneConfig = new JSONObject();                                                                                                   
-          pmPostConfig.put("itemGroup", "CallPhones");                                                                                                     
-          gaPostGroup.put("instanceConfig", pmCallPhoneConfig);                                                                                              
-          gaPostGroup.put("style", "Default");                                                                                                          
-          gaPostGroup.put("defaultOrder", 3);                                                                                                         
-          gaPostGroup.put("separatorFlag", 0); // has separator                                                                                       
-          gaPostGroup.put("separatorHeight", 0);                                                                                                    
+          pmCallPhoneConfig.put("itemGroup", "CallPhones");                                                                                                     
+          callPhoneGroup.put("instanceConfig", pmCallPhoneConfig);                                                                                              
+          callPhoneGroup.put("style", "Default");                                                                                                          
+          callPhoneGroup.put("defaultOrder", 3);                                                                                                         
+          callPhoneGroup.put("separatorFlag", 0); // has separator                                                                                       
+          callPhoneGroup.put("separatorHeight", 0);                                                                                                    
           pmGroups.add(callPhoneGroup);
           
+//          root.put("layoutName", "PmLayout");                                                                                                       
+//          root.put("groups", pmGroups);
+//          root.put("displayName", "物业首页");
+          
+       // 业委会相关layout和group                                                                                                                      
+          JSONArray garcGroups = new JSONArray();                                                                                                         
+          
+          JSONObject garcActionBarGroup = new JSONObject();                                                                                                  
+          garcActionBarGroup.put("groupName", "actionBar");                                                                                                           
+          garcActionBarGroup.put("widget", "ActionBars");                                                                                                       
+          JSONObject garcConfig = new JSONObject();                                                                                                       
+          garcConfig.put("itemGroup", "ActionBars");                                                                                                         
+          garcActionBarGroup.put("instanceConfig", garcConfig);                                                                                                
+          garcActionBarGroup.put("style", "Default");                                                                                                        
+          garcActionBarGroup.put("defaultOrder", 1);                                                                                                       
+          garcActionBarGroup.put("separatorFlag", 1); // no separator                                                                                      
+          garcActionBarGroup.put("separatorHeight", 21);                                                                                                     
+          garcGroups.add(garcActionBarGroup);    
 
-//          JSONObject gaLayout = new JSONObject();                                                                                                       
-//          gaLayout.put("layoutName", "PmLayout");                                                                                                       
-//          gaLayout.put("groups", pmGroups);
-//          gaLayout.put("displayName", "物业首页");
-//          layouts.add(gaLayout);                                                                                                     
-          root.put("layoutName", "PmLayout");                                                                                                       
+          JSONObject gracActionGroup = new JSONObject();                                                                                                  
+          gracActionGroup.put("groupName", "");                                                                                                           
+          pmActionGroup.put("widget", "Navigator");                                                                                                     
+          JSONObject gracActionConfig = new JSONObject();                                                                                                 
+          gracActionGroup.put("itemGroup", "GaActions");                                                                                                 
+          gracActionGroup.put("instanceConfig", gracActionConfig);                                                                                          
+          gracActionGroup.put("style", "Metro");                                                                                                           
+          gracActionGroup.put("defaultOrder", 2);                                                                                                       
+          gracActionGroup.put("separatorFlag", 1); // has separator                                                                                     
+          gracActionGroup.put("separatorHeight", 21);                                                                                                  
+          garcGroups.add(pmActionGroup);                                                                                                                  
+
+          JSONObject gracPostGroup = new JSONObject();                                                                                                    
+          gracPostGroup.put("groupName", "");                                                                                                             
+          gracPostGroup.put("widget", "Posts");                                                                                                           
+          JSONObject gracPostConfig = new JSONObject();                                                                                                   
+          gracPostConfig.put("itemGroup", "GaActions");                                                                                                     
+          gracPostGroup.put("instanceConfig", pmPostConfig);                                                                                              
+          gracPostGroup.put("style", "Default");                                                                                                          
+          gracPostGroup.put("defaultOrder", 3);                                                                                                         
+          gracPostGroup.put("separatorFlag", 1); // has separator                                                                                       
+          gracPostGroup.put("separatorHeight", 21);                                                                                                    
+          garcGroups.add(gracPostGroup);
+          
+          JSONObject gracCallPhoneGroup = new JSONObject();                                                                                                    
+          gracCallPhoneGroup.put("groupName", "CallPhone");                                                                                                             
+          gracCallPhoneGroup.put("widget", "CallPhones");                                                                                                           
+          JSONObject gracCallPhoneConfig = new JSONObject();                                                                                                   
+          gracCallPhoneConfig.put("itemGroup", "CallPhones");                                                                                                     
+          gracCallPhoneGroup.put("instanceConfig", pmCallPhoneConfig);                                                                                              
+          gracCallPhoneGroup.put("style", "Default");                                                                                                          
+          gracCallPhoneGroup.put("defaultOrder", 3);                                                                                                         
+          gracCallPhoneGroup.put("separatorFlag", 0); // has separator                                                                                       
+          gracCallPhoneGroup.put("separatorHeight", 0);                                                                                                    
+          garcGroups.add(gracCallPhoneGroup);
+                                                                                                  
+//          root.put("layoutName", "GracLayout");                                                                                                       
+//          root.put("groups", pmGroups);
+//          root.put("displayName", "业委会首页");
+          
+          
+       // 派出所相关layout和group                                                                                                                      
+          JSONArray gapsGroups = new JSONArray();                                                                                                         
+          
+          JSONObject gapsActionBarGroup = new JSONObject();                                                                                                  
+          gapsActionBarGroup.put("groupName", "actionBar");                                                                                                           
+          gapsActionBarGroup.put("widget", "ActionBars");                                                                                                       
+          JSONObject gapsConfig = new JSONObject();                                                                                                       
+          gapsConfig.put("itemGroup", "ActionBars");                                                                                                         
+          gapsActionBarGroup.put("instanceConfig", gapsConfig);                                                                                                
+          gapsActionBarGroup.put("style", "Default");                                                                                                        
+          gapsActionBarGroup.put("defaultOrder", 1);                                                                                                       
+          gapsActionBarGroup.put("separatorFlag", 1); // no separator                                                                                      
+          gapsActionBarGroup.put("separatorHeight", 21);                                                                                                     
+          gapsGroups.add(gapsActionBarGroup);    
+
+          JSONObject gapsActionGroup = new JSONObject();                                                                                                  
+          gapsActionGroup.put("groupName", "");                                                                                                           
+          gapsActionGroup.put("widget", "Navigator");                                                                                                     
+          JSONObject gapsActionConfig = new JSONObject();                                                                                                 
+          gapsActionGroup.put("itemGroup", "GaActions");                                                                                                 
+          gapsActionGroup.put("instanceConfig", gapsActionConfig);                                                                                          
+          gapsActionGroup.put("style", "Metro");                                                                                                           
+          gapsActionGroup.put("defaultOrder", 2);                                                                                                       
+          gapsActionGroup.put("separatorFlag", 1); // has separator                                                                                     
+          gapsActionGroup.put("separatorHeight", 21);                                                                                                  
+          gapsGroups.add(pmActionGroup);                                                                                                                  
+
+          JSONObject gapsPostGroup = new JSONObject();                                                                                                    
+          gapsPostGroup.put("groupName", "");                                                                                                             
+          gapsPostGroup.put("widget", "Posts");                                                                                                           
+          JSONObject gapsPostConfig = new JSONObject();                                                                                                   
+          gapsPostConfig.put("itemGroup", "GaActions");                                                                                                     
+          gapsPostGroup.put("instanceConfig", pmPostConfig);                                                                                              
+          gapsPostGroup.put("style", "Default");                                                                                                          
+          gapsPostGroup.put("defaultOrder", 3);                                                                                                         
+          gapsPostGroup.put("separatorFlag", 1); // has separator                                                                                       
+          gapsPostGroup.put("separatorHeight", 21);                                                                                                    
+          gapsGroups.add(gapsPostGroup);
+          
+          JSONObject gapsCallPhoneGroup = new JSONObject();                                                                                                    
+          gapsCallPhoneGroup.put("groupName", "CallPhone");                                                                                                             
+          gapsCallPhoneGroup.put("widget", "CallPhones");                                                                                                           
+          JSONObject gapsCallPhoneConfig = new JSONObject();                                                                                                   
+          gapsCallPhoneConfig.put("itemGroup", "CallPhones");                                                                                                     
+          gapsCallPhoneGroup.put("instanceConfig", gapsCallPhoneConfig);                                                                                              
+          gapsCallPhoneGroup.put("style", "Default");                                                                                                          
+          gapsCallPhoneGroup.put("defaultOrder", 3);                                                                                                         
+          gapsCallPhoneGroup.put("separatorFlag", 0); // has separator                                                                                       
+          gapsCallPhoneGroup.put("separatorHeight", 0);                                                                                                    
+          gapsGroups.add(gapsCallPhoneGroup);
+                                                                                                  
+//          root.put("layoutName", "GapsLayout");                                                                                                       
+//          root.put("groups", pmGroups);
+//          root.put("displayName", "派出所首页");
+          
+          // 居委相关layout和group                                                                                                                      
+          JSONArray gancGroups = new JSONArray();                                                                                                         
+          
+          JSONObject gancActionBarGroup = new JSONObject();                                                                                                  
+          gancActionBarGroup.put("groupName", "actionBar");                                                                                                           
+          gancActionBarGroup.put("widget", "ActionBars");                                                                                                       
+          JSONObject gancConfig = new JSONObject();                                                                                                       
+          gancConfig.put("itemGroup", "ActionBars");                                                                                                         
+          gancActionBarGroup.put("instanceConfig", gancConfig);                                                                                                
+          gancActionBarGroup.put("style", "Default");                                                                                                        
+          gancActionBarGroup.put("defaultOrder", 1);                                                                                                       
+          gancActionBarGroup.put("separatorFlag", 1); // no separator                                                                                      
+          gancActionBarGroup.put("separatorHeight", 21);                                                                                                     
+          gancGroups.add(gancActionBarGroup);    
+
+          JSONObject gancActionGroup = new JSONObject();                                                                                                  
+          gancActionGroup.put("groupName", "");                                                                                                           
+          gancActionGroup.put("widget", "Navigator");                                                                                                     
+          JSONObject gancActionConfig = new JSONObject();                                                                                                 
+          gancActionGroup.put("itemGroup", "GaActions");                                                                                                 
+          gancActionGroup.put("instanceConfig", gancActionConfig);                                                                                          
+          gancActionGroup.put("style", "Metro");                                                                                                           
+          gancActionGroup.put("defaultOrder", 2);                                                                                                       
+          gancActionGroup.put("separatorFlag", 1); // has separator                                                                                     
+          gancActionGroup.put("separatorHeight", 21);                                                                                                  
+          garcGroups.add(pmActionGroup);                                                                                                                  
+
+          JSONObject gancPostGroup = new JSONObject();                                                                                                    
+          gancPostGroup.put("groupName", "");                                                                                                             
+          gancPostGroup.put("widget", "Posts");                                                                                                           
+          JSONObject gancPostConfig = new JSONObject();                                                                                                   
+          gancPostConfig.put("itemGroup", "GaActions");                                                                                                     
+          gancPostGroup.put("instanceConfig", pmPostConfig);                                                                                              
+          gancPostGroup.put("style", "Default");                                                                                                          
+          gancPostGroup.put("defaultOrder", 3);                                                                                                         
+          gancPostGroup.put("separatorFlag", 1); // has separator                                                                                       
+          gancPostGroup.put("separatorHeight", 21);                                                                                                    
+          gancGroups.add(gancPostGroup);
+          
+          JSONObject gancCallPhoneGroup = new JSONObject();                                                                                                    
+          gancCallPhoneGroup.put("groupName", "CallPhone");                                                                                                             
+          gancCallPhoneGroup.put("widget", "CallPhones");                                                                                                           
+          JSONObject gancCallPhoneConfig = new JSONObject();                                                                                                   
+          gancCallPhoneConfig.put("itemGroup", "CallPhones");                                                                                                     
+          gancCallPhoneGroup.put("instanceConfig", gancCallPhoneConfig);                                                                                              
+          gancCallPhoneGroup.put("style", "Default");                                                                                                          
+          gancCallPhoneGroup.put("defaultOrder", 3);                                                                                                         
+          gancCallPhoneGroup.put("separatorFlag", 0); // has separator                                                                                       
+          gancCallPhoneGroup.put("separatorHeight", 0);                                                                                                    
+          gancGroups.add(gancCallPhoneGroup);
+                                                                                                  
+          root.put("layoutName", "GancLayout");                                                                                                       
           root.put("groups", pmGroups);
-          root.put("displayName", "物业首页");        
-
-          //root.put("layouts", marketLayout);
+          root.put("displayName", "居委会首页");
           System.out.println(root.toString());
           return root;
     }
+    
     @Test
     public void findLaunchPadLayout(){
         GetLaunchPadLayoutByVersionCodeCommand cmd = new GetLaunchPadLayoutByVersionCodeCommand();
         cmd.setVersionCode(3L);
         System.out.println(this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd));
     }
-   
+    
+    @Test
+    public void findLaunchPadPostActionCategories(){
+        //获取帖子分类列表
+        FindLaunchPadPostActionItemCategoriesCommand cmd = new FindLaunchPadPostActionItemCategoriesCommand();
+        cmd.setCommunityId(8l);
+        cmd.setItemGroup("GaActions");
+        cmd.setItemLocation("/home/Pm");
+        List<LaunchPadPostActionCategoryDTO> result = launchPadService.findLaunchPadPostActionCategories(cmd);
+        if(result != null && !result.isEmpty()){
+            result.forEach(r ->{
+                System.out.println(r);
+            });
+        }
+    }
 }

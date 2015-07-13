@@ -214,7 +214,19 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-
+		
+		if(community.getCityId() == null || community.getCityId().longValue() == 0){
+		    LOGGER.error("Community missing infomation,cityId is null.communityId=" + cmd.getCommunityId());
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_CITY_NOT_EXIST, 
+                    "Community missing infomation,cityId is null.");
+		}
+		List<CommunityGeoPoint> geoPoints = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+		if(geoPoints == null || geoPoints.isEmpty()){
+		    LOGGER.error("Community missing infomation,community geopoint is null.communityId=" + cmd.getCommunityId());
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_GEOPOIN_NOT_EXIST, 
+                    "Community missing infomation,community geopoint is null.");
+		}
+		
 		community.setOperatorUid(userId);
 		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		this.communityProvider.updateCommunity(community);
