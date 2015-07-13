@@ -3,6 +3,7 @@ package com.everhomes.recommend;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.jasper.tagplugins.jstl.core.If;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,8 @@ public class RecommendCommunityAction implements Runnable {
         if(userContacts == null || userContacts.isEmpty())
             return;
         userContacts.forEach(u ->{
+            if(u.getUid().longValue() == userId)
+                return;
             Recommendation r = new Recommendation();
             r.setAppid(0l);
             r.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -102,6 +105,8 @@ public class RecommendCommunityAction implements Runnable {
         if(groupMembers != null && !groupMembers.isEmpty()){
             
             groupMembers.forEach(m ->{
+                if(m.getMemberId().longValue() == userId)
+                    return;
                 Recommendation r = new Recommendation();
                 r.setAppid(0l);
                 r.setCreateTime(new Timestamp(System.currentTimeMillis()));
