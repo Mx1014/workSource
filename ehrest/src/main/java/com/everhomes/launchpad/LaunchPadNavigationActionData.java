@@ -18,11 +18,11 @@ import com.everhomes.util.StringHelper;
  */
 public class LaunchPadNavigationActionData implements Serializable{
     private static final long serialVersionUID = -8762650365959360709L;
-    //"itemLocation":"/home/Pm","layoutName":"PmLayout","cellPhones":"[15875300001,15875300002]","title":"xx"} 
+    //"itemLocation":"/home/Pm","layoutName":"PmLayout","callPhones":"[15875300001,15875300002]","title":"xx"} 
     private String itemLocation;
     private String layoutName;
     @ItemType(String.class)
-    private ArrayList<String> cellPhones;
+    private ArrayList<String> callPhones;
     private String title;
     private Long appId;
     private String entityTag;
@@ -40,11 +40,11 @@ public class LaunchPadNavigationActionData implements Serializable{
         this.layoutName = layoutName;
     }
 
-    public ArrayList<String> getCellPhones() {
-        return cellPhones;
+    public ArrayList<String> getCallPhones() {
+        return callPhones;
     }
-    public void setCellPhones(ArrayList<String> cellPhones) {
-        this.cellPhones = cellPhones;
+    public void setCallPhones(ArrayList<String> callPhones) {
+        this.callPhones = callPhones;
     }
     public String getTitle() {
         return title;

@@ -15,15 +15,24 @@ import com.everhomes.util.StringHelper;
 public class LaunchPadAppOpenAppActionData implements Serializable{
 
     private static final long serialVersionUID = -5364366676212368720L;
-    //{"phone": "15875301110"}  
-    private String phone;
+    //{"platform": "","embedded_json":""}  
+    private String flatform;
+    private String embedded_json;
 
-    public String getPhone() {
-        return phone;
+    public String getFlatform() {
+        return flatform;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setFlatform(String flatform) {
+        this.flatform = flatform;
+    }
+
+    public String getEmbedded_json() {
+        return embedded_json;
+    }
+
+    public void setEmbedded_json(String embedded_json) {
+        this.embedded_json = embedded_json;
     }
 
     @Override
