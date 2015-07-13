@@ -22,6 +22,7 @@ package com.everhomes.launchpad;
  * <li>QRCODE_SCAN(16): 二维码扫描</li>
  * <li>PHONE_CALL(17): 拨打电话</li>
  * <li>OPEN_APP(18): 打开应用</li>
+ * <li>TOPIC_ACTION(19): 发帖动作</li>
  * </ul>
  */
 public enum ActionType {
@@ -30,7 +31,7 @@ public enum ActionType {
       NONE((byte)0),MORE_BUTTON((byte)1),NAVIGATION((byte)2),FAMILY_DETAILS((byte)3),GROUP_DETAILS((byte)4),
       WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),TOPIC_DETAILS((byte)9),
       CHECKIN_ACTIVITY((byte)10),OPEN_MSG_SESSION((byte)11),SEND_MSG((byte)12),ZUOLIN_URL((byte)13),
-      THIRDPART_URL((byte)14),TOPIC_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),OPEN_APP((byte)18);
+      THIRDPART_URL((byte)14),TOPIC_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),OPEN_APP((byte)18),TOPIC_ACTION((byte)19);
     
     private byte code;
     

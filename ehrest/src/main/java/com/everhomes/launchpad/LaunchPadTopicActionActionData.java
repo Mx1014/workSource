@@ -6,12 +6,12 @@ import com.everhomes.util.StringHelper;
 
 
 /**
- * <ul>actionType为post时点击item需要的参数
+ * <ul>actionType为topic action时点击item需要的参数
  * <li>forumId: 论坛id</li>
  * <li>postId: 帖子id</li>
  * </ul>
  */
-public class LaunchPadPostActionActionData implements Serializable{
+public class LaunchPadTopicActionActionData implements Serializable{
     private static final long serialVersionUID = -4277718167680363828L;
 //{"contentCategory":9,"actionCategory":3092,"forumId":1,"entityTag":"PM"}  
     private Long forumId;
