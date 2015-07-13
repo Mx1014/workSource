@@ -8,14 +8,17 @@ public interface LaunchPadConstants {
     public static final String TOKEN = "token"; 
     public static final String URL = "url";
     public static final String CONTENT_CATEGORY = "contentCategory"; 
+    public static final String CALLPHONES = "callPhones"; 
     
 
     //Item Group
-    public static final String DEFAULT = "Default";
-    public static final String BANNERS = "Banners";
-    public static final String GOVAGENCIES = "GovAgencies";
-    public static final String BIZS = "Bizs";
-    public static final String GAACTIONS = "GaActions";
+    public static final String GROUP_DEFAULT = "Default";
+    public static final String GROUP_BANNERS = "Banners";
+    public static final String GROUP_GOVAGENCIES = "GovAgencies";
+    public static final String GROUP_BIZS = "Bizs";
+    public static final String GROUP_GAACTIONS = "GaActions";
+    public static final String GROUP_ACTIONBARS = "ActionBars";
+    public static final String GROUP_CALLPHONES = "CallPhones";
 
     //Action Type
     public static final int NONE = 0;

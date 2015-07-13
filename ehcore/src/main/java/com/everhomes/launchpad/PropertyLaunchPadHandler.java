@@ -40,7 +40,7 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
         try{
             if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
                 jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
-                if(jsonObject.get("cellPhones") != null){
+                if(jsonObject.get("calllPhones") != null){
                     ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
                     cmd.setCommunityId(commnunityId);
                     List<String> contacts = new ArrayList<String>();
@@ -52,7 +52,7 @@ public class PropertyLaunchPadHandler implements LaunchPadHandler {
                             }
                         });
                     }
-                    jsonObject.put("cellPhones",contacts);
+                    jsonObject.put("calllPhones",contacts);
                 }
             }
             jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);

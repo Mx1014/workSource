@@ -26,6 +26,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },
@@ -95,13 +96,18 @@ public class LaunchPadTest extends TestCase {
         User user = new User();
         user.setId(10001L);
         UserContext.current().setUser(user);
+        UserLogin login = new UserLogin();
+        login.setUserId(100001);
+        UserContext.current().setLogin(login);
+        
+        UserContext.current().getLogin().getLoginToken().getTokenString();
         GetLaunchPadItemsCommand cmd = new GetLaunchPadItemsCommand();
         cmd.setCommunityId(8L);
-        cmd.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
-        cmd.setItemLocation("/home");
+        cmd.setItemGroup(ItemGroup.CALLPHONES.getCode());
+        cmd.setItemLocation("/home/Pm");
         GetLaunchPadItemsCommandResponse response = launchPadService.getLaunchPadItems(cmd);
         for(LaunchPadItemDTO dto : response.getLaunchPadItems()){
-            System.out.println(dto.getActionData());
+            System.out.println(dto);
         }
     }
     @Test
@@ -177,26 +183,27 @@ public class LaunchPadTest extends TestCase {
     @SuppressWarnings("unchecked")
     private JSONObject createLayouts() {
         JSONObject root = new JSONObject();                                                                                                             
-        root.put("versionCode", "Long, 说明：整个layout文件的版本号，用于作逻辑，如2015061701");                                                        
-        root.put("versionName", "String, 说明：整个layout文件的版本号名称，用于显示，如3.0.0");                                                         
+        root.put("versionCode", "2015061701");                                                        
+        root.put("versionName", "3.0.0");                                                         
         JSONArray layouts = new JSONArray();                                                                                                            
 
-        // 示例layout和group                                                                                                                            
+        // 示例layout和group                                                                                                                           
         JSONArray exampleGroups = new JSONArray();                                                                                                      
         JSONObject exampleBannerGroup = new JSONObject();                                                                                               
         exampleBannerGroup.put("groupName", "String, 说明：分组显示名称，用于显示，若显示时不需要名称则留空");                                          
         exampleBannerGroup.put("widget", "String, 说明：组内控件，如Navigator、Banners、Coupons、Posts");                                               
         exampleBannerGroup.put("instanceConfig", "String, json格式，说明：widget实例相关的配置，不需要时为空，如Default、GovAgencies、Bizs、GaActions");
-          exampleBannerGroup.put("style", "String, 说明：组内控件风格，如Default、Win8");                                                               
+          exampleBannerGroup.put("style", "String, 说明：组内控件风格，如Default、Metro、Light");                                                               
           exampleBannerGroup.put("defaultOrder", "Integer, 组排列顺序");                                                                                
           exampleBannerGroup.put("separatorFlag", "Byte, 说明：组底部是否有分隔条，0: no, 1: yes");                                                     
-          exampleBannerGroup.put("separatorHeight", "Double, 说明：组底部分隔条高度");                                                                  
+          exampleBannerGroup.put("separatorHeight", "Integer, 说明：组底部分隔条高度,单位px");                                                                  
           exampleGroups.add(exampleBannerGroup);                                                                                                        
 
           JSONObject exampleLayout = new JSONObject();                                                                                                  
           exampleLayout.put("layoutName", "String, 说明：单个layout的名称，用于识别是哪个layout，如ServiceMarket");                                     
-          exampleLayout.put("groups", exampleGroups);                                                                                                   
-          layouts.add(exampleLayout);                                                                                                                   
+          exampleLayout.put("groups", exampleGroups);
+          exampleLayout.put("displayName", "当前layout的标题");
+          //layouts.add(exampleLayout);                                                                                                                   
 
 
 
@@ -209,9 +216,9 @@ public class LaunchPadTest extends TestCase {
           mktBannerConfig.put("itemGroup", "Default");                                                                                                  
           mktBannerGroup.put("instanceConfig", mktBannerConfig);                                                                                        
           mktBannerGroup.put("style", "Default");                                                                                                       
-          mktBannerGroup.put("defaultOrder", "1");                                                                                                      
-          mktBannerGroup.put("separatorFlag", "0"); // no separator                                                                                     
-          mktBannerGroup.put("separatorHeight", "");                                                                                                    
+          mktBannerGroup.put("defaultOrder", 1);                                                                                                      
+          mktBannerGroup.put("separatorFlag", 0); // no separator                                                                                     
+          mktBannerGroup.put("separatorHeight", 0);                                                                                                    
           marketGroups.add(mktBannerGroup);                                                                                                             
 
           JSONObject gaGroup = new JSONObject();                                                                                                        
@@ -220,10 +227,10 @@ public class LaunchPadTest extends TestCase {
           JSONObject gaConfig = new JSONObject();                                                                                                       
           gaConfig.put("itemGroup", "GovAgencies");                                                                                                     
           gaGroup.put("instanceConfig", gaConfig);                                                                                                      
-          gaGroup.put("style", "Default");                                                                                                              
-          gaGroup.put("defaultOrder", "2");                                                                                                             
-          gaGroup.put("separatorFlag", "1"); // has separator                                                                                           
-          gaGroup.put("separatorHeight", "0.3");                                                                                                        
+          gaGroup.put("style", "Light");                                                                                                              
+          gaGroup.put("defaultOrder", 2);                                                                                                             
+          gaGroup.put("separatorFlag", 1); // has separator                                                                                           
+          gaGroup.put("separatorHeight", 21);                                                                                                        
           marketGroups.add(gaGroup);                                                                                                                    
 
           JSONObject couponGroup = new JSONObject();                                                                                                    
@@ -233,11 +240,23 @@ public class LaunchPadTest extends TestCase {
           couponConfig.put("itemGroup", "Default");                                                                                                     
           couponGroup.put("instanceConfig", couponConfig);                                                                                              
           couponGroup.put("style", "Default");                                                                                                          
-          couponGroup.put("defaultOrder", "3");                                                                                                         
-          couponGroup.put("separatorFlag", "1"); // has separator                                                                                       
-          couponGroup.put("separatorHeight", "0.3");                                                                                                    
-          marketGroups.add(couponGroup);                                                                                                                
+          couponGroup.put("defaultOrder", 3);                                                                                                         
+          couponGroup.put("separatorFlag", 1); // has separator                                                                                       
+          couponGroup.put("separatorHeight", 21);                                                                                                    
+          marketGroups.add(couponGroup); 
 
+          JSONObject actionGroup = new JSONObject();                                                                                                  
+          actionGroup.put("groupName", "");                                                                                                           
+          actionGroup.put("widget", "Navigator");                                                                                                     
+          JSONObject actionConfig = new JSONObject();                                                                                                 
+          actionConfig.put("itemGroup", "GaActions");                                                                                                 
+          actionGroup.put("instanceConfig", actionConfig);                                                                                          
+          actionGroup.put("style", "Metro");                                                                                                           
+          actionGroup.put("defaultOrder", 4);                                                                                                       
+          actionGroup.put("separatorFlag", 1); // has separator                                                                                     
+          actionGroup.put("separatorHeight", 21);                                                                                                  
+          marketGroups.add(actionGroup);      
+          
           JSONObject bizGroup = new JSONObject();                                                                                                       
           bizGroup.put("groupName", "热销商品");                                                                                                        
           bizGroup.put("widget", "Navigator");                                                                                                          
@@ -245,32 +264,51 @@ public class LaunchPadTest extends TestCase {
           bizConfig.put("itemGroup", "Bizs");                                                                                                           
           bizGroup.put("instanceConfig", bizConfig);                                                                                                    
           bizGroup.put("style", "Default");                                                                                                             
-          bizGroup.put("defaultOrder", "4");                                                                                                            
-          bizGroup.put("separatorFlag", "0"); // no separator                                                                                           
-          bizGroup.put("separatorHeight", "0.3");                                                                                                       
-          marketGroups.add(bizGroup);                                                                                                                   
+          bizGroup.put("defaultOrder", 5);                                                                                                            
+          bizGroup.put("separatorFlag", 0); // no separator                                                                                           
+          bizGroup.put("separatorHeight", 0);                                                                                                       
+          marketGroups.add(bizGroup);
+          
+           
 
 
-          JSONObject marketLayout = new JSONObject();                                                                                                   
-          marketLayout.put("layoutName", "ServiceMarketLayout");                                                                                        
-          marketLayout.put("groups", marketGroups);                                                                                                     
-          layouts.add(marketLayout);                                                                                                                    
+//          JSONObject marketLayout = new JSONObject();                                                                                                   
+//          marketLayout.put("layoutName", "ServiceMarketLayout");                                                                                        
+//          marketLayout.put("groups", marketGroups);    
+//          marketLayout.put("displayName", "服务市场");                                                                                               
+//          root.put("layoutName", "ServiceMarketLayout");                                                                                        
+//          root.put("groups", marketGroups);    
+//          root.put("displayName", "服务市场");
+          
+          //layouts.add(marketLayout);                                                                                                                    
 
 
 
           // 物业相关layout和group                                                                                                                      
           JSONArray pmGroups = new JSONArray();                                                                                                         
-          JSONObject pmBannerGroup = new JSONObject();                                                                                                  
-          pmBannerGroup.put("groupName", "");                                                                                                           
-          pmBannerGroup.put("widget", "Banners");                                                                                                       
+//          JSONObject pmBannerGroup = new JSONObject();                                                                                                  
+//          pmBannerGroup.put("groupName", "");                                                                                                           
+//          pmBannerGroup.put("widget", "Banners");                                                                                                       
+//          JSONObject pmConfig = new JSONObject();                                                                                                       
+//          pmConfig.put("itemGroup", "Default");                                                                                                         
+//          pmBannerGroup.put("instanceConfig", pmConfig);                                                                                                
+//          pmBannerGroup.put("style", "Default");                                                                                                        
+//          pmBannerGroup.put("defaultOrder", 1);                                                                                                       
+//          pmBannerGroup.put("separatorFlag", 0); // no separator                                                                                      
+//          pmBannerGroup.put("separatorHeight", 0);                                                                                                     
+//          pmGroups.add(pmBannerGroup);
+          
+          JSONObject pmActionBarGroup = new JSONObject();                                                                                                  
+          pmActionBarGroup.put("groupName", "actionBar");                                                                                                           
+          pmActionBarGroup.put("widget", "ActionBar");                                                                                                       
           JSONObject pmConfig = new JSONObject();                                                                                                       
-          pmConfig.put("itemGroup", "Default");                                                                                                         
-          pmBannerGroup.put("instanceConfig", pmConfig);                                                                                                
-          pmBannerGroup.put("style", "Default");                                                                                                        
-          pmBannerGroup.put("defaultOrder", "1");                                                                                                       
-          pmBannerGroup.put("separatorFlag", "0"); // no separator                                                                                      
-          pmBannerGroup.put("separatorHeight", "");                                                                                                     
-          pmGroups.add(pmBannerGroup);                                                                                                                  
+          pmConfig.put("itemGroup", "ActionBar");                                                                                                         
+          pmActionBarGroup.put("instanceConfig", pmConfig);                                                                                                
+          pmActionBarGroup.put("style", "Default");                                                                                                        
+          pmActionBarGroup.put("defaultOrder", 1);                                                                                                       
+          pmActionBarGroup.put("separatorFlag", 1); // no separator                                                                                      
+          pmActionBarGroup.put("separatorHeight", 21);                                                                                                     
+          pmGroups.add(pmActionBarGroup);    
 
           JSONObject pmActionGroup = new JSONObject();                                                                                                  
           pmActionGroup.put("groupName", "");                                                                                                           
@@ -278,30 +316,48 @@ public class LaunchPadTest extends TestCase {
           JSONObject pmActionConfig = new JSONObject();                                                                                                 
           pmActionConfig.put("itemGroup", "GaActions");                                                                                                 
           pmActionGroup.put("instanceConfig", pmActionConfig);                                                                                          
-          pmActionGroup.put("style", "Win8");                                                                                                           
-          pmActionGroup.put("defaultOrder", "2");                                                                                                       
-          pmActionGroup.put("separatorFlag", "1"); // has separator                                                                                     
-          pmActionGroup.put("separatorHeight", "0.3");                                                                                                  
+          pmActionGroup.put("style", "Metro");                                                                                                           
+          pmActionGroup.put("defaultOrder", 2);                                                                                                       
+          pmActionGroup.put("separatorFlag", 1); // has separator                                                                                     
+          pmActionGroup.put("separatorHeight", 21);                                                                                                  
           pmGroups.add(pmActionGroup);                                                                                                                  
 
           JSONObject gaPostGroup = new JSONObject();                                                                                                    
           gaPostGroup.put("groupName", "");                                                                                                             
           gaPostGroup.put("widget", "Posts");                                                                                                           
           JSONObject pmPostConfig = new JSONObject();                                                                                                   
-          pmPostConfig.put("itemGroup", "Default");                                                                                                     
+          pmPostConfig.put("itemGroup", "GaActions");                                                                                                     
           gaPostGroup.put("instanceConfig", pmPostConfig);                                                                                              
           gaPostGroup.put("style", "Default");                                                                                                          
-          gaPostGroup.put("defaultOrder", "3");                                                                                                         
-          gaPostGroup.put("separatorFlag", "1"); // has separator                                                                                       
-          gaPostGroup.put("separatorHeight", "0.3");                                                                                                    
-          pmGroups.add(gaPostGroup);                                                                                                                    
+          gaPostGroup.put("defaultOrder", 3);                                                                                                         
+          gaPostGroup.put("separatorFlag", 1); // has separator                                                                                       
+          gaPostGroup.put("separatorHeight", 21);                                                                                                    
+          pmGroups.add(gaPostGroup);
+          
+          JSONObject callPhoneGroup = new JSONObject();                                                                                                    
+          gaPostGroup.put("groupName", "CallPhone");                                                                                                             
+          gaPostGroup.put("widget", "CallPhones");                                                                                                           
+          JSONObject pmCallPhoneConfig = new JSONObject();                                                                                                   
+          pmPostConfig.put("itemGroup", "CallPhones");                                                                                                     
+          gaPostGroup.put("instanceConfig", pmCallPhoneConfig);                                                                                              
+          gaPostGroup.put("style", "Default");                                                                                                          
+          gaPostGroup.put("defaultOrder", 3);                                                                                                         
+          gaPostGroup.put("separatorFlag", 0); // has separator                                                                                       
+          gaPostGroup.put("separatorHeight", 0);                                                                                                    
+          pmGroups.add(callPhoneGroup);
+          
 
-          JSONObject gaLayout = new JSONObject();                                                                                                       
-          gaLayout.put("layoutName", "PmLayout");                                                                                                       
-          gaLayout.put("groups", pmGroups);                                                                                                             
-          layouts.add(gaLayout);                                                                                                                        
+//          JSONObject gaLayout = new JSONObject();                                                                                                       
+//          gaLayout.put("layoutName", "PmLayout");                                                                                                       
+//          gaLayout.put("groups", pmGroups);
+//          gaLayout.put("displayName", "物业首页");
+//          layouts.add(gaLayout);                                                                                                     
+          root.put("layoutName", "PmLayout");                                                                                                       
+          root.put("groups", pmGroups);
+          root.put("displayName", "物业首页");        
 
-          root.put("layouts", layouts);
+          //root.put("layouts", marketLayout);
+          System.out.println(root.toString());
           return root;
     }
     @Test

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import com.everhomes.bootstrap.PlatformContext;
+
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -24,9 +25,12 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.organization.pm.PropCommunityContactDTO;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -114,14 +118,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         try{
             allItems.forEach((r) ->{
-                LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getAppId());
-                if(handler == null){
-                    LOGGER.error("Unable to find launch pad handler.appId=" + r.getAppId());
+//                LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getAppId());
+//                if(handler == null){
+//                    LOGGER.error("Unable to find launch pad handler.appId=" + r.getAppId());
 //                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //                            "Unable to find launch pad handler.");
-                }
-                LaunchPadItem  item = handler.accesProcessLaunchPadItem(token, userId, communityId, r);
-                LaunchPadItemDTO itemDTO = ConvertHelper.convert(item, LaunchPadItemDTO.class);
+//                }
+//                LaunchPadItem  item = handler.accesProcessLaunchPadItem(token, userId, communityId, r);
+                LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+                itemDTO.setActionData(parserJson(token,userId, communityId, r));
                 itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 result.add(itemDTO);
                
@@ -137,10 +142,52 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             
             return response;
         }catch(Exception e){
-            LOGGER.error("Unable to find launch pad handler.",e);
+            LOGGER.error("Process item aciton data is error.",e);
             return null;
         }
         
+    }
+    
+    @SuppressWarnings("unchecked")
+    private String parserJson(String userToken,long userId, long commnunityId,LaunchPadItem launchPadItem) {
+        JSONObject jsonObject = new JSONObject();
+        try{
+            if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
+                jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
+                if(launchPadItem.getItemGroup().equals(LaunchPadConstants.GROUP_CALLPHONES)){ 
+                    if(jsonObject.get(LaunchPadConstants.CALLPHONES) != null ){
+                        ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
+                        cmd.setCommunityId(commnunityId);
+                        List<String> contacts = new ArrayList<String>();
+                        List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
+                        if(dtos != null && !dtos.isEmpty()){
+                            dtos.forEach(r ->{
+                                if(r.getContactType() == IdentifierType.MOBILE.getCode()){
+                                    contacts.add(r.getContactToken());
+                                }
+                            });
+                        }
+                        jsonObject.put(LaunchPadConstants.CALLPHONES,contacts);
+                    }
+                }
+                
+                if(launchPadItem.getActionType() == ActionType.THIRDPART_URL.getCode()){
+                    Community community = communityProvider.findCommunityById(commnunityId);
+                    long cityId = community == null ? 0 : community.getCityId();
+                    jsonObject.put(LaunchPadConstants.TOKEN, userToken);
+                    String url = (String) jsonObject.get(LaunchPadConstants.URL);
+                    if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
+                        url = url + "&userId=" + userId + "&cityId=" + cityId;
+                    }
+                    jsonObject.put(LaunchPadConstants.URL, url);
+                  }
+            }
+            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
+        }catch(Exception e){
+            LOGGER.error("Parser json is error,userToken=" + userToken + ",communityId=" + commnunityId,e.getMessage());
+        }
+        
+        return jsonObject.toJSONString();
     }
     
     

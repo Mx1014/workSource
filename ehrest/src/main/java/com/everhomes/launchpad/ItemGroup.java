@@ -7,10 +7,12 @@ package com.everhomes.launchpad;
  * <li>GOVAGENCIES: 首页政府部门（物业，公安，居委等）</li>
  * <li>BIZS: 商家</li>
  * <li>GAACTIONS: 政府相关，发帖动作（报修，投诉，建议，缴费等）</li>
+ * <li>ACTIONBARS: 工具栏</li>
+ * <li>CALLPHONES: 电话</li>
  * </ul>
  */
 public enum ItemGroup {
-    DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions");
+    DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones");
     
     private String code;
        
