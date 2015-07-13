@@ -678,15 +678,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     	List<OrganizationCommunityDTO> members = new ArrayList<OrganizationCommunityDTO>();
     	if(result != null && result.size() > 0){
     		for (OrganizationCommunity organizationCommunity : result) {
-    			OrganizationCommunityDTO dto = new OrganizationCommunityDTO();
-    			Organization organization = organizationProvider.findOrganizationById(organizationCommunity.getOrganizationId());
+    			OrganizationCommunityDTO dto = ConvertHelper.convert(organizationCommunity, OrganizationCommunityDTO.class);
     			Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
-    			dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
-    			dto.setOrganization(ConvertHelper.convert(organization,OrganizationDTO.class));
+    			dto.setCommunityName(community.getName());
     			members.add(dto);
 			}
     	}
-    	response.setMembers(members);
+    	response.setCommunities(members);
     	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
     	return response;
     }
