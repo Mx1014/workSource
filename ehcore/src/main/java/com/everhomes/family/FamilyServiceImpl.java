@@ -771,7 +771,7 @@ public class FamilyServiceImpl implements FamilyService {
             setCurrentFamilyAfterApproval(memberUid,familyId,0);
             
             //通知小区用户(通知通讯录好友)有新用户入住
-            recommendationService.communityNotify(userId, group.getIntegralTag1() , group.getIntegralTag2());
+            recommendationService.communityNotify(memberUid, group.getIntegralTag1() , group.getIntegralTag2());
             //积分
             AddUserPointCommand pointCmd=new AddUserPointCommand(user.getId(), PointType.ADDRESS_APPROVAL.name(), 
                     userPointService.getItemPoint(PointType.ADDRESS_APPROVAL), memberUid); 
