@@ -1,13 +1,18 @@
 package com.everhomes.activity;
 
 import java.util.List;
+
+import com.everhomes.discover.ItemType;
 /**
  * 
  * @author elians
  *pageAnchor:分页参数
  */
 public class ListNearbyActivitiesResponse {
+    
+    @ItemType(ActivityDTO.class)
     private List<ActivityDTO> activities;
+    
     private Long pageAnchor;
 
     public List<ActivityDTO> getActivities() {

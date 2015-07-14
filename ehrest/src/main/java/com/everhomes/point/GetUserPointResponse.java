@@ -2,6 +2,8 @@ package com.everhomes.point;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * 
  * @author elians
@@ -13,7 +15,10 @@ import java.util.List;
  */
 public class GetUserPointResponse {
     private Long uid;
+    
+    @ItemType(UserScoreDTO.class)
     private List<UserScoreDTO> userPoints;
+    
     private Long nextPageAnchor;
 
     public GetUserPointResponse(Long uid, List<UserScoreDTO> userPoints, Long nextPageAnchor) {

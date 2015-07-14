@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.admin;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,8 +14,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Zip;
+import org.apache.tools.ant.types.FileSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
@@ -59,10 +69,12 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserLoginDTO;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.FileHelper;
 import com.everhomes.util.ReflectionHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.ZipHelper;
 
 /**
  * Infrastructure Administration API controller
@@ -216,6 +228,15 @@ public class AdminController extends ControllerBase {
             List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
             for(RestMethod restMethod: apiMethods)
                 generator.generateControllerPojos(restMethod, context);
+            
+            File srcDir = new File(this.destinationDir);
+            File dstFile = srcDir.getParentFile();
+            if(!dstFile.exists()) {
+                dstFile.mkdirs();
+            }
+            dstFile = new File(dstFile, "ehng-ios.zip");
+            
+            ZipHelper.compress(this.destinationDir, dstFile.getAbsolutePath());
         } else {
             JavaGenerator generator = new JavaGenerator();
 
@@ -556,5 +577,41 @@ public class AdminController extends ControllerBase {
         }
         List<UserLogin> logins = this.userService.listUserLogins(uid);
         return new RestResponse(logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList()));
+    }
+    
+    @RequireAuthentication(false)
+    @RequestMapping(value="getIosZip")
+    public ModelAndView getIosZip(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        
+        java.io.BufferedInputStream bis = null;  
+        java.io.BufferedOutputStream bos = null;  
+        try {  
+            File srcDir = new File(this.destinationDir);
+            File dstFile = srcDir.getParentFile();
+            if(!dstFile.exists()) {
+                dstFile.mkdirs();
+            }
+            File zipFile = new File(dstFile, "ehng-ios.zip");
+            String fileName = zipFile.getName();
+            
+            long fileLength = zipFile.length();
+            response.setContentType("application/octet-stream;");
+            response.setHeader("Content-disposition", "attachment; filename="
+                    + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+            response.setHeader("Content-Length", String.valueOf(fileLength));  
+
+            bis = new BufferedInputStream(new FileInputStream(zipFile));
+            bos = new BufferedOutputStream(response.getOutputStream());
+            
+            FileHelper.readAndWriteStream(bis, bos);
+        } catch (Exception e) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Failed to download the package file");
+        } finally {  
+            FileHelper.closeInputStream(bis);
+            FileHelper.closeOuputStream(bos);
+        }          
+
+        return null;
     }
 }

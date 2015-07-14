@@ -18,7 +18,7 @@ public class ListOrganizationCommunityCommandResponse {
 	private Integer nextPageOffset;
 	
 	@ItemType(OrganizationCommunityDTO.class)
-    private List<OrganizationCommunityDTO> members;
+    private List<OrganizationCommunityDTO> communities;
 	public ListOrganizationCommunityCommandResponse() {
     }
 	
@@ -30,12 +30,13 @@ public class ListOrganizationCommunityCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	public List<OrganizationCommunityDTO> getMembers() {
-		return members;
+	
+	public List<OrganizationCommunityDTO> getCommunities() {
+		return communities;
 	}
 
-	public void setMembers(List<OrganizationCommunityDTO> members) {
-		this.members = members;
+	public void setCommunities(List<OrganizationCommunityDTO> communities) {
+		this.communities = communities;
 	}
 
 	@Override

@@ -15,26 +15,15 @@ import com.everhomes.discover.ItemType;
  *
  */
 public class IgnoreRecommendCommand {
-    @NotNull
-    private Long userId;
-    
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-    
     @ItemType(IgnoreRecommandItem.class)
-    public List<IgnoreRecommandItem> recommandItems;
+    public List<IgnoreRecommandItem> recommendItems;
 
-    public List<IgnoreRecommandItem> getRecommandItems() {
-        return recommandItems;
+    public List<IgnoreRecommandItem> getRecommendItems() {
+        return recommendItems;
     }
 
-    public void setRecommandItems(List<IgnoreRecommandItem> recommandItems) {
-        this.recommandItems = recommandItems;
+    public void setRecommendItems(List<IgnoreRecommandItem> recommendItems) {
+        this.recommendItems = recommendItems;
     }
     
     

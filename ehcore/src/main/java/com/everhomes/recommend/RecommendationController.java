@@ -96,9 +96,12 @@ public class RecommendationController extends ControllerBase{
                     , PaginationConfigHelper.getPageSize(configProvider, null));
             
             for(Recommendation rec : recommends) {
-                RecommendUserInfo reUser = new RecommendUserInfo();
                 UserInfo userInfo = userService.getUserSnapshotInfo(rec.getSourceId());
-                reUser.setUserInfo(ConvertHelper.convert(userInfo, UserInfo.class));
+                RecommendUserInfo reUser = ConvertHelper.convert(userInfo, RecommendUserInfo.class);
+                
+                if(rec.getEmbeddedJson() == null) {
+                    continue;
+                    }
                 
                 JSONObject jsonObject = (JSONObject) JSONValue.parse(rec.getEmbeddedJson());
                 if(jsonObject != null) {
@@ -124,16 +127,16 @@ public class RecommendationController extends ControllerBase{
   @RestReturn(String.class)
   public RestResponse ignoreRecommend(@Valid IgnoreRecommendCommand cmd) {
       RestResponse res = new RestResponse();
-      
-      for(IgnoreRecommandItem item: cmd.getRecommandItems()) {
+      Long userId = UserContext.current().getUser().getId();
+      for(IgnoreRecommandItem item: cmd.getRecommendItems()) {
           try {
-              recommendationService.ignoreRecommend(cmd.getUserId(), item.getSuggestType().intValue(), item.getSourceId(), item.getSourceType().intValue());    
+              recommendationService.ignoreRecommend(userId, item.getSuggestType().intValue(), item.getSourceId(), item.getSourceType().intValue());    
           } catch(Exception ex) {
               LOGGER.info("ignoreRecommend: " + ex.getMessage());
           }
       }
       
-      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(cmd.getUserId(), UserProfileContstant.RecommendName);
+      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
       //Update the modify time for ETAG
       if(null != profile) {
           profile.setItemValue(Long.toString(System.currentTimeMillis()));

@@ -6,40 +6,71 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>organization：机构详情</li>
- * <li>community：小区详情</li>
+ * <li>id：id</li>
+ * <li>organizationId：机构id</li>
+ * <li>communityId：小区id</li>
+ * <li>communityName：小区名称</li>
  * </ul>
  */
 public class OrganizationCommunityDTO {
 	
-	private OrganizationDTO organization;
-	
-	private CommunityDTO community;
-
+	private Long id;
+	private Long organizationId;
+	private Long communityId;
+	private String communityName;
 	
 	public OrganizationCommunityDTO() {
 		
 	}
 	
+	
 
-	public OrganizationDTO getOrganization() {
-		return organization;
+	public Long getId() {
+		return id;
 	}
 
 
-	public void setOrganization(OrganizationDTO organization) {
-		this.organization = organization;
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 
-	public CommunityDTO getCommunity() {
-		return community;
+
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
 
-	public void setCommunity(CommunityDTO community) {
-		this.community = community;
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
 
 
 	@Override

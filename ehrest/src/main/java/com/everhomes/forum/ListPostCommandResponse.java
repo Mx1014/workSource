@@ -17,6 +17,8 @@ public class ListPostCommandResponse {
     @ItemType(PostDTO.class)
     private List<PostDTO> posts;
     
+    private String keywords;
+    
     public ListPostCommandResponse() {
     }
     
@@ -39,6 +41,14 @@ public class ListPostCommandResponse {
 
     public void setPosts(List<PostDTO> posts) {
         this.posts = posts;
+    }
+
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
     }
 
     @Override
