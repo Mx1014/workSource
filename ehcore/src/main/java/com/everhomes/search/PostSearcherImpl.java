@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.base.Strings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -35,6 +36,7 @@ import com.everhomes.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
+import com.everhomes.forum.ForumService;
 import com.everhomes.forum.IteratePostCallback;
 import com.everhomes.forum.ListPostCommandResponse;
 import com.everhomes.forum.Post;
@@ -76,6 +78,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Autowired
     private CommunityService communityService;
+    
+    @Autowired
+    ForumService forumService;
     
     private final String contentcategory = "contentcategory";
     private final String actioncategory = "actioncategory";
@@ -336,14 +341,13 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             listPost.setNextPageAnchor(null);
             }
         
-        List<PostDTO> posts = new ArrayList<PostDTO>();
-        listPost.setPosts(posts);
-        for(Long id : ids) {
-            PostDTO p =  ConvertHelper.convert(this.forumProvider.findPostById(id.longValue()), PostDTO.class);
-            if(p != null) {
-                posts.add(p);
-                }
+        List<PostDTO> posts = this.forumService.getTopicById(ids, cmd.getCommunityId(), false);
+        if(null != cmd.getQueryString() && !cmd.getQueryString().isEmpty()) {
+            List<String> ss = this.analyze("ansj_query", cmd.getQueryString());
+            listPost.setKeywords(String.join(" ", ss));
             }
+        
+        listPost.setPosts(posts);
         
         return listPost;
     }
