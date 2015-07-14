@@ -248,6 +248,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             
             List<GroupDTO> groups = groupService.listUserRelatedGroups();
             List<Long> groupIds = new ArrayList<Long>();
+            groupIds.add(1l);
             for(GroupDTO groupDTO : groups) {
                 groupIds.add(groupDTO.getId());
                 }
@@ -336,6 +337,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             }
         
         List<PostDTO> posts = new ArrayList<PostDTO>();
+        listPost.setPosts(posts);
         for(Long id : ids) {
             PostDTO p =  ConvertHelper.convert(this.forumProvider.findPostById(id.longValue()), PostDTO.class);
             if(p != null) {

@@ -105,6 +105,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 query.addConditions(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType));
                 query.addConditions(Tables.EH_RECOMMENDATIONS.STATUS.eq(RecommendStatus.OK.getCode()));
+                query.addConditions(Tables.EH_RECOMMENDATIONS.EMBEDDED_JSON.isNotNull());
                 return query;
             }
             

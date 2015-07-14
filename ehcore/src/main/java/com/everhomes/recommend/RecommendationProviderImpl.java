@@ -100,7 +100,7 @@ public class RecommendationProviderImpl implements RecommendationProvider {
         .and(Tables.EH_RECOMMENDATIONS.SOURCE_TYPE.eq(sourceType))
         .and(Tables.EH_RECOMMENDATIONS.SUGGEST_TYPE.eq(suggestType))
         .and(Tables.EH_RECOMMENDATIONS.USER_ID.eq(userId))
-        .and(Tables.EH_RECOMMENDATIONS.STATUS.eq(0));
+        .and(Tables.EH_RECOMMENDATIONS.STATUS.eq(0)).execute();
         
     }
     
