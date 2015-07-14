@@ -216,6 +216,19 @@ public class AdminController extends ControllerBase {
             List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
             for(RestMethod restMethod: apiMethods)
                 generator.generateControllerPojos(restMethod, context);
+            
+//            Project pj = new Project();  
+//            Zip zip = new Zip();  
+//            zip.setProject(pj);  
+//            zip.setDestFile(new File("F:/1.zip"));//打包完的目标文件  
+//              
+//            FileSet fileSet = new FileSet();  
+//            fileSet.setProject(pj);  
+//            fileSet.setDir(new File("F:/context"));//需要打包的路径  
+//            fileSet.setIncludes("*.doc");//文件过滤  只 包含所有.doc文件  
+//              
+//            zip.addFileset(fileSet);  
+//            zip.execute(); 
         } else {
             JavaGenerator generator = new JavaGenerator();
 
