@@ -62,24 +62,38 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>banner_location IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByBannerLocation(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.BANNER_LOCATION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>banner_group IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByBannerGroup(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.BANNER_GROUP, values);
+	}
+
+	/**
+	 * Fetch records that have <code>scope_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByScopeType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.SCOPE_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>scope_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.SCOPE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.NAME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>description IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByDescription(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.DESCRIPTION, values);
-	}
-
-	/**
-	 * Fetch records that have <code>banner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByBannerType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.BANNER_TYPE, values);
 	}
 
 	/**
@@ -90,31 +104,38 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>flow_type IN (values)</code>
+	 * Fetch records that have <code>poster_path IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByFlowType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.FLOW_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByPosterPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.POSTER_PATH, values);
 	}
 
 	/**
-	 * Fetch records that have <code>flow_data IN (values)</code>
+	 * Fetch records that have <code>action_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByFlowData(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.FLOW_DATA, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>resource_id IN (values)</code>
+	 * Fetch records that have <code>action_data IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByResourceId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.RESOURCE_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByActionData(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ACTION_DATA, values);
 	}
 
 	/**
-	 * Fetch records that have <code>resource_url IN (values)</code>
+	 * Fetch records that have <code>start_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByResourceUrl(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.RESOURCE_URL, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByStartTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.START_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>end_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByEndTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.END_TIME, values);
 	}
 
 	/**
@@ -125,24 +146,17 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>group_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByGroupId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.GROUP_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>forum_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByForumId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.FORUM_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>order IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByOrder(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.ORDER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.CREATOR_UID, values);
 	}
 
 	/**

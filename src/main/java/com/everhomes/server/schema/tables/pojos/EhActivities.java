@@ -11,12 +11,18 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -398382850;
+	private static final long serialVersionUID = -1389520256;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
+	private java.lang.String   posterUri;
+	private java.lang.String   tag;
+	private java.lang.Double   longitude;
+	private java.lang.Double   latitude;
+	private java.lang.String   geohash;
 	private java.lang.String   location;
 	private java.lang.String   contactPerson;
 	private java.lang.String   contactNumber;
@@ -47,9 +53,15 @@ public class EhActivities implements java.io.Serializable {
 
 	public EhActivities(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Integer  namespaceId,
 		java.lang.String   subject,
 		java.lang.String   description,
+		java.lang.String   posterUri,
+		java.lang.String   tag,
+		java.lang.Double   longitude,
+		java.lang.Double   latitude,
+		java.lang.String   geohash,
 		java.lang.String   location,
 		java.lang.String   contactPerson,
 		java.lang.String   contactNumber,
@@ -77,9 +89,15 @@ public class EhActivities implements java.io.Serializable {
 		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.namespaceId = namespaceId;
 		this.subject = subject;
 		this.description = description;
+		this.posterUri = posterUri;
+		this.tag = tag;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.geohash = geohash;
 		this.location = location;
 		this.contactPerson = contactPerson;
 		this.contactNumber = contactNumber;
@@ -115,6 +133,14 @@ public class EhActivities implements java.io.Serializable {
 		this.id = id;
 	}
 
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
+	}
+
 	public java.lang.Integer getNamespaceId() {
 		return this.namespaceId;
 	}
@@ -137,6 +163,46 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setDescription(java.lang.String description) {
 		this.description = description;
+	}
+
+	public java.lang.String getPosterUri() {
+		return this.posterUri;
+	}
+
+	public void setPosterUri(java.lang.String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public java.lang.String getTag() {
+		return this.tag;
+	}
+
+	public void setTag(java.lang.String tag) {
+		this.tag = tag;
+	}
+
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public java.lang.String getGeohash() {
+		return this.geohash;
+	}
+
+	public void setGeohash(java.lang.String geohash) {
+		this.geohash = geohash;
 	}
 
 	public java.lang.String getLocation() {

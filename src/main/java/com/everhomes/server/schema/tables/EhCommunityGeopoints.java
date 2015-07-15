@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunityGeopoints extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunityGeopointsRecord> {
 
-	private static final long serialVersionUID = 136374299;
+	private static final long serialVersionUID = -1762951796;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_community_geopoints</code>
@@ -39,7 +39,7 @@ public class EhCommunityGeopoints extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_community_geopoints.description</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityGeopointsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunityGeopointsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_community_geopoints.longitude</code>.

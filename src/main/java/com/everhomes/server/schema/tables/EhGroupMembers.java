@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = 1941993829;
+	private static final long serialVersionUID = 563088651;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -30,6 +30,11 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_group_members.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.group_id</code>.
@@ -62,9 +67,9 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_NICK_NAME = createField("member_nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "member nick name within the group");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: active
+	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: active");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> MEMBER_STATUS = createField("member_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.create_time</code>. remove-deletion policy, user directly managed data
@@ -72,14 +77,109 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "remove-deletion policy, user directly managed data");
 
 	/**
+	 * The column <code>ehcore.eh_group_members.creator_uid</code>. record creator user id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "record creator user id");
+
+	/**
 	 * The column <code>ehcore.eh_group_members.operator_uid</code>. redundant auditing info
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "redundant auditing info");
 
 	/**
+	 * The column <code>ehcore.eh_group_members.process_code</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> PROCESS_CODE = createField("process_code", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.process_details</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROCESS_DETAILS = createField("process_details", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.proof_resource_uri</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> PROOF_RESOURCE_URI = createField("proof_resource_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_group_members.approve_time</code>. redundant auditing info
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> APPROVE_TIME = createField("approve_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "redundant auditing info");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.requestor_comment</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> REQUESTOR_COMMENT = createField("requestor_comment", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.operation_type</code>. 1: request to join, 2: invite to join
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Byte> OPERATION_TYPE = createField("operation_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: request to join, 2: invite to join");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.inviter_uid</code>. record inviter user id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INVITER_UID = createField("inviter_uid", org.jooq.impl.SQLDataType.BIGINT, this, "record inviter user id");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.invite_time</code>. the time the member is invited
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> INVITE_TIME = createField("invite_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the time the member is invited");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG1 = createField("integral_tag1", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG2 = createField("integral_tag2", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG3 = createField("integral_tag3", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG4 = createField("integral_tag4", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.integral_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.Long> INTEGRAL_TAG5 = createField("integral_tag5", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG1 = createField("string_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG2 = createField("string_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG3 = createField("string_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG4 = createField("string_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_group_members.string_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_group_members</code> table reference
@@ -116,7 +216,7 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupMembersRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_U_EH_UUID, com.everhomes.server.schema.Keys.KEY_EH_GROUP_MEMBERS_U_EH_GRP_MEMBER);
 	}
 
 	/**

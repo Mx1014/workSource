@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = -754518764;
+	private static final long serialVersionUID = 1737124362;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -32,6 +32,11 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
+	 * The column <code>ehcore.eh_groups.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_groups.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
@@ -40,6 +45,11 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_groups.display_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> DISPLAY_NAME = createField("display_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_groups.avatar</code>.
@@ -57,29 +67,64 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_groups.create_time</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, multi-purpose base entity");
-
-	/**
 	 * The column <code>ehcore.eh_groups.private_flag</code>. 0: public, 1: private
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> PRIVATE_FLAG = createField("private_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: public, 1: private");
 
 	/**
-	 * The column <code>ehcore.eh_groups.join_policy</code>. 0: free join(public group), 1: should be approved by operator/owner
+	 * The column <code>ehcore.eh_groups.join_policy</code>. 0: free join(public group), 1: should be approved by operator/owner, 2: invite only
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Integer> JOIN_POLICY = createField("join_policy", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: free join(public group), 1: should be approved by operator/owner");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Integer> JOIN_POLICY = createField("join_policy", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: free join(public group), 1: should be approved by operator/owner, 2: invite only");
 
 	/**
 	 * The column <code>ehcore.eh_groups.discriminator</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> DISCRIMINATOR = createField("discriminator", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_groups.visibility_scope</code>. define the group visibiliy region
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> VISIBILITY_SCOPE = createField("visibility_scope", org.jooq.impl.SQLDataType.TINYINT, this, "define the group visibiliy region");
+
+	/**
+	 * The column <code>ehcore.eh_groups.visibility_scope_id</code>. region information, could be an id in eh_regions table or an id in eh_communities
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> VISIBILITY_SCOPE_ID = createField("visibility_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "region information, could be an id in eh_regions table or an id in eh_communities");
+
+	/**
+	 * The column <code>ehcore.eh_groups.category_id</code>. group category
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.BIGINT, this, "group category");
+
+	/**
+	 * The column <code>ehcore.eh_groups.category_path</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> CATEGORY_PATH = createField("category_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_groups.status</code>. 0: inactive, 1: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: active");
+
+	/**
+	 * The column <code>ehcore.eh_groups.member_count</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> MEMBER_COUNT = createField("member_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_groups.share_count</code>. How many times the group card is shared
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> SHARE_COUNT = createField("share_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "How many times the group card is shared");
+
+	/**
+	 * The column <code>ehcore.eh_groups.post_flag</code>. 0: all, 1: admin only
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> POST_FLAG = createField("post_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: admin only");
+
+	/**
+	 * The column <code>ehcore.eh_groups.tag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> TAG = createField("tag", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_groups.integral_tag1</code>.
@@ -132,19 +177,19 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_groups.region_scope</code>. define the group visibiliy region
+	 * The column <code>ehcore.eh_groups.update_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> REGION_SCOPE = createField("region_scope", org.jooq.impl.SQLDataType.TINYINT, this, "define the group visibiliy region");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_groups.region_scope_id</code>. region information, could be an id in eh_regions table or an id in eh_communities
+	 * The column <code>ehcore.eh_groups.create_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> REGION_SCOPE_ID = createField("region_scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "region information, could be an id in eh_regions table or an id in eh_communities");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_groups.member_count</code>.
+	 * The column <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> MEMBER_COUNT = createField("member_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, multi-purpose base entity");
 
 	/**
 	 * Create a <code>ehcore.eh_groups</code> table reference
@@ -181,7 +226,7 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUPS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUPS_U_EH_GROUP_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhGroupsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_GROUPS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_GROUPS_U_EH_UUID);
 	}
 
 	/**

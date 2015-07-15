@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFamilyFollowers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFamilyFollowersRecord> {
 
-	private static final long serialVersionUID = -435083063;
+	private static final long serialVersionUID = -1849489299;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_family_followers</code>
@@ -37,14 +37,9 @@ public class EhFamilyFollowers extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFamilyFollowersRecord, java.lang.Long> OWNER_FAMILY = createField("owner_family", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_family_followers.follower_family</code>.
+	 * The column <code>ehcore.eh_family_followers.follower_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFamilyFollowersRecord, java.lang.Long> FOLLOWER_FAMILY = createField("follower_family", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_family_followers.alias_name</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFamilyFollowersRecord, java.lang.String> ALIAS_NAME = createField("alias_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFamilyFollowersRecord, java.lang.Long> FOLLOWER_UID = createField("follower_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_family_followers.create_time</code>. remove-deletion, user directly managed data

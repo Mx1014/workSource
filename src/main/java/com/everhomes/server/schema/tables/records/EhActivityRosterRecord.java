@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> implements org.jooq.Record16<java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.Byte, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Timestamp, java.lang.Byte, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 254373771;
+	private static final long serialVersionUID = 623191453;
 
 	/**
 	 * Setter for <code>ehcore.eh_activity_roster.id</code>. id of the record
@@ -112,30 +112,30 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_activity_roster.signup_flag</code>.
+	 * Setter for <code>ehcore.eh_activity_roster.checkin_flag</code>.
 	 */
-	public void setSignupFlag(java.lang.Byte value) {
+	public void setCheckinFlag(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_activity_roster.signup_flag</code>.
+	 * Getter for <code>ehcore.eh_activity_roster.checkin_flag</code>.
 	 */
-	public java.lang.Byte getSignupFlag() {
+	public java.lang.Byte getCheckinFlag() {
 		return (java.lang.Byte) getValue(7);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_activity_roster.signup_uid</code>.
+	 * Setter for <code>ehcore.eh_activity_roster.checkin_uid</code>. id of checkin user
 	 */
-	public void setSignupUid(java.lang.Long value) {
+	public void setCheckinUid(java.lang.Long value) {
 		setValue(8, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_activity_roster.signup_uid</code>.
+	 * Getter for <code>ehcore.eh_activity_roster.checkin_uid</code>. id of checkin user
 	 */
-	public java.lang.Long getSignupUid() {
+	public java.lang.Long getCheckinUid() {
 		return (java.lang.Long) getValue(8);
 	}
 
@@ -330,7 +330,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Byte> field8() {
-		return com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.SIGNUP_FLAG;
+		return com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CHECKIN_FLAG;
 	}
 
 	/**
@@ -338,7 +338,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field9() {
-		return com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.SIGNUP_UID;
+		return com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.CHECKIN_UID;
 	}
 
 	/**
@@ -458,7 +458,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public java.lang.Byte value8() {
-		return getSignupFlag();
+		return getCheckinFlag();
 	}
 
 	/**
@@ -466,7 +466,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public java.lang.Long value9() {
-		return getSignupUid();
+		return getCheckinUid();
 	}
 
 	/**
@@ -593,7 +593,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public EhActivityRosterRecord value8(java.lang.Byte value) {
-		setSignupFlag(value);
+		setCheckinFlag(value);
 		return this;
 	}
 
@@ -602,7 +602,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public EhActivityRosterRecord value9(java.lang.Long value) {
-		setSignupUid(value);
+		setCheckinUid(value);
 		return this;
 	}
 
@@ -691,7 +691,7 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	/**
 	 * Create a detached, initialised EhActivityRosterRecord
 	 */
-	public EhActivityRosterRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long activityId, java.lang.Long uid, java.lang.Long familyId, java.lang.Integer adultCount, java.lang.Integer childCount, java.lang.Byte signupFlag, java.lang.Long signupUid, java.lang.Long confirmFlag, java.lang.Long confirmUid, java.lang.Long confirmFamilyId, java.sql.Timestamp confirmTime, java.lang.Byte lotteryFlag, java.sql.Timestamp lotteryTime, java.sql.Timestamp createTime) {
+	public EhActivityRosterRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long activityId, java.lang.Long uid, java.lang.Long familyId, java.lang.Integer adultCount, java.lang.Integer childCount, java.lang.Byte checkinFlag, java.lang.Long checkinUid, java.lang.Long confirmFlag, java.lang.Long confirmUid, java.lang.Long confirmFamilyId, java.sql.Timestamp confirmTime, java.lang.Byte lotteryFlag, java.sql.Timestamp lotteryTime, java.sql.Timestamp createTime) {
 		super(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER);
 
 		setValue(0, id);
@@ -701,8 +701,8 @@ public class EhActivityRosterRecord extends org.jooq.impl.UpdatableRecordImpl<co
 		setValue(4, familyId);
 		setValue(5, adultCount);
 		setValue(6, childCount);
-		setValue(7, signupFlag);
-		setValue(8, signupUid);
+		setValue(7, checkinFlag);
+		setValue(8, checkinUid);
 		setValue(9, confirmFlag);
 		setValue(10, confirmUid);
 		setValue(11, confirmFamilyId);

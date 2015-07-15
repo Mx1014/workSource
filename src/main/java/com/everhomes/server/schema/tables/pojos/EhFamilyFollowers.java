@@ -11,12 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFamilyFollowers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1234758254;
+	private static final long serialVersionUID = -2045176160;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerFamily;
-	private java.lang.Long     followerFamily;
-	private java.lang.String   aliasName;
+	private java.lang.Long     followerUid;
 	private java.sql.Timestamp createTime;
 
 	public EhFamilyFollowers() {}
@@ -24,14 +23,12 @@ public class EhFamilyFollowers implements java.io.Serializable {
 	public EhFamilyFollowers(
 		java.lang.Long     id,
 		java.lang.Long     ownerFamily,
-		java.lang.Long     followerFamily,
-		java.lang.String   aliasName,
+		java.lang.Long     followerUid,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.ownerFamily = ownerFamily;
-		this.followerFamily = followerFamily;
-		this.aliasName = aliasName;
+		this.followerUid = followerUid;
 		this.createTime = createTime;
 	}
 
@@ -51,20 +48,12 @@ public class EhFamilyFollowers implements java.io.Serializable {
 		this.ownerFamily = ownerFamily;
 	}
 
-	public java.lang.Long getFollowerFamily() {
-		return this.followerFamily;
+	public java.lang.Long getFollowerUid() {
+		return this.followerUid;
 	}
 
-	public void setFollowerFamily(java.lang.Long followerFamily) {
-		this.followerFamily = followerFamily;
-	}
-
-	public java.lang.String getAliasName() {
-		return this.aliasName;
-	}
-
-	public void setAliasName(java.lang.String aliasName) {
-		this.aliasName = aliasName;
+	public void setFollowerUid(java.lang.Long followerUid) {
+		this.followerUid = followerUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

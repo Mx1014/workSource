@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = 1300678908;
+	private static final long serialVersionUID = -1330812916;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -32,6 +32,11 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
+	 * The column <code>ehcore.eh_users.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_users.account_name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> ACCOUNT_NAME = createField("account_name", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
@@ -42,9 +47,94 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NICK_NAME = createField("nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_users.avatar</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> AVATAR = createField("avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.status_line</code>. status line to express who you are
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> STATUS_LINE = createField("status_line", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "status line to express who you are");
+
+	/**
 	 * The column <code>ehcore.eh_users.status</code>. 0 - inactive, 1 - active
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0 - inactive, 1 - active");
+
+	/**
+	 * The column <code>ehcore.eh_users.points</code>. points
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Integer> POINTS = createField("points", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "points");
+
+	/**
+	 * The column <code>ehcore.eh_users.level</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> LEVEL = createField("level", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.gender</code>. 0: undisclosured, 1: male, 2: female
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> GENDER = createField("gender", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: undisclosured, 1: male, 2: female");
+
+	/**
+	 * The column <code>ehcore.eh_users.birthday</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.sql.Date> BIRTHDAY = createField("birthday", org.jooq.impl.SQLDataType.DATE, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.address_id</code>. current address id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT, this, "current address id");
+
+	/**
+	 * The column <code>ehcore.eh_users.address</code>. redundant current address description
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "redundant current address description");
+
+	/**
+	 * The column <code>ehcore.eh_users.community_id</code>. if current family has been setup, it is the community id from address
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "if current family has been setup, it is the community id from address");
+
+	/**
+	 * The column <code>ehcore.eh_users.home_town</code>. region id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> HOME_TOWN = createField("home_town", org.jooq.impl.SQLDataType.BIGINT, this, "region id");
+
+	/**
+	 * The column <code>ehcore.eh_users.home_town_path</code>. redundant region path for recursive matching
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> HOME_TOWN_PATH = createField("home_town_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "redundant region path for recursive matching");
+
+	/**
+	 * The column <code>ehcore.eh_users.occupation</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> OCCUPATION = createField("occupation", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.company</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> COMPANY = createField("company", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.school</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> SCHOOL = createField("school", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.locale</code>. zh_CN, en_US etc
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> LOCALE = createField("locale", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "zh_CN, en_US etc");
+
+	/**
+	 * The column <code>ehcore.eh_users.invite_type</code>. 1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Byte> INVITE_TYPE = createField("invite_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: SMS, 2: wechat, 3, wechat friend circle, 4: weibo, 5: phone contact");
+
+	/**
+	 * The column <code>ehcore.eh_users.invitor_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> INVITOR_UID = createField("invitor_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.create_time</code>.
@@ -55,6 +145,21 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_users.delete_time</code>. mark-deletion policy. may be valuable for user to restore account
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. may be valuable for user to restore account");
+
+	/**
+	 * The column <code>ehcore.eh_users.last_login_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.sql.Timestamp> LAST_LOGIN_TIME = createField("last_login_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.last_login_ip</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> LAST_LOGIN_IP = createField("last_login_ip", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.salt</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> SALT = createField("salt", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
@@ -96,7 +201,7 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_USERS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_USERS_U_EH_USER_ACCOUNT_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhUsersRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_USERS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_USERS_U_EH_UUID, com.everhomes.server.schema.Keys.KEY_EH_USERS_U_EH_USER_ACCOUNT_NAME);
 	}
 
 	/**

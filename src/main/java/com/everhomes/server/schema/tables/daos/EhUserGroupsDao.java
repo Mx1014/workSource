@@ -69,6 +69,20 @@ public class EhUserGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>region_scope IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByRegionScope(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.REGION_SCOPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>region_scope_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByRegionScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS.REGION_SCOPE_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>member_role IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroups> fetchByMemberRole(java.lang.Long... values) {

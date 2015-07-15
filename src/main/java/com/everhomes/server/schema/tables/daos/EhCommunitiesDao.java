@@ -48,6 +48,20 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhCommunities fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>city_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCityId(java.lang.Long... values) {
@@ -115,6 +129,76 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByDetailDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.DETAIL_DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_segment1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptSegment1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_SEGMENT1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_segment2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptSegment2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_SEGMENT2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_segment3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptSegment3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_SEGMENT3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_seg1_sample IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptSeg1Sample(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_SEG1_SAMPLE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_seg2_sample IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptSeg2Sample(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_SEG2_SAMPLE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_seg3_sample IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptSeg3Sample(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_SEG3_SAMPLE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apt_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAptCount(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.APT_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.CREATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.OPERATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.STATUS, values);
 	}
 
 	/**

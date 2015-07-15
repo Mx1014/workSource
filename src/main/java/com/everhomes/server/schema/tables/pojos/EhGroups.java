@@ -11,19 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -68864487;
+	private static final long serialVersionUID = -988933983;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   name;
+	private java.lang.String   displayName;
 	private java.lang.String   avatar;
 	private java.lang.String   description;
 	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp deleteTime;
 	private java.lang.Byte     privateFlag;
 	private java.lang.Integer  joinPolicy;
 	private java.lang.String   discriminator;
+	private java.lang.Byte     visibilityScope;
+	private java.lang.Long     visibilityScopeId;
+	private java.lang.Long     categoryId;
+	private java.lang.String   categoryPath;
+	private java.lang.Byte     status;
+	private java.lang.Long     memberCount;
+	private java.lang.Long     shareCount;
+	private java.lang.Byte     postFlag;
+	private java.lang.String   tag;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -34,24 +43,33 @@ public class EhGroups implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.Byte     regionScope;
-	private java.lang.Long     regionScopeId;
-	private java.lang.Long     memberCount;
+	private java.sql.Timestamp updateTime;
+	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp deleteTime;
 
 	public EhGroups() {}
 
 	public EhGroups(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Integer  namespaceId,
 		java.lang.String   name,
+		java.lang.String   displayName,
 		java.lang.String   avatar,
 		java.lang.String   description,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime,
 		java.lang.Byte     privateFlag,
 		java.lang.Integer  joinPolicy,
 		java.lang.String   discriminator,
+		java.lang.Byte     visibilityScope,
+		java.lang.Long     visibilityScopeId,
+		java.lang.Long     categoryId,
+		java.lang.String   categoryPath,
+		java.lang.Byte     status,
+		java.lang.Long     memberCount,
+		java.lang.Long     shareCount,
+		java.lang.Byte     postFlag,
+		java.lang.String   tag,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -62,21 +80,30 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Byte     regionScope,
-		java.lang.Long     regionScopeId,
-		java.lang.Long     memberCount
+		java.sql.Timestamp updateTime,
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.namespaceId = namespaceId;
 		this.name = name;
+		this.displayName = displayName;
 		this.avatar = avatar;
 		this.description = description;
 		this.creatorUid = creatorUid;
-		this.createTime = createTime;
-		this.deleteTime = deleteTime;
 		this.privateFlag = privateFlag;
 		this.joinPolicy = joinPolicy;
 		this.discriminator = discriminator;
+		this.visibilityScope = visibilityScope;
+		this.visibilityScopeId = visibilityScopeId;
+		this.categoryId = categoryId;
+		this.categoryPath = categoryPath;
+		this.status = status;
+		this.memberCount = memberCount;
+		this.shareCount = shareCount;
+		this.postFlag = postFlag;
+		this.tag = tag;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -87,9 +114,9 @@ public class EhGroups implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.regionScope = regionScope;
-		this.regionScopeId = regionScopeId;
-		this.memberCount = memberCount;
+		this.updateTime = updateTime;
+		this.createTime = createTime;
+		this.deleteTime = deleteTime;
 	}
 
 	public java.lang.Long getId() {
@@ -98,6 +125,14 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Integer getNamespaceId() {
@@ -114,6 +149,14 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setName(java.lang.String name) {
 		this.name = name;
+	}
+
+	public java.lang.String getDisplayName() {
+		return this.displayName;
+	}
+
+	public void setDisplayName(java.lang.String displayName) {
+		this.displayName = displayName;
 	}
 
 	public java.lang.String getAvatar() {
@@ -140,22 +183,6 @@ public class EhGroups implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 	}
 
-	public java.sql.Timestamp getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
-	public java.sql.Timestamp getDeleteTime() {
-		return this.deleteTime;
-	}
-
-	public void setDeleteTime(java.sql.Timestamp deleteTime) {
-		this.deleteTime = deleteTime;
-	}
-
 	public java.lang.Byte getPrivateFlag() {
 		return this.privateFlag;
 	}
@@ -178,6 +205,78 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setDiscriminator(java.lang.String discriminator) {
 		this.discriminator = discriminator;
+	}
+
+	public java.lang.Byte getVisibilityScope() {
+		return this.visibilityScope;
+	}
+
+	public void setVisibilityScope(java.lang.Byte visibilityScope) {
+		this.visibilityScope = visibilityScope;
+	}
+
+	public java.lang.Long getVisibilityScopeId() {
+		return this.visibilityScopeId;
+	}
+
+	public void setVisibilityScopeId(java.lang.Long visibilityScopeId) {
+		this.visibilityScopeId = visibilityScopeId;
+	}
+
+	public java.lang.Long getCategoryId() {
+		return this.categoryId;
+	}
+
+	public void setCategoryId(java.lang.Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public java.lang.String getCategoryPath() {
+		return this.categoryPath;
+	}
+
+	public void setCategoryPath(java.lang.String categoryPath) {
+		this.categoryPath = categoryPath;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
+	}
+
+	public java.lang.Long getMemberCount() {
+		return this.memberCount;
+	}
+
+	public void setMemberCount(java.lang.Long memberCount) {
+		this.memberCount = memberCount;
+	}
+
+	public java.lang.Long getShareCount() {
+		return this.shareCount;
+	}
+
+	public void setShareCount(java.lang.Long shareCount) {
+		this.shareCount = shareCount;
+	}
+
+	public java.lang.Byte getPostFlag() {
+		return this.postFlag;
+	}
+
+	public void setPostFlag(java.lang.Byte postFlag) {
+		this.postFlag = postFlag;
+	}
+
+	public java.lang.String getTag() {
+		return this.tag;
+	}
+
+	public void setTag(java.lang.String tag) {
+		this.tag = tag;
 	}
 
 	public java.lang.Long getIntegralTag1() {
@@ -260,27 +359,27 @@ public class EhGroups implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
-	public java.lang.Byte getRegionScope() {
-		return this.regionScope;
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
 	}
 
-	public void setRegionScope(java.lang.Byte regionScope) {
-		this.regionScope = regionScope;
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
 	}
 
-	public java.lang.Long getRegionScopeId() {
-		return this.regionScopeId;
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
 	}
 
-	public void setRegionScopeId(java.lang.Long regionScopeId) {
-		this.regionScopeId = regionScopeId;
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
-	public java.lang.Long getMemberCount() {
-		return this.memberCount;
+	public java.sql.Timestamp getDeleteTime() {
+		return this.deleteTime;
 	}
 
-	public void setMemberCount(java.lang.Long memberCount) {
-		this.memberCount = memberCount;
+	public void setDeleteTime(java.sql.Timestamp deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 }

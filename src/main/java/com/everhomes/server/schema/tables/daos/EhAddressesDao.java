@@ -48,6 +48,20 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhAddresses fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCommunityId(java.lang.Long... values) {
@@ -118,10 +132,17 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>appartment_name IN (values)</code>
+	 * Fetch records that have <code>apartment_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAppartmentName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APPARTMENT_NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByApartmentName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APARTMENT_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apartment_floor IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByApartmentFloor(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.APARTMENT_FLOOR, values);
 	}
 
 	/**

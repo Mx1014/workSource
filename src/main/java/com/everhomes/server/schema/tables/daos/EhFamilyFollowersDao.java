@@ -55,17 +55,10 @@ public class EhFamilyFollowersDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>follower_family IN (values)</code>
+	 * Fetch records that have <code>follower_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyFollowers> fetchByFollowerFamily(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS.FOLLOWER_FAMILY, values);
-	}
-
-	/**
-	 * Fetch records that have <code>alias_name IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyFollowers> fetchByAliasName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS.ALIAS_NAME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyFollowers> fetchByFollowerUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS.FOLLOWER_UID, values);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = -1160010931;
+	private static final long serialVersionUID = 2107074337;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -42,19 +42,29 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> APPID = createField("appId", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_banners.banner_location</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> BANNER_LOCATION = createField("banner_location", org.jooq.impl.SQLDataType.VARCHAR.length(2048), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.banner_group</code>. the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> BANNER_GROUP = createField("banner_group", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS");
+
+	/**
+	 * The column <code>ehcore.eh_banners.scope_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> SCOPE_TYPE = createField("scope_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.scope_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_banners.name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_banners.description</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_banners.banner_type</code>. 1: advertisement, 2: backend
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> BANNER_TYPE = createField("banner_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: advertisement, 2: backend");
 
 	/**
 	 * The column <code>ehcore.eh_banners.vendor_tag</code>.
@@ -62,24 +72,29 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> VENDOR_TAG = createField("vendor_tag", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.flow_type</code>. 1: event, 2: slot machine, 3: merchandiser
+	 * The column <code>ehcore.eh_banners.poster_path</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> FLOW_TYPE = createField("flow_type", org.jooq.impl.SQLDataType.TINYINT, this, "1: event, 2: slot machine, 3: merchandiser");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> POSTER_PATH = createField("poster_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_banners.flow_data</code>.
+	 * The column <code>ehcore.eh_banners.action_type</code>. 0: none, 1: zuolin url, 2: thirdpart url, 3: post, 4: coupon
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> FLOW_DATA = createField("flow_data", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> ACTION_TYPE = createField("action_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: zuolin url, 2: thirdpart url, 3: post, 4: coupon");
 
 	/**
-	 * The column <code>ehcore.eh_banners.resource_id</code>.
+	 * The column <code>ehcore.eh_banners.action_data</code>. the parameters depend on item_type, json format
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> RESOURCE_ID = createField("resource_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> ACTION_DATA = createField("action_data", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "the parameters depend on item_type, json format");
 
 	/**
-	 * The column <code>ehcore.eh_banners.resource_url</code>.
+	 * The column <code>ehcore.eh_banners.start_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> RESOURCE_URL = createField("resource_url", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.end_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_banners.status</code>. 0: closed, 1: waiting for confirmation, 2: active
@@ -87,19 +102,14 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: closed, 1: waiting for confirmation, 2: active");
 
 	/**
-	 * The column <code>ehcore.eh_banners.group_id</code>. point to the group created for the banner
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "point to the group created for the banner");
-
-	/**
-	 * The column <code>ehcore.eh_banners.forum_id</code>. point to the forum created for the banner
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> FORUM_ID = createField("forum_id", org.jooq.impl.SQLDataType.BIGINT, this, "point to the forum created for the banner");
-
-	/**
 	 * The column <code>ehcore.eh_banners.order</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Integer> ORDER = createField("order", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_banners.creator_uid</code>. record creator user id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "record creator user id");
 
 	/**
 	 * The column <code>ehcore.eh_banners.create_time</code>.
@@ -131,6 +141,14 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 
 	private EhBanners(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhBannersRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Long> getIdentity() {
+		return com.everhomes.server.schema.Keys.IDENTITY_EH_BANNERS;
 	}
 
 	/**

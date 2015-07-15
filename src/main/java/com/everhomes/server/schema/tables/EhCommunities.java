@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = 89041791;
+	private static final long serialVersionUID = -758209047;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -30,6 +30,11 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_communities.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_communities.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.city_id</code>. city id in region table
@@ -80,6 +85,56 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_communities.detail_description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> DETAIL_DESCRIPTION = createField("detail_description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_segment1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEGMENT1 = createField("apt_segment1", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_segment2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEGMENT2 = createField("apt_segment2", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_segment3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEGMENT3 = createField("apt_segment3", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_seg1_sample</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEG1_SAMPLE = createField("apt_seg1_sample", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_seg2_sample</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEG2_SAMPLE = createField("apt_seg2_sample", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_seg3_sample</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> APT_SEG3_SAMPLE = createField("apt_seg3_sample", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.apt_count</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> APT_COUNT = createField("apt_count", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.creator_uid</code>. user who suggested the creation
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "user who suggested the creation");
+
+	/**
+	 * The column <code>ehcore.eh_communities.operator_uid</code>. operator uid of last operation
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "operator uid of last operation");
+
+	/**
+	 * The column <code>ehcore.eh_communities.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForConfirmation, 2: active");
 
 	/**
 	 * The column <code>ehcore.eh_communities.create_time</code>.
@@ -176,7 +231,7 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_COMMUNITIES_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCommunitiesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_COMMUNITIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_COMMUNITIES_U_EH_UUID);
 	}
 
 	/**

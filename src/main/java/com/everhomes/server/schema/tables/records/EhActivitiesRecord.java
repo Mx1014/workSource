@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = 356373345;
+	private static final long serialVersionUID = -375014601;
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.id</code>. id of the record
@@ -28,395 +28,479 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_activities.uuid</code>.
+	 */
+	public void setUuid(java.lang.String value) {
+		setValue(1, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.uuid</code>.
+	 */
+	public java.lang.String getUuid() {
+		return (java.lang.String) getValue(1);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_activities.namespace_id</code>.
 	 */
 	public void setNamespaceId(java.lang.Integer value) {
-		setValue(1, value);
+		setValue(2, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.namespace_id</code>.
 	 */
 	public java.lang.Integer getNamespaceId() {
-		return (java.lang.Integer) getValue(1);
+		return (java.lang.Integer) getValue(2);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.subject</code>.
 	 */
 	public void setSubject(java.lang.String value) {
-		setValue(2, value);
+		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.subject</code>.
 	 */
 	public java.lang.String getSubject() {
-		return (java.lang.String) getValue(2);
+		return (java.lang.String) getValue(3);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.description</code>.
 	 */
 	public void setDescription(java.lang.String value) {
-		setValue(3, value);
+		setValue(4, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.description</code>.
 	 */
 	public java.lang.String getDescription() {
-		return (java.lang.String) getValue(3);
+		return (java.lang.String) getValue(4);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.poster_uri</code>. poster uri
+	 */
+	public void setPosterUri(java.lang.String value) {
+		setValue(5, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.poster_uri</code>. poster uri
+	 */
+	public java.lang.String getPosterUri() {
+		return (java.lang.String) getValue(5);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.tag</code>.
+	 */
+	public void setTag(java.lang.String value) {
+		setValue(6, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.tag</code>.
+	 */
+	public java.lang.String getTag() {
+		return (java.lang.String) getValue(6);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.longitude</code>.
+	 */
+	public void setLongitude(java.lang.Double value) {
+		setValue(7, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.longitude</code>.
+	 */
+	public java.lang.Double getLongitude() {
+		return (java.lang.Double) getValue(7);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.latitude</code>.
+	 */
+	public void setLatitude(java.lang.Double value) {
+		setValue(8, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.latitude</code>.
+	 */
+	public java.lang.Double getLatitude() {
+		return (java.lang.Double) getValue(8);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_activities.geohash</code>.
+	 */
+	public void setGeohash(java.lang.String value) {
+		setValue(9, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.geohash</code>.
+	 */
+	public java.lang.String getGeohash() {
+		return (java.lang.String) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.location</code>.
 	 */
 	public void setLocation(java.lang.String value) {
-		setValue(4, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.location</code>.
 	 */
 	public java.lang.String getLocation() {
-		return (java.lang.String) getValue(4);
+		return (java.lang.String) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.contact_person</code>.
 	 */
 	public void setContactPerson(java.lang.String value) {
-		setValue(5, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.contact_person</code>.
 	 */
 	public java.lang.String getContactPerson() {
-		return (java.lang.String) getValue(5);
+		return (java.lang.String) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.contact_number</code>.
 	 */
 	public void setContactNumber(java.lang.String value) {
-		setValue(6, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.contact_number</code>.
 	 */
 	public java.lang.String getContactNumber() {
-		return (java.lang.String) getValue(6);
+		return (java.lang.String) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.start_time_ms</code>.
 	 */
 	public void setStartTimeMs(java.lang.Long value) {
-		setValue(7, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.start_time_ms</code>.
 	 */
 	public java.lang.Long getStartTimeMs() {
-		return (java.lang.Long) getValue(7);
+		return (java.lang.Long) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.start_time</code>.
 	 */
 	public void setStartTime(java.sql.Timestamp value) {
-		setValue(8, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.start_time</code>.
 	 */
 	public java.sql.Timestamp getStartTime() {
-		return (java.sql.Timestamp) getValue(8);
+		return (java.sql.Timestamp) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.end_time_ms</code>.
 	 */
 	public void setEndTimeMs(java.lang.Long value) {
-		setValue(9, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.end_time_ms</code>.
 	 */
 	public java.lang.Long getEndTimeMs() {
-		return (java.lang.Long) getValue(9);
+		return (java.lang.Long) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.end_time</code>.
 	 */
 	public void setEndTime(java.sql.Timestamp value) {
-		setValue(10, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.end_time</code>.
 	 */
 	public java.sql.Timestamp getEndTime() {
-		return (java.sql.Timestamp) getValue(10);
+		return (java.sql.Timestamp) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.signup_flag</code>.
 	 */
 	public void setSignupFlag(java.lang.Byte value) {
-		setValue(11, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.signup_flag</code>.
 	 */
 	public java.lang.Byte getSignupFlag() {
-		return (java.lang.Byte) getValue(11);
+		return (java.lang.Byte) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.confirm_flag</code>.
 	 */
 	public void setConfirmFlag(java.lang.Byte value) {
-		setValue(12, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.confirm_flag</code>.
 	 */
 	public java.lang.Byte getConfirmFlag() {
-		return (java.lang.Byte) getValue(12);
+		return (java.lang.Byte) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.max_attendee_count</code>.
 	 */
 	public void setMaxAttendeeCount(java.lang.Integer value) {
-		setValue(13, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.max_attendee_count</code>.
 	 */
 	public java.lang.Integer getMaxAttendeeCount() {
-		return (java.lang.Integer) getValue(13);
+		return (java.lang.Integer) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.signup_attendee_count</code>.
 	 */
 	public void setSignupAttendeeCount(java.lang.Integer value) {
-		setValue(14, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.signup_attendee_count</code>.
 	 */
 	public java.lang.Integer getSignupAttendeeCount() {
-		return (java.lang.Integer) getValue(14);
+		return (java.lang.Integer) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.signup_family_count</code>.
 	 */
 	public void setSignupFamilyCount(java.lang.Integer value) {
-		setValue(15, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.signup_family_count</code>.
 	 */
 	public java.lang.Integer getSignupFamilyCount() {
-		return (java.lang.Integer) getValue(15);
+		return (java.lang.Integer) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.checkin_attendee_count</code>.
 	 */
 	public void setCheckinAttendeeCount(java.lang.Integer value) {
-		setValue(16, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.checkin_attendee_count</code>.
 	 */
 	public java.lang.Integer getCheckinAttendeeCount() {
-		return (java.lang.Integer) getValue(16);
+		return (java.lang.Integer) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.checkin_family_count</code>.
 	 */
 	public void setCheckinFamilyCount(java.lang.Integer value) {
-		setValue(17, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.checkin_family_count</code>.
 	 */
 	public java.lang.Integer getCheckinFamilyCount() {
-		return (java.lang.Integer) getValue(17);
+		return (java.lang.Integer) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.confirm_attendee_count</code>.
 	 */
 	public void setConfirmAttendeeCount(java.lang.Integer value) {
-		setValue(18, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.confirm_attendee_count</code>.
 	 */
 	public java.lang.Integer getConfirmAttendeeCount() {
-		return (java.lang.Integer) getValue(18);
+		return (java.lang.Integer) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.confirm_family_count</code>.
 	 */
 	public void setConfirmFamilyCount(java.lang.Integer value) {
-		setValue(19, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.confirm_family_count</code>.
 	 */
 	public java.lang.Integer getConfirmFamilyCount() {
-		return (java.lang.Integer) getValue(19);
+		return (java.lang.Integer) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.creator_uid</code>.
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(20, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.creator_uid</code>.
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.creator_family_id</code>.
 	 */
 	public void setCreatorFamilyId(java.lang.Long value) {
-		setValue(21, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.creator_family_id</code>.
 	 */
 	public java.lang.Long getCreatorFamilyId() {
-		return (java.lang.Long) getValue(21);
+		return (java.lang.Long) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.post_id</code>. associated post id
 	 */
 	public void setPostId(java.lang.Long value) {
-		setValue(22, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.post_id</code>. associated post id
 	 */
 	public java.lang.Long getPostId() {
-		return (java.lang.Long) getValue(22);
+		return (java.lang.Long) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.group_discriminator</code>. associated group if any
 	 */
 	public void setGroupDiscriminator(java.lang.String value) {
-		setValue(23, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.group_discriminator</code>. associated group if any
 	 */
 	public java.lang.String getGroupDiscriminator() {
-		return (java.lang.String) getValue(23);
+		return (java.lang.String) getValue(29);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.group_id</code>.
 	 */
 	public void setGroupId(java.lang.Long value) {
-		setValue(24, value);
+		setValue(30, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.group_id</code>.
 	 */
 	public java.lang.Long getGroupId() {
-		return (java.lang.Long) getValue(24);
+		return (java.lang.Long) getValue(30);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.status</code>. 0: inactive, 1: drafting, 2: active
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(25, value);
+		setValue(31, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.status</code>. 0: inactive, 1: drafting, 2: active
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(25);
+		return (java.lang.Byte) getValue(31);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.change_version</code>.
 	 */
 	public void setChangeVersion(java.lang.Integer value) {
-		setValue(26, value);
+		setValue(32, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.change_version</code>.
 	 */
 	public java.lang.Integer getChangeVersion() {
-		return (java.lang.Integer) getValue(26);
+		return (java.lang.Integer) getValue(32);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(27, value);
+		setValue(33, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(27);
+		return (java.sql.Timestamp) getValue(33);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public void setDeleteTime(java.sql.Timestamp value) {
-		setValue(28, value);
+		setValue(34, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_activities.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public java.sql.Timestamp getDeleteTime() {
-		return (java.sql.Timestamp) getValue(28);
+		return (java.sql.Timestamp) getValue(34);
 	}
 
 	// -------------------------------------------------------------------------
@@ -445,37 +529,43 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhActivitiesRecord
 	 */
-	public EhActivitiesRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
+	public EhActivitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String posterUri, java.lang.String tag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
 		super(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES);
 
 		setValue(0, id);
-		setValue(1, namespaceId);
-		setValue(2, subject);
-		setValue(3, description);
-		setValue(4, location);
-		setValue(5, contactPerson);
-		setValue(6, contactNumber);
-		setValue(7, startTimeMs);
-		setValue(8, startTime);
-		setValue(9, endTimeMs);
-		setValue(10, endTime);
-		setValue(11, signupFlag);
-		setValue(12, confirmFlag);
-		setValue(13, maxAttendeeCount);
-		setValue(14, signupAttendeeCount);
-		setValue(15, signupFamilyCount);
-		setValue(16, checkinAttendeeCount);
-		setValue(17, checkinFamilyCount);
-		setValue(18, confirmAttendeeCount);
-		setValue(19, confirmFamilyCount);
-		setValue(20, creatorUid);
-		setValue(21, creatorFamilyId);
-		setValue(22, postId);
-		setValue(23, groupDiscriminator);
-		setValue(24, groupId);
-		setValue(25, status);
-		setValue(26, changeVersion);
-		setValue(27, createTime);
-		setValue(28, deleteTime);
+		setValue(1, uuid);
+		setValue(2, namespaceId);
+		setValue(3, subject);
+		setValue(4, description);
+		setValue(5, posterUri);
+		setValue(6, tag);
+		setValue(7, longitude);
+		setValue(8, latitude);
+		setValue(9, geohash);
+		setValue(10, location);
+		setValue(11, contactPerson);
+		setValue(12, contactNumber);
+		setValue(13, startTimeMs);
+		setValue(14, startTime);
+		setValue(15, endTimeMs);
+		setValue(16, endTime);
+		setValue(17, signupFlag);
+		setValue(18, confirmFlag);
+		setValue(19, maxAttendeeCount);
+		setValue(20, signupAttendeeCount);
+		setValue(21, signupFamilyCount);
+		setValue(22, checkinAttendeeCount);
+		setValue(23, checkinFamilyCount);
+		setValue(24, confirmAttendeeCount);
+		setValue(25, confirmFamilyCount);
+		setValue(26, creatorUid);
+		setValue(27, creatorFamilyId);
+		setValue(28, postId);
+		setValue(29, groupDiscriminator);
+		setValue(30, groupId);
+		setValue(31, status);
+		setValue(32, changeVersion);
+		setValue(33, createTime);
+		setValue(34, deleteTime);
 	}
 }

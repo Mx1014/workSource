@@ -48,6 +48,20 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhActivities fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>namespace_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByNamespaceId(java.lang.Integer... values) {
@@ -66,6 +80,41 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>poster_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByPosterUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.POSTER_URI, values);
+	}
+
+	/**
+	 * Fetch records that have <code>tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.LATITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>geohash IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByGeohash(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.GEOHASH, values);
 	}
 
 	/**
