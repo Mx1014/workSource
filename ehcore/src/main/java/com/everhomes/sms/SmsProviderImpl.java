@@ -106,4 +106,18 @@ public class SmsProviderImpl implements SmsProvider {
     public void sendSms(String[] phoneNumbers, String text) throws Exception {
         this.doSend(phoneNumbers, text);
     }
+
+
+    @Override
+    public void sendSms(String phoneNumber, String text, String templateId) {
+        this.doSend(phoneNumber, text);
+        
+    }
+
+
+    @Override
+    public void sendSms(String[] phoneNumbers, String text, String templateId)
+            throws Exception {
+        this.doSend(phoneNumbers, text);
+    }
 }
