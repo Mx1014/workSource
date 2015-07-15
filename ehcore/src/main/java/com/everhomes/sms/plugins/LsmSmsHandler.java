@@ -55,7 +55,21 @@ public class LsmSmsHandler implements SmsHandler {
         Map<String, String> body = new HashMap<>();
         body.put("mobile", phoneNumber);
         body.put("message", text);
-        String rsp = channel.sendMessage(hostAddress, SmsBuilder.HttpMethod.POST.val(), body, null).getMessage();
+        String rsp = channel.sendMessage(hostAddress, SmsBuilder.HttpMethod.POST.val(), body, null,null).getMessage();
         LOGGER.info("send message success.Return message msg={}", rsp);
+    }
+
+    @Override
+    public void doSend(String phoneNumber, String text, String templateId) {
+        if(templateId == null || templateId.trim().equals(""))
+            doSend(phoneNumber, text);
+        
+    }
+
+    @Override
+    public void doSend(String[] phoneNumbers, String text, String templateId) {
+        if(templateId == null || templateId.trim().equals(""))
+            doSend(phoneNumbers, text);
+        
     }
 }
