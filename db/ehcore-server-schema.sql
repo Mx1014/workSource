@@ -1226,15 +1226,13 @@ CREATE TABLE `eh_organization_bills` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_users partition
-# all inner money accounts which related to transactions
+# member of global partition
 #
-DROP TABLE IF EXISTS `eh_billing_accounts`;
-CREATE TABLE `eh_billing_accounts` (
+DROP TABLE IF EXISTS `eh_organization_billing_accounts`;
+CREATE TABLE `eh_organization_billing_accounts` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
 	`account_number` VARCHAR(128) NOT NULL DEFAULT '0' COMMENT 'the account number which use to identify the unique account',
-	`owner_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: user, 2: family, 3: organization',
-    `owner_id` BIGINT NOT NULL DEFAULT 0,
+    `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization id',
 	`balance` DECIMAL(10,2) NOT NULL DEFAULT 0,
     `update_time` DATETIME,
     `create_time` DATETIME,
@@ -1244,14 +1242,15 @@ CREATE TABLE `eh_billing_accounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of eh_users partition
+# member of global partition
 # the transaction history of paid the bills
 #
-DROP TABLE IF EXISTS `eh_billing_transactions`;
-CREATE TABLE `eh_billing_transactions` (
+DROP TABLE IF EXISTS `eh_organization_billing_transactions`;
+CREATE TABLE `eh_organization_billing_transactions` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `tx_sequence` BIGINT NOT NULL COMMENT 'the sequence binding the two records of a single transaction',
-	`owner_account_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: user, 2: family, 3: organization',
+	`tx_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: online, 2: offline',
+    `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization id',
     `owner_account_id` BIGINT NOT NULL DEFAULT 0,
 	`target_account_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: user, 2: family, 3: organization',
     `target_account_id` BIGINT NOT NULL DEFAULT 0,
@@ -1259,9 +1258,15 @@ CREATE TABLE `eh_billing_transactions` (
     `bill_id` BIGINT NOT NULL DEFAULT 0,
 	`charge_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
 	`description` TEXT COMMENT 'the description for the transaction',
+	`vendor` VARCHAR(128) DEFAULT '' COMMENT 'which third-part pay vendor is used',
+	`result_code_scope` VARCHAR(128) DEFAULT '' COMMENT 'the scope of result code, defined in zuolin',
+	`result_code_id` INT NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
+	`result_desc` VARCHAR(2048) DEFAULT '' COMMENT 'the description of the transaction',
+    `operator_uid` BIGINT COMMENT 'the user is who paid the bill, including help others pay the bill',
+	`paid_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: selfpay, 2: agent',
     `create_time` DATETIME,
 	
-    PRIMARY KEY (`id`),
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -1376,6 +1381,51 @@ CREATE TABLE `eh_addresses` (
     INDEX `i_eh_addr_itag2`(`integral_tag2`),
     INDEX `i_eh_addr_stag1`(`string_tag1`),
     INDEX `i_eh_addr_stag2`(`string_tag2`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+#
+# member of address related sharding group
+#
+DROP TABLE IF EXISTS `eh_family_billing_accounts`;
+CREATE TABLE `eh_family_billing_accounts` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+	`account_number` VARCHAR(128) NOT NULL DEFAULT '0' COMMENT 'the account number which use to identify the unique account',
+    `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address id',
+	`balance` DECIMAL(10,2) NOT NULL DEFAULT 0,
+    `update_time` DATETIME,
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_account_number`(`account_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of address related sharding group
+# the transaction history of paid the bills
+#
+DROP TABLE IF EXISTS `eh_family_billing_transactions`;
+CREATE TABLE `eh_family_billing_transactions` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `tx_sequence` BIGINT NOT NULL COMMENT 'the sequence binding the two records of a single transaction',
+	`tx_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: online, 2: offline',
+    `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address id',
+    `owner_account_id` BIGINT NOT NULL DEFAULT 0,
+	`target_account_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: user, 2: family, 3: organization',
+    `target_account_id` BIGINT NOT NULL DEFAULT 0,
+	`bill_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: bills in eh_organization_bills',
+    `bill_id` BIGINT NOT NULL DEFAULT 0,
+	`charge_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
+	`description` TEXT COMMENT 'the description for the transaction',
+	`vendor` VARCHAR(128) DEFAULT '' COMMENT 'which third-part pay vendor is used',
+	`result_code_scope` VARCHAR(128) DEFAULT '' COMMENT 'the scope of result code, defined in zuolin',
+	`result_code_id` INT NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
+	`result_desc` VARCHAR(2048) DEFAULT '' COMMENT 'the description of the transaction',
+    `operator_uid` BIGINT COMMENT 'the user is who paid the bill, including help others pay the bill',
+	`paid_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: selfpay, 2: agent',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
