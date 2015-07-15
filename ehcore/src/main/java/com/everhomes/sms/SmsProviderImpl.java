@@ -60,13 +60,13 @@ public class SmsProviderImpl implements SmsProvider {
         return handler;
     }
 
-    private void doSend(String phoneNumber, String text) {
+    private void doSend(String phoneNumber, String text, String templateId) {
         LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text), phoneNumber,
                 System.currentTimeMillis());
         String escapedText = SmsHepler.convert(text);
 
         Future<?> f = taskQueue.submit(() -> {
-            getHandler().doSend(phoneNumber, escapedText);
+            getHandler().doSend(phoneNumber, escapedText,templateId);
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
@@ -79,12 +79,12 @@ public class SmsProviderImpl implements SmsProvider {
 //        }
     }
 
-    private void doSend(String[] phoneNumbers, String text) {
+    private void doSend(String[] phoneNumbers, String text, String templateId) {
         LOGGER.info("Send SMS text:\"{}\" to {}.beginTime={}", SmsHepler.getEncodingString(text),
                 StringUtils.join(phoneNumbers, ","), System.currentTimeMillis());
         String escapedText = SmsHepler.convert(text);
         Future<?> f = taskQueue.submit(() -> {
-            getHandler().doSend(phoneNumbers, SmsHepler.getEncodingString(escapedText));
+            getHandler().doSend(phoneNumbers, SmsHepler.getEncodingString(escapedText),templateId);
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
@@ -99,18 +99,18 @@ public class SmsProviderImpl implements SmsProvider {
 
     @Override
     public void sendSms(String phoneNumber, String text) {
-        this.doSend(phoneNumber, text);
+        this.doSend(phoneNumber, text,null);
     }
 
     @Override
     public void sendSms(String[] phoneNumbers, String text) throws Exception {
-        this.doSend(phoneNumbers, text);
+        this.doSend(phoneNumbers, text,null);
     }
 
 
     @Override
     public void sendSms(String phoneNumber, String text, String templateId) {
-        this.doSend(phoneNumber, text);
+        this.doSend(phoneNumber, text,templateId);
         
     }
 
@@ -118,6 +118,6 @@ public class SmsProviderImpl implements SmsProvider {
     @Override
     public void sendSms(String[] phoneNumbers, String text, String templateId)
             throws Exception {
-        this.doSend(phoneNumbers, text);
+        this.doSend(phoneNumbers, text,templateId);
     }
 }

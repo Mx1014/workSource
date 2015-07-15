@@ -16,6 +16,7 @@ import javax.net.ssl.SSLSocket;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
@@ -30,6 +31,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -59,14 +61,14 @@ public class SmsChannel {
         }
     }
 
-    public RspMessage sendMessage(String uri, String method, Map<String, String> body, Map<String, String> headers) {
+    public RspMessage sendMessage(String uri, String method, Map<String, String> body, Map<String, String> headers, String entityJsonStr) {
         CloseableHttpClient client = builder.setDefaultRequestConfig(config == null ? RequestConfig.DEFAULT : config)
                 .build();
         if (headers != null)
             this.headers.putAll(headers);
 
         try {
-            CloseableHttpResponse rsp = client.execute(createRequest(uri, method, body), new HttpClientContext());
+            CloseableHttpResponse rsp = client.execute(createRequest(uri, method, body,entityJsonStr), new HttpClientContext());
             assert (rsp != null);
             String result = EntityUtils.toString(rsp.getEntity());
             if (rsp.getStatusLine().getStatusCode() >= 300) {
@@ -114,12 +116,13 @@ public class SmsChannel {
         return this;
     }
 
-    private HttpUriRequest createRequest(String url, String method, Map<String, String> body) {
+    private HttpUriRequest createRequest(String url, String method, Map<String, String> body,String entityJsonStr) {
         RequestBuilder rbudiler = RequestBuilder.create(method);
         this.headers.forEach((key, val) -> {
             rbudiler.addHeader(key, val);
         });
         // assert entityBuilder has some value
+        HttpEntity  httpEntity = null;
         EntityBuilder entityBuilder = null;
         if (MapUtils.isNotEmpty(body)) {
             entityBuilder = EntityBuilder.create();
@@ -128,11 +131,19 @@ public class SmsChannel {
                 params.add(new BasicNameValuePair(jsonKey, jsonVal));
             });
             entityBuilder.setParameters(params);
+            httpEntity = entityBuilder.build();
         }
-        if (entityBuilder == null) {
+        if (entityBuilder == null && entityJsonStr == null) {
             return rbudiler.setUri(url).build();
         }
-        return rbudiler.setEntity(entityBuilder.build()).setUri(url).build();
+
+        if(httpEntity == null && entityJsonStr != null) {
+            StringEntity stringEntity = new StringEntity(entityJsonStr,"UTF-8");
+            stringEntity.setContentEncoding("UTF-8");
+            stringEntity.setContentType("application/json");
+            httpEntity = stringEntity;
+        }
+        return rbudiler.setEntity(httpEntity).setUri(url).build();
     }
 
     private SSLContext createSSLContext() {

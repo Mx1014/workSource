@@ -105,8 +105,9 @@ public class MWSmsHandler implements SmsHandler {
 
     private void createAndSend(String[] phoneNumbers, String text) {
         SmsChannel channel = SmsBuilder.create(false);
+        channel.addHeader("Connection", "Keep-Alive");
         String uri = String.format("http://%s:%d%s", host, port, createUrl((String[]) phoneNumbers, text));
-        String result = channel.sendMessage(uri, SmsBuilder.HttpMethod.GET.val(), null, null).getMessage();
+        String result = channel.sendMessage(uri, SmsBuilder.HttpMethod.GET.val(), null, null, null).getMessage();
         parserResult(result);
     }
 
@@ -114,6 +115,17 @@ public class MWSmsHandler implements SmsHandler {
         return String
                 .format("/MWGate/wmgw.asmx/MongateSendSubmit?userId=%s&password=%s&pszMobis=%s&pszMsg=%s&iMobiCount=%d&pszSubPort=*&MsgId=0",
                         username, password, StringUtils.join(phoneNumbers, ","), text, phoneNumbers.length);
+    }
+
+    @Override
+    public void doSend(String phoneNumber, String text, String templateId) {
+        doSend(phoneNumber, text);
+        
+    }
+
+    @Override
+    public void doSend(String[] phoneNumbers, String text, String templateId) {
+       doSend(phoneNumbers, text);
     }
 
 }
