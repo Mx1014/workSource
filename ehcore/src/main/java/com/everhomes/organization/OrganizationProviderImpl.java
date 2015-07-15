@@ -11,6 +11,7 @@ import org.jooq.InsertQuery;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -425,5 +426,40 @@ public class OrganizationProviderImpl implements OrganizationProvider {
        Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId);
        return step.where(condition).fetchOneInto(Integer.class);
 	}
+
+
+@Override
+public List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(
+		Long communityId) {
+	
+	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+	List<OrganizationCommunityDTO> list = new ArrayList<OrganizationCommunityDTO>();
+
+	context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
+    .where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
+    .fetch().map(r -> {
+    	list.add(ConvertHelper.convert(r, OrganizationCommunityDTO.class));
+		return null;
+    });
+    
+    return list;
+}
+
+
+@Override
+public OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,
+		String organizationType) {
+	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+	Record record = context.select().from(Tables.EH_ORGANIZATIONS)
+    .where(Tables.EH_ORGANIZATIONS.ID.eq(organizationId).and(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType)))
+    .fetchOne();
+	
+	if(record != null)
+		return ConvertHelper.convert(record, OrganizationDTO.class);
+    
+    return null;
+}
 
 }

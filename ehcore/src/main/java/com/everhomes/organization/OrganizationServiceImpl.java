@@ -16,7 +16,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -918,5 +917,44 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    return map;
+	}
+
+	@Override
+	public List<OrganizationSimpleDTO> listUserRelateOrgs() {
+		User user = UserContext.current().getUser();
+		if(user == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,"user is null");
+		
+		List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
+		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+		
+		if(orgMembers != null && !orgMembers.isEmpty()){
+			orgMembers.stream().map(orgMember -> {
+				Organization org = this.organizationProvider.findOrganizationById(orgMember.getOrganizationId());
+				if (org != null){
+					orgs.add(ConvertHelper.convert(org, OrganizationSimpleDTO.class));
+				}
+				return null;
+			}).toArray();
+		}
+		
+		return orgs;
+	}
+
+	@Override
+	public OrganizationDTO getOrganizationByComunityidAndOrgType(
+			GetOrgDetailCommand cmd) {
+		List<OrganizationCommunityDTO> orgCommunitys = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+		
+		if(orgCommunitys != null && !orgCommunitys.isEmpty()){
+			for(int i=0;i<orgCommunitys.size();i++){
+				OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(),cmd.getOrganizationType());
+				if(org != null){
+					return org;
+				}
+			}
+		}
+		
+		return null;
 	}
 }

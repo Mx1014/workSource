@@ -78,7 +78,8 @@ public class PropMgrBillHandler
 					RowResult descriptionResult = (RowResult)resultList.get(ProcessBillModel1.getDescriptionRow(rowIndex));
 					bill.setDescription(descriptionResult.getA());
 					RowResult totalResult = (RowResult)resultList.get(ProcessBillModel1.getTotalRow(rowIndex));
-					bill.setTotalAmount(new BigDecimal(totalResult.getG()));
+					bill.setDueAmount(new BigDecimal(totalResult.getG()));
+					//bill.setTotalAmount(new BigDecimal(totalResult.getG()));
 					
 					bill.setOrganizationId(communityId);
 					bill.setCreatorUid(userId);

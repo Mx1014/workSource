@@ -46,7 +46,6 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.family.RevokeMemberCommand;
 import com.everhomes.forum.CancelLikeTopicCommand;
-import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.GetTopicCommand;
@@ -65,18 +64,14 @@ import com.everhomes.forum.PropertyPostDTO;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.launchpad.ItemKind;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationContactDTO;
 import com.everhomes.organization.OrganizationDTO;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationMemberDTO;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationStatus;
@@ -89,7 +84,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
-import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserTokenCommand;
@@ -163,6 +157,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     
     @Autowired
     private  OrganizationService organizationService;
+    
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     
     @Override
     public void applyPropertyMember(applyPropertyMemberCommand cmd) {
@@ -1265,7 +1262,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				content += item.getItemName()+": " + item.getTotalAmount() + "元\n";
 			}
 		}
-		content += "总费用：" + bill.getTotalAmount();
+		//content += "总费用：" + bill.getTotalAmount();
+		content += "总费用：" + bill.getDueAmount();
 		return content;
 	}
 
@@ -1791,5 +1789,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	    }).collect(Collectors.toList());
 	    return propCommunityContactdtos;
 	    
+	}
+
+	@Override
+	public ListPmBillsByConditionsCommandResponse listPmBillsByConditions(
+			ListPmBillsByConditionsCommand cmd) {
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		
+		//List<PmBillsDto> pmBillsDto = this.propertyMgrProvider.listPmBillsByConditions();
+		
+
+		
+		
+		return null;
 	}
 }

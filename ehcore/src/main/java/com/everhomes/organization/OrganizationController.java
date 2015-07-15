@@ -1,5 +1,7 @@
 package com.everhomes.organization;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -22,12 +24,9 @@ import com.everhomes.forum.ListTopicCommentCommand;
 import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
-import com.everhomes.organization.pm.ListPropMemberCommandResponse;
 import com.everhomes.organization.pm.ListPropPostCommandResponse;
-import com.everhomes.organization.pm.PropCommunityBuildAddessCommand;
 import com.everhomes.organization.pm.QueryPropTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 
@@ -460,6 +459,31 @@ public class OrganizationController extends ControllerBase {
     public RestResponse setCurrentOrganization(@Valid SetCurrentOrganizationCommand cmd) throws Exception {
     	organizationService.setCurrentOrganization(cmd);
         RestResponse response = new RestResponse();
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("userRelateOrg")
+    @RestReturn(String.class)
+    public RestResponse userRelateOrg() throws Exception {
+    	
+    	List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs();
+        RestResponse response = new RestResponse(list);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("getOrgDetail")
+    @RestReturn(String.class)
+    public RestResponse getOrgDetail(GetOrgDetailCommand cmd) throws Exception {
+    	
+    	OrganizationDTO org = organizationService.getOrganizationByComunityidAndOrgType(cmd);
+    	
+        RestResponse response = new RestResponse(org);
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

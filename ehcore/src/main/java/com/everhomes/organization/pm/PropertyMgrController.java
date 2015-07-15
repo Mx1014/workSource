@@ -918,5 +918,22 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }    
+    } 
+    
+    /**
+     * <b>URL: /pm/listPmBillsByCondition
+     * <p>根据条件查询物业缴费单
+     */
+    @RequestMapping("listPmBillsByConditions")
+    @RestReturn(value=ListPmBillsByConditionsCommandResponse.class)
+    public RestResponse listPmBillsByConditions(ListPmBillsByConditionsCommand cmd) {
+    	
+    	ListPmBillsByConditionsCommandResponse result = propertyMgrService.listPmBillsByConditions(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    } 
+    
 }
