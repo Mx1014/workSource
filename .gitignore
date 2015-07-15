@@ -17,3 +17,4 @@ gen
 
 ehcore/core-server.*log
 ehcore/core-server-rest.*log
+ehrest-response/target/
