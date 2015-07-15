@@ -19,6 +19,10 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
+import com.everhomes.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.community.admin.RejectCommunityAdminCommand;
+import com.everhomes.community.admin.UpdateCommunityAdminCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -113,7 +117,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public void updateCommunity(UpdateCommunityCommand cmd) {
+	public void updateCommunity(UpdateCommunityAdminCommand cmd) {
 		if(cmd.getCommunityId() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid communityId parameter");
@@ -200,7 +204,7 @@ public class CommunityServiceImpl implements CommunityService {
 		});
 	}
 	@Override
-	public void approveCommuniy(ApproveCommunityCommand cmd){
+	public void approveCommuniy(ApproveCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid communityId parameter");
@@ -279,7 +283,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public void rejectCommunity(RejectCommunityCommand cmd){
+	public void rejectCommunity(RejectCommunityAdminCommand cmd){
 		if(cmd.getCommunityId() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid communityId parameter");
@@ -448,7 +452,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
-			ListComunitiesByKeywordCommand cmd) {
+			ListComunitiesByKeywordAdminCommand cmd) {
 		if(cmd.getKeyword() == null || cmd.getKeyword().equals("")){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid keyword parameter");

@@ -13,15 +13,24 @@ import com.everhomes.util.StringHelper;
 public class LaunchPadDownAppActionData implements Serializable{
 
     private static final long serialVersionUID = -1378233470078843784L;
-    //{"url": "http://www.baidu.com"} 
-    private String url;
-
-    public String getUrl() {
-        return url;
+    //{"iosUrl":"https://appsto.re/cn/2Q7A7.i","andriodUrl":""}
+    private String iosUrl;
+    private String andriodUrl;
+    
+    public String getIosUrl() {
+        return iosUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setIosUrl(String iosUrl) {
+        this.iosUrl = iosUrl;
+    }
+
+    public String getAndriodUrl() {
+        return andriodUrl;
+    }
+
+    public void setAndriodUrl(String andriodUrl) {
+        this.andriodUrl = andriodUrl;
     }
 
     @Override

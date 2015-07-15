@@ -20,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import com.everhomes.banner.admin.CreateBannerAdminCommand;
 import com.everhomes.junit.PropertyInitializer;
 import com.everhomes.launchpad.ItemGroup;
 import com.everhomes.user.User;
@@ -60,7 +61,7 @@ public class BannerTest extends TestCase {
     
     @Test
     public void testCreateBanner() {
-        CreateBannerCommand cmd = new CreateBannerCommand();
+        CreateBannerAdminCommand cmd = new CreateBannerAdminCommand();
         cmd.setBannerGroup(ItemGroup.BIZS.getCode());
         cmd.setBannerLocation("/home");
 //        cmd.setActionName("google");

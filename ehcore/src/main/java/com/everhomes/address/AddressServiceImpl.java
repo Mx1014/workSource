@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.Community;
@@ -564,7 +565,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
 
     @Override
-    public void correctAddress(CorrectAddressCommand cmd) {
+    public void correctAddress(CorrectAddressAdminCommand cmd) {
         
         if(cmd.getCommunityId() == null || cmd.getAddressId() == null 
                 || cmd.getBuildingName() == null || cmd.getApartmentName() == null)

@@ -22,7 +22,6 @@ public class LaunchPadTopicByCategoryActionData implements Serializable{
     private Long actionCategory;
     private Long contentCategory;
     private String entityTag;
-    private Long regionId;
 
 
     public Long getForumId() {
@@ -31,14 +30,6 @@ public class LaunchPadTopicByCategoryActionData implements Serializable{
 
     public void setForumId(Long forumId) {
         this.forumId = forumId;
-    }
-
-    public Long getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(Long regionId) {
-        this.regionId = regionId;
     }
 
     public Long getActionCategory() {

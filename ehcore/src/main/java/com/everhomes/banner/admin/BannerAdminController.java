@@ -1,4 +1,4 @@
-package com.everhomes.admin.banner;
+package com.everhomes.banner.admin;
 
 
 
@@ -41,7 +41,7 @@ public class BannerAdminController extends ControllerBase {
      */
     @RequestMapping("createBanner")
     @RestReturn(value=String.class)
-    public RestResponse createBanner(@Valid CreateBannerCommand cmd) {
+    public RestResponse createBanner(@Valid CreateBannerAdminCommand cmd) {
         
         bannerService.createBanner(cmd);
         RestResponse response =  new RestResponse();
@@ -70,7 +70,7 @@ public class BannerAdminController extends ControllerBase {
      */
     @RequestMapping("updateBanner")
     @RestReturn(value=String.class)
-    public RestResponse updateBanner(@Valid UpdateBannerCommand cmd) {
+    public RestResponse updateBanner(@Valid UpdateBannerAdminCommand cmd) {
         
         bannerService.updateBanner(cmd);
         RestResponse response =  new RestResponse();
@@ -85,7 +85,7 @@ public class BannerAdminController extends ControllerBase {
      */
     @RequestMapping("deleteBanner")
     @RestReturn(value=String.class)
-    public RestResponse deleteBanner(@Valid DeleteBannerCommand cmd) {
+    public RestResponse deleteBanner(@Valid DeleteBannerAdminCommand cmd) {
         
         bannerService.deleteBannerById(cmd);
         RestResponse response =  new RestResponse();

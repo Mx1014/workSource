@@ -26,6 +26,14 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
+import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
+import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
+import com.everhomes.launchpad.admin.DeleteLaunchPadLayoutAdminCommand;
+import com.everhomes.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommand;
+import com.everhomes.launchpad.admin.ListLaunchPadLayoutAdminCommand;
+import com.everhomes.launchpad.admin.UpdateLaunchPadItemAdminCommand;
+import com.everhomes.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
 import com.everhomes.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.organization.pm.PropCommunityContactDTO;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -277,7 +285,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
-    public void createLaunchPadItem(CreateLaunchPadItemCommand cmd){
+    public void createLaunchPadItem(CreateLaunchPadItemAdminCommand cmd){
         if(cmd.getItemScopes() == null || cmd.getItemScopes().isEmpty()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid item scopes paramter.");
@@ -366,7 +374,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 
     @Override
-    public void deleteLaunchPadItem(DeleteLaunchPadItemCommand cmd) {
+    public void deleteLaunchPadItem(DeleteLaunchPadItemAdminCommand cmd) {
         if(cmd.getItemIds() == null || cmd.getItemIds().isEmpty()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid itemIds paramter.itemId is null");
@@ -382,7 +390,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
-    public void createLaunchPadLayout(CreateLaunchPadLayoutCommand cmd){
+    public void createLaunchPadLayout(CreateLaunchPadLayoutAdminCommand cmd){
         if(cmd.getLayoutJson() == null || cmd.getLayoutJson().trim().equals("")){
           throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                   "Invalid layoutJson paramter.layoutJson is null");
@@ -403,7 +411,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @Override
-    public void deleteLaunchPadLayout(DeleteLaunchPadLayoutCommand cmd){
+    public void deleteLaunchPadLayout(DeleteLaunchPadLayoutAdminCommand cmd){
         if(cmd.getIds() == null || cmd.getIds().isEmpty()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid ids paramter.ids is null");
@@ -421,7 +429,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     
 
     @Override
-    public void updateLaunchPadLayout(UpdateLaunchPadLayoutCommand cmd) {
+    public void updateLaunchPadLayout(UpdateLaunchPadLayoutAdminCommand cmd) {
         if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid id paramter.id is null");
@@ -520,7 +528,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
 
     @Override
-    public void updateLaunchPadItem(UpdateLaunchPadItemCommand cmd) {
+    public void updateLaunchPadItem(UpdateLaunchPadItemAdminCommand cmd) {
         if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid id paramter.id is null");
@@ -585,7 +593,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
 
     @Override
-    public GetLaunchPadItemsByKeywordCommandResponse getLaunchPadItemsByKeyword(GetLaunchPadItemsByKeywordCommand cmd) {
+    public GetLaunchPadItemsByKeywordCommandResponse getLaunchPadItemsByKeyword(GetLaunchPadItemsByKeywordAdminCommand cmd) {
         
         final int size = this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
@@ -680,7 +688,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
 
 	@Override
-	public ListLaunchPadLayoutCommandResponse listLaunchPadLayoutByKeyword(ListLaunchPadLayoutCommand cmd) {
+	public ListLaunchPadLayoutCommandResponse listLaunchPadLayoutByKeyword(ListLaunchPadLayoutAdminCommand cmd) {
 		long pageOffset = cmd.getPageOffset() == null?1L:cmd.getPageOffset();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);

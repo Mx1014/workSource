@@ -6,7 +6,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.elasticsearch.cluster.routing.RotationShardShuffler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -25,6 +24,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
+import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
+import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
@@ -67,7 +69,7 @@ public class LaunchPadTest extends TestCase {
     
     @Test
     public void testCreateLaunchPadItems() {
-        CreateLaunchPadItemCommand cmd = new  CreateLaunchPadItemCommand();
+        CreateLaunchPadItemAdminCommand cmd = new  CreateLaunchPadItemAdminCommand();
         
         cmd.setItemLocation("/home");
         cmd.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
@@ -166,7 +168,7 @@ public class LaunchPadTest extends TestCase {
     
     @Ignore @Test
     public void deleteLaunchPadItems(){
-        DeleteLaunchPadItemCommand cmd = new DeleteLaunchPadItemCommand();
+        DeleteLaunchPadItemAdminCommand cmd = new DeleteLaunchPadItemAdminCommand();
         List<Long> itemIds = new ArrayList<Long>();
         itemIds.add(10L);
         cmd.setItemIds(itemIds);
@@ -175,7 +177,7 @@ public class LaunchPadTest extends TestCase {
     
     @Test
     public void createLaunchPadLayout(){
-        CreateLaunchPadLayoutCommand cmd = new CreateLaunchPadLayoutCommand();
+        CreateLaunchPadLayoutAdminCommand cmd = new CreateLaunchPadLayoutAdminCommand();
         cmd.setMinVersionCode(3L);
         cmd.setName("v3.0");
         cmd.setNamespaceId(0);

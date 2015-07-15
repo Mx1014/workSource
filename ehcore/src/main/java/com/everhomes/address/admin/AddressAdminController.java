@@ -1,4 +1,4 @@
-package com.everhomes.admin.address;
+package com.everhomes.address.admin;
 
 import javax.validation.Valid;
 
@@ -37,7 +37,7 @@ public class AddressAdminController extends ControllerBase {
      */
     @RequestMapping("correctAddress")
     @RestReturn(value=String.class)
-    public RestResponse correctAddress(@Valid CorrectAddressCommand cmd) {
+    public RestResponse correctAddress(@Valid CorrectAddressAdminCommand cmd) {
         this.addressService.correctAddress(cmd);
         RestResponse response = new RestResponse(null);
         

@@ -1,4 +1,4 @@
-package com.everhomes.admin.family;
+package com.everhomes.family.admin;
 
 import javax.validation.Valid;
 
@@ -38,7 +38,7 @@ public class FamilyAdminController extends ControllerBase {
      */
     @RequestMapping("listWaitApproveFamily")
     @RestReturn(value=ListWaitApproveFamilyCommandResponse.class, collection=true)
-    public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyCommand cmd) {
+    public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyAdminCommand cmd) {
         ListWaitApproveFamilyCommandResponse cmdResponse = this.familyService.listWaitApproveFamily(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -85,7 +85,7 @@ public class FamilyAdminController extends ControllerBase {
      */
     @RequestMapping("listAllFamilyMembers")
     @RestReturn(value=ListAllFamilyMembersCommandResponse.class)
-    public RestResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
+    public RestResponse listAllFamilyMembers(ListAllFamilyMembersAdminCommand cmd) {
         ListAllFamilyMembersCommandResponse cmdResponse = this.familyService.listAllFamilyMembers(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);

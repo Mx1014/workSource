@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.banner.admin.CreateBannerAdminCommand;
+import com.everhomes.banner.admin.DeleteBannerAdminCommand;
+import com.everhomes.banner.admin.UpdateBannerAdminCommand;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -145,7 +148,7 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public void createBanner(CreateBannerCommand cmd){
+    public void createBanner(CreateBannerAdminCommand cmd){
         if(cmd.getScopes() == null || cmd.getScopes().isEmpty()){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scopes paramter.");
@@ -190,7 +193,7 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public void updateBanner(UpdateBannerCommand cmd){
+    public void updateBanner(UpdateBannerAdminCommand cmd){
         if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");
@@ -226,7 +229,7 @@ public class BannerServiceImpl implements BannerService {
         bannerProvider.updateBanner(banner);
     }
     @Override
-    public void deleteBannerById(DeleteBannerCommand cmd){
+    public void deleteBannerById(DeleteBannerAdminCommand cmd){
         if(cmd.getId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid id paramter.");

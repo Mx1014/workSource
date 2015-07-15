@@ -40,6 +40,8 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupDiscriminator;
@@ -1437,7 +1439,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public ListWaitApproveFamilyCommandResponse listWaitApproveFamily(ListWaitApproveFamilyCommand cmd) {
+    public ListWaitApproveFamilyCommandResponse listWaitApproveFamily(ListWaitApproveFamilyAdminCommand cmd) {
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1L : pageOffset;
         
@@ -1684,7 +1686,7 @@ public class FamilyServiceImpl implements FamilyService {
         return metaObject;
     }
     @Override
-    public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersCommand cmd) {
+    public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersAdminCommand cmd) {
         
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();

@@ -1,4 +1,4 @@
-package com.everhomes.admin.community;
+package com.everhomes.community.admin;
 
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class CommunityAdminController extends ControllerBase {
      */
     @RequestMapping("approveCommunity")
     @RestReturn(value=String.class)
-    public RestResponse approveCommunity(@Valid ApproveCommunityCommand cmd) {
+    public RestResponse approveCommunity(@Valid ApproveCommunityAdminCommand cmd) {
         
         this.communityService.approveCommuniy(cmd);
         
@@ -81,7 +81,7 @@ public class CommunityAdminController extends ControllerBase {
      */
     @RequestMapping("rejectCommunity")
     @RestReturn(value=String.class)
-    public RestResponse rejectCommunity(@Valid RejectCommunityCommand cmd) {
+    public RestResponse rejectCommunity(@Valid RejectCommunityAdminCommand cmd) {
         
         this.communityService.rejectCommunity(cmd);
         
@@ -97,7 +97,7 @@ public class CommunityAdminController extends ControllerBase {
      */
     @RequestMapping("updateCommunity")
     @RestReturn(value=String.class)
-    public RestResponse updateCommunity(@Valid UpdateCommunityCommand cmd) {
+    public RestResponse updateCommunity(@Valid UpdateCommunityAdminCommand cmd) {
         
         this.communityService.updateCommunity(cmd);
         
@@ -177,7 +177,7 @@ public class CommunityAdminController extends ControllerBase {
      */
     @RequestMapping("listCommunitiesByKeyword")
     @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
-    public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordCommand cmd) {
+    public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordAdminCommand cmd) {
     	
     	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
     	

@@ -1,4 +1,4 @@
-package com.everhomes.admin.launchpad;
+package com.everhomes.launchpad.admin;
 
 
 import javax.validation.Valid;
@@ -45,7 +45,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("getLaunchPadItemsByKeyword")
     @RestReturn(value=GetLaunchPadItemsByKeywordCommandResponse.class)
-    public RestResponse getLaunchPadItemsByKeyword(@Valid GetLaunchPadItemsByKeywordCommand cmd) {
+    public RestResponse getLaunchPadItemsByKeyword(@Valid GetLaunchPadItemsByKeywordAdminCommand cmd) {
         
         GetLaunchPadItemsByKeywordCommandResponse cmdResponse = this.launchPadService.getLaunchPadItemsByKeyword(cmd);
         RestResponse response =  new RestResponse(cmdResponse);
@@ -76,7 +76,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("createLaunchPadItem")
     @RestReturn(value=String.class)
-    public RestResponse createLaunchPadItem(@Valid CreateLaunchPadItemCommand cmd) {
+    public RestResponse createLaunchPadItem(@Valid CreateLaunchPadItemAdminCommand cmd) {
         
         launchPadService.createLaunchPadItem(cmd);
         RestResponse response =  new RestResponse();
@@ -91,7 +91,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("deleteLaunchPadItem")
     @RestReturn(value=String.class)
-    public RestResponse deleteLaunchPadItem(@Valid DeleteLaunchPadItemCommand cmd) {
+    public RestResponse deleteLaunchPadItem(@Valid DeleteLaunchPadItemAdminCommand cmd) {
         
         this.launchPadService.deleteLaunchPadItem(cmd);
         RestResponse response =  new RestResponse();
@@ -106,7 +106,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("updateLaunchPadItem")
     @RestReturn(value=String.class)
-    public RestResponse updateLaunchPadItem(@Valid UpdateLaunchPadItemCommand cmd) {
+    public RestResponse updateLaunchPadItem(@Valid UpdateLaunchPadItemAdminCommand cmd) {
         
         this.launchPadService.updateLaunchPadItem(cmd);
         RestResponse response =  new RestResponse();
@@ -121,7 +121,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("createLaunchPadLayout")
     @RestReturn(value=String.class)
-    public RestResponse createLaunchPadLayout(@Valid CreateLaunchPadLayoutCommand cmd) {
+    public RestResponse createLaunchPadLayout(@Valid CreateLaunchPadLayoutAdminCommand cmd) {
         this.launchPadService.createLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -135,7 +135,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("deleteLaunchPadLayout")
     @RestReturn(value=String.class)
-    public RestResponse deleteLaunchPadLayout(@Valid DeleteLaunchPadLayoutCommand cmd) {
+    public RestResponse deleteLaunchPadLayout(@Valid DeleteLaunchPadLayoutAdminCommand cmd) {
         this.launchPadService.deleteLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -149,7 +149,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("updateLaunchPadLayout")
     @RestReturn(value=String.class)
-    public RestResponse updateLaunchPadLayout(@Valid UpdateLaunchPadLayoutCommand cmd) {
+    public RestResponse updateLaunchPadLayout(@Valid UpdateLaunchPadLayoutAdminCommand cmd) {
         this.launchPadService.updateLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -177,7 +177,7 @@ public class LaunchPadAdminController extends ControllerBase {
      */
     @RequestMapping("listLaunchPadLayoutByKeyword")
     @RestReturn(value=LaunchPadLayoutDTO.class)
-    public RestResponse listLaunchPadLayoutByKeyword(@Valid ListLaunchPadLayoutCommand cmd) {
+    public RestResponse listLaunchPadLayoutByKeyword(@Valid ListLaunchPadLayoutAdminCommand cmd) {
     	ListLaunchPadLayoutCommandResponse result = this.launchPadService.listLaunchPadLayoutByKeyword(cmd);
         RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
