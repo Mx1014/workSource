@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1620751368;
+	private static final long serialVersionUID = -1211956234;
 
 	private java.lang.Long       id;
 	private java.lang.Long       organizationId;
@@ -20,12 +20,13 @@ public class EhOrganizationBills implements java.io.Serializable {
 	private java.lang.String     address;
 	private java.lang.String     name;
 	private java.lang.String     dateStr;
-	private java.math.BigDecimal totalAmount;
 	private java.lang.String     description;
+	private java.math.BigDecimal dueAmount;
+	private java.math.BigDecimal oweAmount;
 	private java.lang.Long       creatorUid;
-	private java.sql.Timestamp   createTime;
 	private java.lang.Integer    notifyCount;
 	private java.sql.Timestamp   notifyTime;
+	private java.sql.Timestamp   createTime;
 
 	public EhOrganizationBills() {}
 
@@ -37,12 +38,13 @@ public class EhOrganizationBills implements java.io.Serializable {
 		java.lang.String     address,
 		java.lang.String     name,
 		java.lang.String     dateStr,
-		java.math.BigDecimal totalAmount,
 		java.lang.String     description,
+		java.math.BigDecimal dueAmount,
+		java.math.BigDecimal oweAmount,
 		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime,
 		java.lang.Integer    notifyCount,
-		java.sql.Timestamp   notifyTime
+		java.sql.Timestamp   notifyTime,
+		java.sql.Timestamp   createTime
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -51,12 +53,13 @@ public class EhOrganizationBills implements java.io.Serializable {
 		this.address = address;
 		this.name = name;
 		this.dateStr = dateStr;
-		this.totalAmount = totalAmount;
 		this.description = description;
+		this.dueAmount = dueAmount;
+		this.oweAmount = oweAmount;
 		this.creatorUid = creatorUid;
-		this.createTime = createTime;
 		this.notifyCount = notifyCount;
 		this.notifyTime = notifyTime;
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -115,14 +118,6 @@ public class EhOrganizationBills implements java.io.Serializable {
 		this.dateStr = dateStr;
 	}
 
-	public java.math.BigDecimal getTotalAmount() {
-		return this.totalAmount;
-	}
-
-	public void setTotalAmount(java.math.BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
 	public java.lang.String getDescription() {
 		return this.description;
 	}
@@ -131,20 +126,28 @@ public class EhOrganizationBills implements java.io.Serializable {
 		this.description = description;
 	}
 
+	public java.math.BigDecimal getDueAmount() {
+		return this.dueAmount;
+	}
+
+	public void setDueAmount(java.math.BigDecimal dueAmount) {
+		this.dueAmount = dueAmount;
+	}
+
+	public java.math.BigDecimal getOweAmount() {
+		return this.oweAmount;
+	}
+
+	public void setOweAmount(java.math.BigDecimal oweAmount) {
+		this.oweAmount = oweAmount;
+	}
+
 	public java.lang.Long getCreatorUid() {
 		return this.creatorUid;
 	}
 
 	public void setCreatorUid(java.lang.Long creatorUid) {
 		this.creatorUid = creatorUid;
-	}
-
-	public java.sql.Timestamp getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
 	}
 
 	public java.lang.Integer getNotifyCount() {
@@ -161,5 +164,13 @@ public class EhOrganizationBills implements java.io.Serializable {
 
 	public void setNotifyTime(java.sql.Timestamp notifyTime) {
 		this.notifyTime = notifyTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }

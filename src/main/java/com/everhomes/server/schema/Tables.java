@@ -164,6 +164,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhEventTicketGroups EH_EVENT_TICKET_GROUPS = com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS;
 
 	/**
+	 * The table ehcore.eh_family_billing_accounts
+	 */
+	public static final com.everhomes.server.schema.tables.EhFamilyBillingAccounts EH_FAMILY_BILLING_ACCOUNTS = com.everhomes.server.schema.tables.EhFamilyBillingAccounts.EH_FAMILY_BILLING_ACCOUNTS;
+
+	/**
+	 * The table ehcore.eh_family_billing_transactions
+	 */
+	public static final com.everhomes.server.schema.tables.EhFamilyBillingTransactions EH_FAMILY_BILLING_TRANSACTIONS = com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS;
+
+	/**
 	 * The table ehcore.eh_family_followers
 	 */
 	public static final com.everhomes.server.schema.tables.EhFamilyFollowers EH_FAMILY_FOLLOWERS = com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS;
@@ -257,6 +267,16 @@ public class Tables {
 	 * The table ehcore.eh_organization_address_mappings
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationAddressMappings EH_ORGANIZATION_ADDRESS_MAPPINGS = com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS;
+
+	/**
+	 * The table ehcore.eh_organization_billing_accounts
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationBillingAccounts EH_ORGANIZATION_BILLING_ACCOUNTS = com.everhomes.server.schema.tables.EhOrganizationBillingAccounts.EH_ORGANIZATION_BILLING_ACCOUNTS;
+
+	/**
+	 * The table ehcore.eh_organization_billing_transactions
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationBillingTransactions EH_ORGANIZATION_BILLING_TRANSACTIONS = com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS;
 
 	/**
 	 * The table ehcore.eh_organization_bills

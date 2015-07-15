@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -1087699158;
+	private static final long serialVersionUID = 465254570;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -64,6 +64,8 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhEventRoster.EH_EVENT_ROSTER,
 			com.everhomes.server.schema.tables.EhEventTickets.EH_EVENT_TICKETS,
 			com.everhomes.server.schema.tables.EhEventTicketGroups.EH_EVENT_TICKET_GROUPS,
+			com.everhomes.server.schema.tables.EhFamilyBillingAccounts.EH_FAMILY_BILLING_ACCOUNTS,
+			com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS,
 			com.everhomes.server.schema.tables.EhFamilyFollowers.EH_FAMILY_FOLLOWERS,
 			com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS,
 			com.everhomes.server.schema.tables.EhForums.EH_FORUMS,
@@ -83,6 +85,8 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES,
 			com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS,
 			com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS,
+			com.everhomes.server.schema.tables.EhOrganizationBillingAccounts.EH_ORGANIZATION_BILLING_ACCOUNTS,
+			com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS,
 			com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS,
 			com.everhomes.server.schema.tables.EhOrganizationBillItems.EH_ORGANIZATION_BILL_ITEMS,
 			com.everhomes.server.schema.tables.EhOrganizationCommunities.EH_ORGANIZATION_COMMUNITIES,
