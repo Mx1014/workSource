@@ -119,8 +119,9 @@ public class LaunchPadTest extends TestCase {
         UserDefinedLaunchPadCommand cmd = new UserDefinedLaunchPadCommand();
         Item item1  = new Item();
         item1.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-        item1.setId(4L);
+        item1.setId(24L);
         item1.setOrderIndex(0);
+        item1.setDisplayFlag((byte)0);
         
 //        Item item2  = new Item();
 //        item2.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
@@ -129,8 +130,9 @@ public class LaunchPadTest extends TestCase {
         
         Item item3  = new Item();
         item3.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-        item3.setId(5L);
+        item3.setId(25L);
         item3.setOrderIndex(0);
+        item3.setDisplayFlag((byte)0);
         item3.setDisplayFlag((byte)0);
         
 //        Item item4  = new Item();
@@ -140,20 +142,22 @@ public class LaunchPadTest extends TestCase {
         
         Item item5  = new Item();
         item5.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-        item5.setId(7L);
+        item5.setId(26L);
         item5.setOrderIndex(0);
+        item5.setDisplayFlag((byte)0);
         
         Item item6  = new Item();
         item6.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-        item6.setId(8L);
+        item6.setId(55L);
         item6.setOrderIndex(0);
+        item6.setDisplayFlag((byte)0);
         
         
         List<Item> items = new ArrayList<Item>();
         items.add(item1);
         items.add(item3);
-//        items.add(item5);
-//        items.add(item6);
+        items.add(item5);
+        items.add(item6);
         cmd.setItems(items);
         
         

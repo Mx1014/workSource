@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.google.gson.JsonObject;
 
 
 
@@ -247,14 +249,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return allItems;
     }
     
+    @SuppressWarnings("unchecked")
     public List<LaunchPadItem> getUserItems(long userId){
        List<LaunchPadItem> userItems = new ArrayList<LaunchPadItem>();
+       
         //List<UserProfile> userProfiles = this.userActivityProvider.findProfileByUid(userId);
         UserProfile profile = this.userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.LaunchPadName);
         if(profile == null) return userItems;
         if(profile.getItemKind() == ItemKind.JSON.getCode()){
             String jsonString = profile.getItemValue();
-            userItems.add((LaunchPadItem) StringHelper.fromJsonString(jsonString, LaunchPadItem.class));
+            JSONArray jsonArray = new JSONArray();
+            jsonArray = (JSONArray) JSONValue.parse(jsonString);
+            jsonArray.forEach(r ->{
+                userItems.add((LaunchPadItem) StringHelper.fromJsonString(r.toString(), LaunchPadItem.class));
+            });
+            
         }
 //        userProfiles.forEach((userProfile) ->{
 //            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
@@ -302,6 +311,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         this.launchPadProvider.createLaunchPadItems(items);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void userDefinedLaunchPad(UserDefinedLaunchPadCommand cmd){
         if(cmd.getItems() == null || cmd.getItems().isEmpty()){
@@ -324,6 +334,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     this.userActivityProvider.deleteProfile(p);
             });
             
+            JSONArray array = new JSONArray();
             items.forEach((Item item) ->{
                 Long id = item.getId();
                 if (id == null) return ;
@@ -338,15 +349,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 launchPadItem.setScopeType(LaunchPadScopeType.USERDEFINED.getCode());
                 launchPadItem.setScopeId(userId);
                 launchPadItem.setDisplayFlag(item.getDisplayFlag());
+                array.add(launchPadItem);
                 
-                UserProfile userProfile = new UserProfile();
-                userProfile.setItemKind(ItemKind.JSON.getCode());
-                userProfile.setOwnerId(userId);
-                userProfile.setItemName(launchPadItem.getItemName());
-                userProfile.setItemValue(StringHelper.toJsonString(launchPadItem));
-                
-                this.userActivityProvider.addUserProfile(userProfile);
             });
+            UserProfile userProfile = new UserProfile();
+            userProfile.setItemKind(ItemKind.JSON.getCode());
+            userProfile.setOwnerId(userId);
+            userProfile.setItemName(UserProfileContstant.LaunchPadName);
+            userProfile.setItemValue(array.toJSONString());
+            
+            this.userActivityProvider.addUserProfile(userProfile);
             return null;
         });
        
