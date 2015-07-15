@@ -39,9 +39,13 @@ public class LaunchPadController extends ControllerBase {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
         RestResponse resp =  new RestResponse();
-        if(EtagHelper.checkHeaderEtagOnly(30,commandResponse.hashCode()+"", request, response)) {
-            resp.setResponseObject(commandResponse);
+        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
+            int hashCode = commandResponse.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                resp.setResponseObject(commandResponse);
+            }
         }
+       
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
