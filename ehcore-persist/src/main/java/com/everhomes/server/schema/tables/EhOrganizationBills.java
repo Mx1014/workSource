@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord> {
 
-	private static final long serialVersionUID = 1290387798;
+	private static final long serialVersionUID = -1245121861;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_bills</code>
@@ -62,24 +62,24 @@ public class EhOrganizationBills extends org.jooq.impl.TableImpl<com.everhomes.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.lang.String> DATE_STR = createField("date_str", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the date string in bill");
 
 	/**
-	 * The column <code>ehcore.eh_organization_bills.total_amount</code>. the money amount of the bill
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.math.BigDecimal> TOTAL_AMOUNT = createField("total_amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "the money amount of the bill");
-
-	/**
 	 * The column <code>ehcore.eh_organization_bills.description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_organization_bills.due_amount</code>. the money amount of the bill for the current month
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.math.BigDecimal> DUE_AMOUNT = createField("due_amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "the money amount of the bill for the current month");
+
+	/**
+	 * The column <code>ehcore.eh_organization_bills.owe_amount</code>. the paid money amount of the paid bill
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.math.BigDecimal> OWE_AMOUNT = createField("owe_amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "the paid money amount of the paid bill");
+
+	/**
 	 * The column <code>ehcore.eh_organization_bills.creator_uid</code>. uid of the user who has the bill
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "uid of the user who has the bill");
-
-	/**
-	 * The column <code>ehcore.eh_organization_bills.create_time</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organization_bills.notify_count</code>. how many times of notification is sent for the bill
@@ -90,6 +90,11 @@ public class EhOrganizationBills extends org.jooq.impl.TableImpl<com.everhomes.s
 	 * The column <code>ehcore.eh_organization_bills.notify_time</code>. the last time of notification for the bill
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.sql.Timestamp> NOTIFY_TIME = createField("notify_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the last time of notification for the bill");
+
+	/**
+	 * The column <code>ehcore.eh_organization_bills.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_bills</code> table reference

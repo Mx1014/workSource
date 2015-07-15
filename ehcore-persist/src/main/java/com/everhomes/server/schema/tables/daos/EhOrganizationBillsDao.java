@@ -90,13 +90,6 @@ public class EhOrganizationBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
-	 * Fetch records that have <code>total_amount IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByTotalAmount(java.math.BigDecimal... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.TOTAL_AMOUNT, values);
-	}
-
-	/**
 	 * Fetch records that have <code>description IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByDescription(java.lang.String... values) {
@@ -104,17 +97,24 @@ public class EhOrganizationBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
+	 * Fetch records that have <code>due_amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByDueAmount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.DUE_AMOUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owe_amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByOweAmount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.OWE_AMOUNT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>creator_uid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByCreatorUid(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.CREATOR_UID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>create_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByCreateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.CREATE_TIME, values);
 	}
 
 	/**
@@ -129,5 +129,12 @@ public class EhOrganizationBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByNotifyTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.NOTIFY_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.CREATE_TIME, values);
 	}
 }
