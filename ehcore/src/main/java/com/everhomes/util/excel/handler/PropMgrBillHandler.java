@@ -174,7 +174,8 @@ public class PropMgrBillHandler
 				RowResult rowResult = (RowResult)resultList.get(rowIndex);
 				//生成账单总信息
 				PmBillsDTO bill = new PmBillsDTO();
-				bill.setAddress(monthResult.getA());
+				bill.setAddress(rowResult.getB());
+				bill.setDateStr(monthResult.getA());
 
 			}
 		}
