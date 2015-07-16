@@ -1,25 +1,14 @@
 package com.everhomes.user.base;
 
-import static org.junit.Assert.fail;
-
 import org.jooq.DSLContext;
 import org.junit.Assert;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.junit.TestCaseBase;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
@@ -31,9 +20,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.user.VerifyAndLogonCommand;
 import com.everhomes.util.RuntimeErrorException;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class }, loader = AnnotationConfigContextLoader.class)
-public class UserGenerator {
+public class UserGenerator extends TestCaseBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGenerator.class);
 
@@ -52,12 +39,6 @@ public class UserGenerator {
 
     // delete identifier
     protected long identifierId;
-
-    @Configuration
-    @ComponentScan(basePackages = { "com.everhomes" })
-    @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class, })
-    static class ContextConfiguration {
-    }
 
     protected long createLoginUser(String number, String password) {
         Assert.assertNotNull(number, "number cannot be empty");

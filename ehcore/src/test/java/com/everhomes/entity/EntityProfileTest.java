@@ -1,36 +1,18 @@
 // @formatter:off
 package com.everhomes.entity;
 
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqDiscover;
 import com.everhomes.jooq.JooqMetaInfo;
-import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.junit.TestCaseBase;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhBanners;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class },
-    loader = AnnotationConfigContextLoader.class)
-public class EntityProfileTest extends TestCase {
+public class EntityProfileTest extends TestCaseBase {
     @Autowired
     private DbProvider dbProvider;
     
@@ -39,19 +21,6 @@ public class EntityProfileTest extends TestCase {
     
     @Value("${db.master}")
     private String dbUrl;
-    
-    @Configuration
-    @ComponentScan(basePackages = {
-        "com.everhomes"
-    })
-    @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class,
-            FreeMarkerAutoConfiguration.class
-        })
-    static class ContextConfiguration {
-    }
-    
     
     @Ignore @Test
     public void testJooqDiscovery() {

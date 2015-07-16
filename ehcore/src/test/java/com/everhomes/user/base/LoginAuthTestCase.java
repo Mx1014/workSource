@@ -1,31 +1,15 @@
 package com.everhomes.user.base;
 
-import static org.junit.Assert.fail;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
 
-import org.jooq.DSLContext;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.acl.Acl;
 import com.everhomes.acl.AclProvider;
@@ -33,19 +17,12 @@ import com.everhomes.acl.Privilege;
 import com.everhomes.acl.PrivilegeConstants;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
-import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.junit.PropertyInitializer;
-import com.everhomes.server.schema.tables.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.EhUsers;
-import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
-import com.everhomes.server.schema.tables.daos.EhUsersDao;
+import com.everhomes.junit.TestCaseBase;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.IdentifierType;
-import com.everhomes.user.SignupCommand;
-import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -53,14 +30,10 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserStatus;
-import com.everhomes.user.VerifyAndLogonCommand;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class }, loader = AnnotationConfigContextLoader.class)
-public class LoginAuthTestCase extends TestCase {
+public class LoginAuthTestCase extends TestCaseBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthTestCase.class);
 
@@ -76,16 +49,6 @@ public class LoginAuthTestCase extends TestCase {
     @Autowired
     UserService userService;
 
-    @Configuration
-    @ComponentScan(basePackages = { "com.everhomes" })
-    @EnableAutoConfiguration(exclude = { 
-            FreeMarkerAutoConfiguration.class,
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class, 
-            })
-    static class ContextConfiguration {
-    }
-    
     @Before
     public void setUp() throws Exception {
     	super.setUp();
