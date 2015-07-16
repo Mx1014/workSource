@@ -66,10 +66,10 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 //			propertyMgrProvider.createPmTask(task );
 //			post.setEmbeddedId(task.getId());
 //		}
-//		
-//		Organization cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
-//            ActivityPostCommand.class);
-//		PostEntityTag entityTag = PostEntityTag.fromCode(post.getTargetTag());
+		
+		CreateOrganizationCommand cmd = (CreateOrganizationCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+		    CreateOrganizationCommand.class);
+		PostEntityTag entityTag = PostEntityTag.fromCode(post.getTargetTag());
 		
 		return post;	
     }
@@ -85,5 +85,17 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 //    	}
     	 return post;
     }
+    
+    private Organization getOrganization(Post post) {
+        return null;
+    }
 
+    private OrganizationTaskType getOrganizationTaskType(Post post) {
+        Long contentCategoryId = post.getContentCategory();
+        Long actionCategoryId = post.getActionCategory();
+        
+        // TODO: convert the category to organization task type
+        
+        return null;
+    }
 }

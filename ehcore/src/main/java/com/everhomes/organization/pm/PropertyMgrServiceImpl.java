@@ -1514,13 +1514,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	//权限控制
     	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
     	cmd.setCommunityId(organizationId);
-    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+    	int totalCount = 0; //propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
     	if(totalCount == 0) return response;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	int pageCount = getPageCount(totalCount, pageSize);
     	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
     	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
-    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
+    	List<CommunityPmTasks> tasks = null; //propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
     	if(tasks != null && tasks.size() > 0){
     		for (CommunityPmTasks task : tasks) {
 				PostDTO post = forumService.getTopicById(task.getApplyEntityId(), communityId, false);		
@@ -1598,7 +1598,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
-		String taskType = OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
+		String taskType = null; // OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
 		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
