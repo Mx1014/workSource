@@ -473,7 +473,7 @@ public class OrganizationController extends ControllerBase {
      * @return 
      */
     @RequestMapping("listUserRelatedOrganizations")
-    @RestReturn(String.class)
+    @RestReturn(value=OrganizationSimpleDTO.class,collection=true)
     public RestResponse listUserRelatedOrganizations() throws Exception {
     	
     	List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs();
@@ -491,8 +491,8 @@ public class OrganizationController extends ControllerBase {
      * @return 
      */
     @RequestMapping("getOrganizationDetails")
-    @RestReturn(String.class)
-    public RestResponse listUserRelatedOrganizations(GetOrgDetailCommand cmd) throws Exception {
+    @RestReturn(OrganizationDTO.class)
+    public RestResponse listUserRelatedOrganizations(@Valid GetOrgDetailCommand cmd) throws Exception {
     	
     	OrganizationDTO org = organizationService.getOrganizationByComunityidAndOrgType(cmd);
         RestResponse response = new RestResponse(org);
