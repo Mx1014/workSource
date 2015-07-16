@@ -465,9 +465,16 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("userRelateOrg")
+    
+    /**
+     * <b>URL: /org/listUserRelatedOrganizations</b>
+     * <p>查询当前用户加入的组织</p>
+     * @param 
+     * @return 
+     */
+    @RequestMapping("listUserRelatedOrganizations")
     @RestReturn(String.class)
-    public RestResponse userRelateOrg() throws Exception {
+    public RestResponse listUserRelatedOrganizations() throws Exception {
     	
     	List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs();
         RestResponse response = new RestResponse(list);
@@ -477,12 +484,17 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("getOrgDetail")
+    /**
+     * <b>URL: /org/getOrganizationDetails</b>
+     * <p>根据小区Id和组织类型查询对应的组织</p>
+     * @param  communityId : 小区id,	organizationType : 组织类型
+     * @return 
+     */
+    @RequestMapping("getOrganizationDetails")
     @RestReturn(String.class)
-    public RestResponse getOrgDetail(GetOrgDetailCommand cmd) throws Exception {
+    public RestResponse listUserRelatedOrganizations(GetOrgDetailCommand cmd) throws Exception {
     	
     	OrganizationDTO org = organizationService.getOrganizationByComunityidAndOrgType(cmd);
-    	
         RestResponse response = new RestResponse(org);
         
         response.setErrorCode(ErrorCodes.SUCCESS);
