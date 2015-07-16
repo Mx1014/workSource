@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.openxmlformats.schemas.presentationml.x2006.main.CmAuthorLstDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,7 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.GetOrgDetailCommand;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDTO;
@@ -1772,13 +1774,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "propterty communityId paramter can not be null or empty");
 	    }
-	        
-	    Long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-	    if(organizationId == 0L){
+	    GetOrgDetailCommand c = new GetOrgDetailCommand();
+	    c.setCommunityId(cmd.getCommunityId());
+	    c.setOrganizationType(cmd.getOrganizationType());
+	    OrganizationDTO organizationDTO = this.organizationService.getOrganizationByComunityidAndOrgType(c);
+	    if(organizationDTO == null){
 	        LOGGER.error("Property organization is not exists.communityId="+ cmd.getCommunityId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Property organization is not exists.");
 	    }
+	    long organizationId = organizationDTO.getId();
 	    List<CommunityPmContact> communityPmContacts = propertyMgrProvider.listCommunityPmContacts(organizationId);
 	    if(communityPmContacts == null || communityPmContacts.isEmpty()){
 	        LOGGER.error("Property community contacts is not exists.communityId="+ cmd.getCommunityId());

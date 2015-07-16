@@ -166,8 +166,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
                 if(launchPadItem.getItemGroup().equals(LaunchPadConstants.GROUP_CALLPHONES)){ 
                     if(jsonObject.get(LaunchPadConstants.CALLPHONES) != null ){
+                        
+                        String location = launchPadItem.getItemLocation();
+                        String organizationType = location.substring(location.lastIndexOf("/") + 1).toUpperCase();
                         ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
                         cmd.setCommunityId(commnunityId);
+                        cmd.setOrganizationType(organizationType);
                         List<String> contacts = new ArrayList<String>();
                         List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
                         if(dtos != null && !dtos.isEmpty()){
