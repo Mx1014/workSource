@@ -40,7 +40,7 @@ import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.Tuple;
 
 @RestController
-@RequestMapping("/organization/pm")
+@RequestMapping("/pm")
 public class PropertyMgrController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrController.class);
     
