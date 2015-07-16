@@ -76,6 +76,13 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
+	 * Fetch records that have <code>description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.DESCRIPTION, values);
+	}
+
+	/**
 	 * Fetch records that have <code>path IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByPath(java.lang.String... values) {

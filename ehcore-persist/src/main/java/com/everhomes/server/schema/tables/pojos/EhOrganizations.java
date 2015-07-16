@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1917369935;
+	private static final long serialVersionUID = -1337633507;
 
 	private java.lang.Long    id;
 	private java.lang.Long    parentId;
 	private java.lang.String  organizationType;
 	private java.lang.String  name;
 	private java.lang.Long    addressId;
+	private java.lang.String  description;
 	private java.lang.String  path;
 	private java.lang.Integer level;
 	private java.lang.Byte    status;
@@ -30,6 +31,7 @@ public class EhOrganizations implements java.io.Serializable {
 		java.lang.String  organizationType,
 		java.lang.String  name,
 		java.lang.Long    addressId,
+		java.lang.String  description,
 		java.lang.String  path,
 		java.lang.Integer level,
 		java.lang.Byte    status
@@ -39,6 +41,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.organizationType = organizationType;
 		this.name = name;
 		this.addressId = addressId;
+		this.description = description;
 		this.path = path;
 		this.level = level;
 		this.status = status;
@@ -82,6 +85,14 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setAddressId(java.lang.Long addressId) {
 		this.addressId = addressId;
+	}
+
+	public java.lang.String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(java.lang.String description) {
+		this.description = description;
 	}
 
 	public java.lang.String getPath() {

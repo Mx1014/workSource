@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = 378012205;
+	private static final long serialVersionUID = 884944789;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>
@@ -50,6 +50,11 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_organizations.address_id</code>. address for department
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "address for department");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organizations.path</code>. path from the root

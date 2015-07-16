@@ -84,9 +84,24 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhBusiness EH_BUSINESS = com.everhomes.server.schema.tables.EhBusiness.EH_BUSINESS;
 
 	/**
+	 * The table ehcore.eh_businesses
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinesses EH_BUSINESSES = com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES;
+
+	/**
+	 * The table ehcore.eh_business_categories
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessCategories EH_BUSINESS_CATEGORIES = com.everhomes.server.schema.tables.EhBusinessCategories.EH_BUSINESS_CATEGORIES;
+
+	/**
 	 * The table ehcore.eh_business_profiles
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinessProfiles EH_BUSINESS_PROFILES = com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES;
+
+	/**
+	 * The table ehcore.eh_business_visible_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessVisibleScopes EH_BUSINESS_VISIBLE_SCOPES = com.everhomes.server.schema.tables.EhBusinessVisibleScopes.EH_BUSINESS_VISIBLE_SCOPES;
 
 	/**
 	 * The table ehcore.eh_categories

@@ -11,17 +11,20 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 619101882;
+	private static final long serialVersionUID = -1290025376;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
 	private java.lang.String   organizationType;
-	private java.lang.String   entityType;
-	private java.lang.Long     entityId;
+	private java.lang.String   applyEntityType;
+	private java.lang.Long     applyEntityId;
 	private java.lang.String   targetType;
 	private java.lang.Long     targetId;
 	private java.lang.String   taskType;
+	private java.lang.String   description;
 	private java.lang.Byte     taskStatus;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 
@@ -31,24 +34,30 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     organizationId,
 		java.lang.String   organizationType,
-		java.lang.String   entityType,
-		java.lang.Long     entityId,
+		java.lang.String   applyEntityType,
+		java.lang.Long     applyEntityId,
 		java.lang.String   targetType,
 		java.lang.Long     targetId,
 		java.lang.String   taskType,
+		java.lang.String   description,
 		java.lang.Byte     taskStatus,
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
 		this.organizationType = organizationType;
-		this.entityType = entityType;
-		this.entityId = entityId;
+		this.applyEntityType = applyEntityType;
+		this.applyEntityId = applyEntityId;
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.taskType = taskType;
+		this.description = description;
 		this.taskStatus = taskStatus;
+		this.operatorUid = operatorUid;
+		this.operateTime = operateTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 	}
@@ -77,20 +86,20 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		this.organizationType = organizationType;
 	}
 
-	public java.lang.String getEntityType() {
-		return this.entityType;
+	public java.lang.String getApplyEntityType() {
+		return this.applyEntityType;
 	}
 
-	public void setEntityType(java.lang.String entityType) {
-		this.entityType = entityType;
+	public void setApplyEntityType(java.lang.String applyEntityType) {
+		this.applyEntityType = applyEntityType;
 	}
 
-	public java.lang.Long getEntityId() {
-		return this.entityId;
+	public java.lang.Long getApplyEntityId() {
+		return this.applyEntityId;
 	}
 
-	public void setEntityId(java.lang.Long entityId) {
-		this.entityId = entityId;
+	public void setApplyEntityId(java.lang.Long applyEntityId) {
+		this.applyEntityId = applyEntityId;
 	}
 
 	public java.lang.String getTargetType() {
@@ -117,12 +126,36 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		this.taskType = taskType;
 	}
 
+	public java.lang.String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(java.lang.String description) {
+		this.description = description;
+	}
+
 	public java.lang.Byte getTaskStatus() {
 		return this.taskStatus;
 	}
 
 	public void setTaskStatus(java.lang.Byte taskStatus) {
 		this.taskStatus = taskStatus;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public java.sql.Timestamp getOperateTime() {
+		return this.operateTime;
+	}
+
+	public void setOperateTime(java.sql.Timestamp operateTime) {
+		this.operateTime = operateTime;
 	}
 
 	public java.lang.Long getCreatorUid() {

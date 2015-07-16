@@ -62,17 +62,17 @@ public class EhOrganizationTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
-	 * Fetch records that have <code>entity_type IN (values)</code>
+	 * Fetch records that have <code>apply_entity_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByEntityType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.ENTITY_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByApplyEntityType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>entity_id IN (values)</code>
+	 * Fetch records that have <code>apply_entity_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByEntityId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.ENTITY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByApplyEntityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.APPLY_ENTITY_ID, values);
 	}
 
 	/**
@@ -97,10 +97,31 @@ public class EhOrganizationTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
+	 * Fetch records that have <code>description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.DESCRIPTION, values);
+	}
+
+	/**
 	 * Fetch records that have <code>task_status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByTaskStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.TASK_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.OPERATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operate_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByOperateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.OPERATE_TIME, values);
 	}
 
 	/**

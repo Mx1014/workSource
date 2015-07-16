@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord> {
 
-	private static final long serialVersionUID = 716167522;
+	private static final long serialVersionUID = 435172320;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_tasks</code>
@@ -42,14 +42,14 @@ public class EhOrganizationTasks extends org.jooq.impl.TableImpl<com.everhomes.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.String> ORGANIZATION_TYPE = createField("organization_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "NONE, PM(Property Management), GARC(Resident Committee), GANC(Neighbor Committee), GAPS(Police Station)");
 
 	/**
-	 * The column <code>ehcore.eh_organization_tasks.entity_type</code>. TOPIC
+	 * The column <code>ehcore.eh_organization_tasks.apply_entity_type</code>. the entity who apply the task, like TOPIC
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.String> ENTITY_TYPE = createField("entity_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "TOPIC");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.String> APPLY_ENTITY_TYPE = createField("apply_entity_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "the entity who apply the task, like TOPIC");
 
 	/**
-	 * The column <code>ehcore.eh_organization_tasks.entity_id</code>. target topic id if target_type is a topic
+	 * The column <code>ehcore.eh_organization_tasks.apply_entity_id</code>. target topic id if target_type is a topic
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Long> ENTITY_ID = createField("entity_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "target topic id if target_type is a topic");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Long> APPLY_ENTITY_ID = createField("apply_entity_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "target topic id if target_type is a topic");
 
 	/**
 	 * The column <code>ehcore.eh_organization_tasks.target_type</code>. user
@@ -67,9 +67,24 @@ public class EhOrganizationTasks extends org.jooq.impl.TableImpl<com.everhomes.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.String> TASK_TYPE = createField("task_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "task type assigned by organization");
 
 	/**
-	 * The column <code>ehcore.eh_organization_tasks.task_status</code>.
+	 * The column <code>ehcore.eh_organization_tasks.description</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Byte> TASK_STATUS = createField("task_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_tasks.task_status</code>. 1: unprocessed, 2: processing；3 已处理；4 其他
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Byte> TASK_STATUS = createField("task_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: unprocessed, 2: processing；3 已处理；4 其他");
+
+	/**
+	 * The column <code>ehcore.eh_organization_tasks.operator_uid</code>. uid of the user who process the task
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "uid of the user who process the task");
+
+	/**
+	 * The column <code>ehcore.eh_organization_tasks.operate_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organization_tasks.creator_uid</code>. uid of the user who create the task

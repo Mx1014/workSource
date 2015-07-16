@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 465254570;
+	private static final long serialVersionUID = -522164079;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -48,7 +48,10 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhBizCouponGroups.EH_BIZ_COUPON_GROUPS,
 			com.everhomes.server.schema.tables.EhBorders.EH_BORDERS,
 			com.everhomes.server.schema.tables.EhBusiness.EH_BUSINESS,
+			com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES,
+			com.everhomes.server.schema.tables.EhBusinessCategories.EH_BUSINESS_CATEGORIES,
 			com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES,
+			com.everhomes.server.schema.tables.EhBusinessVisibleScopes.EH_BUSINESS_VISIBLE_SCOPES,
 			com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES,
 			com.everhomes.server.schema.tables.EhCerts.EH_CERTS,
 			com.everhomes.server.schema.tables.EhClientPackages.EH_CLIENT_PACKAGES,
