@@ -12,10 +12,7 @@ import com.everhomes.util.StringHelper;
  *	</ul>
  *
  */
-
-
-public class RejectOrganizationCommand {
-	
+public class UserExitOrganizationCommand {
 	@NotNull
 	private Long communityId;
 	@NotNull
@@ -41,7 +38,4 @@ public class RejectOrganizationCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
-	
-
 }

@@ -526,6 +526,28 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /org/rejectOrganization</b>
+	 * <p>说明 : 
+	 * 根据小区id查询eh_organization_communities表,
+	 * 返回列表组织列表，再查eh_organizations表找到对应组织类型organizationType的组织,
+	 * 最后根据组织id和userId更新eh_organization_members表的status状态为inactive
+	 * </p>
+	 * @param  communityId : 小区id,	organizationType : 组织类型
+	 * @return 
+	 */
+	@RequestMapping("userExitOrganization")
+	@RestReturn(String.class)
+	public RestResponse userExitOrganization(@Valid UserExitOrganizationCommand cmd) throws Exception {
+
+		int status = organizationService.userExitOrganization(cmd);
+		
+		RestResponse response = new RestResponse(status);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 
 
