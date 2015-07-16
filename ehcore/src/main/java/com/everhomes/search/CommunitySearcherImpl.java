@@ -49,6 +49,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("name", community.getName());
             b.field("cityId", community.getCityId());
+            b.field("cityName", community.getCityName());
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -75,8 +76,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             LOGGER.info("communities sync count= " + count);
         }
         
-        //this.optimize(1);
-        //this.refresh();
+        this.optimize(1);
+        this.refresh();
     }
    
     @Override
@@ -136,7 +137,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             doc.setId(Long.parseLong(idAsStr));
             doc.setCityId(SearchUtils.getLongField(source.get("cityId")));
             doc.setName((String)source.get("name"));
-    
+            doc.setCityName((String)source.get("cityName"));
             
             return doc;
         }

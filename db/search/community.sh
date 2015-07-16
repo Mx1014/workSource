@@ -23,6 +23,7 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
                     }
                 }
             }, 
+            "cityName":{"type":"string","index":"no", "store":"yes"},
             "cityId": {
                 "type": "long",
                 "index": "not_analyzed"

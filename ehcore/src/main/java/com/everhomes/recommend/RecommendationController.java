@@ -24,6 +24,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -64,6 +65,9 @@ public class RecommendationController extends ControllerBase{
     
     @Autowired
     RecommendationProvider recommendationProvider;
+    
+    @Autowired
+    CommunitySearcher searcher;
    
     
     /**
@@ -140,6 +144,7 @@ public class RecommendationController extends ControllerBase{
       //Update the modify time for ETAG
       if(null != profile) {
           profile.setItemValue(Long.toString(System.currentTimeMillis()));
+          userActivityProvider.updateUserProfile(profile);
       }
       res.setErrorCode(ErrorCodes.SUCCESS);
       res.setErrorDescription("OK");
@@ -163,20 +168,23 @@ public class RecommendationController extends ControllerBase{
 //      r.setUserId(userId);
 //      recommendationProvider.createRecommendation(r);
 //      
-//      //UserInfo user = userService.getUserInfo(userId);
-//      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
-//      if(null != profile) {
-//          profile.setItemValue(Long.toString(System.currentTimeMillis()));
-//      } else {
-//          UserProfile p2 = new UserProfile();
-//          p2.setItemName(UserProfileContstant.RecommendName);
-//          p2.setItemKind((byte)0);
-//          p2.setItemValue(Long.toString(System.currentTimeMillis()));
-//          p2.setOwnerId(userId);
-//          userActivityProvider.addUserProfile(p2);
-//          }
-//      
-      recommendationService.communityNotify(4l, 6l, 7l);
+      //UserInfo user = userService.getUserInfo(userId);
+      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
+      if(null != profile) {
+          profile.setItemValue(Long.toString(System.currentTimeMillis()));
+          userActivityProvider.updateUserProfile(profile);
+      } else {
+          UserProfile p2 = new UserProfile();
+          p2.setItemName(UserProfileContstant.RecommendName);
+          p2.setItemKind((byte)0);
+          p2.setItemValue(Long.toString(System.currentTimeMillis()));
+          p2.setOwnerId(userId);
+          userActivityProvider.addUserProfile(p2);
+          //userActivityProvider.updateUserProfile(userProfile);
+          }
+      
+      //recommendationService.communityNotify(4l, 6l, 7l);
+      searcher.syncDb();
       
       RestResponse res = new RestResponse();
       res.setErrorCode(ErrorCodes.SUCCESS);

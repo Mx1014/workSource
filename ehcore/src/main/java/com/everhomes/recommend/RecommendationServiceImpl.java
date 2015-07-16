@@ -76,6 +76,7 @@ public class RecommendationServiceImpl implements RecommendationService {
        UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(recommend.getUserId(), UserProfileContstant.RecommendName);
        if(null != profile) {
            profile.setItemValue(Long.toString(System.currentTimeMillis()));
+           userActivityProvider.updateUserProfile(profile);
        } else {
            UserProfile p2 = new UserProfile();
            p2.setItemName(UserProfileContstant.RecommendName);

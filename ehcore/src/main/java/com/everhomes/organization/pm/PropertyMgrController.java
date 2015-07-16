@@ -936,4 +936,23 @@ public class PropertyMgrController extends ControllerBase {
         return response;
     } 
     
+    /**
+     * <b>URL: /pm/importPmBills
+     * <p>上传缴费账单excel文件
+     * @param communityId 小区id
+     * @param files 要上传文件
+     * @return 
+     */
+    @RequestMapping("importPmBills")
+    @RestReturn(value=ListPmBillsByConditionsCommandResponse.class)
+    public RestResponse importPmBills(PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
+    	
+    	propertyMgrService.importPmBills(cmd, files);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+        
+    } 
+    
 }
