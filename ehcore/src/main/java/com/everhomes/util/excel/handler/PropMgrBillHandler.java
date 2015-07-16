@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmBillItem;
+import com.everhomes.organization.pm.PmBillsDTO;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
@@ -23,8 +24,8 @@ import com.everhomes.util.excel.SAXHandlerEventUserModel;
 public class PropMgrBillHandler
 {
 	/** 日志 */
-	 private static final Logger LOGGER = LoggerFactory.getLogger(PropMgrBillHandler.class);
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropMgrBillHandler.class);
+
 	public static ArrayList processorExcel(File file)
 	{
 		ArrayList resultList = new ArrayList();
@@ -40,7 +41,7 @@ public class PropMgrBillHandler
 		}
 		return resultList;
 	}
-	
+
 	public static ArrayList processorExcel(InputStream is)
 	{
 		ArrayList resultList = new ArrayList();
@@ -56,7 +57,7 @@ public class PropMgrBillHandler
 		}
 		return resultList;
 	}
-	
+
 	public static List<CommunityPmBill> processorPropBill(long userId, long communityId,ArrayList resultList,int rowCount,int previousRow) {
 		List<CommunityPmBill> billList = new ArrayList<CommunityPmBill>();
 		if(resultList != null && resultList.size() > 0)
@@ -64,12 +65,12 @@ public class PropMgrBillHandler
 			int row = resultList.size();
 			//得到时间行数据
 			RowResult titleResult = (RowResult)resultList.get(ProcessBillModel1.getDateRow());
-			
+
 			if((row - previousRow) % rowCount == 0)
 			{
 				int aptCount = (row -previousRow)/rowCount; 
 				for (int rowIndex = 0; rowIndex < aptCount ; rowIndex++) {
-					
+
 					//生成账单总信息
 					RowResult addressResult = (RowResult)resultList.get(ProcessBillModel1.getAddressRow(rowIndex));
 					CommunityPmBill bill = new CommunityPmBill();
@@ -80,7 +81,7 @@ public class PropMgrBillHandler
 					RowResult totalResult = (RowResult)resultList.get(ProcessBillModel1.getTotalRow(rowIndex));
 					bill.setDueAmount(new BigDecimal(totalResult.getG()));
 					//bill.setTotalAmount(new BigDecimal(totalResult.getG()));
-					
+
 					bill.setOrganizationId(communityId);
 					bill.setCreatorUid(userId);
 					bill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -101,11 +102,11 @@ public class PropMgrBillHandler
 					itemList.add(electricityItem);
 					itemList.add(gasItem);
 					bill.setItemList(itemList);
-					
+
 					billList.add(bill);
 				}
 			}
-			
+
 		}
 		else
 		{
@@ -133,17 +134,17 @@ public class PropMgrBillHandler
 		}
 		return item;
 	}
-	
+
 	public static BigDecimal getBigDecimalValue(String value)
 	{
 		BigDecimal bigDecimal = new BigDecimal(0);
 		if(value != null)
 		{
-			 bigDecimal = new BigDecimal(value);
+			bigDecimal = new BigDecimal(value);
 		}
 		return bigDecimal;
 	}
-	
+
 	public static String getPropBillDate(ArrayList resultList,int dateRow)
 	{
 		String date = "" ;
@@ -154,5 +155,31 @@ public class PropMgrBillHandler
 		}
 		return date;
 	}
-	
+
+	public static List<PmBillsDTO> processorPmBills(Long id,Long communityId, ArrayList resultList) {
+		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
+
+		if(resultList != null && resultList.size() > 0)
+		{
+			int rowCount = resultList.size();
+
+			int startRow = 1;
+
+			int monthRow = 1;
+
+			RowResult monthResult = (RowResult)resultList.get(monthRow);
+
+			for (int rowIndex = startRow; rowIndex < rowCount ; rowIndex++) {
+
+				RowResult rowResult = (RowResult)resultList.get(rowIndex);
+				//生成账单总信息
+				PmBillsDTO bill = new PmBillsDTO();
+				bill.setAddress(monthResult.getA());
+
+			}
+		}
+
+	return billList;
+}
+
 }

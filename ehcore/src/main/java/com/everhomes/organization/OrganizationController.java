@@ -31,7 +31,7 @@ import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 
 @RestController
-@RequestMapping("/org")
+@RequestMapping("/organization")
 public class OrganizationController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationController.class);
 

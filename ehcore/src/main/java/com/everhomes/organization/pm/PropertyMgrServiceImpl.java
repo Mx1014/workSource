@@ -1835,8 +1835,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		List<CommunityPmBill> billList = PropMgrBillHandler.processorPropBill(user.getId(), communityId, resultList, ProcessBillModel1.PROCESS_TO_OBJECT_PER_ROW, ProcessBillModel1.PROCESS_PREVIOUS_ROW_TITLE);
-		ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
+		List<PmBillsDTO> billList = PropMgrBillHandler.processorPmBills(user.getId(), communityId, resultList);
+		
+		/*ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
 		command.setCommunityId(communityId);
 		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
 
@@ -1863,7 +1864,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
 				createPropBill(bill);
 			}
-		}
+		}*/
 
 	}
 }

@@ -8,7 +8,7 @@ public class ListPmBillsByConditionsCommandResponse {
 	
 	private Long nextPageAnchor;
 	
-	private List<PmBillsDto> requests;
+	private List<PmBillsDTO> requests;
 
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
@@ -18,11 +18,11 @@ public class ListPmBillsByConditionsCommandResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<PmBillsDto> getRequests() {
+	public List<PmBillsDTO> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(List<PmBillsDto> requests) {
+	public void setRequests(List<PmBillsDTO> requests) {
 		this.requests = requests;
 	}
 
