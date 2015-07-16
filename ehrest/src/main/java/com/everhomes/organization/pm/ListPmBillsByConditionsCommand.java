@@ -29,6 +29,8 @@ public class ListPmBillsByConditionsCommand {
 	
 	private String telephone;
 	
+	private Long communityId;
+	
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
@@ -75,6 +77,14 @@ public class ListPmBillsByConditionsCommand {
 	
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	@Override

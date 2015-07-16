@@ -13,9 +13,12 @@ import com.everhomes.util.StringHelper;
  * <li>addressId：地址</li>
  * <li>OrganizationType：组织类型：参考{@link com.everhomes.organization.OrganizationType}</li>
  * <li>status：状态：参考{@link com.everhomes.organization.OrganizationStatus}</li>
+ * <li>memberStatus：成员状态：参考{@link com.everhomes.organization.OrganizationMemberStatus}</li>
+ * <li>
  * </ul>
  */
 public class OrganizationDTO {
+	
 	private Long    id;
     private Long    parentId;
 	private String  name;
@@ -24,6 +27,8 @@ public class OrganizationDTO {
 	private Long addressId;
 	private String OrganizationType;
 	private Byte    status;
+	private Byte memberStatus;
+	
 	public OrganizationDTO() {
     }
 	
@@ -67,9 +72,6 @@ public class OrganizationDTO {
 		this.level = level;
 	}
 
-
-	
-
 	public Long getAddressId() {
 		return addressId;
 	}
@@ -107,6 +109,14 @@ public class OrganizationDTO {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+	
+	public Byte getMemberStatus() {
+		return memberStatus;
+	}
+
+	public void setMemberStatus(Byte memberStatus) {
+		this.memberStatus = memberStatus;
 	}
 
 

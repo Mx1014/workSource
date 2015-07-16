@@ -968,6 +968,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			for(int i=0;i<orgCommunitys.size();i++){
 				OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(),cmd.getOrganizationType());
 				if(org != null){
+					User user = UserContext.current().getUser();
+					OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),org.getId());
+					
+					if(member != null && member.getStatus() !=null)
+						org.setMemberStatus(member.getStatus());
+					else
+						org.setMemberStatus(OrganizationMemberStatus.INACTIVE.getCode());
+					
 					return org;
 				}
 			}

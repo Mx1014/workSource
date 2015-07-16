@@ -1,87 +1,150 @@
 package com.everhomes.organization.pm;
 
-import java.math.BigDecimal;
+import com.everhomes.util.StringHelper;
 
-public class PmBillsDTO {
+public class PmBillsDTO{
 	
-	private Long	id;
+	private java.lang.Long       id;
+	private java.lang.Long       organizationId;
+	private java.lang.String     entityType;
+	private java.lang.Long       entityId;
+	private java.lang.String     address;
+	private java.lang.String     name;
+	private java.lang.String     dateStr;
+	private java.lang.String     description;
+	private java.math.BigDecimal dueAmount;
+	private java.math.BigDecimal oweAmount;
+	private java.lang.Long       creatorUid;
+	private java.lang.Integer    notifyCount;
+	private java.sql.Timestamp   notifyTime;
+	private java.sql.Timestamp   createTime;
 	
-	private String dateStr;
-	
-	private String address;
-	
-	private String telephone;
-	
-	private BigDecimal dueAmount;
-	
-	private BigDecimal oweAmount;
-	
-	private BigDecimal totalAmount;
-	
-	private String     description;
+	//expand
+	private java.math.BigDecimal totalAmount;
 
-	public Long getId() {
+	public java.lang.Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
 
-	public String getDateStr() {
-		return dateStr;
+	public java.lang.Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setDateStr(String dateStr) {
-		this.dateStr = dateStr;
+	public void setOrganizationId(java.lang.Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
-	public String getAddress() {
+	public java.lang.String getEntityType() {
+		return entityType;
+	}
+
+	public void setEntityType(java.lang.String entityType) {
+		this.entityType = entityType;
+	}
+
+	public java.lang.Long getEntityId() {
+		return entityId;
+	}
+
+	public void setEntityId(java.lang.Long entityId) {
+		this.entityId = entityId;
+	}
+
+	public java.lang.String getAddress() {
 		return address;
 	}
 
-	public void setAddress(String address) {
+	public void setAddress(java.lang.String address) {
 		this.address = address;
 	}
 
-	public String getTelephone() {
-		return telephone;
+	public java.lang.String getName() {
+		return name;
 	}
 
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
+	public void setName(java.lang.String name) {
+		this.name = name;
 	}
 
-	public BigDecimal getDueAmount() {
-		return dueAmount;
+	public java.lang.String getDateStr() {
+		return dateStr;
 	}
 
-	public void setDueAmount(BigDecimal dueAmount) {
-		this.dueAmount = dueAmount;
+	public void setDateStr(java.lang.String dateStr) {
+		this.dateStr = dateStr;
 	}
 
-	public BigDecimal getOweAmount() {
-		return oweAmount;
-	}
-
-	public void setOweAmount(BigDecimal oweAmount) {
-		this.oweAmount = oweAmount;
-	}
-
-	public BigDecimal getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
-	public String getDescription() {
+	public java.lang.String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(java.lang.String description) {
 		this.description = description;
+	}
+
+	public java.math.BigDecimal getDueAmount() {
+		return dueAmount;
+	}
+
+	public void setDueAmount(java.math.BigDecimal dueAmount) {
+		this.dueAmount = dueAmount;
+	}
+
+	public java.math.BigDecimal getOweAmount() {
+		return oweAmount;
+	}
+
+	public void setOweAmount(java.math.BigDecimal oweAmount) {
+		this.oweAmount = oweAmount;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.Integer getNotifyCount() {
+		return notifyCount;
+	}
+
+	public void setNotifyCount(java.lang.Integer notifyCount) {
+		this.notifyCount = notifyCount;
+	}
+
+	public java.sql.Timestamp getNotifyTime() {
+		return notifyTime;
+	}
+
+	public void setNotifyTime(java.sql.Timestamp notifyTime) {
+		this.notifyTime = notifyTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public java.math.BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(java.math.BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 	
 	

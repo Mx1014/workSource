@@ -431,7 +431,7 @@ public class PropertyMgrController extends ControllerBase {
      * @param files 要上传文件
      * @return 
      */
-    @RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
+    @RequestMapping(value="importPropertyBills2", method = RequestMethod.POST)
     @RestReturn(value=String.class)
     public RestResponse importPropertyBills(@Valid PropCommunityIdCommand cmd,
     	@RequestParam(value = "attachment") MultipartFile[] files) {
@@ -921,31 +921,15 @@ public class PropertyMgrController extends ControllerBase {
     } 
     
     /**
-     * <b>URL: /pm/listPmBillsByCondition
-     * <p>根据条件查询物业缴费单
-     */
-    @RequestMapping("listPmBillsByConditions")
-    @RestReturn(value=ListPmBillsByConditionsCommandResponse.class)
-    public RestResponse listPmBillsByConditions(ListPmBillsByConditionsCommand cmd) {
-    	
-    	ListPmBillsByConditionsCommandResponse result = propertyMgrService.listPmBillsByConditions(cmd);
-        
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    } 
-    
-    /**
      * <b>URL: /pm/importPmBills
      * <p>上传缴费账单excel文件
      * @param communityId 小区id
      * @param files 要上传文件
      * @return 
      */
-    @RequestMapping("importPmBills")
-    @RestReturn(value=ListPmBillsByConditionsCommandResponse.class)
-    public RestResponse importPmBills(PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
+    @RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importPmBills(@Valid PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
     	
     	propertyMgrService.importPmBills(cmd, files);
     	RestResponse response = new RestResponse();
@@ -955,4 +939,22 @@ public class PropertyMgrController extends ControllerBase {
         
     } 
     
+    /**
+     * <b>URL: /pm/listPmBillsByCondition
+     * <p>根据条件查询物业缴费单
+     */
+    @RequestMapping("listPmBillsByConditions")
+    @RestReturn(value=ListPmBillsByConditionsCommandResponse.class)
+    public RestResponse listPmBillsByConditions(ListPmBillsByConditionsCommand cmd) {
+    	
+    	ListPmBillsByConditionsCommandResponse result = propertyMgrService.listPmBillsByConditions(cmd);
+        
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    } 
+    
+    	
+    	
 }
