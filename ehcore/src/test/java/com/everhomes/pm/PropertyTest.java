@@ -227,8 +227,8 @@ public class PropertyTest {
     public void testCreateTask () {
     	CommunityPmTasks task = new CommunityPmTasks();
     	task.setOrganizationId(9l);
-		task.setEntityType("EhUsers");
-		task.setEntityId(0L);
+		task.setApplyEntityType("EhUsers");
+		task.setApplyEntityId(0L);
 		task.setTargetType(EntityType.USER.getCode());
 		task.setTargetId(0L);
 		task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());

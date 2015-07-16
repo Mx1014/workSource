@@ -55,8 +55,8 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 				organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
 			}
 			task.setOrganizationId(organizationId);
-			task.setEntityType(EntityType.TOPIC.getCode());
-			task.setEntityId(-1L);
+			task.setApplyEntityType(EntityType.TOPIC.getCode());
+			task.setApplyEntityId(-1L);
 			task.setTargetType(EntityType.USER.getCode());
 			task.setTargetId(0L);
 			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
@@ -73,7 +73,7 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
     	if(post != null){
     		CommunityPmTasks task = propertyMgrProvider.findPmTaskById(post.getEmbeddedId());
     		if(task != null){
-    			task.setEntityId(post.getId());
+    			task.setApplyEntityId(post.getId());
     			propertyMgrProvider.updatePmTask(task);
     		}
     	}
