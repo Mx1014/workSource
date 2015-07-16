@@ -7,18 +7,18 @@ package com.everhomes.recommend;
  * </ul>
  */
 public enum RecommendUserSourceType {
-    COMMUNITY_USER(0), CONTACT_USER(1);
+    COMMUNITY_USER(0l), CONTACT_USER(1l);
     
-    private int code;
-    private RecommendUserSourceType(int code) {
+    private long code;
+    private RecommendUserSourceType(long code) {
         this.code = code;
     }
     
-    public Integer getCode() {
+    public Long getCode() {
         return this.code;
     }
     
-    public static RecommendUserSourceType fromCode(int code) {
+    public static RecommendUserSourceType fromCode(long code) {
         for(RecommendUserSourceType t : RecommendUserSourceType.values()) {
             if (t.code == code) {
                 return t;

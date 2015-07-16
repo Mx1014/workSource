@@ -13,6 +13,7 @@ public class CommunityDoc {
     private Long id;
     private Long cityId;
     private String name;
+    private String cityName;
     
     public Long getId() {
         return id;
@@ -32,6 +33,10 @@ public class CommunityDoc {
     public void setName(String name) {
         this.name = name;
     }
-    
-    
+    public String getCityName() {
+        return cityName;
+    }
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
 }
