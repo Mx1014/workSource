@@ -144,6 +144,7 @@ public class RecommendationController extends ControllerBase{
       //Update the modify time for ETAG
       if(null != profile) {
           profile.setItemValue(Long.toString(System.currentTimeMillis()));
+          userActivityProvider.updateUserProfile(profile);
       }
       res.setErrorCode(ErrorCodes.SUCCESS);
       res.setErrorDescription("OK");
