@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
@@ -61,6 +63,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.organization.pm.QueryPropTopicByCategoryCommand;
 import com.everhomes.organization.pm.SetPmTopicStatusCommand;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -938,7 +941,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public List<OrganizationSimpleDTO> listUserRelateOrgs() {
+	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {
 		User user = UserContext.current().getUser();
 		if(user == null)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,"user is null");
@@ -948,9 +951,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		if(orgMembers != null && !orgMembers.isEmpty()){
 			orgMembers.stream().map(orgMember -> {
+				
 				Organization org = this.organizationProvider.findOrganizationById(orgMember.getOrganizationId());
 				if (org != null){
-					orgs.add(ConvertHelper.convert(org, OrganizationSimpleDTO.class));
+					if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
+						if(org.getOrganizationType().equals(cmd.getOrganiztionType())){
+							orgs.add(ConvertHelper.convert(org, OrganizationSimpleDTO.class));
+						}
+					}
+					else
+						orgs.add(ConvertHelper.convert(org, OrganizationSimpleDTO.class));
 				}
 				return null;
 			}).toArray();
@@ -982,5 +992,56 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return null;
+	}
+
+	@Override
+	public int rejectOrganization(RejectOrganizationCommand cmd) {
+		
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+	     if(community == null){
+	      LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+	       throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	                     "Unable to find the community.");
+	     }
+		
+		List<OrganizationCommunity> orgComunitys = this.organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
+		
+		if(orgComunitys != null && !orgComunitys.isEmpty()){
+			
+			Long organizationId = 0L;
+			for(int i=0;i<orgComunitys.size();i++){
+				Organization org = this.organizationProvider.findOrganizationById(orgComunitys.get(i).getOrganizationId());
+				if(org != null && org.getOrganizationType().equals(cmd.getOrganizationType())){
+					organizationId = org.getId();
+					break;
+				}
+			}
+			
+			if(organizationId != 0){
+				User user = UserContext.current().getUser();
+				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+				if(member != null){
+					member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+					this.organizationProvider.updateOrganizationMember(member);
+					return 1;
+				}
+				else{
+					LOGGER.error("Unable to reject organization ，because userId = " + user.getId() +" is not in the organization : " + organizationId);
+				       throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				    		   "Unable to reject organization ，because user is not in the organization");
+				}
+			}
+			else{
+				LOGGER.error("Unable to reject organization ，because organization not found.");
+			       throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			                     "Unable to find the organization so can not reject");
+			}
+		}
+		else{
+			LOGGER.error("Unable to find the organization by communityId : " + cmd.getCommunityId());
+		       throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		    		   "Unable to find the organization by communityId : " + cmd.getCommunityId());
+		}
+		
 	}
 }
