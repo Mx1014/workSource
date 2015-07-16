@@ -613,9 +613,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if(communityId != null && communityId > 0)
         	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId));
         if(entityId != null && entityId > 0)
-        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_ID.eq(entityId));
         if(entityType != null && !entityType .equals(""))
-        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE.eq(entityType));
         if(targetType != null && !targetType .equals(""))
         	query.addConditions(Tables.EH_ORGANIZATION_TASKS.TARGET_TYPE.eq(targetType));
         if(targetId != null && targetId > 0)
@@ -645,9 +645,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         if(communityId != null && communityId > 0)
         	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId));
         if(entityId != null && entityId > 0)
-        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_ID.eq(entityId));
         if(entityType != null && !entityType .equals(""))
-        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
+        	query.addConditions(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE.eq(entityType));
         if(targetType != null && !targetType .equals(""))
         	query.addConditions(Tables.EH_ORGANIZATION_TASKS.TARGET_TYPE.eq(targetType));
         if(targetId != null && targetId > 0)
@@ -844,8 +844,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationTasksRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_TASKS);
         query.addConditions(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId));
-        query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
-        query.addConditions(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
+        query.addConditions(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_ID.eq(entityId));
+        query.addConditions(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE.eq(entityType));
         
         query.fetch().map((r) -> {
      	   if(r != null)
@@ -966,9 +966,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_TASKS);
         Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId);
         if(entityId != null && entityId > 0)
-        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.ENTITY_ID.eq(entityId));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_ID.eq(entityId));
         if(entityType != null && !entityType .equals(""))
-        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.ENTITY_TYPE.eq(entityType));
+        	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE.eq(entityType));
         if(targetType != null && !targetType .equals(""))
         	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TARGET_TYPE.eq(targetType));
         if(targetId != null && targetId > 0)
