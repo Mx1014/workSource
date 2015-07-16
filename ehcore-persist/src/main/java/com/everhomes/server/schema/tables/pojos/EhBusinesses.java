@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1538715123;
+	private static final long serialVersionUID = -1948106623;
 
 	private java.lang.Long     id;
+	private java.lang.Long     creatorUid;
 	private java.lang.String   name;
 	private java.lang.String   displayName;
 	private java.lang.String   logoUri;
@@ -32,6 +33,7 @@ public class EhBusinesses implements java.io.Serializable {
 
 	public EhBusinesses(
 		java.lang.Long     id,
+		java.lang.Long     creatorUid,
 		java.lang.String   name,
 		java.lang.String   displayName,
 		java.lang.String   logoUri,
@@ -47,6 +49,7 @@ public class EhBusinesses implements java.io.Serializable {
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
+		this.creatorUid = creatorUid;
 		this.name = name;
 		this.displayName = displayName;
 		this.logoUri = logoUri;
@@ -68,6 +71,14 @@ public class EhBusinesses implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public java.lang.String getName() {

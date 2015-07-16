@@ -1886,113 +1886,6 @@ CREATE TABLE `eh_poll_votes`(
     INDEX `i_eh_poll_vote_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-#
-# key table of business management sharding group
-# First level resource objects
-#
-DROP TABLE IF EXISTS `eh_business`;
-CREATE TABLE `eh_business`(
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `namespace_id` INTEGER,
-    `name` VARCHAR(128),
-    `contact_number` VARCHAR(64), 
-    `category_id` BIGINT,
-    `longitude` DOUBLE,
-    `latitude` DOUBLE,
-    `geohash` VARCHAR(64),
-    `change_version` INTEGER,
-    `create_time` DATETIME,
-    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_biz_name`(`name`),
-    INDEX `i_eh_biz_geohash`(`geohash`),
-    INDEX `i_eh_biz_create_time`(`create_time`),
-    INDEX `i_eh_biz_delete_time`(`delete_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of eh_business sharding group
-# entity profile info for eh_business objects
-#
-DROP TABLE IF EXISTS `eh_business_profiles`;
-CREATE TABLE `eh_business_profiles`(
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `app_id` BIGINT,
-    `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
-    `item_name` VARCHAR(32),
-    `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
-    `item_value` TEXT,
-    `target_type` VARCHAR(32),
-    `target_id` BIGINT,
-    
-    `integral_tag1` BIGINT,
-    `integral_tag2` BIGINT,
-    `integral_tag3` BIGINT,
-    `integral_tag4` BIGINT,
-    `integral_tag5` BIGINT,
-    `string_tag1` VARCHAR(128),
-    `string_tag2` VARCHAR(128),
-    `string_tag3` VARCHAR(128),
-    `string_tag4` VARCHAR(128),
-    `string_tag5` VARCHAR(128),
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_biz_prof_item`(`app_id`, `owner_id`, `item_name`),
-    INDEX `i_eh_biz_prof_owner`(`owner_id`),
-    INDEX `i_eh_biz_prof_itag1`(`integral_tag1`),
-    INDEX `i_eh_biz_prof_itag2`(`integral_tag2`),
-    INDEX `i_eh_biz_prof_stag1`(`string_tag1`),
-    INDEX `i_eh_biz_prof_stag2`(`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of eh_business sharding group
-# secondary resource objects (after owner eh_business object)
-#
-DROP TABLE IF EXISTS `eh_biz_coupon_groups`;
-CREATE TABLE `eh_biz_coupon_groups`(
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `business_id` BIGINT,
-    `name` VARCHAR(128),
-    `description` TEXT,
-    `verification_code` VARCHAR(64),
-    `tag` VARCHAR(500),
-    `rank` INTEGER,
-    `link_url` VARCHAR(256),
-    `status` TINYINT,
-    `start_time` DATETIME,
-    `expire_time` DATETIME,
-    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_biz_grp_business_id`(`business_id`),
-    INDEX `i_eh_biz_grp_name`(`name`),
-    INDEX `i_eh_biz_grp_start_time`(`start_time`),
-    INDEX `i_eh_biz_grp_expire_time`(`expire_time`),
-    INDEX `i_eh_biz_grp_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of eh_business sharding group
-# secondary resource objects (after owner eh_business object)
-#
-DROP TABLE IF EXISTS `eh_biz_coupon`;
-CREATE TABLE `eh_biz_coupon`(
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `business_id` BIGINT,
-    `coupon_group_id` BIGINT,
-    `coupon_number` VARCHAR(128),
-    `uid` BIGINT,
-    `family_id` BIGINT,
-    `status` TINYINT,
-    `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
-    
-    PRIMARY KEY (`id`),
-    INDEX `i_eh_biz_coupon_business_id`(`business_id`),    
-    INDEX `i_eh_biz_coupon_number`(`coupon_group_id`, `coupon_number`),    
-    INDEX `i_eh_biz_coupon_create_time`(`create_time`)    
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # member of global parition
@@ -2316,6 +2209,9 @@ CREATE TABLE `eh_feedbacks` (
 DROP TABLE IF EXISTS `eh_businesses`;
 CREATE TABLE `eh_businesses` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: zuolin biz, 2: third part url', 
+  `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the original biz id',
+  `biz_owner_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the owner of the shop',
   `name` VARCHAR(512) NOT NULL DEFAULT '',
   `display_name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the name used to display in desk',
   `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the shop',
@@ -2328,6 +2224,7 @@ CREATE TABLE `eh_businesses` (
   `address` VARCHAR(1024) COMMENT '',
   `description` TEXT NOT NULL,
   `update_time` DATETIME,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   
   PRIMARY KEY (`ID`)

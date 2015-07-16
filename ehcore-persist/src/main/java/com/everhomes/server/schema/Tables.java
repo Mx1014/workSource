@@ -64,24 +64,9 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhBinaryResources EH_BINARY_RESOURCES = com.everhomes.server.schema.tables.EhBinaryResources.EH_BINARY_RESOURCES;
 
 	/**
-	 * The table ehcore.eh_biz_coupon
-	 */
-	public static final com.everhomes.server.schema.tables.EhBizCoupon EH_BIZ_COUPON = com.everhomes.server.schema.tables.EhBizCoupon.EH_BIZ_COUPON;
-
-	/**
-	 * The table ehcore.eh_biz_coupon_groups
-	 */
-	public static final com.everhomes.server.schema.tables.EhBizCouponGroups EH_BIZ_COUPON_GROUPS = com.everhomes.server.schema.tables.EhBizCouponGroups.EH_BIZ_COUPON_GROUPS;
-
-	/**
 	 * The table ehcore.eh_borders
 	 */
 	public static final com.everhomes.server.schema.tables.EhBorders EH_BORDERS = com.everhomes.server.schema.tables.EhBorders.EH_BORDERS;
-
-	/**
-	 * The table ehcore.eh_business
-	 */
-	public static final com.everhomes.server.schema.tables.EhBusiness EH_BUSINESS = com.everhomes.server.schema.tables.EhBusiness.EH_BUSINESS;
 
 	/**
 	 * The table ehcore.eh_businesses
@@ -92,11 +77,6 @@ public class Tables {
 	 * The table ehcore.eh_business_categories
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinessCategories EH_BUSINESS_CATEGORIES = com.everhomes.server.schema.tables.EhBusinessCategories.EH_BUSINESS_CATEGORIES;
-
-	/**
-	 * The table ehcore.eh_business_profiles
-	 */
-	public static final com.everhomes.server.schema.tables.EhBusinessProfiles EH_BUSINESS_PROFILES = com.everhomes.server.schema.tables.EhBusinessProfiles.EH_BUSINESS_PROFILES;
 
 	/**
 	 * The table ehcore.eh_business_visible_scopes
