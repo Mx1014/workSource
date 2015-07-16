@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>topicId: 帖子Id</li>
- * <li>status: 任务状态，0-未处理，1-处理中，2-已处理，参考{@link com.everhomes.pm.PmTaskStatus}</li>
+ * <li>status: 任务状态，0-未处理，1-处理中，2-已处理，参考{@link com.everhomes.organization.OrganizationTaskStatus.PmTaskStatus}</li>
  * <li>communityId: 小区Id</li>
  * </ul>
  */

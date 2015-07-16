@@ -40,6 +40,7 @@ import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.PropertyPostDTO;
+import com.everhomes.forum.QueryOrganizationTopicCommand;
 import com.everhomes.group.Group;
 import com.everhomes.launchpad.ItemKind;
 import com.everhomes.messaging.MessageChannel;
@@ -54,8 +55,7 @@ import com.everhomes.organization.pm.ListPropPostCommandResponse;
 import com.everhomes.organization.pm.PmMemberGroup;
 import com.everhomes.organization.pm.PmMemberStatus;
 import com.everhomes.organization.pm.PmMemberTargetType;
-import com.everhomes.organization.pm.PmTaskStatus;
-import com.everhomes.organization.pm.PmTaskType;
+import com.everhomes.organization.OrganizationTaskType;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
@@ -425,47 +425,48 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
-		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
-		User user  = UserContext.current().getUser();
-    	Long communityId = cmd.getCommunityId();
-    	if(communityId == null){
-    		LOGGER.error("organizationId paramter can not be null or empty");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "organizationId paramter can not be null or empty");
-    	}
-    	Community community = communityProvider.findCommunityById(communityId);
-    	if(community == null){
-    		LOGGER.error("Unable to find the community.communityId=" + communityId);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                     "Unable to find the community.");
-    	}
-    	
-    	//权限控制
-    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
-    	if(totalCount == 0) return response;
-    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-    	int pageCount = getPageCount(totalCount, pageSize);
-    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-    	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
-    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
-    	if(tasks != null && tasks.size() > 0){
-    		for (CommunityPmTasks task : tasks) {
-				PostDTO post = forumService.getTopicById(task.getEntityId(), communityId, false);		
-				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
-				dto.setCommunityId(task.getOrganizationId());
-				dto.setEntityType(task.getEntityType());
-				dto.setEntityId(task.getEntityId());
-				dto.setTargetType(task.getTargetType());
-				dto.setTargetId(task.getTargetId());
-				dto.setTaskType(task.getTaskType());
-				dto.setTaskStatus(task.getTaskStatus());
-				results.add(dto);
-			}
-    	}
-    	response.setPosts(results);
-    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-    	return response;
+	public ListPostCommandResponse  queryTopicsByCategory(QueryOrganizationTopicCommand cmd) {
+	    return this.forumService.queryOrganizationTopics(cmd);
+//		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
+//		User user  = UserContext.current().getUser();
+//    	Long communityId = cmd.getCommunityId();
+//    	if(communityId == null){
+//    		LOGGER.error("organizationId paramter can not be null or empty");
+//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+//                    "organizationId paramter can not be null or empty");
+//    	}
+//    	Community community = communityProvider.findCommunityById(communityId);
+//    	if(community == null){
+//    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+//                     "Unable to find the community.");
+//    	}
+//    	
+//    	//权限控制
+//    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+//    	if(totalCount == 0) return response;
+//    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//    	int pageCount = getPageCount(totalCount, pageSize);
+//    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+//    	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
+//    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
+//    	if(tasks != null && tasks.size() > 0){
+//    		for (CommunityPmTasks task : tasks) {
+//				PostDTO post = forumService.getTopicById(task.getEntityId(), communityId, false);		
+//				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
+//				dto.setCommunityId(task.getOrganizationId());
+//				dto.setEntityType(task.getEntityType());
+//				dto.setEntityId(task.getEntityId());
+//				dto.setTargetType(task.getTargetType());
+//				dto.setTargetId(task.getTargetId());
+//				dto.setTaskType(task.getTaskType());
+//				dto.setTaskStatus(task.getTaskStatus());
+//				results.add(dto);
+//			}
+//    	}
+//    	response.setPosts(results);
+//    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+//    	return response;
 	}
 	
 	@Override
@@ -561,7 +562,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         
         dbProvider.execute((status) -> {
-        	task.setTaskStatus(PmTaskStatus.TREATING.getCode());
+        	task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
             this.propertyMgrProvider.updatePmTask(task);
         
             //发送评论
@@ -640,7 +641,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid topicIds or status  paramter.");
         }
-        if(cmd.getStatus() == PmTaskStatus.TREATING.getCode()){
+        if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
         	 throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK_STATUS, 
                      "Invalid topic task status  paramter. please assign task");
         }
@@ -656,7 +657,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         task.setTaskStatus(cmd.getStatus());
         this.propertyMgrProvider.updatePmTask(task);
-        if(cmd.getStatus() == PmTaskStatus.TREATED.getCode()){
+        if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
         	//发送评论
             sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
         }
@@ -688,6 +689,23 @@ public class OrganizationServiceImpl implements OrganizationService {
     	return response;
     }
     
+    @Override
+    public List<Long> getOrganizationCommunityIdById(Long organizationId) {
+        List<Long> communityIdList = new ArrayList<Long>();
+        if(organizationId == null) {
+            LOGGER.error("Invalid organization id, organizationId=" + organizationId);
+            return communityIdList;
+        }
+        
+        List<OrganizationCommunity> communityList = this.organizationProvider.listOrganizationCommunities(organizationId);
+        if(communityIdList != null && communityIdList.size() > 0) {
+            for(OrganizationCommunity community : communityList) {
+                communityIdList.add(community.getCommunityId());
+            }
+        }
+        
+        return communityIdList;
+    }
     
     @Override
     public void createOrgContact(CreateOrganizationContactCommand cmd) {

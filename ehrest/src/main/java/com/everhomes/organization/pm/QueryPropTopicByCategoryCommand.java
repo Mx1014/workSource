@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>communityId: 当前小区ID</li>
- * <li>taskType: 任务类型{@link com.everhomes.pm.PmTaskType}</li>
- * <li>taskStatus: 任务状态{@link com.everhomes.pm.PmTaskStatus}</li>
+ * <li>taskType: 任务类型{@link com.everhomes.OrganizationTaskType.PmTaskType}</li>
+ * <li>taskStatus: 任务状态{@link com.everhomes.organization.OrganizationTaskStatus.PmTaskStatus}</li>
  * <li>pageOffset: 当前页码</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>

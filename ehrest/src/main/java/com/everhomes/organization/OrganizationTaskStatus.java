@@ -1,9 +1,19 @@
-package com.everhomes.organization.pm;
-public enum PmTaskStatus {
-    UNTREATED((byte)0), TREATING((byte)1), TREATED((byte)2);
+// @formatter:off
+package com.everhomes.organization;
+
+/**
+ * <ul>
+ * <li>UNPROCESSED: 未处理</li>
+ * <li>PROCESSING: 处理中</li>
+ * <li>PROCESSED: 已处理</li>
+ * <li>OTHER: 其它</li>
+ * </ul>
+ */
+public enum OrganizationTaskStatus {
+    UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), OTHER((byte)4);
     
     private byte code;
-    private PmTaskStatus(byte code) {
+    private OrganizationTaskStatus(byte code) {
         this.code = code;
     }
     
@@ -11,23 +21,14 @@ public enum PmTaskStatus {
         return this.code;
     }
     
-    public static PmTaskStatus fromCode(Byte code) {
-        if(code == null)
-            return null;
-        
-        switch(code.byteValue()) {
-        case 0:
-            return UNTREATED;
-            
-        case 1:
-            return TREATING;
-            
-        case 2:
-            return TREATED;
-            
-        default :
-            assert(false);
-            break;
+    public static OrganizationTaskStatus fromCode(Byte code) {
+        if(code != null) {
+            OrganizationTaskStatus[] values = OrganizationTaskStatus.values();
+            for(OrganizationTaskStatus value : values) {
+                if(value.code == code.byteValue()) {
+                    return value;
+                }
+            }
         }
         
         return null;

@@ -22,6 +22,7 @@ import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmMember;
@@ -34,7 +35,6 @@ import com.everhomes.organization.pm.ListPropOwnerCommand;
 import com.everhomes.organization.pm.ListPropOwnerCommandResponse;
 import com.everhomes.organization.pm.ListPropTopicStatisticCommand;
 import com.everhomes.organization.pm.ListPropTopicStatisticCommandResponse;
-import com.everhomes.organization.pm.PmTaskStatus;
 import com.everhomes.organization.pm.PropBillDTO;
 import com.everhomes.organization.pm.PropCommunityBillDateCommand;
 import com.everhomes.organization.pm.PropCommunityBillIdCommand;
@@ -231,7 +231,7 @@ public class PropertyTest {
 		task.setEntityId(0L);
 		task.setTargetType(EntityType.USER.getCode());
 		task.setTargetId(0L);
-		task.setTaskStatus(PmTaskStatus.UNTREATED.getCode());
+		task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 		task.setTaskType("help");
 		pp.createPmTask(task );
 		

@@ -81,7 +81,6 @@ public class PropMgrBillHandler
 					RowResult totalResult = (RowResult)resultList.get(ProcessBillModel1.getTotalRow(rowIndex));
 					bill.setDueAmount(new BigDecimal(totalResult.getG()));
 					//bill.setTotalAmount(new BigDecimal(totalResult.getG()));
-
 					bill.setOrganizationId(communityId);
 					bill.setCreatorUid(userId);
 					bill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

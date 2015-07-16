@@ -77,6 +77,8 @@ import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationStatus;
+import com.everhomes.organization.OrganizationTaskStatus;
+import com.everhomes.organization.OrganizationTaskType;
 import com.everhomes.organization.OrganizationType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -360,294 +362,294 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					m.setLivingStatus((byte)0);
 					propertyMgrProvider.createPropAddressMapping(m);
 				}
-			}
-		}
+    		}
+        }
+    	
+    }
+    
+    @Override
+    public ListPropAddressMappingCommandResponse ListAddressMappings(
+    		ListPropAddressMappingCommand cmd) {
+    	ListPropAddressMappingCommandResponse commandResponse = new ListPropAddressMappingCommandResponse();
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+    	int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId(),(byte)0);
+    	if(totalCount == 0) return commandResponse;
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), cmd.getPageOffset(), pageSize);
+    	commandResponse.setMembers( entityResultList.stream()
+                 .map(r->{ 
+                	 PropAddressMappingDTO dto = ConvertHelper.convert(r, PropAddressMappingDTO.class);
+                	 Address address = addressProvider.findAddressById(dto.getAddressId());
+                	 if(address != null)
+                		 dto.setAddressName(address.getAddress());
+                	 return  dto;})
+                 .collect(Collectors.toList()));
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+        return commandResponse;
+    }
+    
+    @Override
+    public ListPropBillCommandResponse listPropertyBill(ListPropBillCommand cmd) {
+    	ListPropBillCommandResponse commandResponse = new ListPropBillCommandResponse();
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+    	int totalCount = propertyMgrProvider.countCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress());
+    	if(totalCount == 0) return commandResponse;
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	List<CommunityPmBill> entityResultList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress(), cmd.getPageOffset(), pageSize);
+    	commandResponse.setMembers( entityResultList.stream()
+                 .map(r->{ 
+                	 PropBillDTO dto = ConvertHelper.convert(r, PropBillDTO.class);
+                	 List<CommunityPmBillItem> itemList = propertyMgrProvider.listCommunityPmBillItems(dto.getId());
+                	 List<PropBillItemDTO> itemDtoList = new ArrayList<PropBillItemDTO>();
+                	 for (CommunityPmBillItem item : itemList) {
+                		 PropBillItemDTO itemDto = ConvertHelper.convert(item, PropBillItemDTO.class);
+                		 itemDtoList.add(itemDto);
+					 }
+                	 dto.setItemList(itemDtoList);
+                	 return  dto;})
+                 .collect(Collectors.toList()));
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+        return commandResponse;
+    }
+    
 
-	}
+    
+    @Override
+    public ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
+    	ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
+    	User user  = UserContext.current().getUser();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+    	int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
+    	if(totalCount == 0) return commandResponse;
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
+    	commandResponse.setMembers( entityResultList.stream()
+                .map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
+                .collect(Collectors.toList()));
+    	commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+    	return commandResponse;
+    }
+    private int getPageCount(int totalCount, int pageSize){
+        int pageCount = totalCount/pageSize;
+        
+        if(totalCount % pageSize != 0){
+            pageCount ++;
+        }
+        return pageCount;
+    }
+    
+   
+    @Override
+    public void assignPMTopics(AssginPmTopicCommand cmd) {
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        if(cmd.getTopicId() == null || cmd.getTopicId() == 0)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid topicIds paramter.");
+        if(cmd.getCommunityId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId paramter.");
+        long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+        long communityId = cmd.getCommunityId();
+        
+        List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
+        		PmMemberTargetType.USER.getCode(), cmd.getUserId());
+        if(pmMemberList == null || pmMemberList.isEmpty()){
+            LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId()+",communityId=" + communityId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid userId paramter,user is not the community pm member.");
+        }
+        
+        long topicId = cmd.getTopicId();
+        
+        Post topic = this.forumProvider.findPostById(topicId);
+        if(topic == null){
+        	 LOGGER.error("Unable to find the topic.topicId=" + topicId+",communityId=" + communityId);
+             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TOPIC, 
+                     "Unable to find the topic.");
+        }
+        
+        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(communityId, topicId, 
+                EntityType.TOPIC.getCode());
+        if(task == null){
+        	 LOGGER.error("Unable to find the topic task.topicId=" + topicId +",communityId=" + communityId);
+             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK, 
+                     "Unable to find the topic task.");
+        }
+        
+        dbProvider.execute((status) -> {
+        	task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+            this.propertyMgrProvider.updatePmTask(task);
+        
+            //发送评论
+            sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
+            //发送短信
+            sendMSMToUser(topicId,cmd.getUserId(),topic.getCreatorUid(),topic.getCategoryId());
+        
+            return null;
+        });
+           
+       
+    }
 
-	@Override
-	public ListPropAddressMappingCommandResponse ListAddressMappings(
-			ListPropAddressMappingCommand cmd) {
-		ListPropAddressMappingCommandResponse commandResponse = new ListPropAddressMappingCommandResponse();
-		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId(),(byte)0);
-		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int pageCount = getPageCount(totalCount, pageSize);
-		List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), cmd.getPageOffset(), pageSize);
-		commandResponse.setMembers( entityResultList.stream()
-				.map(r->{ 
-					PropAddressMappingDTO dto = ConvertHelper.convert(r, PropAddressMappingDTO.class);
-					Address address = addressProvider.findAddressById(dto.getAddressId());
-					if(address != null)
-						dto.setAddressName(address.getAddress());
-					return  dto;})
-					.collect(Collectors.toList()));
-		commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-		return commandResponse;
-	}
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
+    private void sendComment(long topicId, long forumId, long userId, long category) {
+        Post comment = new Post();
+        comment.setParentPostId(topicId);
+        comment.setForumId(forumId);
+        comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        comment.setCreatorUid(userId);
+        comment.setContentType(PostContentType.TEXT.getCode());
+        String template = configProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
+        if(StringUtils.isEmpty(template)){
+        	template = "该物业已在处理";
+        }
+        if (!StringUtils.isEmpty(template)) {
+            comment.setContent(template);
+            forumProvider.createPost(comment);
+        }
+       
+    }
 
-	@Override
-	public ListPropBillCommandResponse listPropertyBill(ListPropBillCommand cmd) {
-		ListPropBillCommandResponse commandResponse = new ListPropBillCommandResponse();
-		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		int totalCount = propertyMgrProvider.countCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress());
-		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int pageCount = getPageCount(totalCount, pageSize);
-		List<CommunityPmBill> entityResultList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress(), cmd.getPageOffset(), pageSize);
-		commandResponse.setMembers( entityResultList.stream()
-				.map(r->{ 
-					PropBillDTO dto = ConvertHelper.convert(r, PropBillDTO.class);
-					List<CommunityPmBillItem> itemList = propertyMgrProvider.listCommunityPmBillItems(dto.getId());
-					List<PropBillItemDTO> itemDtoList = new ArrayList<PropBillItemDTO>();
-					for (CommunityPmBillItem item : itemList) {
-						PropBillItemDTO itemDto = ConvertHelper.convert(item, PropBillItemDTO.class);
-						itemDtoList.add(itemDto);
-					}
-					dto.setItemList(itemDtoList);
-					return  dto;})
-					.collect(Collectors.toList()));
-		commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-		return commandResponse;
-	}
+    /**
+     * 
+     * @param topicId
+     * @param userId 维修人员id
+     * @param owerId 业主id
+     * @param category 分类
+     */
+    private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
+        //给维修人员发送短信是否显示业主地址
+        String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
+        List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
+        userList.stream().filter((u) -> {
+            if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
+                return false;
+            return true;
+        });
+        if(userList == null || userList.isEmpty()) return ;
+        String cellPhone = userList.get(0).getIdentifierToken();
+        if(StringUtils.isEmpty(template)){
+        	template = "该物业已在处理";
+        }
+        if (!StringUtils.isEmpty(template)) {
+        	this.smsProvider.sendSms(cellPhone, template);
+        }
+    }
+    
+    
+    @Override
+    public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
+    	User user  = UserContext.current().getUser();
+    	long userId = user.getId();
+    	if(cmd.getCommunityId() == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+    		 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	//权限控制--admin角色
+        if(cmd.getTopicId() == null || cmd.getStatus() == null ){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid topicIds or status  paramter.");
+        }
+        if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
+        	 throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK_STATUS, 
+                     "Invalid topic task status  paramter. please assign task");
+        }
+        long topicId = cmd.getTopicId();
+        Post topic = this.forumProvider.findPostById(topicId);
+        if(topic == null){ 
+            LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
+         }
+        long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+        CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(cmd.getCommunityId(), 
+                topicId, EntityType.TOPIC.getCode());
+        if(task == null){
+            LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
+        }
+        task.setTaskStatus(cmd.getStatus());
+        this.propertyMgrProvider.updatePmTask(task);
+        if(cmd.getStatus() == OrganizationTaskStatus.PROCESSED.getCode()){
+        	//发送评论
+            sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
+        }
+        
+    }
 
-
-
-	@Override
-	public ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
-		ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
-		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
-		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int pageCount = getPageCount(totalCount, pageSize);
-		List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
-		commandResponse.setMembers( entityResultList.stream()
-				.map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
-				.collect(Collectors.toList()));
-		commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-		return commandResponse;
-	}
-	private int getPageCount(int totalCount, int pageSize){
-		int pageCount = totalCount/pageSize;
-
-		if(totalCount % pageSize != 0){
-			pageCount ++;
-		}
-		return pageCount;
-	}
-
-
-	@Override
-	public void assignPMTopics(AssginPmTopicCommand cmd) {
-		User user = UserContext.current().getUser();
-		long userId = user.getId();
-		if(cmd.getTopicId() == null || cmd.getTopicId() == 0)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid topicIds paramter.");
-		if(cmd.getCommunityId() == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid communityId paramter.");
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		long communityId = cmd.getCommunityId();
-
-		List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
-				PmMemberTargetType.USER.getCode(), cmd.getUserId());
-		if(pmMemberList == null || pmMemberList.isEmpty()){
-			LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId()+",communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid userId paramter,user is not the community pm member.");
-		}
-
-		long topicId = cmd.getTopicId();
-
-		Post topic = this.forumProvider.findPostById(topicId);
-		if(topic == null){
-			LOGGER.error("Unable to find the topic.topicId=" + topicId+",communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TOPIC, 
-					"Unable to find the topic.");
-		}
-
-		CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(communityId, topicId, 
-				EntityType.TOPIC.getCode());
-		if(task == null){
-			LOGGER.error("Unable to find the topic task.topicId=" + topicId +",communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK, 
-					"Unable to find the topic task.");
-		}
-
-		dbProvider.execute((status) -> {
-			task.setTaskStatus(PmTaskStatus.TREATING.getCode());
-			this.propertyMgrProvider.updatePmTask(task);
-
-			//发送评论
-			sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
-			//发送短信
-			sendMSMToUser(topicId,cmd.getUserId(),topic.getCreatorUid(),topic.getCategoryId());
-
-			return null;
-		});
-
-
-	}
-
-	@Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
-	private void sendComment(long topicId, long forumId, long userId, long category) {
-		Post comment = new Post();
-		comment.setParentPostId(topicId);
-		comment.setForumId(forumId);
-		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		comment.setCreatorUid(userId);
-		comment.setContentType(PostContentType.TEXT.getCode());
-		String template = configProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
-		if(StringUtils.isEmpty(template)){
-			template = "该物业已在处理";
-		}
-		if (!StringUtils.isEmpty(template)) {
-			comment.setContent(template);
-			forumProvider.createPost(comment);
-		}
-
-	}
-
-	/**
-	 * 
-	 * @param topicId
-	 * @param userId 维修人员id
-	 * @param owerId 业主id
-	 * @param category 分类
-	 */
-	private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
-		//给维修人员发送短信是否显示业主地址
-		String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
-		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
-		userList.stream().filter((u) -> {
-			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
-				return false;
-			return true;
-		});
-		if(userList == null || userList.isEmpty()) return ;
-		String cellPhone = userList.get(0).getIdentifierToken();
-		if(StringUtils.isEmpty(template)){
-			template = "该物业已在处理";
-		}
-		if (!StringUtils.isEmpty(template)) {
-			this.smsProvider.sendSms(cellPhone, template);
-		}
-	}
-
-
-	@Override
-	public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
-		User user  = UserContext.current().getUser();
-		long userId = user.getId();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制--admin角色
-		if(cmd.getTopicId() == null || cmd.getStatus() == null ){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid topicIds or status  paramter.");
-		}
-		if(cmd.getStatus() == PmTaskStatus.TREATING.getCode()){
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK_STATUS, 
-					"Invalid topic task status  paramter. please assign task");
-		}
-		long topicId = cmd.getTopicId();
-		Post topic = this.forumProvider.findPostById(topicId);
-		if(topic == null){ 
-			LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
-		}
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(cmd.getCommunityId(), 
-				topicId, EntityType.TOPIC.getCode());
-		if(task == null){
-			LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
-		}
-		task.setTaskStatus(cmd.getStatus());
-		this.propertyMgrProvider.updatePmTask(task);
-		if(cmd.getStatus() == PmTaskStatus.TREATED.getCode()){
-			//发送评论
-			sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
-		}
-
-	}
-
-	@Override
-	public ListPropInvitedUserCommandResponse listInvitedUsers(ListPropInvitedUserCommand cmd) {
-		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid communityId paramter,community is not found.");
-		}
-
-		//??权限控制
-		Long pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
-
-		Long pageSize = cmd.getPageSize() == null ? this.configProvider.getIntValue("pagination.page.size", 
-				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize(); 
-		long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
-
-		return this.propertyMgrProvider.listInvitedUsers(cmd.getCommunityId(),
-				cmd.getContactToken(),offset,pageSize);
-	}
+    @Override
+    public ListPropInvitedUserCommandResponse listInvitedUsers(ListPropInvitedUserCommand cmd) {
+        Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+        if(community == null){
+            LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId paramter,community is not found.");
+        }
+        
+        //??权限控制
+        Long pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        
+        Long pageSize = cmd.getPageSize() == null ? this.configProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize(); 
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        
+        return this.propertyMgrProvider.listInvitedUsers(cmd.getCommunityId(),
+                cmd.getContactToken(),offset,pageSize);
+    }
 
 	@Override
 	public void approvePropMember(CommunityPropMemberCommand cmd) {
@@ -1265,7 +1267,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 		//content += "总费用：" + bill.getTotalAmount();
-		content += "总费用：" + bill.getDueAmount();
 		return content;
 	}
 
@@ -1494,36 +1495,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public ListPropPostCommandResponse  queryTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
 		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
 		User user  = UserContext.current().getUser();
-		Long communityId = cmd.getCommunityId();
-		if(communityId == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(communityId);
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
-		if(totalCount == 0) return response;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		int pageCount = getPageCount(totalCount, pageSize);
-		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
-		List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, PmTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
-		if(tasks != null && tasks.size() > 0){
-			for (CommunityPmTasks task : tasks) {
-				PostDTO post = forumService.getTopicById(task.getEntityId(), communityId, false);		
+		
+    	Long communityId = cmd.getCommunityId();
+    	if(communityId == null){
+    		LOGGER.error("propterty communityId paramter can not be null or empty");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "propterty communityId paramter can not be null or empty");
+    	}
+    	Community community = communityProvider.findCommunityById(communityId);
+    	if(community == null){
+    		LOGGER.error("Unable to find the community.communityId=" + communityId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Unable to find the community.");
+    	}
+    	
+    	//权限控制
+    	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+    	cmd.setCommunityId(organizationId);
+    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+    	if(totalCount == 0) return response;
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+    	int pageCount = getPageCount(totalCount, pageSize);
+    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+    	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
+    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
+    	if(tasks != null && tasks.size() > 0){
+    		for (CommunityPmTasks task : tasks) {
+				PostDTO post = forumService.getTopicById(task.getApplyEntityId(), communityId, false);		
 				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
 				dto.setCommunityId(task.getOrganizationId());
-				dto.setEntityType(task.getEntityType());
-				dto.setEntityId(task.getEntityId());
+				dto.setEntityType(task.getApplyEntityType());
+				dto.setEntityId(task.getApplyEntityId());
 				dto.setTargetType(task.getTargetType());
 				dto.setTargetId(task.getTargetId());
 				dto.setTaskType(task.getTaskType());
@@ -1594,7 +1596,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
-		String taskType = PmTaskType.fromCode(cmd.getCategoryId()).getCode();
+		String taskType = OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
 		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
@@ -1652,7 +1654,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	{
 		int todayCount = propertyMgrProvider.countCommunityPmTasks(communityId, taskType,null,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 		todayList.add(todayCount);
-		int num = PmTaskStatus.TREATED.getCode();
+		int num = OrganizationTaskStatus.PROCESSED.getCode();
 		for (int i = 0; i <= num ; i++)
 		{
 			int count = propertyMgrProvider.countCommunityPmTasks(communityId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));

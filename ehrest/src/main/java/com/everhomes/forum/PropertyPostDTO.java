@@ -48,8 +48,8 @@ import com.everhomes.util.StringHelper;
  * <li>entityId: 帖子id</li>
  * <li>targetType: 帖子任务目标类型user</li>
  * <li>targetId: userId</li>
- * <li>taskType: 帖子任务所属类型  参见{@link com.everhomes.pm.PmTaskType}</li>
- * <li>taskStatus: 帖子任务状态 参见{@link com.everhomes.pm.PmTaskStatus}</li>
+ * <li>taskType: 帖子任务所属类型  参见{@link com.everhomes.OrganizationTaskType.PmTaskType}</li>
+ * <li>taskStatus: 帖子任务状态 参见{@link com.everhomes.organization.OrganizationTaskStatus.PmTaskStatus}</li>
  * </ul>
  */
 public class PropertyPostDTO  extends PostDTO{

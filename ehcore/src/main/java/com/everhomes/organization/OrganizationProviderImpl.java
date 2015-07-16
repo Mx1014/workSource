@@ -311,13 +311,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
     
     @Override
-    public List<OrganizationCommunity> listOrganizationCommunities(Long departmentId,Integer pageOffset,Integer pageSize) {
+    public List<OrganizationCommunity> listOrganizationCommunities(Long organizationId,Integer pageOffset,Integer pageSize) {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<OrganizationCommunity> result  = new ArrayList<OrganizationCommunity>();
          SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
-         if(departmentId != null && departmentId > 0){
-             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(departmentId));
+         if(organizationId != null && organizationId > 0){
+             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId));
           }
          
          Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
@@ -331,13 +331,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
     
     @Override
-    public List<OrganizationCommunity> listOrganizationCommunities(Long departmentId) {
+    public List<OrganizationCommunity> listOrganizationCommunities(Long organizationId) {
     	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
          List<OrganizationCommunity> result  = new ArrayList<OrganizationCommunity>();
          SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
-         if(departmentId != null && departmentId > 0){
-             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(departmentId));
+         if(organizationId != null && organizationId > 0){
+             query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId));
           }
          query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
          query.fetch().map((r) -> {

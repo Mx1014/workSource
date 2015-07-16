@@ -24,6 +24,8 @@ import com.everhomes.forum.ListTopicCommentCommand;
 import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.QueryOrganizationTopicCommand;
+import com.everhomes.organization.pm.ListPropMemberCommandResponse;
 import com.everhomes.organization.pm.ListPropPostCommandResponse;
 import com.everhomes.organization.pm.QueryPropTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
@@ -172,12 +174,13 @@ public class OrganizationController extends ControllerBase {
     
     /**
      * <b>URL: /org/queryOrgTopicsByCategory</b>
-     * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
+     * <p>查询的机构可看的帖子列表（仅查询社区论坛），如果不提供类型则查询全部，
+     * 若指定类型则查询指定类型的</p>
      */
     @RequestMapping("queryOrgTopicsByCategory")
-    @RestReturn(value=ListPropPostCommandResponse.class)
-    public RestResponse queryOrgTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
-    	ListPropPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
+        ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

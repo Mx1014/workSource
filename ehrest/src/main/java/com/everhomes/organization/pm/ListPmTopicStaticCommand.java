@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>forumId: 论坛Id</li>
- * <li>status: 任务状态，0-未处理，1-处理中，2-已处理，参考{@link com.everhomes.pm.PmTaskStatus}</li>
+ * <li>status: 任务状态，0-未处理，1-处理中，2-已处理，参考{@link com.everhomes.organization.OrganizationTaskStatus.PmTaskStatus}</li>
  * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
