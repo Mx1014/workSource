@@ -1119,6 +1119,7 @@ CREATE TABLE `eh_organizations` (
     `organization_type` VARCHAR(64) COMMENT 'NONE, PM(Property Management), GARC(Resident Committee), GANC(Neighbor Committee), GAPS(Police Station)',
     `name` VARCHAR(64),
     `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address for department', 
+	`description` TEXT,
     `path` VARCHAR(128) COMMENT 'path from the root',
     `level` INTEGER NOT NULL DEFAULT 0,
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
@@ -1171,12 +1172,15 @@ CREATE TABLE `eh_organization_tasks` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `organization_id` BIGINT NOT NULL DEFAULT 0,
 	`organization_type` VARCHAR(64) COMMENT 'NONE, PM(Property Management), GARC(Resident Committee), GANC(Neighbor Committee), GAPS(Police Station)',
-	`entity_type` VARCHAR(32) COMMENT 'TOPIC',
-    `entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
+	`apply_entity_type` VARCHAR(32) COMMENT 'the entity who apply the task, like TOPIC',
+    `apply_entity_id` BIGINT NOT NULL COMMENT 'target topic id if target_type is a topic',
 	`target_type` VARCHAR(32) COMMENT 'user',
     `target_id` BIGINT NOT NULL COMMENT 'target user id if target_type is a user',
     `task_type` VARCHAR(32) COMMENT 'task type assigned by organization',
-    `task_status` TINYINT NOT NULL,    
+	`description` TEXT,
+    `task_status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: unprocessed, 2: processing；3 已处理；4 其他',
+	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'uid of the user who process the task',
+    `operate_time` DATETIME,
 	`creator_uid` BIGINT COMMENT 'uid of the user who create the task',
     `create_time` DATETIME,
 	
@@ -2304,5 +2308,63 @@ CREATE TABLE `eh_feedbacks` (
   `proof_resource_uri` VARCHAR(1024),
   PRIMARY KEY (`id`)
 ) engine=innodb DEFAULT charset=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_businesses`;
+CREATE TABLE `eh_businesses` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(512) NOT NULL DEFAULT '',
+  `display_name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the name used to display in desk',
+  `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the shop',
+  `url` VARCHAR(1024) COMMENT 'the url to access shop',
+  `contact` VARCHAR(1024) COMMENT 'the name of shop owner',
+  `phone` VARCHAR(128) COMMENT 'the phone of shop owner',
+  `longitude` DOUBLE,
+  `latitude` DOUBLE,
+  `geohash` VARCHAR(32),
+  `address` VARCHAR(1024) COMMENT '',
+  `description` TEXT NOT NULL,
+  `update_time` DATETIME,
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_business_visible_scopes`;
+CREATE TABLE `eh_business_visible_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner business id',
+    `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city',
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+	UNIQUE `u_eh_scope_owner_code_id`(`owner_id`, `scope_code`, `scope_id`),
+    FOREIGN KEY `fk_eh_bussiness_scope_owner`(`owner_id`) REFERENCES `eh_businesses`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_bussiness_scope_owner_id`(`owner_id`),
+    INDEX `i_eh_bussiness_scope_target`(`scope_code`, `scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_business_categories`;
+CREATE TABLE `eh_business_categories` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner business id',
+    `category_id` BIGINT NOT NULL DEFAULT 0,
+    `category_path` VARCHAR(128),
+    
+    PRIMARY KEY (`id`),
+	UNIQUE `u_eh_bussiness_category_id`(`owner_id`, `category_id`),
+    FOREIGN KEY `fk_eh_bussiness_category`(`owner_id`) REFERENCES `eh_businesses`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_bussiness_owner_id`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;
