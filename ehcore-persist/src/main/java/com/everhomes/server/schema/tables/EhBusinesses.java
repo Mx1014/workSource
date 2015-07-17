@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBusinessesRecord> {
 
-	private static final long serialVersionUID = -1293373559;
+	private static final long serialVersionUID = 302918430;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_businesses</code>
@@ -32,9 +32,19 @@ public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_businesses.creator_uid</code>.
+	 * The column <code>ehcore.eh_businesses.target_type</code>. 0: none, 1: zuolin biz, 2: third part url
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Byte> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: zuolin biz, 2: third part url");
+
+	/**
+	 * The column <code>ehcore.eh_businesses.target_id</code>. the original biz id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the original biz id");
+
+	/**
+	 * The column <code>ehcore.eh_businesses.biz_owner_uid</code>. the owner of the shop
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> BIZ_OWNER_UID = createField("biz_owner_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the owner of the shop");
 
 	/**
 	 * The column <code>ehcore.eh_businesses.name</code>.
@@ -95,6 +105,11 @@ public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_businesses.update_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_businesses.creator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_businesses.create_time</code>.
