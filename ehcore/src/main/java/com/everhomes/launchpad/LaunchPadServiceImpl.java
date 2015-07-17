@@ -128,35 +128,41 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
         List<Long> bizIds = userActivityProvider.findFavorite(userId).stream()
                 .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
-        if(bizIds == null)
-            return null;
         //TODO get the businesses with the user create
         
         //TODO get the business with the user join in
         //get the business with the user favorite
-        List<Business> businesses = businessProvider.findBusinessByIds(bizIds);
-        if(businesses == null || businesses.isEmpty())
-            return null;
-        int index = 1;
-        for(Business r : businesses){
-            LaunchPadItemDTO dto = new LaunchPadItemDTO();
-            dto.setIconUri(r.getLogoUri());
-            dto.setIconUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(LaunchPadConstants.URL, r.getUrl());
-            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
-            dto.setActionData(jsonObject.toJSONString());
-            dto.setActionType(ActionType.BIZ_DETAILS.getCode());
-            dto.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
-            dto.setItemGroup(LaunchPadConstants.GROUP_BIZS);
-            dto.setItemHeight(1);
-            dto.setItemWidth(1);
-            dto.setDefaultOrder(index ++);
-            dto.setItemName(r.getName());
-            dto.setItemLabel(r.getDisplayName() + "(商铺)");
-            dto.setItemLocation(cmd.getItemLocation());
-            result.add(dto);
+        if(bizIds != null && !bizIds.isEmpty()){
+            List<Business> businesses = businessProvider.findBusinessByIds(bizIds);
+            if(businesses == null || businesses.isEmpty())
+                return null;
+            int index = 1;
+            for(Business r : businesses){
+                LaunchPadItemDTO dto = new LaunchPadItemDTO();
+                dto.setIconUri(r.getLogoUri());
+                dto.setIconUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(LaunchPadConstants.URL, r.getUrl());
+                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
+                dto.setActionData(jsonObject.toJSONString());
+                dto.setActionType(ActionType.BIZ_DETAILS.getCode());
+                dto.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+                dto.setItemGroup(LaunchPadConstants.GROUP_BIZS);
+                dto.setItemHeight(1);
+                dto.setItemWidth(1);
+                dto.setDefaultOrder(index ++);
+                dto.setItemName(r.getName());
+                dto.setItemLabel(r.getDisplayName() + "(商铺)");
+                dto.setItemLocation(cmd.getItemLocation());
+                result.add(dto);
+            }
         }
+       
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
+        defaultItems.forEach(r ->{
+            LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+            result.add(itemDTO);
+        });
         return result;
         
     }
