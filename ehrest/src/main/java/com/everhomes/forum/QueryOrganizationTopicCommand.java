@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizaitonId: 机构ID</li>
- * <li>contentCategory: 内容类型</li>
- * <li>actionCategory: 动作类型，对应以前的serviceType</li>
+ * <li>contentCategory: 内容类型ID，{@link com.everhomes.category.CategoryConstants}</li>
+ * <li>actionCategory: 动作类型ID，对应以前的serviceType</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
