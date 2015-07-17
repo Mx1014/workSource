@@ -47,24 +47,24 @@ public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {
 		//      ActivityPostCommand.class);
 		//帖子post传过来的 appId 都是null。最后默认为2.    	
 		//if(post != null  && post.getAppId() == AppConstants.APPID_PM && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
-		if(post != null  && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
-			CommunityPmTasks task = new CommunityPmTasks();
-			Long organizationId = post.getVisibleRegionId();
-			//如果是物业或者业委会发帖 ，帖子可见范围id存的是小区id。组织任务表中应该存组织id。 需要把小区id转成 组织id。
-			if(VisibleRegionType.fromCode(post.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-				organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
-			}
-			task.setOrganizationId(organizationId);
-			task.setApplyEntityType(EntityType.TOPIC.getCode());
-			task.setApplyEntityId(-1L);
-			task.setTargetType(EntityType.USER.getCode());
-			task.setTargetId(0L);
-			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
-			//task.setTaskType(OrganizationTaskType.fromCode(post.getActionCategory()).getCode());
-			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			propertyMgrProvider.createPmTask(task );
-			post.setEmbeddedId(task.getId());
-		}
+//		if(post != null  && post.getCategoryId() == CategoryConstants.CATEGORY_ID_PM){
+//			CommunityPmTasks task = new CommunityPmTasks();
+//			Long organizationId = post.getVisibleRegionId();
+//			//如果是物业或者业委会发帖 ，帖子可见范围id存的是小区id。组织任务表中应该存组织id。 需要把小区id转成 组织id。
+//			if(VisibleRegionType.fromCode(post.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+//				organizationId = propertyMgrService.findPropertyOrganizationId(post.getVisibleRegionId());
+//			}
+//			task.setOrganizationId(organizationId);
+//			task.setApplyEntityType(EntityType.TOPIC.getCode());
+//			task.setApplyEntityId(-1L);
+//			task.setTargetType(EntityType.USER.getCode());
+//			task.setTargetId(0L);
+//			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
+//			//task.setTaskType(OrganizationTaskType.fromCode(post.getActionCategory()).getCode());
+//			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			propertyMgrProvider.createPmTask(task );
+//			post.setEmbeddedId(task.getId());
+//		}
 		return post;	
     }
 

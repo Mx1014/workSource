@@ -26,19 +26,19 @@ public enum CategoryType {
     }
     
     public static CategoryType fromCode(long code) {
-    	if(code == CategoryConstants.CATEGORY_ID_GA_ADVISE) {
+    	if(code == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
     		return ADVISE;
     	}
         
-        if(code == CategoryConstants.CATEGORY_ID_GA_NOTICE) {
+        if(code == CategoryConstants.CATEGORY_ID_NOTICE) {
         	return NOTICE;
         }
 
-        if(code == CategoryConstants.CATEGORY_ID_GA_HELP) {
+        if(code == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
         	return HELP;
         }
 
-        if(code == CategoryConstants.CATEGORY_ID_GA_REPAIR) {
+        if(code == CategoryConstants.CATEGORY_ID_REPAIRS) {
         	return REPAIR;
         }
 

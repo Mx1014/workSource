@@ -16,6 +16,9 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -26,9 +29,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
@@ -464,5 +469,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, OrganizationMember.class);
 		return null;
 	}
+    
+    @Override
+    public void createOrganizationTask(OrganizationTask task) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
+        dao.insert(task);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null); 
+    }
 
+    @Cacheable(value="findOrganizationTaskById", key="#id", unless="#result == null")
+    public OrganizationTask findOrganizationTaskById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        
+        EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
+        EhOrganizationTasks task = dao.findById(id);
+        
+        return ConvertHelper.convert(task, OrganizationTask.class);
+    }
+    
+    @Caching(evict={@CacheEvict(value="findOrganizationTaskById", key="#task.id")})
+    public void updateOrganizationTask(OrganizationTask task) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
+        dao.update(task);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, OrganizationTask.class, task.getId());
+    }
 }
