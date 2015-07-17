@@ -3,35 +3,13 @@ package com.everhomes.util;
 
 import java.io.File;
 
+import junit.framework.TestCase;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import com.everhomes.junit.PropertyInitializer;
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class },
-    loader = AnnotationConfigContextLoader.class)
-public class ZipHelperTest {
-    @Configuration
-    @ComponentScan(basePackages = {
-        "com.everhomes"
-    })
-    @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class,
-        })
-    static class ContextConfiguration {
-    }
+public class ZipHelperTest extends TestCase {
 
     @Ignore @Test
     public void testCompressAndDecompress() {

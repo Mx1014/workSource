@@ -1,18 +1,16 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import com.everhomes.category.CategoryConstants;
-
 /**
  * <ul>
- * <li>NOTICE: 物业公告-3091</li>
- * <li>ADVISE: 建议-3092</li>
- * <li>HELP: 求助-3093</li>
- * <li>REPAIR: 维修-3094</li>
+ * <li>NOTICE: 公告</li>
+ * <li>REPAIRS: 报修</li>
+ * <li>CONSULT_APPEAL: 咨询与求助</li>
+ * <li>COMPLAINT_ADVICE: 投诉与建议</li>
  * </ul>
  */
 public enum OrganizationTaskType {
-	NOTICE("notice"), ADVISE("advise"), HELP("help"), REPAIR("repair");
+	NOTICE("NOTICE"), REPAIRS("REPAIRS"), CONSULT_APPEAL("CONSULT_APPEAL"), COMPLAINT_ADVICE("COMPLAINT_ADVICE");
     
     private String code;
     private OrganizationTaskType(String code) {
@@ -23,21 +21,12 @@ public enum OrganizationTaskType {
         return this.code;
     }
     
-    public static OrganizationTaskType fromCode(long code) {
-    	if(code == CategoryConstants.CATEGORY_ID_GA_ADVISE) {
-    		return ADVISE;
-    	}
-        
-        if(code == CategoryConstants.CATEGORY_ID_GA_NOTICE) {
-        	return NOTICE;
-        }
-
-        if(code == CategoryConstants.CATEGORY_ID_GA_HELP) {
-        	return HELP;
-        }
-
-        if(code == CategoryConstants.CATEGORY_ID_GA_REPAIR) {
-        	return REPAIR;
+    public static OrganizationTaskType fromCode(String code) {
+        OrganizationTaskType[] values = OrganizationTaskType.values();
+        for(OrganizationTaskType value : values) {
+            if(value.code.equals(code)) {
+                return value;
+            }
         }
 
         return null;

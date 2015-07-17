@@ -2,6 +2,7 @@
 package com.everhomes.organization.pm;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.openxmlformats.schemas.presentationml.x2006.main.CmAuthorLstDocument;
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,7 @@ import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.OrganizationTaskType;
 import com.everhomes.organization.OrganizationType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -1512,13 +1514,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	//权限控制
     	long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
     	cmd.setCommunityId(organizationId);
-    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
+    	int totalCount = 0; //propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
     	if(totalCount == 0) return response;
     	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	int pageCount = getPageCount(totalCount, pageSize);
     	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
     	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
-    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
+    	List<CommunityPmTasks> tasks = null; //propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
     	if(tasks != null && tasks.size() > 0){
     		for (CommunityPmTasks task : tasks) {
 				PostDTO post = forumService.getTopicById(task.getApplyEntityId(), communityId, false);		
@@ -1596,7 +1598,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
-		String taskType = OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
+		String taskType = null; // OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
 		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
@@ -1803,21 +1805,29 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public ListPmBillsByConditionsCommandResponse listPmBillsByConditions(
 			ListPmBillsByConditionsCommand cmd) {
 
+		ListPmBillsByConditionsCommandResponse result = new ListPmBillsByConditionsCommandResponse();
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
+		
+		Long organizationId = this.findPropertyOrganizationId(cmd.getCommunityId());
+		
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId);
+		
+		List<PmBillsDTO> billList = this.propertyMgrProvider.listCommunityPmBills(condition,locator, pageSize+1);
 
-		//List<PmBillsDto> pmBillsDto = this.propertyMgrProvider.listPmBillsByConditions();
+		if(billList != null && billList.size() == pageSize+1){
+			billList.remove(billList.size()-1);
+			result.setNextPageAnchor(billList.get(billList.size()-1).getId());
+		}
+		result.setRequests(billList);
 
-
-
-
-		return null;
+		return result;
 	}
 
 	@Override
 	public void importPmBills(PropCommunityIdCommand cmd, MultipartFile[] files) {
-		User user  = UserContext.current().getUser();
 		Long communityId = cmd.getCommunityId();
 		if(communityId == null){
 			LOGGER.error("propterty communityId paramter can not be null or empty");
@@ -1837,36 +1847,47 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		List<PmBillsDTO> billList = PropMgrBillHandler.processorPmBills(user.getId(), communityId, resultList);
+		List<CommunityPmBill> billList = PropMgrBillHandler.processorPmBills(resultList);
 		
-		/*ListPropAddressMappingCommand command = new ListPropAddressMappingCommand();
-		command.setCommunityId(communityId);
+		
+		User user  = UserContext.current().getUser();
+		Timestamp timeStamp = new Timestamp(new Date().getTime());
+		
 		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
 
 		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(organizationId);
 		long addressId = 0;
 		if(billList != null && billList.size() > 0)
 		{
-			for (CommunityPmBill bill : billList)
-			{
+			for (CommunityPmBill bill : billList){
 				if(mappingList != null && mappingList.size() > 0)
 				{
 					for (CommunityAddressMapping mapping : mappingList)
 					{
 						if(bill != null && bill.getAddress().equals(mapping.getOrganizationAddress()));
 						{
-							addressId = mapping.getAddressId();
+							bill.setOrganizationId(organizationId);
+							bill.setEntityId(mapping.getAddressId());
+							bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
+							bill.setName(bill.getDateStr() + " " + bill.getAddress() + "物业账单");
+							
+							bill.setCreatorUid(user.getId());
+							bill.setCreateTime(timeStamp);
+							
+							bill.setItemList(null);
+							
+							//往期欠款处理
+							if(bill.getOweAmount() == null)
+								bill.setOweAmount(new BigDecimal(0));
+							
+							createPropBill(bill);
 							break;
 						}
 					}
 
 				}
-				bill.setOrganizationId(organizationId);
-				bill.setEntityId(addressId);
-				bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
-				createPropBill(bill);
 			}
-		}*/
+		}
 
 	}
 }

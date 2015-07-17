@@ -11,7 +11,6 @@ import org.jooq.InsertQuery;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
-import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -24,12 +23,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.forum.Post;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
@@ -37,7 +30,6 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
@@ -366,100 +358,111 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     
     @Override
 	public OrganizationCommunity findOrganizationProperty(Long communityId) {
-	   final OrganizationCommunity[] result = new OrganizationCommunity[1];
-       DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-       SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
-       if(communityId != null && communityId > 0){
-           query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
-       }
-       query.fetch().map((r) -> {
-   	   if(r != null)
-   		   	result[0] = ConvertHelper.convert(r, OrganizationCommunity.class);
-   	   		return null;
-       });
-       return result[0];
+		final OrganizationCommunity[] result = new OrganizationCommunity[1];
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+		if(communityId != null && communityId > 0){
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+		}
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, OrganizationCommunity.class);
+			return null;
+		});
+		return result[0];
 	}
-    
-    @Override
+
+	@Override
 	public OrganizationCommunity findOrganizationPropertyCommunity(Long organizationId) {
-	   final OrganizationCommunity[] result = new OrganizationCommunity[1];
-       DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-       SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
-       if(organizationId != null && organizationId > 0){
-           query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId));
-       }
-       query.fetch().map((r) -> {
-   	   if(r != null)
-   		   	result[0] = ConvertHelper.convert(r, OrganizationCommunity.class);
-   	   		return null;
-       });
-       return result[0];
+		final OrganizationCommunity[] result = new OrganizationCommunity[1];
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOrganizationCommunitiesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+		if(organizationId != null && organizationId > 0){
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId));
+		}
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, OrganizationCommunity.class);
+			return null;
+		});
+		return result[0];
 	}
-    
-    @Override
-    public int countOrganizations(String name) {
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATIONS);
-        Condition condition = Tables.EH_ORGANIZATIONS.ID.greaterOrEqual(0L);
-        if(!StringUtils.isEmpty(name))
-        	condition = condition.and(Tables.EH_ORGANIZATIONS.NAME.eq(name));
-        return step.where(condition).fetchOneInto(Integer.class);
-    }
-    
-   @Override
-    public int countOrganizationMembers(Long departmentId, Long memberUid) {
-	   DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	@Override
+	public int countOrganizations(String name) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-       SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS);
-       Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId);
-       if(memberUid != null && memberUid > 0)
-       		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
-       return step.where(condition).fetchOneInto(Integer.class);
-    }
-   
-   @Override
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATIONS);
+		Condition condition = Tables.EH_ORGANIZATIONS.ID.greaterOrEqual(0L);
+		if(!StringUtils.isEmpty(name))
+			condition = condition.and(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		return step.where(condition).fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public int countOrganizationMembers(Long departmentId, Long memberUid) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS);
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId);
+		if(memberUid != null && memberUid > 0)
+			condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
+		return step.where(condition).fetchOneInto(Integer.class);
+	}
+
+	@Override
 	public int countOrganizationCommunitys(Long organizationId) {
-	   DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-       SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_COMMUNITIES);
-       Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId);
-       return step.where(condition).fetchOneInto(Integer.class);
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_COMMUNITIES);
+		Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId);
+		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
+	@Override
+	public List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(
+			Long communityId) {
 
-@Override
-public List<OrganizationCommunityDTO> findOrganizationCommunityByCommunityId(
-		Long communityId) {
-	
-	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-	List<OrganizationCommunityDTO> list = new ArrayList<OrganizationCommunityDTO>();
+		List<OrganizationCommunityDTO> list = new ArrayList<OrganizationCommunityDTO>();
 
-	context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
-    .where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
-    .fetch().map(r -> {
-    	list.add(ConvertHelper.convert(r, OrganizationCommunityDTO.class));
+		context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
+		.where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
+		.fetch().map(r -> {
+			list.add(ConvertHelper.convert(r, OrganizationCommunityDTO.class));
+			return null;
+		});
+
+		return list;
+	}
+
+	@Override
+	public OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,
+			String organizationType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		Record record = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.ID.eq(organizationId).and(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType)))
+				.fetchOne();
+
+		if(record != null)
+			return ConvertHelper.convert(record, OrganizationDTO.class);
+
 		return null;
-    });
-    
-    return list;
-}
+	}
 
+	@Override
+	public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId,
+			Long organizationId) {
 
-@Override
-public OrganizationDTO findOrganizationByIdAndOrgType(Long organizationId,
-		String organizationType) {
-	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchOne();
 
-	Record record = context.select().from(Tables.EH_ORGANIZATIONS)
-    .where(Tables.EH_ORGANIZATIONS.ID.eq(organizationId).and(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType)))
-    .fetchOne();
-	
-	if(record != null)
-		return ConvertHelper.convert(record, OrganizationDTO.class);
-    
-    return null;
-}
+		if(r != null)
+			return ConvertHelper.convert(r, OrganizationMember.class);
+		return null;
+	}
 
 }

@@ -1,46 +1,24 @@
 // @formatter:off
 package com.everhomes.address;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.junit.PropertyInitializer;
-import com.everhomes.region.Region;
-import com.everhomes.region.RegionAdminStatus;
+import com.everhomes.junit.TestCaseBase;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.region.RegionScope;
-import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class },
-    loader = AnnotationConfigContextLoader.class)
-public class AddressTest extends TestCase {
+public class AddressTest extends TestCaseBase {
     
     @Autowired
     private AddressProvider addressProvider;
@@ -56,18 +34,6 @@ public class AddressTest extends TestCase {
     
     private List<Community> communityCleanupList = new ArrayList<>();
     private List<CommunityGeoPoint> communityGeopointsCleanupList = new ArrayList<>();
-    
-    @Configuration
-    @ComponentScan(basePackages = {
-        "com.everhomes"
-    })
-    @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class,
-            FreeMarkerAutoConfiguration.class
-        })
-    static class ContextConfiguration {
-    }
     
     //@Before
     public void setup() {

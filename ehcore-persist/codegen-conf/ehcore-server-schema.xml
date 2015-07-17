@@ -44,8 +44,7 @@
         eh_banner_orders | eh_binary_resources | eh_rtxt_resources | 
         eh_events | eh_event_roster | eh_event_ticket_groups | eh_event_tickets |
         eh_event_profiles | eh_activities | eh_activity_roster | eh_polls |
-        eh_poll_items | eh_poll_votes | eh_business | eh_business_profiles | 
-        eh_biz_coupon_groups | eh_biz_coupon |
+        eh_poll_items | eh_poll_votes | 
         eh_client_package_files | eh_client_packages | 
         eh_user_locations | eh_user_behaviors | eh_user_contacts | eh_user_installed_apps | eh_user_activities |
         eh_content_server_resources | eh_content_server |

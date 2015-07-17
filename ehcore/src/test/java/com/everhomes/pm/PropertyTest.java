@@ -4,24 +4,14 @@ package com.everhomes.pm;
 import java.util.List;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.junit.TestCaseBase;
 import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
@@ -45,10 +35,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.sharding.ShardingProvider;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class },
-    loader = AnnotationConfigContextLoader.class)
-public class PropertyTest {
+public class PropertyTest extends TestCaseBase {
     
     @Autowired
     private ShardingProvider shardingProvider;
@@ -64,18 +51,6 @@ public class PropertyTest {
     
     @Autowired
     private AddressService addressService;
-
-    @Configuration
-    @ComponentScan(basePackages = {
-        "com.everhomes"
-    })
-    @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class,
-            FreeMarkerAutoConfiguration.class
-        })
-    static class ContextConfiguration {
-    }
 
     @Test
     public void testtListPropPmOwners() {

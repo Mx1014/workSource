@@ -4,48 +4,20 @@ package com.everhomes.region;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
-import com.everhomes.junit.PropertyInitializer;
+import com.everhomes.junit.TestCaseBase;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = { PropertyInitializer.class },
-    loader = AnnotationConfigContextLoader.class)
-public class RegionProviderTest  extends TestCase {
+public class RegionProviderTest extends TestCaseBase {
      
     @Autowired
     RegionProvider regionProvider;
     
     List<Long> newRecordIds = new ArrayList<Long>();
-    
-    @Configuration
-    @ComponentScan(basePackages = {
-        "com.everhomes"
-    })
-    @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class,
-            FreeMarkerAutoConfiguration.class
-        })
-    static class ContextConfiguration {
-    }
     
     @Before
     public void setup() {

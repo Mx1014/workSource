@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBusinessesRecord> {
 
-	private static final long serialVersionUID = 1658104112;
+	private static final long serialVersionUID = -1293373559;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_businesses</code>
@@ -30,6 +30,11 @@ public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_businesses.id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_businesses.creator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_businesses.name</code>.

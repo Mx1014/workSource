@@ -48,6 +48,13 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.CREATOR_UID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByName(java.lang.String... values) {

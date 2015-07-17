@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: 任务ID</li>
  * <li>organizationId: 机构id </li>
- * <li>entityType: 承载任务的实体类型，参考{@link com.everhomes.organization.OrganizationTaskEnityType}</li>
+ * <li>entityType: 承载任务的实体类型，参考{@link com.everhomes.organization.OrganizationTaskApplyEnityType}</li>
  * <li>entityId: 承载任务的实体类型对应的ID，如帖子id</li>
  * <li>targetType: 任务被指派的目标类型，参考{@link com.everhomes.organization.OrganizationTaskTargetType}</li>
  * <li>targetId: 任务被指派的目标类型对应的ID，如用户ID</li>

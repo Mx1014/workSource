@@ -5,11 +5,11 @@ package com.everhomes.organization;
  * <li>TOPIC: 帖子</li>
  * </ul>
  */
-public enum OrganizationTaskEnityType {
+public enum OrganizationTaskApplyEnityType {
 	TOPIC("TOPIC");
     
     private String code;
-    private OrganizationTaskEnityType(String code) {
+    private OrganizationTaskApplyEnityType(String code) {
         this.code = code;
     }
     
@@ -17,9 +17,9 @@ public enum OrganizationTaskEnityType {
         return this.code;
     }
     
-    public static OrganizationTaskEnityType fromCode(String code) {
-        OrganizationTaskEnityType[] values = OrganizationTaskEnityType.values();
-        for(OrganizationTaskEnityType value : values) {
+    public static OrganizationTaskApplyEnityType fromCode(String code) {
+        OrganizationTaskApplyEnityType[] values = OrganizationTaskApplyEnityType.values();
+        for(OrganizationTaskApplyEnityType value : values) {
             if(value.code.equals(code)) {
                 return value;
             }

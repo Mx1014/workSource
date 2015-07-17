@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.formula.functions.Offset;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -23,6 +24,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
@@ -994,4 +996,25 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         	condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
         return step.where(condition).fetchOneInto(Integer.class);
     }
+
+	@Override
+	public List<PmBillsDTO> listCommunityPmBills(Condition condition,
+			CrossShardListingLocator locator, int pageSize) {
+		
+		List<PmBillsDTO> list = new ArrayList<PmBillsDTO>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		condition.and(Tables.EH_ORGANIZATION_BILLS.ID.eq(locator.getAnchor()));
+		
+		context.select().from(Tables.EH_ORGANIZATION_BILLS)
+		.where(condition)
+		.limit(pageSize)
+		.fetch().map(r -> {
+			list.add(ConvertHelper.convert(r, PmBillsDTO.class));
+			return null;
+		});
+		
+		return list;
+	}
 }
