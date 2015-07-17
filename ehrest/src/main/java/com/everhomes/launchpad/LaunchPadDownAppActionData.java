@@ -7,15 +7,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>actionType为DOWNLOAD_APP跳转到下载APP页面
- * <li>url: 下载APP的URL（区分android/ios）</li>
+ * <li>iosUrl: IOS下载APP的URL</li>
+ * <li>androidUrl: Android下载APP的URL</li>
  * </ul>
  */
 public class LaunchPadDownAppActionData implements Serializable{
 
     private static final long serialVersionUID = -1378233470078843784L;
-    //{"iosUrl":"https://appsto.re/cn/2Q7A7.i","andriodUrl":""}
+    //{"iosUrl":"https://appsto.re/cn/2Q7A7.i","androidUrl":""}
     private String iosUrl;
-    private String andriodUrl;
+    private String androidUrl;
     
     public String getIosUrl() {
         return iosUrl;
@@ -25,12 +26,12 @@ public class LaunchPadDownAppActionData implements Serializable{
         this.iosUrl = iosUrl;
     }
 
-    public String getAndriodUrl() {
-        return andriodUrl;
+    public String getAndroidUrl() {
+        return androidUrl;
     }
 
-    public void setAndriodUrl(String andriodUrl) {
-        this.andriodUrl = andriodUrl;
+    public void setAndroidUrl(String androidUrl) {
+        this.androidUrl = androidUrl;
     }
 
     @Override
