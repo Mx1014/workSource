@@ -119,8 +119,8 @@ CREATE TABLE `eh_locale_templates`(
 DROP TABLE IF EXISTS `eh_categories`;
 CREATE TABLE `eh_categories`(
     `id` BIGINT NOT NULL,
-    `parent_id` BIGINT,
-    `link_id` BIGINT COMMENT 'point to the linked category (similar to soft link in file system)',
+    `parent_id` BIGINT NOT NULL DEFAULT 0,
+    `link_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'point to the linked category (similar to soft link in file system)',
     `name` VARCHAR(64) NOT NULL,
     `path` VARCHAR(128),
     `default_order` INTEGER,
@@ -1738,6 +1738,8 @@ CREATE TABLE `eh_activities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
 	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `namespace_id` INTEGER,
+    `category_id` BIGINT,
+    `category_path` VARCHAR(128),
     `subject` VARCHAR(512),
     `description` TEXT,
     `poster_uri` VARCHAR(1024) COMMENT 'poster uri',

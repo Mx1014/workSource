@@ -11,10 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1948106623;
+	private static final long serialVersionUID = 1564829915;
 
 	private java.lang.Long     id;
-	private java.lang.Long     creatorUid;
+	private java.lang.Byte     targetType;
+	private java.lang.Long     targetId;
+	private java.lang.Long     bizOwnerUid;
 	private java.lang.String   name;
 	private java.lang.String   displayName;
 	private java.lang.String   logoUri;
@@ -27,13 +29,16 @@ public class EhBusinesses implements java.io.Serializable {
 	private java.lang.String   address;
 	private java.lang.String   description;
 	private java.sql.Timestamp updateTime;
+	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 
 	public EhBusinesses() {}
 
 	public EhBusinesses(
 		java.lang.Long     id,
-		java.lang.Long     creatorUid,
+		java.lang.Byte     targetType,
+		java.lang.Long     targetId,
+		java.lang.Long     bizOwnerUid,
 		java.lang.String   name,
 		java.lang.String   displayName,
 		java.lang.String   logoUri,
@@ -46,10 +51,13 @@ public class EhBusinesses implements java.io.Serializable {
 		java.lang.String   address,
 		java.lang.String   description,
 		java.sql.Timestamp updateTime,
+		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
-		this.creatorUid = creatorUid;
+		this.targetType = targetType;
+		this.targetId = targetId;
+		this.bizOwnerUid = bizOwnerUid;
 		this.name = name;
 		this.displayName = displayName;
 		this.logoUri = logoUri;
@@ -62,6 +70,7 @@ public class EhBusinesses implements java.io.Serializable {
 		this.address = address;
 		this.description = description;
 		this.updateTime = updateTime;
+		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 	}
 
@@ -73,12 +82,28 @@ public class EhBusinesses implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getCreatorUid() {
-		return this.creatorUid;
+	public java.lang.Byte getTargetType() {
+		return this.targetType;
 	}
 
-	public void setCreatorUid(java.lang.Long creatorUid) {
-		this.creatorUid = creatorUid;
+	public void setTargetType(java.lang.Byte targetType) {
+		this.targetType = targetType;
+	}
+
+	public java.lang.Long getTargetId() {
+		return this.targetId;
+	}
+
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public java.lang.Long getBizOwnerUid() {
+		return this.bizOwnerUid;
+	}
+
+	public void setBizOwnerUid(java.lang.Long bizOwnerUid) {
+		this.bizOwnerUid = bizOwnerUid;
 	}
 
 	public java.lang.String getName() {
@@ -175,6 +200,14 @@ public class EhBusinesses implements java.io.Serializable {
 
 	public void setUpdateTime(java.sql.Timestamp updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

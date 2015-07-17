@@ -13,97 +13,127 @@ INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `o
 #
 # Root categories
 #
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1, 0, '帖子', '帖子', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2, 0, '兴趣', '兴趣', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3, 0, '商家和服务', '商家和服务', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4, 0, '活动', '活动', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1, 0, 0, '帖子', '帖子', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2, 0, 0, '兴趣', '兴趣', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3, 0, 0, '商家和服务', '商家和服务', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4, 0, 0, '活动', '活动', 0, 2, UTC_TIMESTAMP());
 
 #
 # Business categories
 #
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1001, 1, '普通', '帖子/普通', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1002, 1, '紧急通知', '帖子/紧急通知', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1003, 1, '公告', '帖子/公告', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1004, 1, '报修', '帖子/报修', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1005, 1, '咨询与求助', '帖子/咨询与求助', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1006, 1, '投诉与建议', '帖子/投诉与建议', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1007, 1, '二手和租售', '帖子/二手和租售', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1008, 1, '免费物品', '帖子/免费物品', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(1009, 1, '失物招领', '帖子/失物招领', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1001, 1, 0, '普通', '帖子/普通', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1002, 1, 0, '紧急通知', '帖子/紧急通知', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1003, 1, 0, '公告', '帖子/公告', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1004, 1, 0, '报修', '帖子/报修', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1005, 1, 0, '咨询与求助', '帖子/咨询与求助', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1006, 1, 0, '投诉与建议', '帖子/投诉与建议', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1007, 1, 0, '二手和租售', '帖子/二手和租售', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1008, 1, 0, '免费物品', '帖子/免费物品', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1009, 1, 0, '失物招领', '帖子/失物招领', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1010, 1, 0, '活动', '帖子/活动', 0, 2, UTC_TIMESTAMP());
 	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2001, 2, '亲子教育', '兴趣/亲子教育', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2002, 2, '运动与音乐', '兴趣/运动与音乐', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2003, 2, '美食与厨艺', '兴趣/美食与厨艺', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2004, 2, '美容化妆', '兴趣/美容化妆', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2005, 2, '家庭装饰', '兴趣/家庭装饰', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2006, 2, '名牌汇', '兴趣/名牌汇', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2007, 2, '宠物会', '兴趣/宠物会', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2008, 2, '旅游摄影', '兴趣/旅游摄影', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2009, 2, '拼车', '兴趣/拼车', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2010, 2, '老乡群', '兴趣/老乡群', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2011, 2, '同事群', '兴趣/同事群', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2012, 2, '同学群', '兴趣/同学群', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(2013, 2, '其他', '兴趣/其他', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2001, 2, 0, '亲子与教育', '兴趣/亲子与教育', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2002, 2, 0, '运动与音乐', '兴趣/运动与音乐', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2003, 2, 0, '美食与厨艺', '兴趣/美食与厨艺', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2004, 2, 0, '美容化妆', '兴趣/美容化妆', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2005, 2, 0, '家庭装饰', '兴趣/家庭装饰', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2006, 2, 0, '名牌汇', '兴趣/名牌汇', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2007, 2, 0, '宠物会', '兴趣/宠物会', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2008, 2, 0, '旅游摄影', '兴趣/旅游摄影', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2009, 2, 0, '拼车', '兴趣/拼车', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2010, 2, 0, '老乡群', '兴趣/老乡群', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2011, 2, 0, '同事群', '兴趣/同事群', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2012, 2, 0, '同学群', '兴趣/同学群', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2013, 2, 0, '其他', '兴趣/其他', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2014, 2001, 0, '亲子', '兴趣/亲子与教育/亲子', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2015, 2001, 0, '教育', '兴趣/亲子与教育/教育', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2016, 2002, 0, '运动', '兴趣/运动与音乐/运动', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2017, 2002, 0, '音乐', '兴趣/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2018, 2008, 0, '旅游', '兴趣/旅游摄影/旅游', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(2019, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP());
 	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3001, 3, '教育', '商家和服务/教育', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3002, 3, '家政与维修', '商家和服务/家政与维修', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3003, 3, '休闲与运动', '商家和服务/休闲与运动', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3004, 3, '便利店与超市', '商家和服务/便利店与超市', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3005, 3, '水果店', '商家和服务/水果店', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3006, 3, '餐饮', '商家和服务/餐饮', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3007, 3, '宠物', '商家和服务/宠物', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3008, 3, '公共服务', '商家和服务/公共服务', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3009, 3, '其他', '商家和服务/其他', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3001, 3, 0, '教育', '商家和服务/教育', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3002, 3, 0, '家政与维修', '商家和服务/家政与维修', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3003, 3, 0, '休闲与运动', '商家和服务/休闲与运动', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3004, 3, 0, '便利店与超市', '商家和服务/便利店与超市', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3005, 3, 0, '水果店', '商家和服务/水果店', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3006, 3, 0, '餐饮', '商家和服务/餐饮', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3007, 3, 0, '宠物', '商家和服务/宠物', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3008, 3, 0, '公共服务', '商家和服务/公共服务', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3009, 3, 0, '其他', '商家和服务/其他', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3010, 3002, 0, '家政', '商家和服务/家政与维修/家政', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3011, 3002, 0, '维修', '商家和服务/家政与维修/维修', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3012, 3003, 0, '休闲', '商家和服务/休闲与运动/休闲', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3013, 3003, 0, '运动', '商家和服务/休闲与运动/运动', 0, 2, UTC_TIMESTAMP());	
 	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4001, 4, '亲子与教育', '活动/亲子与教育', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4002, 4, '运动与音乐', '活动/运动与音乐', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4003, 4, '宠物会', '活动/宠物会', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4004, 4, '美食与厨艺', '活动/美食与厨艺', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4005, 4, '美容化妆', '活动/美容化妆', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4006, 4, '家庭装饰', '活动/家庭装饰', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4007, 4, '其他', '活动/其他', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4001, 4, 0, '亲子与教育', '活动/亲子与教育', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4002, 4, 0, '运动与音乐', '活动/运动与音乐', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4003, 4, 0, '宠物会', '活动/宠物会', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4004, 4, 0, '美食与厨艺', '活动/美食与厨艺', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4005, 4, 0, '美容化妆', '活动/美容化妆', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4006, 4, 0, '家庭装饰', '活动/家庭装饰', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4007, 4, 0, '其他', '活动/其他', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4008, 4001, 0, '亲子', '活动/亲子与教育/亲子', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4009, 4001, 0, '教育', '活动/亲子与教育/教育', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4010, 4002, 0, '运动', '活动/运动与音乐/运动', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4011, 4002, 0, '音乐', '活动/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP());
      
   
 

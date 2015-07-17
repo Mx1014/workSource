@@ -48,10 +48,24 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 * Fetch records that have <code>target_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByCreatorUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.CREATOR_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByTargetType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.TARGET_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.TARGET_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>biz_owner_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByBizOwnerUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.BIZ_OWNER_UID, values);
 	}
 
 	/**
@@ -136,6 +150,13 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByUpdateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.CREATOR_UID, values);
 	}
 
 	/**
