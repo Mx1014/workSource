@@ -7,12 +7,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.elasticsearch.search.facet.terms.doubles.TermsDoubleFacetExecutor.StaticAggregatorValueProc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -25,9 +27,12 @@ import com.everhomes.util.EtagHelper;
 @RequestMapping("/launchpad")
 public class LaunchPadController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadController.class);
+    private static final String LAUNCHPAD_ITEM_VERSION = "launchpad.item.version";
     
     @Autowired
     private LaunchPadService launchPadService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     /**
      * <b>URL: /launchpad/getLaunchPadItems</b>
@@ -40,7 +45,7 @@ public class LaunchPadController extends ControllerBase {
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
         RestResponse resp =  new RestResponse();
         if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
-            int hashCode = commandResponse.hashCode();
+            int hashCode = configurationProvider.getIntValue(LAUNCHPAD_ITEM_VERSION, 0);
             if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
                 resp.setResponseObject(commandResponse);
             }
