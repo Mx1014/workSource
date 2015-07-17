@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,11 @@ import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserFavorite;
 import com.everhomes.user.UserLogin;
+import com.everhomes.util.DateHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },
@@ -38,7 +42,8 @@ public class LaunchPadTest extends TestCase {
     
     @Autowired
     private LaunchPadService launchPadService;
-    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     
     @Configuration
     @ComponentScan(basePackages = {
@@ -187,6 +192,17 @@ public class LaunchPadTest extends TestCase {
         cmd.setLayoutJson(createLayouts().toJSONString());
         this.launchPadService.createLaunchPadLayout(cmd);
     }
+    @Test
+    public void addUserFavorite(){
+        UserFavorite userFavorite = new UserFavorite();
+        userFavorite.setTargetId(1l);
+        userFavorite.setTargetType("biz");
+        userFavorite.setOwnerUid(1l);
+        userFavorite.setId(1l);
+        userFavorite.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        userActivityProvider.addUserFavorite(userFavorite);
+    }
+    
     @SuppressWarnings("unchecked")
     private JSONObject createLayouts() {
         JSONObject root = new JSONObject();                                                                                                             

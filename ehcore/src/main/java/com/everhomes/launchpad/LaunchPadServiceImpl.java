@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.business.Business;
+import com.everhomes.business.BusinessProvider;
+import com.everhomes.business.BusinessService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -43,6 +46,7 @@ import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserFavoriteDTO;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
@@ -77,6 +81,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private RegionProvider regionProvider;
     @Autowired
     private PropertyMgrService propertyMgrService;
+    @Autowired
+    private BusinessProvider businessProvider;
 
     @Override
     public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
@@ -100,13 +106,69 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
         }
         long startTime = System.currentTimeMillis();
+        GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
+        List<LaunchPadItemDTO> result = null;
+        if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
+            result = getBusinessItems(cmd,community);
+        }else{
+            result = getLaunchPadItems(cmd,community);
+        }
+        response.setLaunchPadItems(result);
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Query launch pad complete,communityId=" + communityId 
+                + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
+        return response;
+        
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<LaunchPadItemDTO> getBusinessItems(GetLaunchPadItemsCommand cmd,Community community) {
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
+        List<Long> bizIds = userActivityProvider.findFavorite(userId).stream()
+                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
+        if(bizIds == null)
+            return null;
+        //TODO get the businesses with the user create
+        
+        //TODO get the business with the user join in
+        //get the business with the user favorite
+        List<Business> businesses = businessProvider.findBusinessByIds(bizIds);
+        if(businesses == null || businesses.isEmpty())
+            return null;
+        int index = 1;
+        for(Business r : businesses){
+            LaunchPadItemDTO dto = new LaunchPadItemDTO();
+            dto.setIconUri(r.getLogoUri());
+            dto.setIconUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(LaunchPadConstants.URL, r.getUrl());
+            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
+            dto.setActionData(jsonObject.toJSONString());
+            dto.setActionType(ActionType.BIZ_DETAILS.getCode());
+            dto.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+            dto.setItemGroup(LaunchPadConstants.GROUP_BIZS);
+            dto.setItemHeight(1);
+            dto.setItemWidth(1);
+            dto.setDefaultOrder(index ++);
+            dto.setItemName(r.getName());
+            dto.setItemLabel(r.getDisplayName() + "(商铺)");
+            dto.setItemLocation(cmd.getItemLocation());
+            result.add(dto);
+        }
+        return result;
+        
+    }
+
+    private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community){
         User user = UserContext.current().getUser();
         long userId = user.getId();
         String token = UserContext.current().getLogin().getLoginToken().getTokenString();
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
         List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
         List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
-        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),community.getId());
         List<LaunchPadItem> userItems = getUserItems(user.getId());
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
@@ -127,35 +189,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
         try{
-            allItems.forEach((r) ->{
-//                LaunchPadHandler handler = PlatformContext.getComponent(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + r.getAppId());
-//                if(handler == null){
-//                    LOGGER.error("Unable to find launch pad handler.appId=" + r.getAppId());
-//                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//                            "Unable to find launch pad handler.");
-//                }
-//                LaunchPadItem  item = handler.accesProcessLaunchPadItem(token, userId, communityId, r);
+            allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
-                itemDTO.setActionData(parserJson(token,userId, communityId, r));
+                itemDTO.setActionData(parserJson(token,userId, community.getId(), r));
                 itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 result.add(itemDTO);
                
             });
             if(result != null && !result.isEmpty())
                 sortLaunchPadItems(result);
-            long endTime = System.currentTimeMillis();
             
-            LOGGER.info("Query launch pad complete,userId=" + userId + ",communityId=" + communityId 
-                    + ",itemLocation=" + cmd.getItemLocation() + ",itemGroup=" + cmd.getItemGroup() + ",esplse=" + (endTime - startTime));
-            GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
-            response.setLaunchPadItems(result);
-            
-            return response;
         }catch(Exception e){
             LOGGER.error("Process item aciton data is error.",e);
             return null;
         }
-        
+        return result;
     }
     
     @SuppressWarnings("unchecked")

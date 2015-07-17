@@ -1,0 +1,46 @@
+package com.everhomes.business;
+
+
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+
+@RestDoc(value="Business controller", site="core")
+@RestController
+@RequestMapping("/business")
+public class BusinessController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessController.class);
+    
+    @Autowired
+    private BusinessService businessService;
+
+    /**
+     * <b>URL: /business/getBusinessesByCategory</b>
+     * <p>根据分类获取该类别下的商家列表</p>
+     */
+    @RequestMapping("getBusinessesByCategory")
+    @RestReturn(value=BusinessDTO.class,collection=true)
+    public RestResponse getBusinessesByCategory(@Valid GetBusinessesByCategoryCommand cmd) {
+        
+        List<BusinessDTO> result = businessService.getBusinessesByCategory(cmd);
+        RestResponse response =  new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+}

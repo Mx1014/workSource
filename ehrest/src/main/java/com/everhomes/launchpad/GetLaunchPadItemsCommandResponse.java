@@ -3,6 +3,8 @@ package com.everhomes.launchpad;
 
 import java.util.List;
 
+
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -31,17 +33,20 @@ public class GetLaunchPadItemsCommandResponse {
     }
     
     @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj){
+        if (! (obj instanceof GetLaunchPadItemsCommandResponse)) {
+            return false;
+        }
         return EqualsBuilder.reflectionEquals(this, obj);
     }
-
+    
+    @Override
+    public int hashCode(){
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+   
 }
