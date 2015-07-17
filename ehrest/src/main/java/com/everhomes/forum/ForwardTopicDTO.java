@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>topicId: 原帖子ID</li>
+ * <li>subject: 原帖子标题</li>
  * <li>forumId: 原帖所在论坛ID</li>
  * <li>contentUri: 内容图片URI</li>
  * <li>contentUrl: 内容图片URL</li>
