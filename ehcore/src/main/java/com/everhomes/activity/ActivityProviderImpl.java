@@ -3,6 +3,7 @@ package com.everhomes.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -53,6 +54,9 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public void createActity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class));
+        if(activity.getUuid() == null) {
+            activity.setUuid(UUID.randomUUID().toString());
+        }
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
     }
@@ -157,6 +161,9 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public void createActivityRoster(ActivityRoster createRoster) {
         Long id = shardingProvider.allocShardableContentId(EhActivityRoster.class).second();
+        if(createRoster.getUuid() == null) {
+            createRoster.setUuid(UUID.randomUUID().toString());
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, createRoster.getActivityId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
         createRoster.setId(id);

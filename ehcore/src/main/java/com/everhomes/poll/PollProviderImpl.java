@@ -3,6 +3,7 @@ package com.everhomes.poll;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -42,6 +43,9 @@ public class PollProviderImpl implements PollProvider {
 
     @Override
     public void createPoll(Poll poll) {
+        if(poll.getUuid() == null) {
+            poll.setUuid(UUID.randomUUID().toString());
+        }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, poll.getId()));
         EhPollsDao dao = new EhPollsDao(context.configuration());
         dao.insert(poll);
