@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.app.AppConstants;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
@@ -22,7 +24,6 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Autowired
     private ShardingProvider shardingProvider;
-
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {

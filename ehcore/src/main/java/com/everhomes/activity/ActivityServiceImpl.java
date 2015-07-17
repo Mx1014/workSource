@@ -112,6 +112,22 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setNamespaceId(0);
         activity.setCreatorUid(user.getId());
         activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
+
+        Long categoryId = cmd.getCategoryId();
+        if(categoryId != null) {
+            Category category = this.categoryProvider.findCategoryById(categoryId);
+            if(category != null) {
+                activity.setCategoryId(categoryId);
+                activity.setCategoryPath(category.getPath());
+            } else {
+                LOGGER.error("Category not found, userId=" + user.getId() 
+                    + ", postId=" + postId + ", categoryId=" + categoryId);
+            }
+        } else {
+            LOGGER.error("Category id is null, userId=" + user.getId() 
+                + ", postId=" + postId + ", categoryId=" + categoryId);
+        }
+        
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
         //status:状态，0-无效、1-草稿、2-已发布

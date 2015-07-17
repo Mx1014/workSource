@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * @author elians
  *<ul>
  *<li>activityId:活动ID</li>
+ *<li>categoryId: 类型</li>
  *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
  *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>
@@ -32,6 +33,7 @@ public class ActivityDTO {
     private Long activityId;
     private Long postId;
     private Long forumId;
+    private Long categoryId;
     private String startTime;
     private String stopTime;
     private String location;
@@ -65,8 +67,14 @@ public class ActivityDTO {
     public void setActivityId(Long activityId) {
         this.activityId = activityId;
     }
+    
+    public Long getCategoryId() {
+        return categoryId;
+    }
 
-
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public String getStartTime() {
         return startTime;

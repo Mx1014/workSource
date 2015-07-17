@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *<ul>
+ *<li>categoryId: 类型</li>
  *<li>subject:主题</li>
  *<li>description:描述</li>
  *<li>location:位置</li>
@@ -29,19 +30,20 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ActivityPostCommand{
-    private String   subject;
-    private String   description;
-    private String   location;
-    private String   contactPerson;
+    private Long categoryId;
+    private String subject;
+    private String description;
+    private String location;
+    private String contactPerson;
     private String contactNumber;
     private String startTime;
     private String endTime;
-    private Byte     checkinFlag;
-    private Byte     confirmFlag;
-    private Integer  maxAttendeeCount;
-    private Long     creatorFamilyId;
-    private Long     groupId;
-    private Integer  changeVersion;
+    private Byte checkinFlag;
+    private Byte confirmFlag;
+    private Integer maxAttendeeCount;
+    private Long creatorFamilyId;
+    private Long groupId;
+    private Integer changeVersion;
     private Double longitude;
     private Double latitude;
     private String tag;
@@ -51,208 +53,157 @@ public class ActivityPostCommand{
     public ActivityPostCommand() {
     }
 
-   
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public String getSubject() {
         return subject;
     }
 
-
     public void setSubject(String subject) {
         this.subject = subject;
     }
-
 
     public String getDescription() {
         return description;
     }
 
-
     public void setDescription(String description) {
         this.description = description;
     }
-
 
     public String getLocation() {
         return location;
     }
 
-
     public void setLocation(String location) {
         this.location = location;
     }
-
 
     public String getContactPerson() {
         return contactPerson;
     }
 
-
     public void setContactPerson(String contactPerson) {
         this.contactPerson = contactPerson;
     }
-
-
 
     public String getContactNumber() {
         return contactNumber;
     }
 
-
     public void setContactNumber(String contactNumber) {
         this.contactNumber = contactNumber;
     }
-
-
-
-    public Byte getCheckinFlag() {
-        return checkinFlag;
-    }
-
-
-
-    public void setCheckinFlag(Byte checkinFlag) {
-        this.checkinFlag = checkinFlag;
-    }
-
-
-
-    public Byte getConfirmFlag() {
-        return confirmFlag;
-    }
-
-
-    public void setConfirmFlag(Byte confirmFlag) {
-        this.confirmFlag = confirmFlag;
-    }
-
-
-    public Integer getMaxAttendeeCount() {
-        return maxAttendeeCount;
-    }
-
-
-    public void setMaxAttendeeCount(Integer maxAttendeeCount) {
-        this.maxAttendeeCount = maxAttendeeCount;
-    }
-
-
-
-
-    public Long getCreatorFamilyId() {
-        return creatorFamilyId;
-    }
-
-
-    public void setCreatorFamilyId(Long creatorFamilyId) {
-        this.creatorFamilyId = creatorFamilyId;
-    }
-
-
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
-    }
-
-
-
-    public Integer getChangeVersion() {
-        return changeVersion;
-    }
-
-
-    public void setChangeVersion(Integer changeVersion) {
-        this.changeVersion = changeVersion;
-    }
-
-
 
     public String getStartTime() {
         return startTime;
     }
 
-
     public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
-
 
     public String getEndTime() {
         return endTime;
     }
 
-
     public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
-    
 
-    public String getTag() {
-        return tag;
+    public Byte getCheckinFlag() {
+        return checkinFlag;
     }
 
-
-
-    public void setTag(String tag) {
-        this.tag = tag;
+    public void setCheckinFlag(Byte checkinFlag) {
+        this.checkinFlag = checkinFlag;
     }
 
+    public Byte getConfirmFlag() {
+        return confirmFlag;
+    }
 
+    public void setConfirmFlag(Byte confirmFlag) {
+        this.confirmFlag = confirmFlag;
+    }
+
+    public Integer getMaxAttendeeCount() {
+        return maxAttendeeCount;
+    }
+
+    public void setMaxAttendeeCount(Integer maxAttendeeCount) {
+        this.maxAttendeeCount = maxAttendeeCount;
+    }
+
+    public Long getCreatorFamilyId() {
+        return creatorFamilyId;
+    }
+
+    public void setCreatorFamilyId(Long creatorFamilyId) {
+        this.creatorFamilyId = creatorFamilyId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Integer getChangeVersion() {
+        return changeVersion;
+    }
+
+    public void setChangeVersion(Integer changeVersion) {
+        this.changeVersion = changeVersion;
+    }
 
     public Double getLongitude() {
         return longitude;
     }
 
-
-
-
-
-    public String getPosterUri() {
-        return posterUri;
-    }
-
-
-
-    public void setPosterUri(String posterUri) {
-        this.posterUri = posterUri;
-    }
-
-
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
-
-
 
     public Double getLatitude() {
         return latitude;
     }
 
-
-
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
+    public String getTag() {
+        return tag;
+    }
 
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
     public Long getId() {
         return id;
     }
 
-
-
     public void setId(Long id) {
         this.id = id;
     }
 
+    public String getPosterUri() {
+        return posterUri;
+    }
 
+    public void setPosterUri(String posterUri) {
+        this.posterUri = posterUri;
+    }
 
     @Override
     public String toString() {
