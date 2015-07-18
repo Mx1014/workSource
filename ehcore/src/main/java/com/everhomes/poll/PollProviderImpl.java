@@ -58,7 +58,7 @@ public class PollProviderImpl implements PollProvider {
             Long id=sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPollItems.class));
             item.setId(id);
         });
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(PollItem.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class));
         EhPollItemsDao dao = new EhPollItemsDao(context.configuration());
         dao.insert(pollItems.stream().map(r->ConvertHelper.convert(r, EhPollItems.class)).collect(Collectors.toList()));
     }
@@ -67,7 +67,7 @@ public class PollProviderImpl implements PollProvider {
     public void createPollVote(PollVote pollVote) {
         Long id=sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPollVotes.class));
         pollVote.setId(id);
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(Poll.class, pollVote.getPollId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollVote.getPollId()));
         EhPollVotesDao dao = new EhPollVotesDao(context.configuration());
         dao.insert(pollVote);
     }
@@ -75,7 +75,7 @@ public class PollProviderImpl implements PollProvider {
     @Override
     public List<PollItem> listPollItemByPollId(Long pollId) {
         List<PollItem> values=new ArrayList<PollItem>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(Poll.class, pollId));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollId));
         EhPollItemsDao dao=new EhPollItemsDao(context.configuration());
         List<PollItem> result = dao.fetchByPollId(pollId).stream().map(r->ConvertHelper.convert(r, PollItem.class)).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(result)){
@@ -87,7 +87,7 @@ public class PollProviderImpl implements PollProvider {
     @Override
     public List<PollVote> listPollVoteByPollId(Long pollId) {
         List<PollVote> pollVotes=new ArrayList<PollVote>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(Poll.class, pollId));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollId));
         EhPollVotesDao dao=new EhPollVotesDao(context.configuration());
         dao.fetchByPollId(pollId).forEach(vote->{
             pollVotes.add(ConvertHelper.convert(vote,PollVote.class));
@@ -110,7 +110,7 @@ public class PollProviderImpl implements PollProvider {
     @Override
     public PollVote findPollVoteByUidAndPollId(Long uid, Long pollId) {
         PollVote pollVote =null;
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(Poll.class, pollId));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPolls.class, pollId));
         EhPollVotesRecord result = (EhPollVotesRecord)context.select().from(Tables.EH_POLL_VOTES).where(Tables.EH_POLL_VOTES.POLL_ID.eq(pollId))
                 .and(Tables.EH_POLL_VOTES.VOTER_UID.eq(uid)).fetchAny();
         if(result!=null){

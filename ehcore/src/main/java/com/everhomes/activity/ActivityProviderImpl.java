@@ -201,7 +201,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid) {
         ActivityRoster[] rosters = new ActivityRoster[1];
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivityRoster.class),null,
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
                 (context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId))
@@ -226,7 +226,7 @@ public class ActivityProviderImpl implements ActivityProivider {
             Condition... conditons) {
         List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
         if (locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             locator.setShardIterator(shardIterator);
         }
@@ -279,7 +279,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public void deleteRoster(ActivityRoster createRoster) {
         DSLContext cxt = dbProvider
-                .getDslContext(AccessSpec.readOnlyWith(EhActivityRoster.class, createRoster.getId()));
+                .getDslContext(AccessSpec.readOnlyWith(EhActivities.class, createRoster.getId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(cxt.configuration());
         dao.delete(createRoster);
     }
