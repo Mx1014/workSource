@@ -193,11 +193,12 @@ public class SequenceServiceImpl implements SequenceService {
             return true;
         });
         String key = NameMapper.getSequenceDomainFromTablePojo(pojoClass);
-        long orgNextSequence = sequenceProvider.getNextSequence(key);
+        long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
         sequenceProvider.resetSequence(key, result[0].longValue() + 1);
-        if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Syn table sequence, tableName=" + tableName + ", key=" + key 
-                + ", orgNextSequence=" + orgNextSequence + ", newSequence=" + (result[0].longValue() + 1));
+        long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Sync table sequence, tableName=" + tableName + ", key=" + key + ", newSequence=" + (result[0].longValue() + 1)
+                + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
         }
     }
 }
