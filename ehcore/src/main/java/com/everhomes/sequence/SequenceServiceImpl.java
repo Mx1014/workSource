@@ -8,13 +8,34 @@ import org.springframework.stereotype.Component;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.schema.tables.pojos.EhAcls;
+import com.everhomes.schema.tables.pojos.EhContentShardMap;
+import com.everhomes.schema.tables.pojos.EhServerShardMap;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
+import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhForums;
+import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
+import com.everhomes.server.schema.tables.pojos.EhGroupOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhPollItems;
+import com.everhomes.server.schema.tables.pojos.EhPollVotes;
 import com.everhomes.server.schema.tables.pojos.EhPolls;
+import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
+import com.everhomes.server.schema.tables.pojos.EhUserGroups;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
+import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
+import com.everhomes.server.schema.tables.pojos.EhUserLikes;
+import com.everhomes.server.schema.tables.pojos.EhUserPosts;
+import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 
 @Component
@@ -29,12 +50,12 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Override
     public void syncSequence() {
-        syncTableSequence(null, com.everhomes.schema.Tables.EH_ACLS.getName(), (dbContext) -> { 
+        syncTableSequence(null, EhAcls.class, com.everhomes.schema.Tables.EH_ACLS.getName(), (dbContext) -> { 
             return dbContext.select(com.everhomes.schema.Tables.EH_ACLS.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACLS).fetchOne().value1(); 
         });
         
-        syncTableSequence(null, com.everhomes.schema.Tables.EH_SERVER_SHARD_MAP.getName(), (dbContext) -> { 
+        syncTableSequence(null, EhServerShardMap.class, com.everhomes.schema.Tables.EH_SERVER_SHARD_MAP.getName(), (dbContext) -> { 
             Integer max = dbContext.select(com.everhomes.schema.Tables.EH_SERVER_SHARD_MAP.ID.max())
                 .from(com.everhomes.schema.Tables.EH_SERVER_SHARD_MAP).fetchOne().value1();
             Long lmax = null;
@@ -44,114 +65,115 @@ public class SequenceServiceImpl implements SequenceService {
             return lmax;
         });
         
-        syncTableSequence(null, com.everhomes.schema.Tables.EH_CONTENT_SHARD_MAP.getName(), (dbContext) -> { 
+        syncTableSequence(null, EhContentShardMap.class, com.everhomes.schema.Tables.EH_CONTENT_SHARD_MAP.getName(), (dbContext) -> { 
             return dbContext.select(com.everhomes.schema.Tables.EH_CONTENT_SHARD_MAP.ID.max())
                 .from(com.everhomes.schema.Tables.EH_CONTENT_SHARD_MAP).fetchOne().value1();
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USERS.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUsers.class, Tables.EH_USERS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USERS.ID.max()).from(Tables.EH_USERS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_GROUPS.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserGroups.class, Tables.EH_USER_GROUPS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_GROUPS.ID.max()).from(Tables.EH_USER_GROUPS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_INVITATIONS.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserInvitations.class, Tables.EH_USER_INVITATIONS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_INVITATIONS.ID.max()).from(Tables.EH_USER_INVITATIONS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_IDENTIFIERS.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserIdentifiers.class, Tables.EH_USER_IDENTIFIERS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_IDENTIFIERS.ID.max()).from(Tables.EH_USER_IDENTIFIERS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_INVITATION_ROSTER.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserInvitationRoster.class, Tables.EH_USER_INVITATION_ROSTER.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_INVITATION_ROSTER.ID.max()).from(Tables.EH_USER_INVITATION_ROSTER).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_POSTS.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserPosts.class, Tables.EH_USER_POSTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_POSTS.ID.max()).from(Tables.EH_USER_POSTS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_LIKES.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserLikes.class, Tables.EH_USER_LIKES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_LIKES.ID.max()).from(Tables.EH_USER_LIKES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_FAVORITES.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserFavorites.class, Tables.EH_USER_FAVORITES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_FAVORITES.ID.max()).from(Tables.EH_USER_FAVORITES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, Tables.EH_USER_PROFILES.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserProfiles.class, Tables.EH_USER_PROFILES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_PROFILES.ID.max()).from(Tables.EH_USER_PROFILES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhForums.class, Tables.EH_FORUMS.getName(), (dbContext) -> { 
+        syncTableSequence(EhForums.class, EhForums.class, Tables.EH_FORUMS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_FORUMS.ID.max()).from(Tables.EH_FORUMS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhAddresses.class, Tables.EH_ADDRESSES.getName(), (dbContext) -> { 
+        syncTableSequence(EhAddresses.class, EhAddresses.class, Tables.EH_ADDRESSES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ADDRESSES.ID.max()).from(Tables.EH_ADDRESSES).fetchOne().value1(); 
         });
         
-        syncTableSequence(null, Tables.EH_CONTENT_SERVER_RESOURCES.getName(), (dbContext) -> { 
+        syncTableSequence(null, EhContentServerResources.class, Tables.EH_CONTENT_SERVER_RESOURCES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_CONTENT_SERVER_RESOURCES.ID.max())
                 .from(Tables.EH_CONTENT_SERVER_RESOURCES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhGroups.class, Tables.EH_GROUPS.getName(), (dbContext) -> { 
+        syncTableSequence(EhGroups.class, EhGroups.class, Tables.EH_GROUPS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_GROUPS.ID.max()).from(Tables.EH_GROUPS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhGroups.class, Tables.EH_GROUP_MEMBERS.getName(), (dbContext) -> { 
+        syncTableSequence(EhGroups.class, EhGroupMembers.class, Tables.EH_GROUP_MEMBERS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_GROUP_MEMBERS.ID.max()).from(Tables.EH_GROUP_MEMBERS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhGroups.class, Tables.EH_GROUP_OP_REQUESTS.getName(), (dbContext) -> { 
+        syncTableSequence(EhGroups.class, EhGroupOpRequests.class, Tables.EH_GROUP_OP_REQUESTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_GROUP_OP_REQUESTS.ID.max()).from(Tables.EH_GROUP_OP_REQUESTS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhForums.class, Tables.EH_FORUM_POSTS.getName(), (dbContext) -> { 
+        syncTableSequence(EhForums.class, EhForumPosts.class, Tables.EH_FORUM_POSTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_FORUM_POSTS.ID.max()).from(Tables.EH_FORUM_POSTS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhForums.class, Tables.EH_FORUM_ASSIGNED_SCOPES.getName(), (dbContext) -> { 
+        syncTableSequence(EhForums.class, EhForumAssignedScopes.class, Tables.EH_FORUM_ASSIGNED_SCOPES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_FORUM_ASSIGNED_SCOPES.ID.max()).from(Tables.EH_FORUM_ASSIGNED_SCOPES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhForums.class, Tables.EH_FORUM_ATTACHMENTS.getName(), (dbContext) -> { 
+        syncTableSequence(EhForums.class, EhForumAttachments.class, Tables.EH_FORUM_ATTACHMENTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_FORUM_ATTACHMENTS.ID.max()).from(Tables.EH_FORUM_ATTACHMENTS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhCommunities.class, Tables.EH_COMMUNITIES.getName(), (dbContext) -> { 
+        syncTableSequence(EhCommunities.class, EhCommunities.class, Tables.EH_COMMUNITIES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_COMMUNITIES.ID.max()).from(Tables.EH_COMMUNITIES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhCommunities.class, Tables.EH_COMMUNITY_GEOPOINTS.getName(), (dbContext) -> { 
+        syncTableSequence(EhCommunities.class, EhCommunityGeopoints.class, Tables.EH_COMMUNITY_GEOPOINTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_COMMUNITY_GEOPOINTS.ID.max()).from(Tables.EH_COMMUNITY_GEOPOINTS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhActivities.class, Tables.EH_ACTIVITIES.getName(), (dbContext) -> { 
+        syncTableSequence(EhActivities.class, EhActivities.class, Tables.EH_ACTIVITIES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ACTIVITIES.ID.max()).from(Tables.EH_ACTIVITIES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhActivities.class, Tables.EH_ACTIVITY_ROSTER.getName(), (dbContext) -> { 
+        syncTableSequence(EhActivities.class, EhActivityRoster.class, Tables.EH_ACTIVITY_ROSTER.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ACTIVITY_ROSTER.ID.max()).from(Tables.EH_ACTIVITY_ROSTER).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhPolls.class, Tables.EH_POLLS.getName(), (dbContext) -> { 
+        syncTableSequence(EhPolls.class, EhPolls.class, Tables.EH_POLLS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_POLLS.ID.max()).from(Tables.EH_POLLS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhPolls.class, Tables.EH_POLL_ITEMS.getName(), (dbContext) -> { 
+        syncTableSequence(EhPolls.class, EhPollItems.class, Tables.EH_POLL_ITEMS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_POLL_ITEMS.ID.max()).from(Tables.EH_POLL_ITEMS).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhPolls.class, Tables.EH_POLL_VOTES.getName(), (dbContext) -> { 
+        syncTableSequence(EhPolls.class, EhPollVotes.class, Tables.EH_POLL_VOTES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_POLL_VOTES.ID.max()).from(Tables.EH_POLL_VOTES).fetchOne().value1(); 
         });
     }
     
-    private void syncTableSequence(Class keytableCls, String tableName, SequenceQueryCallback callback) {
+    @SuppressWarnings("rawtypes")
+    private void syncTableSequence(Class keytableCls, Class pojoClass, String tableName, SequenceQueryCallback callback) {
         AccessSpec spec = null;
         if(keytableCls == null) {
             spec = AccessSpec.readOnly();
@@ -170,11 +192,12 @@ public class SequenceServiceImpl implements SequenceService {
             }
             return true;
         });
-        long orgNextSequence = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUsers.class));
-        sequenceProvider.resetSequence(NameMapper.getSequenceDomainFromTablePojo(EhUsers.class), result[0].longValue() + 1);
+        String key = NameMapper.getSequenceDomainFromTablePojo(pojoClass);
+        long orgNextSequence = sequenceProvider.getNextSequence(key);
+        sequenceProvider.resetSequence(key, result[0].longValue() + 1);
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Syn table sequence, tableName=" + tableName + ", orgNextSequence=" + orgNextSequence 
-                + ", newSequence=" + (result[0].longValue() + 1));
+            LOGGER.info("Syn table sequence, tableName=" + tableName + ", key=" + key 
+                + ", orgNextSequence=" + orgNextSequence + ", newSequence=" + (result[0].longValue() + 1));
         }
     }
 }
