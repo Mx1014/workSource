@@ -1,35 +1,32 @@
 package com.everhomes.organization.pm;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
 /**
- * 
-  <ul>
-  	<li>pageOffset : 下一条记录id</li>	
-	<li>pageSize : 页大小</li>	
-	<li>address : 地址</li>
-	<li>dateStr : 账单日期</li>
-	<li>communityId : 小区Id</li>
-  </ul>
+ * <ul>
+ * 	<li>pageOffSet : 页码</li>
+ *	<li>pageSize : 页大小</li>
+ *	<li>address : 地址</li>
+ *	<li>createTime : 缴费日期</li>
+ *	<li>communityId : 小区Id</li>
+ *</ul>
  *
  */
-
-public class ListPmBillsByConditionsCommand {
+public class ListOrgBillingTransactionsByConditionCommand {
 	
 	private Long pageOffset;
-	
 	private Integer pageSize;
 	
 	private String address;
-	
-	private String dateStr;
+	private String createTime;
 	
 	@NotNull
 	private Long communityId;
-	
-	
+
 	public Long getPageOffset() {
 		return pageOffset;
 	}
@@ -41,11 +38,11 @@ public class ListPmBillsByConditionsCommand {
 	public Integer getPageSize() {
 		return pageSize;
 	}
-	
+
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
 	public String getAddress() {
 		return address;
 	}
@@ -54,12 +51,12 @@ public class ListPmBillsByConditionsCommand {
 		this.address = address;
 	}
 
-	public String getDateStr() {
-		return dateStr;
+	public String getCreateTime() {
+		return createTime;
 	}
 
-	public void setDateStr(String dateStr) {
-		this.dateStr = dateStr;
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
 	}
 
 	public Long getCommunityId() {
@@ -74,6 +71,7 @@ public class ListPmBillsByConditionsCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+	
 	
 	
 	

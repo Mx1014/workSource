@@ -3,24 +3,15 @@ package com.everhomes.organization.pm;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.organization.OrganizationBillingTransactions;
 import com.everhomes.util.StringHelper;
 
-
-/**
- * 
- * <ul>
- * <li>nextPageOffset : 页码</li>
- * <li>requests : 账单列表</li>
- * </ul>
- *
- */
-
-public class ListPmBillsByConditionsCommandResponse {
-
+public class ListOrgBillingTransactionsByConditionCommandResponse {
+	
 	private Long nextPageOffset;
-
-	@ItemType(PmBillsDTO.class)
-	private List<PmBillsDTO> requests;
+	
+	@ItemType(OrganizationBillingTransactions.class)
+	private List<OrganizationBillingTransactions> requests;
 
 	public Long getNextPageOffset() {
 		return nextPageOffset;
@@ -30,11 +21,11 @@ public class ListPmBillsByConditionsCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	public List<PmBillsDTO> getRequests() {
+	public List<OrganizationBillingTransactions> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(List<PmBillsDTO> requests) {
+	public void setRequests(List<OrganizationBillingTransactions> requests) {
 		this.requests = requests;
 	}
 
@@ -42,7 +33,5 @@ public class ListPmBillsByConditionsCommandResponse {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
-
 
 }

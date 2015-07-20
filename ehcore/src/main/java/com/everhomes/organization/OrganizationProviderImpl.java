@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.jooq.InsertQuery;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -26,6 +28,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
@@ -479,6 +483,142 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null); 
     }
+	
+	@Override
+	public Organization findOrganizationByCommunityIdAndOrgType(Long communityId,String organizationType){
+		
+		List<Organization> list = new ArrayList<Organization>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	
+		context.select().from(Tables.EH_ORGANIZATIONS)
+		.join(Tables.EH_ORGANIZATION_COMMUNITIES).on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID))
+		.where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId).and(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType)))
+		.fetch().map(r -> {
+			Organization org = new Organization();
+			org.setAddressId(r.getValue(Tables.EH_ORGANIZATIONS.ADDRESS_ID));
+			org.setDescription(r.getValue(Tables.EH_ORGANIZATIONS.DESCRIPTION));
+			org.setId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
+			org.setLevel(r.getValue(Tables.EH_ORGANIZATIONS.LEVEL));
+			org.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+			org.setOrganizationType(r.getValue(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE));
+			org.setParentId(r.getValue(Tables.EH_ORGANIZATIONS.PARENT_ID));
+			org.setPath(r.getValue(Tables.EH_ORGANIZATIONS.PATH));
+			org.setStatus(r.getValue(Tables.EH_ORGANIZATIONS.STATUS));
+			
+			list.add(org);
+			return null;
+		});
+		
+		if(list != null && !list.isEmpty())
+			return list.get(0);
+		return null;
+	}
+
+
+	@Override
+	public List<CommunityAddressMapping> findOrgAddressMappingByCondition(Condition condition) {
+		
+		List<CommunityAddressMapping> list = new ArrayList<CommunityAddressMapping>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+		.where(condition).fetch();
+		
+		if(records != null && !records.isEmpty()){
+			records.stream().map(r -> {
+				list.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
+				return null;
+			}).toArray();
+		}
+		
+		return list;
+	}
+	
+	@Override
+	public List<OrganizationBillingTransactions> listOrganizationBillingTransactions(
+			Condition condition, long offset, int pageSize) {
+		List<OrganizationBillingTransactions> list = new ArrayList<OrganizationBillingTransactions>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
+		.where(condition)
+		.orderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.TARGET_ACCOUNT_ID.asc())
+		.limit(pageSize).offset((int)offset)
+		.fetch();
+		
+		if(records != null && !records.isEmpty()){
+			records.stream().map(r -> {
+				list.add(ConvertHelper.convert(r, OrganizationBillingTransactions.class));
+				return null;
+			}).toArray();
+		}
+		
+		return list;
+	}
+
+
+	@Override
+	public List<OrganizationCommunityDTO> findOrganizationCommunityByCondition(
+			Condition condition) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
+		.where(condition)
+		.fetch();
+		
+		List<OrganizationCommunityDTO> list = new ArrayList<OrganizationCommunityDTO>();
+		if(records != null && !records.isEmpty()){
+			records.stream().map( r -> {
+				list.add(ConvertHelper.convert(r, OrganizationCommunityDTO.class));
+				return null;
+			}).toArray();
+		}
+		
+		return list;
+	}
+
+
+	@Override
+	public List<CommunityPmOwner> findOrganizationMemberByAddressIdAndOrgId(
+			Long addressId, Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+		.where(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId).and(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId)))
+		.fetch();
+		
+		List<CommunityPmOwner> list = new ArrayList<CommunityPmOwner>();
+		
+		if(records != null && !records.isEmpty()){
+			records.stream().map(r -> {
+				list.add(ConvertHelper.convert(r, CommunityPmOwner.class));
+				return null;
+			}).toArray();
+		}
+		
+		return list;
+	}
+	
+	@Override
+	public BigDecimal organizationTransactionBillingAmountByBillId(Long billId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
+				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
+
+		if(records != null && !records.isEmpty()){
+			BigDecimal total = new BigDecimal(0);
+			for(int i=0;i<records.size();i++){
+				total = total.add(records.get(i).value1());
+			}
+			return total;
+		}
+		else
+			return new BigDecimal(0);
+	}
 
     @Cacheable(value="findOrganizationTaskById", key="#id", unless="#result == null")
     public OrganizationTask findOrganizationTaskById(Long id) {

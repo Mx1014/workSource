@@ -16,8 +16,8 @@ public class PmBillsDTO{
 	private java.math.BigDecimal oweAmount;
 	private java.lang.Long       creatorUid;
 	private java.lang.Integer    notifyCount;
-	private java.sql.Timestamp   notifyTime;
-	private java.sql.Timestamp   createTime;
+	private String   notifyTime;
+	private String   createTime;
 	
 	//expand
 	private java.math.BigDecimal totalAmount;
@@ -118,19 +118,19 @@ public class PmBillsDTO{
 		this.notifyCount = notifyCount;
 	}
 
-	public java.sql.Timestamp getNotifyTime() {
+	public String getNotifyTime() {
 		return notifyTime;
 	}
 
-	public void setNotifyTime(java.sql.Timestamp notifyTime) {
+	public void setNotifyTime(String notifyTime) {
 		this.notifyTime = notifyTime;
 	}
 
-	public java.sql.Timestamp getCreateTime() {
+	public String getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(java.sql.Timestamp createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
 

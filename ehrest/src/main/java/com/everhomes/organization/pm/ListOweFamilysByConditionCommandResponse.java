@@ -5,22 +5,12 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+public class ListOweFamilysByConditionCommandResponse {
+	
+private Long nextPageOffset;
 
-/**
- * 
- * <ul>
- * <li>nextPageOffset : 页码</li>
- * <li>requests : 账单列表</li>
- * </ul>
- *
- */
-
-public class ListPmBillsByConditionsCommandResponse {
-
-	private Long nextPageOffset;
-
-	@ItemType(PmBillsDTO.class)
-	private List<PmBillsDTO> requests;
+	@ItemType(OweFamilyDTO.class)
+	private List<OweFamilyDTO> requests;
 
 	public Long getNextPageOffset() {
 		return nextPageOffset;
@@ -30,11 +20,11 @@ public class ListPmBillsByConditionsCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	public List<PmBillsDTO> getRequests() {
+	public List<OweFamilyDTO> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(List<PmBillsDTO> requests) {
+	public void setRequests(List<OweFamilyDTO> requests) {
 		this.requests = requests;
 	}
 
@@ -42,7 +32,5 @@ public class ListPmBillsByConditionsCommandResponse {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
-
 
 }
