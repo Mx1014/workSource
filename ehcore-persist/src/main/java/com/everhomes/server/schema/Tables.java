@@ -334,6 +334,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
+	 * The table ehcore.eh_qrcodes
+	 */
+	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;
+
+	/**
 	 * The table ehcore.eh_recommendations
 	 */
 	public static final com.everhomes.server.schema.tables.EhRecommendations EH_RECOMMENDATIONS = com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS;

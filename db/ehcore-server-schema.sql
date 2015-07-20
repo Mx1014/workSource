@@ -2311,4 +2311,22 @@ CREATE TABLE `eh_oauth2_tokens` (
     INDEX `i_eh_otoken_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_qrcodes`;
+CREATE TABLE `eh_qrcodes` (
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`description` VARCHAR(1024) COMMENT '',
+    `view_count` BIGINT NOT NULL DEFAULT 0,
+	`expire_time` DATETIME COMMENT 'it is permanent if there is no expired time, else it is temporary',
+	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
+    `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+    `creator_uid` BIGINT NOT NULL COMMENT 'createor user id',
+	`create_time` DATETIME,
+    
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET foreign_key_checks = 1;
