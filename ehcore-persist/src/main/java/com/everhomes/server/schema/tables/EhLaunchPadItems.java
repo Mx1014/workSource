@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 132832120;
+	private static final long serialVersionUID = -2060992008;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -87,9 +87,9 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Integer> ITEM_HEIGHT = createField("item_height", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.action_type</code>. 0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan
+	 * The column <code>ehcore.eh_launch_pad_items.action_type</code>. according to document
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> ACTION_TYPE = createField("action_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> ACTION_TYPE = createField("action_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "according to document");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_items.action_data</code>. the parameters depend on item_type, json format

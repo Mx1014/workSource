@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> implements org.jooq.Record20<java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Byte, java.lang.String, java.lang.Integer, java.lang.Byte, java.lang.Long, java.lang.Byte, java.lang.String, java.lang.Integer> {
 
-	private static final long serialVersionUID = -799673927;
+	private static final long serialVersionUID = -1799515735;
 
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.id</code>.
@@ -182,14 +182,14 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_launch_pad_items.action_type</code>. 0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan
+	 * Setter for <code>ehcore.eh_launch_pad_items.action_type</code>. according to document
 	 */
 	public void setActionType(java.lang.Byte value) {
 		setValue(12, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_launch_pad_items.action_type</code>. 0: none, 1: more button, 2: app, 3: zuolin url, 4: thirdpart url, 5: yellow page, 6: post, 7: message, 8: activity, 9: hotline, 10: QRCode scan
+	 * Getter for <code>ehcore.eh_launch_pad_items.action_type</code>. according to document
 	 */
 	public java.lang.Byte getActionType() {
 		return (java.lang.Byte) getValue(12);

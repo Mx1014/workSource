@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBusinessesRecord> {
 
-	private static final long serialVersionUID = 302918430;
+	private static final long serialVersionUID = -128142197;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_businesses</code>
@@ -39,12 +39,22 @@ public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_businesses.target_id</code>. the original biz id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the original biz id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.String> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.VARCHAR.length(1024).nullable(false).defaulted(true), this, "the original biz id");
 
 	/**
 	 * The column <code>ehcore.eh_businesses.biz_owner_uid</code>. the owner of the shop
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Long> BIZ_OWNER_UID = createField("biz_owner_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the owner of the shop");
+
+	/**
+	 * The column <code>ehcore.eh_businesses.contact</code>. the name of shop owner
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.String> CONTACT = createField("contact", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the name of shop owner");
+
+	/**
+	 * The column <code>ehcore.eh_businesses.phone</code>. the phone of shop owner
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.String> PHONE = createField("phone", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the phone of shop owner");
 
 	/**
 	 * The column <code>ehcore.eh_businesses.name</code>.
@@ -65,16 +75,6 @@ public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_businesses.url</code>. the url to access shop
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.String> URL = createField("url", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "the url to access shop");
-
-	/**
-	 * The column <code>ehcore.eh_businesses.contact</code>. the name of shop owner
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.String> CONTACT = createField("contact", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "the name of shop owner");
-
-	/**
-	 * The column <code>ehcore.eh_businesses.phone</code>. the phone of shop owner
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.String> PHONE = createField("phone", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the phone of shop owner");
 
 	/**
 	 * The column <code>ehcore.eh_businesses.longitude</code>.

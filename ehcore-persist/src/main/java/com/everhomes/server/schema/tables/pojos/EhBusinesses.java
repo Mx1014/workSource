@@ -11,18 +11,18 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1564829915;
+	private static final long serialVersionUID = 1233220053;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     targetType;
-	private java.lang.Long     targetId;
+	private java.lang.String   targetId;
 	private java.lang.Long     bizOwnerUid;
+	private java.lang.String   contact;
+	private java.lang.String   phone;
 	private java.lang.String   name;
 	private java.lang.String   displayName;
 	private java.lang.String   logoUri;
 	private java.lang.String   url;
-	private java.lang.String   contact;
-	private java.lang.String   phone;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
@@ -37,14 +37,14 @@ public class EhBusinesses implements java.io.Serializable {
 	public EhBusinesses(
 		java.lang.Long     id,
 		java.lang.Byte     targetType,
-		java.lang.Long     targetId,
+		java.lang.String   targetId,
 		java.lang.Long     bizOwnerUid,
+		java.lang.String   contact,
+		java.lang.String   phone,
 		java.lang.String   name,
 		java.lang.String   displayName,
 		java.lang.String   logoUri,
 		java.lang.String   url,
-		java.lang.String   contact,
-		java.lang.String   phone,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
@@ -58,12 +58,12 @@ public class EhBusinesses implements java.io.Serializable {
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.bizOwnerUid = bizOwnerUid;
+		this.contact = contact;
+		this.phone = phone;
 		this.name = name;
 		this.displayName = displayName;
 		this.logoUri = logoUri;
 		this.url = url;
-		this.contact = contact;
-		this.phone = phone;
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.geohash = geohash;
@@ -90,11 +90,11 @@ public class EhBusinesses implements java.io.Serializable {
 		this.targetType = targetType;
 	}
 
-	public java.lang.Long getTargetId() {
+	public java.lang.String getTargetId() {
 		return this.targetId;
 	}
 
-	public void setTargetId(java.lang.Long targetId) {
+	public void setTargetId(java.lang.String targetId) {
 		this.targetId = targetId;
 	}
 
@@ -104,6 +104,22 @@ public class EhBusinesses implements java.io.Serializable {
 
 	public void setBizOwnerUid(java.lang.Long bizOwnerUid) {
 		this.bizOwnerUid = bizOwnerUid;
+	}
+
+	public java.lang.String getContact() {
+		return this.contact;
+	}
+
+	public void setContact(java.lang.String contact) {
+		this.contact = contact;
+	}
+
+	public java.lang.String getPhone() {
+		return this.phone;
+	}
+
+	public void setPhone(java.lang.String phone) {
+		this.phone = phone;
 	}
 
 	public java.lang.String getName() {
@@ -136,22 +152,6 @@ public class EhBusinesses implements java.io.Serializable {
 
 	public void setUrl(java.lang.String url) {
 		this.url = url;
-	}
-
-	public java.lang.String getContact() {
-		return this.contact;
-	}
-
-	public void setContact(java.lang.String contact) {
-		this.contact = contact;
-	}
-
-	public java.lang.String getPhone() {
-		return this.phone;
-	}
-
-	public void setPhone(java.lang.String phone) {
-		this.phone = phone;
 	}
 
 	public java.lang.Double getLongitude() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord> {
 
-	private static final long serialVersionUID = -1245121861;
+	private static final long serialVersionUID = -217468046;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_bills</code>
@@ -60,6 +60,21 @@ public class EhOrganizationBills extends org.jooq.impl.TableImpl<com.everhomes.s
 	 * The column <code>ehcore.eh_organization_bills.date_str</code>. the date string in bill
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.lang.String> DATE_STR = createField("date_str", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the date string in bill");
+
+	/**
+	 * The column <code>ehcore.eh_organization_bills.start_date</code>. the start date of the bill
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.sql.Date> START_DATE = createField("start_date", org.jooq.impl.SQLDataType.DATE, this, "the start date of the bill");
+
+	/**
+	 * The column <code>ehcore.eh_organization_bills.end_date</code>. the end date of the bill
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.sql.Date> END_DATE = createField("end_date", org.jooq.impl.SQLDataType.DATE, this, "the end date of the bill");
+
+	/**
+	 * The column <code>ehcore.eh_organization_bills.pay_date</code>. the pay date of the bill, the bill must be paid at the end of the date
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillsRecord, java.sql.Date> PAY_DATE = createField("pay_date", org.jooq.impl.SQLDataType.DATE, this, "the pay date of the bill, the bill must be paid at the end of the date");
 
 	/**
 	 * The column <code>ehcore.eh_organization_bills.description</code>.

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBannersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> implements org.jooq.Record19<java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.Byte, java.lang.String, java.sql.Timestamp, java.sql.Timestamp, java.lang.Byte, java.lang.Integer, java.lang.Long, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 390985005;
+	private static final long serialVersionUID = -153098825;
 
 	/**
 	 * Setter for <code>ehcore.eh_banners.id</code>. id of the record
@@ -154,14 +154,14 @@ public class EhBannersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everh
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_banners.action_type</code>. 0: none, 1: zuolin url, 2: thirdpart url, 3: post, 4: coupon
+	 * Setter for <code>ehcore.eh_banners.action_type</code>. according to document
 	 */
 	public void setActionType(java.lang.Byte value) {
 		setValue(10, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_banners.action_type</code>. 0: none, 1: zuolin url, 2: thirdpart url, 3: post, 4: coupon
+	 * Getter for <code>ehcore.eh_banners.action_type</code>. according to document
 	 */
 	public java.lang.Byte getActionType() {
 		return (java.lang.Byte) getValue(10);
