@@ -11,7 +11,6 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *<ul>
- *<li>categoryId: 类型</li>
  *<li>subject:主题</li>
  *<li>description:描述</li>
  *<li>location:位置</li>
@@ -30,7 +29,6 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ActivityPostCommand{
-    private Long categoryId;
     private String subject;
     private String description;
     private String location;
@@ -51,14 +49,6 @@ public class ActivityPostCommand{
     private String posterUri;
     
     public ActivityPostCommand() {
-    }
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
     }
 
     public String getSubject() {
