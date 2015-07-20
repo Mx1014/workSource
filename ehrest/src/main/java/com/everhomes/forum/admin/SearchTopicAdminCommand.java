@@ -3,6 +3,7 @@ package com.everhomes.forum.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -19,7 +20,9 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchTopicAdminCommand {
     private Long communityId;
+    @ItemType(String.class)
     private List<String> senderPhones;
+    @ItemType(String.class)
     private List<String> senderNickNames;
     private String keyword;
     private Long startTime;
