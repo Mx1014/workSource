@@ -36,7 +36,25 @@ public class CategoryController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 
     @Autowired
-    private CategoryProvider categoryProvider;
+    private CategoryProvider categoryProvider;    
+    
+    
+    /**
+     * <b>URL: /category/listAllCategories</b> 
+     * <p>列出所有支持的类型</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listAllCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listAllCategories() {
+        List<Category> list = this.categoryProvider.listAllCategories();
+        
+        List<CategoryDTO> dtoResultList = list.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        
+        return new RestResponse(dtoResultList);
+    }
 
     /**
      * <b>URL: /category/listChildren</b> 列出指定类型的第一层孩子类型
