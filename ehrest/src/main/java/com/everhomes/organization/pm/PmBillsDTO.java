@@ -1,5 +1,9 @@
 package com.everhomes.organization.pm;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.util.StringHelper;
 
 public class PmBillsDTO{
@@ -21,6 +25,9 @@ public class PmBillsDTO{
 	
 	//expand
 	private java.math.BigDecimal totalAmount;
+	
+	@ItemType(FamilyBillingTransactionDTO.class)
+	private List<FamilyBillingTransactionDTO> payList;
 
 	public java.lang.Long getId() {
 		return id;
@@ -142,10 +149,19 @@ public class PmBillsDTO{
 		this.totalAmount = totalAmount;
 	}
 
+	public List<FamilyBillingTransactionDTO> getPayList() {
+		return payList;
+	}
+
+	public void setPayList(List<FamilyBillingTransactionDTO> payList) {
+		this.payList = payList;
+	}
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+	
 	
 	
 	

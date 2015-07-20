@@ -44,6 +44,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.Family;
+import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.family.FamilyBillingTransactions;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyMemberDTO;
@@ -1961,7 +1962,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 			EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
-			
+
 			if(cmd.getDeleteList() != null && !cmd.getDeleteList().isEmpty()){
 				List<EhOrganizationBills> bills = new ArrayList<EhOrganizationBills>();
 				cmd.getDeleteList().stream().map(r -> {
@@ -1983,7 +1984,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 
 			if(cmd.getInsertList() != null && !cmd.getInsertList().isEmpty()){
-				
+
 				Long communityId = cmd.getCommunityId();
 				if(communityId == null){
 					LOGGER.error("propterty communityId paramter can not be null or empty");
@@ -1996,18 +1997,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 							"Unable to find the community.");
 				}
-				
+
 				User user  = UserContext.current().getUser();
 				Timestamp timeStamp = new Timestamp(new Date().getTime());
 
 				long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
 
 				List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(organizationId);
-				
+
 				for (PmBillsDTO insertBill : cmd.getInsertList()){
-					
+
 					CommunityPmBill bill = ConvertHelper.convert(insertBill, CommunityPmBill.class);
-					
+
 					if(mappingList != null && mappingList.size() > 0)
 					{
 						for (CommunityAddressMapping mapping : mappingList)
@@ -2205,6 +2206,95 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			family.setLastBillingTransactionId(familyBillTransaction.getId());
 			family.setLastPayTime(familyBillTransaction.getCreateTime());
 		}
+	}
+
+	@Override
+	public ListFamilyBillingTransactionByAddressCommandResponse listFamilyBillingTransactionByAddress(
+			ListFamilyBillingTransactionByAddressCommand cmd) {
+		if(cmd.getAddress() == null || cmd.getAddress().equals("")){
+			LOGGER.error("propterty address paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty address paramter can not be null or empty");
+		}
+
+		ListFamilyBillingTransactionByAddressCommandResponse response = new ListFamilyBillingTransactionByAddressCommandResponse();
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+
+		//可能需要加物业id
+		Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(cmd.getAddress());
+		List<CommunityAddressMapping>  addMappingList =this.organizationProvider.findOrgAddressMappingByCondition(condition);
+
+		if(addMappingList != null && !addMappingList.isEmpty()){
+			Long addresssId = addMappingList.get(0).getAddressId();
+			List<FamilyBillingTransactions> familyTransactionList = this.familyProvider.listFamilyBillingTrransactionByAddressId(addresssId,pageSize+1,offset);
+			if(familyTransactionList.size() == pageSize+1){
+				response.setNextPageOffset(offset+1);
+				familyTransactionList.remove(familyTransactionList.size()-1);
+			}
+			if(familyTransactionList != null && !familyTransactionList.isEmpty()){
+
+				List<FamilyBillingTransactionDTO> transactionList = new ArrayList<FamilyBillingTransactionDTO>();
+				familyTransactionList.stream().map(r -> {
+					transactionList.add(ConvertHelper.convert(r, FamilyBillingTransactionDTO.class));
+					return null;
+				}).toArray();
+
+				response.setRequests(transactionList);
+			}
+		}
+		else{
+			LOGGER.error("can not find the family by address");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"can not find the family by address");
+		}
+
+		return response;
+	}
+
+	@Override
+	public CommunityPmBill findPmBillByAddressAndDate(FindPmBillByAddressAndDateCommand cmd) {
+		if(cmd.getAddress() == null || cmd.getAddress().equals("") || cmd.getBillDate() == null || cmd.getBillDate().equals("")){
+			LOGGER.error("propterty address or billDate paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty address or billDate paramter can not be null or empty");
+		}
+
+		CommunityPmBill communityPmBill = this.propertyMgrProvider.findPmBillByAddressAndDate(cmd.getAddress(),cmd.getBillDate());
+		
+		return communityPmBill;
+	}
+
+	@Override
+	public PmBillsDTO findFamilyBillAndPayByAddressAndTime(FindFamilyBillAndPayByAddressAndTimeCommand cmd) {
+		
+		if(cmd.getAddress() == null || cmd.getAddress().equals("") || cmd.getBillDate() == null || cmd.getBillDate().equals("")){
+			LOGGER.error("propterty address or billDate paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty address or billDate paramter can not be null or empty");
+		}
+
+		CommunityPmBill communityPmBill = this.propertyMgrProvider.findPmBillByAddressAndDate(cmd.getAddress(),cmd.getBillDate());
+		if(communityPmBill != null){
+			PmBillsDTO dto = ConvertHelper.convert(communityPmBill, PmBillsDTO.class);
+			BigDecimal totalAmount = dto.getDueAmount().add(dto.getOweAmount());
+			
+			List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(dto.getId());
+			if(payList != null && !payList.isEmpty()){
+				List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
+				for(FamilyBillingTransactions payRecord : payList){
+					payDtoList.add(ConvertHelper.convert(payRecord, FamilyBillingTransactionDTO.class));
+					totalAmount = totalAmount.add(payRecord.getChargeAmount());
+				}
+				dto.setPayList(payDtoList);
+			}
+			
+			dto.setTotalAmount(totalAmount);
+			return dto;
+		}
+		
+		return null;
 	}
 
 }

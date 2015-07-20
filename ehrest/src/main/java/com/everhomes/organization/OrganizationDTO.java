@@ -15,6 +15,9 @@ import com.everhomes.util.StringHelper;
  * <li>status：状态：参考{@link com.everhomes.organization.OrganizationStatus}</li>
  * <li>memberStatus：成员状态：参考{@link com.everhomes.organization.OrganizationMemberStatus}</li>
  * <li>description：组织描述</li>
+ * 
+ * <li>communityId：i小区id</li>
+ * <li>communityName：小区名称</li>
  * <li>
  * </ul>
  */
@@ -31,6 +34,32 @@ public class OrganizationDTO {
 	private Byte memberStatus;
 	private String description;
 	
+	//expand 
+	private Long communityId;
+	private String communityName;
+	
+	
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
+
 	public String getDescription() {
 		return description;
 	}

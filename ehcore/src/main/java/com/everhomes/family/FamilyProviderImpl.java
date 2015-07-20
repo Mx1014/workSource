@@ -670,4 +670,57 @@ public class FamilyProviderImpl implements FamilyProvider {
 		return null;
 	}
 
+	@Override
+	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByAddressId(
+			Long addresssId,int pageSize, long offset) {
+		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
+
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
+				(DSLContext context , Object object) -> {
+
+					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addresssId))
+							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
+							.limit(pageSize).offset((int)offset)
+							.fetch();
+
+					if(records != null && !records.isEmpty()){
+						records.stream().map(r -> {
+							list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
+							return null;
+						}).toArray();
+					}
+
+					return true;
+				});
+		
+		return list;
+	}
+
+	@Override
+	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByBillId(
+			Long billId) {
+		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
+
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
+				(DSLContext context , Object object) -> {
+
+					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID.eq(billId))
+							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
+							.fetch();
+
+					if(records != null && !records.isEmpty()){
+						records.stream().map(r -> {
+							list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
+							return null;
+						}).toArray();
+					}
+
+					return true;
+				});
+		
+		return list;
+	}
+
 }

@@ -20,6 +20,7 @@ import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.forum.CancelLikeTopicCommand;
 import com.everhomes.forum.DeleteCommentCommand;
@@ -1010,7 +1011,61 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	
+//web-family	
+	/**
+	 * <b>URL: /pm/listFamilyBillingTransactionByAddress
+	 * <p>根据地址id查询家庭的缴费记录
+	 */
+	@RequestMapping("listFamilyBillingTransactionByAddress")
+	@RestReturn(value=FamilyBillingTransactionDTO.class,collection=true)
+	public RestResponse listFamilyBillingTransactionByAddress(@Valid ListFamilyBillingTransactionByAddressCommand cmd) {
 
+		ListFamilyBillingTransactionByAddressCommandResponse result = propertyMgrService.listFamilyBillingTransactionByAddress(cmd);
 
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/findFamilyBillByAddressAndTime
+	 * <p>根据地址id和日期查询家庭的账单
+	 */
+	@RequestMapping("findPmBillByAddressAndDate")
+	@RestReturn(value=CommunityPmBill.class)
+	public RestResponse findPmBillByAddressAndDate(@Valid FindPmBillByAddressAndDateCommand cmd) {
+
+		CommunityPmBill bill = propertyMgrService.findPmBillByAddressAndDate(cmd);
+
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+//app
+	/**
+	 * <b>URL: /pm/findFamilyBillAndPayByAddressAndTime
+	 * <p>根据地址id和日期查询家庭的账单和缴费记录
+	 */
+	@RequestMapping("findFamilyBillAndPayByAddressAndTime")
+	@RestReturn(value=PmBillsDTO.class)
+	public RestResponse findFamilyBillAndPayByAddressAndTime(@Valid FindFamilyBillAndPayByAddressAndTimeCommand cmd) {
+
+		PmBillsDTO bill = propertyMgrService.findFamilyBillAndPayByAddressAndTime(cmd);
+
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	
+	
+	
 
 }

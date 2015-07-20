@@ -894,6 +894,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(organization != null){
 				dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode())){
+					Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(dto.getId());
+					List<OrganizationCommunityDTO> orgCommuList = this.organizationProvider.findOrganizationCommunityByCondition(condition);
+					if(orgCommuList != null && !orgCommuList.isEmpty()){
+						Community community = this.communityProvider.findCommunityById(orgCommuList.get(0).getCommunityId());
+						if(community != null){
+							dto.setCommunityId(orgCommuList.get(0).getCommunityId());
+							dto.setCommunityName(community.getName());
+						}
+					}
+				}
 			}
 		}
 		return dto;

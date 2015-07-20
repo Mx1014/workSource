@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.text.TabExpander;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -1026,7 +1028,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-		List<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)))
 				.orderBy(Tables.EH_ORGANIZATION_BILLS.DATE_STR.desc())
 				.fetch();
@@ -1035,6 +1037,21 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
 		return null;
 
+	}
+
+	@Override
+	public CommunityPmBill findPmBillByAddressAndDate(String address,
+			String billDate) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+		.where(Tables.EH_ORGANIZATION_BILLS.ADDRESS.eq(address).and(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(billDate)))
+		.fetch();
+		
+		if(records != null && !records.isEmpty())
+			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
+		return null;
 	}
 
 }
