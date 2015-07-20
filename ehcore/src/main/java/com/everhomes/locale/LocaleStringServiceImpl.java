@@ -10,7 +10,7 @@ public class LocaleStringServiceImpl implements LocaleStringService {
     private LocaleStringProvider provider;
     
     @Override
-    public String getLocalizedString(String scope, int code, String locale, String defaultValue) {
+    public String getLocalizedString(String scope, String code, String locale, String defaultValue) {
         LocaleString localeText = this.provider.find(scope, code, locale);
         if(localeText != null)
             return localeText.getText();

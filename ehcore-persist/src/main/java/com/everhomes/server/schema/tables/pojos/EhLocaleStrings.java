@@ -11,22 +11,22 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLocaleStrings implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1372495547;
+	private static final long serialVersionUID = -129444251;
 
-	private java.lang.Long    id;
-	private java.lang.String  scope;
-	private java.lang.Integer code;
-	private java.lang.String  locale;
-	private java.lang.String  text;
+	private java.lang.Long   id;
+	private java.lang.String scope;
+	private java.lang.String code;
+	private java.lang.String locale;
+	private java.lang.String text;
 
 	public EhLocaleStrings() {}
 
 	public EhLocaleStrings(
-		java.lang.Long    id,
-		java.lang.String  scope,
-		java.lang.Integer code,
-		java.lang.String  locale,
-		java.lang.String  text
+		java.lang.Long   id,
+		java.lang.String scope,
+		java.lang.String code,
+		java.lang.String locale,
+		java.lang.String text
 	) {
 		this.id = id;
 		this.scope = scope;
@@ -51,11 +51,11 @@ public class EhLocaleStrings implements java.io.Serializable {
 		this.scope = scope;
 	}
 
-	public java.lang.Integer getCode() {
+	public java.lang.String getCode() {
 		return this.code;
 	}
 
-	public void setCode(java.lang.Integer code) {
+	public void setCode(java.lang.String code) {
 		this.code = code;
 	}
 

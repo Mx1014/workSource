@@ -1,44 +1,43 @@
 package com.everhomes.organization.pm;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * 
   <ul>
-  	<li>pageAnchor : 下一条记录id</li>	
+  	<li>pageOffset : 下一条记录id</li>	
 	<li>pageSize : 页大小</li>	
-	<li>buildingName : 楼栋号</li>	
-	<li>apartmentName : 门牌号</li>
+	<li>address : 地址</li>
 	<li>dateStr : 账单日期</li>
-	<li>telephone : 业主电话</li>
+	<li>communityId : 小区Id</li>
   </ul>
  *
  */
 
 public class ListPmBillsByConditionsCommand {
 	
-	private Long pageAnchor;
+	private Long pageOffset;
 	
 	private Integer pageSize;
 	
-	private Long buildingName;
-	
-	private Long apartmentName;
+	private String address;
 	
 	private String dateStr;
 	
-	private String telephone;
-	
+	@NotNull
 	private Long communityId;
 	
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
 	
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public Long getPageOffset() {
+		return pageOffset;
 	}
-	
+
+	public void setPageOffset(Long pageOffset) {
+		this.pageOffset = pageOffset;
+	}
+
 	public Integer getPageSize() {
 		return pageSize;
 	}
@@ -47,36 +46,20 @@ public class ListPmBillsByConditionsCommand {
 		this.pageSize = pageSize;
 	}
 	
-	public Long getBuildingName() {
-		return buildingName;
+	public String getAddress() {
+		return address;
 	}
-	
-	public void setBuildingName(Long buildingName) {
-		this.buildingName = buildingName;
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
-	
-	public Long getApartmentName() {
-		return apartmentName;
-	}
-	
-	public void setApartmentName(Long apartmentName) {
-		this.apartmentName = apartmentName;
-	}
-	
+
 	public String getDateStr() {
 		return dateStr;
 	}
-	
+
 	public void setDateStr(String dateStr) {
 		this.dateStr = dateStr;
-	}
-	
-	public String getTelephone() {
-		return telephone;
-	}
-	
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
 	}
 
 	public Long getCommunityId() {

@@ -2,20 +2,32 @@ package com.everhomes.organization.pm;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * 
+ * <ul>
+ * <li>nextPageOffset : 页码</li>
+ * <li>requests : 账单列表</li>
+ * </ul>
+ *
+ */
+
 public class ListPmBillsByConditionsCommandResponse {
-	
-	private Long nextPageAnchor;
-	
+
+	private Long nextPageOffset;
+
+	@ItemType(PmBillsDTO.class)
 	private List<PmBillsDTO> requests;
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Long getNextPageOffset() {
+		return nextPageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Long nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
 
 	public List<PmBillsDTO> getRequests() {
@@ -30,7 +42,7 @@ public class ListPmBillsByConditionsCommandResponse {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
-	
+
+
 
 }

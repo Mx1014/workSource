@@ -11,7 +11,7 @@ public class LocaleTest extends TestCaseBase {
     
     @Test
     public void test() {
-        LocaleString localeString = this.localeProvider.find("general", 505, "en_US");
+        LocaleString localeString = this.localeProvider.find("general", "505", "en_US");
         if(localeString != null)
             System.out.println(localeString.getText());
     }

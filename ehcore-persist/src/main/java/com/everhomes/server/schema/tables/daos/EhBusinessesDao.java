@@ -57,7 +57,7 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	/**
 	 * Fetch records that have <code>target_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByTargetId(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByTargetId(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.TARGET_ID, values);
 	}
 
@@ -66,6 +66,20 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByBizOwnerUid(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.BIZ_OWNER_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByContact(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.CONTACT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.PHONE, values);
 	}
 
 	/**
@@ -94,20 +108,6 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByUrl(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.URL, values);
-	}
-
-	/**
-	 * Fetch records that have <code>contact IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByContact(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.CONTACT, values);
-	}
-
-	/**
-	 * Fetch records that have <code>phone IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByPhone(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.PHONE, values);
 	}
 
 	/**

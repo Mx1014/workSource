@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.organization.pm.SetPmTopicStatusCommand;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -892,6 +894,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(organization != null){
 				dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode())){
+					Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(dto.getId());
+					List<OrganizationCommunityDTO> orgCommuList = this.organizationProvider.findOrganizationCommunityByCondition(condition);
+					if(orgCommuList != null && !orgCommuList.isEmpty()){
+						Community community = this.communityProvider.findCommunityById(orgCommuList.get(0).getCommunityId());
+						if(community != null){
+							dto.setCommunityId(orgCommuList.get(0).getCommunityId());
+							dto.setCommunityName(community.getName());
+						}
+					}
+				}
 			}
 		}
 		return dto;
@@ -947,19 +960,47 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 				Organization org = this.organizationProvider.findOrganizationById(orgMember.getOrganizationId());
 				if (org != null){
+					
 					if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
 						if(org.getOrganizationType().equals(cmd.getOrganiztionType())){
-							orgs.add(ConvertHelper.convert(org, OrganizationSimpleDTO.class));
+							OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+							//物业或业委增加小区Id和小区name信息
+							if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
+								this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+							}
+							
+							orgs.add(tempSimpleOrgDTO);
 						}
 					}
-					else
-						orgs.add(ConvertHelper.convert(org, OrganizationSimpleDTO.class));
+					else{
+						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+						//物业或业委增加小区Id和小区name信息
+						if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
+							this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+						}
+						
+						orgs.add(tempSimpleOrgDTO);
+					}
+					
 				}
 				return null;
 			}).toArray();
 		}
-
+		
 		return orgs;
+	}
+
+	private void addCommunityInfoToUserRelaltedOrgsByOrgId(OrganizationSimpleDTO org) {
+		Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(org.getId());
+		List<OrganizationCommunityDTO> orgCommunityList = this.organizationProvider.findOrganizationCommunityByCondition(condition);
+		if(orgCommunityList != null && !orgCommunityList.isEmpty()){
+			Long communityId = orgCommunityList.get(0).getCommunityId();
+			Community community = this.communityProvider.findCommunityById(communityId);
+			if(community != null){
+				org.setCommunityId(communityId);
+				org.setCommunityName(community.getName());
+			}
+		}
 	}
 
 	@Override

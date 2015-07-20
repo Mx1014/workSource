@@ -1,0 +1,10 @@
+#
+# OAuth2-clientapp service configuration
+#
+logging.path: ./
+logging.file: oauth2-clientapp.log
+logging.level.: INFO
+
+server.port: 7788
+
+

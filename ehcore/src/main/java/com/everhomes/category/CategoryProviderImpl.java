@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -40,7 +41,8 @@ public class CategoryProviderImpl implements CategoryProvider {
     private DbProvider dbProvider;
 
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory") })
+            @CacheEvict(value="listDescendantCategory"),
+            @CacheEvict(value="listAllCategory") })
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -61,7 +63,8 @@ public class CategoryProviderImpl implements CategoryProvider {
 
     @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
             @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory") })
+            @CacheEvict(value="listDescendantCategory"),
+            @CacheEvict(value="listAllCategory") })
     @Override
     public void updateCategory(Category category) {
         assert(category.getId() != null);
@@ -75,7 +78,8 @@ public class CategoryProviderImpl implements CategoryProvider {
 
     @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
             @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory") })
+            @CacheEvict(value="listDescendantCategory"),
+            @CacheEvict(value="listAllCategory") })
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -85,17 +89,13 @@ public class CategoryProviderImpl implements CategoryProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, category.getId());
     }
 
-    @Caching(evict = { @CacheEvict(value="Category", key="#id"),
-            @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory") })
     @Override
     public void deleteCategoryById(long id) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
-        
-        dao.deleteById(id);
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCategories.class, id);
+        CategoryProvider self = PlatformContext.getComponent(CategoryProvider.class);
+        Category category = self.findCategoryById(id);
+        if(category != null) {
+            deleteCategory(category);
+        }
     }
 
     @Cacheable(value="Category", key="#id")
@@ -104,6 +104,21 @@ public class CategoryProviderImpl implements CategoryProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Category.class);
+    }
+    
+    @Cacheable(value = "listAllCategory")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<Category> listAllCategories() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
+        selectStep.where(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+        List<Category> result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+            );
+        
+        return result;
     }
 
     @Cacheable(value = "listChildCategory")

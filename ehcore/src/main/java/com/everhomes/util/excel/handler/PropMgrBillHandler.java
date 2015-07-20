@@ -170,6 +170,10 @@ public class PropMgrBillHandler
 			for (int rowIndex = startRow; rowIndex < rowCount ; rowIndex++) {
 
 				RowResult rowResult = (RowResult)resultList.get(rowIndex);
+				
+				if(rowResult.getB() == null)
+					continue;
+				
 				//生成账单总信息
 				CommunityPmBill bill = new CommunityPmBill();
 				bill.setAddress(rowResult.getB());

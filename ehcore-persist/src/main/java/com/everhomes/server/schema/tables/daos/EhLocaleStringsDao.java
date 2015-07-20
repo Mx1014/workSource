@@ -57,7 +57,7 @@ public class EhLocaleStringsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	/**
 	 * Fetch records that have <code>code IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLocaleStrings> fetchByCode(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLocaleStrings> fetchByCode(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS.CODE, values);
 	}
 

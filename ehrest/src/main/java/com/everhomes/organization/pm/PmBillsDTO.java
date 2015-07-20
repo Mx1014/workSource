@@ -1,5 +1,9 @@
 package com.everhomes.organization.pm;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.util.StringHelper;
 
 public class PmBillsDTO{
@@ -16,11 +20,14 @@ public class PmBillsDTO{
 	private java.math.BigDecimal oweAmount;
 	private java.lang.Long       creatorUid;
 	private java.lang.Integer    notifyCount;
-	private java.sql.Timestamp   notifyTime;
-	private java.sql.Timestamp   createTime;
+	private String   notifyTime;
+	private String   createTime;
 	
 	//expand
 	private java.math.BigDecimal totalAmount;
+	
+	@ItemType(FamilyBillingTransactionDTO.class)
+	private List<FamilyBillingTransactionDTO> payList;
 
 	public java.lang.Long getId() {
 		return id;
@@ -118,19 +125,19 @@ public class PmBillsDTO{
 		this.notifyCount = notifyCount;
 	}
 
-	public java.sql.Timestamp getNotifyTime() {
+	public String getNotifyTime() {
 		return notifyTime;
 	}
 
-	public void setNotifyTime(java.sql.Timestamp notifyTime) {
+	public void setNotifyTime(String notifyTime) {
 		this.notifyTime = notifyTime;
 	}
 
-	public java.sql.Timestamp getCreateTime() {
+	public String getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(java.sql.Timestamp createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
 
@@ -142,10 +149,19 @@ public class PmBillsDTO{
 		this.totalAmount = totalAmount;
 	}
 
+	public List<FamilyBillingTransactionDTO> getPayList() {
+		return payList;
+	}
+
+	public void setPayList(List<FamilyBillingTransactionDTO> payList) {
+		this.payList = payList;
+	}
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+	
 	
 	
 	

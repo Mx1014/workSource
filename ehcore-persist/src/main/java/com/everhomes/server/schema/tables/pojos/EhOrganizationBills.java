@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1211956234;
+	private static final long serialVersionUID = -1080857864;
 
 	private java.lang.Long       id;
 	private java.lang.Long       organizationId;
@@ -20,6 +20,9 @@ public class EhOrganizationBills implements java.io.Serializable {
 	private java.lang.String     address;
 	private java.lang.String     name;
 	private java.lang.String     dateStr;
+	private java.sql.Date        startDate;
+	private java.sql.Date        endDate;
+	private java.sql.Date        payDate;
 	private java.lang.String     description;
 	private java.math.BigDecimal dueAmount;
 	private java.math.BigDecimal oweAmount;
@@ -38,6 +41,9 @@ public class EhOrganizationBills implements java.io.Serializable {
 		java.lang.String     address,
 		java.lang.String     name,
 		java.lang.String     dateStr,
+		java.sql.Date        startDate,
+		java.sql.Date        endDate,
+		java.sql.Date        payDate,
 		java.lang.String     description,
 		java.math.BigDecimal dueAmount,
 		java.math.BigDecimal oweAmount,
@@ -53,6 +59,9 @@ public class EhOrganizationBills implements java.io.Serializable {
 		this.address = address;
 		this.name = name;
 		this.dateStr = dateStr;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.payDate = payDate;
 		this.description = description;
 		this.dueAmount = dueAmount;
 		this.oweAmount = oweAmount;
@@ -116,6 +125,30 @@ public class EhOrganizationBills implements java.io.Serializable {
 
 	public void setDateStr(java.lang.String dateStr) {
 		this.dateStr = dateStr;
+	}
+
+	public java.sql.Date getStartDate() {
+		return this.startDate;
+	}
+
+	public void setStartDate(java.sql.Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public java.sql.Date getEndDate() {
+		return this.endDate;
+	}
+
+	public void setEndDate(java.sql.Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public java.sql.Date getPayDate() {
+		return this.payDate;
+	}
+
+	public void setPayDate(java.sql.Date payDate) {
+		this.payDate = payDate;
 	}
 
 	public java.lang.String getDescription() {

@@ -11,13 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1399972440;
+	private static final long serialVersionUID = -1389520256;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
 	private java.lang.Integer  namespaceId;
-	private java.lang.Long     categoryId;
-	private java.lang.String   categoryPath;
 	private java.lang.String   subject;
 	private java.lang.String   description;
 	private java.lang.String   posterUri;
@@ -57,8 +55,6 @@ public class EhActivities implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.String   uuid,
 		java.lang.Integer  namespaceId,
-		java.lang.Long     categoryId,
-		java.lang.String   categoryPath,
 		java.lang.String   subject,
 		java.lang.String   description,
 		java.lang.String   posterUri,
@@ -95,8 +91,6 @@ public class EhActivities implements java.io.Serializable {
 		this.id = id;
 		this.uuid = uuid;
 		this.namespaceId = namespaceId;
-		this.categoryId = categoryId;
-		this.categoryPath = categoryPath;
 		this.subject = subject;
 		this.description = description;
 		this.posterUri = posterUri;
@@ -153,22 +147,6 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
-	}
-
-	public java.lang.Long getCategoryId() {
-		return this.categoryId;
-	}
-
-	public void setCategoryId(java.lang.Long categoryId) {
-		this.categoryId = categoryId;
-	}
-
-	public java.lang.String getCategoryPath() {
-		return this.categoryPath;
-	}
-
-	public void setCategoryPath(java.lang.String categoryPath) {
-		this.categoryPath = categoryPath;
 	}
 
 	public java.lang.String getSubject() {

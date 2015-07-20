@@ -90,6 +90,27 @@ public class EhOrganizationBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
+	 * Fetch records that have <code>start_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByStartDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.START_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>end_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByEndDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.END_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>pay_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByPayDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS.PAY_DATE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>description IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBills> fetchByDescription(java.lang.String... values) {
