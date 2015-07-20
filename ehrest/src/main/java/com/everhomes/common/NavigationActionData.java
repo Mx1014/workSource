@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>entityTag: 帖子标签</li>
  * </ul>
  */
-public class LaunchPadNavigationActionData implements Serializable{
+public class NavigationActionData implements Serializable{
     private static final long serialVersionUID = -8762650365959360709L;
     //"itemLocation":"/home/Pm","layoutName":"PmLayout","callPhones":"[15875300001,15875300002]","title":"xx"} 
     private String itemLocation;

@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>topicId: 帖子ID</li>
  * </ul>
  */
-public class LaunchPadTopicDetailActionData implements Serializable{
+public class PostDetailActionData implements Serializable{
     private static final long serialVersionUID = 7502654058025166257L;
     //{"forumId": 1,"topicId":1}  
     private Long forumId;

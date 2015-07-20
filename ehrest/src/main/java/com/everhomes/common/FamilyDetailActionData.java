@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>inviterId: 邀请人用户ID，有值时认为是邀请的，调邀请接口</li>
  * </ul>
  */
-public class LaunchPadFamilyDetailActionData implements Serializable{
+public class FamilyDetailActionData implements Serializable{
     private static final long serialVersionUID = -5594052479250042128L;
     //{"familyId": 1,"inviterId":1} 
     private Long familyId;

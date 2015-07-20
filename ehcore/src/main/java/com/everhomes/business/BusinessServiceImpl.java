@@ -2,6 +2,7 @@
 package com.everhomes.business;
 
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,13 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 
@@ -36,6 +41,12 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
+        if(cmd.getTargetId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid paramter targetId,targetId is null");
+        if(cmd.getBizOwnerUid() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid paramter ownerUid,ownerUid is null");
         if(cmd.getName() == null || cmd.getName().trim().equals(""))
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter name,name is null");
@@ -45,6 +56,24 @@ public class BusinessServiceImpl implements BusinessService {
         if(cmd.getScopes() == null || cmd.getScopes().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter scopes,scopes is null");
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        
+        Business business = ConvertHelper.convert(cmd, Business.class);
+        business.setCreatorUid(userId);
+        business.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.dbProvider.execute((TransactionStatus status) -> {
+            this.businessProvider.createBusiness(business);
+            cmd.getScopes().forEach(r ->{
+                this.businessProvider.createBusinessVisibleScope(ConvertHelper.convert(r,BusinessVisibleScope.class));
+            });
+            cmd.getCategroies().forEach(r ->{
+                this.businessProvider.createBusinessCategory(ConvertHelper.convert(r, BusinessCategory.class));
+            });
+            return null;
+        });
+        
+        
     }
 
     @Override
@@ -84,7 +113,16 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public void deleteBusiness(DeleteBusinessCommand cmd) {
-        // TODO Auto-generated method stub
+        if(cmd.getId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid paramter id null,categoryId is null");
+        Business business = this.businessProvider.findBusinessById(cmd.getId());
+        if(business == null){
+            LOGGER.error("Business is not exists.id=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");
+        }
+        this.businessProvider.deleteBusiness(business);
         
     }
 
@@ -95,14 +133,18 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public Business findBusinessById(long id) {
-        // TODO Auto-generated method stub
+    public BusinessDTO findBusinessById(Long id) {
+        if(id == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid paramter id null,categoryId is null");
+        Business business = this.businessProvider.findBusinessById(id);
+        if(business != null)
+            return ConvertHelper.convert(business,BusinessDTO.class);
         return null;
     }
 
     @Override
-    public List<BusinessDTO> getBusinessesByScope(
-            GetBusinessesByScopeCommand cmd) {
+    public List<BusinessDTO> getBusinessesByScope(GetBusinessesByScopeCommand cmd) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -9,14 +9,15 @@ import com.everhomes.util.StringHelper;
  * <ul>actionType为GROUP_DETAILS跳转到圈详情、可点击加入圈（可能含邀请人）
  * <li>id: 圈ID</li>
  * <li>inviterId: 邀请人用户ID，有值时认为是邀请的，调邀请接口</li>
+ * <li>privateFlag: group公有、私有标记，0-公有、1-私有</li>
  * </ul>
  */
-public class LaunchPadGroupDetailActionData implements Serializable{
+public class GroupDetailActionData implements Serializable{
     private static final long serialVersionUID = 4265129665290482898L;
-    //{"groupId": 1,"inviterId":1} 
+    //{"groupId": 1,"inviterId":1,"privateFlag":1} 
     private Long groupId;
     private Long inviterId;
-    
+    private Byte privateFlag;
     public Long getGroupId() {
         return groupId;
     }
@@ -31,6 +32,14 @@ public class LaunchPadGroupDetailActionData implements Serializable{
 
     public void setInviterId(Long inviterId) {
         this.inviterId = inviterId;
+    }
+
+    public Byte getPrivateFlag() {
+        return privateFlag;
+    }
+
+    public void setPrivateFlag(Byte privateFlag) {
+        this.privateFlag = privateFlag;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.everhomes.business;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,9 +13,14 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhBusinessVisibleScopes;
+import com.everhomes.server.schema.tables.daos.EhBusinessCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhBusinessVisibleScopesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessesDao;
+import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
 import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.util.ConvertHelper;
 
@@ -23,7 +29,8 @@ import com.everhomes.util.ConvertHelper;
 public class BusinessProviderImpl implements BusinessProvider {
 	@Autowired
 	private DbProvider dbProvider;
-
+	@Autowired
+	private SequenceProvider sequenceProvider;
     @Override
     public void createBusiness(Business business) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -60,6 +67,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusiness(business);
         
     }
+    
     @Override
     public Business findBusinessById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -103,6 +111,106 @@ public class BusinessProviderImpl implements BusinessProvider {
             return ConvertHelper.convert(r, BusinessVisibleScope.class);
         });
         return businessVisibleScopes;
+    }
+    
+    @Override
+    public void createBusinessVisibleScope(BusinessVisibleScope businessVisibleScope) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessVisibleScopes.class));
+        businessVisibleScope.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessVisibleScopesDao dao = new EhBusinessVisibleScopesDao(context.configuration()); 
+        dao.insert(businessVisibleScope); 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessVisibleScopes.class, null); 
+    }
+    
+    @Override
+    public void updateBusinessVisibleScope(BusinessVisibleScope businessVisibleScope) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessVisibleScopesDao dao = new EhBusinessVisibleScopesDao(context.configuration()); 
+        dao.update(businessVisibleScope);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
+        
+    }
+    
+    @Override
+    public void deleteBusinessVisibleScope(BusinessVisibleScope businessVisibleScope) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessVisibleScopesDao dao = new EhBusinessVisibleScopesDao(context.configuration()); 
+        dao.delete(businessVisibleScope);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
+        
+    }
+    
+    @Override
+    public void deleteBusinessVisibleScope(long id) {
+        BusinessProvider self = PlatformContext.getComponent(BusinessProvider.class);
+        BusinessVisibleScope businessVisibleScope = self.findBusinessVisibleScopeById(id);
+        if(businessVisibleScope != null)
+            self.deleteBusinessVisibleScope(businessVisibleScope);
+        
+    }
+    
+    @Override
+    public BusinessVisibleScope findBusinessVisibleScopeById(long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessVisibleScopesDao dao = new EhBusinessVisibleScopesDao(context.configuration()); 
+        return ConvertHelper.convert(dao.findById(id),BusinessVisibleScope.class);
+    }
+    
+    @Override
+    public void createBusinessCategory(BusinessCategory businessCategory) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessCategories.class));
+        businessCategory.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
+        dao.insert(businessCategory); 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessCategories.class, null); 
+        
+    }
+    
+    @Override
+    public void updateBusinessCategory(BusinessCategory businessCategory) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
+        dao.update(businessCategory);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
+        
+    }
+    
+    @Override
+    public void deleteBusinessCategory(BusinessCategory businessCategory) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
+        dao.delete(businessCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
+        
+    }
+    
+    @Override
+    public void deleteBusinessCategory(long id) {
+        BusinessProvider self = PlatformContext.getComponent(BusinessProvider.class);
+        BusinessCategory businessCategory = self.findBusinessCategoryById(id);
+        if(businessCategory != null)
+            self.deleteBusinessCategory(businessCategory);
+        
+    }
+    
+    @Override
+    public BusinessCategory findBusinessCategoryById(long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
+        return ConvertHelper.convert(dao.findById(id),BusinessCategory.class);
     }
     
 

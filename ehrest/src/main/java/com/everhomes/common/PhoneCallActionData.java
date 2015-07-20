@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>phone: 电话号码/li>
  * </ul>
  */
-public class LaunchPadPhoneCallActionData implements Serializable{
+public class PhoneCallActionData implements Serializable{
 
     private static final long serialVersionUID = -5364366676212368720L;
     //{"phone": "15875301110"}  

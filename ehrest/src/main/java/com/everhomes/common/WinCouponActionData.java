@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -6,16 +6,15 @@ import com.everhomes.util.StringHelper;
 
 
 /**
- * <ul>actionType为USE COUPON时跳转到优惠券详情并使用优惠券（参数待细化）
- * <li>couponId: 优惠券id</li>
+ * <ul>actionType为WIN_COUPON跳转到优惠券详情并获取优惠券（参数待细化）
+ * <li>couponId: 优惠券ID</li>
  * </ul>
  */
-public class LaunchPadUseCouponActionData implements Serializable{
-
-    private static final long serialVersionUID = -1513899386773142335L;
-    //{"couponId": 1}  
+public class WinCouponActionData implements Serializable{
+    private static final long serialVersionUID = -1029552301306256166L;
+    //{"couponId": 1} 
     private Long couponId;
-    
+
     public Long getCouponId() {
         return couponId;
     }

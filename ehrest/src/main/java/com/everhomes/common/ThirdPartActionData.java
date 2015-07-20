@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>url: 左邻url</li>
  * </ul>
  */
-public class LaunchPadThirdPartActionData implements Serializable{
+public class ThirdPartActionData implements Serializable{
 
     private static final long serialVersionUID = 5331800144156878448L;
     //{"url": "http://www.baidu.com"}  

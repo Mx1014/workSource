@@ -1,19 +1,19 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
+
 
 import com.everhomes.util.StringHelper;
 
 
 /**
- * <ul>actionType为zuolin url时点击item需要的参数
+ * <ul>actionType为BIZ_DETAILS时跳转到商家详情
  * <li>url: 左邻url</li>
  * </ul>
  */
-public class LaunchPadZuoLinActionData implements Serializable{
-
-    private static final long serialVersionUID = -22341699932739557L;
-    //{"url": "http://www.zuolin.com"}  
+public class BizDetailActionData implements Serializable{
+    private static final long serialVersionUID = 3538472620854484985L;
+    //{"url": "http://www.baidu.com"}  
     private String url;
     
     public String getUrl() {

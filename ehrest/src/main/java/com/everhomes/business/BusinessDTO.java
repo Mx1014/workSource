@@ -9,6 +9,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>targetType: 商家来源类型</li>
+ * <li>targetId: 商家原始id</li>
+ * <li>bizOwnerUid: 商家拥有者id</li>
  * <li>name: 商家名字</li>
  * <li>displayName: 商家显示名</li>
  * <li>logoUri: 商家logo/li>
@@ -29,6 +32,9 @@ import com.everhomes.util.StringHelper;
 
 public class BusinessDTO{
     private Long     id;
+    private Byte     targetType;
+    private Long     targetId;
+    private Long     bizOwnerUid;
     private String   name;
     private String   displayName;
     private String   logoUri;
@@ -53,6 +59,30 @@ public class BusinessDTO{
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Byte getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(Byte targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public Long getBizOwnerUid() {
+        return bizOwnerUid;
+    }
+
+    public void setBizOwnerUid(Long bizOwnerUid) {
+        this.bizOwnerUid = bizOwnerUid;
     }
 
     public String getName() {

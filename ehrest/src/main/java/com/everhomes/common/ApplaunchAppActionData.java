@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -12,10 +12,10 @@ import com.everhomes.util.StringHelper;
  * <li>andriodEmbedded_json: Android平台打开应用需要的参数/li>
  * </ul>
  */
-public class LaunchPadAppOpenAppActionData implements Serializable{
+public class ApplaunchAppActionData implements Serializable{
 
     private static final long serialVersionUID = -5364366676212368720L;
-    //{"iosEmbedded_json":{"appUrlScheme":"mqq:open"},"androidEmbedded_json":{"appUrlScheme":""}}
+    //{"iosEmbedded_json":{"package":"mqq:open","download":"www.xx.com"},"androidEmbedded_json":{"package":"mqq:open","download":"www.xx.com"}}
     private String iosEmbedded_json;
     private String androidEmbedded_json;
     

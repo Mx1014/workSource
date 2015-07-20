@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -14,14 +14,15 @@ import com.everhomes.util.StringHelper;
  * <li>entityTag: 普通用户/物业/业委等对应小区ID、居委/公安等对应片区ID</li> 
  * </ul>
  */
-public class LaunchPadTopicByCategoryActionData implements Serializable{
+public class PostByCategoryActionData implements Serializable{
 
     private static final long serialVersionUID = 882096233068114981L;
-    //{"contentCategory":9,"actionCategory":3092,"forumId":1,"entityTag":"PM"} 
+    //{"contentCategory":9,"actionCategory":3092,"forumId":1,"entityTag":"PM","displayName":"投诉"} 
     private Long forumId;
     private Long actionCategory;
     private Long contentCategory;
     private String entityTag;
+    private String displayName;
 
 
     public Long getForumId() {
@@ -54,6 +55,14 @@ public class LaunchPadTopicByCategoryActionData implements Serializable{
 
     public void setEntityTag(String entityTag) {
         this.entityTag = entityTag;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override

@@ -27,7 +27,7 @@ import com.everhomes.util.EtagHelper;
 @RequestMapping("/launchpad")
 public class LaunchPadController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadController.class);
-    private static final String LAUNCHPAD_ITEM_VERSION = "launchpad.item.version";
+    private static final String MARKETDATA_ITEM_VERSION = "marketdata.item.version";
     
     @Autowired
     private LaunchPadService launchPadService;
@@ -45,7 +45,7 @@ public class LaunchPadController extends ControllerBase {
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
         RestResponse resp =  new RestResponse();
         if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
-            int hashCode = configurationProvider.getIntValue(LAUNCHPAD_ITEM_VERSION, 0);
+            int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
             if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
                 resp.setResponseObject(commandResponse);
             }

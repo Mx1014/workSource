@@ -1,4 +1,4 @@
-package com.everhomes.launchpad;
+package com.everhomes.common;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>androidUrl: Android下载APP的URL</li>
  * </ul>
  */
-public class LaunchPadDownAppActionData implements Serializable{
+public class DownAppActionData implements Serializable{
 
     private static final long serialVersionUID = -1378233470078843784L;
     //{"iosUrl":"https://appsto.re/cn/2Q7A7.i","androidUrl":""}
