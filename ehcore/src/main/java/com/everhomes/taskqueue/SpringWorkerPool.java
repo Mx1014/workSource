@@ -27,7 +27,7 @@ public class SpringWorkerPool extends WorkerPool {
     @PostConstruct
     public void init() {
         logger.info("Start a new thread for SpringWorkerPool");
-        new Thread(this).start();
+        // new Thread(this).start();
     }
 
     @PreDestroy
