@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLocaleStrings extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLocaleStringsRecord> {
 
-	private static final long serialVersionUID = 620805383;
+	private static final long serialVersionUID = -533097288;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_locale_strings</code>
@@ -39,7 +39,7 @@ public class EhLocaleStrings extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_locale_strings.code</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLocaleStringsRecord, java.lang.Integer> CODE = createField("code", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLocaleStringsRecord, java.lang.String> CODE = createField("code", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_locale_strings.locale</code>.

@@ -32,7 +32,7 @@ public class LocaleStringProviderImpl implements LocaleStringProvider {
     
     @Cacheable(value="LocaleStringFind", key="{#scope, #code, #locale}")
     @Override
-    public LocaleString find(String scope, int code, String locale) {
+    public LocaleString find(String scope, String code, String locale) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhLocaleStringsRecord record = (EhLocaleStringsRecord)context.select().from(Tables.EH_LOCALE_STRINGS)
             .where(Tables.EH_LOCALE_STRINGS.SCOPE.like(scope))

@@ -254,6 +254,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_oauth2_codes
+	 */
+	public static final com.everhomes.server.schema.tables.EhOauth2Codes EH_OAUTH2_CODES = com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES;
+
+	/**
+	 * The table ehcore.eh_oauth2_tokens
+	 */
+	public static final com.everhomes.server.schema.tables.EhOauth2Tokens EH_OAUTH2_TOKENS = com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS;
+
+	/**
 	 * The table ehcore.eh_organizations
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizations EH_ORGANIZATIONS = com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS;

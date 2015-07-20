@@ -91,7 +91,7 @@ DROP TABLE IF EXISTS `eh_locale_strings`;
 CREATE TABLE `eh_locale_strings`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `scope` VARCHAR(64),
-    `code` INTEGER,
+    `code` VARCHAR(64),
     `locale` VARCHAR(16),
     `text` TEXT,
     
@@ -2264,6 +2264,50 @@ CREATE TABLE `eh_business_categories` (
 	UNIQUE `u_eh_bussiness_category_id`(`owner_id`, `category_id`),
     FOREIGN KEY `fk_eh_bussiness_category`(`owner_id`) REFERENCES `eh_businesses`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_bussiness_owner_id`(`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global sharding group
+#
+DROP TABLE IF EXISTS `eh_oauth2_codes`;
+CREATE TABLE `eh_oauth2_codes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `code` VARCHAR(128) NOT NULL COMMENT 'authorization code issued to requestor',
+    `app_id` BIGINT NOT NULL COMMENT 'corresponding to client_id in OAuth2',
+    `grantor_uid` BIGINT NOT NULL COMMENT 'user who authorizes the grant',
+    `expiration_time` DATETIME NOT NULL COMMENT 'a successful acquire of access token by the code should immediately expires it',
+    `redirect_uri` VARCHAR(256) COMMENT 'original redirect URI in OAuth2 authorization request',
+    `scope` VARCHAR(256) COMMENT 'space-delimited scope tokens per RFC 6749',
+
+    `create_time` DATETIME,
+    `modify_time` DATETIME,
+
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_ocode_code`(`code`),
+    INDEX `i_eh_ocode_expiration_time`(`expiration_time`),
+    INDEX `i_eh_ocode_create_time`(`create_time`),
+    INDEX `i_eh_ocode_modify_time`(`modify_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global sharding group
+#
+DROP TABLE IF EXISTS `eh_oauth2_tokens`;
+CREATE TABLE `eh_oauth2_tokens` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `token_string` VARCHAR(128) NOT NULL COMMENT 'token string issued to requestor',
+    `app_id` BIGINT NOT NULL COMMENT 'corresponding to client_id in OAuth2',
+    `grantor_uid` BIGINT NOT NULL COMMENT 'user who authorizes the grant',
+    `expiration_time` DATETIME NOT NULL COMMENT 'a successful acquire of access token by the code should immediately expires it',
+    `scope` VARCHAR(256) COMMENT 'space-delimited scope tokens per RFC 6749',
+
+    `type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: access token, 1: refresh token',
+
+    `create_time` DATETIME,
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_otoken_token_string`(`token_string`),
+    INDEX `i_eh_otoken_expiration_time`(`expiration_time`),
+    INDEX `i_eh_otoken_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;

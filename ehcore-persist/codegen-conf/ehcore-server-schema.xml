@@ -50,7 +50,8 @@
         eh_content_server_resources | eh_content_server |
         eh_launch_pad_layouts | eh_launch_pad_items | eh_recommendations | eh_recommendation_configs |
         eh_links | eh_address_messages | eh_user_scores |
-        eh_businesses | eh_business_visible_scopes | eh_business_categories
+        eh_businesses | eh_business_visible_scopes | eh_business_categories |
+        eh_oauth2_codes | eh_oauth2_tokens
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

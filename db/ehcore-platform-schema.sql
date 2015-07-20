@@ -162,6 +162,7 @@ CREATE TABLE `eh_acl_role_assignments` (
 DROP TABLE IF EXISTS `eh_apps`;
 CREATE TABLE `eh_apps` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `creator_uid` BIGINT,
     `app_key` VARCHAR(64),
     `secret_key` VARCHAR(1024),
     `name` VARCHAR(128) NOT NULL,
@@ -174,6 +175,20 @@ CREATE TABLE `eh_apps` (
     UNIQUE `u_eh_app_reg_name`(`name`),
     INDEX `i_eh_app_reg_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_app_profiles`;
+CREATE TABLE `eh_app_profiles` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `app_id` BIGINT NOT NULL COMMENT 'owner app id',
+    `item_group` VARCHAR(32) COMMENT 'for profile grouping purpose',
+    `item_name` VARCHAR(32),
+    `item_value` TEXT,
+    `item_tag` VARCHAR(32) COMMENT 'for profile value tagging purpose',
+
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_appprof_app_id`(`app_id`) REFERENCES `eh_apps`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_appprof_app_id_group`(`app_id`, `item_group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_sequences`;
 CREATE TABLE `eh_sequences` (

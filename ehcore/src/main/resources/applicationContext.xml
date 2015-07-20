@@ -15,11 +15,11 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**" />
-            <bean class="com.everhomes.db.WebRequestDbInterceptor" />
+            <bean class="com.everhomes.controller.WebRequestInterceptor" />
         </mvc:interceptor>
         <mvc:interceptor>
             <mvc:mapping path="/**" />
-            <bean class="com.everhomes.controller.WebRequestInterceptor" />
+            <bean class="com.everhomes.oauth2.WebRequestOAuth2Interceptor" />
         </mvc:interceptor>
     </mvc:interceptors> 
     

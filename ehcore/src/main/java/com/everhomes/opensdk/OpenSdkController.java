@@ -1,0 +1,42 @@
+package com.everhomes.opensdk;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.oauth2.AccessToken;
+import com.everhomes.oauth2.OAuth2AuthenticationType;
+import com.everhomes.oauth2.OAuth2UserContext;
+import com.everhomes.oauth2.RequireOAuth2Authentication;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserInfo;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
+
+@RequireAuthentication(false)
+@RequireOAuth2Authentication(OAuth2AuthenticationType.ACCESS_TOKEN)
+@RestController
+@RequestMapping("/opensdk")
+public class OpenSdkController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenSdkController.class);
+
+    @Autowired
+    private UserService userService;
+
+    @RequestMapping("getUserInfo")
+    @RestReturn(value=UserInfo.class)
+    public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) {
+        AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
+
+        UserInfo info = this.userService.getUserInfo(accessToken.getGrantorUid());
+
+        return new RestResponse(info);
+    }
+}
