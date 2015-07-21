@@ -2,6 +2,8 @@ package com.everhomes.organization.pm;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 
 
@@ -10,14 +12,14 @@ import com.everhomes.discover.ItemType;
  * 	<li>insertList : 待插入账单列表</li>
  *	<li>updateList : 待更新账单列表</li>
  *	<li>deleteList : 待删除账单列表</li>
- *	<li>communityId : 小区id</li>
+ *	<li>organizationId : 组织id</li>
  *</ul>
  *
  */
 public class UpdatePmBillsCommand {
 	
-	private Long communityId;
-	
+	@NotNull
+	private Long organizationId;
 
 	@ItemType(PmBillsDTO.class)
 	private List<PmBillsDTO> insertList;
@@ -28,12 +30,12 @@ public class UpdatePmBillsCommand {
 	@ItemType(PmBillsDTO.class)
 	private List<PmBillsDTO> deleteList;
 	
-	public Long getCommunityId() {
-		return communityId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
-	
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public List<PmBillsDTO> getInsertList() {

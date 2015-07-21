@@ -11,11 +11,17 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>oweAmount : 总欠费</li>
  *	<li>billDescription : 账单描述</li>
+ *	<li>billId : 账单id</li>
+ *
  *	<li>address : 家庭地址</li>
  *	<li>addressId : 家庭地址Id</li>
+ *
  *	<li>lastPayTime : 最后缴费时间</li>
+ *	<li>lastBillingTransactionId : 最后缴费记录id</li>
+ *
  *	<li>ownerName : 业主姓名</li>
  *	<li>telephone : 业主联系电话</li>
+ *·<li>ownerId : 业主Id</li>
  *</ul>
  *
  */

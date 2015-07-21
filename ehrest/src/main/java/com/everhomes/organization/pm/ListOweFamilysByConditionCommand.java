@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *	<li>pageSize : 页大小</li>
  *	<li>address : 地址</li>
  *	<li>lastPayTime : 最后的缴费日期</li>
- *	<li>communityId : 小区Id</li>
+ *	<li>organizationId : 组织id</li>
  *</ul>
  *
  */
@@ -23,7 +23,7 @@ public class ListOweFamilysByConditionCommand {
 	private String lastPayTime;
 	
 	@NotNull
-	private Long communityId;
+	private Long organizationId;
 
 	public Long getPageOffset() {
 		return pageOffset;
@@ -57,12 +57,12 @@ public class ListOweFamilysByConditionCommand {
 		this.lastPayTime = lastPayTime;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

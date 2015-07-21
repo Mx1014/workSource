@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>address: 家庭所在地址详情</li>
  * <li>addressId: 地址信息</li>
  * <li>livingStatus: 地址状态, {@link com.everhomes.pm.PmMemberStatus}</li>
+ * <li>owed: 是否欠费 , {@link }</li>
  * </ul>
  */
 public class PropFamilyDTO {
@@ -20,11 +21,22 @@ public class PropFamilyDTO {
     private Long addressId;
     private String address;
     private Byte livingStatus;
- 
+    
+    private Byte owed;
+    
     public PropFamilyDTO () {
     }
+    
+    public Byte getOwed() {
+		return owed;
+	}
 
-    public Long getId() {
+	public void setOwed(Byte owed) {
+		this.owed = owed;
+	}
+
+
+	public Long getId() {
         return id;
     }
 

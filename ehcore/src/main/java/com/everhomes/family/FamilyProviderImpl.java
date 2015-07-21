@@ -49,6 +49,10 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFamilyBillingAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhFamilyBillingTransactionsDao;
+import com.everhomes.server.schema.tables.pojos.EhFamilyBillingAccounts;
+import com.everhomes.server.schema.tables.pojos.EhFamilyBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.user.IdentifierType;
@@ -613,7 +617,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	}
 
 	@Override
-	public BigDecimal familyTransactionBillingAmountByBillId(Long billId){
+	public BigDecimal countFamilyTransactionBillingAmountByBillId(Long billId){
 		List<BigDecimal> list = new ArrayList<BigDecimal>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
 				(DSLContext context , Object obj) -> {
@@ -663,7 +667,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 					return true;
 				});
-		
+
 		if(list != null && !list.isEmpty()){
 			return list.get(0);
 		}
@@ -693,7 +697,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 					return true;
 				});
-		
+
 		return list;
 	}
 
@@ -719,8 +723,62 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 					return true;
 				});
-		
+
 		return list;
 	}
+
+	@Override
+	public FamilyBillingAccount findFamilyBillingAccountByOwnerId(Long ownerId) {
+
+		List<FamilyBillingAccount> list = new ArrayList<FamilyBillingAccount>();
+
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+				(DSLContext context, Object object) -> {
+					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_ACCOUNTS)
+							.where(Tables.EH_FAMILY_BILLING_ACCOUNTS.OWNER_ID.eq(ownerId))
+							.fetch();
+
+					if(records != null && !records.isEmpty()){
+						list.add(ConvertHelper.convert(records.get(0),FamilyBillingAccount.class));
+					}
+
+					return true;
+				});
+
+		if(list != null && !list.isEmpty()){
+			return list.get(0);
+		}
+		return null;
+	}
+
+	@Override
+	public void createFamilyBillingAccount(FamilyBillingAccount fAccount) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class));
+
+		EhFamilyBillingAccountsDao dao = new EhFamilyBillingAccountsDao(context.configuration());
+		dao.insert(ConvertHelper.convert(fAccount, EhFamilyBillingAccounts.class));
+	}
+
+	@Override
+	public void createFamilyBillingTransaction(
+			FamilyBillingTransactions familyTx) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class));
+
+		EhFamilyBillingTransactionsDao dao = new EhFamilyBillingTransactionsDao(context.configuration());
+		dao.insert(ConvertHelper.convert(familyTx, EhFamilyBillingTransactions.class));
+
+	}
+
+	@Override
+	public void updateFamilyBillingAccount(FamilyBillingAccount fAccount) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class));
+
+		EhFamilyBillingAccountsDao dao = new EhFamilyBillingAccountsDao(context.configuration());
+		dao.update(ConvertHelper.convert(fAccount, EhFamilyBillingAccounts.class));
+
+	}
+
+
 
 }
