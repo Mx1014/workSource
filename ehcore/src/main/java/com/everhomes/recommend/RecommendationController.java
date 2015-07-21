@@ -25,6 +25,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.search.GroupSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -67,7 +68,7 @@ public class RecommendationController extends ControllerBase{
     RecommendationProvider recommendationProvider;
     
     @Autowired
-    CommunitySearcher searcher;
+    GroupSearcher searcher;
    
     
     /**
@@ -169,22 +170,23 @@ public class RecommendationController extends ControllerBase{
 //      recommendationProvider.createRecommendation(r);
 //      
       //UserInfo user = userService.getUserInfo(userId);
-      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
-      if(null != profile) {
-          profile.setItemValue(Long.toString(System.currentTimeMillis()));
-          userActivityProvider.updateUserProfile(profile);
-      } else {
-          UserProfile p2 = new UserProfile();
-          p2.setItemName(UserProfileContstant.RecommendName);
-          p2.setItemKind((byte)0);
-          p2.setItemValue(Long.toString(System.currentTimeMillis()));
-          p2.setOwnerId(userId);
-          userActivityProvider.addUserProfile(p2);
-          //userActivityProvider.updateUserProfile(userProfile);
-          }
+//      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
+//      if(null != profile) {
+//          profile.setItemValue(Long.toString(System.currentTimeMillis()));
+//          userActivityProvider.updateUserProfile(profile);
+//      } else {
+//          UserProfile p2 = new UserProfile();
+//          p2.setItemName(UserProfileContstant.RecommendName);
+//          p2.setItemKind((byte)0);
+//          p2.setItemValue(Long.toString(System.currentTimeMillis()));
+//          p2.setOwnerId(userId);
+//          userActivityProvider.addUserProfile(p2);
+//          }
       
       //recommendationService.communityNotify(4l, 6l, 7l);
-      searcher.syncDb();
+      //searcher.syncDb();
+      searcher.syncFromDb();
+      
       
       RestResponse res = new RestResponse();
       res.setErrorCode(ErrorCodes.SUCCESS);
