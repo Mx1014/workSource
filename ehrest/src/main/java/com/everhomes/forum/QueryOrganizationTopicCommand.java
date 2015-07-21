@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>organizaitonId: 机构ID</li>
+ * <li>organizationId: 机构ID</li>
  * <li>contentCategory: 内容类型ID，{@link com.everhomes.category.CategoryConstants}</li>
  * <li>actionCategory: 动作类型ID，对应以前的serviceType</li>
  * <li>pageAnchor: 本页开始的锚点</li>
@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
-    private Long organizaitonId;
+    private Long organizationId;
     private Long contentCategory;
     private Long actionCategory;
     private Long pageAnchor;
@@ -22,12 +22,12 @@ public class QueryOrganizationTopicCommand {
     public QueryOrganizationTopicCommand() {
     }
 
-    public Long getOrganizaitonId() {
-        return organizaitonId;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setOrganizaitonId(Long organizaitonId) {
-        this.organizaitonId = organizaitonId;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Long getContentCategory() {
