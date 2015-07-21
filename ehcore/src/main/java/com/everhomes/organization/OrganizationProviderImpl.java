@@ -31,10 +31,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
@@ -639,4 +643,60 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, OrganizationTask.class, task.getId());
     }
+
+	@Override
+	public OrganizationBillingAccount findOrganizationBillingAccount(
+			Long organizationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLING_ACCOUNTS)
+		.where(Tables.EH_ORGANIZATION_BILLING_ACCOUNTS.OWNER_ID.eq(organizationId))
+		.fetch();
+		
+		if(records != null && !records.isEmpty()){
+			return ConvertHelper.convert(records.get(0), OrganizationBillingAccount.class);
+		}
+		
+		return null;
+	}
+
+	@Override
+	public void createOrganizationBillingAccount(OrganizationBillingAccount oAccount) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		EhOrganizationBillingAccountsDao dao = new EhOrganizationBillingAccountsDao(context.configuration());
+		dao.insert(ConvertHelper.convert(oAccount,EhOrganizationBillingAccounts.class));
+		
+	}
+
+	@Override
+	public void createOrganizationBillingTransaction(OrganizationBillingTransactions orgTx) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationBillingTransactionsDao dao = new EhOrganizationBillingTransactionsDao();
+		dao.insert(ConvertHelper.convert(orgTx, EhOrganizationBillingTransactions.class));
+	}
+
+	@Override
+	public void updateOrganizationBillingAccount(OrganizationBillingAccount oAccount) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationBillingAccountsDao dao = new EhOrganizationBillingAccountsDao(context.configuration());
+		dao.update(ConvertHelper.convert(oAccount,EhOrganizationBillingAccounts.class));
+	}
+
+
+	@Override
+	public List<Organization> findOrganizationByCondition(Condition condition) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATIONS).where(condition).fetch();
+		
+		List<Organization> list = new ArrayList<Organization>();
+		if(records != null && !records.isEmpty()){
+			records.stream().map(r -> {
+				list.add(ConvertHelper.convert(r, Organization.class));
+				return null;
+			}).toArray();
+		}
+		
+		return list;
+	}
 }

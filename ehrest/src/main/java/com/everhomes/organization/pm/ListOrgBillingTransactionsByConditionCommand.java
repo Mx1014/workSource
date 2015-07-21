@@ -1,7 +1,5 @@
 package com.everhomes.organization.pm;
 
-import java.sql.Timestamp;
-
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -12,7 +10,8 @@ import com.everhomes.util.StringHelper;
  *	<li>pageSize : 页大小</li>
  *	<li>address : 地址</li>
  *	<li>createTime : 缴费日期</li>
- *	<li>communityId : 小区Id</li>
+ *	<li>organizationId : 组织id</li>
+
  *</ul>
  *
  */
@@ -25,7 +24,7 @@ public class ListOrgBillingTransactionsByConditionCommand {
 	private String createTime;
 	
 	@NotNull
-	private Long communityId;
+	private Long organizationId;
 
 	public Long getPageOffset() {
 		return pageOffset;
@@ -59,12 +58,12 @@ public class ListOrgBillingTransactionsByConditionCommand {
 		this.createTime = createTime;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

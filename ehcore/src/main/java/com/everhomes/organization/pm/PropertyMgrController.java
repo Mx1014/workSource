@@ -931,7 +931,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
-	public RestResponse importPmBills(@Valid PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
+	public RestResponse importPmBills(@Valid ImportPropertyBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
 		int result = propertyMgrService.importPmBills(cmd, files);
 
@@ -1015,14 +1015,14 @@ public class PropertyMgrController extends ControllerBase {
 	
 //web-family	
 	/**
-	 * <b>URL: /pm/listFamilyBillingTransactionByAddress
-	 * <p>根据地址id查询家庭的缴费记录
+	 * <b>URL: /pm/listFamilyBillingTransactionByFamilyId
+	 * <p>根据家庭Id查询家庭的缴费记录
 	 */
-	@RequestMapping("listFamilyBillingTransactionByAddress")
+	@RequestMapping("listFamilyBillingTransactionByFamilyId")
 	@RestReturn(value=FamilyBillingTransactionDTO.class,collection=true)
-	public RestResponse listFamilyBillingTransactionByAddress(@Valid ListFamilyBillingTransactionByAddressCommand cmd) {
+	public RestResponse listFamilyBillingTransactionByFamilyId(@Valid ListFamilyBillingTransactionByFamilyIdCommand cmd) {
 
-		ListFamilyBillingTransactionByAddressCommandResponse result = propertyMgrService.listFamilyBillingTransactionByAddress(cmd);
+		ListFamilyBillingTransactionByFamilyIdCommandResponse result = propertyMgrService.listFamilyBillingTransactionByAddress(cmd);
 
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1031,14 +1031,14 @@ public class PropertyMgrController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pm/findFamilyBillByAddressAndTime
-	 * <p>根据地址id和日期查询家庭的账单
+	 * <b>URL: /pm/findFamilyBillByFamilyIdAndTime
+	 * <p>根据家庭Id和日期查询家庭的账单
 	 */
-	@RequestMapping("findPmBillByAddressAndDate")
+	@RequestMapping("findFamilyBillByFamilyIdAndTime")
 	@RestReturn(value=CommunityPmBill.class)
-	public RestResponse findPmBillByAddressAndDate(@Valid FindPmBillByAddressAndDateCommand cmd) {
+	public RestResponse findFamilyBillByFamilyIdAndTime(@Valid FindFamilyBillByFamilyIdAndTimeCommand cmd) {
 
-		CommunityPmBill bill = propertyMgrService.findPmBillByAddressAndDate(cmd);
+		CommunityPmBill bill = propertyMgrService.findFamilyBillByFamilyIdAndTime(cmd);
 
 		RestResponse response = new RestResponse(bill);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1048,16 +1048,49 @@ public class PropertyMgrController extends ControllerBase {
 	
 //app
 	/**
-	 * <b>URL: /pm/findFamilyBillAndPayByAddressAndTime
-	 * <p>根据地址id和日期查询家庭的账单和缴费记录
+	 * <b>URL: /pm/findFamilyBillAndPayByFamilyIdAndTime
+	 * <p>根据家庭id和日期查询家庭某月份的账单和缴费记录
 	 */
-	@RequestMapping("findFamilyBillAndPayByAddressAndTime")
+	@RequestMapping("findFamilyBillAndPayByFamilyIdAndTime")
 	@RestReturn(value=PmBillsDTO.class)
-	public RestResponse findFamilyBillAndPayByAddressAndTime(@Valid FindFamilyBillAndPayByAddressAndTimeCommand cmd) {
+	public RestResponse findFamilyBillAndPayByFamilyIdAndTime(@Valid FindFamilyBillAndPayByFamilyIdAndTimeCommand cmd) {
 
-		PmBillsDTO bill = propertyMgrService.findFamilyBillAndPayByAddressAndTime(cmd);
+		PmBillsDTO bill = propertyMgrService.findFamilyBillAndPayByFamilyIdAndTime(cmd);
 
 		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listFamilyBillAndPayByFamilyId
+	 * <p>根据家庭id和日期查询家庭的所有账单和缴费记录
+	 */
+	@RequestMapping("listFamilyBillAndPayByFamilyId")
+	@RestReturn(value=PmBillsDTO.class,collection=true)
+	public RestResponse listFamilyBillAndPayByFamilyId(@Valid ListFamilyBillAndPayByFamilyIdCommand cmd) {
+
+		ListFamilyBillAndPayByFamilyIdCommandResponse result = propertyMgrService.listFamilyBillAndPayByFamilyId(cmd);
+
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+//支付
+	/**
+	 * <b>URL: /pm/payPmBillByAddress
+	 * <p>缴费
+	 */
+	@RequestMapping("payPmBillByFamilyId")
+	@RestReturn(value=String.class)
+	public RestResponse payPmBillByFamilyId(@Valid PayPmBillByFamilyIdCommand cmd) {
+
+		int result = propertyMgrService.payPmBillByFamilyId(cmd);
+
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

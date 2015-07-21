@@ -1,5 +1,6 @@
 package com.everhomes.organization.pm;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -24,11 +25,20 @@ public class PmBillsDTO{
 	private String   createTime;
 	
 	//expand
+	private BigDecimal payedAmount;
+
 	private java.math.BigDecimal totalAmount;
 	
 	@ItemType(FamilyBillingTransactionDTO.class)
 	private List<FamilyBillingTransactionDTO> payList;
 
+	public BigDecimal getPayedAmount() {
+		return payedAmount;
+	}
+	
+	public void setPayedAmount(BigDecimal payedAmount) {
+		this.payedAmount = payedAmount;
+	}
 	public java.lang.Long getId() {
 		return id;
 	}

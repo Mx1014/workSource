@@ -8,16 +8,16 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>billDate : 账单日期</li>
- *	<li>address : 地址</li>
+ * <li>familyId : 家庭Id</li>
  *</ul>
  *
  */
-public class FindPmBillByAddressAndDateCommand {
+public class FindFamilyBillByFamilyIdAndTimeCommand {
 	
 	@NotNull
 	private String billDate;
 	@NotNull
-	private String address;
+	private Long familyId;
 	
 	public String getBillDate() {
 		return billDate;
@@ -25,11 +25,12 @@ public class FindPmBillByAddressAndDateCommand {
 	public void setBillDate(String billDate) {
 		this.billDate = billDate;
 	}
-	public String getAddress() {
-		return address;
+	
+	public Long getFamilyId() {
+		return familyId;
 	}
-	public void setAddress(String address) {
-		this.address = address;
+	public void setFamilyId(Long familyId) {
+		this.familyId = familyId;
 	}
 	@Override
 	public String toString() {

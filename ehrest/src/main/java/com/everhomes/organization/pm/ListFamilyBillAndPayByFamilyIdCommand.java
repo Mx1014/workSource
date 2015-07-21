@@ -2,26 +2,35 @@ package com.everhomes.organization.pm;
 
 import javax.validation.constraints.NotNull;
 
-import com.everhomes.util.StringHelper;
-
 
 /**
  * <ul>
  * <li>pageOffset : 页码</li>
- * <li>pageSize : 页大小</li>
- * <li>address : 地址</li>
+ *	<li>pageSize : 页大小</li>
+ *	<li>dateStr : 优先显示该月份的账单</li>
+ *	<li>familyId : 家庭Id</li>
  *</ul>
  *
  */
-public class ListFamilyBillingTransactionByAddressCommand {
+
+public class ListFamilyBillAndPayByFamilyIdCommand {
 	
 	private Long pageOffset;
-	
 	private Integer pageSize;
 	
-	@NotNull
-	private String address;
+	private String billDate;
 	
+	@NotNull
+	private Long familyId;
+
+	public Long getFamilyId() {
+		return familyId;
+	}
+
+	public void setFamilyId(Long familyId) {
+		this.familyId = familyId;
+	}
+
 	public Long getPageOffset() {
 		return pageOffset;
 	}
@@ -37,18 +46,13 @@ public class ListFamilyBillingTransactionByAddressCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-
-	public String getAddress() {
-		return address;
+	
+	public String getBillDate() {
+		return billDate;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
+	public void setBillDate(String billDate) {
+		this.billDate = billDate;
 	}
 	
 	

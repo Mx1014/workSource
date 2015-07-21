@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 	<li>pageSize : 页大小</li>	
 	<li>address : 地址</li>
 	<li>dateStr : 账单日期</li>
-	<li>communityId : 小区Id</li>
+	<li>organizationId : 组织Id</li>
   </ul>
  *
  */
@@ -27,7 +27,7 @@ public class ListPmBillsByConditionsCommand {
 	private String dateStr;
 	
 	@NotNull
-	private Long communityId;
+	private Long organizationId;
 	
 	
 	public Long getPageOffset() {
@@ -61,13 +61,14 @@ public class ListPmBillsByConditionsCommand {
 	public void setDateStr(String dateStr) {
 		this.dateStr = dateStr;
 	}
+	
 
-	public Long getCommunityId() {
-		return communityId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override
