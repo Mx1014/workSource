@@ -6,12 +6,14 @@ import com.everhomes.util.StringHelper;
 
 
 /**
- * <ul>actionType为postAction时点击item需要的参数
+ * <ul>actionType为postByCategory时点击item需要的参数
  * <li>forumId: 论坛id</li>
  * <li>contentCategory: 发帖动作的大类，如物业，家政等</li>
  * <li>actionCategory: 发帖动作的小类，如投诉，建议等</li>
  * <li>entityTag: 帖子标签</li>
- * <li>entityTag: 普通用户/物业/业委等对应小区ID、居委/公安等对应片区ID</li> 
+ * <li>displayName: 显示名</li> 
+ * <li>regionType: 可见范围类型</li>
+ * <li>regionId: 范围id，小区或片区id</li> 
  * </ul>
  */
 public class PostByCategoryActionData implements Serializable{
@@ -23,6 +25,8 @@ public class PostByCategoryActionData implements Serializable{
     private Long contentCategory;
     private String entityTag;
     private String displayName;
+    private Byte regionType;
+    private Long regionId;
 
 
     public Long getForumId() {
@@ -63,6 +67,22 @@ public class PostByCategoryActionData implements Serializable{
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public Byte getRegionType() {
+        return regionType;
+    }
+
+    public void setRegionType(Byte regionType) {
+        this.regionType = regionType;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
     @Override

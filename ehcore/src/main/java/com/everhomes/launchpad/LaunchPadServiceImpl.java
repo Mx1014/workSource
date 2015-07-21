@@ -255,7 +255,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     jsonObject = processLaunchApp(jsonObject,request);
                 }
             }
-            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
+            if(jsonObject != null)
+                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
         }catch(Exception e){
             LOGGER.error("Parser json is error,userToken=" + userToken + ",communityId=" + commnunityId,e.getMessage());
         }
