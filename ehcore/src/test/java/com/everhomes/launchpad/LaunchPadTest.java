@@ -5,6 +5,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.catalina.Context;
+import org.apache.tomcat.util.descriptor.web.ContextService;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -17,6 +21,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import ch.qos.logback.core.util.ContextUtil;
 
 import com.everhomes.junit.TestCaseBase;
 import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
@@ -105,7 +111,7 @@ public class LaunchPadTest extends TestCaseBase {
         cmd.setCommunityId(8L);
         cmd.setItemGroup(ItemGroup.BIZS.getCode());
         cmd.setItemLocation("/home");
-        GetLaunchPadItemsCommandResponse response = launchPadService.getLaunchPadItems(cmd);
+        GetLaunchPadItemsCommandResponse response = launchPadService.getLaunchPadItems(cmd,null);
         for(LaunchPadItemDTO dto : response.getLaunchPadItems()){
             System.out.println(dto);
         }

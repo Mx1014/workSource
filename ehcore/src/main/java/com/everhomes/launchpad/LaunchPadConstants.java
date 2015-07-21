@@ -8,7 +8,9 @@ public interface LaunchPadConstants {
     public static final String TOKEN = "token"; 
     public static final String URL = "url";
     public static final String CONTENT_CATEGORY = "contentCategory"; 
-    public static final String CALLPHONES = "callPhones"; 
+    public static final String CALLPHONES = "callPhones";
+    public static final String ANDROID_EMBEDDED = "androidEmbedded_json";
+    public static final String IOS_EMBEDDED = "iosEmbedded_json";
     
 
     //Item Group

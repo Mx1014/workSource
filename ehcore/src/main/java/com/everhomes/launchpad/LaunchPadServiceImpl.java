@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -85,7 +87,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private BusinessProvider businessProvider;
 
     @Override
-    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
+    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
         if(cmd.getItemLocation() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid itemLocation paramter,itemLocation is null");
@@ -111,7 +113,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
             result = getBusinessItems(cmd,community);
         }else{
-            result = getLaunchPadItems(cmd,community);
+            result = getLaunchPadItems(cmd,community,request);
         }
         response.setLaunchPadItems(result);
         long endTime = System.currentTimeMillis();
@@ -167,7 +169,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         
     }
 
-    private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community){
+    private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community, HttpServletRequest request){
         User user = UserContext.current().getUser();
         long userId = user.getId();
         String token = UserContext.current().getLogin().getLoginToken().getTokenString();
@@ -197,7 +199,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         try{
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
-                itemDTO.setActionData(parserJson(token,userId, community.getId(), r));
+                itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
                 itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 result.add(itemDTO);
                
@@ -213,7 +215,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @SuppressWarnings("unchecked")
-    private String parserJson(String userToken,long userId, long commnunityId,LaunchPadItem launchPadItem) {
+    private String parserJson(String userToken,long userId, long commnunityId,LaunchPadItem launchPadItem, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         try{
             if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
@@ -249,6 +251,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     }
                     jsonObject.put(LaunchPadConstants.URL, url);
                   }
+                else if(launchPadItem.getActionType() == ActionType.LAUNCH_APP.getCode()){
+                    jsonObject = processLaunchApp(jsonObject,request);
+                }
             }
             jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
         }catch(Exception e){
@@ -256,6 +261,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         
         return jsonObject.toJSONString();
+    }
+    
+    private JSONObject processLaunchApp(JSONObject actionDataJson, HttpServletRequest request){
+        String header = request.getHeader("user-agent");
+        //"androidEmbedded_json":{"package":"mqq:open","download":"www.xx.com"}
+        if(header.contains("Android")){
+            JSONObject androidJson =  (JSONObject) actionDataJson.get(LaunchPadConstants.ANDROID_EMBEDDED);
+            if(androidJson != null)
+                return  androidJson;
+        }else if(header.contains("iOS")){
+            JSONObject iosJson =  (JSONObject)actionDataJson.get(LaunchPadConstants.IOS_EMBEDDED);
+            if(iosJson != null)
+                return iosJson;
+        }
+        return actionDataJson;
     }
     
     

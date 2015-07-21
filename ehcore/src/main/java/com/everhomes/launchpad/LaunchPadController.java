@@ -42,7 +42,7 @@ public class LaunchPadController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
-        GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd);
+        GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd,request);
         RestResponse resp =  new RestResponse();
         if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
             int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
