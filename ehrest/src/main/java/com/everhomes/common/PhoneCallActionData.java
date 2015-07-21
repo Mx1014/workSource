@@ -3,26 +3,28 @@ package com.everhomes.common;
 import java.io.Serializable;
 
 
+import java.util.ArrayList;
+
 import com.everhomes.util.StringHelper;
 
 
 /**
  * <ul>actionType为PHONE_CALL时拨电话
- * <li>phone: 电话号码/li>
+ * <li>callPhones: 电话号码列表/li>
  * </ul>
  */
 public class PhoneCallActionData implements Serializable{
 
     private static final long serialVersionUID = -5364366676212368720L;
-    //{"phone": "15875301110"}  
-    private String phone;
+    //{"callPhones": "[15875301110]"}  
+    private ArrayList<String> callPhones;
 
-    public String getPhone() {
-        return phone;
+    public ArrayList<String> getCallPhones() {
+        return callPhones;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setCallPhones(ArrayList<String> callPhones) {
+        this.callPhones = callPhones;
     }
 
     @Override
