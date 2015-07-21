@@ -124,6 +124,9 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS,
 			com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS,
 			com.everhomes.server.schema.tables.EhUserProfiles.EH_USER_PROFILES,
-			com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES);
+			com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES,
+			com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT,
+			com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM,
+			com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES);
 	}
 }
