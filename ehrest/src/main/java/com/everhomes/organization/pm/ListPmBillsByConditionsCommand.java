@@ -1,5 +1,7 @@
 package com.everhomes.organization.pm;
 
+import java.sql.Date;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -9,9 +11,11 @@ import com.everhomes.util.StringHelper;
   <ul>
   	<li>pageOffset : 下一条记录id</li>	
 	<li>pageSize : 页大小</li>	
-	<li>address : 地址</li>
-	<li>dateStr : 账单日期</li>
+	
 	<li>organizationId : 组织Id</li>
+	
+	<li>billDate : 账单日期</li>
+	<li>address : 地址</li>
   </ul>
  *
  */
@@ -19,17 +23,22 @@ import com.everhomes.util.StringHelper;
 public class ListPmBillsByConditionsCommand {
 	
 	private Long pageOffset;
-	
 	private Integer pageSize;
-	
-	private String address;
-	
-	private String dateStr;
 	
 	@NotNull
 	private Long organizationId;
 	
+	private String address;
+	private String billDate;
 	
+	public String getBillDate() {
+		return billDate;
+	}
+
+	public void setBillDate(String billDate) {
+		this.billDate = billDate;
+	}
+
 	public Long getPageOffset() {
 		return pageOffset;
 	}
@@ -54,15 +63,6 @@ public class ListPmBillsByConditionsCommand {
 		this.address = address;
 	}
 
-	public String getDateStr() {
-		return dateStr;
-	}
-
-	public void setDateStr(String dateStr) {
-		this.dateStr = dateStr;
-	}
-	
-
 	public Long getOrganizationId() {
 		return organizationId;
 	}
@@ -75,9 +75,5 @@ public class ListPmBillsByConditionsCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
-	
-	
-	
 
 }

@@ -16,13 +16,16 @@ public class PmBillsDTO{
 	private java.lang.String     address;
 	private java.lang.String     name;
 	private java.lang.String     dateStr;
+	private java.sql.Date        startDate;
+	private java.sql.Date        endDate;
+	private java.sql.Date        payDate;
 	private java.lang.String     description;
 	private java.math.BigDecimal dueAmount;
 	private java.math.BigDecimal oweAmount;
 	private java.lang.Long       creatorUid;
 	private java.lang.Integer    notifyCount;
-	private String   notifyTime;
-	private String   createTime;
+	private java.sql.Timestamp   notifyTime;
+	private java.sql.Timestamp   createTime;
 	
 	//expand
 	private BigDecimal payedAmount;
@@ -135,19 +138,43 @@ public class PmBillsDTO{
 		this.notifyCount = notifyCount;
 	}
 
-	public String getNotifyTime() {
+	public java.sql.Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(java.sql.Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public java.sql.Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(java.sql.Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public java.sql.Date getPayDate() {
+		return payDate;
+	}
+
+	public void setPayDate(java.sql.Date payDate) {
+		this.payDate = payDate;
+	}
+
+	public java.sql.Timestamp getNotifyTime() {
 		return notifyTime;
 	}
 
-	public void setNotifyTime(String notifyTime) {
+	public void setNotifyTime(java.sql.Timestamp notifyTime) {
 		this.notifyTime = notifyTime;
 	}
 
-	public String getCreateTime() {
+	public java.sql.Timestamp getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(String createTime) {
+	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
 	}
 

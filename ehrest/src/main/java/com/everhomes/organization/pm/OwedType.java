@@ -2,7 +2,7 @@ package com.everhomes.organization.pm;
 
 public enum OwedType {
 	
-	OWED((byte)1),NO_OWED((byte)2);
+	NO_OWED((byte)1),OWED((byte)2);
 	
 	private byte code;
 	

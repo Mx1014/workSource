@@ -1081,7 +1081,7 @@ public class PropertyMgrController extends ControllerBase {
 	
 //支付
 	/**
-	 * <b>URL: /pm/payPmBillByAddress
+	 * <b>URL: /pm/payPmBillByFamilyId
 	 * <p>缴费
 	 */
 	@RequestMapping("payPmBillByFamilyId")
