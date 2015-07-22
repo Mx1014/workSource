@@ -1,5 +1,6 @@
 package com.everhomes.launchpad;
 
+
 public interface LaunchPadConstants {
     public static final String USER_ID = "userId";
     public static final String COMMUNITY_ID = "communityId";
@@ -14,6 +15,10 @@ public interface LaunchPadConstants {
     public static final String REGION_TYPE = "regionType";
     public static final String REGION_ID = "regionId";
     public static final String ENTITY_TAG = "entityTag";
+    public static final String DISPLAY_NAME = "displayName";
+    public static final String CREATOR_TAG = "creatorEntityTag";
+    public static final String TARGET_TAG = "targetEntityTag";
+    
     
 
     //Item Group

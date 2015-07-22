@@ -40,8 +40,10 @@ import com.everhomes.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
 import com.everhomes.organization.GetOrgDetailCommand;
+import com.everhomes.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationSimpleDTO;
 import com.everhomes.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.organization.pm.PropCommunityContactDTO;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -58,8 +60,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.visibility.VisibleRegionType;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.visibility.VisibleRegionType;
 
 
 
@@ -162,7 +164,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             }
         }
        
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
         defaultItems.forEach(r ->{
             LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
             result.add(itemDTO);
@@ -176,9 +178,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         long userId = user.getId();
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
-        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
-        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),community.getId());
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId(),null);
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),community.getId(),null);
         List<LaunchPadItem> userItems = getUserItems(user.getId());
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
@@ -197,6 +199,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, communityItems);
             if(userItems != null && !userItems.isEmpty())
                 allItems = overrideOrRevertItems(allItems, userItems);
+        }
+        
+        ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
+        List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
+        if(dtos != null && !dtos.isEmpty()){
+            List<String> tags = new ArrayList<String>();
+            dtos.forEach(r -> tags.add(r.getOrganizationType()));
+            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,tags);
+            if(adminItems != null && !adminItems.isEmpty())
+                adminItems.addAll(adminItems);
         }
         try{
             allItems.forEach(r ->{
@@ -297,12 +309,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     
     @SuppressWarnings("unchecked")
     private JSONObject processPostNew(long communityId, JSONObject actionDataJson, LaunchPadItem launchPadItem) {
+        actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
         String entityTag = (String)actionDataJson.get(LaunchPadConstants.ENTITY_TAG);
-        if(entityTag.equalsIgnoreCase(PostEntityTag.USER.getCode())){
-            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY);
+        if(launchPadItem.getTag() == null || launchPadItem.getTag().trim().equals("")){
+            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
             actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
+            actionDataJson.put(LaunchPadConstants.CREATOR_TAG, PostEntityTag.USER.getCode());
+            actionDataJson.put(LaunchPadConstants.TARGET_TAG, entityTag);
             return actionDataJson;
         }
+        
         GetOrgDetailCommand cmd = new GetOrgDetailCommand();
         cmd.setCommunityId(communityId);
         cmd.setOrganizationType(entityTag);
@@ -313,7 +329,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
         actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
-        
+        actionDataJson.put(LaunchPadConstants.CREATOR_TAG, entityTag);
+        actionDataJson.put(LaunchPadConstants.TARGET_TAG, PostEntityTag.USER.getCode());
         return actionDataJson;
     }
     
@@ -759,9 +776,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<LaunchPadPostActionCategoryDTO> result = new ArrayList<LaunchPadPostActionCategoryDTO>();
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
-        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());
-        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId);
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId(),null);
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),communityId,null);
         List<LaunchPadItem> userItems = getUserItems(user.getId());
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 

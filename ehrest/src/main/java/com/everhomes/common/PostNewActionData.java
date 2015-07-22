@@ -28,6 +28,7 @@ public class PostNewActionData implements Serializable{
     private String targetEntityTag;
     private Byte regionType;
     private Long regionId;
+    private Long embedAppId; 
     
     public Long getForumId() {
         return forumId;
@@ -99,6 +100,14 @@ public class PostNewActionData implements Serializable{
 
     public void setRegionId(Long regionId) {
         this.regionId = regionId;
+    }
+
+    public Long getEmbedAppId() {
+        return embedAppId;
+    }
+
+    public void setEmbedAppId(Long embedAppId) {
+        this.embedAppId = embedAppId;
     }
 
     @Override
