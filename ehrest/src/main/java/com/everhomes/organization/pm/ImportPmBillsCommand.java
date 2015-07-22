@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class ImportPropertyBillsCommand {
+public class ImportPmBillsCommand {
 	
 	@NotNull
 	private Long organizationId;

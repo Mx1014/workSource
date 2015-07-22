@@ -5,6 +5,8 @@ logging.path: ./
 logging.file: oauth2-clientapp.log
 logging.level.: INFO
 
+management.port: 8084
+
 server.port: 7788
 
 

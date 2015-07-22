@@ -54,16 +54,6 @@ public class LoginToken {
         this.loginInstanceNumber = loginInstanceNumber;
     }
     
-    public String getTokenString() {
-        String json = new Gson().toJson(this);
-        return Base64.encodeBase64URLSafeString(json.getBytes());
-    }
-    
-    public static LoginToken fromTokenString(String tokenString) {
-        String json = new String(Base64.decodeBase64(tokenString));
-        return (LoginToken)new Gson().fromJson(json, LoginToken.class);
-    }
-    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

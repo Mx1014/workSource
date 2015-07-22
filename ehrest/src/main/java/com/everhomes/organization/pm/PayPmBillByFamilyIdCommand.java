@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  *	<li>payDate : 支付日期</li>
  *	<li>payAmount : 支付金额</li>
  *	<li>description : 描述</li>
+ *	<li>ownerName : 用户姓名</li>
+ *	<li>telephone : 用户电话</li>
  *	<li>txType : 交易方式,详情:{@link com.everhomes.organization.TxType}</li>
  *	<li>vendor : 第三方支付</li>
  *	<li>paidType : 支付方式,详情:{@link com.everhomes.organization.PaidType}</li>
@@ -30,7 +32,6 @@ public class PayPmBillByFamilyIdCommand {
 	private BigDecimal payAmount;
 	
 	private String description;
-	
 	private String ownerName;
 	private String telephone;
 	

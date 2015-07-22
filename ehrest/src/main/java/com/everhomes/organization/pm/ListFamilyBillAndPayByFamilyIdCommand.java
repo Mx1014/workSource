@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  * <li>pageOffset : 页码</li>
  *	<li>pageSize : 页大小</li>
- *	<li>dateStr : 优先显示该月份的账单</li>
+ *	<li>billDate : 优先显示该月份的账单</li>
  *	<li>familyId : 家庭Id</li>
  *</ul>
  *

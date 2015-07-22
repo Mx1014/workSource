@@ -29,6 +29,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
@@ -725,5 +726,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			}
 		}
 		return list;
+	}
+
+
+	@Override
+	public CommunityPmBill findOranizationBillsById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+		.where(Tables.EH_ORGANIZATION_BILLS.ID.eq(id))
+		.fetch();
+		if(records != null && !records.isEmpty())
+			return ConvertHelper.convert(records.get(0), CommunityPmBill.class);
+		return null;
 	}
 }

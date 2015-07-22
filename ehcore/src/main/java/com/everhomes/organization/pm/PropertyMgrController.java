@@ -612,21 +612,6 @@ public class PropertyMgrController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /pm/listPropApartmentsByKeyword</b>
-	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
-	 */
-	@RequestMapping("listPropApartmentsByKeyword")
-	@RestReturn(value=PropFamilyDTO.class, collection=true)
-	public RestResponse listPropApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
-		List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
-		RestResponse response = new RestResponse(results);
-
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /pm/findUserByIndentifier</b>
 	 * <p>根据用户token查询用户信息</p>
 	 */
@@ -921,6 +906,21 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	} 
+	
+	/**
+	 * <b>URL: /pm/listPropApartmentsByKeyword</b>
+	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
+	 */
+	@RequestMapping("listPropApartmentsByKeyword")
+	@RestReturn(value=PropFamilyDTO.class, collection=true)
+	public RestResponse listPropApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+		List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
+		RestResponse response = new RestResponse(results);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /pm/importPmBills
@@ -929,9 +929,9 @@ public class PropertyMgrController extends ControllerBase {
 	 * @param files 要上传文件
 	 * @return 
 	 */
-	@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
+	@RequestMapping(value="importPmBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
-	public RestResponse importPmBills(@Valid ImportPropertyBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
+	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
 		int result = propertyMgrService.importPmBills(cmd, files);
 
@@ -949,7 +949,7 @@ public class PropertyMgrController extends ControllerBase {
 	} 
 
 	/**
-	 * <b>URL: /pm/listPmBillsByCondition
+	 * <b>URL: /pm/listPmBillsByConditions
 	 * <p>根据条件查询物业缴费单
 	 */
 	@RequestMapping("listPmBillsByConditions")
@@ -986,7 +986,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("listOrgBillingTransactionsByCondition")
 	@RestReturn(value=OrganizationBillingTransactions.class,collection=true)
-	public RestResponse updatePmBills(@Valid ListOrgBillingTransactionsByConditionCommand cmd) {
+	public RestResponse listOrgBillingTransactionsByCondition(@Valid ListOrgBillingTransactionsByConditionCommand cmd) {
 
 		ListOrgBillingTransactionsByConditionCommandResponse result = propertyMgrService.listOrgBillingTransactionsByCondition(cmd);
 
@@ -1001,7 +1001,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>根据条件查询欠费家庭
 	 */
 	@RequestMapping("listOweFamilysByCondition")
-	@RestReturn(value=String.class)
+	@RestReturn(value=OweFamilyDTO.class,collection=true)
 	public RestResponse listOweFamilysByCondition(@Valid ListOweFamilysByConditionCommand cmd) {
 
 		ListOweFamilysByConditionCommandResponse result = propertyMgrService.listOweFamilysByCondition(cmd);
@@ -1035,10 +1035,10 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>根据家庭Id和日期查询家庭的账单
 	 */
 	@RequestMapping("findFamilyBillByFamilyIdAndTime")
-	@RestReturn(value=CommunityPmBill.class)
+	@RestReturn(value=PmBillsDTO.class)
 	public RestResponse findFamilyBillByFamilyIdAndTime(@Valid FindFamilyBillByFamilyIdAndTimeCommand cmd) {
 
-		CommunityPmBill bill = propertyMgrService.findFamilyBillByFamilyIdAndTime(cmd);
+		PmBillsDTO bill = propertyMgrService.findFamilyBillByFamilyIdAndTime(cmd);
 
 		RestResponse response = new RestResponse(bill);
 		response.setErrorCode(ErrorCodes.SUCCESS);

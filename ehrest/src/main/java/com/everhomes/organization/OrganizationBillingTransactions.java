@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *	<li>createTime : 缴费时间</li>
- *	<li>address : 楼栋门牌</li>
+ *	<li>address : 楼栋门牌号</li>
  *	<li>ownerName : 业主姓名</li>
  *	<li>ownerTelephone : 业主电话</li>
  *	<li>chargeAmount : 实付金额</li>

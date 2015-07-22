@@ -10,8 +10,8 @@ import com.everhomes.util.StringHelper;
  * 	<li>id : 缴费id</li>
  *	<li>createTime : 缴费日期</li>
  *	<li>billType : 缴费类型</li>
- *	<li>description : 缴费描述</li>
  *	<li>chargeAmount : 缴费金额</li>
+ *	<li>description : 缴费描述</li>
  *</ul>
  *
  */
