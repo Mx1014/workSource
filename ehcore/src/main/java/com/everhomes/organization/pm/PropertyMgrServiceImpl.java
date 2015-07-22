@@ -953,6 +953,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			else
 				dto.setOwed(OwedType.NO_OWED.getCode());
+			
+			list.add(dto);
 		}
 		return list;
 	}
