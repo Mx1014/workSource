@@ -5,12 +5,12 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.Version;
 
-public class UserServiceTest extends TestCaseBase {
+public class UserServiceTest extends CoreServerTestCase {
     
     @Autowired
     private UserProvider userProvider;

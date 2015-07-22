@@ -7,13 +7,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.app.AppConstants;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.namespace.Namespace;
 
-public class BusBridgeTest  extends TestCaseBase {
+public class BusBridgeTest  extends CoreServerTestCase {
 
     @Autowired
     private LocalBusProvider localBusProvider;

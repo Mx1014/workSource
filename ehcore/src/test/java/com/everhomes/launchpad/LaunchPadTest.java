@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 
 import ch.qos.logback.core.util.ContextUtil;
 
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
@@ -35,7 +35,7 @@ import com.everhomes.user.UserFavorite;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.DateHelper;
 
-public class LaunchPadTest extends TestCaseBase {
+public class LaunchPadTest extends CoreServerTestCase {
     
     @Autowired
     private LaunchPadService launchPadService;

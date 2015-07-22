@@ -8,11 +8,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
-public class RegionProviderTest extends TestCaseBase {
+public class RegionProviderTest extends CoreServerTestCase {
      
     @Autowired
     RegionProvider regionProvider;
