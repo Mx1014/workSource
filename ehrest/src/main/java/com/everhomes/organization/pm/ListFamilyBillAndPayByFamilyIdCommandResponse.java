@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageOffset : 下一页码</li>
- * <li>requests : 账单和缴费记录列表</li>
+ * <li>requests : 账单和缴费记录列表,详见 {@link com.everhomes.organization.pm.PmBillsDTO}</li>
  *</ul>
  *
  */

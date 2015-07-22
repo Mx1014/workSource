@@ -1,5 +1,11 @@
 package com.everhomes.organization;
 
+/**
+ * <ul>
+ * <li>1: online, 2: offline</li>
+ *</ul>
+ *
+ */
 public enum TxType {
 
 	//1: online, 2: offline

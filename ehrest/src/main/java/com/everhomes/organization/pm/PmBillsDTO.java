@@ -7,6 +7,26 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *	<li>id : 账单id</li>
+ *
+ *	<li>startDate : 账单开始日期</li>
+ *	<li>endDate : 账单截止日期</li>
+ *	<li>payDate : 还款日期</li>
+ *	<li>endDate : 账单截止日期</li>
+ *	<li>address : 楼栋-门牌号</li>
+ * 	<li>dueAmount : 本月金额</li>
+ *	<li>oweAmount : 往期欠款</li>
+ *	<li>totalAmount : 本月应付总额</li>
+ *	<li>description : 账单说明</li>
+ *	
+ *	<li>payList : 账单缴费记录,详见: {@link com.everhomes.family.FamilyBillingTransactionDTO}</li>
+ *	
+ *</ul>
+ *
+ */
+
 public class PmBillsDTO{
 	
 	private java.lang.Long       id;

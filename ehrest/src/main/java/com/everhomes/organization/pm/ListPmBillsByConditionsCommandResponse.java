@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>nextPageOffset : 页码</li>
- * <li>requests : 账单列表</li>
+ * <li>requests : 账单列表,详见: {@link com.everhomes.organization.pm.PmBillsDTO}</li>
  * </ul>
  *
  */

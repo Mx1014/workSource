@@ -1,5 +1,12 @@
 package com.everhomes.organization;
 
+/**
+ * 
+ * <ul>
+ * <li>1: selfpay, 2: agent</li>
+ * </ul>
+ *
+ */
 public enum PaidType {
 	
 	//1: selfpay, 2: agent
