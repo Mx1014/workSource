@@ -319,7 +319,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             LOGGER.error("Organization is not exists,communityId=" + communityId);
             return actionDataJson;
         }
-        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION);
+        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
         actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
         
         return actionDataJson;
