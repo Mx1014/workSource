@@ -126,7 +126,7 @@ public class CategoryController extends ControllerBase {
         
         Tuple<String, SortOrder> orderBy = null;
         @SuppressWarnings("unchecked")
-        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.Interest,
+        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_INTEREST,
                 CategoryAdminStatus.ACTIVE, orderBy);
 
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
@@ -136,15 +136,15 @@ public class CategoryController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /category/listActionCategories</b> 
+     * <b>URL: /category/listContentCategories</b> 
      * 获取帖子操作分类列表
      */
     @RequireAuthentication(false)
-    @RequestMapping("listActionCategories")
+    @RequestMapping("listContentCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listActionCategories() {
+    public RestResponse listContentCategories() {
         
-        List<Category> entityResultList = this.categoryProvider.listActionCategories();
+        List<Category> entityResultList = this.categoryProvider.listContentCategories();
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
@@ -152,15 +152,16 @@ public class CategoryController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /category/listContentCategories</b> 
+     * <b>URL: /category/listActionCategories</b> 
      * 根据帖子操作分类获取具体分类
      */
     @RequireAuthentication(false)
-    @RequestMapping("listContentCategories")
+    @RequestMapping("listActionCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listContentCategories(ListCategoryCommand cmd) {
-        
-        List<Category> entityResultList = this.categoryProvider.listContentCategories(cmd.getParentId());
+        if(cmd.getParentId() == null)
+            cmd.setParentId(1l);
+        List<Category> entityResultList = this.categoryProvider.listActionCategories(cmd.getParentId());
 
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);

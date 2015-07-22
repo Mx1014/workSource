@@ -2,9 +2,9 @@ package com.everhomes.category;
 
 public interface CategoryConstants {
     // system defined root category
-    public static final long Business = 10000L;
-    public static final long Interest = 10001L;
-    public static final long ApplicationTool = 10002L;
+//    public static final long Business = 10000L;
+//    public static final long INTEREST = 10001L;
+//    public static final long ApplicationTool = 10002L;
     
     /** 帖子 */
     public static final long CATEGORY_ID_TOPIC = 1L;

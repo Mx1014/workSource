@@ -230,16 +230,16 @@ public class CategoryProviderImpl implements CategoryProvider {
         return categories;
     }
     
-    @Cacheable(value = "listActionCategory")
+    @Cacheable(value = "listContentCategories")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public List<Category> listActionCategories() {
+    public List<Category> listContentCategories() {
         List<Category> result = new ArrayList<>();
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
-        Condition condition = Tables.EH_CATEGORIES.PARENT_ID.eq(CategoryConstants.Business);
+        Condition condition = Tables.EH_CATEGORIES.PARENT_ID.eq(CategoryConstants.CATEGORY_ID_TOPIC);
 
         condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         
@@ -254,22 +254,22 @@ public class CategoryProviderImpl implements CategoryProvider {
         return result;
     }
 
-    @Cacheable(value = "listContentCategories")
+    @Cacheable(value = "listActionCategories")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public List<Category> listContentCategories(Long linkId) {
+    public List<Category> listActionCategories(Long parentId) {
         
         List<Category> result = new ArrayList<>();
         
-        if(linkId == null) {
-            LOGGER.error("Could not find parent region, linkId=" + linkId);
+        if(parentId == null) {
+            LOGGER.error("Could not find parent region, parentId=" + parentId);
             return null;
         }
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
-        Condition condition = Tables.EH_CATEGORIES.LINK_ID.eq(linkId);
+        Condition condition = Tables.EH_CATEGORIES.PARENT_ID.eq(parentId);
            
         if(condition != null) {
             selectStep.where(condition);
