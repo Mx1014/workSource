@@ -151,7 +151,6 @@ public class OAuth2ProviderImpl implements OAuth2Provider {
             self.deleteAccessToken(token);
     }
 
-
     @Cacheable(value="OAuth2Token-Id", key="#id", unless="#result == null")
     @Override
     public AccessToken findAccessTokenById(long id) {

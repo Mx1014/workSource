@@ -2319,6 +2319,7 @@ CREATE TABLE `eh_qrcodes` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`description` VARCHAR(1024) COMMENT '',
     `view_count` BIGINT NOT NULL DEFAULT 0,
+	`logo_uri` VARCHAR(1024) COMMENT '',
 	`expire_time` DATETIME COMMENT 'it is permanent if there is no expired time, else it is temporary',
 	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
     `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
@@ -2327,6 +2328,56 @@ CREATE TABLE `eh_qrcodes` (
 	`create_time` DATETIME,
     
     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global sharding group
+#
+DROP TABLE IF EXISTS `eh_version_realm`;
+CREATE TABLE `eh_version_realm` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `realm` VARCHAR(128),
+    `description` TEXT,
+    
+    `create_time` DATETIME,
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_ver_realm`(`realm`),
+    INDEX `i_eh_ver_realm_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_version_upgrade_rules`;
+CREATE TABLE `eh_version_upgrade_rules` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `realm_id` BIGINT NOT NULL,
+    `matching_lower_bound` DOUBLE NOT NULL,
+    `matching_upper_bound` DOUBLE NOT NULL,
+    `order` INTEGER NOT NULL DEFAULT 0,
+
+    `target_version` VARCHAR(128),
+    `force_upgrade` TINYINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY(`id`),
+    FOREIGN KEY `fk_eh_ver_upgrade_realm`(`realm_id`) REFERENCES `eh_version_realm`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_ver_upgrade_order`(`order`),
+    INDEX `i_eh_ver_upgrade_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_versioned_content`;
+CREATE TABLE `eh_versioned_content` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `realm_id` BIGINT NOT NULL,
+    `matching_lower_bound` DOUBLE NOT NULL,
+    `matching_upper_bound` DOUBLE NOT NULL,
+    `order` INTEGER NOT NULL DEFAULT 0,
+    
+    `content` TEXT,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY(`id`),
+    FOREIGN KEY `fk_eh_ver_content_realm`(`realm_id`) REFERENCES `eh_version_realm`(`id`) ON DELETE CASCADE ,
+    INDEX `i_eh_ver_content_order`(`order`),
+    INDEX `i_eh_ver_content_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;

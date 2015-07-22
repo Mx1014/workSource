@@ -19,7 +19,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.IdentifierType;
@@ -33,7 +33,7 @@ import com.everhomes.user.UserStatus;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RandomGenerator;
 
-public class LoginAuthTestCase extends TestCaseBase {
+public class LoginAuthTestCase extends CoreServerTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthTestCase.class);
 

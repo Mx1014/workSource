@@ -12,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
-public class AddressTest extends TestCaseBase {
+public class AddressTest extends CoreServerTestCase {
     
     @Autowired
     private AddressProvider addressProvider;

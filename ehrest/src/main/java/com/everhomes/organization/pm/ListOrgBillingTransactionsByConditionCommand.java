@@ -9,7 +9,8 @@ import com.everhomes.util.StringHelper;
  * 	<li>pageOffSet : 页码</li>
  *	<li>pageSize : 页大小</li>
  *	<li>address : 地址</li>
- *	<li>createTime : 缴费日期</li>
+ *	<li>startTime : 起始日期</li>
+ *	<li>endTime : 结束日期</li>
  *	<li>organizationId : 组织id</li>
 
  *</ul>
@@ -21,7 +22,8 @@ public class ListOrgBillingTransactionsByConditionCommand {
 	private Integer pageSize;
 	
 	private String address;
-	private String createTime;
+	private String startTime;
+	private String endTime;
 	
 	@NotNull
 	private Long organizationId;
@@ -50,12 +52,20 @@ public class ListOrgBillingTransactionsByConditionCommand {
 		this.address = address;
 	}
 
-	public String getCreateTime() {
-		return createTime;
+	public String getStartTime() {
+		return startTime;
 	}
 
-	public void setCreateTime(String createTime) {
-		this.createTime = createTime;
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
 	}
 
 	public Long getOrganizationId() {

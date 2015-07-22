@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
@@ -20,7 +20,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.user.VerifyAndLogonCommand;
 import com.everhomes.util.RuntimeErrorException;
 
-public class UserGenerator extends TestCaseBase {
+public class UserGenerator extends CoreServerTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGenerator.class);
 

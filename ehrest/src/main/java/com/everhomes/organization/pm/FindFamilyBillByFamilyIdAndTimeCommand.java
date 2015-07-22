@@ -1,5 +1,7 @@
 package com.everhomes.organization.pm;
 
+import java.sql.Date;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;

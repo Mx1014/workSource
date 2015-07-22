@@ -8,11 +8,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.db.DbProvider;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.sharding.ShardingProvider;
 
-public class GroupTest extends TestCaseBase {
+public class GroupTest extends CoreServerTestCase {
     
     @Autowired
     private ShardingProvider shardingProvider;
