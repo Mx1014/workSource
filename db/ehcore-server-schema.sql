@@ -280,6 +280,7 @@ CREATE TABLE `eh_launch_pad_items` (
 	`display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'default display on the pad, 0: hide, 1:display',
 	`display_layout` VARCHAR(128) DEFAULT '1' COMMENT 'how many grids it takes at the layout, format: 2x3',
 	`bgcolor` INTEGER NOT NULL DEFAULT 0,
+    `tag` VARCHAR(1024),
 
     PRIMARY KEY (`id`),
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
