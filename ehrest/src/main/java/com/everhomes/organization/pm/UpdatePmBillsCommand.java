@@ -9,9 +9,9 @@ import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
- * 	<li>insertList : 待插入账单列表,详见: {@link com.everhomes.organization.pm。UpdatePmBillsDto}</li>
- *	<li>updateList : 待更新账单列表,详见: {@link com.everhomes.organization.pm。UpdatePmBillsDto}</li>
- *	<li>deleteList : 待删除账单列表,详见: {@link com.everhomes.organization.pm。UpdatePmBillsDto}</li>
+ * 	<li>insertList : 待插入账单列表,详见: {@link com.everhomes.organization.pm.UpdatePmBillsDto}</li>
+ *	<li>updateList : 待更新账单列表,详见: {@link com.everhomes.organization.pm.UpdatePmBillsDto}</li>
+ *	<li>deleteList : 待删除账单列表,详见: {@link com.everhomes.organization.pm.UpdatePmBillsDto}</li>
  *</ul>
  *
  */
