@@ -1,4 +1,4 @@
-package version;
+package com.everhomes.version;
 
 import java.sql.Timestamp;
 import java.util.List;
