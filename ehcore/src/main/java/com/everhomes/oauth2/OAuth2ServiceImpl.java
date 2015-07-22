@@ -41,6 +41,11 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         if(user == null)
             return null;
 
+        return confirmAuthorization(user, cmd);
+    }
+   
+    @Override
+    public URI confirmAuthorization(User user, AuthorizationCommand cmd) {
         if(!"code".equals(cmd.getResponseType()))
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE, OAuth2ServiceErrorCode.ERROR_UNSUPPORTED_RESPONSE_TYPE,
                     "Only code response type is supported");
@@ -64,6 +69,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
                     "Invalid redirect URI parameter");
         }
     }
+    
 
     @Override
     public AccessToken grantAccessTokenFromAuthorizationCode(String code, String redirectUri, String clientId) {
