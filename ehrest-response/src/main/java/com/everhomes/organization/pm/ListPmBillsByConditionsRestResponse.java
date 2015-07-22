@@ -1,23 +1,24 @@
 // @formatter:off
-// generated at 2015-07-16 11:20:45
+// generated at 2015-07-22 15:04:22
 package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.ListPmBillsByConditionsCommandResponse;
+import java.util.List;
+import com.everhomes.organization.pm.PmBillsDTO;
 
 public class ListPmBillsByConditionsRestResponse extends RestResponseBase {
 
-    private ListPmBillsByConditionsCommandResponse response;
+    private List<PmBillsDTO> response;
 
     public ListPmBillsByConditionsRestResponse () {
     }
 
-    public ListPmBillsByConditionsCommandResponse getResponse() {
+    public List<PmBillsDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(ListPmBillsByConditionsCommandResponse response) {
+    public void setResponse(List<PmBillsDTO> response) {
         this.response = response;
     }
 }

@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-07-16 11:20:45
+// generated at 2015-07-22 15:04:22
 package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.ListPropPostCommandResponse;
+import com.everhomes.forum.ListPostCommandResponse;
 
 public class QueryOrgTopicsByCategoryRestResponse extends RestResponseBase {
 
-    private ListPropPostCommandResponse response;
+    private ListPostCommandResponse response;
 
     public QueryOrgTopicsByCategoryRestResponse () {
     }
 
-    public ListPropPostCommandResponse getResponse() {
+    public ListPostCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListPropPostCommandResponse response) {
+    public void setResponse(ListPostCommandResponse response) {
         this.response = response;
     }
 }
