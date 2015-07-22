@@ -11,7 +11,7 @@ import com.everhomes.address.AddressService;
 import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
@@ -35,7 +35,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.sharding.ShardingProvider;
 
-public class PropertyTest extends TestCaseBase {
+public class PropertyTest extends CoreServerTestCase {
     
     @Autowired
     private ShardingProvider shardingProvider;

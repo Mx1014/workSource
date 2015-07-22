@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.banner.admin.CreateBannerAdminCommand;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.launchpad.ItemGroup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 
-public class BannerTest extends TestCaseBase {
+public class BannerTest extends CoreServerTestCase {
     
     @Autowired
     private BannerService bannerService;

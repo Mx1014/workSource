@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,6 +79,8 @@ import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.AccountType;
+import com.everhomes.organization.BillingAccountHelper;
+import com.everhomes.organization.BillingAccountType;
 import com.everhomes.organization.GetOrgDetailCommand;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationBillType;
@@ -91,6 +94,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.OrganizationType;
+import com.everhomes.organization.TxType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
@@ -928,10 +932,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 
 			//判断公寓是否欠费
-			Condition condition = Tables.EH_ORGANIZATIONS.ADDRESS_ID.eq(dto.getAddressId()).and(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode()));
-			List<Organization> orgList = this.organizationProvider.findOrganizationByCondition(condition);
-			if(orgList != null && !orgList.isEmpty()){
-				CommunityPmBill bill =  this.propertyMgrProvider.findFamilyNewestBill(dto.getAddressId(), orgList.get(0).getId());
+			List<OrganizationCommunityDTO> orgCommunList = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+			if(orgCommunList != null && !orgCommunList.isEmpty()){
+				OrganizationDTO org = null;
+				for(OrganizationCommunityDTO orgCommun : orgCommunList){
+					org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommun.getOrganizationId(), OrganizationType.PM.getCode());
+					if(org != null)
+						break;
+				}
+
+				if(org == null){
+					LOGGER.error("the community has not pm organization");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+							"the community has not pm organization");
+				}
+
+				CommunityPmBill bill =  this.propertyMgrProvider.findFamilyNewestBill(dto.getAddressId(), org.getId());
 				if(bill != null){
 					BigDecimal paidAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
 					BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount()).add(paidAmount);
@@ -943,7 +959,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				else
 					dto.setOwed(OwedType.NO_OWED.getCode());
 			}
-
 
 			list.add(dto);
 		}
@@ -1846,6 +1861,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Unable to find the organization.");
 		}
+		
+		Calendar cal = Calendar.getInstance();
 
 		ListPmBillsByConditionsCommandResponse result = new ListPmBillsByConditionsCommandResponse();
 
@@ -1853,7 +1870,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 
 		if(organization != null){
-
 			Condition orgCommunCondition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
 			List<OrganizationCommunityDTO> orgCommunList = this.organizationProvider.findOrganizationCommunityByCondition(orgCommunCondition);
 			OrganizationCommunityDTO orgCommunObj = null;
@@ -1880,8 +1896,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			if(addressId != null){
 				condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId));
 			}
-			if(cmd.getDateStr() != null && !cmd.getDateStr().equals("")){
-				condition = condition.and(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(cmd.getDateStr()));
+
+			if(!(cmd.getBillDate() == null || cmd.getBillDate().equals(""))){
+				//cal.setTimeInMillis(Long.valueOf(cmd.getBillDate()));
+				//String str = cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1);
+				condition = condition.and(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(cmd.getBillDate()));
 			}
 
 			List<PmBillsDTO> billList = this.propertyMgrProvider.listCommunityPmBills(condition,offset,pageSize+1);
@@ -1917,6 +1936,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Unable to find the organization.");
 		}
+		
+		Calendar cal = Calendar.getInstance();
 
 		ArrayList resultList = new ArrayList();
 		try {
@@ -1934,7 +1955,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if(billList != null && billList.size() > 0){
 
 			TransactionStatus status = this.dbProvider.execute( s -> {
-
+				
 				for (CommunityPmBill bill : billList){
 					if(mappingList != null && mappingList.size() > 0)
 					{
@@ -1945,7 +1966,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 								bill.setOrganizationId(cmd.getOrganizationId());
 								bill.setEntityId(mapping.getAddressId());
 								bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
-								bill.setName(bill.getDateStr() + " " + bill.getAddress() + "物业账单");
+								
+								cal.setTimeInMillis(bill.getStartDate().getTime());
+								bill.setDateStr(cal.get(Calendar.YEAR) +"-"+ (cal.get(Calendar.MONTH)+1));
+								bill.setName(bill.getDateStr() + "月账单");
 
 								bill.setCreatorUid(user.getId());
 								bill.setCreateTime(timeStamp);
@@ -1984,6 +2008,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public int updatePmBills(UpdatePmBillsCommand cmd) {
+		
+		Calendar cal = Calendar.getInstance();
 
 		this.dbProvider.execute(s -> {
 
@@ -2011,63 +2037,58 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 
 			if(cmd.getInsertList() != null && !cmd.getInsertList().isEmpty()){
-
-				if(cmd.getOrganizationId() == null){
-					LOGGER.error("propterty organizationId paramter can not be null or empty");
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"propterty organizationId paramter can not be null or empty");
-				}
-				Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-				if(organization == null){
-					LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Unable to find the organization.");
-				}
-
 				User user  = UserContext.current().getUser();
 				Timestamp timeStamp = new Timestamp(new Date().getTime());
 
-				List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(cmd.getOrganizationId());
-
 				for (PmBillsDTO insertBill : cmd.getInsertList()){
+					if(insertBill.getOrganizationId() == null || insertBill.getEntityId() == null){
+						LOGGER.error("propterty organizationId or addressId paramter can not be null or empty");
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+								"propterty organizationId or addressId paramter can not be null or empty");
+					}
+					Organization organization = this.organizationProvider.findOrganizationById(insertBill.getOrganizationId());
+					if(organization == null){
+						LOGGER.error("Insert failure.Unable to find the organization.organizationId=" + insertBill.getOrganizationId());
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+								"Insert failure.Unable to find the organization.");
+					}
+
+					Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(insertBill.getEntityId())
+							.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(insertBill.getOrganizationId()));
+					List<CommunityAddressMapping> addressList = this.organizationProvider.findOrgAddressMappingByCondition(condition);
+					if(addressList == null || addressList.isEmpty()){
+						LOGGER.error("Insert failure.the address not find");
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+								"Insert failure.the address not find");
+					}
 
 					CommunityPmBill bill = ConvertHelper.convert(insertBill, CommunityPmBill.class);
+					bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
+					bill.setAddress(addressList.get(0).getOrganizationAddress());
+					bill.setCreatorUid(user.getId());
+					bill.setCreateTime(timeStamp);
+					
+					cal.setTimeInMillis(bill.getStartDate().getTime());
+					bill.setDateStr(cal.get(Calendar.YEAR) +"-"+ (cal.get(Calendar.MONTH)+1));
+					bill.setName(bill.getDateStr() + "月账单");
 
-					if(mappingList != null && mappingList.size() > 0)
-					{
-						for (CommunityAddressMapping mapping : mappingList)
-						{
-							if(bill != null && bill.getAddress().equals(mapping.getOrganizationAddress())){
-								Long addressId = mapping.getAddressId();
-								bill.setOrganizationId(cmd.getOrganizationId());
-								bill.setEntityId(mapping.getAddressId());
-								bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
-								bill.setName(bill.getDateStr() + " " + bill.getAddress() + "物业账单");
+					bill.setItemList(null);
 
-								bill.setCreatorUid(user.getId());
-								bill.setCreateTime(timeStamp);
-
-								bill.setItemList(null);
-
-								//往期欠款处理
-								if(bill.getOweAmount() == null){
-									CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(addressId, cmd.getOrganizationId());
-									if(beforeBill != null){
-										//payAmount为负
-										BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(beforeBill.getId());
-										BigDecimal oweAmount = beforeBill.getDueAmount().add(beforeBill.getOweAmount()).add(payAmount);
-										bill.setOweAmount(oweAmount);
-									}
-									else
-										bill.setOweAmount(BigDecimal.ZERO);
-								}
-								createPropBill(bill);
-								break;
-							}
+					//往期欠款处理
+					if(bill.getOweAmount() == null){
+						CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), cmd.getOrganizationId());
+						if(beforeBill != null){
+							//payAmount为负
+							BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(beforeBill.getId());
+							BigDecimal oweAmount = beforeBill.getDueAmount().add(beforeBill.getOweAmount()).add(payAmount);
+							bill.setOweAmount(oweAmount);
 						}
+						else
+							bill.setOweAmount(BigDecimal.ZERO);
 					}
+					createPropBill(bill);
+					break;
 				}
-
 			}
 
 			return s;
@@ -2106,25 +2127,52 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				if(addressMappingList != null && !addressMappingList.isEmpty()){
 					addressId = addressMappingList.get(0).getAddressId();
 				}
+				else
+					return null;
 			}
 
-			Condition condition = Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ACCOUNT_ID.eq(organization.getId());
-
+			Condition condition = Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(organization.getId());
 			if(addressId != null){
-				condition = condition.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.TARGET_ACCOUNT_ID.eq(addressId));
+				FamilyBillingAccount fAccount =this.familyProvider.findFamilyBillingAccountByOwnerId(addressId);
+				if(fAccount == null){
+					LOGGER.error("Can not find the FamilyBillingAccount by addressId");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Can not find the FamilyBillingAccount by addressId");
+				}
+				condition = condition.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.TARGET_ACCOUNT_ID.eq(fAccount.getId()));
 			}
-			/*if(cmd.getCreateTime() != null && !cmd.getCreateTime().equals("")){
-				condition = condition.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.eq(cmd.getCreateTime()));
-			}*/
+			
+			if(!(cmd.getStartTime() == null || cmd.getStartTime().equals("") || cmd.getEndTime() != null || cmd.getEndTime().equals(""))){
+				Timestamp startTimestamp = new Timestamp(Long.valueOf(cmd.getStartTime()));
+				Timestamp endTimestamp = new Timestamp(Long.valueOf(cmd.getEndTime()));
+				condition = condition.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTimestamp))
+						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(endTimestamp));
+			}
 
-			List<OrganizationBillingTransactions> billTransactionList = this.organizationProvider.listOrganizationBillingTransactions(condition,offset,pageSize+1);
-
-			if(billTransactionList != null && billTransactionList.size() == pageSize+1){
-				billTransactionList.remove(billTransactionList.size()-1);
+			List<OrganizationBillingTransactions> orgbillTxList = this.organizationProvider.listOrganizationBillingTransactions(condition,offset,pageSize+1);
+			if(orgbillTxList != null && orgbillTxList.size() == pageSize+1){
+				orgbillTxList.remove(orgbillTxList.size()-1);
 				result.setNextPageOffset(cmd.getPageOffset()+1);
 			}
-
-			result.setRequests(billTransactionList);
+			//设置交易的家庭地址和业主
+			for(OrganizationBillingTransactions orgbillTx : orgbillTxList){
+				FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountById(orgbillTx.getTargetAccountId());
+				if(fAccount != null){
+					Condition addresscondition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(orgbillTx.getOwnerId())
+							.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(fAccount.getOwnerId()));
+					List<CommunityAddressMapping> addressMappingList = this.organizationProvider.findOrgAddressMappingByCondition(addresscondition);
+					if(addressMappingList != null && !addressMappingList.isEmpty()){
+						List<CommunityPmOwner> orgOwnerList = this.organizationProvider.listOrganizationOwnerByOrgIdAndAddressId(addressMappingList.get(0).getOrganizationId(),addressMappingList.get(0).getAddressId());
+						if(orgOwnerList != null && !orgOwnerList.isEmpty()){
+							orgbillTx.setAddressId(addressMappingList.get(0).getAddressId());
+							orgbillTx.setAddress(addressMappingList.get(0).getOrganizationAddress());
+							orgbillTx.setOwnerName(orgOwnerList.get(0).getContactName());
+							orgbillTx.setOwnerTelephone(orgOwnerList.get(0).getContactToken());
+						}
+					}
+				}
+			}
+			result.setRequests(orgbillTxList);
 		}
 
 		return result;
@@ -2151,7 +2199,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ListOrgBillingTransactionsByConditionCommandResponse result = new ListOrgBillingTransactionsByConditionCommandResponse();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-
+		
 		if(organization != null){
 
 			List<CommunityAddressMapping> addressMappingList = null;
@@ -2246,6 +2294,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 				List<FamilyBillingTransactionDTO> transactionList = new ArrayList<FamilyBillingTransactionDTO>();
 				familyTransactionList.stream().map(r -> {
+					r.setChargeAmount(r.getChargeAmount().negate());
 					transactionList.add(ConvertHelper.convert(r, FamilyBillingTransactionDTO.class));
 					return null;
 				}).toArray();
@@ -2269,6 +2318,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty familyId or billDate paramter can not be null or empty");
 		}
+		
+		/*Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(cmd.getBillDate().getTime());
+		String dateStr = cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1);*/
 
 		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
 		if(family != null){
@@ -2285,12 +2338,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public PmBillsDTO findFamilyBillAndPayByFamilyIdAndTime(FindFamilyBillAndPayByFamilyIdAndTimeCommand cmd) {
 
-		if(cmd.getFamilyId() == null || cmd.getFamilyId().equals("") || cmd.getBillDate() == null || cmd.getBillDate().equals("")){
+		if(cmd.getFamilyId() == null || cmd.getFamilyId().equals("") || cmd.getBillDate() == null){
 			LOGGER.error("propterty familyId or billDate paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty familyId or billDate paramter can not be null or empty");
 		}
 
+		/*Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(cmd.getBillDate().getTime());
+		String dateStr = cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1);*/
+		
 		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
 		if(family != null){
 			CommunityPmBill communityPmBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),cmd.getBillDate());
@@ -2332,6 +2389,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 
 		ListFamilyBillAndPayByFamilyIdCommandResponse response = new ListFamilyBillAndPayByFamilyIdCommandResponse();
+		
+		/*Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(cmd.getBillDate().getTime());
+		String dateStr = cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1);*/
+		
 		response.setBillDate(cmd.getBillDate());
 
 		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
@@ -2340,7 +2402,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the family is not exist");
 		}
-		
+
 		Condition condition = Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(family.getIntegralTag1());
 		List<PmBillsDTO> billList = this.propertyMgrProvider.listCommunityPmBills(condition, offset, pageSize+1);
 
@@ -2358,6 +2420,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
 					BigDecimal payedAmount = BigDecimal.ZERO;
 					for(FamilyBillingTransactions payRecord : payList){
+						payRecord.setChargeAmount(payRecord.getChargeAmount().negate());
 						payDtoList.add(ConvertHelper.convert(payRecord, FamilyBillingTransactionDTO.class));
 						payedAmount = payedAmount.add(payRecord.getChargeAmount());
 					}
@@ -2414,7 +2477,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
 				if(fAccount == null){
 					fAccount = new FamilyBillingAccount();
-					fAccount.setAccountNumber("1");
+					fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
 					fAccount.setBalance(BigDecimal.ZERO);
 					fAccount.setCreateTime(timestamp);
 					fAccount.setOwnerId(bill.getEntityId());
@@ -2422,20 +2485,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 
 				OrganizationBillingAccount oAccount = this.organizationProvider.findOrganizationBillingAccount(bill.getOrganizationId());
-				if(oAccount != null){
-					oAccount.setAccountNumber("1");
+				if(oAccount == null){
+					oAccount = new OrganizationBillingAccount();
+					oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
 					oAccount.setBalance(BigDecimal.ZERO);
 					oAccount.setCreateTime(timestamp);
 					oAccount.setOwnerId(bill.getOrganizationId());
 					this.organizationProvider.createOrganizationBillingAccount(oAccount);
 				}
+				
+				Long timeMills = Long.valueOf(cmd.getPayDate());
+				Timestamp createTimeStamp = new Timestamp(timeMills);
 
 				FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
 				familyTx.setBillId(bill.getId());
 				familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
 				familyTx.setChargeAmount(cmd.getPayAmount().negate());
-				familyTx.setCreateTime(timestamp);
-				familyTx.setDescription(cmd.getDescription());
+				familyTx.setCreateTime(createTimeStamp);
+				familyTx.setDescription(cmd.getDescription() +" "+ cmd.getOwnerName() +" "+ cmd.getTelephone());
 				familyTx.setOperatorUid(user.getId());
 				familyTx.setOwnerAccountId(fAccount.getId());
 				familyTx.setOwnerId(bill.getEntityId());
@@ -2453,9 +2520,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
 				orgTx.setBillId(bill.getId());
 				orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
-				orgTx.setChargeAmount(cmd.getPayAmount().negate());
-				orgTx.setCreateTime(timestamp);
-				orgTx.setDescription(cmd.getDescription());
+				orgTx.setChargeAmount(cmd.getPayAmount());
+				orgTx.setCreateTime(createTimeStamp);
+				orgTx.setDescription(cmd.getDescription() +" "+ cmd.getOwnerName() +" "+ cmd.getTelephone());
 				orgTx.setOperatorUid(user.getId());
 				orgTx.setOwnerAccountId(oAccount.getId());
 				orgTx.setOwnerId(bill.getOrganizationId());
@@ -2470,15 +2537,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				orgTx.setVendor(cmd.getVendor());
 				this.organizationProvider.createOrganizationBillingTransaction(orgTx);
 
-				oAccount.setBalance(oAccount.getBalance().add(cmd.getPayAmount()));
-				oAccount.setUpdateTime(timestamp);
-				this.organizationProvider.updateOrganizationBillingAccount(oAccount);
+				if(cmd.getTxType() == TxType.ONLINE.getCode()){//线上支付,将金额存到物业账号中
+					oAccount.setBalance(oAccount.getBalance().add(cmd.getPayAmount()));
+					oAccount.setUpdateTime(timestamp);
+					this.organizationProvider.updateOrganizationBillingAccount(oAccount);
+				}
 
-				BigDecimal payMoreAmount = cmd.getPayAmount().subtract(totalAmount);
+				/*BigDecimal payMoreAmount = cmd.getPayAmount().subtract(totalAmount);
 				if(payMoreAmount.compareTo(BigDecimal.ZERO) > 0){
+					fAccount.setUpdateTime(timestamp);
 					fAccount.setBalance(fAccount.getBalance().add(payMoreAmount));
 					this.familyProvider.updateFamilyBillingAccount(fAccount);
-				}
+				}*/
 
 				return true;
 			});

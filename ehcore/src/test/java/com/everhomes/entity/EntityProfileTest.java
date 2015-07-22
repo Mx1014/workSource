@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqDiscover;
 import com.everhomes.jooq.JooqMetaInfo;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 
-public class EntityProfileTest extends TestCaseBase {
+public class EntityProfileTest extends CoreServerTestCase {
     @Autowired
     private DbProvider dbProvider;
     

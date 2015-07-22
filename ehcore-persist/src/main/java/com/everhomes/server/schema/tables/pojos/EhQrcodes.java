@@ -11,11 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQrcodes implements java.io.Serializable {
 
-	private static final long serialVersionUID = 281269884;
+	private static final long serialVersionUID = 1268923160;
 
 	private java.lang.Long     id;
 	private java.lang.String   description;
 	private java.lang.Long     viewCount;
+	private java.lang.String   logoUri;
 	private java.sql.Timestamp expireTime;
 	private java.lang.Byte     actionType;
 	private java.lang.String   actionData;
@@ -29,6 +30,7 @@ public class EhQrcodes implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.String   description,
 		java.lang.Long     viewCount,
+		java.lang.String   logoUri,
 		java.sql.Timestamp expireTime,
 		java.lang.Byte     actionType,
 		java.lang.String   actionData,
@@ -39,6 +41,7 @@ public class EhQrcodes implements java.io.Serializable {
 		this.id = id;
 		this.description = description;
 		this.viewCount = viewCount;
+		this.logoUri = logoUri;
 		this.expireTime = expireTime;
 		this.actionType = actionType;
 		this.actionData = actionData;
@@ -69,6 +72,14 @@ public class EhQrcodes implements java.io.Serializable {
 
 	public void setViewCount(java.lang.Long viewCount) {
 		this.viewCount = viewCount;
+	}
+
+	public java.lang.String getLogoUri() {
+		return this.logoUri;
+	}
+
+	public void setLogoUri(java.lang.String logoUri) {
+		this.logoUri = logoUri;
 	}
 
 	public java.sql.Timestamp getExpireTime() {

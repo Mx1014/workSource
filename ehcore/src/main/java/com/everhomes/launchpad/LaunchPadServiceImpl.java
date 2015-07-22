@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
@@ -29,6 +33,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.forum.PostEntityTag;
 import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
@@ -37,6 +42,9 @@ import com.everhomes.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommand;
 import com.everhomes.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
+import com.everhomes.organization.GetOrgDetailCommand;
+import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.organization.pm.PropCommunityContactDTO;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -54,6 +62,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.visibility.VisibilityScope;
+import com.everhomes.visibility.VisibleRegionType;
 import com.google.gson.JsonObject;
 
 
@@ -83,9 +93,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private PropertyMgrService propertyMgrService;
     @Autowired
     private BusinessProvider businessProvider;
+    @Autowired
+    private OrganizationService organizationService;
 
     @Override
-    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd){
+    public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
         if(cmd.getItemLocation() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid itemLocation paramter,itemLocation is null");
@@ -111,7 +123,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
             result = getBusinessItems(cmd,community);
         }else{
-            result = getLaunchPadItems(cmd,community);
+            result = getLaunchPadItems(cmd,community,request);
         }
         response.setLaunchPadItems(result);
         long endTime = System.currentTimeMillis();
@@ -167,7 +179,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         
     }
 
-    private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community){
+    private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community, HttpServletRequest request){
         User user = UserContext.current().getUser();
         long userId = user.getId();
         String token = UserContext.current().getLogin().getLoginToken().getTokenString();
@@ -197,7 +209,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         try{
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
-                itemDTO.setActionData(parserJson(token,userId, community.getId(), r));
+                itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
                 itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 result.add(itemDTO);
                
@@ -213,34 +225,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     @SuppressWarnings("unchecked")
-    private String parserJson(String userToken,long userId, long commnunityId,LaunchPadItem launchPadItem) {
+    private String parserJson(String userToken,long userId, long communityId,LaunchPadItem launchPadItem, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         try{
+            //use handler instead of??
             if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
                 jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
-                if(launchPadItem.getItemGroup().equals(LaunchPadConstants.GROUP_CALLPHONES)){ 
-                    if(jsonObject.get(LaunchPadConstants.CALLPHONES) != null ){
-                        
-                        String location = launchPadItem.getItemLocation();
-                        String organizationType = location.substring(location.lastIndexOf("/") + 1).toUpperCase();
-                        ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
-                        cmd.setCommunityId(commnunityId);
-                        cmd.setOrganizationType(organizationType);
-                        List<String> contacts = new ArrayList<String>();
-                        List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
-                        if(dtos != null && !dtos.isEmpty()){
-                            dtos.forEach(r ->{
-                                if(r.getContactType() == IdentifierType.MOBILE.getCode()){
-                                    contacts.add(r.getContactToken());
-                                }
-                            });
-                        }
-                        jsonObject.put(LaunchPadConstants.CALLPHONES,contacts);
-                    }
+                if(launchPadItem.getActionType() == ActionType.PHONE_CALL.getCode() &&
+                        launchPadItem.getItemGroup().equals(LaunchPadConstants.GROUP_CALLPHONES)){ 
+                    jsonObject = processPhoneCall(communityId, jsonObject, launchPadItem);
                 }
                 
-                if(launchPadItem.getActionType() == ActionType.THIRDPART_URL.getCode()){
-                    Community community = communityProvider.findCommunityById(commnunityId);
+                else if(launchPadItem.getActionType() == ActionType.THIRDPART_URL.getCode()){
+                    Community community = communityProvider.findCommunityById(communityId);
                     long cityId = community == null ? 0 : community.getCityId();
                     jsonObject.put(LaunchPadConstants.TOKEN, userToken);
                     String url = (String) jsonObject.get(LaunchPadConstants.URL);
@@ -248,16 +245,85 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                         url = url + "&userId=" + userId + "&cityId=" + cityId;
                     }
                     jsonObject.put(LaunchPadConstants.URL, url);
-                  }
+                }
+                else if(launchPadItem.getActionType() == ActionType.LAUNCH_APP.getCode()){
+                    jsonObject = processLaunchApp(jsonObject,request);
+                }
+                else if(launchPadItem.getActionType() == ActionType.POST_NEW.getCode()){
+                    jsonObject = processPostNew(communityId,jsonObject,launchPadItem);
+                }
             }
-            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, commnunityId);
+            if(jsonObject != null)
+                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
         }catch(Exception e){
-            LOGGER.error("Parser json is error,userToken=" + userToken + ",communityId=" + commnunityId,e.getMessage());
+            LOGGER.error("Parser json is error,userToken=" + userToken + ",communityId=" + communityId,e.getMessage());
         }
         
         return jsonObject.toJSONString();
     }
+
+    @SuppressWarnings("unchecked")
+    private JSONObject processPhoneCall(long communityId, JSONObject actionDataJson, LaunchPadItem launchPadItem){
+        if(actionDataJson.get(LaunchPadConstants.CALLPHONES) != null ){
+            
+            String location = launchPadItem.getItemLocation();
+            if(location.lastIndexOf("/") == -1)
+                return actionDataJson;
+            String organizationType = location.substring(location.lastIndexOf("/") + 1).toUpperCase();
+            ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
+            cmd.setCommunityId(communityId);
+            cmd.setOrganizationType(organizationType);
+            List<String> contacts = new ArrayList<String>();
+            List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
+            if(dtos != null && !dtos.isEmpty()){
+                dtos.forEach(r ->{
+                    if(r.getContactType() == IdentifierType.MOBILE.getCode()){
+                        contacts.add(r.getContactToken());
+                    }
+                });
+            }
+            actionDataJson.put(LaunchPadConstants.CALLPHONES,contacts);
+        }
+        return actionDataJson;
+    }
     
+    private JSONObject processLaunchApp(JSONObject actionDataJson, HttpServletRequest request){
+        String header = request.getHeader("user-agent");
+        //"androidEmbedded_json":{"package":"mqq:open","download":"www.xx.com"}
+        if(header.contains("Android")){
+            JSONObject androidJson =  (JSONObject) actionDataJson.get(LaunchPadConstants.ANDROID_EMBEDDED);
+            if(androidJson != null)
+                return  androidJson;
+        }else if(header.contains("iOS")){
+            JSONObject iosJson =  (JSONObject)actionDataJson.get(LaunchPadConstants.IOS_EMBEDDED);
+            if(iosJson != null)
+                return iosJson;
+        }
+        return actionDataJson;
+    }
+    
+    
+    @SuppressWarnings("unchecked")
+    private JSONObject processPostNew(long communityId, JSONObject actionDataJson, LaunchPadItem launchPadItem) {
+        String entityTag = (String)actionDataJson.get(LaunchPadConstants.ENTITY_TAG);
+        if(entityTag.equalsIgnoreCase(PostEntityTag.USER.getCode())){
+            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY);
+            actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
+            return actionDataJson;
+        }
+        GetOrgDetailCommand cmd = new GetOrgDetailCommand();
+        cmd.setCommunityId(communityId);
+        cmd.setOrganizationType(entityTag);
+        OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
+        if(organization == null){
+            LOGGER.error("Organization is not exists,communityId=" + communityId);
+            return actionDataJson;
+        }
+        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION);
+        actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
+        
+        return actionDataJson;
+    }
     
     private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
         Collections.sort(result, new Comparator<LaunchPadItemDTO>(){

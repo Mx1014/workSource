@@ -1028,8 +1028,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)))
-				//.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
-				.orderBy(Tables.EH_ORGANIZATION_BILLS.DATE_STR.desc())
+				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.desc())
 				.fetch();
 
 		if(records != null && !records.isEmpty())
@@ -1058,7 +1057,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
-				.orderBy(Tables.EH_ORGANIZATION_BILLS.DATE_STR.desc())
+				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.desc())
 				.fetch();
 
 		if(records != null && !records.isEmpty())

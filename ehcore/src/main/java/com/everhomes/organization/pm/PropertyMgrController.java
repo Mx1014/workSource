@@ -612,10 +612,10 @@ public class PropertyMgrController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /pm/listPropAppartmentsByKeyword</b>
+	 * <b>URL: /pm/listPropApartmentsByKeyword</b>
 	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
 	 */
-	@RequestMapping("listPropAppartmentsByKeyword")
+	@RequestMapping("listPropApartmentsByKeyword")
 	@RestReturn(value=PropFamilyDTO.class, collection=true)
 	public RestResponse listPropApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
 		List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
@@ -1081,7 +1081,7 @@ public class PropertyMgrController extends ControllerBase {
 	
 //支付
 	/**
-	 * <b>URL: /pm/payPmBillByAddress
+	 * <b>URL: /pm/payPmBillByFamilyId
 	 * <p>缴费
 	 */
 	@RequestMapping("payPmBillByFamilyId")

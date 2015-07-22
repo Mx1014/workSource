@@ -2,6 +2,19 @@ package com.everhomes.organization;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ *	<li>createTime : 缴费时间</li>
+ *	<li>address : 楼栋门牌</li>
+ *	<li>ownerName : 业主姓名</li>
+ *	<li>ownerTelephone : 业主电话</li>
+ *	<li>chargeAmount : 实付金额</li>
+ *	<li>description : 缴费说明</li>
+ *	
+ *</ul>
+ *
+ */
 public class OrganizationBillingTransactions {
 	
 	private java.lang.Long       id;
@@ -22,6 +35,37 @@ public class OrganizationBillingTransactions {
 	private java.lang.Long       operatorUid;
 	private java.lang.Byte       paidType;
 	private java.sql.Timestamp   createTime;
+	
+	//expand
+	private Long addressId;
+	private String address;
+	private String ownerTelephone;
+	private String ownerName;
+	
+	public Long getAddressId() {
+		return addressId;
+	}
+	public String getOwnerTelephone() {
+		return ownerTelephone;
+	}
+	public void setOwnerTelephone(String ownerTelephone) {
+		this.ownerTelephone = ownerTelephone;
+	}
+	public String getOwnerName() {
+		return ownerName;
+	}
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
 	public java.lang.Long getId() {
 		return id;
 	}

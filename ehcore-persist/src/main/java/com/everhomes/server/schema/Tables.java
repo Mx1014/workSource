@@ -467,4 +467,19 @@ public class Tables {
 	 * The table ehcore.eh_user_scores
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserScores EH_USER_SCORES = com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES;
+
+	/**
+	 * The table ehcore.eh_versioned_content
+	 */
+	public static final com.everhomes.server.schema.tables.EhVersionedContent EH_VERSIONED_CONTENT = com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT;
+
+	/**
+	 * The table ehcore.eh_version_realm
+	 */
+	public static final com.everhomes.server.schema.tables.EhVersionRealm EH_VERSION_REALM = com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM;
+
+	/**
+	 * The table ehcore.eh_version_upgrade_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhVersionUpgradeRules EH_VERSION_UPGRADE_RULES = com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES;
 }

@@ -26,7 +26,6 @@ public class OAuth2UserContext {
         s_oauth2UserContexts.set(null);
     }
 
-
     public OAuth2AuthenticationType getAuthenticationType() {
         return authenticationType;
     }

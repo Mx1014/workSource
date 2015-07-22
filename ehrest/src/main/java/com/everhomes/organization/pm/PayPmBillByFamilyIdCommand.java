@@ -31,9 +31,14 @@ public class PayPmBillByFamilyIdCommand {
 	
 	private String description;
 	
+	private String ownerName;
+	private String telephone;
+	
 	//other
-	private Byte txType;
 	private String vendor;
+	@NotNull
+	private Byte txType;
+	@NotNull
 	private Byte paidType;
 	
 	
@@ -79,6 +84,19 @@ public class PayPmBillByFamilyIdCommand {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public String getOwnerName() {
+		return ownerName;
+	}
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
+	public String getTelephone() {
+		return telephone;
+	}
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
 	}
 	@Override
 	public String toString() {

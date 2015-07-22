@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(initializers = { PropertyInitializer.class },
     loader = AnnotationConfigContextLoader.class)
-public class TestCaseBase extends TestCase {
+public class CoreServerTestCase extends TestCase {
     @Configuration
     @ComponentScan(basePackages = {
             "com.everhomes"

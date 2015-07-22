@@ -3,9 +3,9 @@ package com.everhomes.queue;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 
-public class DispatchQueueTest extends TestCaseBase {
+public class DispatchQueueTest extends CoreServerTestCase {
 
     @Autowired
     private DispatchQueueProvider queueProvider;

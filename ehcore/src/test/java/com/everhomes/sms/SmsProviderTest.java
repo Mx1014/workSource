@@ -6,9 +6,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.everhomes.junit.TestCaseBase;
+import com.everhomes.junit.CoreServerTestCase;
 
-public class SmsProviderTest extends TestCaseBase {
+public class SmsProviderTest extends CoreServerTestCase {
     @Autowired
     @Qualifier("smsProvider")
     SmsProvider smsProvider;

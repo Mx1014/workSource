@@ -3,7 +3,10 @@ package com.everhomes.util.excel.handler;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,33 +160,33 @@ public class PropMgrBillHandler
 
 	public static List<CommunityPmBill> processorPmBills(ArrayList resultList) {
 		List<CommunityPmBill> billList = new ArrayList<CommunityPmBill>();
-
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		
 		if(resultList != null && resultList.size() > 0)
 		{
 			int rowCount = resultList.size();
-
 			int startRow = 1;
-			int monthRow = 1;
-
-			RowResult monthResult = (RowResult)resultList.get(monthRow);
 
 			for (int rowIndex = startRow; rowIndex < rowCount ; rowIndex++) {
-
 				RowResult rowResult = (RowResult)resultList.get(rowIndex);
-				
 				if(rowResult.getB() == null)
 					continue;
 				
 				//生成账单总信息
 				CommunityPmBill bill = new CommunityPmBill();
-				bill.setAddress(rowResult.getB());
-				bill.setDateStr(monthResult.getA());
-				bill.setDescription(rowResult.getE());
-				
 				bill.setId(null);
-				
-				bill.setDueAmount(rowResult.getC() == null ? null:new BigDecimal(rowResult.getC()));
-				bill.setOweAmount(rowResult.getD() == null ? null:new BigDecimal(rowResult.getD()));
+
+				try {
+					bill.setStartDate(new Date(format.parse(rowResult.getA()).getTime()));
+					bill.setEndDate(new Date(format.parse(rowResult.getB()).getTime()));
+					bill.setPayDate(new Date(format.parse(rowResult.getC()).getTime()));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				bill.setAddress(rowResult.getD());
+				bill.setDueAmount(rowResult.getE() == null ? null:new BigDecimal(rowResult.getE()));
+				bill.setOweAmount(rowResult.getF() == null ? null:new BigDecimal(rowResult.getF()));
+				bill.setDescription(rowResult.getG());
 				
 				billList.add(bill);
 			}

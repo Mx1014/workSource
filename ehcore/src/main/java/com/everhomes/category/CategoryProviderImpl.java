@@ -47,16 +47,16 @@ public class CategoryProviderImpl implements CategoryProvider {
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         
-//        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
-//        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
-//        query.setRecord(record);
-//        query.setReturning(Tables.EH_CATEGORIES.ID);
-//        query.execute();
-//        
-//        category.setId(query.getReturnedRecord().getId());
+        EhCategoriesRecord record = ConvertHelper.convert(category, EhCategoriesRecord.class);
+        InsertQuery<EhCategoriesRecord> query = context.insertQuery(Tables.EH_CATEGORIES);
+        query.setRecord(record);
+        query.setReturning(Tables.EH_CATEGORIES.ID);
+        query.execute();
         
-        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
-        dao.insert(category);
+        category.setId(query.getReturnedRecord().getId());
+        
+//        EhCategoriesDao dao = new EhCategoriesDao(context.configuration());
+//        dao.insert(category);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCategories.class, null);
     }

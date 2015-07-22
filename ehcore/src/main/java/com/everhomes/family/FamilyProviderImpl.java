@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Result;
@@ -34,6 +35,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
@@ -54,6 +57,7 @@ import com.everhomes.server.schema.tables.daos.EhFamilyBillingTransactionsDao;
 import com.everhomes.server.schema.tables.pojos.EhFamilyBillingAccounts;
 import com.everhomes.server.schema.tables.pojos.EhFamilyBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhFamilyBillingAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.UserGroup;
@@ -627,7 +631,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 						records.stream().map( r -> {
 							list.add(r.value1());
 							return null;
-						});
+						}).toArray();
 					}
 
 					return true;
@@ -756,8 +760,13 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class));
 
-		EhFamilyBillingAccountsDao dao = new EhFamilyBillingAccountsDao(context.configuration());
-		dao.insert(ConvertHelper.convert(fAccount, EhFamilyBillingAccounts.class));
+		InsertQuery<EhFamilyBillingAccountsRecord> query = context.insertQuery(Tables.EH_FAMILY_BILLING_ACCOUNTS);
+		query.setRecord(ConvertHelper.convert(fAccount, EhFamilyBillingAccountsRecord.class));
+		query.setReturning(Tables.EH_FAMILY_BILLING_ACCOUNTS.ID);
+		query.execute();
+		
+		fAccount.setId(query.getReturnedRecord().getId());
+		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhFamilyBillingAccounts.class, null);
 	}
 
 	@Override
@@ -767,6 +776,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		EhFamilyBillingTransactionsDao dao = new EhFamilyBillingTransactionsDao(context.configuration());
 		dao.insert(ConvertHelper.convert(familyTx, EhFamilyBillingTransactions.class));
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhFamilyBillingTransactions.class, null);
 
 	}
 
@@ -776,7 +787,27 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		EhFamilyBillingAccountsDao dao = new EhFamilyBillingAccountsDao(context.configuration());
 		dao.update(ConvertHelper.convert(fAccount, EhFamilyBillingAccounts.class));
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhFamilyBillingAccounts.class, null);
 
+	}
+
+	@Override
+	public FamilyBillingAccount findFamilyBillingAccountById(
+			Long id) {
+		List<FamilyBillingAccount> list = new ArrayList<FamilyBillingAccount>();
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+				(DSLContext context, Object object) -> {
+					EhFamilyBillingAccountsDao dao = new EhFamilyBillingAccountsDao(context.configuration());
+					EhFamilyBillingAccounts account = dao.findById(id);
+					if(account != null)
+						list.add(ConvertHelper.convert(account, FamilyBillingAccount.class));
+					return true;
+				});
+		
+		if(list != null && !list.isEmpty())
+			return list.get(0);
+		return null;
 	}
 
 
