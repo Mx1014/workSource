@@ -20,11 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import ch.qos.logback.core.joran.conditional.ElseAction;
-
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
-import com.everhomes.business.BusinessService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -54,7 +51,6 @@ import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserFavoriteDTO;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
@@ -62,12 +58,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.visibility.VisibilityScope;
 import com.everhomes.visibility.VisibleRegionType;
-import com.google.gson.JsonObject;
-
-
-
+import com.everhomes.util.WebTokenGenerator;
 
 
 
@@ -182,7 +174,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community, HttpServletRequest request){
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        String token = UserContext.current().getLogin().getLoginToken().getTokenString();
+        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
         List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L);
         List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId());

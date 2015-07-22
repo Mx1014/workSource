@@ -20,6 +20,7 @@ import com.everhomes.rpc.PduFrame;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class ContentServerServiceImpl implements ContentServerService {
@@ -133,8 +134,8 @@ public class ContentServerServiceImpl implements ContentServerService {
         }
         Map<Long, ContentServer> cache = getServersHash();
         final String token[] = new String[1];
-        if(UserContext.current().getLogin()!=null)
-            token[0] = UserContext.current().getLogin().getLoginToken().getTokenString();
+        if(UserContext.current().getLogin() != null) 
+            token[0] = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token[0]))
                 .collect(Collectors.toList());
     }
@@ -143,8 +144,8 @@ public class ContentServerServiceImpl implements ContentServerService {
     public String parserUri(String uri, String ownerType, Long ownerId) {
         Map<Long, ContentServer> cache = getServersHash();
         String token =null;
-        if(UserContext.current().getLogin()!=null)
-            token = UserContext.current().getLogin().getLoginToken().getTokenString();
+        if(UserContext.current().getLogin() != null)
+            token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         return parserSingleUri(uri, cache, ownerType, ownerId, token);
     }
 

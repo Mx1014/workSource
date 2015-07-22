@@ -5,10 +5,12 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.Version;
+import com.everhomes.util.WebTokenGenerator;
 
 public class UserServiceTest extends CoreServerTestCase {
     
@@ -90,9 +92,9 @@ public class UserServiceTest extends CoreServerTestCase {
     @Ignore @Test
     public void testLoginToken() {
         LoginToken token = new LoginToken(1, 1, 100);
-        String tokenString = token.getTokenString();
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
         
-        LoginToken token2 = LoginToken.fromTokenString(tokenString);
+        LoginToken token2 = WebTokenGenerator.getInstance().fromWebToken(tokenString, LoginToken.class);
         Assert.assertTrue(token.getUserId() == token2.getUserId());
         Assert.assertTrue(token.getLoginId() == token2.getLoginId());
         Assert.assertTrue(token.getLoginInstanceNumber() == token2.getLoginInstanceNumber());
@@ -111,9 +113,9 @@ public class UserServiceTest extends CoreServerTestCase {
     public void testSignupToken() {
         SignupToken token = new SignupToken(100, IdentifierType.MOBILE, "140812345567");
         
-        String tokenString = token.getTokenString();
+        String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
         
-        SignupToken token2 = SignupToken.fromTokenString(tokenString);
+        SignupToken token2 = WebTokenGenerator.getInstance().fromWebToken(tokenString, SignupToken.class);
         Assert.assertTrue(token.getUserId() == token2.getUserId());
         Assert.assertTrue(token.getIdentifierType() == token2.getIdentifierType());
         Assert.assertTrue(token.getIdentifierToken().equals(token2.getIdentifierToken()));
@@ -125,7 +127,7 @@ public class UserServiceTest extends CoreServerTestCase {
         cmd.setType("mobile");
         cmd.setToken("14081234567");
         SignupToken token = this.userService.signup(cmd);
-        System.out.println("Signup token: " + token.getTokenString());
+        System.out.println("Signup token: " + WebTokenGenerator.getInstance().toWebToken(token));
     }
     
     @Ignore @Test
@@ -137,12 +139,12 @@ public class UserServiceTest extends CoreServerTestCase {
         UserLogin login = this.userService.verifyAndLogon(cmd);
         
         LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
-        System.out.println("Login token: " + loginToken.getTokenString());
+        System.out.println("Login token: " + WebTokenGenerator.getInstance().toWebToken(loginToken));
     }
     
     @Ignore @Test
     public void testLoginByToken() {
-        LoginToken token = LoginToken.fromTokenString("eyJ1c2VySWQiOjEsImxvZ2luSWQiOjEsImxvZ2luSW5zdGFuY2VOdW1iZXIiOi0xMzY5Njg0ODEzfQ");
+        LoginToken token = WebTokenGenerator.getInstance().fromWebToken("eyJ1c2VySWQiOjEsImxvZ2luSWQiOjEsImxvZ2luSW5zdGFuY2VOdW1iZXIiOi0xMzY5Njg0ODEzfQ", LoginToken.class);
         this.userService.logonByToken(token);
     }
     

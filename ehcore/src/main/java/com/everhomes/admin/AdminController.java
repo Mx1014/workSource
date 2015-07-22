@@ -74,6 +74,7 @@ import com.everhomes.util.ReflectionHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.ZipHelper;
 
 /**
@@ -533,7 +534,7 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
             
         LOGGER.info("Register login connection. border id: " + borderId + ", login token: " + loginToken);
-        LoginToken token = LoginToken.fromTokenString(loginToken);
+        LoginToken token = WebTokenGenerator.getInstance().fromWebToken(loginToken, LoginToken.class);
         if(token == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
         
@@ -554,7 +555,7 @@ public class AdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
         
         LOGGER.info("Register login connection. border id: " + borderId + ", login token: " + loginToken);
-        LoginToken token = LoginToken.fromTokenString(loginToken);
+        LoginToken token = WebTokenGenerator.getInstance().fromWebToken(loginToken, LoginToken.class);
         if(token == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unrecoginized login token");
         

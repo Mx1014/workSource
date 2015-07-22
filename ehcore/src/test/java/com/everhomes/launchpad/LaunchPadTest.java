@@ -34,6 +34,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserFavorite;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.WebTokenGenerator;
 
 public class LaunchPadTest extends CoreServerTestCase {
     
@@ -106,7 +107,7 @@ public class LaunchPadTest extends CoreServerTestCase {
     public void getItemList(){
         
         
-        UserContext.current().getLogin().getLoginToken().getTokenString();
+        WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         GetLaunchPadItemsCommand cmd = new GetLaunchPadItemsCommand();
         cmd.setCommunityId(8L);
         cmd.setItemGroup(ItemGroup.BIZS.getCode());

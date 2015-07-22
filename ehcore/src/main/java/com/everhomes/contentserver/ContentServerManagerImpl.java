@@ -13,6 +13,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class ContentServerManagerImpl implements ContentServerMananger {
@@ -39,7 +40,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         Long[] ids=new Long[1];
         LoginToken login;
         try {
-             login = LoginToken.fromTokenString(request.getToken());
+             login = WebTokenGenerator.getInstance().fromWebToken(request.getToken(), LoginToken.class);
             if (null != login) {
                 LOGGER.error("cannot find login information");
                 ids[0]=login.getUserId();
@@ -96,7 +97,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
     @Override
     public void delete(MessageHandleRequest request) {
-        LoginToken token = LoginToken.fromTokenString(request.getToken());
+        LoginToken token = WebTokenGenerator.getInstance().fromWebToken(request.getToken(), LoginToken.class);
         if (null == token) {
             LOGGER.error("may be some internal error.token can convert or is empty.tokenString={}", request.getToken());
             return;
@@ -109,7 +110,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     public void auth(MessageHandleRequest request) {
         LoginToken login = null;
         try {
-            login = LoginToken.fromTokenString(request.getToken());
+            login = WebTokenGenerator.getInstance().fromWebToken(request.getToken(), LoginToken.class);
         } catch (Exception e) {
             // skip validate
         }

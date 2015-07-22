@@ -19,6 +19,7 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
 import com.everhomes.user.VerifyAndLogonCommand;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 
 public class UserGenerator extends CoreServerTestCase {
 
@@ -63,7 +64,7 @@ public class UserGenerator extends CoreServerTestCase {
             VerifyAndLogonCommand verifyCommand = new VerifyAndLogonCommand();
             verifyCommand.setInitialPassword(password);
             verifyCommand.setNamespaceId(0);
-            verifyCommand.setSignupToken(rsp.getTokenString());
+            verifyCommand.setSignupToken(WebTokenGenerator.getInstance().toWebToken(rsp));
             verifyCommand.setVerificationCode(ret.getVerificationCode());
             UserLogin verifyRsp = userService.verifyAndLogon(verifyCommand);
             ownId = verifyRsp.getUserId();
