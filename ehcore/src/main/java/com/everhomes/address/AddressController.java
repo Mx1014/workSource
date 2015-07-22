@@ -118,7 +118,7 @@ public class AddressController extends ControllerBase {
      */
     @RequestMapping("listApartmentsByKeyword")
     @RestReturn(value=ApartmentDTO.class, collection=true)
-    public RestResponse listApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+    public RestResponse listApartmentsByKeyword(@Valid ListPropApartmentsByKeywordCommand cmd) {
         Tuple<Integer, List<ApartmentDTO>> results = this.addressService.listApartmentsByKeyword(cmd);
         RestResponse response = new RestResponse(results.second());
         
@@ -178,7 +178,7 @@ public class AddressController extends ControllerBase {
      */
     @RequestMapping("findNearyCommunityById")
     @RestReturn(value=CommunityDoc.class, collection=true)
-    public RestResponse findNearyCommunityById(@Valid ListApartmentByKeywordCommand cmd) {
+    public RestResponse findNearyCommunityById(@Valid ListPropApartmentsByKeywordCommand cmd) {
         List<Community> results = this.communityProvider.findNearyByCommunityById(cmd.getCommunityId());
         RestResponse response =  new RestResponse(results);
 

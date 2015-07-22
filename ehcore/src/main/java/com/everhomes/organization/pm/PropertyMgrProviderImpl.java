@@ -1022,7 +1022,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public CommunityPmBill findFamilyNewestBill(Long addressId, long organizationId) {
+	public CommunityPmBill findFamilyNewestBill(Long addressId, Long organizationId) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 

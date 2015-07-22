@@ -7,33 +7,42 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communityId: 小区Id</li>
+ * <li>organizationId: 组织id</li>
  * <li>buildingName: 楼栋号</li>
  * <li>keyword: 查询关键字</li>
  * </ul>
  */
-public class ListApartmentByKeywordCommand {
+public class ListPropApartmentsByKeywordCommand {
     @NotNull
+    private Long organizationId;
+    
     private Long communityId;
 
-    @NotNull
+	@NotNull
     private String buildingName;
     
-  
     private String keyword;
 
-    public ListApartmentByKeywordCommand() {
+    public ListPropApartmentsByKeywordCommand() {
     }
 
-    public Long getCommunityId() {
-        return communityId;
-    }
+	public Long getOrganizationId() {
+		return organizationId;
+	}
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
-    public String getBuildingName() {
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getBuildingName() {
         return buildingName;
     }
 

@@ -22,8 +22,8 @@ public class ListOrgBillingTransactionsByConditionCommand {
 	private Integer pageSize;
 	
 	private String address;
-	private String startTime;
-	private String endTime;
+	private Long startTime;
+	private Long endTime;
 	
 	@NotNull
 	private Long organizationId;
@@ -52,19 +52,19 @@ public class ListOrgBillingTransactionsByConditionCommand {
 		this.address = address;
 	}
 
-	public String getStartTime() {
+	public Long getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(Long startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
 

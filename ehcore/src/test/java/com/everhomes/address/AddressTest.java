@@ -221,7 +221,7 @@ public class AddressTest extends CoreServerTestCase {
         addr4.setApartmentName("APT 2");
         this.addressProvider.createAddress(addr4);
         
-        ListApartmentByKeywordCommand cmd = new ListApartmentByKeywordCommand();
+        ListPropApartmentsByKeywordCommand cmd = new ListPropApartmentsByKeywordCommand();
         cmd.setKeyword("APT");
         cmd.setCommunityId(1L);
         cmd.setBuildingName("Building 1");

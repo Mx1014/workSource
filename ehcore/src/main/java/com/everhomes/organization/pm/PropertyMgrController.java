@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.BuildingDTO;
-import com.everhomes.address.ListApartmentByKeywordCommand;
+import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -913,7 +913,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("listPropApartmentsByKeyword")
 	@RestReturn(value=PropFamilyDTO.class, collection=true)
-	public RestResponse listPropApartmentsByKeyword(@Valid ListApartmentByKeywordCommand cmd) {
+	public RestResponse listPropApartmentsByKeyword(@Valid ListPropApartmentsByKeywordCommand cmd) {
 		List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
 		RestResponse response = new RestResponse(results);
 
@@ -929,7 +929,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * @param files 要上传文件
 	 * @return 
 	 */
-	@RequestMapping(value="importPmBills", method = RequestMethod.POST)
+	@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
