@@ -93,14 +93,19 @@ public class LaunchPadController extends ControllerBase {
      */
     @RequestMapping("getLastLaunchPadLayoutByVersionCode")
     @RestReturn(value=LaunchPadLayoutDTO.class)
-    public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd) {
+    public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd, HttpServletRequest request,HttpServletResponse response) {
         
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
-        
-        RestResponse response =  new RestResponse(launchPadLayoutDTO);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        RestResponse resp =  new RestResponse();
+        if(launchPadLayoutDTO != null){
+            long hashCode = launchPadLayoutDTO.getVersionCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                resp.setResponseObject(launchPadLayoutDTO);
+            }
+        }
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
     
     /**

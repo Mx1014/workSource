@@ -11,6 +11,9 @@ public interface LaunchPadConstants {
     public static final String CALLPHONES = "callPhones";
     public static final String ANDROID_EMBEDDED = "androidEmbedded_json";
     public static final String IOS_EMBEDDED = "iosEmbedded_json";
+    public static final String REGION_TYPE = "regionType";
+    public static final String REGION_ID = "regionId";
+    public static final String ENTITY_TAG = "entityTag";
     
 
     //Item Group
