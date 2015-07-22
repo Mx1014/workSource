@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionUpgradeRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> {
 
-	private static final long serialVersionUID = 1720355139;
+	private static final long serialVersionUID = -1190404198;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_version_upgrade_rules</code>
@@ -86,14 +86,6 @@ public class EhVersionUpgradeRules extends org.jooq.impl.TableImpl<com.everhomes
 
 	private EhVersionUpgradeRules(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord, java.lang.Long> getIdentity() {
-		return com.everhomes.server.schema.Keys.IDENTITY_EH_VERSION_UPGRADE_RULES;
 	}
 
 	/**

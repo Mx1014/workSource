@@ -62,9 +62,6 @@ public class Keys {
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserInstalledAppsRecord, java.lang.Long> IDENTITY_EH_USER_INSTALLED_APPS = Identities0.IDENTITY_EH_USER_INSTALLED_APPS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLocationsRecord, java.lang.Long> IDENTITY_EH_USER_LOCATIONS = Identities0.IDENTITY_EH_USER_LOCATIONS;
 	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserScoresRecord, java.lang.Long> IDENTITY_EH_USER_SCORES = Identities0.IDENTITY_EH_USER_SCORES;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionedContentRecord, java.lang.Long> IDENTITY_EH_VERSIONED_CONTENT = Identities0.IDENTITY_EH_VERSIONED_CONTENT;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionRealmRecord, java.lang.Long> IDENTITY_EH_VERSION_REALM = Identities0.IDENTITY_EH_VERSION_REALM;
-	public static final org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord, java.lang.Long> IDENTITY_EH_VERSION_UPGRADE_RULES = Identities0.IDENTITY_EH_VERSION_UPGRADE_RULES;
 
 	// -------------------------------------------------------------------------
 	// UNIQUE and PRIMARY KEY definitions
@@ -284,9 +281,6 @@ public class Keys {
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserInstalledAppsRecord, java.lang.Long> IDENTITY_EH_USER_INSTALLED_APPS = createIdentity(com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS, com.everhomes.server.schema.tables.EhUserInstalledApps.EH_USER_INSTALLED_APPS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserLocationsRecord, java.lang.Long> IDENTITY_EH_USER_LOCATIONS = createIdentity(com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS, com.everhomes.server.schema.tables.EhUserLocations.EH_USER_LOCATIONS.ID);
 		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhUserScoresRecord, java.lang.Long> IDENTITY_EH_USER_SCORES = createIdentity(com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES, com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionedContentRecord, java.lang.Long> IDENTITY_EH_VERSIONED_CONTENT = createIdentity(com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT, com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionRealmRecord, java.lang.Long> IDENTITY_EH_VERSION_REALM = createIdentity(com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM, com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM.ID);
-		public static org.jooq.Identity<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord, java.lang.Long> IDENTITY_EH_VERSION_UPGRADE_RULES = createIdentity(com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES, com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES.ID);
 	}
 
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {
