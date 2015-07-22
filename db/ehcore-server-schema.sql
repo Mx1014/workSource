@@ -2319,6 +2319,7 @@ CREATE TABLE `eh_qrcodes` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`description` VARCHAR(1024) COMMENT '',
     `view_count` BIGINT NOT NULL DEFAULT 0,
+	`logo_uri` VARCHAR(1024) COMMENT '',
 	`expire_time` DATETIME COMMENT 'it is permanent if there is no expired time, else it is temporary',
 	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
     `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',

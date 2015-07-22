@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQrcodes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQrcodesRecord> {
 
-	private static final long serialVersionUID = 1798709245;
+	private static final long serialVersionUID = 695243321;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_qrcodes</code>
@@ -40,6 +40,11 @@ public class EhQrcodes extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_qrcodes.view_count</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQrcodesRecord, java.lang.Long> VIEW_COUNT = createField("view_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_qrcodes.logo_uri</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQrcodesRecord, java.lang.String> LOGO_URI = createField("logo_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_qrcodes.expire_time</code>. it is permanent if there is no expired time, else it is temporary

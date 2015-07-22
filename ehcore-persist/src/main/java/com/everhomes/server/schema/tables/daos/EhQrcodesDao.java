@@ -62,6 +62,13 @@ public class EhQrcodesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>logo_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQrcodes> fetchByLogoUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES.LOGO_URI, values);
+	}
+
+	/**
 	 * Fetch records that have <code>expire_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQrcodes> fetchByExpireTime(java.sql.Timestamp... values) {
