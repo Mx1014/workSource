@@ -208,7 +208,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             dtos.forEach(r -> tags.add(r.getOrganizationType()));
             List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,tags);
             if(adminItems != null && !adminItems.isEmpty())
-                adminItems.addAll(adminItems);
+                allItems.addAll(adminItems);
         }
         try{
             allItems.forEach(r ->{
