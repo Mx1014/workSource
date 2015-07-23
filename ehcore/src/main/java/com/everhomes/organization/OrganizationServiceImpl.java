@@ -158,6 +158,64 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
 	}
+	
+	@Override
+	public void applyOrganizationMember(ApplyOrganizationMemberCommand cmd) {
+		User user  = UserContext.current().getUser();
+		
+		Long communityId = user.getCommunityId();
+		if(cmd.getCommunityId() == null){
+			LOGGER.error("ApplyOrganizationMemberCommand communityId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"ApplyOrganizationMemberCommand communityId paramter can not be null or empty");
+		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null){
+			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Unable to find the community.");
+		}
+		if(!communityId .equals( cmd.getCommunityId())){
+			LOGGER.error("you not belong to the community.communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"you not belong to the community.");
+		}
+		
+		GetOrgDetailCommand command = new GetOrgDetailCommand();
+		command.setCommunityId(cmd.getCommunityId());
+		command.setOrganizationType(cmd.getOrganizationType());
+		OrganizationDTO organization = getOrganizationByComunityidAndOrgType(command);
+		
+		OrganizationMember member = createOrganizationMember(user,organization.getId(),cmd.getContactDescription());
+		organizationProvider.createOrganizationMember(member);
+	}
+
+	private OrganizationMember createOrganizationMember(User user, Long organizationId, String contactDescription) {
+		UserIdentifier identifier = null; 
+		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(user.getId());
+		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
+			for (UserIdentifier userIdentifier : userIndIdentifiers) {
+				if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
+					identifier = userIdentifier;
+					break;
+				}
+			}
+		}
+		OrganizationMember member = new OrganizationMember();
+		member.setContactDescription(contactDescription);
+		member.setContactName(user.getAccountName());
+		if(identifier != null){
+			member.setContactToken(identifier.getIdentifierToken());
+			member.setContactType(identifier.getIdentifierType());
+		}
+		member.setMemberGroup(OrganizationGroup.MANAGER.getCode());
+		member.setOrganizationId(organizationId);
+		member.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
+		member.setTargetId(user.getId());
+		member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+		
+		return member;
+	}
 
 	@Override
 	public void createOrganizationMember(CreateOrganizationMemberCommand cmd) {
