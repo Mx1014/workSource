@@ -351,6 +351,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			result.add(ConvertHelper.convert(r, OrganizationCommunity.class));
 			return null;
 		});
+		
+		if(result == null || result.size() == 0) {
+		    if(LOGGER.isWarnEnabled()) {
+		        LOGGER.warn("The community for the organization is not found, organizationId=" + organizationId);
+		        LOGGER.warn(query.getSQL());
+		    }
+		}
+		
 		return result;
 	}
 
