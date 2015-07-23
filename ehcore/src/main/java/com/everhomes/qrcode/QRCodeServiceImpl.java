@@ -2,75 +2,22 @@
 package com.everhomes.qrcode;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.acl.Acl;
-import com.everhomes.acl.AclAccessor;
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.PrivilegeConstants;
-import com.everhomes.acl.ResourceUserRoleResolver;
-import com.everhomes.acl.Role;
-import com.everhomes.app.AppConstants;
-import com.everhomes.auditlog.AuditLog;
-import com.everhomes.auditlog.AuditLogProvider;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.forum.Forum;
-import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.ForumServiceErrorCode;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessageBodyType;
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
-import com.everhomes.messaging.MessageMetaConstant;
-import com.everhomes.messaging.MessagingConstants;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.messaging.MetaObjectType;
-import com.everhomes.messaging.QuestionMetaObject;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.region.RegionDescriptor;
-import com.everhomes.search.GroupQueryResult;
-import com.everhomes.search.GroupSearcher;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.IdentifierType;
-import com.everhomes.user.MessageChannelType;
+import com.everhomes.launchpad.ActionType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IdToken;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.visibility.VisibilityScope;
-import com.google.gson.Gson;
 
 @Component
 public class QRCodeServiceImpl implements QRCodeService {   
@@ -86,16 +33,26 @@ public class QRCodeServiceImpl implements QRCodeService {
      
     @Override
     public QRCodeDTO createQRCode(NewQRCodeCommand cmd) {
-        User user = UserContext.current().getUser();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
         
         QRCode qrcode = new QRCode();
         qrcode.setDescription(cmd.getDescription());
-        qrcode.setExpireTime(cmd.getExpireTime());
+        Long expireSeconds = cmd.getExpireSeconds();
+        if(expireSeconds != null) {
+            qrcode.setExpireTime(new Timestamp(DateHelper.currentGMTTime().getTime() + expireSeconds * 1000));
+        }
+        ActionType actionType = ActionType.fromCode(cmd.getActionType());
+        if(actionType == null) {
+            LOGGER.error("Invalid action type, operatorId=" + operatorId + ", actionType=" + cmd.getActionType());
+            throw RuntimeErrorException.errorWith(QRCodeServiceErrorCode.SCOPE, 
+                QRCodeServiceErrorCode.ERROR_ACTION_TYPE_INVALID, "Action type invalid");
+        }
         qrcode.setActionType(cmd.getActionType());
         qrcode.setActionData(cmd.getActionData());
         qrcode.setStatus(QRCodeStatus.ACTIVE.getCode());
         qrcode.setViewCount(0L);
-        qrcode.setCreatorUid(user.getId());
+        qrcode.setCreatorUid(operatorId);
         
         qrcodeProvider.createQRCode(qrcode);
         
@@ -125,6 +82,15 @@ public class QRCodeServiceImpl implements QRCodeService {
             IdToken token = WebTokenGenerator.getInstance().fromWebToken(qrid, IdToken.class);
             long qrcodeId = token.getId();
             QRCode qrcode = qrcodeProvider.findQRCodeById(qrcodeId);
+            if(qrcode.getExpireTime() != null) {
+                Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+                if(qrcode.getExpireTime().before(current)) {
+                    LOGGER.error("QR code expired, operatorId=" + operatorId + ", qrid=" + qrid 
+                        + ", current=" + current.getTime() + ", expiredTime=" + qrcode.getExpireTime().getTime());
+                    throw RuntimeErrorException.errorWith(QRCodeServiceErrorCode.SCOPE, 
+                        QRCodeServiceErrorCode.ERROR_QR_CODE_EXPIRED, "QR code expired");
+                }
+            }
             
             return toQRCodeDTO(qrcode);
         } catch(Exception e) {
@@ -137,9 +103,13 @@ public class QRCodeServiceImpl implements QRCodeService {
     private QRCodeDTO toQRCodeDTO(QRCode qrcode) {
         QRCodeDTO qrcodeDto = ConvertHelper.convert(qrcode, QRCodeDTO.class);
         
-        // TODO: set url
-        String qrid = WebTokenGenerator.getInstance().toWebToken(qrcode.getId());
+        IdToken idToken = new IdToken(qrcode.getId());
+        String qrid = WebTokenGenerator.getInstance().toWebToken(idToken);
         qrcodeDto.setQrid(qrid);
+        IdToken token = WebTokenGenerator.getInstance().fromWebToken(qrid, IdToken.class);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("id=" + qrcode.getId() + ", qrid=" + qrid + ", decodeId=" + token.getId());
+        }
         
         String url = configProvider.getValue(HOME_URL, "");
         if(!url.endsWith("/")) {

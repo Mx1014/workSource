@@ -7,6 +7,8 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,7 +60,7 @@ public class QRCodeController extends ControllerBase {
      */
     @RequestMapping("newQRCode")
     @RestReturn(value=QRCodeDTO.class)
-    public RestResponse newTopic(@Valid NewQRCodeCommand cmd) {
+    public RestResponse newQRCode(@Valid NewQRCodeCommand cmd) {
         QRCodeDTO qrcodeDto = this.qrcodeService.createQRCode(cmd);
         
         RestResponse response = new RestResponse(qrcodeDto);
@@ -88,7 +90,7 @@ public class QRCodeController extends ControllerBase {
      */
     @RequireAuthentication(false)
     @RequestMapping(value="getQRCodeImage")
-    public ModelAndView download(GetQRCodeImageCommand cmd, 
+    public ModelAndView getQRCodeImage(GetQRCodeImageCommand cmd, 
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         
         String qrid = cmd.getQrid();
@@ -109,9 +111,10 @@ public class QRCodeController extends ControllerBase {
             out = new ByteArrayOutputStream();
             ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
             
+            String fileName = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()) + "." + QRCodeConfig.FORMAT_PNG;
             response.setContentType("application/octet-stream;");
             response.setHeader("Content-disposition", "attachment; filename="
-                    + new String(qrid.getBytes("utf-8"), "ISO8859-1"));
+                    + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
             response.setHeader("Content-Length", String.valueOf(out.size()));  
             
             bos = new BufferedOutputStream(response.getOutputStream());
