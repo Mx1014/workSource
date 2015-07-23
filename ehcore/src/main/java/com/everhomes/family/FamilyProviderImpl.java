@@ -54,6 +54,7 @@ import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFamilyBillingAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhFamilyBillingTransactionsDao;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhFamilyBillingAccounts;
 import com.everhomes.server.schema.tables.pojos.EhFamilyBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
@@ -193,7 +194,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid keyword parameter");
 		List<FamilyDTO> results = new ArrayList<FamilyDTO>();
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
 				(DSLContext context, Object reducingContext)-> {
 
 					String likeVal = keyword + "%";
