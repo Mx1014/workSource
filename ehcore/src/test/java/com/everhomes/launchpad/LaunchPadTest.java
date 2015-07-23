@@ -541,18 +541,4 @@ public class LaunchPadTest extends CoreServerTestCase {
         System.out.println(this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd));
     }
     
-    @Test
-    public void findLaunchPadPostActionCategories(){
-        //获取帖子分类列表
-        FindLaunchPadPostActionItemCategoriesCommand cmd = new FindLaunchPadPostActionItemCategoriesCommand();
-        cmd.setCommunityId(8l);
-        cmd.setItemGroup("GaActions");
-        cmd.setItemLocation("/home/Pm");
-        List<LaunchPadPostActionCategoryDTO> result = launchPadService.findLaunchPadPostActionCategories(cmd);
-        if(result != null && !result.isEmpty()){
-            result.forEach(r ->{
-                System.out.println(r);
-            });
-        }
-    }
 }
