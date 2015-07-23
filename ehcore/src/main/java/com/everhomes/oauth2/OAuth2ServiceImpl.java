@@ -52,15 +52,15 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
         AuthorizationCode code = new AuthorizationCode();
         code.setScope(cmd.getScope());
-        code.setRedirectUri(cmd.getRedirectUri());
+        code.setRedirectUri(cmd.getredirect_uri());
         code.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         code.setModifyTime(code.getCreateTime());
         code.setExpirationTime(new Timestamp(DateHelper.currentGMTTime().getTime() + getCodeExpirationSeconds() * 1000));
-        code.setAppId(appIdFromClientId(cmd.getClientId()));
+        code.setAppId(appIdFromClientId(cmd.getclient_id()));
         code.setGrantorUid(user.getId());
         oAuth2Provider.createAuthorizationCode(code);
 
-        String redirectUrl = String.format("%s?code=%s&state=%s", cmd.getRedirectUri(), code.getCode(), cmd.getState());
+        String redirectUrl = String.format("%s?code=%s&state=%s", cmd.getredirect_uri(), code.getCode(), cmd.getState());
 
         try {
             return new URI(redirectUrl);

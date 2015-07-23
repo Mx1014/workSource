@@ -71,8 +71,8 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
         AuthorizationCommand cmd = new AuthorizationCommand();
         cmd.setResponseType(responseType);
-        cmd.setClientId(clientId);
-        cmd.setRedirectUri(redirectUri);
+        cmd.setclient_id(clientId);
+        cmd.setredirect_uri(redirectUri);
         cmd.setScope(scope);
         cmd.setState(state);
 
@@ -90,7 +90,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
         AuthorizationCommand cmd = WebTokenGenerator.getInstance().fromWebToken(viewState, AuthorizationCommand.class);
 
         // double check in confirmation call to protect against tampering in confirmation callback
-        App app = this.appProvider.findAppByKey(cmd.getClientId());
+        App app = this.appProvider.findAppByKey(cmd.getclient_id());
         if(app == null) {
             model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
                 OAuth2ServiceErrorCode.SCOPE,
@@ -101,7 +101,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
             return "oauth2-error-response";
         }
 
-        String redirectUri = cmd.getRedirectUri();
+        String redirectUri = cmd.getredirect_uri();
         if(redirectUri == null || redirectUri.isEmpty()) {
             redirectUri = this.oAuth2Service.getDefaultRedirectUri(app.getId());
         }
