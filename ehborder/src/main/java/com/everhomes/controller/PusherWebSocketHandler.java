@@ -29,9 +29,11 @@ import org.slf4j.LoggerFactory;
 
 import com.everhomes.message.HandshakeMessage;
 import com.everhomes.pusher.PusherMessageResp;
+import com.everhomes.pusher.RecentMessageCommand;
 import com.everhomes.rpc.PduFrame;
 import com.everhomes.rpc.server.PusherNotifyPdu;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 
 public class PusherWebSocketHandler extends TextWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PusherWebSocketHandler.class);
@@ -282,22 +284,26 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
             DeviceInfo dev = devNode.Item();
-            Long anchor = frame.getPayload(Long.class);
-            if(anchor == null) {
+            RecentMessageCommand msgCmd = frame.getPayload(RecentMessageCommand.class);
+            if(msgCmd == null) {
                 LOGGER.error("request message error, missing anchor");
                 return;
                 }
             
             Map<String, String> params = new HashMap<String, String>();
             params.put("deviceId", dev.getDeviceId());
-            params.put("anchor", anchor.toString());
+            if(msgCmd.getAnchor() != null) {
+                params.put("anchor", msgCmd.getAnchor().toString());    
+                }
+            if(msgCmd.getCount() != null) {
+                params.put("count", msgCmd.getCount().toString());
+            } else {
+                params.put("count", "10");
+                }
            
             restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
-                    //PusherMessageResp resp = new PusherMessageResp();
-                    //resp.setName("MESSAGES");
-                    //resp.setContent(result.getBody());
                     PduFrame pdu = new PduFrame();
                     pdu.setName("MESSAGES");
                     pdu.setPayLoadForString(result.getBody());

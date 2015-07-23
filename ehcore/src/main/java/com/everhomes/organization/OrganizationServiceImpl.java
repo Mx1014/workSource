@@ -696,7 +696,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 
 		List<OrganizationCommunity> communityList = this.organizationProvider.listOrganizationCommunities(organizationId);
-		if(communityIdList != null && communityIdList.size() > 0) {
+		if(communityList != null && communityList.size() > 0) {
 			for(OrganizationCommunity community : communityList) {
 				communityIdList.add(community.getCommunityId());
 			}

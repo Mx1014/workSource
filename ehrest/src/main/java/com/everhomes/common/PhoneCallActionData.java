@@ -1,10 +1,9 @@
 package com.everhomes.common;
 
 import java.io.Serializable;
-
-
 import java.util.ArrayList;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -16,7 +15,9 @@ import com.everhomes.util.StringHelper;
 public class PhoneCallActionData implements Serializable{
 
     private static final long serialVersionUID = -5364366676212368720L;
-    //{"callPhones": "[15875301110]"}  
+    //{"callPhones": "[15875301110]"} 
+    
+    @ItemType(String.class)
     private ArrayList<String> callPhones;
 
     public ArrayList<String> getCallPhones() {

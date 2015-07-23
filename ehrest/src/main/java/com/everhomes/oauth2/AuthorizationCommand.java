@@ -10,9 +10,9 @@ public class AuthorizationCommand {
     private String responseType;
 
     @NotNull
-    private String clientId;
+    private String client_id;
 
-    private String redirectUri;
+    private String redirect_uri;
 
     private String scope;
 
@@ -29,21 +29,22 @@ public class AuthorizationCommand {
     public void setResponseType(String responseType) {
         this.responseType = responseType;
     }
-
-    public String getClientId() {
-        return clientId;
+    
+    
+    public String getclient_id() {
+        return client_id;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setclient_id(String client_id) {
+        this.client_id = client_id;
+    }
+    
+    public String getredirect_uri() {
+        return redirect_uri;
     }
 
-    public String getRedirectUri() {
-        return redirectUri;
-    }
-
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
+    public void setredirect_uri(String redirect_uri) {
+        this.redirect_uri = redirect_uri;
     }
 
     public String getScope() {
