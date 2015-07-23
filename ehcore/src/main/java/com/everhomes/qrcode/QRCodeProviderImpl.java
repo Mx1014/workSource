@@ -20,7 +20,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhQrcodesDao;
-import com.everhomes.server.schema.tables.daos.EhRegionsDao;
 import com.everhomes.server.schema.tables.pojos.EhQrcodes;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -74,7 +73,7 @@ public class QRCodeProviderImpl implements QRCodeProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQrcodes.class, qrcode.getId());
     }
     
-    @Caching(evict = { @CacheEvict(value="findQRCodeById", key="#regionId") })
+    @Caching(evict = { @CacheEvict(value="findQRCodeById", key="#qrcodeId") })
     @Override
     public void deleteQRCodeById(long qrcodeId) {
         QRCodeProvider self = PlatformContext.getComponent(QRCodeProvider.class);
@@ -89,7 +88,7 @@ public class QRCodeProviderImpl implements QRCodeProvider {
     @Override
     public QRCode findQRCodeById(long qrcodeId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhRegionsDao dao = new EhRegionsDao(context.configuration());
+        EhQrcodesDao dao = new EhQrcodesDao(context.configuration());
         
         return ConvertHelper.convert(dao.findById(qrcodeId), QRCode.class);
     }
