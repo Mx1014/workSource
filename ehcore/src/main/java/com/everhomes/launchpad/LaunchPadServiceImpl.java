@@ -200,7 +200,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             if(userItems != null && !userItems.isEmpty())
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
-        
+        //获取用户相关组织，如果用户加入组织，则获取相应的item（如某个item物业人员可见）
         ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
         List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
         if(dtos != null && !dtos.isEmpty()){
@@ -235,6 +235,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             //use handler instead of??
             if(launchPadItem.getActionData() != null && !launchPadItem.getActionData().trim().equals("")){
                 jsonObject = (JSONObject) JSONValue.parse(launchPadItem.getActionData());
+                //处理phoneCall actionData
                 if(launchPadItem.getActionType() == ActionType.PHONE_CALL.getCode() &&
                         launchPadItem.getItemGroup().equals(LaunchPadConstants.GROUP_CALLPHONES)){ 
                     jsonObject = processPhoneCall(communityId, jsonObject, launchPadItem);
@@ -245,6 +246,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     long cityId = community == null ? 0 : community.getCityId();
                     jsonObject.put(LaunchPadConstants.TOKEN, userToken);
                     String url = (String) jsonObject.get(LaunchPadConstants.URL);
+                    //处理收集地址url
                     if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
                         url = url + "&userId=" + userId + "&cityId=" + cityId;
                     }
@@ -255,6 +257,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 }
                 else if(launchPadItem.getActionType() == ActionType.POST_NEW.getCode()){
                     jsonObject = processPostNew(communityId,jsonObject,launchPadItem);
+                }
+                else if(launchPadItem.getActionType() == ActionType.POST_BY_CATEGORY.getCode()){
+                    jsonObject = processPostByCategory(communityId,jsonObject,launchPadItem);
                 }
             }
             if(jsonObject != null)
@@ -292,6 +297,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     private JSONObject processLaunchApp(JSONObject actionDataJson, HttpServletRequest request){
+        //区分访问平台，根据相应平台返回相应的数据
         String header = request.getHeader("user-agent");
         //"androidEmbedded_json":{"package":"mqq:open","download":"www.xx.com"}
         if(header.contains("Android")){
@@ -310,18 +316,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     @SuppressWarnings("unchecked")
     private JSONObject processPostNew(long communityId, JSONObject actionDataJson, LaunchPadItem launchPadItem) {
         actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
-        String entityTag = (String)actionDataJson.get(LaunchPadConstants.ENTITY_TAG);
-        if(launchPadItem.getTag() == null || launchPadItem.getTag().trim().equals("")){
+        String tag = launchPadItem.getTag();
+        if(tag == null || tag.trim().equals("")){
             actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
             actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
             actionDataJson.put(LaunchPadConstants.CREATOR_TAG, PostEntityTag.USER.getCode());
-            actionDataJson.put(LaunchPadConstants.TARGET_TAG, entityTag);
+            actionDataJson.put(LaunchPadConstants.TARGET_TAG, tag);
             return actionDataJson;
         }
         
         GetOrgDetailCommand cmd = new GetOrgDetailCommand();
         cmd.setCommunityId(communityId);
-        cmd.setOrganizationType(entityTag);
+        cmd.setOrganizationType(tag);
         OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
         if(organization == null){
             LOGGER.error("Organization is not exists,communityId=" + communityId);
@@ -329,8 +335,31 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
         actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
-        actionDataJson.put(LaunchPadConstants.CREATOR_TAG, entityTag);
+        actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
         actionDataJson.put(LaunchPadConstants.TARGET_TAG, PostEntityTag.USER.getCode());
+        return actionDataJson;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private JSONObject processPostByCategory(long communityId, JSONObject actionDataJson, LaunchPadItem launchPadItem) {
+        actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
+        String tag = launchPadItem.getTag();
+        if(tag == null || tag.trim().equals("")){
+            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
+            actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
+            return actionDataJson;
+        }
+        
+        GetOrgDetailCommand cmd = new GetOrgDetailCommand();
+        cmd.setCommunityId(communityId);
+        cmd.setOrganizationType(tag);
+        OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
+        if(organization == null){
+            LOGGER.error("Organization is not exists,communityId=" + communityId);
+            return actionDataJson;
+        }
+        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
+        actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
         return actionDataJson;
     }
     
