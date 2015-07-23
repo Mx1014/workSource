@@ -70,6 +70,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
@@ -1257,7 +1258,7 @@ public class FamilyServiceImpl implements FamilyService {
         List<NeighborUserDTO> results = new ArrayList<NeighborUserDTO>();
         
         long startTime = System.currentTimeMillis();
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     context.select(Tables.EH_USER_GROUPS.OWNER_UID).from(Tables.EH_USER_GROUPS)
                         .where(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
@@ -1313,7 +1314,7 @@ public class FamilyServiceImpl implements FamilyService {
     
     private List<UserLocation> listCommunityUserLocation(List<Long> userIds,double latitude,double longitude) {
         long startTime = System.currentTimeMillis();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
         
         final List<UserLocation> members = new ArrayList<UserLocation>();
         SelectQuery<?> query = context.selectQuery(Tables.EH_USER_LOCATIONS);
