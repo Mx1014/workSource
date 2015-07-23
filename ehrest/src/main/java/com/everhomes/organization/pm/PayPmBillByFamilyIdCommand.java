@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 	<li>familyId : 家庭Id</li>
- *	<li>payDate : 支付日期</li>
+ *	<li>payTime : 支付日期</li>
  *	<li>payAmount : 支付金额</li>
  *	<li>description : 描述</li>
  *	<li>ownerName : 用户姓名</li>
@@ -27,7 +27,7 @@ public class PayPmBillByFamilyIdCommand {
 	@NotNull
 	private Long familyId;
 	@NotNull
-	private String payDate;
+	private Long payTime;
 	@NotNull
 	private BigDecimal payAmount;
 	
@@ -68,11 +68,12 @@ public class PayPmBillByFamilyIdCommand {
 	public void setFamilyId(Long familyId) {
 		this.familyId = familyId;
 	}
-	public String getPayDate() {
-		return payDate;
+	
+	public Long getPayTime() {
+		return payTime;
 	}
-	public void setPayDate(String payDate) {
-		this.payDate = payDate;
+	public void setPayTime(Long payTime) {
+		this.payTime = payTime;
 	}
 	public BigDecimal getPayAmount() {
 		return payAmount;

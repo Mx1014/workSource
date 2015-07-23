@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *	<li>address : 楼栋-门牌号</li>
  * 	<li>dueAmount : 本月金额</li>
  *	<li>oweAmount : 往期欠款</li>
+ *	<li>waitPayAmount : 应付金额</li>
  *	<li>totalAmount : 本月应付总额</li>
  *	<li>description : 账单说明</li>
  *	
@@ -31,29 +32,32 @@ public class PmBillsDTO{
 	
 	private java.lang.Long       id;
 	private java.lang.Long       organizationId;
-	private java.lang.String     entityType;
 	private java.lang.Long       entityId;
 	private java.lang.String     address;
 	private java.lang.String     name;
-	private java.lang.String     dateStr;
 	private java.sql.Date        startDate;
 	private java.sql.Date        endDate;
 	private java.sql.Date        payDate;
 	private java.lang.String     description;
 	private java.math.BigDecimal dueAmount;
 	private java.math.BigDecimal oweAmount;
-	private java.lang.Long       creatorUid;
-	private java.lang.Integer    notifyCount;
-	private java.sql.Timestamp   notifyTime;
-	private java.sql.Timestamp   createTime;
 	
 	//expand
 	private BigDecimal payedAmount;
+	private BigDecimal waitPayAmount;
 
 	private java.math.BigDecimal totalAmount;
 	
 	@ItemType(FamilyBillingTransactionDTO.class)
 	private List<FamilyBillingTransactionDTO> payList;
+	
+	public BigDecimal getWaitPayAmount() {
+		return waitPayAmount;
+	}
+
+	public void setWaitPayAmount(BigDecimal waitPayAmount) {
+		this.waitPayAmount = waitPayAmount;
+	}
 
 	public BigDecimal getPayedAmount() {
 		return payedAmount;
@@ -76,14 +80,6 @@ public class PmBillsDTO{
 
 	public void setOrganizationId(java.lang.Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-	public java.lang.String getEntityType() {
-		return entityType;
-	}
-
-	public void setEntityType(java.lang.String entityType) {
-		this.entityType = entityType;
 	}
 
 	public java.lang.Long getEntityId() {
@@ -110,14 +106,6 @@ public class PmBillsDTO{
 		this.name = name;
 	}
 
-	public java.lang.String getDateStr() {
-		return dateStr;
-	}
-
-	public void setDateStr(java.lang.String dateStr) {
-		this.dateStr = dateStr;
-	}
-
 	public java.lang.String getDescription() {
 		return description;
 	}
@@ -142,22 +130,6 @@ public class PmBillsDTO{
 		this.oweAmount = oweAmount;
 	}
 
-	public java.lang.Long getCreatorUid() {
-		return creatorUid;
-	}
-
-	public void setCreatorUid(java.lang.Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
-	public java.lang.Integer getNotifyCount() {
-		return notifyCount;
-	}
-
-	public void setNotifyCount(java.lang.Integer notifyCount) {
-		this.notifyCount = notifyCount;
-	}
-
 	public java.sql.Date getStartDate() {
 		return startDate;
 	}
@@ -180,22 +152,6 @@ public class PmBillsDTO{
 
 	public void setPayDate(java.sql.Date payDate) {
 		this.payDate = payDate;
-	}
-
-	public java.sql.Timestamp getNotifyTime() {
-		return notifyTime;
-	}
-
-	public void setNotifyTime(java.sql.Timestamp notifyTime) {
-		this.notifyTime = notifyTime;
-	}
-
-	public java.sql.Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
 	}
 
 	public java.math.BigDecimal getTotalAmount() {

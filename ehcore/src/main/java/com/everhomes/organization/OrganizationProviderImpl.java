@@ -2,6 +2,7 @@
 package com.everhomes.organization;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -531,7 +532,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<CommunityAddressMapping> findOrgAddressMappingByCondition(Condition condition) {
+	public List<CommunityAddressMapping> listOrgAddressMappingByCondition(Condition condition) {
 
 		List<CommunityAddressMapping> list = new ArrayList<CommunityAddressMapping>();
 
@@ -747,5 +748,50 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(records != null && !records.isEmpty())
 			return ConvertHelper.convert(records.get(0), CommunityPmBill.class);
 		return null;
+	}
+
+
+	@Override
+	public List<OrganizationBillingTransactionDTO> listOrganizationBillingTransactionsByTimeAndAddress(
+			Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
+		
+		List<OrganizationBillingTransactionDTO> list = new ArrayList<OrganizationBillingTransactionDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addFrom(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS);
+		query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(Tables.EH_ORGANIZATION_BILLS.ID));
+		
+		if(startTime != null && endTime != null)
+			query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTime)
+					.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(endTime)));
+		if(address != null && !address.equals(""))
+			query.addConditions(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+address+"%"));
+		
+		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc());
+		query.addLimit((int)offset, pageSize);
+		query.execute();
+		
+		System.out.println(query.getSQL());
+		
+		Result<Record> records = query.getResult();
+		if(records != null && !records.isEmpty()){
+			for(Record r : records){
+				OrganizationBillingTransactionDTO orgBillTxDto = new OrganizationBillingTransactionDTO();
+				orgBillTxDto.setAddress(r.getValue(Tables.EH_ORGANIZATION_BILLS.ADDRESS));
+				orgBillTxDto.setAddressId(r.getValue(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID));
+				orgBillTxDto.setChargeAmount(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT));
+				orgBillTxDto.setCreateTime(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME));
+				orgBillTxDto.setDescription(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.DESCRIPTION));
+				orgBillTxDto.setId(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.ID));
+				orgBillTxDto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID));
+				orgBillTxDto.setPaidType(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.PAID_TYPE));
+				orgBillTxDto.setTxType(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.TX_TYPE));
+				orgBillTxDto.setVendor(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.VENDOR));
+				list.add(orgBillTxDto);
+			}
+		}
+		
+		return list;
 	}
 }

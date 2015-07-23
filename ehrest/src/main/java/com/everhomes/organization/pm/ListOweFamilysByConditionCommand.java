@@ -6,40 +6,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>pageOffSet : 页码</li>
- *	<li>pageSize : 页大小</li>
  *	<li>address : 地址</li>
- *	<li>lastPayTime : 最后的缴费日期</li>
+ *	<li>lastPayDate : 最后的缴费日期</li>
  *	<li>organizationId : 组织id</li>
  *</ul>
  *
  */
 public class ListOweFamilysByConditionCommand {
 	
-	private Long pageOffset;
-	private Integer pageSize;
-	
 	private String address;
-	private String lastPayTime;
+	private String lastPayDate;
 	
 	@NotNull
 	private Long organizationId;
-
-	public Long getPageOffset() {
-		return pageOffset;
-	}
-
-	public void setPageOffset(Long pageOffset) {
-		this.pageOffset = pageOffset;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
 
 	public String getAddress() {
 		return address;
@@ -49,12 +28,12 @@ public class ListOweFamilysByConditionCommand {
 		this.address = address;
 	}
 
-	public String getLastPayTime() {
-		return lastPayTime;
+	public String getLastPayDate() {
+		return lastPayDate;
 	}
 
-	public void setLastPayTime(String lastPayTime) {
-		this.lastPayTime = lastPayTime;
+	public void setLastPayDate(String lastPayDate) {
+		this.lastPayDate = lastPayDate;
 	}
 
 	public Long getOrganizationId() {

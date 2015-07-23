@@ -1025,9 +1025,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	public CommunityPmBill findFamilyNewestBill(Long addressId, Long organizationId) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId));
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)))
+				.where(condition)
 				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.desc())
 				.fetch();
 

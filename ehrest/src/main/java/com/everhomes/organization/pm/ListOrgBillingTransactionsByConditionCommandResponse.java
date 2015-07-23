@@ -3,12 +3,12 @@ package com.everhomes.organization.pm;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.organization.OrganizationBillingTransactions;
+import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>nextPageOffset : 下一页页码</li>
- *	<li>requests : 缴费记录列表,详见: {@link com.everhomes.organization.OrganizationBillingTransactions}</li>
+ *	<li>requests : 缴费记录列表,详见: {@link com.everhomes.organization.OrganizationBillingTransactionDTO}</li>
  *</ul>
  *
  */
@@ -17,8 +17,8 @@ public class ListOrgBillingTransactionsByConditionCommandResponse {
 	
 	private Long nextPageOffset;
 	
-	@ItemType(OrganizationBillingTransactions.class)
-	private List<OrganizationBillingTransactions> requests;
+	@ItemType(OrganizationBillingTransactionDTO.class)
+	private List<OrganizationBillingTransactionDTO> requests;
 
 	public Long getNextPageOffset() {
 		return nextPageOffset;
@@ -28,11 +28,11 @@ public class ListOrgBillingTransactionsByConditionCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	public List<OrganizationBillingTransactions> getRequests() {
+	public List<OrganizationBillingTransactionDTO> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(List<OrganizationBillingTransactions> requests) {
+	public void setRequests(List<OrganizationBillingTransactionDTO> requests) {
 		this.requests = requests;
 	}
 

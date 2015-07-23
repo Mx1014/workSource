@@ -11,15 +11,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *	<li>lastPayTime : 上次缴费时间</li>
  *	<li>address : 楼栋门牌号</li>
- *	<li>telephone : 业主电话</li>
+ *	<li>ownerTelephone : 业主电话</li>
  * 	<li>oweAmount : 应付金额</li>
  *	<li>billDescription : 账单说明</li>
  *
  *	<li>billId : 账单id</li>
  *	<li>addressId : 家庭地址Id</li>
  *	<li>lastBillingTransactionId : 最后缴费记录id</li>
- *	<li>ownerName : 业主姓名</li>
- *	<li>ownerId : 业主Id</li>
  *</ul>
  *
  */
@@ -39,9 +37,7 @@ public class OweFamilyDTO {
 	private Long lastBillingTransactionId;
 
 	//organizationOwner
-	private String ownerName;
-	private String telephone;
-	private Long ownerId;
+	private String ownerTelephone;
 	
 	public Long getAddressId() {
 		return addressId;
@@ -73,17 +69,11 @@ public class OweFamilyDTO {
 	public void setLastPayTime(Timestamp lastPayTime) {
 		this.lastPayTime = lastPayTime;
 	}
-	public String getOwnerName() {
-		return ownerName;
+	public String getOwnerTelephone() {
+		return ownerTelephone;
 	}
-	public void setOwnerName(String ownerName) {
-		this.ownerName = ownerName;
-	}
-	public String getTelephone() {
-		return telephone;
-	}
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
+	public void setOwnerTelephone(String ownerTelephone) {
+		this.ownerTelephone = ownerTelephone;
 	}
 	public Long getBillId() {
 		return billId;
@@ -96,12 +86,6 @@ public class OweFamilyDTO {
 	}
 	public void setLastBillingTransactionId(Long lastBillingTransactionId) {
 		this.lastBillingTransactionId = lastBillingTransactionId;
-	}
-	public Long getOwnerId() {
-		return ownerId;
-	}
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
 	}
 	@Override
 	public String toString() {
