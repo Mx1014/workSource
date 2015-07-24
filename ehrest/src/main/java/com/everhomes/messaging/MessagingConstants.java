@@ -12,6 +12,7 @@ package com.everhomes.messaging;
 public enum MessagingConstants {
     MSG_FLAG_STORED(0x1),
     MSG_FLAG_PUSH_ENABLED(0x2),
+    MSG_FLAG_STORED_PUSH(0x3),
     MSG_FLAG_VOICE_ALERT(0x4),
     MSG_FLAG_REFLECT_BACK(0x8);
 
@@ -34,6 +35,9 @@ public enum MessagingConstants {
                 
             case 2 :
                 return MSG_FLAG_PUSH_ENABLED;
+                
+            case 3:
+                return MSG_FLAG_STORED_PUSH;
                 
             case 4 :
                 return MSG_FLAG_VOICE_ALERT;
