@@ -2644,8 +2644,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"the bill is not exist");
 		}
 
-		BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
-		BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).add(payAmount);
+		BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId()).negate();
+		BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).subtract(payAmount);
 		if(balance.compareTo(BigDecimal.ZERO) <= 0){//该家庭欠费
 			LOGGER.error("the family don't owed pm fee.Should not send pm pay message.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2688,8 +2688,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrganizationId(organization.getId());
 			if(billList != null && !billList.isEmpty()){
 				for(CommunityPmBill bill : billList){
-					BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
-					BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).add(payAmount);
+					BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId()).negate();
+					BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).subtract(payAmount);
 					if(balance.compareTo(BigDecimal.ZERO) > 0){//该家庭欠费
 						Family family = this.familyProvider.findFamilyByAddressId(bill.getEntityId());
 						if(family != null){
