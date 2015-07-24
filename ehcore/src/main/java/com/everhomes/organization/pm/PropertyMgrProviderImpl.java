@@ -1,15 +1,20 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
@@ -1002,9 +1007,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			long offset, int pageSize) {
 
 		List<PmBillsDTO> list = new ArrayList<PmBillsDTO>();
-
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(condition)
 				.orderBy(Tables.EH_ORGANIZATION_BILLS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc())
@@ -1025,9 +1028,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	public CommunityPmBill findFamilyNewestBill(Long addressId, Long organizationId) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
-		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId));
-
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId));
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(condition)
 				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.desc())
@@ -1036,16 +1038,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		if(records != null && !records.isEmpty())
 			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
 		return null;
-
 	}
 
 	@Override
-	public CommunityPmBill findPmBillByAddressAndDate(Long addressId,String billDate) {
+	public CommunityPmBill findPmBillByAddressAndDate(Long addressId,java.sql.Date startDate,java.sql.Date endDate) {
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-		.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId).and(Tables.EH_ORGANIZATION_BILLS.DATE_STR.eq(billDate)))
+		.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)
+				.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate))
+				.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)))
 		.fetch();
 		
 		if(records != null && !records.isEmpty())
@@ -1053,18 +1056,85 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public CommunityPmBill findFamilyNewestBillByAddress(Long addressId) {
+	public List<CommunityPmBill> listOweFamilyBillsByOrganizationId(
+			Long organizationId) {
+		
+		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
+		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
+		
+		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
+				.from(Tables.EH_ORGANIZATION_BILLS)
+				.groupBy(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID).asTable("t2");
+		
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
-				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.desc())
-				.fetch();
+		.join(table2)
+		.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
+				.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
+		.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId))
+		.fetch();
+		
+		if(records != null && !records.isEmpty()){
+			records.stream().map(r -> {
+				CommunityPmBill bill = new CommunityPmBill();
+				bill.setAddress(r.getValue(Tables.EH_ORGANIZATION_BILLS.ADDRESS));
+				bill.setCreateTime(r.getValue(Tables.EH_ORGANIZATION_BILLS.CREATE_TIME));
+				bill.setCreatorUid(r.getValue(Tables.EH_ORGANIZATION_BILLS.CREATOR_UID));
+				bill.setDateStr(r.getValue(Tables.EH_ORGANIZATION_BILLS.DATE_STR));
+				bill.setDescription(r.getValue(Tables.EH_ORGANIZATION_BILLS.DESCRIPTION));
+				bill.setDueAmount(r.getValue(Tables.EH_ORGANIZATION_BILLS.DUE_AMOUNT));
+				bill.setEndDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.END_DATE));
+				bill.setEntityId(r.getValue(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID));
+				bill.setEntityType(r.getValue(Tables.EH_ORGANIZATION_BILLS.ENTITY_TYPE));
+				bill.setId(r.getValue(Tables.EH_ORGANIZATION_BILLS.ID));
+				bill.setName(r.getValue(Tables.EH_ORGANIZATION_BILLS.NAME));
+				bill.setNotifyCount(r.getValue(Tables.EH_ORGANIZATION_BILLS.NOTIFY_COUNT));
+				bill.setNotifyTime(r.getValue(Tables.EH_ORGANIZATION_BILLS.NOTIFY_TIME));
+				bill.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID));
+				bill.setOweAmount(r.getValue(Tables.EH_ORGANIZATION_BILLS.OWE_AMOUNT));
+				bill.setPayDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.PAY_DATE));
+				bill.setStartDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.START_DATE));
+				
+				list.add(bill);
+				return null;
+			}).toArray();
+		}
+		
+		return list;
+	}
 
-		if(records != null && !records.isEmpty())
-			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
-		return null;
+	@Override
+	public BigDecimal countPmYearIncomeByOrganizationId(Long organizationId) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new java.util.Date());
+		
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.DAY_OF_YEAR, cal.getActualMinimum(Calendar.DAY_OF_YEAR));
+		Timestamp firstDateOfYear = new Timestamp(cal.getTime().getTime());
+		
+		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMaximum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
+		cal.set(Calendar.DAY_OF_YEAR, cal.getActualMaximum(Calendar.DAY_OF_YEAR));
+		Timestamp lastDateOfYear = new Timestamp(cal.getTime().getTime());
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Record1<BigDecimal> record = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT.sum())
+		.from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
+		.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear)
+				.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
+		.fetchOne();
+		
+		if(record != null)
+			return record.value1();
+		return BigDecimal.ZERO;
 	}
 
 }

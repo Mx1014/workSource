@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.BuildingDTO;
-import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
+import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -1089,10 +1089,50 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-
-
-
-
-
+	
+	/**
+	 * <b>URL: /pm/getPmPayStatistics
+	 * <p>物业缴费统计:年度收入，待收费,欠费户数
+	 */
+	@RequestMapping("getPmPayStatistics")
+	@RestReturn(GetPmPayStatisticsCommandResponse.class)
+	public RestResponse getPmPayStatistics (@Valid GetPmPayStatisticsCommand cmd){
+		GetPmPayStatisticsCommandResponse result = this.propertyMgrService.getPmPayStatistics(cmd);
+		
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/sendPmPayMessageToOneOweFamily
+	 * <p>给指定欠费家庭发缴费通知
+	 */
+	@RequestMapping("sendPmPayMessageToOneOweFamily")
+	@RestReturn(String.class)
+	public RestResponse sendPmPayMessageToOneOweFamily (@Valid SendPmPayMessageToOneOweFamilyCommand cmd){
+		this.propertyMgrService.sendPmPayMessageToOneOweFamily(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/sendPmPayMessageToAllOweFamily
+	 * <p>给所有欠费家庭发缴费通知
+	 */
+	@RequestMapping("sendPmPayMessageToAllOweFamily")
+	@RestReturn(String.class)
+	public RestResponse sendPmPayMessageToAllOweFamily (@Valid SendPmPayMessageToAllOweFamilyCommand cmd){
+		this.propertyMgrService.sendPmPayMessageToAllOweFamily(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

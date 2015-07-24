@@ -618,7 +618,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public BigDecimal organizationTransactionBillingAmountByBillId(Long billId){
+	public BigDecimal getOrgBillTxAmountByBillId(Long billId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
 		Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
@@ -703,7 +703,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<Organization> findOrganizationByCondition(Condition condition) {
+	public List<Organization> listOrganizationByCondition(Condition condition) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATIONS).where(condition).fetch();
 
