@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,6 +92,7 @@ import com.everhomes.organization.OrganizationBillingTransactions;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityDTO;
 import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationStatus;
@@ -1861,54 +1863,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Calendar cal = Calendar.getInstance();
 
 		ListPmBillsByConditionsCommandResponse result = new ListPmBillsByConditionsCommandResponse();
+		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-
-		if(organization != null){
-			Condition orgCommunCondition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
-			List<OrganizationCommunityDTO> orgCommunList = this.organizationProvider.findOrganizationCommunityByCondition(orgCommunCondition);
-			OrganizationCommunityDTO orgCommunObj = null;
-			if(orgCommunList != null && !orgCommunList.isEmpty())
-				orgCommunObj = orgCommunList.get(0);
-			else{
-				LOGGER.error("Unable to find the community by organizationId=" + cmd.getOrganizationId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"Unable to find the community.");
-			}
-
-			Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organization.getId());
-
-			if(!(cmd.getAddress() == null || cmd.getAddress().isEmpty())){
-				condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+cmd.getAddress()+"%"));
-			}
-
-			if(!(cmd.getBillDate() == null || cmd.getBillDate().equals(""))){
-				java.sql.Date startDate = this.getFirstDayOfMonthByStr(cmd.getBillDate());
-				java.sql.Date endDate = this.getLastDayOfMonthByStr(cmd.getBillDate());
-
-				if(startDate != null && endDate != null)
-					condition = condition.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate)
-							.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)));
-			}
-
-			List<PmBillsDTO> billList = this.propertyMgrProvider.listCommunityPmBills(condition,offset,pageSize+1);
-
-			if(billList != null && billList.size() == pageSize+1){
-				billList.remove(billList.size()-1);
-				result.setNextPageOffset(cmd.getPageOffset()+1);
-			}
-
-			for(int i=0;i<billList.size();i++){
-				PmBillsDTO tempBill = billList.get(i);
-				BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(tempBill.getId());
-				tempBill.setPayedAmount(payedAmount.abs());
-				tempBill.setWaitPayAmount(tempBill.getDueAmount().add(tempBill.getOweAmount()).add(payedAmount));
-				tempBill.setTotalAmount(tempBill.getDueAmount().add(tempBill.getOweAmount()));
-			}
-			result.setRequests(billList);
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organization.getId());
+		if(!(cmd.getAddress() == null || cmd.getAddress().isEmpty())){
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+cmd.getAddress()+"%"));
+		}
+		if(!(cmd.getBillDate() == null || cmd.getBillDate().equals(""))){
+			java.sql.Date startDate = this.getFirstDayOfMonthByStr(cmd.getBillDate());
+			java.sql.Date endDate = this.getLastDayOfMonthByStr(cmd.getBillDate());
+			if(startDate != null && endDate != null)
+				condition = condition.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate)
+						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)));
+		}
+		
+		billList = this.propertyMgrProvider.listCommunityPmBills(condition,offset,pageSize+1);
+		if(billList != null && billList.size() == pageSize+1){
+			billList.remove(billList.size()-1);
+			result.setNextPageOffset(cmd.getPageOffset()+1);
+		}
+		
+		for(int i=0;i<billList.size();i++){
+			PmBillsDTO tempBill = billList.get(i);
+			BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(tempBill.getId());
+			tempBill.setPayedAmount(payedAmount.negate());
+			tempBill.setWaitPayAmount(tempBill.getDueAmount().add(tempBill.getOweAmount()).add(payedAmount));
+			tempBill.setTotalAmount(tempBill.getDueAmount().add(tempBill.getOweAmount()));
 		}
 
+		result.setRequests(billList);
 		return result;	
 	}
 
@@ -1986,7 +1971,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if(billList != null && billList.size() > 0){
 
 			TransactionStatus status = this.dbProvider.execute( s -> {
-
 				for (CommunityPmBill bill : billList){
 					if(mappingList != null && mappingList.size() > 0)
 					{
@@ -2046,11 +2030,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public int updatePmBills(UpdatePmBillsCommand cmd) {
-
 		Calendar cal = Calendar.getInstance();
 
 		this.dbProvider.execute(s -> {
-
 			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 			EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
 
@@ -2078,6 +2060,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 							communBill.setDueAmount(bill.getDueAmount());
 						if(bill.getOweAmount() != null)
 							communBill.setOweAmount(bill.getOweAmount());
+						if(bill.getAddress() != null && !bill.getAddress().equals("")){
+							Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communBill.getOrganizationId())
+									.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(bill.getAddress()));
+							List<CommunityAddressMapping> addressMappingList = this.organizationProvider.listOrgAddressMappingByCondition(condition);
+							if(addressMappingList != null && addressMappingList.size() == 1){
+								communBill.setAddress(bill.getAddress());
+								communBill.setEntityId(addressMappingList.get(0).getAddressId());
+							}
+							else{
+								LOGGER.error("update bill failure.because address not found..address="+bill.getAddress());
+								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+										"update bill failure.because address not found.address="+bill.getAddress());
+							}
+						}
 
 						dao.update(communBill);
 					}
@@ -2159,9 +2155,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public ListOrgBillingTransactionsByConditionCommandResponse listOrgBillingTransactionsByCondition(
-			ListOrgBillingTransactionsByConditionCommand cmd) {
-
+	public ListOrgBillingTransactionsByConditionsCommandResponse listOrgBillingTransactionsByConditions(
+			ListOrgBillingTransactionsByConditionsCommand cmd) {
 		if(cmd.getOrganizationId() == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2174,19 +2169,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"Unable to find the organization.");
 		}
 
-		ListOrgBillingTransactionsByConditionCommandResponse result = new ListOrgBillingTransactionsByConditionCommandResponse();
+		ListOrgBillingTransactionsByConditionsCommandResponse result = new ListOrgBillingTransactionsByConditionsCommandResponse();
+		List<OrganizationBillingTransactionDTO> orgbillTxList = new ArrayList<OrganizationBillingTransactionDTO>();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-
 		Timestamp startTime = null;
 		Timestamp endTime = null;
 		if(cmd.getPayDate() != null && !cmd.getPayDate().equals("")){
 			startTime = new Timestamp(this.getFirstDayOfMonthByStr(cmd.getPayDate()).getTime());
 			endTime =  new Timestamp(this.getLastDayOfMonthByStr(cmd.getPayDate()).getTime());
 		}
-
-		List<OrganizationBillingTransactionDTO> orgbillTxList = this.organizationProvider.listOrganizationBillingTransactionsByTimeAndAddress(startTime,endTime,cmd.getAddress(),offset,pageSize+1);
+		orgbillTxList = this.organizationProvider.listOrganizationBillingTransactionsByTimeAndAddress(startTime,endTime,cmd.getAddress(),offset,pageSize+1);
+		if(orgbillTxList != null && orgbillTxList.size() == pageSize+1){
+			orgbillTxList.remove(orgbillTxList.size()-1);
+			result.setNextPageOffset(cmd.getPageOffset()+1);
+		}
+		
 		if(orgbillTxList != null && !orgbillTxList.isEmpty()){
 			//设置业主电话
 			for(OrganizationBillingTransactionDTO orgbillTx : orgbillTxList){
@@ -2197,20 +2196,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
-		if(orgbillTxList != null && orgbillTxList.size() == pageSize+1){
-			orgbillTxList.remove(orgbillTxList.size()-1);
-			result.setNextPageOffset(cmd.getPageOffset()+1);
-		}
 		result.setRequests(orgbillTxList);
 		return result;
 	}
 
 	@Override
-	public ListOweFamilysByConditionCommandResponse listOweFamilysByCondition(
-			ListOweFamilysByConditionCommand cmd) {
-
-		ListOweFamilysByConditionCommandResponse response = new ListOweFamilysByConditionCommandResponse();
-
+	public ListOweFamilysByConditionsCommandResponse listOweFamilysByConditions(
+			ListOweFamilysByConditionsCommand cmd) {
 		if(cmd.getOrganizationId() == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2223,40 +2215,51 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"Unable to find the organization.");
 		}
 
-		if(organization != null){
-			List<OweFamilyDTO> familyList = new ArrayList<OweFamilyDTO>();
-			List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrganizationId(organization.getId());
-			if(billList != null && !billList.isEmpty()){
-				for(CommunityPmBill bill : billList){
-					BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
-					BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).add(payAmount);
-					if(balance.compareTo(BigDecimal.ZERO) > 0){//该家庭欠费
-						OweFamilyDTO family = new OweFamilyDTO();
-						family.setAddress(bill.getAddress());
-						family.setAddressId(bill.getEntityId());
-						family.setBillDescription(bill.getDescription());
-						family.setBillId(bill.getId());
-						this.setOweFamilyDTOLastTransactionInfo(family,bill.getId());
-						family.setOweAmount(balance);
-						this.setOweFamilyOwnerInfo(family,bill.getEntityId(),bill.getOrganizationId());
-
-						//判断欠费家庭是否在最后缴费时间查询条件范围内
-						if(cmd.getLastPayDate() != null && !cmd.getLastPayDate().isEmpty()){
-							if(family.getLastPayTime() != null){
-								Date startDate = this.getFirstDayOfMonthByStr(cmd.getLastPayDate());
-								Date endDate = this.getLastDayOfMonthByStr(cmd.getLastPayDate());
-								if(family.getLastPayTime().compareTo(startDate) >= 0 && family.getLastPayTime().compareTo(endDate) <= 0){
-									familyList.add(family);
-								}
+		ListOweFamilysByConditionsCommandResponse response = new ListOweFamilysByConditionsCommandResponse();
+		List<OweFamilyDTO> familyList = new ArrayList<OweFamilyDTO>();
+		List<OweFamilyDTO> familyList2 = new ArrayList<OweFamilyDTO>();
+		
+		List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrganizationId(organization.getId());
+		if(billList != null && !billList.isEmpty()){
+			for(CommunityPmBill bill : billList){
+				BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
+				BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).add(payAmount);
+				if(balance.compareTo(BigDecimal.ZERO) > 0){//该家庭欠费
+					OweFamilyDTO family = new OweFamilyDTO();
+					family.setAddress(bill.getAddress());
+					family.setAddressId(bill.getEntityId());
+					family.setBillDescription(bill.getDescription());
+					family.setBillId(bill.getId());
+					this.setOweFamilyDTOLastTransactionInfo(family,bill.getId());
+					family.setOweAmount(balance);
+					this.setOweFamilyOwnerInfo(family,bill.getEntityId(),bill.getOrganizationId());
+					//判断欠费家庭是否在最后缴费时间查询条件范围内
+					if(cmd.getLastPayDate() != null && !cmd.getLastPayDate().isEmpty()){
+						if(family.getLastPayTime() != null){
+							Date startDate = this.getFirstDayOfMonthByStr(cmd.getLastPayDate());
+							Date endDate = this.getLastDayOfMonthByStr(cmd.getLastPayDate());
+							if(family.getLastPayTime().compareTo(startDate) >= 0 && family.getLastPayTime().compareTo(endDate) <= 0){
+								familyList.add(family);
 							}
 						}
-						else
-							familyList.add(family);
 					}
+					else
+						familyList.add(family);
 				}
 			}
-			response.setRequests(familyList);
-		}//end : if(organization != null){
+		}
+		if(familyList != null && !familyList.isEmpty()){
+			familyList.stream().sorted(new Comparator<OweFamilyDTO>() {
+				public int compare(OweFamilyDTO o1, OweFamilyDTO o2){
+					return o2.getLastPayTime().compareTo(o1.getLastPayTime());
+				}
+			}).map(r -> {
+				familyList2.add(r);
+				return null;
+			}).toArray();
+		}
+
+		response.setRequests(familyList2);
 		return response;
 	}
 
@@ -2276,46 +2279,45 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public ListFamilyBillingTransactionByFamilyIdCommandResponse listFamilyBillingTransactionByAddress(
-			ListFamilyBillingTransactionByFamilyIdCommand cmd) {
+	public ListFamilyBillingTransactionsByFamilyIdCommandResponse listFamilyBillingTransactionByFamilyId(
+			ListFamilyBillingTransactionsByFamilyIdCommand cmd) {
 		if(cmd.getFamilyId() == null){
 			LOGGER.error("propterty familyId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty familyId paramter can not be null or empty");
 		}
 
-		ListFamilyBillingTransactionByFamilyIdCommandResponse response = new ListFamilyBillingTransactionByFamilyIdCommandResponse();
+		ListFamilyBillingTransactionsByFamilyIdCommandResponse response = new ListFamilyBillingTransactionsByFamilyIdCommandResponse();
+		List<FamilyBillingTransactionDTO> transactionList = new ArrayList<FamilyBillingTransactionDTO>();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-
 		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
-
-		if(family != null){
-			Long addresssId = family.getIntegralTag1();
-			List<FamilyBillingTransactions> familyTransactionList = this.familyProvider.listFamilyBillingTrransactionByAddressId(addresssId,pageSize+1,offset);
-			if(familyTransactionList.size() == pageSize+1){
-				response.setNextPageOffset(offset+1);
-				familyTransactionList.remove(familyTransactionList.size()-1);
-			}
-			if(familyTransactionList != null && !familyTransactionList.isEmpty()){
-
-				List<FamilyBillingTransactionDTO> transactionList = new ArrayList<FamilyBillingTransactionDTO>();
-				familyTransactionList.stream().map(r -> {
-					r.setChargeAmount(r.getChargeAmount().negate());
-					transactionList.add(ConvertHelper.convert(r, FamilyBillingTransactionDTO.class));
-					return null;
-				}).toArray();
-
-				response.setRequests(transactionList);
-			}
-		}
-		else{
+		if(family == null){
 			LOGGER.error("the family is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the family is not exist");
 		}
+		Long addresssId = family.getIntegralTag1();
+		List<FamilyBillingTransactions> familyTransactionList = this.familyProvider.listFamilyBillingTrransactionByAddressId(addresssId,pageSize+1,offset);
+		if(transactionList.size() == pageSize+1){
+			response.setNextPageOffset(offset+1);
+			familyTransactionList.remove(transactionList.size()-1);
+		}
+		if(familyTransactionList != null && !familyTransactionList.isEmpty()){
+			familyTransactionList.stream().map(r -> {
+				FamilyBillingTransactionDTO fBillTxdto = new FamilyBillingTransactionDTO();
+				fBillTxdto.setBillType(r.getTxType());
+				fBillTxdto.setChargeAmount(r.getChargeAmount().negate());
+				fBillTxdto.setCreateTime(r.getCreateTime());
+				fBillTxdto.setDescription(r.getDescription());
+				fBillTxdto.setId(r.getId());
+				transactionList.add(fBillTxdto);
+				return null;
+			}).toArray();
+		}
 
+		response.setRequests(transactionList);
 		return response;
 	}
 
@@ -2326,95 +2328,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty familyId or billDate paramter can not be null or empty");
 		}
-
-		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
-		if(family != null){
-
-			java.sql.Date startDate = null;
-			java.sql.Date endDate = null;
-			if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
-				startDate = new java.sql.Date(this.getFirstDayOfMonthByStr(cmd.getBillDate()).getTime());
-				endDate =  new java.sql.Date(this.getLastDayOfMonthByStr(cmd.getBillDate()).getTime());
-			}
-
-			CommunityPmBill communityBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
-			if(communityBill != null){
-				PmBillsDTO billDto = ConvertHelper.convert(communityBill, PmBillsDTO.class);
-				BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(billDto.getId());
-				billDto.setPayedAmount(payedAmount.negate());
-				billDto.setWaitPayAmount(billDto.getDueAmount().add(billDto.getOweAmount()).add(payedAmount));
-				billDto.setTotalAmount(billDto.getDueAmount().add(billDto.getOweAmount()));
-				return billDto;
-			}
-			return null;
-		}
-		else{
-			LOGGER.error("the family is not exist.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the family is not exist");
-		}
-
-	}
-
-	@Override
-	public PmBillsDTO findFamilyBillAndPayByFamilyIdAndTime(FindFamilyBillAndPayByFamilyIdAndTimeCommand cmd) {
-
-		if(cmd.getFamilyId() == null || cmd.getFamilyId().equals("") || cmd.getBillDate() == null){
-			LOGGER.error("propterty familyId or billDate paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty familyId or billDate paramter can not be null or empty");
-		}
-
-		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
-		if(family != null){
-			java.sql.Date startDate = null;
-			java.sql.Date endDate = null;
-			if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
-				startDate = new java.sql.Date(this.getFirstDayOfMonthByStr(cmd.getBillDate()).getTime());
-				endDate =  new java.sql.Date(this.getLastDayOfMonthByStr(cmd.getBillDate()).getTime());
-			}
-
-			CommunityPmBill communityPmBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
-			if(communityPmBill != null){
-				PmBillsDTO dto = ConvertHelper.convert(communityPmBill, PmBillsDTO.class);
-				BigDecimal totalAmount = dto.getDueAmount().add(dto.getOweAmount());
-				BigDecimal payedAmount = BigDecimal.ZERO;
-
-				List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(dto.getId());
-				if(payList != null && !payList.isEmpty()){
-					List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
-					for(FamilyBillingTransactions payRecord : payList){
-						payRecord.setChargeAmount(payRecord.getChargeAmount().negate());
-						payDtoList.add(ConvertHelper.convert(payRecord, FamilyBillingTransactionDTO.class));
-						payedAmount = payedAmount.add(payRecord.getChargeAmount());
-					}
-					dto.setPayList(payDtoList);
-				}
-				dto.setPayedAmount(payedAmount);
-				dto.setWaitPayAmount(totalAmount.subtract(payedAmount));
-				dto.setTotalAmount(totalAmount);
-				return dto;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public ListFamilyBillAndPayByFamilyIdCommandResponse listFamilyBillAndPayByFamilyId(
-			ListFamilyBillAndPayByFamilyIdCommand cmd) {
-
-		if(cmd.getFamilyId() == null){
-			LOGGER.error("propterty familyId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty familyId paramter can not be null or empty");
-		}
-
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-
-		ListFamilyBillAndPayByFamilyIdCommandResponse response = new ListFamilyBillAndPayByFamilyIdCommandResponse();
-
-		response.setBillDate(cmd.getBillDate());
+		
+		PmBillsDTO billDto = new PmBillsDTO();
 
 		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
 		if(family == null){
@@ -2422,37 +2337,130 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the family is not exist");
 		}
+		java.sql.Date startDate = null;
+		java.sql.Date endDate = null;
+		if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
+			startDate = new java.sql.Date(this.getFirstDayOfMonthByStr(cmd.getBillDate()).getTime());
+			endDate =  new java.sql.Date(this.getLastDayOfMonthByStr(cmd.getBillDate()).getTime());
+		}
+		CommunityPmBill communityBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
+		if(communityBill != null){
+			billDto = ConvertHelper.convert(communityBill, PmBillsDTO.class);
+			BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(billDto.getId());
+			billDto.setPayedAmount(payedAmount.negate());
+			billDto.setWaitPayAmount(billDto.getDueAmount().add(billDto.getOweAmount()).add(payedAmount));
+			billDto.setTotalAmount(billDto.getDueAmount().add(billDto.getOweAmount()));
+		}
+		
+		return billDto;
 
+	}
+
+	@Override
+	public PmBillsDTO findFamilyBillAndPaysByFamilyIdAndTime(FindFamilyBillAndPaysByFamilyIdAndTimeCommand cmd) {
+		if(cmd.getFamilyId() == null || cmd.getFamilyId().equals("") || cmd.getBillDate() == null){
+			LOGGER.error("propterty familyId or billDate paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty familyId or billDate paramter can not be null or empty");
+		}
+		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
+		if(family == null){
+			LOGGER.error("the family is not exist.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the family is not exist");
+		}
+		
+		PmBillsDTO dto = new PmBillsDTO();
+		List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
+		
+		java.sql.Date startDate = null;
+		java.sql.Date endDate = null;
+		if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
+			startDate = new java.sql.Date(this.getFirstDayOfMonthByStr(cmd.getBillDate()).getTime());
+			endDate =  new java.sql.Date(this.getLastDayOfMonthByStr(cmd.getBillDate()).getTime());
+		}
+		CommunityPmBill communityPmBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
+		if(communityPmBill != null){
+			dto = ConvertHelper.convert(communityPmBill, PmBillsDTO.class);
+			BigDecimal totalAmount = dto.getDueAmount().add(dto.getOweAmount());
+			BigDecimal payedAmount = BigDecimal.ZERO;
+
+			List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(dto.getId());
+			if(payList != null && !payList.isEmpty()){
+				for(FamilyBillingTransactions payRecord : payList){
+					FamilyBillingTransactionDTO fBillTxDto = new FamilyBillingTransactionDTO();
+					fBillTxDto.setBillType(payRecord.getTxType());
+					fBillTxDto.setChargeAmount(payRecord.getChargeAmount().negate());
+					fBillTxDto.setCreateTime(payRecord.getCreateTime());
+					fBillTxDto.setDescription(payRecord.getDescription());
+					fBillTxDto.setId(payRecord.getId());
+					payDtoList.add(fBillTxDto);
+					payedAmount = payedAmount.add(fBillTxDto.getChargeAmount());
+				}
+			}
+			dto.setPayedAmount(payedAmount);
+			dto.setWaitPayAmount(totalAmount.subtract(payedAmount));
+			dto.setTotalAmount(totalAmount);
+		}
+		dto.setPayList(payDtoList);
+		
+		return dto;
+	}
+
+	@Override
+	public ListFamilyBillsAndPaysByFamilyIdCommandResponse listFamilyBillsAndPaysByFamilyId(
+			ListFamilyBillsAndPaysByFamilyIdCommand cmd) {
+		if(cmd.getFamilyId() == null){
+			LOGGER.error("propterty familyId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty familyId paramter can not be null or empty");
+		}
+
+		ListFamilyBillsAndPaysByFamilyIdCommandResponse response = new ListFamilyBillsAndPaysByFamilyIdCommandResponse();
+		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+		response.setBillDate(cmd.getBillDate());
+		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
+		if(family == null){
+			LOGGER.error("the family is not exist.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the family is not exist");
+		}
 		Condition condition = Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(family.getIntegralTag1());
-		List<PmBillsDTO> billList = this.propertyMgrProvider.listCommunityPmBills(condition, offset, pageSize+1);
-
+		billList = this.propertyMgrProvider.listCommunityPmBills(condition, offset, pageSize+1);
 		if(billList != null && !billList.isEmpty()){
 			if(billList.size()==pageSize+1){
 				billList.remove(billList.size()-1);
 				response.setNextPageOffset(cmd.getPageOffset()+1);
 			}
-
 			for(PmBillsDTO bill : billList){
+				List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
+				
 				BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount());
 				BigDecimal paidAmount = BigDecimal.ZERO;
-
 				List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(bill.getId());
 				if(payList != null && !payList.isEmpty()){
-					List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
 					for(FamilyBillingTransactions payRecord : payList){
-						payRecord.setChargeAmount(payRecord.getChargeAmount().negate());
-						payDtoList.add(ConvertHelper.convert(payRecord, FamilyBillingTransactionDTO.class));
-						paidAmount = paidAmount.add(payRecord.getChargeAmount());
+						FamilyBillingTransactionDTO fBillTxDto = new FamilyBillingTransactionDTO();
+						fBillTxDto.setBillType(payRecord.getTxType());
+						fBillTxDto.setChargeAmount(payRecord.getChargeAmount().negate());
+						fBillTxDto.setCreateTime(payRecord.getCreateTime());
+						fBillTxDto.setDescription(payRecord.getDescription());
+						fBillTxDto.setId(payRecord.getId());
+						payDtoList.add(fBillTxDto);
+						paidAmount = paidAmount.add(fBillTxDto.getChargeAmount());
 					}
-					bill.setPayList(payDtoList);
 				}
 				bill.setPayedAmount(paidAmount);
 				bill.setWaitPayAmount(totalAmount.subtract(paidAmount));
 				bill.setTotalAmount(totalAmount);
+				bill.setPayList(payDtoList);
 			}
-			response.setRequests(billList);
 		}
 
+		response.setRequests(billList);
 		return response;
 	}
 
@@ -2469,25 +2477,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the family is not exist");
 		}
-
 		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(),OrganizationType.PM.getCode());
 		if(org == null){
 			LOGGER.error("have not pm organization in the community.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"have not pm organization in the community.");
 		}
-
 		CommunityPmBill bill = this.propertyMgrProvider.findFamilyNewestBill(family.getIntegralTag1(), org.getId());
 		if(bill == null){
 			LOGGER.error("the bill is not exist by addressId="+family.getIntegralTag1());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is not exist");
 		}
-
 		User user = UserContext.current().getUser();
 		Date cunnentTime = new Date();
 		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
-
 		//账单欠费金额已缴齐,无需继续缴费
 		BigDecimal paidAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
 		BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount()).add(paidAmount);
@@ -2530,9 +2534,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			familyTx.setOwnerAccountId(fAccount.getId());
 			familyTx.setOwnerId(bill.getEntityId());
 			familyTx.setPaidType(cmd.getPaidType());
-			familyTx.setResultCodeId(1);
+			/*familyTx.setResultCodeId(1);
 			familyTx.setResultCodeScope("test");
-			familyTx.setResultDesc("test description");
+			familyTx.setResultDesc("test description");*/
 			familyTx.setTargetAccountId(oAccount.getId());
 			familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
 			familyTx.setTxSequence(1L);
@@ -2550,9 +2554,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			orgTx.setOwnerAccountId(oAccount.getId());
 			orgTx.setOwnerId(bill.getOrganizationId());
 			orgTx.setPaidType(cmd.getPaidType());
-			orgTx.setResultCodeId(1);
+			/*orgTx.setResultCodeId(1);
 			orgTx.setResultCodeScope("test");
-			orgTx.setResultDesc("test description");
+			orgTx.setResultDesc("test description");*/
 			orgTx.setTargetAccountId(fAccount.getId());
 			orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
 			orgTx.setTxSequence(1L);
@@ -2575,10 +2579,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public GetPmPayStatisticsCommandResponse getPmPayStatistics(
 			GetPmPayStatisticsCommand cmd) {
-		GetPmPayStatisticsCommandResponse result = new GetPmPayStatisticsCommandResponse();
+		if(cmd.getOrganizationId() == null){
+			LOGGER.error("propterty organizationId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty organizationId paramter can not be null or empty");
+		}
+		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(organization == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
+		}
 
+		GetPmPayStatisticsCommandResponse result = new GetPmPayStatisticsCommandResponse();
 		int oweFamilyCount = 0;
 		BigDecimal unPayAmount = BigDecimal.ZERO;
+		BigDecimal yearIncomeAmount = BigDecimal.ZERO;
+		
 		List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrganizationId(cmd.getOrganizationId());
 		if(billList != null && !billList.isEmpty()){
 			for(CommunityPmBill bill : billList){
@@ -2590,10 +2607,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
+		yearIncomeAmount = this.propertyMgrProvider.countPmYearIncomeByOrganizationId(cmd.getOrganizationId());
 
 		result.setOweFamilyCount(oweFamilyCount);
 		result.setUnPayAmount(unPayAmount);
-		result.setYearIncomeAmount(this.propertyMgrProvider.countPmYearIncomeByOrganizationId(cmd.getOrganizationId()));
+		result.setYearIncomeAmount(yearIncomeAmount);
 		return result;
 	}
 
@@ -2625,7 +2643,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is not exist");
 		}
-		
+
 		BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
 		BigDecimal balance = bill.getDueAmount().add(bill.getOweAmount()).add(payAmount);
 		if(balance.compareTo(BigDecimal.ZERO) <= 0){//该家庭欠费
@@ -2635,11 +2653,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		//发送物业缴费通知
 		String message = this.getPmPayMessage(bill,balance,payAmount);
+		//给未注册用户发短信
+		this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),family.getIntegralTag1(),message);
+		//给注册用户发消息
 		sendNoticeToFamilyById(cmd.getFamilyId(), message);
 	}
 
+	private void sendPmPayMessageToUnRegisterUserInFamily(Long organizationId,Long addressId,String message) {
+		List<OrganizationOwners> orgOwnerList = this.organizationProvider.listOrganizationOwnersByOrgIdAndAddressId(organizationId,addressId);
+		if(orgOwnerList != null && !orgOwnerList.isEmpty()){
+			for(OrganizationOwners orgOwner : orgOwnerList){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(orgOwner.getContactToken());
+				if(userIdentifier == null)
+					smsProvider.sendSms(orgOwner.getContactToken(), message);
+			}
+		}
+	}
+
 	@Override
-	public void sendPmPayMessageToAllOweFamily(SendPmPayMessageToAllOweFamilyCommand cmd) {
+	public void sendPmPayMessageToAllOweFamilies(SendPmPayMessageToAllOweFamiliesCommand cmd) {
 		if(cmd.getOrganizationId() == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2663,6 +2695,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						if(family != null){
 							//发送物业缴费通知
 							String message = this.getPmPayMessage(bill, balance, payAmount);
+							//给未注册用户发短信
+							this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),family.getIntegralTag1(),message);
+							//给注册用户发消息
 							sendNoticeToFamilyById(family.getId(), message);
 						}
 					}
@@ -2670,7 +2705,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 	}
-	
+
 	private String getPmPayMessage(CommunityPmBill bill, BigDecimal balance, BigDecimal payAmount){
 		//String str = "您2015年07月物业账单为，本月金额：300.00,往期欠款：200.00，本月实付金额：100.00，应付金额：400.00 ，+ 账单说明。 请尽快使用左邻缴纳物业费。";
 		StringBuilder builder = new StringBuilder();
@@ -2682,16 +2717,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			builder.append("0"+month+"月");
 		else
 			builder.append(month+"月");
-		builder.append("物业账单为.本月金额:");
+		builder.append("物业账单为，本月金额：");
 		builder.append(bill.getDueAmount());
-		builder.append(",往期欠款:");
+		builder.append("，往期欠款：");
 		builder.append(bill.getOweAmount());
-		builder.append(",本月实付金额:");
+		builder.append("，本月实付金额：");
 		builder.append(payAmount);
-		builder.append(".应付金额:");
-		builder.append(balance+".");
-		builder.append(bill.getDescription()+".");
-		builder.append(" 请尽快使用左邻缴纳物业费.");
+		builder.append("，应付金额：");
+		builder.append(balance);
+		if(bill.getDescription() != null && !bill.getDescription().isEmpty())
+			builder.append("，"+bill.getDescription());
+		builder.append("。");
+		builder.append("请尽快使用左邻缴纳物业费。");
 		return builder.toString();
 	}
 

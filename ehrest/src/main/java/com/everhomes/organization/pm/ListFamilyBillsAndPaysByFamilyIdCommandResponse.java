@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class ListFamilyBillAndPayByFamilyIdCommandResponse {
+public class ListFamilyBillsAndPaysByFamilyIdCommandResponse {
 	
 	private String billDate;
 	

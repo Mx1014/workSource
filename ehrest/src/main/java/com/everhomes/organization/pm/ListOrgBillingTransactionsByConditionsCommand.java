@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  *
  */
-public class ListOrgBillingTransactionsByConditionCommand {
+public class ListOrgBillingTransactionsByConditionsCommand {
 	
 	private Long pageOffset;
 	private Integer pageSize;

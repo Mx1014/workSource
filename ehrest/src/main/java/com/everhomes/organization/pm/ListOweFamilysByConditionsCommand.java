@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  *
  */
-public class ListOweFamilysByConditionCommand {
+public class ListOweFamilysByConditionsCommand {
 	
 	private String address;
 	private String lastPayDate;

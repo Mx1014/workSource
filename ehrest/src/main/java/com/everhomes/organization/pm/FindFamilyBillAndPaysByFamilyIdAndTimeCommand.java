@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  *
  */
-public class FindFamilyBillAndPayByFamilyIdAndTimeCommand {
+public class FindFamilyBillAndPaysByFamilyIdAndTimeCommand {
 	
 	@NotNull
 	private String billDate;

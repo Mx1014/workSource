@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class ListOrgBillingTransactionsByConditionCommandResponse {
+public class ListOrgBillingTransactionsByConditionsCommandResponse {
 	
 	private Long nextPageOffset;
 	

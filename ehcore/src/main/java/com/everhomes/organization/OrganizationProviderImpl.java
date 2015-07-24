@@ -794,4 +794,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		return list;
 	}
+
+
+	@Override
+	public List<OrganizationOwners> listOrganizationOwnersByOrgIdAndAddressId(
+			Long organizationId, Long addressId) {
+		List<OrganizationOwners> list = new ArrayList<OrganizationOwners>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+				.where(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId)
+						.and(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId)))
+				.fetch();
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationOwners.class));
+		}
+		return list;
+	}
 }

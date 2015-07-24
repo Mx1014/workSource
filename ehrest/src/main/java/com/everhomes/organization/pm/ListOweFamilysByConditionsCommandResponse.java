@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class ListOweFamilysByConditionCommandResponse {
+public class ListOweFamilysByConditionsCommandResponse {
 	
 	@ItemType(OweFamilyDTO.class)
 	private List<OweFamilyDTO> requests;

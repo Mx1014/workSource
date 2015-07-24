@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  *
  */
-public class ListFamilyBillingTransactionByFamilyIdCommandResponse {
+public class ListFamilyBillingTransactionsByFamilyIdCommandResponse {
 	
 	private Long nextPageOffset;
 	

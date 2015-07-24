@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  *
  */
-public class SendPmPayMessageToAllOweFamilyCommand {
+public class SendPmPayMessageToAllOweFamiliesCommand {
 	@NotNull
 	private Long organizationId;
 
