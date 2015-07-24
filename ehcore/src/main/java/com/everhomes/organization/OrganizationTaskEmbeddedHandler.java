@@ -117,7 +117,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
     }
     
     private String getOrganizationTaskRenderString(Post post) {
-        String str = null;
+        String str = post.getEmbeddedJson();
         
         try {
             Long taskId = post.getEmbeddedId();
