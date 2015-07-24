@@ -34,6 +34,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
 import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.border.AddBorderCommand;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
@@ -111,6 +112,9 @@ public class AdminController extends ControllerBase {
     
     @Autowired
     private SequenceService sequenceService;
+    
+    @Autowired
+    private AppProvider appProvider;
     
     @Value("#{T(java.util.Arrays).asList('${source.jars}')}")
     private List<String> jars;
@@ -578,6 +582,27 @@ public class AdminController extends ControllerBase {
         }
         List<UserLogin> logins = this.userService.listUserLogins(uid);
         return new RestResponse(logins.stream().map((r) -> { return r.toDto(); }).collect(Collectors.toList()));
+    }
+    
+    @RequestMapping("createApp")
+    @RestReturn(value=String.class)
+    public RestResponse createApp(@Valid AppCreateCommand cmd) {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+                UserContext.current().getUser().getId(), Privilege.Visible, null)) {
+            
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+            }
+        
+        App app = new App();
+        app.setAppKey(cmd.getAppKey());
+        app.setCreatorUid(UserContext.current().getUser().getId());
+        app.setDescription(cmd.getDescription());
+        app.setName(cmd.getName());
+        app.setSecretKey(cmd.getSecretKey());
+        app.setStatus((byte)1);
+        this.appProvider.createApp(app);
+        
+        return new RestResponse("ok");
     }
     
     @RequireAuthentication(false)
