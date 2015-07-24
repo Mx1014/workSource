@@ -69,6 +69,22 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /org/applyOrganizationMember</b>
+	 * <p>申请组织管理员</p>
+	 * @return 添加的结果
+	 */
+	@RequestMapping("applyOrganizationMember")
+	@RestReturn(value=String.class)
+	public RestResponse applyOrganizationMember(@Valid ApplyOrganizationMemberCommand cmd) {
+
+		organizationService.applyOrganizationMember(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /org/addOrgMemberByPhone</b>
 	 * <p>通过手机添加府机构成员</p>
 	 * @return 添加的结果

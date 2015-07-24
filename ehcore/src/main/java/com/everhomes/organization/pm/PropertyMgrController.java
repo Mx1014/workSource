@@ -33,7 +33,7 @@ import com.everhomes.forum.ListTopicCommentCommand;
 import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
-import com.everhomes.organization.OrganizationBillingTransactions;
+import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
@@ -906,7 +906,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	} 
-	
+
 	/**
 	 * <b>URL: /pm/listPropApartmentsByKeyword</b>
 	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
@@ -933,17 +933,11 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
-		int result = propertyMgrService.importPmBills(cmd, files);
+		propertyMgrService.importPmBills(cmd, files);
 
 		RestResponse response = new RestResponse();
-		if(result == 1){
-			response.setErrorCode(ErrorCodes.SUCCESS);
-			response.setErrorDescription("OK");
-		}
-		else{
-			response.setErrorCode(ErrorCodes.ERROR_OUT_OF_STORAGE);
-			response.setErrorDescription("failure");
-		}
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
 
 	} 
@@ -952,7 +946,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listPmBillsByConditions
 	 * <p>根据条件查询物业缴费单
 	 */
-	@RequestMapping("listPmBillsByConditions")
+	@RequestMapping(value="listPmBillsByConditions",method = RequestMethod.POST)
 	@RestReturn(value=PmBillsDTO.class,collection=true)
 	public RestResponse listPmBillsByConditions(@Valid ListPmBillsByConditionsCommand cmd) {
 
@@ -963,7 +957,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	} 
-	
+
 	/**
 	 * <b>URL: /pm/updatePmBills
 	 * <p>更新物业缴费单
@@ -972,20 +966,20 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse updatePmBills(@Valid UpdatePmBillsCommand cmd) {
 
-		 int result = propertyMgrService.updatePmBills(cmd);
+		propertyMgrService.updatePmBills(cmd);
 
-		RestResponse response = new RestResponse(result);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	} 
-	
+
 	/**
 	 * <b>URL: /pm/listOrgBillingTransactionsByCondition
 	 * <p>根据条件查询缴费记录
 	 */
 	@RequestMapping("listOrgBillingTransactionsByCondition")
-	@RestReturn(value=OrganizationBillingTransactions.class,collection=true)
+	@RestReturn(value=OrganizationBillingTransactionDTO.class,collection=true)
 	public RestResponse listOrgBillingTransactionsByCondition(@Valid ListOrgBillingTransactionsByConditionCommand cmd) {
 
 		ListOrgBillingTransactionsByConditionCommandResponse result = propertyMgrService.listOrgBillingTransactionsByCondition(cmd);
@@ -995,7 +989,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/listOweFamilysByCondition
 	 * <p>根据条件查询欠费家庭
@@ -1011,9 +1005,9 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
-//web-family	
+
+
+	//web-family	
 	/**
 	 * <b>URL: /pm/listFamilyBillingTransactionByFamilyId
 	 * <p>根据家庭Id查询家庭的缴费记录
@@ -1029,7 +1023,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/findFamilyBillByFamilyIdAndTime
 	 * <p>根据家庭Id和日期查询家庭的账单
@@ -1045,8 +1039,8 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-//app
+
+	//app
 	/**
 	 * <b>URL: /pm/findFamilyBillAndPayByFamilyIdAndTime
 	 * <p>根据家庭id和日期查询家庭某月份的账单和缴费记录
@@ -1062,7 +1056,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/listFamilyBillAndPayByFamilyId
 	 * <p>根据家庭id和日期查询家庭的所有账单和缴费记录
@@ -1078,8 +1072,8 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-//支付
+
+	//支付
 	/**
 	 * <b>URL: /pm/payPmBillByFamilyId
 	 * <p>缴费
@@ -1088,17 +1082,17 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse payPmBillByFamilyId(@Valid PayPmBillByFamilyIdCommand cmd) {
 
-		int result = propertyMgrService.payPmBillByFamilyId(cmd);
+		propertyMgrService.payPmBillByFamilyId(cmd);
 
-		RestResponse response = new RestResponse(result);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 
 }

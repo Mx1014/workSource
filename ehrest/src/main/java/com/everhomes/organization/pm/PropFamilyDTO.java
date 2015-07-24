@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberCount: 家庭成员数</li>
  * <li>address: 家庭所在地址详情</li>
  * <li>addressId: 地址信息</li>
- * <li>livingStatus: 地址状态, 详见{@link com.everhomes.pm.PmMemberStatus}</li>
+ * <li>livingStatus: 地址状态, 详见{@link com.everhomes.organization.pm.PmMemberStatus}</li>
  * <li>owed: 是否欠费 , 详见{@link com.everhomes.organization.pm.OwedType}</li>
  * </ul>
  */
