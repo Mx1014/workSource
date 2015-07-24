@@ -316,14 +316,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     @SuppressWarnings("unchecked")
     private JSONObject processPostNew(long communityId, JSONObject actionDataJson, LaunchPadItem launchPadItem) {
         actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
+        String targetEntityTag = (String) actionDataJson.get(LaunchPadConstants.TARGET_TAG);
+        targetEntityTag = targetEntityTag == null || targetEntityTag.trim().equals("") ? PostEntityTag.USER.getCode() : targetEntityTag;
         String tag = launchPadItem.getTag();
         if(tag == null || tag.trim().equals("")){
-            String entityTag = (String) actionDataJson.get(LaunchPadConstants.ENTITY_TAG);
-            entityTag = entityTag == null || entityTag.trim().equals("") ? PostEntityTag.USER.getCode() : entityTag;
+            
             actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
             actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
             actionDataJson.put(LaunchPadConstants.CREATOR_TAG, PostEntityTag.USER.getCode());
-            actionDataJson.put(LaunchPadConstants.TARGET_TAG,entityTag);
+            actionDataJson.put(LaunchPadConstants.TARGET_TAG,targetEntityTag);
             return actionDataJson;
         }
         
@@ -338,7 +339,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
         actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
         actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
-        actionDataJson.put(LaunchPadConstants.TARGET_TAG, PostEntityTag.USER.getCode());
+        actionDataJson.put(LaunchPadConstants.TARGET_TAG, targetEntityTag);
         return actionDataJson;
     }
     
