@@ -12,13 +12,13 @@ public interface LaunchPadConstants {
     public static final String CALLPHONES = "callPhones";
     public static final String ANDROID_EMBEDDED = "androidEmbedded_json";
     public static final String IOS_EMBEDDED = "iosEmbedded_json";
-    public static final String REGION_TYPE = "regionType";
-    public static final String REGION_ID = "regionId";
+    public static final String VISIBLE_REGION_TYPE = "visibleRegionType";
+    public static final String VISIBLE_REGIONID = "visibleRegionId";
     public static final String ENTITY_TAG = "entityTag";
     public static final String DISPLAY_NAME = "displayName";
     public static final String CREATOR_TAG = "creatorEntityTag";
     public static final String TARGET_TAG = "targetEntityTag";
-    public static final String ENTITY_ID = "entityId";
+    public static final String ORGANIZATION_ID = "organizationId";
     
     
 
