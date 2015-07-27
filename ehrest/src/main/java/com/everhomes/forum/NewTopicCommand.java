@@ -9,7 +9,19 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>
+ * <ul>发帖举例：
+ * <li>普通用户给物业或业委发帖：createTag填USER，targetTag填PM（物业）或GARC（业委），visibleRegionType填小区、visibleRegionId填用户当前小区ID，
+ *                            contentCategory选报修/咨询与求助/投诉与建议，actionCategory不填；</li>
+ * <li>普通用户给居委或公安发帖：createTag填USER，targetTag填GANC（居委）或GAPS（公安），visibleRegionType填小区、visibleRegionId填用户当前小区ID，
+ *                            contentCategory选报修/咨询与求助/投诉与建议，actionCategory不填；</li>
+ * <li>物业或业委发帖：createTag填PM（物业）或GARC（业委），如果是公告则targetTag填USER(是发给普通用户看的）、报修/咨询与求助/投诉与建议则targetTag
+ *                            填PM（物业）或GARC（业委）、相当于代替普通用户发这些帖给物业或业委，visibleRegionType填小区、visibleRegionId填物业或业委
+ *                            所管理的小区ID（只支持一个物业或业委管理一个小区）；contentCategory选公告/报修/咨询与求助/投诉与建议，actionCategory不填；</li>
+ * <li>居委或公安发帖：createTag填PM（物业）或GARC（业委），如果是公告则targetTag填USER(是发给普通用户看的）、报修/咨询与求助/投诉与建议则targetTag
+ *                            填GANC（居委）或GAPS（公安）、相当于代替普通用户发这些帖给居委或公安，visibleRegionType填片区、visibleRegionId填居委或公安
+ *                            所管理的片区ID（片区ID实际上为机构ID）；contentCategory选公告/报修/咨询与求助/投诉与建议，actionCategory不填；</li>
+ * </ul>
+ * <ul>字段：
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.forum.PostEntityTag}</li>
