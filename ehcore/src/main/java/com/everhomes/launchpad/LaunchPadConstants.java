@@ -18,6 +18,7 @@ public interface LaunchPadConstants {
     public static final String DISPLAY_NAME = "displayName";
     public static final String CREATOR_TAG = "creatorEntityTag";
     public static final String TARGET_TAG = "targetEntityTag";
+    public static final String ENTITY_ID = "entityId";
     
     
 

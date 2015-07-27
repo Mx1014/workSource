@@ -68,7 +68,7 @@ import com.everhomes.visibility.VisibleRegionType;
 @Component
 public class LaunchPadServiceImpl implements LaunchPadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
-    
+    private static final String OFFICIAL_PHONE = "400-838-4688";
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
@@ -291,6 +291,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     }
                 });
             }
+            if(contacts.isEmpty())
+                contacts.add(OFFICIAL_PHONE);
             actionDataJson.put(LaunchPadConstants.CALLPHONES,contacts);
         }
         return actionDataJson;
@@ -348,8 +350,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
         String tag = launchPadItem.getTag();
         if(tag == null || tag.trim().equals("")){
-            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
-            actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
+            actionDataJson.put(LaunchPadConstants.ENTITY_TAG, PostEntityTag.USER.getCode());
+            actionDataJson.put(LaunchPadConstants.ENTITY_ID, communityId);
             return actionDataJson;
         }
         
@@ -361,8 +363,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             LOGGER.error("Organization is not exists,communityId=" + communityId);
             return actionDataJson;
         }
-        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
-        actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
+        actionDataJson.put(LaunchPadConstants.ENTITY_TAG, tag);
+        actionDataJson.put(LaunchPadConstants.ENTITY_ID, organization.getId());
         return actionDataJson;
     }
     
