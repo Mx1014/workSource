@@ -781,7 +781,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				orgBillTxDto.setAddress(r.getValue(Tables.EH_ORGANIZATION_BILLS.ADDRESS));
 				orgBillTxDto.setAddressId(r.getValue(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID));
 				orgBillTxDto.setChargeAmount(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT));
-				orgBillTxDto.setCreateTime(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME));
+				orgBillTxDto.setCreateTime(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME).getTime());
 				orgBillTxDto.setDescription(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.DESCRIPTION));
 				orgBillTxDto.setId(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.ID));
 				orgBillTxDto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID));

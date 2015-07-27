@@ -1016,7 +1016,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		if(records != null && !records.isEmpty()){
 			records.stream().map(r -> {
-				list.add(ConvertHelper.convert(r, PmBillsDTO.class));
+				PmBillsDTO bill = ConvertHelper.convert(r, PmBillsDTO.class);
+				bill.setStartDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.START_DATE).getTime());
+				bill.setEndDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.END_DATE).getTime());
+				bill.setPayDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.PAY_DATE).getTime());
+				list.add(bill);
 				return null;
 			}).toArray();
 		}

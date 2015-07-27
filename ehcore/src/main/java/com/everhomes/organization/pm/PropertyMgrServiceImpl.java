@@ -1940,7 +1940,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public int importPmBills(ImportPmBillsCommand cmd, MultipartFile[] files) {
-
 		if(cmd.getOrganizationId() == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1953,79 +1952,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"Unable to find the organization.");
 		}
 
-		Calendar cal = Calendar.getInstance();
-
-		ArrayList resultList = new ArrayList();
-		try {
-			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		List<CommunityPmBill> billList = PropMgrBillHandler.processorPmBills(resultList);
-
-		User user  = UserContext.current().getUser();
-		Timestamp timeStamp = new Timestamp(new Date().getTime());
-
-		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(cmd.getOrganizationId());
-
-		if(billList != null && billList.size() > 0){
-
-			TransactionStatus status = this.dbProvider.execute( s -> {
-				for (CommunityPmBill bill : billList){
-					if(mappingList != null && mappingList.size() > 0)
-					{
-						for (CommunityAddressMapping mapping : mappingList)
-						{
-							if(bill != null && bill.getAddress().equals(mapping.getOrganizationAddress())){
-								Long addressId = mapping.getAddressId();
-								bill.setOrganizationId(cmd.getOrganizationId());
-								bill.setEntityId(mapping.getAddressId());
-								bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
-
-								cal.setTimeInMillis(bill.getStartDate().getTime());
-								StringBuilder builder = new StringBuilder();
-								builder.append(cal.get(Calendar.YEAR) +"-");
-								if(cal.get(Calendar.MONTH)<9)
-									builder.append("0"+(cal.get(Calendar.MONTH)+1));
-								else
-									builder.append(cal.get(Calendar.MONTH)+1);
-
-								bill.setDateStr(builder.toString());
-								bill.setName(bill.getDateStr() + "月账单");
-
-								bill.setCreatorUid(user.getId());
-								bill.setCreateTime(timeStamp);
-
-								bill.setItemList(null);
-
-								//往期欠款处理
-								if(bill.getOweAmount() == null){
-									CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(addressId, cmd.getOrganizationId());
-									if(beforeBill != null){
-										//payAmount为负
-										BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(beforeBill.getId());
-										BigDecimal oweAmount = beforeBill.getDueAmount().add(beforeBill.getOweAmount()).add(payedAmount);
-										bill.setOweAmount(oweAmount);
-									}
-									else
-										bill.setOweAmount(BigDecimal.ZERO);
-								}
-
-								createPropBill(bill);
-								break;
-							}
-						}
-					}
-				}
-
-				return s;
-			});
-
-			if(status.isCompleted())
-				return 1;
-			return 0;
-		}
-		return 0;
+		ImportPmBillsHandle handle = new ImportPmBillsHandle(new DefaultImportPmBillsParser());
+		handle.importPmBills(files);
+		return 1;
 	}
 
 	@Override
@@ -2238,7 +2167,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						if(family.getLastPayTime() != null){
 							Date startDate = this.getFirstDayOfMonthByStr(cmd.getLastPayDate());
 							Date endDate = this.getLastDayOfMonthByStr(cmd.getLastPayDate());
-							if(family.getLastPayTime().compareTo(startDate) >= 0 && family.getLastPayTime().compareTo(endDate) <= 0){
+							if(family.getLastPayTime().compareTo(startDate.getTime()) >= 0 && family.getLastPayTime().compareTo(endDate.getTime()) <= 0){
 								familyList.add(family);
 							}
 						}
@@ -2274,7 +2203,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		FamilyBillingTransactions familyBillTransaction = this.familyProvider.findLastFamilyBillingTransactionByBillId(billId);
 		if(familyBillTransaction != null){
 			family.setLastBillingTransactionId(familyBillTransaction.getId());
-			family.setLastPayTime(familyBillTransaction.getCreateTime());
+			family.setLastPayTime(familyBillTransaction.getCreateTime().getTime());
 		}
 	}
 
@@ -2309,7 +2238,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				FamilyBillingTransactionDTO fBillTxdto = new FamilyBillingTransactionDTO();
 				fBillTxdto.setBillType(r.getTxType());
 				fBillTxdto.setChargeAmount(r.getChargeAmount().negate());
-				fBillTxdto.setCreateTime(r.getCreateTime());
+				fBillTxdto.setCreateTime(r.getCreateTime().getTime());
 				fBillTxdto.setDescription(r.getDescription());
 				fBillTxdto.setId(r.getId());
 				transactionList.add(fBillTxdto);
@@ -2391,7 +2320,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					FamilyBillingTransactionDTO fBillTxDto = new FamilyBillingTransactionDTO();
 					fBillTxDto.setBillType(payRecord.getTxType());
 					fBillTxDto.setChargeAmount(payRecord.getChargeAmount().negate());
-					fBillTxDto.setCreateTime(payRecord.getCreateTime());
+					fBillTxDto.setCreateTime(payRecord.getCreateTime().getTime());
 					fBillTxDto.setDescription(payRecord.getDescription());
 					fBillTxDto.setId(payRecord.getId());
 					payDtoList.add(fBillTxDto);
@@ -2446,7 +2375,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						FamilyBillingTransactionDTO fBillTxDto = new FamilyBillingTransactionDTO();
 						fBillTxDto.setBillType(payRecord.getTxType());
 						fBillTxDto.setChargeAmount(payRecord.getChargeAmount().negate());
-						fBillTxDto.setCreateTime(payRecord.getCreateTime());
+						fBillTxDto.setCreateTime(payRecord.getCreateTime().getTime());
 						fBillTxDto.setDescription(payRecord.getDescription());
 						fBillTxDto.setId(payRecord.getId());
 						payDtoList.add(fBillTxDto);

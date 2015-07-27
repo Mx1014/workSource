@@ -33,7 +33,7 @@ public class OweFamilyDTO {
 	private Long addressId;
 
 	//billingTransaction
-	private Timestamp lastPayTime;
+	private Long lastPayTime;
 	private Long lastBillingTransactionId;
 
 	//organizationOwner
@@ -63,10 +63,10 @@ public class OweFamilyDTO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	public Timestamp getLastPayTime() {
+	public Long getLastPayTime() {
 		return lastPayTime;
 	}
-	public void setLastPayTime(Timestamp lastPayTime) {
+	public void setLastPayTime(Long lastPayTime) {
 		this.lastPayTime = lastPayTime;
 	}
 	public String getOwnerTelephone() {
