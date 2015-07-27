@@ -26,8 +26,8 @@ public class PostNewActionData implements Serializable{
     private String displayName;
     private String creatorEntityTag;
     private String targetEntityTag;
-    private Byte regionType;
-    private Long regionId;
+    private Byte visibleRegionType;
+    private Long visibleRegionId;
     private Long embedAppId; 
     
     public Long getForumId() {
@@ -86,20 +86,20 @@ public class PostNewActionData implements Serializable{
         this.targetEntityTag = targetEntityTag;
     }
 
-    public Byte getRegionType() {
-        return regionType;
+    public Byte getVisibleRegionType() {
+        return visibleRegionType;
     }
 
-    public void setRegionType(Byte regionType) {
-        this.regionType = regionType;
+    public void setVisibleRegionType(Byte visibleRegionType) {
+        this.visibleRegionType = visibleRegionType;
     }
 
-    public Long getRegionId() {
-        return regionId;
+    public Long getVisibleRegionId() {
+        return visibleRegionId;
     }
 
-    public void setRegionId(Long regionId) {
-        this.regionId = regionId;
+    public void setVisibleRegionId(Long visibleRegionId) {
+        this.visibleRegionId = visibleRegionId;
     }
 
     public Long getEmbedAppId() {
