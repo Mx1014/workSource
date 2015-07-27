@@ -1953,7 +1953,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"Unable to find the organization.");
 		}
 
-		ImportPmBillsHandle handle = new ImportPmBillsHandle(new DefaultImportPmBillsParser());
+		ImportPmBillsHandle handle = new ImportPmBillsHandle(new DefaultImportPmBillsParser(),dbProvider,propertyMgrProvider,familyProvider,cmd.getOrganizationId());
 		handle.importPmBills(files);
 		return 1;
 	}

@@ -6,7 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.db.DbProvider;
@@ -20,13 +19,21 @@ public class ImportPmBillsHandle {
 	private PropertyMgrProvider propertyMgrProvider;
 	private DbProvider dbProvider;
 	private FamilyProvider familyProvider;
+	private Long orgId;
 	
-	public ImportPmBillsHandle(ImportPmBillsBaseParser parser){
+	public ImportPmBillsHandle(ImportPmBillsBaseParser parser, 
+			DbProvider dbProvider, PropertyMgrProvider propertyMgrProvider, FamilyProvider familyProvider, Long orgId){
 		this.parser = parser;
+		this.dbProvider = dbProvider;
+		this.familyProvider = familyProvider;
+		this.propertyMgrProvider = propertyMgrProvider;
+		this.orgId = orgId;
 	}
 	
 	public void importPmBills(MultipartFile[] files){
 		if(files == null)
+			return ;
+		if(dbProvider == null ||propertyMgrProvider == null || familyProvider == null || orgId == null)
 			return ;
 		
 		if(parser == null)
@@ -36,7 +43,6 @@ public class ImportPmBillsHandle {
 
 	private void createPmBills(List<CommunityPmBill> billList) {
 		
-		Long orgId = 1L;
 		Calendar cal = Calendar.getInstance();
 		User user  = UserContext.current().getUser();
 		Timestamp timeStamp = new Timestamp(new Date().getTime());
@@ -53,7 +59,7 @@ public class ImportPmBillsHandle {
 						{
 							if(bill != null && bill.getAddress().equals(mapping.getOrganizationAddress())){
 								Long addressId = mapping.getAddressId();
-								//bill.setOrganizationId(orgId);
+								bill.setOrganizationId(orgId);
 								bill.setEntityId(mapping.getAddressId());
 								bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
 
