@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.jasper.tagplugins.jstl.core.If;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,11 @@ public class BusinessServiceImpl implements BusinessService {
         Business business = ConvertHelper.convert(cmd, Business.class);
         business.setCreatorUid(userId);
         business.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(cmd.getLatitude() != null && cmd.getLongitude() != null){
+            String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
+            business.setGeohash(geohash);
+            
+        }
         this.dbProvider.execute((TransactionStatus status) -> {
             this.businessProvider.createBusiness(business);
             cmd.getScopes().forEach(r ->{
@@ -107,8 +114,60 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public void updateBusiness(UpdateBusinessCommand cmd) {
-        // TODO Auto-generated method stub
+        if(cmd.getId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+                    "Invalid paramter id null,categoryId is null");
+        Business business = this.businessProvider.findBusinessById(cmd.getId());
+        if(business == null){
+            LOGGER.error("Business is not exists.id=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");
+        }
+        if(cmd.getAddress() != null && !cmd.getAddress().trim().equals(""))
+            business.setAddress(cmd.getAddress());
+        if(cmd.getContact() != null && !cmd.getContact().trim().equals(""))
+            business.setContact(cmd.getContact());
+        if(cmd.getDescription() != null && !cmd.getDescription().trim().equals(""))
+            business.setDescription(cmd.getDescription());
+        if(cmd.getDisplayName() != null && !cmd.getDisplayName().trim().equals(""))
+            business.setDisplayName(cmd.getDisplayName());
+        if(cmd.getLatitude() != null)
+            business.setLatitude(cmd.getLatitude());
+        if(cmd.getLongitude() != null)
+            business.setLongitude(cmd.getLongitude());
+        if(cmd.getLogoUri() != null && !cmd.getLogoUri().trim().equals(""))
+            business.setLogoUri(cmd.getLogoUri());
+        if(cmd.getName() != null && !cmd.getName().trim().equals(""))
+            business.setName(cmd.getName());
+        if(cmd.getPhone() != null && !cmd.getPhone().trim().equals(""))
+            business.setPhone(cmd.getPhone());
+        if(cmd.getTargetId() != null && !cmd.getTargetId().trim().equals(""))
+            business.setTargetId(cmd.getTargetId());
+        if(cmd.getTargetType() != null)
+            business.setTargetType(cmd.getTargetType());
+        if(cmd.getUrl() != null && cmd.getUrl().trim().equals(""))
+            business.setUrl(cmd.getUrl());
         
+        if(cmd.getLatitude() != null && cmd.getLongitude() != null){
+            String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
+            business.setGeohash(geohash);
+            
+        }
+        this.dbProvider.execute((TransactionStatus status) -> {
+            this.businessProvider.createBusiness(business);
+            if(cmd.getScopes() != null){
+                cmd.getScopes().forEach(r ->{
+                    this.businessProvider.createBusinessVisibleScope(ConvertHelper.convert(r,BusinessVisibleScope.class));
+                });
+            }
+            if(cmd.getCategroies() != null){
+                cmd.getCategroies().forEach(r ->{
+                    this.businessProvider.createBusinessCategory(ConvertHelper.convert(r, BusinessCategory.class));
+                });
+            }
+            
+            return null;
+        });
     }
 
     @Override

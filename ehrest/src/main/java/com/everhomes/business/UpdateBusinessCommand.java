@@ -11,9 +11,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 商家ID</li>
- * <li>targetType: 商家来源类型</li>
+ * <li>targetType: 商家来源类型,参考{@link com.everhomes.business.BusinessTargetType}</li>
  * <li>targetId: 商家原始id</li>
- * <li>bizOwnerUid: 商家拥有者id</li>
  * <li>name: 商家名字</li>
  * <li>displayName: 商家显示名</li>
  * <li>logoUri: 商家logo/li>
@@ -22,9 +21,10 @@ import com.everhomes.util.StringHelper;
  * <li>phone: 商家所有在联系方式</li>
  * <li>longitude: 商家地址所在经度</li>
  * <li>latitude: 商家地址所在纬度</li>
- * <li>geohash: 经纬度生成的geohash值</li>
  * <li>address: 商家地址详情</li>
  * <li>description: 商家描述</li>
+ * <li>scopes: 商家可见范围，参考{@link com.everhomes.business.BusinessScope}</li>
+ * <li>categroies: 商家归属的分类列表</li>
  * </ul>
  */
 
@@ -32,8 +32,7 @@ public class UpdateBusinessCommand{
     @NotNull
     private Long id;
     private Byte     targetType;
-    private Long     targetId;
-    private Long     bizOwnerUid;
+    private String     targetId;
     @NotNull
     private String   name;
     @NotNull
@@ -42,9 +41,8 @@ public class UpdateBusinessCommand{
     private String   url;
     private String   contact;
     private String phone;
-    private Long   longitude;
-    private Long   latitude;
-    private String  geohash;
+    private Double   longitude;
+    private Double   latitude;
     private String  address;
     private String  description;
     @ItemType(BusinessScope.class)
@@ -68,20 +66,12 @@ public class UpdateBusinessCommand{
         this.targetType = targetType;
     }
 
-    public Long getTargetId() {
+    public String getTargetId() {
         return targetId;
     }
 
-    public void setTargetId(Long targetId) {
+    public void setTargetId(String targetId) {
         this.targetId = targetId;
-    }
-
-    public Long getBizOwnerUid() {
-        return bizOwnerUid;
-    }
-
-    public void setBizOwnerUid(Long bizOwnerUid) {
-        this.bizOwnerUid = bizOwnerUid;
     }
 
     public String getName() {
@@ -132,28 +122,20 @@ public class UpdateBusinessCommand{
         this.phone = phone;
     }
 
-    public Long getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Long longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public Long getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Long latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
-    }
-
-    public String getGeohash() {
-        return geohash;
-    }
-
-    public void setGeohash(String geohash) {
-        this.geohash = geohash;
     }
 
     public String getAddress() {
