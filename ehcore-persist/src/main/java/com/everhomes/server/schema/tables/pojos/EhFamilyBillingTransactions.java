@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFamilyBillingTransactions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 290955761;
+	private static final long serialVersionUID = -398340987;
 
 	private java.lang.Long       id;
-	private java.lang.Long       txSequence;
+	private java.lang.String     txSequence;
 	private java.lang.Byte       txType;
 	private java.lang.Long       ownerId;
 	private java.lang.Long       ownerAccountId;
@@ -36,7 +36,7 @@ public class EhFamilyBillingTransactions implements java.io.Serializable {
 
 	public EhFamilyBillingTransactions(
 		java.lang.Long       id,
-		java.lang.Long       txSequence,
+		java.lang.String     txSequence,
 		java.lang.Byte       txType,
 		java.lang.Long       ownerId,
 		java.lang.Long       ownerAccountId,
@@ -82,11 +82,11 @@ public class EhFamilyBillingTransactions implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getTxSequence() {
+	public java.lang.String getTxSequence() {
 		return this.txSequence;
 	}
 
-	public void setTxSequence(java.lang.Long txSequence) {
+	public void setTxSequence(java.lang.String txSequence) {
 		this.txSequence = txSequence;
 	}
 

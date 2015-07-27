@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBillingTransactions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord> {
 
-	private static final long serialVersionUID = -869937963;
+	private static final long serialVersionUID = -350363228;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_billing_transactions</code>
@@ -32,9 +32,9 @@ public class EhOrganizationBillingTransactions extends org.jooq.impl.TableImpl<c
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_organization_billing_transactions.tx_sequence</code>. the sequence binding the two records of a single transaction
+	 * The column <code>ehcore.eh_organization_billing_transactions.tx_sequence</code>. uuid, the sequence binding the two records of a single transaction
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Long> TX_SEQUENCE = createField("tx_sequence", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "the sequence binding the two records of a single transaction");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.String> TX_SEQUENCE = createField("tx_sequence", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false), this, "uuid, the sequence binding the two records of a single transaction");
 
 	/**
 	 * The column <code>ehcore.eh_organization_billing_transactions.tx_type</code>. 1: online, 2: offline

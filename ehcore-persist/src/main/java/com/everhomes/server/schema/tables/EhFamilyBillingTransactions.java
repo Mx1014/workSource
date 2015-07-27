@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFamilyBillingTransactions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhFamilyBillingTransactionsRecord> {
 
-	private static final long serialVersionUID = 443747925;
+	private static final long serialVersionUID = -2087426612;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_family_billing_transactions</code>
@@ -34,7 +34,7 @@ public class EhFamilyBillingTransactions extends org.jooq.impl.TableImpl<com.eve
 	/**
 	 * The column <code>ehcore.eh_family_billing_transactions.tx_sequence</code>. the sequence binding the two records of a single transaction
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFamilyBillingTransactionsRecord, java.lang.Long> TX_SEQUENCE = createField("tx_sequence", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "the sequence binding the two records of a single transaction");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhFamilyBillingTransactionsRecord, java.lang.String> TX_SEQUENCE = createField("tx_sequence", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false), this, "the sequence binding the two records of a single transaction");
 
 	/**
 	 * The column <code>ehcore.eh_family_billing_transactions.tx_type</code>. 1: online, 2: offline

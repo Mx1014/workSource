@@ -50,7 +50,7 @@ public class EhOrganizationBillingTransactionsDao extends org.jooq.impl.DAOImpl<
 	/**
 	 * Fetch records that have <code>tx_sequence IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions> fetchByTxSequence(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions> fetchByTxSequence(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS.TX_SEQUENCE, values);
 	}
 

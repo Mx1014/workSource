@@ -1256,7 +1256,7 @@ CREATE TABLE `eh_organization_billing_accounts` (
 DROP TABLE IF EXISTS `eh_organization_billing_transactions`;
 CREATE TABLE `eh_organization_billing_transactions` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `tx_sequence` BIGINT NOT NULL COMMENT 'the sequence binding the two records of a single transaction',
+    `tx_sequence` VARCHAR(128) NOT NULL COMMENT 'uuid, the sequence binding the two records of a single transaction',
 	`tx_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: online, 2: offline',
     `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization id',
     `owner_account_id` BIGINT NOT NULL DEFAULT 0,
@@ -1415,7 +1415,7 @@ CREATE TABLE `eh_family_billing_accounts` (
 DROP TABLE IF EXISTS `eh_family_billing_transactions`;
 CREATE TABLE `eh_family_billing_transactions` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `tx_sequence` BIGINT NOT NULL COMMENT 'the sequence binding the two records of a single transaction',
+    `tx_sequence` VARCHAR(128) NOT NULL COMMENT 'the sequence binding the two records of a single transaction',
 	`tx_type` TINYINT NOT NULL DEFAULT 1 COMMENT '1: online, 2: offline',
     `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'address id',
     `owner_account_id` BIGINT NOT NULL DEFAULT 0,
