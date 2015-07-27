@@ -1042,15 +1042,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Override
 	public CommunityPmBill findPmBillByAddressAndDate(Long addressId,java.sql.Date startDate,java.sql.Date endDate) {
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
+
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-		.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)
-				.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate))
-				.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)))
-		.fetch();
-		
+				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)
+						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate))
+						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)))
+						.fetch();
+
 		if(records != null && !records.isEmpty())
 			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
 		return null;
@@ -1060,22 +1060,22 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	@Override
 	public List<CommunityPmBill> listOweFamilyBillsByOrganizationId(
 			Long organizationId) {
-		
+
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
+
 		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
 				.from(Tables.EH_ORGANIZATION_BILLS)
 				.groupBy(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID).asTable("t2");
-		
+
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-		.join(table2)
-		.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
-				.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
-		.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId))
-		.fetch();
-		
+				.join(table2)
+				.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
+						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
+						.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId))
+						.fetch();
+
 		if(records != null && !records.isEmpty()){
 			records.stream().map(r -> {
 				CommunityPmBill bill = new CommunityPmBill();
@@ -1096,12 +1096,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				bill.setOweAmount(r.getValue(Tables.EH_ORGANIZATION_BILLS.OWE_AMOUNT));
 				bill.setPayDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.PAY_DATE));
 				bill.setStartDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.START_DATE));
-				
+
 				list.add(bill);
 				return null;
 			}).toArray();
 		}
-		
+
 		return list;
 	}
 
@@ -1109,32 +1109,89 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	public BigDecimal countPmYearIncomeByOrganizationId(Long organizationId) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new java.util.Date());
-		
+
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 		cal.set(Calendar.DAY_OF_YEAR, cal.getActualMinimum(Calendar.DAY_OF_YEAR));
 		Timestamp firstDateOfYear = new Timestamp(cal.getTime().getTime());
-		
+
 		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMaximum(Calendar.HOUR_OF_DAY));
 		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
 		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
 		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
 		cal.set(Calendar.DAY_OF_YEAR, cal.getActualMaximum(Calendar.DAY_OF_YEAR));
 		Timestamp lastDateOfYear = new Timestamp(cal.getTime().getTime());
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
+
 		Record1<BigDecimal> record = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT.sum())
-		.from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
-		.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear)
-				.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
-		.fetchOne();
-		
+				.from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
+				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear)
+						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
+						.fetchOne();
+
 		if(record != null)
 			return record.value1();
 		return BigDecimal.ZERO;
+	}
+
+	@Override
+	public BigDecimal countPmBillsDueAmountInYear(Long orgId, Long addressId) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(System.currentTimeMillis());
+		cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
+		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMaximum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
+		java.sql.Date endDateInYear = new java.sql.Date(cal.getTime().getTime());
+		cal.set(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 0);
+		java.sql.Date startDateInYear = new java.sql.Date(cal.getTime().getTime());
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLS.DUE_AMOUNT.sum()).from(Tables.EH_ORGANIZATION_BILLS)
+				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId)
+						.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
+						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDateInYear))
+						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDateInYear)))
+				.fetch();
+
+		if(records != null && !records.isEmpty())
+			return records.get(0).value1();
+		return BigDecimal.ZERO;
+	}
+
+	@Override
+	public CommunityPmBill findFirstPmBillInYear(Long orgId, Long addressId) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(System.currentTimeMillis());
+		cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
+		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMaximum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
+		java.sql.Date endDateInYear = new java.sql.Date(cal.getTime().getTime());
+		cal.set(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 0);
+		java.sql.Date startDateInYear = new java.sql.Date(cal.getTime().getTime());
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId)
+						.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
+						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDateInYear))
+						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDateInYear)))
+				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.asc())
+				.fetch();
+
+		if(records != null && !records.isEmpty())
+			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
+		return null;
 	}
 
 }
