@@ -1131,5 +1131,18 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /pm/getFamilyStatistic
+	 * <p>统计家庭的年总应付，年总实付，目前欠款
+	 */
+	@RequestMapping("getFamilyStatistic")
+	@RestReturn(GetFamilyStatisticCommandResponse.class)
+	public RestResponse getFamilyStatistic (@Valid GetFamilyStatisticCommand cmd){
+		GetFamilyStatisticCommandResponse result = this.propertyMgrService.getFamilyStatistic(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }
