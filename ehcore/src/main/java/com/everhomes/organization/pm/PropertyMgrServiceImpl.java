@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -2480,7 +2481,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			familyTx.setResultDesc("test description");*/
 			familyTx.setTargetAccountId(oAccount.getId());
 			familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
-			familyTx.setTxSequence(1L);
+			familyTx.setTxSequence(UUID.randomUUID().toString());
 			familyTx.setTxType(cmd.getTxType());
 			familyTx.setVendor(cmd.getVendor());
 			this.familyProvider.createFamilyBillingTransaction(familyTx);
@@ -2500,7 +2501,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			orgTx.setResultDesc("test description");*/
 			orgTx.setTargetAccountId(fAccount.getId());
 			orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
-			orgTx.setTxSequence(1L);
+			orgTx.setTxSequence(UUID.randomUUID().toString());
 			orgTx.setTxType(cmd.getTxType());
 			orgTx.setVendor(cmd.getVendor());
 			this.organizationProvider.createOrganizationBillingTransaction(orgTx);
