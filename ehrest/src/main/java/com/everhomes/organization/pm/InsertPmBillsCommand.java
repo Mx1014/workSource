@@ -2,7 +2,10 @@ package com.everhomes.organization.pm;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -12,6 +15,7 @@ import com.everhomes.discover.ItemType;
  */
 public class InsertPmBillsCommand {
 	
+	@NotNull
 	@ItemType(UpdatePmBillsDto.class)
 	private List<UpdatePmBillsDto> insertList;
 
@@ -22,6 +26,13 @@ public class InsertPmBillsCommand {
 	public void setInsertList(List<UpdatePmBillsDto> insertList) {
 		this.insertList = insertList;
 	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+	
+	
 
 	
 

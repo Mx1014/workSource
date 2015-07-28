@@ -2,6 +2,8 @@ package com.everhomes.organization.pm;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 
 
@@ -13,6 +15,7 @@ import com.everhomes.discover.ItemType;
  */
 public class UpdatePmBillsCommand {
 	
+	@NotNull
 	@ItemType(UpdatePmBillsDto.class)
 	private List<UpdatePmBillsDto> updateList;
 

@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -1960,7 +1961,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if(parser == null)
 			parser = new DefaultImportPmBillsParser();
 		List<CommunityPmBill> billList = parser.parse(files);
-		
+
 		Calendar cal = Calendar.getInstance();
 		User user  = UserContext.current().getUser();
 		Timestamp timeStamp = new Timestamp(new Date().getTime());
@@ -2024,10 +2025,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		}
 	}
-	
+
 	@Override
 	public void deletePmBills(DeletePmBillsCommand cmd) {
-		if(cmd.getDeleteList() == null || cmd.getDeleteList().isEmpty()){
+		if(cmd.getIds() == null || cmd.getIds().isEmpty()){
 			LOGGER.error("deleteList paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"deleteList paramter can not be null or empty");
@@ -2036,8 +2037,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 			EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
 
-			if(cmd.getDeleteList() != null && !cmd.getDeleteList().isEmpty()){
-				for(Long billId : cmd.getDeleteList()){
+			if(cmd.getIds() != null && !cmd.getIds().isEmpty()){
+				for(Long billId : cmd.getIds()){
 					CommunityPmBill communBill = this.organizationProvider.findOranizationBillsById(billId);
 					if(communBill != null)
 						dao.deleteById(communBill.getId());
@@ -2045,7 +2046,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			return true;
 		});
-		
+
 	}
 
 	@Override
@@ -2055,7 +2056,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"insertList paramter can not be null or empty");
 		}
-		
+
 		Calendar cal = Calendar.getInstance();
 		this.dbProvider.execute(s -> {
 			if(cmd.getInsertList() != null && !cmd.getInsertList().isEmpty()){
@@ -2127,7 +2128,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			return true;
 		});
-		
+
 	}
 
 	@Override
@@ -2137,7 +2138,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"updateList paramter can not be null or empty");
 		}
-		
+
 		this.dbProvider.execute(s -> {
 			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 			EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
@@ -2181,6 +2182,140 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		});
 
 		return 1;
+	}
+
+	@Override
+	public void deletePmBill(DeletePmBillCommand cmd) {
+		if(cmd.getId() == null){
+			LOGGER.error("id paramter can not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id paramter can not be null");
+		}
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
+
+		CommunityPmBill communBill = this.organizationProvider.findOranizationBillsById(cmd.getId());
+		if(communBill != null)
+			dao.deleteById(communBill.getId());
+
+	}
+
+	@Override
+	public void updatePmBill(UpdatePmBillCommand bill) {
+		if(bill.getId() == null || bill.getOrganizationId() == null){
+			LOGGER.error("id or organizationId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id or organizationId paramter can not be null or empty");
+		}
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
+
+		CommunityPmBill communBill = this.organizationProvider.findOranizationBillsById(bill.getId());
+		if(communBill != null){
+			if(bill.getEndDate() != null)
+				communBill.setEndDate(new java.sql.Date(bill.getEndDate()));
+			if(bill.getPayDate() != null)
+				communBill.setPayDate(new java.sql.Date(bill.getPayDate()));
+			if(bill.getStartDate() != null)
+				communBill.setStartDate(new java.sql.Date(bill.getStartDate()));
+			if(!(bill.getDescription() == null || bill.getDescription().equals("")))
+				communBill.setDescription(bill.getDescription());
+			if(bill.getDueAmount() != null)
+				communBill.setDueAmount(bill.getDueAmount());
+			if(bill.getOweAmount() != null)
+				communBill.setOweAmount(bill.getOweAmount());
+			if(bill.getAddress() != null && !bill.getAddress().equals("")){
+				Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communBill.getOrganizationId())
+						.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(bill.getAddress()));
+				List<CommunityAddressMapping> addressMappingList = this.organizationProvider.listOrgAddressMappingByCondition(condition);
+				if(addressMappingList != null && addressMappingList.size() == 1){
+					communBill.setAddress(bill.getAddress());
+					communBill.setEntityId(addressMappingList.get(0).getAddressId());
+				}
+				else{
+					LOGGER.error("update bill failure.because address not found..address="+bill.getAddress());
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"update bill failure.because address not found.address="+bill.getAddress());
+				}
+			}
+
+			dao.update(communBill);
+		}
+
+	}
+
+	@Override
+	public void insertPmBill(InsertPmBillCommand cmd) {
+		if(cmd.getOrganizationId() == null || cmd.getAddress() == null){
+			LOGGER.error("propterty organizationId or address paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty organizationId or address paramter can not be null or empty");
+		}
+		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(organization == null){
+			LOGGER.error("Insert failure.Unable to find the organization.organizationId=" + cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Insert failure.Unable to find the organization.");
+		}
+		if(cmd.getAddress() == null || cmd.getAddress().equals("") || cmd.getDueAmount() == null || cmd.getEndDate() == null || 
+				cmd.getOweAmount() == null || cmd.getPayDate() == null || cmd.getStartDate() == null){
+			LOGGER.error("address or dueAmount or endDate or oweAmount or payDate or startDate paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"address or dueAmount or endDate or oweAmount or payDate or startDate paramter can not be null or empty");
+		}
+
+		Calendar cal = Calendar.getInstance();
+		User user  = UserContext.current().getUser();
+		Timestamp timeStamp = new Timestamp(new Date().getTime());
+
+		Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(cmd.getOrganizationId())
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(cmd.getAddress()));
+		List<CommunityAddressMapping> addressList = this.organizationProvider.listOrgAddressMappingByCondition(condition);
+		if(addressList == null || addressList.isEmpty()){
+			LOGGER.error("Insert failure.the address not find");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Insert failure.the address not find");
+		}
+
+		CommunityPmBill bill = ConvertHelper.convert(cmd, CommunityPmBill.class);
+		bill.setEntityId(addressList.get(0).getAddressId());
+		bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
+		bill.setAddress(addressList.get(0).getOrganizationAddress());
+		bill.setCreatorUid(user.getId());
+		bill.setCreateTime(timeStamp);
+
+		bill.setEndDate(new java.sql.Date(cmd.getEndDate()));
+		bill.setPayDate(new java.sql.Date(cmd.getPayDate()));
+		bill.setStartDate(new java.sql.Date(cmd.getStartDate()));
+
+		cal.setTimeInMillis(bill.getStartDate().getTime());
+
+		StringBuilder builder = new StringBuilder();
+		builder.append(cal.get(Calendar.YEAR) +"-");
+		if(cal.get(Calendar.MONTH)<9)
+			builder.append("0"+(cal.get(Calendar.MONTH)+1));
+		else
+			builder.append(cal.get(Calendar.MONTH)+1);
+
+		bill.setDateStr(builder.toString());
+		bill.setName(bill.getDateStr() + "月账单");
+
+		bill.setItemList(null);
+
+		//往期欠款处理
+		if(bill.getOweAmount() == null){
+			CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
+			if(beforeBill != null){
+				//payAmount为负
+				BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(beforeBill.getId());
+				BigDecimal oweAmount = beforeBill.getDueAmount().add(beforeBill.getOweAmount()).add(payAmount);
+				bill.setOweAmount(oweAmount);
+			}
+			else
+				bill.setOweAmount(BigDecimal.ZERO);
+		}
+		createPropBill(bill);
 	}
 
 	@Override
@@ -2706,7 +2841,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			for(OrganizationOwners orgOwner : orgOwnerList){
 				//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(orgOwner.getContactToken());
 				//if(userIdentifier == null)
-					smsProvider.sendSms(orgOwner.getContactToken(), message);
+				smsProvider.sendSms(orgOwner.getContactToken(), message);
 			}
 		}
 	}
