@@ -6,14 +6,14 @@ import com.everhomes.discover.ItemType;
 /**
  * 
  * @author elians
- *pageAnchor:分页参数
+ *nextPageAnchor:分页参数
  */
 public class ListNearbyActivitiesResponse {
     
     @ItemType(ActivityDTO.class)
     private List<ActivityDTO> activities;
     
-    private Long pageAnchor;
+    private Long nextPageAnchor;
 
     public List<ActivityDTO> getActivities() {
         return activities;
@@ -23,12 +23,13 @@ public class ListNearbyActivitiesResponse {
         this.activities = activities;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
-    }
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
 
+   
 }

@@ -8,17 +8,17 @@ public class ListRegisterUsersResponse {
     @ItemType(UserInfo.class)
     private List<UserInfo> values;
 
-    private Long pageAnchor;
+    private Long nextPageAnchor;
 
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
+    public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
-    }
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
 
-    public List<UserInfo> getValues() {
+	public List<UserInfo> getValues() {
         return values;
     }
 
