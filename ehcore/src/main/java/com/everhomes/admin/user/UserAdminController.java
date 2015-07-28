@@ -44,7 +44,7 @@ public class UserAdminController extends ControllerBase {
             userIdentfier.setVerifyCode(r.getVerificationCode());
             return userIdentfier;
         }).collect(Collectors.toList()));
-        object.setPageAnchor(result.first());
+        object.setNextPageAnchor(result.first());
         return new RestResponse(object);
     }
 
@@ -54,7 +54,7 @@ public class UserAdminController extends ControllerBase {
         ListVestResponse object = new ListVestResponse();
         Tuple<Long, List<UserInfo>> result = userAdminService.listVets(cmd);
         object.setValues(result.second());
-        object.setPageAnchor(result.first());
+        object.setNextPageAnchor(result.first());
         return new RestResponse(object);
     }
 
@@ -64,7 +64,7 @@ public class UserAdminController extends ControllerBase {
         ListRegisterUsersResponse object = new ListRegisterUsersResponse();
         Tuple<Long, List<UserInfo>> result = userAdminService.listRegisterUsers(cmd);
         object.setValues(result.second());
-        object.setPageAnchor(result.first());
+        object.setNextPageAnchor(result.first());
         return new RestResponse(object);
     }
 
