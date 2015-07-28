@@ -129,6 +129,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhContentServerResources EH_CONTENT_SERVER_RESOURCES = com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES;
 
 	/**
+	 * The table ehcore.eh_cooperation_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhCooperationRequests EH_COOPERATION_REQUESTS = com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS;
+
+	/**
 	 * The table ehcore.eh_devices
 	 */
 	public static final com.everhomes.server.schema.tables.EhDevices EH_DEVICES = com.everhomes.server.schema.tables.EhDevices.EH_DEVICES;
