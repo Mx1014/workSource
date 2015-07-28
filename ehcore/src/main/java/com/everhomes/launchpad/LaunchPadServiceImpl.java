@@ -205,7 +205,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
         List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
         if(dtos != null && !dtos.isEmpty()){
-            List<String> tags = new ArrayList<String>();
+            List<String> tags = new  ArrayList<String>();
             dtos.forEach(r -> tags.add(r.getOrganizationType()));
             List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,tags);
             if(adminItems != null && !adminItems.isEmpty())

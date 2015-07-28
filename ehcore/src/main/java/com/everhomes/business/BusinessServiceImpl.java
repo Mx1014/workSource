@@ -186,12 +186,6 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public void deleteBusiness(long id) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public BusinessDTO findBusinessById(Long id) {
         if(id == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 

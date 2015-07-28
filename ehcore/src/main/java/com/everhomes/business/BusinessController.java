@@ -29,7 +29,7 @@ public class BusinessController extends ControllerBase {
 
     /**
      * <b>URL: /business/getBusinessesByCategory</b>
-     * <p>根据分类获取该类别下的商家列表</p>
+     * <p>根据分类获取该类别下的店铺列表</p>
      */
     @RequestMapping("getBusinessesByCategory")
     @RestReturn(value=BusinessDTO.class,collection=true)
@@ -44,7 +44,7 @@ public class BusinessController extends ControllerBase {
     
     /**
      * <b>URL: /business/createBusiness</b>
-     * <p>创建商家</p>
+     * <p>创建店铺</p>
      */
     @RequestMapping("createBusiness")
     @RestReturn(value=String.class)
@@ -59,7 +59,7 @@ public class BusinessController extends ControllerBase {
     
     /**
      * <b>URL: /business/updateBusiness</b>
-     * <p>更新商家信息</p>
+     * <p>更新店铺信息</p>
      */
     @RequestMapping("updateBusiness")
     @RestReturn(value=String.class)
@@ -71,6 +71,23 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /business/deleteBusiness</b>
+     * <p>删除店铺</p>
+     */
+    @RequestMapping("deleteBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse deleteBusiness(@Valid DeleteBusinessCommand cmd) {
+        
+        businessService.deleteBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 
 
 }

@@ -26,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>displayFlag: 是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * <li>bgcolor：item的背景颜色，默认为0，1-10，每个数值对应一种颜色</li>
+ * <li>bgcolor：item的背景颜色，默认为0，1-10，每个数值对应一种颜色</li>
  * </ul>
  */
 public class CreateLaunchPadItemAdminCommand {
@@ -57,6 +58,8 @@ public class CreateLaunchPadItemAdminCommand {
     private String displayLayout;
     
     private Integer bgcolor;
+    
+    private String tag;
 
     public CreateLaunchPadItemAdminCommand() {
     }

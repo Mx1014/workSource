@@ -24,7 +24,7 @@ public class LaunchPadLayoutDTO {
     private String   name;
     private String   layoutJson;
     private Long     versionCode;
-    private Long     minVersionCode;
+    //private Long     minVersionCode;
     private Byte     status;
     private Timestamp createTime;
     
@@ -69,13 +69,13 @@ public class LaunchPadLayoutDTO {
         this.versionCode = versionCode;
     }
 
-    public Long getMinVersionCode() {
-        return minVersionCode;
-    }
-
-    public void setMinVersionCode(Long minVersionCode) {
-        this.minVersionCode = minVersionCode;
-    }
+//    public Long getMinVersionCode() {
+//        return minVersionCode;
+//    }
+//
+//    public void setMinVersionCode(Long minVersionCode) {
+//        this.minVersionCode = minVersionCode;
+//    }
 
     public Byte getStatus() {
         return status;
