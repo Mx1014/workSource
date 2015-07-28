@@ -3,14 +3,13 @@ package com.everhomes.link;
 
 import java.sql.Timestamp;
 
-import org.jooq.tools.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.activity.Activity;
 import com.everhomes.app.AppConstants;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
@@ -24,7 +23,6 @@ import com.everhomes.util.StringHelper;
 public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
 
     private static final Logger LOGGER=LoggerFactory.getLogger(LinkEmbeddedHandler.class);
-    private static final String HOME_URL = "home.url";
     
     @Autowired
     private LinkProvider linkProvider;
@@ -37,7 +35,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
             Link link = linkProvider.findLinkByPostId(post.getId());
             if(link != null){
             	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
-            		String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
             		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
             	}
             	return StringHelper.toJsonString(link);
@@ -59,7 +57,7 @@ public class LinkEmbeddedHandler implements ForumEmbeddedHandler {
             Link link = linkProvider.findLinkByPostId(post.getId());
             if(link != null){
             	if(link.getContentType().equals(LinkContentType.CREATE.getCode())){
-            		String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
             		link.setContent(homeUrl + "/web/lib/html/rich_text_review.html?id=" + link.getId());
             	}
             	return StringHelper.toJsonString(link);

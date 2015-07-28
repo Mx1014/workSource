@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -44,7 +45,7 @@ public class LocalAppProviderImpl implements LocalAppProvier {
         // find path from database
         Map<String, String> map = findAppInfos();
         GetAppVersion version = new GetAppVersion();
-        String homeUrl = configurationProvider.getValue("home.url", "");
+        String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
         switch (appversion.getPlatformType()) {
         case 1:
             version.setDownloadLink(homeUrl + "/m/downloadres/" + DEAULT_CHANNEL);

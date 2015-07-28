@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.launchpad.ActionType;
@@ -28,8 +29,6 @@ public class QRCodeServiceImpl implements QRCodeService {
     
     @Autowired
     private ConfigurationProvider configProvider;
-    
-    private static final String HOME_URL = "home.url";
      
     @Override
     public QRCodeDTO createQRCode(NewQRCodeCommand cmd) {
@@ -111,7 +110,7 @@ public class QRCodeServiceImpl implements QRCodeService {
             LOGGER.debug("id=" + qrcode.getId() + ", qrid=" + qrid + ", decodeId=" + token.getId());
         }
         
-        String url = configProvider.getValue(HOME_URL, "");
+        String url = configProvider.getValue(ConfigConstants.HOME_URL, "");
         if(!url.endsWith("/")) {
             url += "/";
         }

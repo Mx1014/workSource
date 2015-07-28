@@ -377,7 +377,7 @@ CREATE TABLE `eh_users` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
 	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `account_name` VARCHAR(64) NOT NULL,
-    `nick_name` VARCHAR(32),
+    `nick_name` VARCHAR(256),
     `avatar` VARCHAR(128),
     `status_line` VARCHAR(128) COMMENT 'status line to express who you are',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
