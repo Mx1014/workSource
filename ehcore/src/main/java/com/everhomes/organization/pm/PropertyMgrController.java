@@ -933,7 +933,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
-		propertyMgrService.importPmBills(cmd, files);
+		propertyMgrService.importPmBills(null,cmd.getOrganizationId(), files);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -959,6 +959,22 @@ public class PropertyMgrController extends ControllerBase {
 	} 
 
 	/**
+	 * <b>URL: /pm/deletePmBills
+	 * <p>删除物业缴费单
+	 */
+	@RequestMapping("deletePmBills")
+	@RestReturn(value=String.class)
+	public RestResponse deletePmBills(@Valid DeletePmBillsCommand cmd) {
+
+		propertyMgrService.deletePmBills(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /pm/updatePmBills
 	 * <p>更新物业缴费单
 	 */
@@ -972,7 +988,24 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	} 
+	}
+	
+	/**
+	 * <b>URL: /pm/insertPmBills
+	 * <p>新增物业缴费单
+	 */
+	@RequestMapping("insertPmBills")
+	@RestReturn(value=String.class)
+	public RestResponse insertPmBills(@Valid InsertPmBillsCommand cmd) {
+
+		propertyMgrService.insertPmBills(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 
 	/**
 	 * <b>URL: /pm/listOrgBillingTransactionsByConditions

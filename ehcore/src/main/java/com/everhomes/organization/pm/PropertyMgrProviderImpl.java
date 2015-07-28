@@ -343,7 +343,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
-	@Cacheable(value = "CommunityAddressMappingsList", key="#communityId")
+	/*@Cacheable(value = "CommunityAddressMappingsList", key="#communityId")*/
 	@Override
 	public List<CommunityAddressMapping> listCommunityAddressMappings(Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
