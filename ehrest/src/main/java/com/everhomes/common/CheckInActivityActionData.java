@@ -10,13 +10,15 @@ import com.everhomes.util.StringHelper;
  * <ul>actionType为CHECKIN_ACTIVITY跳转到活动帖子详情并自动签到
  * <li>forumId: 论坛ID
  * <li>topicId: 帖子ID</li>
+ * <li>activityId: 活动ID</li>
  * </ul>
  */
 public class CheckInActivityActionData implements Serializable{
     private static final long serialVersionUID = 7502654058025166257L;
-    //{"forumId": 1,"topicId":1}  
+    //{"forumId": 1,"topicId":1,"activityId":1}  
     private Long forumId;
     private Long topicId;
+    private Long activityId;
     
     public Long getForumId() {
         return forumId;
@@ -32,6 +34,14 @@ public class CheckInActivityActionData implements Serializable{
 
     public void setTopicId(Long topicId) {
         this.topicId = topicId;
+    }
+
+    public Long getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(Long activityId) {
+        this.activityId = activityId;
     }
 
     @Override
