@@ -8,12 +8,15 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId：group id</li>
+ * <li>inviterId：邀请人id</li>
  * <li>requestText：发起请求时可填写的说明文本</li>
  * </ul>
  */
 public class RequestToJoinGroupCommand {
     @NotNull
     private Long groupId;
+    
+    private Long inviterId;
     
     private String requestText;
 
@@ -26,6 +29,14 @@ public class RequestToJoinGroupCommand {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public Long getInviterId() {
+        return inviterId;
+    }
+
+    public void setInviterId(Long inviterId) {
+        this.inviterId = inviterId;
     }
 
     public String getRequestText() {
