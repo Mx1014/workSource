@@ -2415,6 +2415,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if(familyList != null && !familyList.isEmpty()){
 			familyList.stream().sorted(new Comparator<OweFamilyDTO>() {
 				public int compare(OweFamilyDTO o1, OweFamilyDTO o2){
+					if(o1.getLastPayTime() == null || o2.getLastPayTime() == null)
+						return 0;
 					return o2.getLastPayTime().compareTo(o1.getLastPayTime());
 				}
 			}).map(r -> {
