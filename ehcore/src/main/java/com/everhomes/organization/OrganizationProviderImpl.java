@@ -35,12 +35,14 @@ import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
@@ -530,27 +532,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return null;
 	}
 
-
-	@Override
-	public List<CommunityAddressMapping> listOrgAddressMappingByCondition(Condition condition) {
-
-		List<CommunityAddressMapping> list = new ArrayList<CommunityAddressMapping>();
-
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
-				.where(condition).fetch();
-
-		if(records != null && !records.isEmpty()){
-			records.stream().map(r -> {
-				list.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
-				return null;
-			}).toArray();
-		}
-
-		return list;
-	}
-
 	@Override
 	public List<OrganizationBillingTransactions> listOrganizationBillingTransactions(
 			Condition condition, long offset, int pageSize) {
@@ -573,28 +554,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return list;
 	}
-
-
-	@Override
-	public List<OrganizationCommunityDTO> findOrganizationCommunityByCondition(
-			Condition condition) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
-				.where(condition)
-				.fetch();
-
-		List<OrganizationCommunityDTO> list = new ArrayList<OrganizationCommunityDTO>();
-		if(records != null && !records.isEmpty()){
-			records.stream().map( r -> {
-				list.add(ConvertHelper.convert(r, OrganizationCommunityDTO.class));
-				return null;
-			}).toArray();
-		}
-
-		return list;
-	}
-
 
 	@Override
 	public List<CommunityPmOwner> findOrganizationMemberByAddressIdAndOrgId(
@@ -809,5 +768,66 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				list.add(ConvertHelper.convert(r, OrganizationOwners.class));
 		}
 		return list;
+	}
+
+
+	@Override
+	public CommunityAddressMapping findOrganizationAddressMappingByOrgIdAndAddress(
+			Long organizationId, String address) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId)
+						.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ADDRESS.eq(address))).fetch();
+
+		if(records != null && !records.isEmpty()){
+			return ConvertHelper.convert(records.get(0), CommunityAddressMapping.class);
+		}
+		return null;
+	}
+
+
+	@Override
+	public void deleteOrganizationBillsById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, null);
+	}
+
+
+	@Override
+	public void updateOrganizationBill(CommunityPmBill communBill) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
+		dao.update(ConvertHelper.convert(communBill, EhOrganizationBills.class));
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, null);
+	}
+
+
+	@Override
+	public List<CommunityPmBill> listOrganizationBillsByAddressId(Long addreddId,
+			long offset, int pageSize) {
+		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addreddId)).fetch();
+		
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, CommunityPmBill.class));
+		}
+		return list;
+	}
+
+
+	@Override
+	public OrganizationCommunity findOrganizationCommunityByOrgId(Long orgId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
+				.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId)).fetch();
+		
+		if(records != null && !records.isEmpty())
+			return ConvertHelper.convert(records.get(0), OrganizationCommunity.class);
+		return null;
 	}
 }

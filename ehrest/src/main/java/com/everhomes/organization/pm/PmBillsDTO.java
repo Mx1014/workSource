@@ -14,7 +14,6 @@ import com.everhomes.util.StringHelper;
  *	<li>startDate : 账单开始日期</li>
  *	<li>endDate : 账单截止日期</li>
  *	<li>payDate : 还款日期</li>
- *	<li>endDate : 账单截止日期</li>
  *	<li>address : 楼栋-门牌号</li>
  * 	<li>dueAmount : 本月金额</li>
  *	<li>oweAmount : 往期欠款</li>

@@ -8,7 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 @Component("DefaultImportPmBillsParser")
 public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrServiceImpl.class);
-	
+
 	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
 	@Autowired 
@@ -36,7 +38,7 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 	@Autowired
 	private DbProvider dbProvider;
 	
-	
+
 	@Override
 	public List verifyFiles(MultipartFile[] files) {
 		ArrayList list = new ArrayList();
@@ -50,19 +52,21 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"File is empty");
 		}
-		
+
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		int startRow = 1;
 		int rowCount = list.size();
+		Set<String> addressSet = new HashSet<String>();
+		
 		for (int rowIndex = startRow; rowIndex < rowCount ; rowIndex++) {
 			RowResult r = (RowResult)list.get(rowIndex);
 			//verify A,B,C,D,E column not be null
 			if(r.getA() == null || r.getA().isEmpty() || r.getB() == null || r.getB().isEmpty() ||
 					r.getC() == null || r.getC().isEmpty() || r.getD() == null || r.getD().isEmpty() ||
 					r.getE() == null || r.getE().isEmpty()){
-				LOGGER.error("Error happend in row "+rowIndex + ".Column A,B,C,D,E could not be null or empty.");
+				LOGGER.error("Error happend in row " + (rowIndex+1) + ".Column A,B,C,D,E could not be null or empty.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"Error happend in row " + rowIndex + ".Column A,B,C,D,E could not be null or empty.");
+						"Error happend in row " + (rowIndex+1) + ".Column A,B,C,D,E could not be null or empty.");
 			}
 			//verify date in A,B,C column
 			try {
@@ -70,9 +74,9 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 				format.parse(r.getB());
 				format.parse(r.getC());
 			} catch (ParseException e) {
-				LOGGER.error("Error happend in row "+rowIndex + ".Column A,B,C must be date format : yyyy-MM-dd.");
+				LOGGER.error("Error happend in row "+ (rowIndex+1) + ".Column A,B,C must be date format : yyyy-MM-dd.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"Error happend in row "+rowIndex + ".Column A,B,C must be date format : yyyy-MM-dd.");
+						"Error happend in row "+ (rowIndex+1) + ".Column A,B,C must be date format : yyyy-MM-dd.");
 			}
 			//verify E,F column must be bigDecimal
 			try{
@@ -81,11 +85,20 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 					Double.valueOf(r.getF());
 			}
 			catch(NumberFormatException e){
-				LOGGER.error("Error happend in row "+rowIndex + ".Column E,F must be float,otherwise F column can be empty.");
+				LOGGER.error("Error happend in row "+ (rowIndex+1) + ".Column E,F must be float,otherwise F column can be empty.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"Error happend in row "+rowIndex + ".Column E,F must be float,otherwise F column can be empty.");
+						"Error happend in row "+ (rowIndex+1) + ".Column E,F must be float,otherwise F column can be empty.");
 			}
+			//verify D column.address not repeat.
+			addressSet.add(r.getD());
 		}
+		//verify D column.address not repeat.
+		if(addressSet != null && addressSet.size() != list.size()-1){
+			LOGGER.error("address could not repeat");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"address could not repeat");
+		}
+			
 		return list;
 	}
 
@@ -127,9 +140,10 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 	@Override
 	public void createPmBills(List<CommunityPmBill> bills,Long orgId) {
 		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		User user  = UserContext.current().getUser();
 		Timestamp timeStamp = new Timestamp(new java.util.Date().getTime());
-		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(orgId);
+		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listOrganizationAddressMappingsByOrgId(orgId);
 		if(bills != null && bills.size() > 0){
 			this.dbProvider.execute( s -> {
 				for (CommunityPmBill bill : bills){
@@ -147,8 +161,14 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 									bill.getAddress() + " not find in address mapping.");
 						}
-						
-						Long addressId = mapping.getAddressId();
+
+						CommunityPmBill existedBill = this.propertyMgrProvider.findFamilyPmBillInStartDateToEndDate(mapping.getAddressId(),bill.getStartDate(),bill.getEndDate());
+						if(existedBill != null){
+							LOGGER.error("the bill is exist.please don't import repeat data.address="+bill.getAddress()+",startDate=" + format.format(bill.getStartDate())+",endDate="+format.format(bill.getEndDate()));
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+									"the bill is exist.please don't import repeat data.address="+bill.getAddress()+",startDate=" + format.format(bill.getStartDate())+",endDate="+format.format(bill.getEndDate()));
+						}
+
 						bill.setOrganizationId(orgId);
 						bill.setEntityId(mapping.getAddressId());
 						bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
@@ -160,17 +180,13 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 							builder.append("0"+(cal.get(Calendar.MONTH)+1));
 						else
 							builder.append(cal.get(Calendar.MONTH)+1);
-
 						bill.setDateStr(builder.toString());
 						bill.setName(bill.getDateStr() + "月账单");
-
 						bill.setCreatorUid(user.getId());
 						bill.setCreateTime(timeStamp);
-
-						bill.setItemList(null);
 						//往期欠款处理
 						if(bill.getOweAmount() == null){
-							CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(addressId, orgId);
+							CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(mapping.getAddressId(), orgId);
 							if(beforeBill != null){
 								//payAmount为负
 								BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(beforeBill.getId());
@@ -191,11 +207,12 @@ public class DefaultImportPmBillsParser implements ImportPmBillsBaseParser{
 						}
 					}
 				}
+				
 				return s;
 			});
 
 		}
-		
+
 	}
 
 }

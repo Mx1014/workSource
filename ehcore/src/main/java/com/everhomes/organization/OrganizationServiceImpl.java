@@ -954,11 +954,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto = ConvertHelper.convert(organization, OrganizationDTO.class);
 				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode())){
 					Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(dto.getId());
-					List<OrganizationCommunityDTO> orgCommuList = this.organizationProvider.findOrganizationCommunityByCondition(condition);
-					if(orgCommuList != null && !orgCommuList.isEmpty()){
-						Community community = this.communityProvider.findCommunityById(orgCommuList.get(0).getCommunityId());
+					OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(dto.getId());
+					if(orgComm != null){
+						Community community = this.communityProvider.findCommunityById(orgComm.getCommunityId());
 						if(community != null){
-							dto.setCommunityId(orgCommuList.get(0).getCommunityId());
+							dto.setCommunityId(orgComm.getCommunityId());
 							dto.setCommunityName(community.getName());
 						}
 					}
@@ -1049,10 +1049,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void addCommunityInfoToUserRelaltedOrgsByOrgId(OrganizationSimpleDTO org) {
-		Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(org.getId());
-		List<OrganizationCommunityDTO> orgCommunityList = this.organizationProvider.findOrganizationCommunityByCondition(condition);
-		if(orgCommunityList != null && !orgCommunityList.isEmpty()){
-			Long communityId = orgCommunityList.get(0).getCommunityId();
+		OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(org.getId());
+		if(orgComm != null){
+			Long communityId = orgComm.getCommunityId();
 			Community community = this.communityProvider.findCommunityById(communityId);
 			if(community != null){
 				org.setCommunityId(communityId);

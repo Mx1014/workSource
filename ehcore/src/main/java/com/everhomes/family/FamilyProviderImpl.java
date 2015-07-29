@@ -638,7 +638,6 @@ public class FamilyProviderImpl implements FamilyProvider {
 							return null;
 						}).toArray();
 					}
-
 					return true;
 				});
 
