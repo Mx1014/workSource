@@ -254,7 +254,6 @@ public class RegionProviderImpl implements RegionProvider {
         return result;
     }
 
-    @Cacheable(value = "listRegionByKeyword")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
     public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,

@@ -1,5 +1,7 @@
 package com.everhomes.address;
 
+import com.everhomes.util.StringHelper;
+
 public class AddressDTO {
     private java.lang.Long     id;
     private java.lang.String   uuid;
@@ -165,5 +167,10 @@ public class AddressDTO {
 
     public void setDeleteTime(java.sql.Timestamp deleteTime) {
         this.deleteTime = deleteTime;
+    }
+    @Override
+    public String toString(){
+        return StringHelper.toJsonString(this);
+        
     }
 }

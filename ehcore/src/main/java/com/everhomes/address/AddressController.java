@@ -219,5 +219,20 @@ public class AddressController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+    
+    /**
+     * <b>URL: /address/createServiceAddress</b>
+     * <p>创建服务地址</p>
+     */
+    @RequestMapping("createServiceAddress")
+    @RestReturn(value=AddressDTO.class)
+    public RestResponse createServiceAddress(@Valid CreateServiceAddressCommand cmd) {
+        AddressDTO addressDTO = this.addressService.createServiceAddress(cmd);
+        
+        RestResponse response = new RestResponse(addressDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

@@ -283,4 +283,28 @@ public class AddressTest extends CoreServerTestCase {
     	System.out.println(community2);
     }
     
+    @Test
+    public void testCreateServiceAddress(){
+        User user = new User();
+        user.setId(10021L);
+        UserContext.current().setUser(user);
+        CreateServiceAddressCommand cmd = new CreateServiceAddressCommand();
+        cmd.setAddress("深圳武汉大学产学研大楼");
+        cmd.setAreaId(4150l);
+        cmd.setCityId(5636851l);
+        addressService.createServiceAddress(cmd);
+    }
+    
+//    @Test
+//    public void testUserRelateServiceAddress(){
+//        User user = new User();
+//        user.setId(10021L);
+//        UserContext.current().setUser(user);
+//        List<AddressDTO> addresses = addressService.getUserRelateServiceAddress();
+//        if(addresses != null){
+//            addresses.forEach(r ->{
+//                System.out.println(r);
+//            });
+//        }
+//    }
 }

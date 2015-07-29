@@ -253,4 +253,22 @@ public class AddressProviderImpl implements AddressProvider {
                 });
         return addresses[0];
     }
+
+    @Override
+    public Address findAddressByRegionAndAddress(Long cityId, Long areaId, String address) {
+        final Address[] addresses = new Address[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                   context.select().from(Tables.EH_ADDRESSES)
+                   .where(Tables.EH_ADDRESSES.CITY_ID.eq(cityId)
+                           .and(Tables.EH_ADDRESSES.AREA_ID.eq(areaId))
+                           .and(Tables.EH_ADDRESSES.ADDRESS.eq(address)))
+                   .fetch().map(r ->{
+                       addresses[0] = ConvertHelper.convert(r, Address.class);
+                       return null;
+                   });
+                   return true; 
+                });
+        return addresses[0];
+    }
 }
