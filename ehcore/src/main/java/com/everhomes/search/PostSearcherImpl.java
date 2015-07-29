@@ -116,6 +116,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("visibleRegionType", post.getVisibleRegionType());
             b.field("visibleRegionId", post.getVisibleRegionId());
+            b.field("parentPostId", post.getParentPostId());
             
             User u = userProvider.findUserById(post.getCreatorUid());
             if(null != u) {
@@ -203,7 +204,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0l));
+                //query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0l));
                 return query;
             }
             
@@ -272,6 +273,12 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 fb = FilterBuilders.termFilter("forumId", cmd.getForumId());    
                 }
         }
+        
+        if(null == fb) {
+            fb = FilterBuilders.termFilter("parentPostId", 0);
+        } else {
+            fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("parentPostId", 0));
+            }
         
         return fb;
     }
