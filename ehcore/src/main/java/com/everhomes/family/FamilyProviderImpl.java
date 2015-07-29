@@ -645,7 +645,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 		if(list != null && !list.isEmpty()){
 			BigDecimal total = BigDecimal.ZERO;
 			for(int i = 0; i<list.size();i++){
-				total = total.add(list.get(i));
+				if(list.get(i) != null)
+					total = total.add(list.get(i));
 			}
 			return total;
 		}
@@ -687,16 +688,13 @@ public class FamilyProviderImpl implements FamilyProvider {
 	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByAddressId(
 			Long addresssId,int pageSize, long offset) {
 		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
-
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
 				(DSLContext context , Object object) -> {
-
 					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
 							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addresssId))
 							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
 							.limit(pageSize).offset((int)offset)
 							.fetch();
-
 					if(records != null && !records.isEmpty()){
 						records.stream().map(r -> {
 							list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
@@ -845,7 +843,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 					}
 					return true;
 				});
-
+		
+		if(totalChargeAmount[0] == null)
+			return BigDecimal.ZERO;
 		return totalChargeAmount[0];
 	}
 

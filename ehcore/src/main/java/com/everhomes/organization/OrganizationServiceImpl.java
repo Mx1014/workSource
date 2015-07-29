@@ -437,7 +437,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public PostDTO createTopic(NewTopicCommand cmd) {
-		User user  = UserContext.current().getUser();
+		/*User user  = UserContext.current().getUser();
 		if(cmd.getVisibleRegionId() == null){
 			LOGGER.error("organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -475,7 +475,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		if(cmd.getTargetTag() == null || "".equals(cmd.getCreatorTag())){
 			cmd.setTargetTag(PostEntityTag.USER.getCode());
-		}
+		}*/
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
 	}

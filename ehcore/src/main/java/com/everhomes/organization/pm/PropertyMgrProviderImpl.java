@@ -1136,7 +1136,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
 						.fetchOne();
 
-		if(record != null)
+		if(record != null && record.value1() != null)
 			return record.value1();
 		return BigDecimal.ZERO;
 	}
@@ -1164,7 +1164,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDateInYear)))
 				.fetch();
 
-		if(records != null && !records.isEmpty())
+		if(records != null && !records.isEmpty() && records.get(0).value1() != null)
 			return records.get(0).value1();
 		return BigDecimal.ZERO;
 	}
