@@ -8,25 +8,25 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>actionType为postByCategory时点击item需要的参数
  * <li>forumId: 论坛id</li>
- * <li>contentCategory: 发帖动作的大类，如物业，家政等</li>
- * <li>actionCategory: 发帖动作的小类，如投诉，建议等</li>
- * <li>entityTag: 帖子标签</li>
- * <li>displayName: 显示名</li> 
- * <li>regionType: 可见范围类型</li>
- * <li>regionId: 范围id，小区或片区id</li> 
+ * <li>entityTag: 要查询的实体标签，填物业、业委、居委、公安等的一种</li>
+ * <li>displayName: 帖子类型显示名</li> 
+ * <li>contentCategory: 帖子类型如投诉建议、维修等</li>
+ * <li>actionCategory: </li>
+ * <li>organizationId: 组织id，管理员查帖使用，普通用户查帖该id为空</li>
+ * <li>communityId: 小区id，普通用户查询使用，管理员查帖该id为空</li>
  * </ul>
  */
 public class PostByCategoryActionData implements Serializable{
 
     private static final long serialVersionUID = 882096233068114981L;
-    //{"contentCategory":9,"actionCategory":3092,"forumId":1,"entityTag":"PM","displayName":"投诉"} 
+    //{"contentCategory":1006,"actionCategory":0,"forumId":1,"entityTag":"PM","displayName":"投诉"} 
     private Long forumId;
-    private Long actionCategory;
-    private Long contentCategory;
     private String entityTag;
     private String displayName;
-    private Byte regionType;
-    private Long regionId;
+    private Long contentCategory;
+    private Long actionCategory;
+    private Long organizationId;
+    private Long communityId;
 
 
     public Long getForumId() {
@@ -69,20 +69,20 @@ public class PostByCategoryActionData implements Serializable{
         this.displayName = displayName;
     }
 
-    public Byte getRegionType() {
-        return regionType;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setRegionType(Byte regionType) {
-        this.regionType = regionType;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
-    public Long getRegionId() {
-        return regionId;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setRegionId(Long regionId) {
-        this.regionId = regionId;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

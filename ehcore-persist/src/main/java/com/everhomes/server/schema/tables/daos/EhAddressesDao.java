@@ -76,6 +76,27 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
+	 * Fetch records that have <code>city_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByCityName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.CITY_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>area_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAreaId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.AREA_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>area_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAreaName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.AREA_NAME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>zipcode IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByZipcode(java.lang.String... values) {
@@ -150,6 +171,20 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.OPERATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operate_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByOperateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.OPERATE_TIME, values);
 	}
 
 	/**

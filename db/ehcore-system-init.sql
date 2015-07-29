@@ -8,6 +8,10 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.port
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.password','223651','mw password');
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.user','J02300','mw user');
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.host','61.145.229.29','mw host ,special line');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('home.url', 'http://10.1.1.91:8080', 'the home url');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/html/score/score.html', 'the relative path for user score');
+
 ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, 'All');
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(2, 0, 'Visible');

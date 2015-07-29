@@ -3,9 +3,13 @@ package com.everhomes.family;
 
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import org.hibernate.type.descriptor.java.CalendarTypeDescriptor.CalendarMutabilityPlan;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
@@ -639,13 +643,14 @@ public class FamilyProviderImpl implements FamilyProvider {
 				});
 
 		if(list != null && !list.isEmpty()){
-			BigDecimal total = new BigDecimal(0);
+			BigDecimal total = BigDecimal.ZERO;
 			for(int i = 0; i<list.size();i++){
-				total = total.add(list.get(i));
+				if(list.get(i) != null)
+					total = total.add(list.get(i));
 			}
 			return total;
 		}
-		return new BigDecimal(0);
+		return BigDecimal.ZERO;
 
 	}
 
@@ -683,16 +688,13 @@ public class FamilyProviderImpl implements FamilyProvider {
 	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByAddressId(
 			Long addresssId,int pageSize, long offset) {
 		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
-
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
 				(DSLContext context , Object object) -> {
-
 					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
 							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addresssId))
 							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
 							.limit(pageSize).offset((int)offset)
 							.fetch();
-
 					if(records != null && !records.isEmpty()){
 						records.stream().map(r -> {
 							list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
@@ -765,7 +767,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 		query.setRecord(ConvertHelper.convert(fAccount, EhFamilyBillingAccountsRecord.class));
 		query.setReturning(Tables.EH_FAMILY_BILLING_ACCOUNTS.ID);
 		query.execute();
-		
+
 		fAccount.setId(query.getReturnedRecord().getId());
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhFamilyBillingAccounts.class, null);
 	}
@@ -777,7 +779,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		EhFamilyBillingTransactionsDao dao = new EhFamilyBillingTransactionsDao(context.configuration());
 		dao.insert(ConvertHelper.convert(familyTx, EhFamilyBillingTransactions.class));
-		
+
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhFamilyBillingTransactions.class, null);
 
 	}
@@ -788,7 +790,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		EhFamilyBillingAccountsDao dao = new EhFamilyBillingAccountsDao(context.configuration());
 		dao.update(ConvertHelper.convert(fAccount, EhFamilyBillingAccounts.class));
-		
+
 		DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhFamilyBillingAccounts.class, null);
 
 	}
@@ -805,10 +807,46 @@ public class FamilyProviderImpl implements FamilyProvider {
 						list.add(ConvertHelper.convert(account, FamilyBillingAccount.class));
 					return true;
 				});
-		
+
 		if(list != null && !list.isEmpty())
 			return list.get(0);
 		return null;
+	}
+
+	@Override
+	public BigDecimal countFamilyBillTxChargeAmountInYear(Long addressId) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(System.currentTimeMillis());
+		cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
+		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMaximum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
+		Timestamp endStampInYear = new Timestamp(cal.getTime().getTime());
+		cal.set(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 0);
+		Timestamp startStampInYear = new Timestamp(cal.getTime().getTime());
+		
+		BigDecimal [] totalChargeAmount = new BigDecimal [1];
+		totalChargeAmount[0] = BigDecimal.ZERO;
+
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+				(DSLContext context , Object object) -> {
+					Result<Record1<BigDecimal>> records = context.select(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CHARGE_AMOUNT.sum()).from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addressId)
+									.and(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startStampInYear))
+									.and(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(endStampInYear)))
+							.fetch();
+					if(records != null && !records.isEmpty()){
+						totalChargeAmount[0] = records.get(0).value1();
+					}
+					return true;
+				});
+		
+		if(totalChargeAmount[0] == null)
+			return BigDecimal.ZERO;
+		return totalChargeAmount[0];
 	}
 
 

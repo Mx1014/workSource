@@ -212,7 +212,6 @@ public class BusinessProviderImpl implements BusinessProvider {
         EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
         return ConvertHelper.convert(dao.findById(id),BusinessCategory.class);
     }
-    
 
 
 }

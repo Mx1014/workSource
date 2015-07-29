@@ -625,14 +625,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
 
 		if(records != null && !records.isEmpty()){
-			BigDecimal total = new BigDecimal(0);
+			BigDecimal total = BigDecimal.ZERO;
 			for(int i=0;i<records.size();i++){
-				total = total.add(records.get(i).value1());
+				if(records.get(0) != null && records.get(0).value1() != null)
+					total = total.add(records.get(i).value1());
 			}
 			return total;
 		}
 		else
-			return new BigDecimal(0);
+			return BigDecimal.ZERO;
 	}
 
 	@Cacheable(value="findOrganizationTaskById", key="#id", unless="#result == null")
@@ -739,7 +740,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public CommunityPmBill findOranizationBillsById(Long id) {
+	public CommunityPmBill findOranizationBillById(Long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
@@ -772,8 +773,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addLimit((int)offset, pageSize);
 		query.execute();
 		
-		System.out.println(query.getSQL());
-		
 		Result<Record> records = query.getResult();
 		if(records != null && !records.isEmpty()){
 			for(Record r : records){
@@ -781,7 +780,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				orgBillTxDto.setAddress(r.getValue(Tables.EH_ORGANIZATION_BILLS.ADDRESS));
 				orgBillTxDto.setAddressId(r.getValue(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID));
 				orgBillTxDto.setChargeAmount(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT));
-				orgBillTxDto.setCreateTime(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME));
+				orgBillTxDto.setCreateTime(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME).getTime());
 				orgBillTxDto.setDescription(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.DESCRIPTION));
 				orgBillTxDto.setId(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.ID));
 				orgBillTxDto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID));

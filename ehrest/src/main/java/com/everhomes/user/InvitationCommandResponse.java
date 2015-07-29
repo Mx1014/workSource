@@ -8,13 +8,13 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *recipientList :邀请人列表
- *nextAnchor:下一个锚点
+ *nextPageAnchor:下一个锚点
  */
 public class InvitationCommandResponse {
     @ItemType(InvitationDTO.class)
     private List<InvitationDTO> recipientList;
 
-    private Long pageAnchor;
+    private Long nextPageAnchor;
 
     public List<InvitationDTO> getRecipientList() {
         return recipientList;
@@ -24,15 +24,15 @@ public class InvitationCommandResponse {
         this.recipientList = recipientList;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
+    public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
 
-    public void setPageAnchor(Long nextAnchor) {
-        this.pageAnchor = nextAnchor;
-    }
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

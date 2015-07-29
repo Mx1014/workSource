@@ -3,20 +3,27 @@ package com.everhomes.user;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+/**
+ * <ul>
+ * <li>nextPageAnchor : 下一页页码</li>
+ *	<li>contacts : com.everhomes.util.StringHelper.ContactDTO</li>
+ *</ul>
+ *
+ */
 
 public class ListContactRespose {
     @ItemType(ContactDTO.class)
     private List<ContactDTO> contacts;
 
-    private Long pageAnchor;
+    private Long nextPageAnchor;
 
     public ListContactRespose() {
     }
 
-    public ListContactRespose(List<ContactDTO> contacts, Long nextAnchor) {
+    public ListContactRespose(List<ContactDTO> contacts, Long nextPageAnchor) {
         super();
         this.contacts = contacts;
-        this.pageAnchor = nextAnchor;
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     public List<ContactDTO> getContacts() {
@@ -27,12 +34,14 @@ public class ListContactRespose {
         this.contacts = contacts;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
 
-    public void setPageAnchor(Long nextAnchor) {
-        this.pageAnchor = nextAnchor;
-    }
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+    
 
 }

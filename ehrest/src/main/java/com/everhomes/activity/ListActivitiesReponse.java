@@ -7,17 +7,17 @@ import com.everhomes.discover.ItemType;
  * 
  * @author elians
  *<ul>
- *<li>pageAnchor:下一页</li>
+ *<li>nextPageAnchor:下一页</li>
  *</ul>
  */
 public class ListActivitiesReponse {
-    private Long pageAnchor;
+    private Long nextPageAnchor;
     @ItemType(value = ActivityDTO.class)
     private List<ActivityDTO> activities;
 
-    public ListActivitiesReponse(Long pageAnchor, List<ActivityDTO> activities) {
+    public ListActivitiesReponse(Long nextPageAnchor, List<ActivityDTO> activities) {
         super();
-        this.pageAnchor = pageAnchor;
+        this.nextPageAnchor = nextPageAnchor;
         this.activities = activities;
     }
 
@@ -29,12 +29,14 @@ public class ListActivitiesReponse {
         this.activities = activities;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
-    }
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
+	}
+
+   
 
 }

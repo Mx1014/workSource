@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -68,7 +69,7 @@ import com.everhomes.visibility.VisibleRegionType;
 @Component
 public class LaunchPadServiceImpl implements LaunchPadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
-    
+    private static final String OFFICIAL_PHONE = "400-838-4688";
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
@@ -204,7 +205,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
         List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
         if(dtos != null && !dtos.isEmpty()){
-            List<String> tags = new ArrayList<String>();
+            List<String> tags = new  ArrayList<String>();
             dtos.forEach(r -> tags.add(r.getOrganizationType()));
             List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,tags);
             if(adminItems != null && !adminItems.isEmpty())
@@ -291,6 +292,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     }
                 });
             }
+            if(contacts.isEmpty())
+                contacts.add(OFFICIAL_PHONE);
             actionDataJson.put(LaunchPadConstants.CALLPHONES,contacts);
         }
         return actionDataJson;
@@ -318,28 +321,32 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
         String targetEntityTag = (String) actionDataJson.get(LaunchPadConstants.TARGET_TAG);
         targetEntityTag = targetEntityTag == null || targetEntityTag.trim().equals("") ? PostEntityTag.USER.getCode() : targetEntityTag;
+        
         String tag = launchPadItem.getTag();
         if(tag == null || tag.trim().equals("")){
-            
-            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
-            actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
             actionDataJson.put(LaunchPadConstants.CREATOR_TAG, PostEntityTag.USER.getCode());
-            actionDataJson.put(LaunchPadConstants.TARGET_TAG,targetEntityTag);
-            return actionDataJson;
+        }else{
+            actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
         }
+
+        long visibleRegionType = (long) actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
         
-        GetOrgDetailCommand cmd = new GetOrgDetailCommand();
-        cmd.setCommunityId(communityId);
-        cmd.setOrganizationType(tag);
-        OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
-        if(organization == null){
-            LOGGER.error("Organization is not exists,communityId=" + communityId);
-            return actionDataJson;
+        //给GANC（居委）或GAPS（公安）发帖，visibleRegionType填片区、visibleRegionId填居委或公安所管理的片区ID
+        if(visibleRegionType == VisibleRegionType.REGION.getCode()){
+            GetOrgDetailCommand cmd = new GetOrgDetailCommand();
+            cmd.setCommunityId(communityId);
+            cmd.setOrganizationType(targetEntityTag);
+            OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
+            if(organization == null){
+                LOGGER.error("Organization is not exists,communityId=" + communityId);
+                return actionDataJson;
+            }
+            //actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.REGION.getCode());
+            actionDataJson.put(LaunchPadConstants.VISIBLE_REGIONID,organization.getId());
+        }else{
+            //actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
+            actionDataJson.put(LaunchPadConstants.VISIBLE_REGIONID,communityId);
         }
-        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
-        actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
-        actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
-        actionDataJson.put(LaunchPadConstants.TARGET_TAG, targetEntityTag);
         return actionDataJson;
     }
     
@@ -348,8 +355,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, launchPadItem.getItemLabel());
         String tag = launchPadItem.getTag();
         if(tag == null || tag.trim().equals("")){
-            actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
-            actionDataJson.put(LaunchPadConstants.REGION_ID,communityId);
+            actionDataJson.put(LaunchPadConstants.COMMUNITY_ID, communityId);
             return actionDataJson;
         }
         
@@ -361,8 +367,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             LOGGER.error("Organization is not exists,communityId=" + communityId);
             return actionDataJson;
         }
-        actionDataJson.put(LaunchPadConstants.REGION_TYPE, VisibleRegionType.REGION.getCode());
-        actionDataJson.put(LaunchPadConstants.REGION_ID,organization.getId());
+        actionDataJson.put(LaunchPadConstants.ORGANIZATION_ID, organization.getId());
         return actionDataJson;
     }
     

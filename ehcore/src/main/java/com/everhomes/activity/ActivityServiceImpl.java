@@ -25,6 +25,7 @@ import ch.hsr.geohash.GeoHash;
 import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -709,7 +710,7 @@ public class ActivityServiceImpl implements ActivityService {
     @SuppressWarnings("unchecked")
     @Override
     public List<Category> listActivityCategories() {
-        List<Category> result = categoryProvider.listChildCategories(10001L, CategoryAdminStatus.ACTIVE);
+        List<Category> result = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE);
         return result;
     }
 

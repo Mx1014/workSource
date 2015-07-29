@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>targetType: 商家来源类型</li>
+ * <li>targetType: 商家来源类型,参考{@link com.everhomes.business.BusinessTargetType}</li>
  * <li>targetId: 商家原始id</li>
  * <li>bizOwnerUid: 商家拥有者id</li>
  * <li>name: 商家名字</li>
@@ -32,7 +32,7 @@ import com.everhomes.util.StringHelper;
 public class CreateBusinessCommand{
     private Byte     targetType;
     @NotNull
-    private Long     targetId;
+    private String     targetId;
     @NotNull
     private Long     bizOwnerUid;
     @NotNull
@@ -43,8 +43,8 @@ public class CreateBusinessCommand{
     private String   url;
     private String   contact;
     private String phone;
-    private Long   longitude;
-    private Long   latitude;
+    private Double   longitude;
+    private Double   latitude;
     private String  geohash;
     private String  address;
     private String  description;
@@ -61,11 +61,11 @@ public class CreateBusinessCommand{
         this.targetType = targetType;
     }
 
-    public Long getTargetId() {
+    public String getTargetId() {
         return targetId;
     }
 
-    public void setTargetId(Long targetId) {
+    public void setTargetId(String targetId) {
         this.targetId = targetId;
     }
 
@@ -124,20 +124,20 @@ public class CreateBusinessCommand{
     public void setPhone(String phone) {
         this.phone = phone;
     }
-
-    public Long getLongitude() {
+    
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Long longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public Long getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Long latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 

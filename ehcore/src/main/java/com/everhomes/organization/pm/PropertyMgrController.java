@@ -929,11 +929,11 @@ public class PropertyMgrController extends ControllerBase {
 	 * @param files 要上传文件
 	 * @return 
 	 */
-	@RequestMapping(value="importPmBills", method = RequestMethod.POST)
+	@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
-		propertyMgrService.importPmBills(cmd, files);
+		propertyMgrService.importPmBills(null,cmd.getOrganizationId(), files);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -959,6 +959,22 @@ public class PropertyMgrController extends ControllerBase {
 	} 
 
 	/**
+	 * <b>URL: /pm/deletePmBills
+	 * <p>删除物业缴费单
+	 */
+	@RequestMapping("deletePmBills")
+	@RestReturn(value=String.class)
+	public RestResponse deletePmBills(@Valid DeletePmBillsCommand cmd) {
+
+		propertyMgrService.deletePmBills(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /pm/updatePmBills
 	 * <p>更新物业缴费单
 	 */
@@ -972,7 +988,72 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	} 
+	}
+	
+	/**
+	 * <b>URL: /pm/insertPmBills
+	 * <p>新增物业缴费单
+	 */
+	@RequestMapping("insertPmBills")
+	@RestReturn(value=String.class)
+	public RestResponse insertPmBills(@Valid InsertPmBillsCommand cmd) {
+
+		propertyMgrService.insertPmBills(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/deletePmBill
+	 * <p>删除物业缴费单
+	 */
+	@RequestMapping("deletePmBill")
+	@RestReturn(value=String.class)
+	public RestResponse deletePmBill(@Valid DeletePmBillCommand cmd) {
+
+		propertyMgrService.deletePmBill(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/updatePmBill
+	 * <p>更新物业缴费单
+	 */
+	@RequestMapping("updatePmBill")
+	@RestReturn(value=String.class)
+	public RestResponse updatePmBill(@Valid UpdatePmBillCommand cmd) {
+
+		propertyMgrService.updatePmBill(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/insertPmBill
+	 * <p>新增物业缴费单
+	 */
+	@RequestMapping("insertPmBill")
+	@RestReturn(value=String.class)
+	public RestResponse insertPmBill(@Valid InsertPmBillCommand cmd) {
+
+		propertyMgrService.insertPmBill(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 
 	/**
 	 * <b>URL: /pm/listOrgBillingTransactionsByConditions
@@ -1127,6 +1208,19 @@ public class PropertyMgrController extends ControllerBase {
 		this.propertyMgrService.sendPmPayMessageToAllOweFamilies(cmd);
 		
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /pm/getFamilyStatistic
+	 * <p>统计家庭的年总应付，年总实付，目前欠款
+	 */
+	@RequestMapping("getFamilyStatistic")
+	@RestReturn(GetFamilyStatisticCommandResponse.class)
+	public RestResponse getFamilyStatistic (@Valid GetFamilyStatisticCommand cmd){
+		GetFamilyStatisticCommandResponse result = this.propertyMgrService.getFamilyStatistic(cmd);
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

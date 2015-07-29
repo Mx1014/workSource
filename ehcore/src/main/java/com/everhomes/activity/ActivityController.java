@@ -165,7 +165,7 @@ public class ActivityController extends ControllerBase {
         Tuple<Long, List<ActivityDTO>> ret = activityService.listNearByActivities(cmd);
         ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
         rsp.setActivities(ret.second());
-        rsp.setPageAnchor(ret.first());
+        rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
 }

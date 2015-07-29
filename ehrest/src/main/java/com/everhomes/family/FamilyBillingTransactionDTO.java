@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
 public class FamilyBillingTransactionDTO {
 	
 	private Long id;
-	private Timestamp createTime;
+	private Long createTime;
 	private Byte billType;
 	private String description;
 	private BigDecimal chargeAmount;
@@ -36,10 +36,10 @@ public class FamilyBillingTransactionDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Timestamp getCreateTime() {
+	public Long getCreateTime() {
 		return createTime;
 	}
-	public void setCreateTime(Timestamp createTime) {
+	public void setCreateTime(Long createTime) {
 		this.createTime = createTime;
 	}
 	public Byte getBillType() {

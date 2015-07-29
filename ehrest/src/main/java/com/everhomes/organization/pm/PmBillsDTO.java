@@ -35,9 +35,9 @@ public class PmBillsDTO{
 	private java.lang.Long       entityId;
 	private java.lang.String     address;
 	private java.lang.String     name;
-	private java.sql.Date        startDate;
-	private java.sql.Date        endDate;
-	private java.sql.Date        payDate;
+	private java.lang.Long        startDate;
+	private java.lang.Long        endDate;
+	private java.lang.Long        payDate;
 	private java.lang.String     description;
 	private java.math.BigDecimal dueAmount;
 	private java.math.BigDecimal oweAmount;
@@ -130,27 +130,27 @@ public class PmBillsDTO{
 		this.oweAmount = oweAmount;
 	}
 
-	public java.sql.Date getStartDate() {
+	public java.lang.Long getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(java.sql.Date startDate) {
+	public void setStartDate(java.lang.Long startDate) {
 		this.startDate = startDate;
 	}
 
-	public java.sql.Date getEndDate() {
+	public java.lang.Long getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(java.sql.Date endDate) {
+	public void setEndDate(java.lang.Long endDate) {
 		this.endDate = endDate;
 	}
 
-	public java.sql.Date getPayDate() {
+	public java.lang.Long getPayDate() {
 		return payDate;
 	}
 
-	public void setPayDate(java.sql.Date payDate) {
+	public void setPayDate(java.lang.Long payDate) {
 		this.payDate = payDate;
 	}
 

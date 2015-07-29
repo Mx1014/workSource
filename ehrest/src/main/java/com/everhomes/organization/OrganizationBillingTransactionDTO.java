@@ -21,7 +21,7 @@ public class OrganizationBillingTransactionDTO {
 	private java.lang.String     description;
 	private java.lang.String     vendor;
 	private java.lang.Byte       paidType;
-	private java.sql.Timestamp   createTime;
+	private java.lang.Long   createTime;
 	private String ownerTelephone;
 	
 	private Long organizationId;
@@ -91,10 +91,10 @@ public class OrganizationBillingTransactionDTO {
 	public void setPaidType(java.lang.Byte paidType) {
 		this.paidType = paidType;
 	}
-	public java.sql.Timestamp getCreateTime() {
+	public java.lang.Long getCreateTime() {
 		return createTime;
 	}
-	public void setCreateTime(java.sql.Timestamp createTime) {
+	public void setCreateTime(java.lang.Long createTime) {
 		this.createTime = createTime;
 	}
 	@Override

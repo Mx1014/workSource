@@ -45,6 +45,8 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES(1009, 1, 0, '失物招领', '帖子/失物招领', 0, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(1010, 1, 0, '活动', '帖子/活动', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1011, 1, 0, '投票', '帖子/投票', 0, 2, UTC_TIMESTAMP());	
 	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(2001, 2, 0, '亲子与教育', '兴趣/亲子与教育', 0, 2, UTC_TIMESTAMP());
@@ -212,7 +214,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'user.notification', 1, 'zh_CN', '新用户注册', '小左等您好久啦，已经为您准备好了精彩的社区生活…');
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
+
 	
 	
     

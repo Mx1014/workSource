@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -1330812916;
+	private static final long serialVersionUID = 1439828496;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -44,7 +44,7 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	/**
 	 * The column <code>ehcore.eh_users.nick_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NICK_NAME = createField("nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> NICK_NAME = createField("nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_users.avatar</code>.
