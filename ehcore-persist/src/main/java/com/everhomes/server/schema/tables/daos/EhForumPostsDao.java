@@ -321,6 +321,13 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>private_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByPrivateFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.PRIVATE_FLAG, values);
+	}
+
+	/**
 	 * Fetch records that have <code>assigned_flag IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByAssignedFlag(java.lang.Byte... values) {

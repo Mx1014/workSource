@@ -46,6 +46,7 @@ import com.everhomes.util.StringHelper;
  * <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostAssignedFlag}</li>
  * <li>likeFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostLikeFlag}</li>
  * <li>shareUrl: 分享链接</li>
+ * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.forum.PostPrivacy}</li>
  * </ul>
  */
 public class PostDTO {
@@ -124,6 +125,8 @@ public class PostDTO {
     private Byte likeFlag;
     
     private String shareUrl;
+    
+    private Byte privateFlag;
 
 	public Long getId() {
         return id;
@@ -419,6 +422,14 @@ public class PostDTO {
 
     public void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
+    }
+
+    public Byte getPrivateFlag() {
+        return privateFlag;
+    }
+
+    public void setPrivateFlag(Byte privateFlag) {
+        this.privateFlag = privateFlag;
     }
 
     @Override
