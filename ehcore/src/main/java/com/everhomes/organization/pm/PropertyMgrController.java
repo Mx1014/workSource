@@ -929,7 +929,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * @param files 要上传文件
 	 * @return 
 	 */
-	@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
+	@RequestMapping(value="importPmBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
