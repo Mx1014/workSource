@@ -11,12 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = -661811949;
+	private static final long serialVersionUID = 160606837;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
 	private java.lang.Long     communityId;
 	private java.lang.Long     cityId;
+	private java.lang.String   cityName;
+	private java.lang.Long     areaId;
+	private java.lang.String   areaName;
 	private java.lang.String   zipcode;
 	private java.lang.String   address;
 	private java.lang.Double   longitude;
@@ -28,6 +31,8 @@ public class EhAddresses implements java.io.Serializable {
 	private java.lang.String   apartmentName;
 	private java.lang.String   apartmentFloor;
 	private java.lang.Byte     status;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
@@ -49,6 +54,9 @@ public class EhAddresses implements java.io.Serializable {
 		java.lang.String   uuid,
 		java.lang.Long     communityId,
 		java.lang.Long     cityId,
+		java.lang.String   cityName,
+		java.lang.Long     areaId,
+		java.lang.String   areaName,
 		java.lang.String   zipcode,
 		java.lang.String   address,
 		java.lang.Double   longitude,
@@ -60,6 +68,8 @@ public class EhAddresses implements java.io.Serializable {
 		java.lang.String   apartmentName,
 		java.lang.String   apartmentFloor,
 		java.lang.Byte     status,
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
@@ -78,6 +88,9 @@ public class EhAddresses implements java.io.Serializable {
 		this.uuid = uuid;
 		this.communityId = communityId;
 		this.cityId = cityId;
+		this.cityName = cityName;
+		this.areaId = areaId;
+		this.areaName = areaName;
 		this.zipcode = zipcode;
 		this.address = address;
 		this.longitude = longitude;
@@ -89,6 +102,8 @@ public class EhAddresses implements java.io.Serializable {
 		this.apartmentName = apartmentName;
 		this.apartmentFloor = apartmentFloor;
 		this.status = status;
+		this.operatorUid = operatorUid;
+		this.operateTime = operateTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
@@ -134,6 +149,30 @@ public class EhAddresses implements java.io.Serializable {
 
 	public void setCityId(java.lang.Long cityId) {
 		this.cityId = cityId;
+	}
+
+	public java.lang.String getCityName() {
+		return this.cityName;
+	}
+
+	public void setCityName(java.lang.String cityName) {
+		this.cityName = cityName;
+	}
+
+	public java.lang.Long getAreaId() {
+		return this.areaId;
+	}
+
+	public void setAreaId(java.lang.Long areaId) {
+		this.areaId = areaId;
+	}
+
+	public java.lang.String getAreaName() {
+		return this.areaName;
+	}
+
+	public void setAreaName(java.lang.String areaName) {
+		this.areaName = areaName;
 	}
 
 	public java.lang.String getZipcode() {
@@ -222,6 +261,22 @@ public class EhAddresses implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
+	}
+
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public java.sql.Timestamp getOperateTime() {
+		return this.operateTime;
+	}
+
+	public void setOperateTime(java.sql.Timestamp operateTime) {
+		this.operateTime = operateTime;
 	}
 
 	public java.lang.Long getCreatorUid() {

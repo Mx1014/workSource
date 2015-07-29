@@ -474,6 +474,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserScores EH_USER_SCORES = com.everhomes.server.schema.tables.EhUserScores.EH_USER_SCORES;
 
 	/**
+	 * The table ehcore.eh_user_service_addresses
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserServiceAddresses EH_USER_SERVICE_ADDRESSES = com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES;
+
+	/**
 	 * The table ehcore.eh_versioned_content
 	 */
 	public static final com.everhomes.server.schema.tables.EhVersionedContent EH_VERSIONED_CONTENT = com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT;
