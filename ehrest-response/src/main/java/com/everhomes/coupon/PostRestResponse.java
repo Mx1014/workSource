@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-07-30 15:54:52
+// generated at 2015-07-30 19:26:52
 package com.everhomes.coupon;
 
 import com.everhomes.rest.RestResponseBase;

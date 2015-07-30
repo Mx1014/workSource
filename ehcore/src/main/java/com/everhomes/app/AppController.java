@@ -3,6 +3,8 @@ package com.everhomes.app;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,8 +26,8 @@ public class AppController extends ControllerBase {
     
     @RequestMapping("isTrustedApp")
     @RestReturn(value=String.class)
-    public RestResponse isTrustedApp(@RequestParam(value="appKey", required=true) String appKey) {
-        if(s_trustedApps.contains(appKey))
+    public RestResponse isTrustedApp(@Valid TrustedAppCommand cmd) {
+        if(s_trustedApps.contains(cmd.getAppKey()))
             return new RestResponse("YES");
         
         return new RestResponse("NO");

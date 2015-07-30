@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-07-30 15:54:51
+// generated at 2015-07-30 19:26:52
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.address.AddressDTO;
+import com.everhomes.address.ListAddressByKeywordCommandResponse;
 
 public class ListAddressByKeywordRestResponse extends RestResponseBase {
 
-    private List<AddressDTO> response;
+    private ListAddressByKeywordCommandResponse response;
 
     public ListAddressByKeywordRestResponse () {
     }
 
-    public List<AddressDTO> getResponse() {
+    public ListAddressByKeywordCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<AddressDTO> response) {
+    public void setResponse(ListAddressByKeywordCommandResponse response) {
         this.response = response;
     }
 }
