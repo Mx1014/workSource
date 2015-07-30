@@ -7,8 +7,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressDTO;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ListAddressByKeywordCommand;
+import com.everhomes.address.ListAddressByKeywordCommandResponse;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.junit.CoreServerTestCase;
@@ -161,9 +163,13 @@ public class PropertyTest extends CoreServerTestCase {
     public void testAddress () {
     	ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
     	comand.setCommunityId(9l);
-		comand.setKeyword("");
-		List<Address> addresses= addressService.listAddressByKeyword(comand );
-		System.out.println(addresses.size());
+		comand.setKeyword("101");
+		comand.setPageOffset(2);
+		comand.setPageSize(3);
+		ListAddressByKeywordCommandResponse response = addressService.listAddressByKeyword(comand );
+		System.out.println(response.getRequests().size());
+		System.out.println(response.getRequests());
+		System.out.println(response.getNextPageOffset());
 //		if(addresses != null && addresses.size() > 0)
 //		{
 //			System.out.println();

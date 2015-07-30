@@ -2,6 +2,7 @@
 package com.everhomes.address;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +13,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.annotation.PostConstruct;
+
 
 
 
@@ -25,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -72,6 +76,7 @@ import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -392,28 +397,73 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     @Override
-    public List<Address> listAddressByKeyword(ListAddressByKeywordCommand cmd) {
+    public ListAddressByKeywordCommandResponse listAddressByKeyword(ListAddressByKeywordCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getKeyword() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId  or keyword parameter");
 
-        List<Address> results = new ArrayList<>();
+        List<AddressDTO> results = new ArrayList<>();
+        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        long pageOffset = cmd.getPageOffset() == null ? 1L : cmd.getPageOffset();
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
         String likeVal = "%" + cmd.getKeyword() + "%";
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+        if(offset > 0) {
+            final List<Long> countsInShards = new ArrayList<>();
+            this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+                    (DSLContext context, Object reducingContext)-> {
+                        
+                    Long count = context.selectCount().from(Tables.EH_ADDRESSES)
+                            .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
+                            .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                            .fetchOne(0, Long.class);
+                    
+                    countsInShards.add(count);
+                    return true;
+                });
+            
+            targetShard = PaginationHelper.offsetFallsAt(countsInShards, offset);
+        }
+        ListAddressByKeywordCommandResponse response = new ListAddressByKeywordCommandResponse();
+        if(targetShard.first() < 0)
+            return response;
+
+        final int[] currentShard = new int[1];
+        currentShard[0] = 0;
+        final Tuple<Integer, Long> fallingShard = targetShard;
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), currentShard, 
                 (DSLContext context, Object reducingContext)-> {
+                    
+                    int[] current = (int[])reducingContext;
+                    if(current[0] < fallingShard.first()) {
+                        current[0] += 1;
+                        return true;
+                    }
+                    
+                    long off = 0;
+                    if(current[0] == fallingShard.first())
+                        off = fallingShard.second();
                     
                     context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
                     .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
                     .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                    .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
-                        results.add(ConvertHelper.convert(r, Address.class));
+                        results.add(ConvertHelper.convert(r, AddressDTO.class));
                         return null;
                     });
                 return true;
             });
-        
-        return results;
+
+        if(results.size() >= pageSize) {
+            response.setNextPageOffset((int)pageOffset + 1);
+        }
+        response.setRequests(results);
+        return response;
     }
     
     
@@ -595,6 +645,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
                     "Address is not found.");
         }
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         long startTime = System.currentTimeMillis();
         Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
         this.dbProvider.execute((TransactionStatus status) -> {
@@ -604,6 +656,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 address.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
                 address.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
                 address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+                address.setOperatorUid(userId);
+                address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 this.addressProvider.updateAddress(address);
                 //approve members of this address
 //                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());

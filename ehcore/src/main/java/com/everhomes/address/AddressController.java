@@ -192,11 +192,11 @@ public class AddressController extends ControllerBase {
      * <p>根据关键字查询地址</p>
      */
     @RequestMapping("listAddressByKeyword")
-    @RestReturn(value=AddressDTO.class, collection=true)
+    @RestReturn(value=ListAddressByKeywordCommandResponse.class)
     public RestResponse listAddressByKeyword(ListAddressByKeywordCommand cmd) {
         
-        List<Address> results = this.addressService.listAddressByKeyword(cmd);
-        RestResponse response =  new RestResponse(results.stream().map( (r) -> { return ConvertHelper.convert(r, AddressDTO.class); }).collect(Collectors.toList())) ;
+        ListAddressByKeywordCommandResponse results = this.addressService.listAddressByKeyword(cmd);
+        RestResponse response =  new RestResponse(results) ;
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
