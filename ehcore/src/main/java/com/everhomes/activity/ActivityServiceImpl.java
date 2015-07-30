@@ -380,7 +380,7 @@ public class ActivityServiceImpl implements ActivityService {
                 d.setId(r.getId());
                 if (currentUser != null) {
                     d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
-                    d.setUserName(currentUser.getAccountName());
+                    d.setUserName(currentUser.getNickName());
                 }
 
             }

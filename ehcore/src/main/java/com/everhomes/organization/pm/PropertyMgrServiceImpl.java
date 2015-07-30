@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressDTO;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.address.ApartmentDTO;
@@ -375,10 +376,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
 			comand.setCommunityId(community.getId());
 			comand.setKeyword("");
-			List<Address> addresses= addressService.listAddressByKeyword(comand);
+			comand.setPageSize(Integer.MAX_VALUE);
+			List<AddressDTO> addresses= addressService.listAddressByKeyword(comand).getRequests();
 			if(addresses != null && addresses.size() > 0)
 			{
-				for (Address address : addresses) {
+				for (AddressDTO address : addresses) {
 					CommunityAddressMapping m = new CommunityAddressMapping();
 					m.setAddressId(address.getId());
 					m.setOrganizationId(organizationId);
@@ -1301,9 +1303,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
 			comand.setCommunityId(cmd.getCommunityId());
 			comand.setKeyword("");
-			List<Address> addresses= addressService.listAddressByKeyword(comand);
+			comand.setPageSize(Integer.MAX_VALUE);
+			List<AddressDTO> addresses= addressService.listAddressByKeyword(comand).getRequests();
 			if(addresses != null && addresses.size() > 0){
-				for (Address address : addresses) {
+				for (AddressDTO address : addresses) {
 					Family family = familyProvider.findFamilyByAddressId(address.getId());
 					if(family != null){
 						familyIds.add(family.getId());

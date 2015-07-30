@@ -289,10 +289,11 @@ public class AddressTest extends CoreServerTestCase {
         user.setId(10021L);
         UserContext.current().setUser(user);
         CreateServiceAddressCommand cmd = new CreateServiceAddressCommand();
-        cmd.setAddress("深圳武汉大学产学研大楼");
+        cmd.setAddress("京基百纳");
         cmd.setAreaId(4150l);
         cmd.setCityId(5636851l);
-        addressService.createServiceAddress(cmd);
+        AddressDTO addressDTO = addressService.createServiceAddress(cmd);
+        System.out.println(addressDTO);
     }
     
 //    @Test
