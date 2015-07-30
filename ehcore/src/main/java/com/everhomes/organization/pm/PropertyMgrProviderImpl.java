@@ -1038,12 +1038,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<CommunityPmBill> listOweFamilyBillsByOrganizationId(
-			Long organizationId) {
+	public List<CommunityPmBill> listOweFamilyBillsByOrgIdAndAddress(Long organizationId,String address) {
 
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
 
 		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
 				.from(Tables.EH_ORGANIZATION_BILLS)
@@ -1053,7 +1055,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.join(table2)
 				.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
 						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
-						.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId))
+						.where(condition)
 						.fetch();
 
 		if(records != null && !records.isEmpty()){
