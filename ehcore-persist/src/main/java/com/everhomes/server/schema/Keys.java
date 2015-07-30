@@ -212,6 +212,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionRealmRecord> KEY_EH_VERSION_REALM_PRIMARY = UniqueKeys0.KEY_EH_VERSION_REALM_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionRealmRecord> KEY_EH_VERSION_REALM_U_EH_VER_REALM = UniqueKeys0.KEY_EH_VERSION_REALM_U_EH_VER_REALM;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> KEY_EH_VERSION_UPGRADE_RULES_PRIMARY = UniqueKeys0.KEY_EH_VERSION_UPGRADE_RULES_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = UniqueKeys0.KEY_EH_VERSION_URLS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = UniqueKeys0.KEY_EH_VERSION_URLS_U_EH_VER_URL;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
@@ -432,6 +434,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionRealmRecord> KEY_EH_VERSION_REALM_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM, com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionRealmRecord> KEY_EH_VERSION_REALM_U_EH_VER_REALM = createUniqueKey(com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM, com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM.REALM);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> KEY_EH_VERSION_UPGRADE_RULES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES, com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.REALM_ID, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.TARGET_VERSION);
 	}
 
 	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {

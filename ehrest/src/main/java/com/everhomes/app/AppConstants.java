@@ -2,6 +2,8 @@
 package com.everhomes.app;
 
 public interface AppConstants {
+    public static final String APPKEY_BORDER = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
+    
     public static final long APPID_DEFAULT = 0;
     public static final long APPID_MESSAGING = 1;
     public static final long APPID_FORUM = 2;

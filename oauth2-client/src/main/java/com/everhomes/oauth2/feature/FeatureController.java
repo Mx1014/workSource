@@ -42,7 +42,7 @@ public class FeatureController {
         String state = "DemoUser";
 
         if(tokenManager.getAccessToken(state) == null) {
-            URI uri = new URI(String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=basic&state=%s#opensdk_redirect",
+            URI uri = new URI(String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=basic&state=%s#oauth2_redirect",
                     SdkConstants.API_AUTHORIZE_SERVICE_URI,
                     SdkConstants.API_KEY,
                     URLEncoder.encode(SdkConstants.CLIENT_REDIRECT_URI, "UTF-8"),
@@ -66,7 +66,7 @@ public class FeatureController {
         // acquire access token through OAuth2 provider's token service
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpPost post = new HttpPost(String.format("%s/getUserInfo", SdkConstants.API_OPENSDK_URI));
+            HttpPost post = new HttpPost(String.format("%s/getUserInfo", SdkConstants.API_OAUTH2API_URI));
 
             post.addHeader("Content-Type", "application/x-www-form-urlencoded");
             post.addHeader("Authorization", String.format("Bearer %s", Base64.encodeBase64String(token.getBytes("UTF-8"))));

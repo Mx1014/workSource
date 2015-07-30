@@ -36,4 +36,12 @@ public class VersionController extends ControllerBase {
         String content = this.versionService.getVersionedContent(cmd);
         return new RestResponse(content);
     }
+    
+    @RequestMapping("getVersionUrls")
+    @RestReturn(value=VersionUrlResponse.class)
+    public RestResponse getVersionUrls(@Valid VersionRequestCommand cmd) {
+
+        VersionUrlResponse cmdResponse = this.versionService.getVersionUrls(cmd);
+        return new RestResponse(cmdResponse);
+    }
 }

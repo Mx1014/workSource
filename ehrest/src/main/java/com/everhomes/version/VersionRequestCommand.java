@@ -10,6 +10,8 @@ public class VersionRequestCommand {
     @NotNull
     private VersionDTO currentVersion;
     
+    private String locale;
+    
     public VersionRequestCommand() {
     }
 
@@ -27,5 +29,13 @@ public class VersionRequestCommand {
 
     public void setCurrentVersion(VersionDTO currentVersion) {
         this.currentVersion = currentVersion;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

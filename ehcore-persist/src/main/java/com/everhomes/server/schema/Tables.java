@@ -492,4 +492,9 @@ public class Tables {
 	 * The table ehcore.eh_version_upgrade_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhVersionUpgradeRules EH_VERSION_UPGRADE_RULES = com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES;
+
+	/**
+	 * The table ehcore.eh_version_urls
+	 */
+	public static final com.everhomes.server.schema.tables.EhVersionUrls EH_VERSION_URLS = com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS;
 }

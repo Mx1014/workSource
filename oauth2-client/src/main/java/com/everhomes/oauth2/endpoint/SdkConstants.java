@@ -10,7 +10,7 @@ public interface SdkConstants {
 
     public static final String API_TOKEN_SERVICE_URI = "http://10.1.1.98:8080/oauth2/token";
 
-    public static final String API_OPENSDK_URI = "http://10.1.1.98:8080/opensdk";
+    public static final String API_OAUTH2API_URI = "http://10.1.1.91:8080/oauth2api";
 
     public static final String CLIENT_REDIRECT_URI = "http://10.1.1.98:7788/redirect";
 }

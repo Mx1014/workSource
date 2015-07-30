@@ -2386,6 +2386,18 @@ CREATE TABLE `eh_version_upgrade_rules` (
     INDEX `i_eh_ver_upgrade_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_version_urls`;
+CREATE TABLE `eh_version_urls` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `realm_id` BIGINT NOT NULL,
+    `target_version` VARCHAR(128),
+    `download_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk',
+    `info_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html',
+    
+    PRIMARY KEY(`id`),
+    UNIQUE `u_eh_ver_url`(`realm_id`, `target_version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_versioned_content`;
 CREATE TABLE `eh_versioned_content` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',

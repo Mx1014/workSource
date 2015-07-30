@@ -52,7 +52,8 @@
         eh_links | eh_address_messages | eh_user_scores |
         eh_businesses | eh_business_visible_scopes | eh_business_categories |
         eh_oauth2_codes | eh_oauth2_tokens | eh_qrcodes |
-        eh_version_realm | eh_version_upgrade_rules | eh_versioned_content | eh_cooperation_requests
+        eh_version_realm | eh_version_upgrade_rules | eh_versioned_content | eh_version_urls |
+        eh_cooperation_requests
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

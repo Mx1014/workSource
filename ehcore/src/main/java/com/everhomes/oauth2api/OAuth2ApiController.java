@@ -1,4 +1,4 @@
-package com.everhomes.opensdk;
+package com.everhomes.oauth2api;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,12 +20,17 @@ import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 
+/**
+ * This controller contains APIs that returns user information to third-party applications through
+ * OAuth2 authorized access-token mechanism 
+ *
+ */
 @RequireAuthentication(false)
 @RequireOAuth2Authentication(OAuth2AuthenticationType.ACCESS_TOKEN)
 @RestController
-@RequestMapping("/opensdk")
-public class OpenSdkController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenSdkController.class);
+@RequestMapping("/oauth2api")
+public class OAuth2ApiController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2ApiController.class);
 
     @Autowired
     private UserService userService;

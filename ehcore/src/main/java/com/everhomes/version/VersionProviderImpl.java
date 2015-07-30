@@ -18,9 +18,11 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhVersionRealmDao;
 import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
+import com.everhomes.server.schema.tables.daos.EhVersionUrlsDao;
 import com.everhomes.server.schema.tables.daos.EhVersionedContentDao;
 import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
+import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
 import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -334,5 +336,87 @@ public class VersionProviderImpl implements VersionProvider {
             });
         
         return contentPojos;
+    }
+    
+    @Override
+    public void createVersionUrl(VersionUrl versionUrl) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVersionUrls.class));
+        versionUrl.setId(id);
+
+        EhVersionUrlsDao dao = new EhVersionUrlsDao(context.configuration());
+        dao.insert(versionUrl);
+    }
+    
+    @Caching(evict = {
+        @CacheEvict(value="VersionUrl-Id", key="#versionUrl.id"),
+        @CacheEvict(value="VersionUrl-Version")
+    })
+    @Override
+    public void updateVersionUrl(VersionUrl versionUrl) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        EhVersionUrlsDao dao = new EhVersionUrlsDao(context.configuration());
+        dao.update(versionUrl);
+    }
+    
+    @Caching(evict = {
+        @CacheEvict(value="VersionUrl-Id", key="#versionUrl.id"),
+        @CacheEvict(value="VersionUrl-Version")
+    })
+    @Override
+    public void deleteVersionUrl(VersionUrl versionUrl) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+        EhVersionUrlsDao dao = new EhVersionUrlsDao(context.configuration());
+        dao.delete(versionUrl);
+    }
+    
+    @Override
+    public void deleteVersionUrlById(long id) {
+        VersionProvider self = PlatformContext.getComponent(VersionProvider.class);
+        VersionUrl versionUrl = self.findVersionUrlById(id);
+        if(versionUrl != null)
+            self.deleteVersionUrl(versionUrl);
+    }
+    
+    @Cacheable(value="VersionUrl-Id", key="#id", unless="#result == null")
+    @Override
+    public VersionUrl findVersionUrlById(long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<VersionUrl> versionUrls = context.select().from(Tables.EH_VERSION_URLS)
+            .where(Tables.EH_VERSION_URLS.ID.eq(id))
+            .fetch().map((record)-> {
+                return ConvertHelper.convert(record, VersionUrl.class);
+            });
+        if(versionUrls.size() > 0)
+            return versionUrls.get(0);
+        return null;
+    }
+    
+    @Cacheable(value="VersionUrl-Version", key="{#realmName, #targetVersion}", unless="#result == null")
+    @Override
+    public VersionUrl findVersionUrlByVersion(String realmName, String targetVersion) {
+        
+        VersionProvider self = PlatformContext.getComponent(VersionProvider.class);
+        VersionRealm realm = self.findVersionRealmByName(realmName);
+        if(realm == null)
+            return null;
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<VersionUrl> versionUrls = context.select().from(Tables.EH_VERSION_URLS)
+            .where(Tables.EH_VERSION_URLS.REALM_ID.eq(realm.getId()))
+            .and(Tables.EH_VERSION_URLS.TARGET_VERSION.eq(targetVersion))
+            .fetch().map((record)-> {
+                return ConvertHelper.convert(record, VersionUrl.class);
+            });
+        
+        if(versionUrls.size() > 0)
+            return versionUrls.get(0);
+        
+        return null;
     }
 }
