@@ -10,6 +10,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.RequireAuthentication;
 
 @RestController
 @RequestMapping("/org")
@@ -26,6 +27,7 @@ public class CooperationController extends ControllerBase {
 	 * 
 	 * @return 添加的结果
 	 */
+	@RequireAuthentication(false)
 	@RequestMapping("newCooperation")
 	@RestReturn(value = String.class)
 	public RestResponse newCooperation(@Valid NewCooperationCommand cmd) {
