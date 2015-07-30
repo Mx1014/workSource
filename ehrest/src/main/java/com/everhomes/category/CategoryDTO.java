@@ -3,6 +3,11 @@ package com.everhomes.category;
 
 import java.sql.Timestamp;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.everhomes.family.FamilyDTO;
+
 /**
  * <ul>
  * <li>id: 类型ID</li>
@@ -92,4 +97,17 @@ public class CategoryDTO {
     public void setDeleteTime(Timestamp deleteTime) {
         this.deleteTime = deleteTime;
     }   
+    
+    @Override
+    public boolean equals(Object obj){
+        if (! (obj instanceof FamilyDTO)) {
+            return false;
+        }
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+    
+    @Override
+    public int hashCode(){
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 }

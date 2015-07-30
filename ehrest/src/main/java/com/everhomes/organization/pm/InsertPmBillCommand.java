@@ -34,7 +34,7 @@ public class InsertPmBillCommand {
 	private java.lang.String     description;
 	@NotNull
 	private java.math.BigDecimal dueAmount;
-	@NotNull
+	
 	private java.math.BigDecimal oweAmount;
 	
 	public java.lang.Long getOrganizationId() {

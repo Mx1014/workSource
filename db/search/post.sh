@@ -25,6 +25,7 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
 			"senderAvatar":{"type":"string", "index":"no", "store":"yes"},
 			"forumName":{"type":"string", "index":"no", "store":"yes"},
 			"displayName":{"type":"string", "index":"no", "store":"yes"},
+            "parentPostId": {"type":"long"},
             "location": {
                 "type": "geo_point",
                 "geohash": true,

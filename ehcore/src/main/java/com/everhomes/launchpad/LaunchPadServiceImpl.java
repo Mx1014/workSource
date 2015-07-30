@@ -22,7 +22,6 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
-import com.everhomes.category.CategoryConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -484,6 +483,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             item.setDisplayFlag(cmd.getDisplayFlag() == null ? ItemDisplayFlag.DISPLAY.getCode() : cmd.getDisplayFlag());
             item.setDisplayLayout(cmd.getDisplayLayout());
             item.setBgcolor(cmd.getBgcolor() == null ? 0 : cmd.getBgcolor());
+            item.setTag(cmd.getTag());
             items.add(item);
         });
         this.launchPadProvider.createLaunchPadItems(items);
@@ -758,6 +758,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         if(cmd.getScopeType() != null && !cmd.getScopeType().trim().equals("")){
             launchPadItem.setScopeType(cmd.getScopeType());
+        }
+        if(cmd.getTag() != null && !cmd.getTag().trim().equals("")){
+            launchPadItem.setTag(cmd.getTag());
         }
         this.launchPadProvider.updateLaunchPadItem(launchPadItem);
     }

@@ -121,7 +121,8 @@ public class RegionProviderImpl implements RegionProvider {
     public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+      //暂不向客户端开放排序字段指定 20150729
+        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
         List<Region> result;
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
@@ -140,16 +141,18 @@ public class RegionProviderImpl implements RegionProvider {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+//        if(orderByFields != null) {
+//            result = selectStep.orderBy(orderByFields).fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        } else {
+//            result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        }
+        result = selectStep.fetch().map(
                 new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
             );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        }
-        
         return result;
     }
     
@@ -160,8 +163,8 @@ public class RegionProviderImpl implements RegionProvider {
             RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+        //暂不向客户端开放排序字段指定 20150729
+        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
         List<Region> result;
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
@@ -182,16 +185,18 @@ public class RegionProviderImpl implements RegionProvider {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+//        if(orderByFields != null) {
+//            result = selectStep.orderBy(orderByFields).fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        } else {
+//            result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        }
+        result = selectStep.fetch().map(
                 new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
             );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        }
-        
         return result;
     }
     
@@ -221,7 +226,7 @@ public class RegionProviderImpl implements RegionProvider {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
         Condition condition = Tables.EH_REGIONS.PATH.like(pathLike);
@@ -241,20 +246,21 @@ public class RegionProviderImpl implements RegionProvider {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+//        if(orderByFields != null) {
+//            result = selectStep.orderBy(orderByFields).fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        } else {
+//            result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        }
+        result = selectStep.fetch().map(
                 new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
             );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        }
-        
         return result;
     }
 
-    @Cacheable(value = "listRegionByKeyword")
     @SuppressWarnings({"unchecked", "rawtypes" })
     @Override
     public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
@@ -279,7 +285,7 @@ public class RegionProviderImpl implements RegionProvider {
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-        SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
         Condition condition = Tables.EH_REGIONS.NAME.like(likeVal);
@@ -298,16 +304,18 @@ public class RegionProviderImpl implements RegionProvider {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+//        if(orderByFields != null) {
+//            result = selectStep.orderBy(orderByFields).fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        } else {
+//            result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+//            );
+//        }
+        result = selectStep.fetch().map(
                 new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
             );
-        } else {
-            result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        }
-        
         return result;
     }
 

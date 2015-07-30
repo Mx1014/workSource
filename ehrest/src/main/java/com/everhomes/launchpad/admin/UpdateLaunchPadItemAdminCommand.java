@@ -3,6 +3,7 @@ package com.everhomes.launchpad.admin;
 
 
 import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -25,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，如果item存在二级,如物业，则会有layoutName：PmLayout,itemLocation:/home/Pm</li>
  * <li>displayFlag: 是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
+ * <li>tag：标签，默认不填，管理员可见item设相应的值，如物业（PM），居委（GANC），业委（GARC），派出所（GAPS）</li>
  * </ul>
  */
 public class UpdateLaunchPadItemAdminCommand {
@@ -57,6 +59,8 @@ public class UpdateLaunchPadItemAdminCommand {
     private Byte displayFlag;
     
     private String displayLayout;
+    
+    private String tag;
 
     public UpdateLaunchPadItemAdminCommand() {
     }
@@ -203,6 +207,14 @@ public class UpdateLaunchPadItemAdminCommand {
 
     public void setActionData(String actionData) {
         this.actionData = actionData;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @Override

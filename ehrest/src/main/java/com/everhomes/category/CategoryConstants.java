@@ -24,7 +24,7 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_INTEREST = 2L;
     /** 商家与服务 */
     public static final long CATEGORY_ID_SERVICE = 3L;
-    /** /
+    /** 活动 */
     public static final long CATEGORY_ID_ACTIVITY = 4L;
     
     /** 帖子/公告（物业、业委、居委、公安等） */

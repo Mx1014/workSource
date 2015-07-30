@@ -1,5 +1,8 @@
 package com.everhomes.openapi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import com.everhomes.app.AppConstants;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.launchpad.ActionType;
 import com.everhomes.messaging.ChannelType;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
@@ -35,7 +39,7 @@ public class DoorVenderController extends ControllerBase {
     @Autowired
     MessagingService messagingService;
     
-    private void sendMessageToUser(User u, String content) {
+    private void sendMessageToUser(User u, String content, Map<String, String> meta) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
@@ -44,6 +48,9 @@ public class DoorVenderController extends ControllerBase {
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), 
                 u.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -59,11 +66,32 @@ public class DoorVenderController extends ControllerBase {
                 continue;
                 }
             
-            sendMessageToUser(u, cmd.getContent());
+            sendMessageToUser(u, cmd.getContent(), null);
             rsp.getPhoneStatus().add(new PhoneStatus(phone, "OK"));
         }
         
         RestResponse response = new RestResponse(rsp);
         return response;        
+    }
+    
+    @RequestMapping("notifyDoorLock")
+    @RestReturn(NotifyDoorMessageResponse.class)
+    public RestResponse notifyDoorLock(@Valid notifyDoorLockCommand cmd) {
+        NotifyDoorMessageResponse rsp = new NotifyDoorMessageResponse();
+        for(String phone: cmd.getPhones()) {
+            User u = userService.findUserByIndentifier(phone);
+            if(null == u) {
+                rsp.getPhoneStatus().add(new PhoneStatus(phone, "NOT_FOUND"));
+                continue;
+                }
+            
+            Map<String, String> meta = new HashMap<String, String>();
+            meta.put("actionType", Byte.toString(ActionType.OPEN_DOOR.getCode()));
+            meta.put("actionData", "{}");
+            sendMessageToUser(u, "Open door", meta);
+            rsp.getPhoneStatus().add(new PhoneStatus(phone, "OK"));
+        }
+        RestResponse response = new RestResponse(rsp);
+        return response;
     }
 }

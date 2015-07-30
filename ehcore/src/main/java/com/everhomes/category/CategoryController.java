@@ -3,6 +3,8 @@ package com.everhomes.category;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import com.everhomes.util.RequireAuthentication;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.EtagHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -46,14 +49,20 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listAllCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listAllCategories() {
+    public RestResponse listAllCategories(HttpServletRequest request, HttpServletResponse response) {
         List<Category> list = this.categoryProvider.listAllCategories();
         
         List<CategoryDTO> dtoResultList = list.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
         
-        return new RestResponse(dtoResultList);
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
 
     /**
@@ -62,7 +71,7 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listChildren(@Valid ListCategoryCommand cmd) {
+    public RestResponse listChildren(@Valid ListCategoryCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         Tuple<String, SortOrder> orderBy = null;
         // 暂不向客户端开放排序字段指定 by lqs 20150505
         // if(cmd.getSortBy() != null)
@@ -76,7 +85,14 @@ public class CategoryController extends ControllerBase {
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
 
     /**
@@ -85,7 +101,7 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listDescendants")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listDescendants(@Valid ListCategoryCommand cmd) {
+    public RestResponse listDescendants(@Valid ListCategoryCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         Tuple<String, SortOrder> orderBy = null;
         // 暂不向客户端开放排序字段指定 by lqs 20150505
         // if(cmd.getSortBy() != null)
@@ -99,7 +115,14 @@ public class CategoryController extends ControllerBase {
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
 
     /**
@@ -108,12 +131,19 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listRoot")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listRoot() {
+    public RestResponse listRoot(HttpServletRequest request, HttpServletResponse response) {
         List<Category> categories = this.categoryProvider.listRootCategories();
         List<CategoryDTO> convertCategories = categories.stream().map(item -> {
             return ConvertHelper.convert(item, CategoryDTO.class);
         }).collect(Collectors.toList());
-        return new RestResponse(convertCategories);
+        
+        if(convertCategories != null){
+            int hashCode = convertCategories.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(convertCategories);
+            }
+        }
+        return new RestResponse();
     }
     
     /**
@@ -122,7 +152,7 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listInterestCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listInterestCategories() {
+    public RestResponse listInterestCategories(HttpServletRequest request, HttpServletResponse response) {
         
         Tuple<String, SortOrder> orderBy = null;
         @SuppressWarnings("unchecked")
@@ -132,7 +162,14 @@ public class CategoryController extends ControllerBase {
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
     
     /**
@@ -142,13 +179,20 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listContentCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listContentCategories() {
+    public RestResponse listContentCategories(HttpServletRequest request, HttpServletResponse response) {
         
         List<Category> entityResultList = this.categoryProvider.listContentCategories();
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
     
     /**
@@ -158,7 +202,7 @@ public class CategoryController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listActionCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listContentCategories(ListCategoryCommand cmd) {
+    public RestResponse listContentCategories(ListCategoryCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         if(cmd.getParentId() == null)
             cmd.setParentId(1l);
         List<Category> entityResultList = this.categoryProvider.listActionCategories(cmd.getParentId());
@@ -166,6 +210,13 @@ public class CategoryController extends ControllerBase {
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
 }

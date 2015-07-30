@@ -628,6 +628,22 @@ CREATE TABLE `eh_user_profiles`(
     INDEX `i_eh_uprof_stag2`(`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+# 
+# member of eh_users partition
+# Used for duplicated recording of post membership that user is involved in order to store 
+# it in the same shard as of its owner user
+#
+DROP TABLE IF EXISTS `eh_user_service_addresses`;
+CREATE TABLE `eh_user_service_addresses` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `address_id` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_usr_service_address_id`(`owner_uid`, `address_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 #
 # key table of grouping related sharding group
 # Usually there is no need for group object to carry information for other applications, therefore there is
@@ -891,7 +907,8 @@ CREATE TABLE `eh_forum_posts` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    
+   
+    `private_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: public, 1: private', 
 	`assigned_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'the flag indicate the topic is recommanded, 0: none, 1: manual recommand',
 	`floor_number` BIGINT NOT NULL DEFAULT 0,
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
@@ -1347,6 +1364,9 @@ CREATE TABLE `eh_addresses` (
 	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
     `community_id` BIGINT COMMENT 'NULL: means it is an independent street address, otherwise, it is an appartment address',
     `city_id` BIGINT,
+    `city_name` VARCHAR(64) COMMENT 'redundant for query optimization',
+    `area_id` BIGINT NOT NULL COMMENT 'area id in region table',
+    `area_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `zipcode` VARCHAR(16),
     `address` VARCHAR(128),
     `longitude` DOUBLE,
@@ -1358,6 +1378,8 @@ CREATE TABLE `eh_addresses` (
     `apartment_name` VARCHAR(128),
     `apartment_floor` VARCHAR(16),
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: confirming, 2: active',
+	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'uid of the user who process the address',
+    `operate_time` DATETIME,
     `creator_uid` BIGINT COMMENT 'uid of the user who has suggested address, NULL if it is system created',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',

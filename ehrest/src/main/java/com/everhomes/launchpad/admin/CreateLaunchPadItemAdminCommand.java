@@ -26,7 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>displayFlag: 是否显示，参考{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * <li>bgcolor：item的背景颜色，默认为0，1-10，每个数值对应一种颜色</li>
- * <li>bgcolor：item的背景颜色，默认为0，1-10，每个数值对应一种颜色</li>
+ * <li>tag：标签，默认不填，管理员可见item设相应的值，如物业（PM），居委（GANC），业委（GARC），派出所（GAPS）</li>
  * </ul>
  */
 public class CreateLaunchPadItemAdminCommand {
@@ -182,6 +182,14 @@ public class CreateLaunchPadItemAdminCommand {
 
     public void setBgcolor(Integer bgcolor) {
         this.bgcolor = bgcolor;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @Override

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = 1456721248;
+	private static final long serialVersionUID = -591458209;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -45,6 +45,21 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_addresses.city_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> CITY_ID = createField("city_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.city_name</code>. redundant for query optimization
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> CITY_NAME = createField("city_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "redundant for query optimization");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.area_id</code>. area id in region table
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> AREA_ID = createField("area_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "area id in region table");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.area_name</code>. redundant for query optimization
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.String> AREA_NAME = createField("area_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "redundant for query optimization");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.zipcode</code>.
@@ -100,6 +115,16 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_addresses.status</code>. 0: inactive, 1: confirming, 2: active
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.operator_uid</code>. uid of the user who process the address
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "uid of the user who process the address");
+
+	/**
+	 * The column <code>ehcore.eh_addresses.operate_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_addresses.creator_uid</code>. uid of the user who has suggested address, NULL if it is system created

@@ -4,6 +4,8 @@ package com.everhomes.region;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.EtagHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.RequireAuthentication;
@@ -47,7 +50,7 @@ public class RegionController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("list")
     @RestReturn(value=RegionDTO.class, collection=true)
-    public RestResponse list(@Valid ListRegionCommand cmd) {
+    public RestResponse list(@Valid ListRegionCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
@@ -59,7 +62,14 @@ public class RegionController extends ControllerBase {
         List<RegionDTO> dtoResultList = entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
                 .collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        
+        return new RestResponse();
     }
     
     /**
@@ -69,7 +79,7 @@ public class RegionController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
     @RestReturn(value=RegionDTO.class, collection=true)
-    public RestResponse listChildren(@Valid ListRegionCommand cmd) {
+    public RestResponse listChildren(@Valid ListRegionCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         Tuple<String, SortOrder> orderBy = null;
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
@@ -82,7 +92,13 @@ public class RegionController extends ControllerBase {
         List<RegionDTO> dtoResultList = entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
                 .collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
     
     /**
@@ -139,13 +155,19 @@ public class RegionController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("listActiveRegion")
     @RestReturn(value=RegionDTO.class, collection=true)
-    public RestResponse listActiveRegion(@Valid ListActiveRegionCommand cmd) {
+    public RestResponse listActiveRegion(@Valid ListActiveRegionCommand cmd, HttpServletRequest request, HttpServletResponse response) {
         
         List<Region> entityResultList = this.regionProvider.listActiveRegion(RegionScope.fromCode(cmd.getScope()));
         
         List<RegionDTO> dtoResultList = entityResultList.stream()
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
                 .collect(Collectors.toList());
-        return new RestResponse(dtoResultList);
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
     }
 }

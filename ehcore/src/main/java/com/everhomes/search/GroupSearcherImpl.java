@@ -171,6 +171,7 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         }
 
         filter.setPageInfo(pageNum, PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+        filter.addQueryTerm(GroupQueryFilter.TERM_NAME).addQueryTerm(GroupQueryFilter.TERM_TAG);
         filter.setQueryString(cmd.getQueryString());
         return this.query(filter);
     }

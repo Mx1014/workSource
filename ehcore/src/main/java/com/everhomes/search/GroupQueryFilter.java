@@ -95,7 +95,7 @@ public class GroupQueryFilter implements QueryMaker {
     private QueryBuilder getQueryBuilder() {
         QueryBuilder qb = null;
         
-        if((queryString) == null || (queryString.isEmpty()) || (queryTerms.size() == 0) ) {
+        if((queryString == null) || (queryString.isEmpty()) || (queryTerms.size() == 0) ) {
             qb = QueryBuilders.matchAllQuery();
         } else {
             

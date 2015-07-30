@@ -6,11 +6,11 @@ public interface SdkConstants {
     // demostration only, it should be kept in a safe place
     public static final String API_SECRET = "2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ";
 
-    public static final String API_AUTHORIZE_SERVICE_URI = "http://10.1.1.91:8080/oauth2/authorize";
+    public static final String API_AUTHORIZE_SERVICE_URI = "http://10.1.1.98:8080/oauth2/authorize";
 
-    public static final String API_TOKEN_SERVICE_URI = "http://10.1.1.91:8080/oauth2/token";
+    public static final String API_TOKEN_SERVICE_URI = "http://10.1.1.98:8080/oauth2/token";
 
-    public static final String API_OPENSDK_URI = "http://10.1.1.91:8080/opensdk";
+    public static final String API_OPENSDK_URI = "http://10.1.1.98:8080/opensdk";
 
-    public static final String CLIENT_REDIRECT_URI = "http://10.1.1.91:7788/redirect";
+    public static final String CLIENT_REDIRECT_URI = "http://10.1.1.98:7788/redirect";
 }

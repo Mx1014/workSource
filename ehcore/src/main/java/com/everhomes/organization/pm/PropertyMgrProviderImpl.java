@@ -30,6 +30,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
@@ -343,7 +345,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
-	/*@Cacheable(value = "CommunityAddressMappingsList", key="#communityId")*/
+	@Cacheable(value = "CommunityAddressMappingsList", key="#communityId")
 	@Override
 	public List<CommunityAddressMapping> listCommunityAddressMappings(Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -1003,32 +1005,6 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<PmBillsDTO> listCommunityPmBills(Condition condition,
-			long offset, int pageSize) {
-
-		List<PmBillsDTO> list = new ArrayList<PmBillsDTO>();
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-				.where(condition)
-				.orderBy(Tables.EH_ORGANIZATION_BILLS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc())
-				.limit(pageSize).offset((int)offset)
-				.fetch();
-
-		if(records != null && !records.isEmpty()){
-			records.stream().map(r -> {
-				PmBillsDTO bill = ConvertHelper.convert(r, PmBillsDTO.class);
-				bill.setStartDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.START_DATE).getTime());
-				bill.setEndDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.END_DATE).getTime());
-				bill.setPayDate(r.getValue(Tables.EH_ORGANIZATION_BILLS.PAY_DATE).getTime());
-				list.add(bill);
-				return null;
-			}).toArray();
-		}
-
-		return list;
-	}
-
-	@Override
 	public CommunityPmBill findFamilyNewestBill(Long addressId, Long organizationId) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1062,12 +1038,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<CommunityPmBill> listOweFamilyBillsByOrganizationId(
-			Long organizationId) {
+	public List<CommunityPmBill> listOweFamilyBillsByOrgIdAndAddress(Long organizationId,String address) {
 
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId);
+		if(address != null && !address.isEmpty())
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
 
 		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
 				.from(Tables.EH_ORGANIZATION_BILLS)
@@ -1077,7 +1056,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.join(table2)
 				.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
 						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
-						.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId))
+						.where(condition)
 						.fetch();
 
 		if(records != null && !records.isEmpty()){
@@ -1136,7 +1115,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
 						.fetchOne();
 
-		if(record != null)
+		if(record != null && record.value1() != null)
 			return record.value1();
 		return BigDecimal.ZERO;
 	}
@@ -1164,7 +1143,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDateInYear)))
 				.fetch();
 
-		if(records != null && !records.isEmpty())
+		if(records != null && !records.isEmpty() && records.get(0).value1() != null)
 			return records.get(0).value1();
 		return BigDecimal.ZERO;
 	}
@@ -1198,4 +1177,97 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return null;
 	}
 
+	@Override
+	public CommunityPmBill findFamilyPmBillInStartDateToEndDate(Long addressId,
+			Date startDate, Date endDate) {
+		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)
+						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate)).and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)))
+				.fetch();
+		
+		if(records != null && !records.isEmpty()){
+			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
+		}
+		return null;
+	}
+
+	@Override
+	public OrganizationCommunity findOrganizationCommunityByOrgId(Long orgId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
+				.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId))
+				.fetch();
+
+		if(records != null && !records.isEmpty()){
+				return ConvertHelper.convert(records.get(0), OrganizationCommunity.class);
+		}
+		return null;
+	}
+
+	@Override
+	public CommunityAddressMapping findOrganiztionAddressMappingByAddressId(
+			Long organizationId, Long addressId) {
+		final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
+		if(organizationId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, CommunityAddressMapping.class);
+			return null;
+		});
+		return result[0];
+	}
+
+	@Override
+	public List<CommunityAddressMapping> listOrganizationAddressMappingsByOrgId(
+			Long orgId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
+		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
+		if(orgId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(orgId));
+		query.addOrderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<CommunityPmBill> listOrganizationBillsByAddressAndDate(Long orgId,String address,Date startDate, Date endDate, long offset, int pageSize) {
+		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
+		
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId);
+		if(!(address == null || address.isEmpty())){
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+address+"%"));
+		}
+		if(startDate != null && endDate != null){
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate)
+					.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)));
+		}
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_BILLS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc())
+				.limit(pageSize).offset((int)offset)
+				.fetch();
+
+		if(records != null && !records.isEmpty()){
+			records.stream().map(r -> {
+				list.add(ConvertHelper.convert(r, CommunityPmBill.class));
+				return null;
+			}).toArray();
+		}
+		return list;
+	}
 }

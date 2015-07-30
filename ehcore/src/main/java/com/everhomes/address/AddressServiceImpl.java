@@ -7,9 +7,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+
+
 import javax.annotation.PostConstruct;
+
+
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -20,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 import com.everhomes.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.bus.LocalBus;
@@ -52,15 +59,18 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionAdminStatus;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
+import com.everhomes.region.RegionServiceErrorCode;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
@@ -114,6 +124,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     
     @PostConstruct
     public void setup() {
@@ -481,7 +494,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(community == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId");
-
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         if(address == null) {
             // optimize with double-lock pattern 
             Tuple<Address, Boolean> result = this.coordinationProvider
@@ -495,12 +509,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 if(addr == null) {
                      addr = new Address();
                      addr.setCityId(community.getCityId());
+                     addr.setCityName(community.getCityName());
+                     addr.setAreaId(community.getAreaId());
+                     addr.setAreaName(community.getAreaName());
                      addr.setCommunityId(cmd.getCommunityId());
                      addr.setBuildingName(cmd.getBuildingName());
                      addr.setApartmentName(cmd.getApartmentName());
                      addr.setAddress(joinAddrStr(cmd.getBuildingName(),cmd.getApartmentName()));
                      addr.setApartmentFloor(parserApartmentFloor(cmd.getApartmentName()));
                      addr.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+                     addr.setCreatorUid(userId);
                      this.addressProvider.createAddress(addr);
                 }
                 long lcEndTime = System.currentTimeMillis();
@@ -700,6 +718,70 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         response.setApartmentList(results);
         return response;
     }
+    
+    @Override
+    public AddressDTO createServiceAddress(CreateServiceAddressCommand cmd) {
+        if(cmd.getCityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid cityId, cityId parameter");
+        }
+        if(cmd.getAreaId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid areaId, areaId parameter");
+        }
+        if(cmd.getAddress() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid address, address parameter");
+        }
+        Region city = this.regionProvider.findRegionById(cmd.getCityId());
+        if(city == null){
+            throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+                    "City is not found");
+        }
+        Region area = this.regionProvider.findRegionById(cmd.getAreaId());
+        if(area == null){
+            throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+                    "Area is not found");
+        }
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        
+        Address address = this.addressProvider.findAddressByRegionAndAddress(cmd.getCityId(),cmd.getAreaId(),cmd.getAddress());
+        
+        if(address == null) {
+            // optimize with double-lock pattern 
+            Tuple<Address, Boolean> result = this.coordinationProvider
+                     .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
+                Address addr = this.addressProvider.findAddressByRegionAndAddress(cmd.getCityId(),cmd.getAreaId(),cmd.getAddress());;
+                long lcStartTime = System.currentTimeMillis();
+                if(addr == null) {
+                     addr = new Address();
+                     addr.setCityId(cmd.getCityId());
+                     addr.setCityName(city.getName());
+                     addr.setAreaId(cmd.getAreaId());
+                     addr.setAreaName(area.getName());
+                     addr.setAddress(cmd.getAddress());
+                     addr.setAddressAlias(cmd.getAddress());
+                     addr.setStatus(AddressAdminStatus.ACTIVE.getCode());
+                     addr.setCreatorUid(userId);
+                     this.addressProvider.createAddress(addr);
+                     
+                     //insert user_service_addresses
+                     UserServiceAddress serviceAddress = new UserServiceAddress();
+                     serviceAddress.setAddressId(addr.getId());
+                     serviceAddress.setOwnerUid(userId);;
+                     this.userActivityProvider.addUserServiceAddress(serviceAddress);
+                }
+                long lcEndTime = System.currentTimeMillis();
+                LOGGER.info("create address in the lock,elapse=" + (lcEndTime - lcStartTime));
+                return addr;
+             });
+             
+             address = result.first();
+         }
+         return ConvertHelper.convert(address, AddressDTO.class);
+    }
+    
 
 	@Override
 	public void importCommunityInfos(MultipartFile[] files) {
@@ -1007,5 +1089,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		}
 		return count;
 	}
+
 
 }
