@@ -71,6 +71,9 @@ public class GroupIterateTest extends LoginAuthTestCase {
     @Autowired
     private GroupSearcher groupSearcher;
     
+    @Autowired
+    private PostSearcher postSearcher;
+    
     private String phone;
     
     private String password;
@@ -92,6 +95,10 @@ public class GroupIterateTest extends LoginAuthTestCase {
     
     @Before
     public void setUp() throws Exception {
+        super.setUp();
+    }
+    
+    public void setUp2() throws Exception {
         super.setUp();
         
         phone = "13911112222";
@@ -164,10 +171,10 @@ public class GroupIterateTest extends LoginAuthTestCase {
     
     @After
     public void tearDown() {
-        cleanData();
+        //cleanData();
     }
     
-    //@Ignore @Test
+    @Test
     public void testIterateGroup() {
         this.groupSearcher.syncFromDb();
         
@@ -196,7 +203,7 @@ public class GroupIterateTest extends LoginAuthTestCase {
         
     }
     
-    @Test
+    //@Test
     public void testStringHelper() {
         SendMessageCommand cmd = new SendMessageCommand();
         cmd.setAppId(32434L);

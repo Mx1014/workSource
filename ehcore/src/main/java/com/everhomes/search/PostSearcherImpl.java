@@ -144,8 +144,14 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             
             //http://stackoverflow.com/questions/16113439/elasticsearch-geo-distance-filter-with-multiple-locations-in-array-possible
             b.startObject("location");
-            b.field("lat", post.getLatitude());
-            b.field("lon", post.getLongitude());
+            if(null == post.getLatitude() || null == post.getLongitude()) {
+                b.field("lat", 0);
+                b.field("lon", 0);
+            } else {
+                b.field("lat", post.getLatitude());
+                b.field("lon", post.getLongitude());    
+                }
+            
             b.endObject();
             
             b.field("createTime", new Date(post.getCreateTime().getTime()));
@@ -382,6 +388,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                posts.add(p);
                }
            }
+       
+       listPost.setPosts(posts);
        
        return listPost;
    }
