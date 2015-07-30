@@ -1044,8 +1044,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		
-		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId)
-				.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId);
+		if(address != null && !address.isEmpty())
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
 
 		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
 				.from(Tables.EH_ORGANIZATION_BILLS)
@@ -1269,5 +1270,4 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		}
 		return list;
 	}
-
 }

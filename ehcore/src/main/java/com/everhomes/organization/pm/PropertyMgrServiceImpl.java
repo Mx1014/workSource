@@ -2701,7 +2701,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		BigDecimal unPayAmount = BigDecimal.ZERO;
 		BigDecimal yearIncomeAmount = BigDecimal.ZERO;
 
-		List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrgIdAndAddress(cmd.getOrganizationId());
+		List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrgIdAndAddress(cmd.getOrganizationId(), null);
 		if(billList != null && !billList.isEmpty()){
 			for(CommunityPmBill bill : billList){
 				BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
@@ -2789,7 +2789,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"Unable to find the organization.");
 		}
 
-		List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrgIdAndAddress(organization.getId());
+		List<CommunityPmBill> billList = this.propertyMgrProvider.listOweFamilyBillsByOrgIdAndAddress(organization.getId(),null);
 		if(billList != null && !billList.isEmpty()){
 			for(CommunityPmBill bill : billList){
 				BigDecimal payAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
