@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
@@ -31,5 +30,13 @@ public class AppController extends ControllerBase {
             return new RestResponse("YES");
         
         return new RestResponse("NO");
+    }
+    
+    @RequestMapping("isValidAppUrlBinding")
+    @RestReturn(value=String.class)
+    public RestResponse isValidAppUrlBinding(@Valid VerifyAppUrlBindingCommand cmd) {
+        
+        // TODO verify signature
+        return new RestResponse("YES");
     }
 }
