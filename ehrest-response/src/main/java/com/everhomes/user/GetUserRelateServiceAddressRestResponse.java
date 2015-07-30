@@ -1,17 +1,17 @@
 // @formatter:off
-// generated at 2015-07-30 15:54:51
-package com.everhomes.address;
+// generated at 2015-07-30 15:54:52
+package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
 import com.everhomes.address.AddressDTO;
 
-public class ListAddressByKeywordRestResponse extends RestResponseBase {
+public class GetUserRelateServiceAddressRestResponse extends RestResponseBase {
 
     private List<AddressDTO> response;
 
-    public ListAddressByKeywordRestResponse () {
+    public GetUserRelateServiceAddressRestResponse () {
     }
 
     public List<AddressDTO> getResponse() {
