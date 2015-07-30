@@ -2418,6 +2418,25 @@ CREATE TABLE `eh_versioned_content` (
 DROP TABLE IF EXISTS `eh_cooperation_requests`;
 CREATE TABLE `eh_cooperation_requests` (
 	`id` BIGINT NOT NULL,
+    `realm_id` BIGINT NOT NULL,
+	`province_name` VARCHAR(64) COMMENT 'province',
+	`city_name` VARCHAR(64) COMMENT 'city',
+	`area_name` VARCHAR(64) COMMENT 'area',
+	`community_names` TEXT COMMENT 'community name, split with comma if there are multiple communties',
+	`address` VARCHAR(128) COMMENT 'address of the cooperator',
+	`name` VARCHAR(128) COMMENT 'name of the cooperator entity',
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'contact type of cooperator entity, 0: mobile, 1: email',
+	`contact_token` VARCHAR(128) COMMENT 'phone number or email address of cooperator entity',
+	`applicant_name` VARCHAR(128) COMMENT 'the name of applicant',
+	`applicant_occupation` VARCHAR(128) COMMENT 'the occupation of applicant',
+	`applicant_phone` VARCHAR(64) COMMENT 'the phone number of applicant',
+	`applicant_email` VARCHAR(128) COMMENT 'the email address of applicant',
+	PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_nenc_to_groups`;
+CREATE TABLE `eh_nenc_to_groups` (
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`cooperation_type` VARCHAR(64) NOT NULL COMMENT 'coperation type, NONE, BIZ, PARK, PM(Property Management), GARC(Resident Committee), GANC(Neighbor Committee), GAPS(Police Station)',
 	`province_name` VARCHAR(64) COMMENT 'province',
 	`city_name` VARCHAR(64) COMMENT 'city',
@@ -2433,5 +2452,6 @@ CREATE TABLE `eh_cooperation_requests` (
 	`applicant_email` VARCHAR(128) COMMENT 'the email address of applicant',
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 
 SET foreign_key_checks = 1;
