@@ -114,14 +114,12 @@ public class BannerServiceImpl implements BannerService {
 
     }
     
-    @SuppressWarnings("unchecked")
     private String parserJson(String userToken,long commnunityId,BannerDTO banner) {
         
         JSONObject jsonObject = new JSONObject();
         if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
             jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
         }
-        jsonObject.put(LaunchPadConstants.TOKEN, userToken);
         
         return jsonObject.toString();
     }
