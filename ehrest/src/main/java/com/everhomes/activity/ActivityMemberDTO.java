@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * @author elians
  *<ul>
  *<li>id:登记ID</li>
+ *<li>uid:用户ID</li>
  *<li>userName:用户名</li>
  *<li>userAvatar:用户头像</li>
  *<li>familyName:家庭名</li>
@@ -23,6 +24,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ActivityMemberDTO {
     private Long id;
+    private Long uid;
     private String userName;
     private String userAvatar;
     private String familyName;
@@ -46,6 +48,14 @@ public class ActivityMemberDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUid() {
+        return uid;
+    }
+
+    public void setUid(Long uid) {
+        this.uid = uid;
     }
 
     public String getUserName() {
