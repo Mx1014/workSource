@@ -3,10 +3,10 @@ package com.everhomes.organization;
 
 /**
  * <ul>
- * <li>UNPROCESSED: 未处理</li>
- * <li>PROCESSING: 处理中</li>
- * <li>PROCESSED: 已处理</li>
- * <li>OTHER: 其它</li>
+ * <li>1: 未处理</li>
+ * <li>2: 处理中</li>
+ * <li>3: 已处理</li>
+ * <li>4: 其它</li>
  * </ul>
  */
 public enum OrganizationTaskStatus {

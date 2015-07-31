@@ -1,32 +1,41 @@
 // @formatter:off
-package com.everhomes.organization.pm;
+package com.everhomes.organization;
 
 
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>forumId: 论坛Id</li>
- * <li>communityId: 小区Id</li>
+ * <li>organizationId : 组织id</li>
  * <li>topicId: 帖子ID</li>
  * <li>userId: 接收任务的用户Id</li>
  * </ul>
  */
-public class AssginPmTopicCommand {
-	private Long communityId;
+public class AssginOrgTopicCommand {
+	@NotNull
+	private Long organizationId;
+	@NotNull
 	private Long topicId;
+	@NotNull
     private Long userId;
-   
     
-    public AssginPmTopicCommand() {
+    public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public AssginOrgTopicCommand() {
     }
 
     public Long getTopicId() {
 		return topicId;
 	}
+    
 
 	public void setTopicId(Long topicId) {
 		this.topicId = topicId;
@@ -40,15 +49,7 @@ public class AssginPmTopicCommand {
         this.userId = userId;
     }
 
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
-
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
