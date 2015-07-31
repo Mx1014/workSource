@@ -2505,9 +2505,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		BigDecimal paidAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
 		BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount()).add(paidAmount);
 		if(totalAmount.compareTo(BigDecimal.ZERO) <= 0){
-			LOGGER.error("bill owe amount had paid.billId="+bill.getId());
+			/*LOGGER.error("bill owe amount had paid.billId="+bill.getId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"bill owe amount had paid.");
+					"bill owe amount had paid.");*/
 		}
 
 		this.dbProvider.execute(s -> {
