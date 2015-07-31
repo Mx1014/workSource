@@ -3,6 +3,7 @@ package com.everhomes.banner;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -119,11 +120,13 @@ public class BannerProviderImpl implements BannerProvider {
     }
     
     @Override
-    public List<Banner> listAllBanners(){
+    public List<Banner> listBanners(String keyword, long offset, long pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_BANNERS);
+        Condition condition = Tables.EH_BANNERS.NAME.like("%" + keyword + "%");
+        step.where(condition);
 
-        List<Banner> result = step.orderBy(Tables.EH_BANNERS.CREATE_TIME.desc()).
+        List<Banner> result = step.orderBy(Tables.EH_BANNERS.CREATE_TIME.desc()).limit((int)pageSize).offset((int)offset).
                 fetch().map((r) ->{ return ConvertHelper.convert(r, Banner.class);});
         return result;
     }

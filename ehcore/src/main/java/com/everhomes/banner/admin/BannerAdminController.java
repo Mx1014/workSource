@@ -95,13 +95,13 @@ public class BannerAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/banner/listAllBanners</b>
+     * <b>URL: /admin/banner/listBanners</b>
      * <p>获取所有banner</p>
      */
-    @RequestMapping("listAllBanners")
-    @RestReturn(value=BannerDTO.class,collection=true)
-    public RestResponse listAllBanners(){
-        List<BannerDTO> result = bannerService.listAllBanners();
+    @RequestMapping("listBanners")
+    @RestReturn(value=ListBannersAdminCommandResponse.class)
+    public RestResponse listBanners(ListBannersAdminCommand cmd){
+        ListBannersAdminCommandResponse result = bannerService.listBanners(cmd);
         RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

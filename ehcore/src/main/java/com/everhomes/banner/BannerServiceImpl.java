@@ -18,11 +18,15 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.banner.admin.CreateBannerAdminCommand;
 import com.everhomes.banner.admin.DeleteBannerAdminCommand;
+import com.everhomes.banner.admin.ListBannersAdminCommand;
+import com.everhomes.banner.admin.ListBannersAdminCommandResponse;
 import com.everhomes.banner.admin.UpdateBannerAdminCommand;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.core.AppConfig;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.ActionType;
 import com.everhomes.launchpad.LaunchPadConstants;
@@ -30,6 +34,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -47,6 +52,8 @@ public class BannerServiceImpl implements BannerService {
     private CommunityProvider communityProvider;
     @Autowired
     private ContentServerService contentServerService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd){
         if(cmd.getCommunityId() == null){
@@ -256,18 +263,26 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @Override
-    public List<BannerDTO> listAllBanners(){
+    public ListBannersAdminCommandResponse listBanners(ListBannersAdminCommand cmd){
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        
-        List<BannerDTO> result = bannerProvider.listAllBanners().stream().map((Banner r) ->{
+        if(cmd.getKeyword() == null)
+            cmd.setKeyword("");
+        final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        long pageOffset = cmd.getPageOffset() == null ? 1L : cmd.getPageOffset();
+        long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
+        List<BannerDTO> result = bannerProvider.listBanners(cmd.getKeyword(),offset,pageSize).stream().map((Banner r) ->{
             BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class); 
             dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
             return dto;
          }).collect(Collectors.toList());
-        if(result != null && !result.isEmpty())
-            sortBanner(result);
-        return result;
+        ListBannersAdminCommandResponse response = new ListBannersAdminCommandResponse();
+        if(result != null && result.size() >= pageSize){
+            response.setNextPageOffset((int)pageOffset + 1);
+        }
+        response.setRequests(result);
+        return response;
     }
     
     @Override
