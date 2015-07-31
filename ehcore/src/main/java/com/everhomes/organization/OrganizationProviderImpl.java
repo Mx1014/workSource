@@ -871,4 +871,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
+
+
+	@Override
+	public Organization findOrganizationByName(String name) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
 }

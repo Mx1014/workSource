@@ -1,4 +1,4 @@
-package com.everhomes.admin.organization;
+package com.everhomes.organization.admin;
 
 import javax.validation.Valid;
 

@@ -17,6 +17,9 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressAdminStatus;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -52,6 +55,8 @@ import com.everhomes.organization.pm.PmMemberTargetType;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -120,6 +125,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private UserActivityProvider userActivityProvider;
 
+	@Autowired
+	private AddressProvider addressProvider;
+
+	@Autowired
+	private RegionProvider regionProvider;
+
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
 
@@ -141,9 +152,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(cmd.getParentId() == null)
 		{
 			department.setParentId(0L);
+			department.setPath("/"+department.getName());
+			department.setLevel(1);
 		}
-		if(cmd.getLevel() == null){
-			department.setLevel(0);
+		else{
+			Organization parOrg = this.checkOrganization(cmd.getParentId());
+			department.setPath(parOrg.getPath()+"/"+department.getName());
+			department.setLevel(parOrg.getLevel()+1);
 		}
 		if(cmd.getAddressId() == null){
 			department.setAddressId(0L);
@@ -152,6 +167,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationProvider.createOrganization(department);
 
 
+	}
+
+
+
+	private Organization checkOrganization(Long orgId) {
+		Organization org = organizationProvider.findOrganizationById(orgId);
+		if(org == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + orgId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
+		}
+		return org;
 	}
 
 	@Override
@@ -1135,20 +1162,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void sendOrganizationNotificationToUser(Long userId,String message) {
-        if(message != null && message.length() != 0) {
-            String channelType = MessageChannelType.USER.getCode();
-            String channelToken = String.valueOf(userId);
-            MessageDTO messageDto = new MessageDTO();
-            messageDto.setAppId(AppConstants.APPID_MESSAGING);
-            messageDto.setSenderUid(User.SYSTEM_UID);
-            messageDto.setChannels(new MessageChannel(channelType, channelToken));
-            messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
-            messageDto.setBody(message);
-            messageDto.setMetaAppId(AppConstants.APPID_DEFAULT);
-            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType,
-                channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
-        }
-    }
+		if(message != null && message.length() != 0) {
+			String channelType = MessageChannelType.USER.getCode();
+			String channelToken = String.valueOf(userId);
+			MessageDTO messageDto = new MessageDTO();
+			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+			messageDto.setSenderUid(User.SYSTEM_UID);
+			messageDto.setChannels(new MessageChannel(channelType, channelToken));
+			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+			messageDto.setBody(message);
+			messageDto.setMetaAppId(AppConstants.APPID_DEFAULT);
+			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType,
+					channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+		}
+	}
 
 	@Override
 	public void rejectOrganizationMember(OrganizationMemberCommand cmd) {
@@ -1331,5 +1358,152 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			return status;
 		});
+	}
+
+	@Override
+	public void userJoinOrganization(UserJoinOrganizationCommand cmd) {
+		User user = UserContext.current().getUser();
+		if(cmd.getName() == null || cmd.getName().isEmpty() || cmd.getOrgType() == null || cmd.getOrgType().isEmpty()){
+			LOGGER.error("propterty name or orgType paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty name or orgType paramter can not be null or empty");
+		}
+
+		this.dbProvider.execute(status -> {
+			Organization org = null;
+			Community community = null;
+			Address address = null;
+			Region city = null;
+			Region area = null;
+
+			org = this.organizationProvider.findOrganizationByName(cmd.getName());
+			if(org == null){//组织不存在，先创建组织用户再加入组织
+				//地址不为空，先查找地址，不存在则创建
+				if(cmd.getAddress() != null && !cmd.getAddress().isEmpty()){
+					address = addressProvider.findAddressByAddress(cmd.getAddress());
+					if(address == null){
+						city = this.checkCity(cmd.getCityId());
+						area = this.checkArea(cmd.getAreaId());
+						//创建地址
+						address = new Address();
+						address.setAddress(cmd.getAddress());
+						address.setCityId(city.getId());
+						address.setCityName(city.getName());
+						address.setAreaId(area.getId());
+						address.setAreaName(area.getName());
+						address.setCreateTime(new Timestamp(System.currentTimeMillis()));
+						address.setCreatorUid(user.getId());
+						address.setStatus(AddressAdminStatus.CONFIRMING.getCode());
+						this.addressProvider.createAddress(address);
+					}
+				}
+				//创建组织
+				org = new Organization();
+				if(address != null)
+					org.setAddressId(address.getId());
+				else
+					org.setAddressId(0L);
+				org.setName(cmd.getName());
+				org.setOrganizationType(cmd.getOrgType());
+				if(cmd.getParentId() != null){
+					Organization parOrg = this.checkOrganization(cmd.getParentId());
+					org.setLevel(parOrg.getLevel()+1);
+					org.setParentId(parOrg.getId());
+					org.setPath(parOrg.getPath()+"/"+cmd.getName());
+				}
+				else{
+					org.setLevel(0);
+					org.setParentId(0L);
+					org.setPath("/"+cmd.getName());
+				}
+				org.setStatus(OrganizationStatus.ACTIVE.getCode());
+				org.setDescription(cmd.getDescription());
+				this.organizationProvider.createOrganization(org);
+				//创建组织小区关联
+				if(cmd.getOrgType().equals(OrganizationType.PM.getCode()) || cmd.getOrgType().equals(OrganizationType.GARC.getCode())){
+					community = this.checkCommunity(cmd.getCommunityId());
+					OrganizationCommunity orgComm = new OrganizationCommunity();
+					orgComm.setCommunityId(community.getId());
+					orgComm.setOrganizationId(org.getId());
+					this.organizationProvider.createOrganizationCommunity(orgComm);
+				}
+			}
+			//创建组织成员
+			OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), org.getId());
+			if(orgMember != null){
+				LOGGER.error("user have be organization member.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"user have be organization member.");
+			}
+			orgMember = new OrganizationMember();
+			orgMember.setContactDescription(cmd.getDescription());
+			orgMember.setContactName(user.getNickName());
+			UserIdentifier identifier = this.userProvider.findIdentifierById(user.getId());
+			if(identifier != null){
+				orgMember.setContactToken(identifier.getIdentifierToken());
+				orgMember.setContactType(identifier.getIdentifierType());
+			}
+			orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+			orgMember.setOrganizationId(org.getId());
+			orgMember.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
+			orgMember.setTargetId(user.getId());
+			orgMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+			this.organizationProvider.createOrganizationMember(orgMember);
+
+			return status;
+		});
+	}
+
+	private Region checkArea(Long areaId) {
+		if(areaId == null){
+			LOGGER.error("areaId could not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"areaId could not be null");
+		}
+		Region area = regionProvider.findRegionById(areaId);
+		if(area == null){
+			LOGGER.error("area not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"area not found.");
+		}
+		return area;
+	}
+
+	private Region checkCity(Long cityId) {
+		if(cityId == null){
+			LOGGER.error("cityId could not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cityId could not be null");
+		}
+		Region city = regionProvider.findRegionById(cityId);
+		if(city == null){
+			LOGGER.error("city not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city not found.");
+		}
+		return city;	
+	}
+
+	private void checkAddressIsNull(String addressName) {
+		if(addressName == null){
+			LOGGER.error("address could not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"address could not be null");
+		}
+	}
+
+	private Community checkCommunity(Long communityId) {
+		if(communityId == null){
+			LOGGER.error("communityId could not be null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"communityId could not be null");
+		}
+		Community community = this.communityProvider.findCommunityById(communityId);
+		if(community == null){
+			LOGGER.error("community not found");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"community not found");
+		}
+		return community;
 	}
 }

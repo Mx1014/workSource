@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,4 +272,13 @@ public class AddressProviderImpl implements AddressProvider {
                 });
         return addresses[0];
     }
+
+	@Override
+	public Address findAddressByAddress(String address) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ADDRESS.eq(address)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Address.class);
+		return null;
+	}
 }
