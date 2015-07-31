@@ -2777,4 +2777,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return response;
 	}
 
+	@Override
+	public PmBillsDTO findFamilyNewestBillByFamilyId(
+			FindFamilyNewestBillByFamilyIdCommand cmd) {
+		if(cmd.getFamilyId() == null){
+			LOGGER.error("propterty familyId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty familyId paramter can not be null or empty");
+		}
+		Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
+		if(family == null){
+			LOGGER.error("the family is not exist.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the family is not exist");
+		}
+		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(), OrganizationType.PM.getCode());
+		if(org == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + org.getId());
+			   throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			     "Unable to find the organization.");
+		}
+		PmBillsDTO billDto = new PmBillsDTO();
+
+		CommunityPmBill communityBill = this.propertyMgrProvider.findFamilyNewestBill(family.getIntegralTag1(), org.getId());
+		if(communityBill != null){
+			billDto = ConvertHelper.convert(communityBill, PmBillsDTO.class);
+			BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(billDto.getId());
+			billDto.setPayedAmount(payedAmount.negate());
+			billDto.setWaitPayAmount(billDto.getDueAmount().add(billDto.getOweAmount()).add(payedAmount));
+			billDto.setTotalAmount(billDto.getDueAmount().add(billDto.getOweAmount()));
+		}
+
+		return billDto;
+	}
+
 }

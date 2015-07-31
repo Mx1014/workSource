@@ -1118,6 +1118,21 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/findFamilyNewestBillByFamilyId
+	 * <p>根据家庭Id和日期查询家庭的账单
+	 */
+	@RequestMapping("findFamilyNewestBillByFamilyId")
+	@RestReturn(value=PmBillsDTO.class)
+	public RestResponse findFamilyNewestBillByFamilyId(@Valid FindFamilyNewestBillByFamilyIdCommand cmd) {
+
+		PmBillsDTO bill = propertyMgrService.findFamilyNewestBillByFamilyId(cmd);
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	//app
 	/**
