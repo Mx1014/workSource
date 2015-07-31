@@ -5,14 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communityId: 小区id</li>
+ * <li>organizationId: 组织id</li>
  * <li>addressId: 地址id</li>
  * <li>status: 该地址的居住状态</li>
  * </ul>
  */
 public class SetPropAddressStatusCommand {
 	
-	private Long communityId;
+	private Long organizationId;
 	
     private Long addressId;
     
@@ -36,14 +36,13 @@ public class SetPropAddressStatusCommand {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
-
 	
-	public Long getCommunityId() {
-		return communityId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

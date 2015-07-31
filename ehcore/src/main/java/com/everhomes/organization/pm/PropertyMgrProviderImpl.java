@@ -31,7 +31,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationCommunityDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
@@ -1269,5 +1268,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			}).toArray();
 		}
 		return list;
+	}
+
+	@Override
+	public void updateOrganizationAddressMapping(CommunityAddressMapping mapping) {
+		assert(mapping.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.update(mapping);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, mapping.getId());
+		
 	}
 }

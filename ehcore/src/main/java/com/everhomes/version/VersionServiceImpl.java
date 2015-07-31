@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -17,6 +19,9 @@ public class VersionServiceImpl implements VersionService {
     
     @Autowired
     private VersionProvider versionProvider;
+    
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     
     @Override
     public UpgradeInfoResponse getUpgradeInfo(VersionRequestCommand cmd) {
@@ -103,7 +108,7 @@ public class VersionServiceImpl implements VersionService {
         params.put("major", String.valueOf(version.getMajor()));
         params.put("minor", String.valueOf(version.getMinor()));
         params.put("revision", String.valueOf(version.getRevision()));
-        
+        params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, "http://localhost:8080/"));
         response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
         return response;
