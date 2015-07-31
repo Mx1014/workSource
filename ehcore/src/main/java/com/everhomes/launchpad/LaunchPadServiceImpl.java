@@ -244,7 +244,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 else if(launchPadItem.getActionType() == ActionType.THIRDPART_URL.getCode()){
                     Community community = communityProvider.findCommunityById(communityId);
                     long cityId = community == null ? 0 : community.getCityId();
-                    jsonObject.put(LaunchPadConstants.TOKEN, userToken);
                     String url = (String) jsonObject.get(LaunchPadConstants.URL);
                     //处理收集地址url
                     if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
@@ -265,7 +264,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //            if(jsonObject != null)
 //                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
         }catch(Exception e){
-            LOGGER.error("Parser json is error,userToken=" + userToken + ",communityId=" + communityId,e.getMessage());
+            LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
         }
         
         return jsonObject.toJSONString();

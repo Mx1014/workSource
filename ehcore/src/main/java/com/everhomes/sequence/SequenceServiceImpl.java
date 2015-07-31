@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.qrcode.QRCode;
 import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.schema.tables.pojos.EhContentShardMap;
 import com.everhomes.schema.tables.pojos.EhServerShardMap;
@@ -19,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
+import com.everhomes.server.schema.tables.pojos.EhCooperationRequests;
 import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -39,6 +39,10 @@ import com.everhomes.server.schema.tables.pojos.EhUserLikes;
 import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
+import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
+import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
+import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -175,6 +179,26 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhQrcodes.class, Tables.EH_QRCODES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_QRCODES.ID.max()).from(Tables.EH_QRCODES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhVersionRealm.class, Tables.EH_VERSION_REALM.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_VERSION_REALM.ID.max()).from(Tables.EH_VERSION_REALM).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhVersionUpgradeRules.class, Tables.EH_VERSION_UPGRADE_RULES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_VERSION_UPGRADE_RULES.ID.max()).from(Tables.EH_VERSION_UPGRADE_RULES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhVersionUrls.class, Tables.EH_VERSION_URLS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_VERSION_URLS.ID.max()).from(Tables.EH_VERSION_URLS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhVersionedContent.class, Tables.EH_VERSIONED_CONTENT.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_VERSIONED_CONTENT.ID.max()).from(Tables.EH_VERSIONED_CONTENT).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhCooperationRequests.class, Tables.EH_COOPERATION_REQUESTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_COOPERATION_REQUESTS.ID.max()).from(Tables.EH_COOPERATION_REQUESTS).fetchOne().value1(); 
         });
     }
     

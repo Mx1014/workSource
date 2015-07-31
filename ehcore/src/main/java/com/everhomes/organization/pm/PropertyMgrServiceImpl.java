@@ -513,59 +513,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 
-	@Override
-	public void assignPMTopics(AssginPmTopicCommand cmd) {
-		User user = UserContext.current().getUser();
-		long userId = user.getId();
-		if(cmd.getTopicId() == null || cmd.getTopicId() == 0)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid topicIds paramter.");
-		if(cmd.getCommunityId() == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid communityId paramter.");
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		long communityId = cmd.getCommunityId();
-
-		List<CommunityPmMember> pmMemberList = this.propertyMgrProvider.findPmMemberByCommunityAndTarget(communityId, 
-				PmMemberTargetType.USER.getCode(), cmd.getUserId());
-		if(pmMemberList == null || pmMemberList.isEmpty()){
-			LOGGER.error("User is not the community pm member.userId=" + cmd.getUserId()+",communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid userId paramter,user is not the community pm member.");
-		}
-
-		long topicId = cmd.getTopicId();
-
-		Post topic = this.forumProvider.findPostById(topicId);
-		if(topic == null){
-			LOGGER.error("Unable to find the topic.topicId=" + topicId+",communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TOPIC, 
-					"Unable to find the topic.");
-		}
-
-		CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(communityId, topicId, 
-				EntityType.TOPIC.getCode());
-		if(task == null){
-			LOGGER.error("Unable to find the topic task.topicId=" + topicId +",communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK, 
-					"Unable to find the topic task.");
-		}
-
-		dbProvider.execute((status) -> {
-			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
-			this.propertyMgrProvider.updatePmTask(task);
-
-			//发送评论
-			sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
-			//发送短信
-			sendMSMToUser(topicId,cmd.getUserId(),topic.getCreatorUid(),topic.getCategoryId());
-
-			return null;
-		});
-
-
-	}
 
 	@Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
 	private void sendComment(long topicId, long forumId, long userId, long category) {
@@ -610,52 +557,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if (!StringUtils.isEmpty(template)) {
 			this.smsProvider.sendSms(cellPhone, template);
 		}
-	}
-
-
-	@Override
-	public void setPMTopicStatus(SetPmTopicStatusCommand cmd){
-		User user  = UserContext.current().getUser();
-		long userId = user.getId();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制--admin角色
-		if(cmd.getTopicId() == null || cmd.getStatus() == null ){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid topicIds or status  paramter.");
-		}
-		if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK_STATUS, 
-					"Invalid topic task status  paramter. please assign task");
-		}
-		long topicId = cmd.getTopicId();
-		Post topic = this.forumProvider.findPostById(topicId);
-		if(topic == null){ 
-			LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
-		}
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		CommunityPmTasks task = this.propertyMgrProvider.findPmTaskByEntityId(cmd.getCommunityId(), 
-				topicId, EntityType.TOPIC.getCode());
-		if(task == null){
-			LOGGER.error("Pm task is not found.topicId=" + topicId + ",userId=" + userId);
-		}
-		task.setTaskStatus(cmd.getStatus());
-		this.propertyMgrProvider.updatePmTask(task);
-		if(cmd.getStatus() == OrganizationTaskStatus.PROCESSED.getCode()){
-			//发送评论
-			sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
-		}
-
 	}
 
 	@Override
@@ -951,25 +852,26 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public void setApartmentStatus(SetPropAddressStatusCommand cmd) {
 		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
+		if(cmd.getOrganizationId() == null || cmd.getAddressId() == null || cmd.getStatus() == null){
+			LOGGER.error("propterty organizationId or addressId or status paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
+					"propterty organizationId or addressId or status paramter can not be null or empty");
 		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
+		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(organization == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
 		}
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(cmd.getCommunityId(), cmd.getAddressId());
-		if(mapping != null)
-		{
-			mapping.setLivingStatus(cmd.getStatus());
-			propertyMgrProvider.updatePropAddressMapping(mapping);
+
+		CommunityAddressMapping mapping = propertyMgrProvider.findOrganiztionAddressMappingByAddressId(cmd.getOrganizationId(), cmd.getAddressId());
+		if(mapping == null){
+			LOGGER.error("address is not find.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"address is not find.");
 		}
+		mapping.setLivingStatus(cmd.getStatus());
+		propertyMgrProvider.updateOrganizationAddressMapping(mapping);
 
 	}
 

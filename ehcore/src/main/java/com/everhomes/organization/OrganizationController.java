@@ -25,9 +25,6 @@ import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.QueryOrganizationTopicCommand;
-import com.everhomes.organization.pm.ListPropMemberCommandResponse;
-import com.everhomes.organization.pm.ListPropPostCommandResponse;
-import com.everhomes.organization.pm.QueryPropTopicByCategoryCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
@@ -219,53 +216,6 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /org/getOrgTopic</b>
-	 * <p>获取指定论坛里的指定帖子内容</p>
-	 */
-	@RequestMapping("getOrgTopic")
-	@RestReturn(value=PostDTO.class)
-	public RestResponse getOrgTopic(GetTopicCommand cmd) {
-		PostDTO postDto = organizationService.getTopic(cmd);
-
-		RestResponse response = new RestResponse(postDto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /org/likeOrgTopic</b>
-	 * <p>对指定论坛里的指定帖子点赞</p>
-	 * @return 点赞的结果
-	 */
-	@RequestMapping("likeOrgTopic")
-	@RestReturn(value=String.class)
-	public RestResponse likeOrgTopic(LikeTopicCommand cmd) {
-		organizationService.likeTopic(cmd);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /org/cancelLikeOrgTopic</b>
-	 * <p>对指定论坛里的指定帖子取消赞</p>
-	 * @return 取消赞的结果
-	 */
-	@RequestMapping("cancelLikeOrgTopic")
-	@RestReturn(value=String.class)
-	public RestResponse cancelLikeOrgTopic(CancelLikeTopicCommand cmd) {
-		organizationService.cancelLikeTopic(cmd);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /org/deleteOrgTopic</b>
 	 * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
 	 * @return 删除结果
@@ -328,36 +278,6 @@ public class OrganizationController extends ControllerBase {
 	//        response.setErrorDescription("OK");
 	//        return response;
 	//    }
-
-	/**
-	 * <b>URL: /org/listOrgTopicComments</b>
-	 * <p>获取指定论坛里指定帖子下的评论列表</p>
-	 */
-	@RequestMapping("listOrgTopicComments")
-	@RestReturn(value=PostDTO.class, collection=true)
-	public RestResponse listOrgTopicComments(@Valid ListTopicCommentCommand cmd) {
-		ListPostCommandResponse cmdResponse = organizationService.listTopicComments(cmd);
-
-		RestResponse response = new RestResponse(cmdResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /org/newOrgComment</b>
-	 * <p>创建新评论</p>
-	 */
-	@RequestMapping("newOrgComment")
-	@RestReturn(value=PostDTO.class)
-	public RestResponse newOrgComment(@Valid NewCommentCommand cmd) {
-		PostDTO postDTO = organizationService.createComment(cmd);
-
-		RestResponse response = new RestResponse(postDTO);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 
 	/**
 	 * <b>URL: /org/deleteOrgComment</b>
@@ -552,8 +472,169 @@ public class OrganizationController extends ControllerBase {
 		return response;
 	}
 	
+	//move from pm to organization
 	
+	//1. 根据topicId获取贴详情
+	//pm 也有 ： getPmTopic
+	/**
+	 * <b>URL: /org/getOrgTopic</b>
+	 * <p>获取指定论坛里的指定帖子内容</p>
+	 */
+	@RequestMapping("getOrgTopic")
+	@RestReturn(value=PostDTO.class)
+	public RestResponse getOrgTopic(GetTopicCommand cmd) {
+		PostDTO postDto = organizationService.getTopic(cmd);
 
+		RestResponse response = new RestResponse(postDto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	//2. 获取贴评论列表
+	//pm listPmTopicComments
+	/**
+	 * <b>URL: /org/listOrgTopicComments</b>
+	 * <p>获取指定论坛里指定帖子下的评论列表</p>
+	 */
+	@RequestMapping("listOrgTopicComments")
+	@RestReturn(value=PostDTO.class, collection=true)
+	public RestResponse listOrgTopicComments(@Valid ListTopicCommentCommand cmd) {
+		ListPostCommandResponse cmdResponse = organizationService.listTopicComments(cmd);
+		
+		RestResponse response = new RestResponse(cmdResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	//3. 发表评论
+	//pm newPmComment
+	/**
+	 * <b>URL: /org/newOrgComment</b>
+	 * <p>创建新评论</p>
+	 */
+	@RequestMapping("newOrgComment")
+	@RestReturn(value=PostDTO.class)
+	public RestResponse newOrgComment(@Valid NewCommentCommand cmd) {
+		PostDTO postDTO = organizationService.createComment(cmd);
 
+		RestResponse response = new RestResponse(postDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	 
+	//4. 赞
+	//likeOrgTopic is exist in organizationController,PropertyMgrController is likePmTopic and it same to likeOrgTopic of its comments.
+	/**
+	 * <b>URL: /org/likeOrgTopic</b>
+	 * <p>对指定论坛里的指定帖子点赞</p>
+	 * @return 点赞的结果
+	 */
+	@RequestMapping("likeOrgTopic")
+	@RestReturn(value=String.class)
+	public RestResponse likeOrgTopic(LikeTopicCommand cmd) {
+		organizationService.likeTopic(cmd);
 
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	//5. 取消赞
+	//cancelLikeOrgTopic is exist in organizationController.it is also in PropertyMgrController,name cancelLikePmTopic.
+	/**
+	 * <b>URL: /org/cancelLikeOrgTopic</b>
+	 * <p>对指定论坛里的指定帖子取消赞</p>
+	 * @return 取消赞的结果
+	 */
+	@RequestMapping("cancelLikeOrgTopic")
+	@RestReturn(value=String.class)
+	public RestResponse cancelLikeOrgTopic(CancelLikeTopicCommand cmd) {
+		organizationService.cancelLikeTopic(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	//6. 拉报修贴列表
+	/**
+	 * <b>URL: /org/listTopicsByType</b>
+	 * <p>查询指定帖子类型的帖子列表</p>
+	 */
+	@RequestMapping("listTopicsByType")
+	@RestReturn(value=String.class)
+	public RestResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
+		ListTopicsByTypeCommandResponse result= organizationService.listTopicsByType(cmd);//forumService.getTopic(cmd)
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	//7. 报修贴分配人员
+	/**
+	 * <b>URL: /org/assignOrgTopic</b>
+	 * <p>指派帖子给相关人员处理</p>
+	 */
+	@RequestMapping("assignOrgTopic")
+	@RestReturn(value=String.class)
+	public RestResponse assignOrgTopic(@Valid AssginOrgTopicCommand cmd) {
+		organizationService.assignOrgTopic(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	//8. 报修贴修改状态
+	/**
+	 * <b>URL: /org/setOrgTopicStatus</b>
+	 * <p>设置帖状态：未处理、处理中、已处理、其它</p>
+	 */
+	@RequestMapping("setOrgTopicStatus")
+	@RestReturn(value=String.class)
+	public RestResponse setOrgTopicStatus(@Valid SetOrgTopicStatusCommand cmd) {
+		organizationService.setOrgTopicStatus(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	//9. 人员管理通过管理员
+	/**
+	 * <b>URL: /org/approveOrganizationMember</b>
+	 * <p>批准成员成为组织管理员</p>
+	 */
+	@RequestMapping("approveOrganizationMember")
+	@RestReturn(value=String.class)
+	public RestResponse approveOrganizationMember(@Valid OrganizationMemberCommand cmd) {
+		organizationService.approveOrganizationMember(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	//10. 人员管理驳回管理员
+	/**
+	 * <b>URL: /org/rejectOrganizationMember</b>
+	 * <p>拒绝成员成为组织成员</p>
+	 */
+	@RequestMapping("rejectOrganizationMember")
+	@RestReturn(value=String.class)
+	public RestResponse rejectOrganizationMember(@Valid OrganizationMemberCommand cmd) {
+		organizationService.rejectOrganizationMember(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

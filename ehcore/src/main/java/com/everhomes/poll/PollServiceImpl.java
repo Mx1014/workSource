@@ -215,7 +215,7 @@ public class PollServiceImpl implements PollService {
     }
     
    private ProcessStatus getStatus(Poll poll){
-      return StatusChecker.getProcessStatus(poll.getStartTimeMs(), poll.getStartTimeMs());
+      return StatusChecker.getProcessStatus(poll.getStartTimeMs(), poll.getEndTimeMs());
    }
 
     @Override
