@@ -836,6 +836,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
 				.where(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId)
 						.and(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE.eq(topicType)))
+						.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
+						.limit(pageSize).offset((int)offset)
 						.fetch();
 		if(records != null && !records.isEmpty()){
 			for(Record r : records){
@@ -870,5 +872,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				list.add(ConvertHelper.convert(r, OrganizationMember.class));
 		}
 		return list;
+	}
+
+
+	@Override
+	public Organization findOrganizationByName(String name) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
 	}
 }

@@ -637,4 +637,21 @@ public class OrganizationController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /org/userJoinOrganization</b>
+	 * <p>用户加入组织，若组织不存在，则创建</p>
+	 */
+	@RequestMapping("userJoinOrganization")
+	@RestReturn(value=String.class)
+	public RestResponse userJoinOrganization(@Valid UserJoinOrganizationCommand cmd){
+		this.organizationService.userJoinOrganization(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
+	
 }
