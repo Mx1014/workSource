@@ -22,6 +22,8 @@ import com.everhomes.util.StringHelper;
  * <li>actionData: 根据actionType不同的取值决定，json格式的字符串，跳圈，或直接进入帖子等等</li>
  * <li>startTime: banner开始时间</li>
  * <li>endTime: banner结束时间</li>
+ * <li>status: 状态，参考{@link com.everhomes.banner.BannerStatus}</li>
+ * <li>order: banner顺序</li>
  * </ul>
  */
 public class CreateBannerAdminCommand {
