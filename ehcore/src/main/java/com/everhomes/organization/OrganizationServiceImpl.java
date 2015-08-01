@@ -603,7 +603,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
-	private void sendComment(long topicId, long forumId, long userId, long category) {
+	private void sendComment(long topicId, long forumId, long orgId, long userId, long category) {
+		
 		Post comment = new Post();
 		comment.setParentPostId(topicId);
 		comment.setForumId(forumId);
@@ -612,39 +613,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		comment.setContentType(PostContentType.TEXT.getCode());
 		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
 		if(StringUtils.isEmpty(template)){
-			template = "该物业已在处理";
+			OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+			if(orgMember == null)
+				return ;
+			template = "该问题已指定"+orgMember.getContactName()+"来处理。电话是"+orgMember.getContactToken()+"，业主也可以电话和维修员直接联系。";
 		}
 		if (!StringUtils.isEmpty(template)) {
 			comment.setContent(template);
 			forumProvider.createPost(comment);
 		}
 
-	}
-
-	/**
-	 * 
-	 * @param topicId
-	 * @param userId 维修人员id
-	 * @param owerId 业主id
-	 * @param category 分类
-	 */
-	private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
-		//给维修人员发送短信是否显示业主地址
-		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
-		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
-		userList.stream().filter((u) -> {
-			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
-				return false;
-			return true;
-		});
-		if(userList == null || userList.isEmpty()) return ;
-		String cellPhone = userList.get(0).getIdentifierToken();
-		if(StringUtils.isEmpty(template)){
-			template = "该物业已在处理";
-		}
-		if (!StringUtils.isEmpty(template)) {
-			this.smsProvider.sendSms(cellPhone, template);
-		}
 	}
 
 	@Override
@@ -1251,6 +1229,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(orgTaskList != null && !orgTaskList.isEmpty()){
 			if(orgTaskList.size() == pageSize+1){
 				response.setNextPageOffset(cmd.getPageOffset()+1);
+				orgTaskList.remove(orgTaskList.size()-1);
 			}
 			for(OrganizationTask task : orgTaskList){
 				Post topic = this.forumProvider.findPostById(task.getApplyEntityId());
@@ -1305,13 +1284,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
+			task.setOperatorUid(desOrgMember.getTargetId());;
 			this.organizationProvider.updateOrganizationTask(task);
 			//发送评论
-			sendComment(cmd.getTopicId(),topic.getForumId(),user.getId(),topic.getCategoryId());
-			//发送短信
-			sendMSMToUser(cmd.getTopicId(),cmd.getUserId(),topic.getCreatorUid(),topic.getCategoryId());
+			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),user.getId(),topic.getCategoryId());
+			//给分配的处理人员发任务分配短信
+			String message1 = "业主"+topic.getCreatorNickName()+"提交了请求，他/她的地址为"+""+"，请速与他/她联系";
+			sendSmToOrgMember(operOrgMember.getContactToken(),message1);
+			//给用户发请求正在处理短信
+			/*String message2 = "您的请求组织已分配人员处理";
+			sendMSMToUser(cmd.getUserId(),message2);*/
 			return null;
 		});
+	}
+
+	private void sendSmToOrgMember(String cellPhone, String message) {
+		if(cellPhone != null && !cellPhone.isEmpty()){
+			this.smsProvider.sendSms(cellPhone, message);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param topicId
+	 * @param userId 维修人员id
+	 * @param owerId 业主id
+	 */
+	private void sendMSMToUser(long userId, String message) {
+		//给求助用户发消息，组织正在处理
+		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
+		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
+		userList.stream().filter((u) -> {
+			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
+				return false;
+			return true;
+		});
+		if(userList == null || userList.isEmpty()) return ;
+		String cellPhone = userList.get(0).getIdentifierToken();
+		if(StringUtils.isEmpty(template)){
+			template = "该物业已在处理";
+		}
+		if (!StringUtils.isEmpty(cellPhone) && !StringUtils.isEmpty(template)) {
+			this.smsProvider.sendSms(cellPhone, template);
+		}
 	}
 
 	@Override
@@ -1348,13 +1364,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Task is not found.");
 		}
+		if(OrganizationTaskStatus.fromCode(cmd.getStatus()) == null){
+			LOGGER.error("status is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"status is wrong.");
+		}
 
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(cmd.getStatus());
 			this.organizationProvider.updateOrganizationTask(task);
 			if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论
-				sendComment(topicId,topic.getForumId(),userId,topic.getCategoryId());
+				sendComment(topicId,topic.getForumId(),organization.getId(),userId,topic.getCategoryId());
 			}
 			return status;
 		});
