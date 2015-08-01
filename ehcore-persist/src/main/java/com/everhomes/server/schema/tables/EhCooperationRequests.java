@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCooperationRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCooperationRequestsRecord> {
 
-	private static final long serialVersionUID = -63785741;
+	private static final long serialVersionUID = -180128344;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_cooperation_requests</code>
@@ -32,9 +32,9 @@ public class EhCooperationRequests extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCooperationRequestsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_cooperation_requests.realm_id</code>.
+	 * The column <code>ehcore.eh_cooperation_requests.cooperation_type</code>. coperation type, NONE, BIZ, PARK, PM, GA
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCooperationRequestsRecord, java.lang.Long> REALM_ID = createField("realm_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCooperationRequestsRecord, java.lang.String> COOPERATION_TYPE = createField("cooperation_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "coperation type, NONE, BIZ, PARK, PM, GA");
 
 	/**
 	 * The column <code>ehcore.eh_cooperation_requests.province_name</code>. province
@@ -116,6 +116,14 @@ public class EhCooperationRequests extends org.jooq.impl.TableImpl<com.everhomes
 
 	private EhCooperationRequests(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhCooperationRequestsRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhCooperationRequestsRecord, java.lang.Long> getIdentity() {
+		return com.everhomes.server.schema.Keys.IDENTITY_EH_COOPERATION_REQUESTS;
 	}
 
 	/**

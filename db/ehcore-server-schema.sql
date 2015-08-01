@@ -2417,8 +2417,8 @@ CREATE TABLE `eh_versioned_content` (
 
 DROP TABLE IF EXISTS `eh_cooperation_requests`;
 CREATE TABLE `eh_cooperation_requests` (
-	`id` BIGINT NOT NULL,
-    `realm_id` BIGINT NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`cooperation_type` VARCHAR(64) NOT NULL COMMENT 'coperation type, NONE, BIZ, PARK, PM, GA',
 	`province_name` VARCHAR(64) COMMENT 'province',
 	`city_name` VARCHAR(64) COMMENT 'city',
 	`area_name` VARCHAR(64) COMMENT 'area',
@@ -2433,6 +2433,5 @@ CREATE TABLE `eh_cooperation_requests` (
 	`applicant_email` VARCHAR(128) COMMENT 'the email address of applicant',
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 
 SET foreign_key_checks = 1;
