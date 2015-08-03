@@ -1368,7 +1368,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			task.setOperatorUid(desOrgMember.getTargetId());;
 			this.organizationProvider.updateOrganizationTask(task);
 			//发送评论
-			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),user.getId(),topic.getCategoryId());
+			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),desOrgMember.getTargetId(),topic.getCategoryId());
 			//给分配的处理人员发任务分配短信
 			sendSmToOrgMemberForAssignOrgTopic(organization,operOrgMember,desOrgMember,task);
 			return status;
@@ -1449,10 +1449,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(cmd.getStatus());
 			this.organizationProvider.updateOrganizationTask(task);
-			if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
+			/*if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论
 				sendComment(topicId,topic.getForumId(),organization.getId(),userId,topic.getCategoryId());
-			}
+			}*/
 			return status;
 		});
 	}
