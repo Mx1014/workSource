@@ -37,6 +37,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.StringHelper;
 
 /**
  * <p>用户推荐</p>
@@ -70,7 +71,46 @@ public class RecommendationController extends ControllerBase{
     @Autowired
     GroupSearcher searcher;
    
-    
+    @RequestMapping("recommendBanners")
+    @RestReturn(RecommendBannerListResponse.class)
+    public RestResponse getRecommendBanners(HttpServletResponse response
+            , HttpServletRequest request) {
+        Long userId = UserContext.current().getUser().getId();
+        UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendBannerName);
+        long ageSec = 30;
+      
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        if(profile == null || null == profile.getItemValue()) {
+            return res;
+            }
+        String s = profile.getItemValue();
+        long lastModify = Long.parseLong(s);
+        if(EtagHelper.checkHeaderCache(ageSec, lastModify, request, response)) {
+            RecommendBannerListResponse recommendBanners = new RecommendBannerListResponse();
+            List<Recommendation> recommends = recommendationService.getRecommendsByUserId(userId
+                    , RecommendSourceType.BANNER.getCode().intValue()
+                    , PaginationConfigHelper.getPageSize(configProvider, null));
+            for(Recommendation rec : recommends) {
+                if(rec.getEmbeddedJson() == null) {
+                    continue;
+                    }
+                RecommendBannerInfo bannerInfo = (RecommendBannerInfo)StringHelper.fromJsonString(rec.getEmbeddedJson(), RecommendBannerInfo.class);
+                if(null == bannerInfo) {
+                    continue;
+                    }
+                bannerInfo.setId(rec.getSourceId());
+                bannerInfo.setCreateTime(rec.getCreateTime());
+                recommendBanners.getBanners().add(bannerInfo);
+            }
+            
+            res.setResponseObject(recommendBanners);
+        }
+        
+        return res;
+    }
     /**
      * <b>URL: /recommend/recommendUsers</b>
      * <p>获取推荐的用户</p>
@@ -155,37 +195,43 @@ public class RecommendationController extends ControllerBase{
   
   @RequestMapping("testAddUser")
   @RestReturn(String.class)
-  public RestResponse testAddUser(@RequestParam(value="userId")Long userId, @RequestParam(value="sourceId")Long sourceId) {
-//      Recommendation r = new Recommendation();
-//      r.setAppid(0l);
-//      r.setCreateTime(new Timestamp(System.currentTimeMillis()));
-//      r.setExpireTime(new Timestamp(System.currentTimeMillis()+1000));
-//      r.setMaxCount(1);
-//      r.setScore(1.0);
-//      r.setSourceId(sourceId);
-//      r.setSourceType(RecommendSourceType.USER.getCode().intValue());
-//      r.setStatus(RecommendStatus.OK.getCode());
-//      r.setSuggestType(RecommendSourceType.USER.getCode().intValue());
-//      r.setUserId(userId);
-//      recommendationProvider.createRecommendation(r);
-//      
-      //UserInfo user = userService.getUserInfo(userId);
-//      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendName);
-//      if(null != profile) {
-//          profile.setItemValue(Long.toString(System.currentTimeMillis()));
-//          userActivityProvider.updateUserProfile(profile);
-//      } else {
-//          UserProfile p2 = new UserProfile();
-//          p2.setItemName(UserProfileContstant.RecommendName);
-//          p2.setItemKind((byte)0);
-//          p2.setItemValue(Long.toString(System.currentTimeMillis()));
-//          p2.setOwnerId(userId);
-//          userActivityProvider.addUserProfile(p2);
-//          }
+  public RestResponse testAddUser(@RequestParam(value="sourceId")Long sourceId) {
+      Long userId = UserContext.current().getUser().getId();
+      Recommendation r = new Recommendation();
+      r.setAppid(0l);
+      r.setCreateTime(new Timestamp(System.currentTimeMillis()));
+      r.setExpireTime(new Timestamp(System.currentTimeMillis()+1000));
+      r.setMaxCount(1);
+      r.setScore(1.0);
+      r.setSourceId(sourceId);
+      r.setSourceType(RecommendSourceType.BANNER.getCode().intValue());
+      r.setStatus(RecommendStatus.OK.getCode());
+      r.setSuggestType(RecommendSourceType.BANNER.getCode().intValue());
+      r.setUserId(userId);
+      RecommendBannerInfo banner = new RecommendBannerInfo();
+      banner.setPosterUrl("http://www.zuolin.com/posturl/xxx");
+      banner.setRedirectUrl("http://www.zuolin.com/redirecturl/xxx");
+      banner.setDescription("description");
+      r.setEmbeddedJson(StringHelper.toJsonString(banner));
+      recommendationProvider.createRecommendation(r);
+      
+      UserInfo user = userService.getUserInfo(userId);
+      UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.RecommendBannerName);
+      if(null != profile) {
+          profile.setItemValue(Long.toString(System.currentTimeMillis()));
+          userActivityProvider.updateUserProfile(profile);
+      } else {
+          UserProfile p2 = new UserProfile();
+          p2.setItemName(UserProfileContstant.RecommendBannerName);
+          p2.setItemKind((byte)0);
+          p2.setItemValue(Long.toString(System.currentTimeMillis()));
+          p2.setOwnerId(userId);
+          userActivityProvider.addUserProfile(p2);
+          }
       
       //recommendationService.communityNotify(4l, 6l, 7l);
       //searcher.syncDb();
-      searcher.syncFromDb();
+      //searcher.syncFromDb();
       
       
       RestResponse res = new RestResponse();
