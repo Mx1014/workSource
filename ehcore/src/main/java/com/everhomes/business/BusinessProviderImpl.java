@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.InsertQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ import com.everhomes.server.schema.tables.daos.EhBusinessVisibleScopesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessesDao;
 import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
 import com.everhomes.server.schema.tables.pojos.EhBusinesses;
+import com.everhomes.server.schema.tables.records.EhBusinessesRecord;
 import com.everhomes.util.ConvertHelper;
 
 
@@ -34,9 +36,12 @@ public class BusinessProviderImpl implements BusinessProvider {
     @Override
     public void createBusiness(Business business) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        EhBusinessesDao dao = new EhBusinessesDao(context.configuration()); 
-        dao.insert(business); 
+        EhBusinessesRecord record = ConvertHelper.convert(business, EhBusinessesRecord.class);
+        InsertQuery<EhBusinessesRecord> query = context.insertQuery(Tables.EH_BUSINESSES);
+        query.setRecord(record);
+        query.setReturning(Tables.EH_BUSINESSES.ID);
+        query.execute();
+        business.setId(query.getReturnedRecord().getId());
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinesses.class, null); 
         
     }
@@ -211,6 +216,25 @@ public class BusinessProviderImpl implements BusinessProvider {
 
         EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
         return ConvertHelper.convert(dao.findById(id),BusinessCategory.class);
+    }
+    
+    @Override
+    public void deleteBusinessVisibleScopeByBusinessId(long businessId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        context.delete(Tables.EH_BUSINESS_VISIBLE_SCOPES).where(Tables.EH_BUSINESS_VISIBLE_SCOPES.OWNER_ID.eq(businessId)).execute();
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
+    }
+    
+    @Override
+    public void deleteBusinessCategoryByBusinessId(long businessId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        context.delete(Tables.EH_BUSINESS_CATEGORIES).where(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID.eq(businessId)).execute();
+      
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
+        
     }
 
 

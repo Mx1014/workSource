@@ -14,7 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>bizOwnerUid: 商家拥有者id</li>
  * <li>name: 商家名字</li>
  * <li>displayName: 商家显示名</li>
- * <li>logoUri: 商家logo/li>
+ * <li>logoUri: 商家logo uri</li>
+ * <li>logoUrl: 商家logo url</li>
  * <li>url: 访问商家信息的url</li>
  * <li>contact: 商家拥有者名字</li>
  * <li>phone: 商家所有在联系方式</li>
@@ -38,6 +39,7 @@ public class BusinessDTO{
     private String   name;
     private String   displayName;
     private String   logoUri;
+    private String   logoUrl;
     private String   url;
     private String   contact;
     private String phone;
@@ -107,6 +109,14 @@ public class BusinessDTO{
 
     public void setLogoUri(String logoUri) {
         this.logoUri = logoUri;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
     public String getUrl() {

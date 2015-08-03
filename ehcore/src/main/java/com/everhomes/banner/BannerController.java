@@ -41,7 +41,7 @@ public class BannerController extends ControllerBase {
     @RestReturn(value=BannerDTO.class,collection=true)
     public RestResponse getBanners(@Valid GetBannersCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
-        List<BannerDTO> result = bannerService.getBanners(cmd);
+        List<BannerDTO> result = bannerService.getBanners(cmd,request);
         RestResponse resp =  new RestResponse();
         int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
         if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {

@@ -19,7 +19,9 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -40,12 +42,14 @@ public class BusinessServiceImpl implements BusinessService {
     private DbProvider dbProvider;
     @Autowired
     private CategoryProvider categoryProvider;
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
-        if(cmd.getTargetId() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
-                    "Invalid paramter targetId,targetId is null");
+//        if(cmd.getTargetId() == null)
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+//                    "Invalid paramter targetId,targetId is null");
         if(cmd.getBizOwnerUid() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter ownerUid,ownerUid is null");
@@ -63,6 +67,7 @@ public class BusinessServiceImpl implements BusinessService {
         
         Business business = ConvertHelper.convert(cmd, Business.class);
         business.setCreatorUid(userId);
+        business.setDescription(cmd.getDescription() == null ? "" : cmd.getDescription());
         business.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         if(cmd.getLatitude() != null && cmd.getLongitude() != null){
             String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
@@ -72,10 +77,18 @@ public class BusinessServiceImpl implements BusinessService {
         this.dbProvider.execute((TransactionStatus status) -> {
             this.businessProvider.createBusiness(business);
             cmd.getScopes().forEach(r ->{
-                this.businessProvider.createBusinessVisibleScope(ConvertHelper.convert(r,BusinessVisibleScope.class));
+                BusinessVisibleScope scope = ConvertHelper.convert(r,BusinessVisibleScope.class);
+                scope.setOwnerId(business.getId());
+                this.businessProvider.createBusinessVisibleScope(scope);
             });
             cmd.getCategroies().forEach(r ->{
-                this.businessProvider.createBusinessCategory(ConvertHelper.convert(r, BusinessCategory.class));
+                BusinessCategory category = new BusinessCategory();
+                category.setCategoryId(r.longValue());
+                category.setOwnerId(business.getId());
+                Category c = categoryProvider.findCategoryById(r.longValue());
+                if(c != null)
+                    category.setCategoryPath(c.getPath());
+                this.businessProvider.createBusinessCategory(category);
             });
             return null;
         });
@@ -89,6 +102,8 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter categoryId,categoryId is null");
         }
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId());
         if(busineseCategories == null || busineseCategories.isEmpty())
             return null;
@@ -107,9 +122,22 @@ public class BusinessServiceImpl implements BusinessService {
             List<CategoryDTO> categories = new ArrayList<>();
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
+            dto.setLogoUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
             dtos.add(dto);
         });
         return dtos;
+    }
+    
+    private String parserUri(String uri,String ownerType, long ownerId){
+        try {
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+                return contentServerService.parserUri(uri,ownerType,ownerId);
+            
+        } catch (Exception e) {
+            LOGGER.error("Parser uri is error." + e.getMessage());
+        }
+        return null;
+
     }
 
     @Override
@@ -154,18 +182,28 @@ public class BusinessServiceImpl implements BusinessService {
             
         }
         this.dbProvider.execute((TransactionStatus status) -> {
-            this.businessProvider.createBusiness(business);
-            if(cmd.getScopes() != null){
+            this.businessProvider.updateBusiness(business);
+            if(cmd.getScopes() != null && !cmd.getScopes().isEmpty()){
+                this.businessProvider.deleteBusinessVisibleScopeByBusinessId(business.getId());
                 cmd.getScopes().forEach(r ->{
-                    this.businessProvider.createBusinessVisibleScope(ConvertHelper.convert(r,BusinessVisibleScope.class));
+                    BusinessVisibleScope scope = ConvertHelper.convert(r,BusinessVisibleScope.class);
+                    scope.setOwnerId(business.getId());
+                    this.businessProvider.createBusinessVisibleScope(scope);
                 });
             }
-            if(cmd.getCategroies() != null){
+            if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
+                this.businessProvider.deleteBusinessCategoryByBusinessId(business.getId());
                 cmd.getCategroies().forEach(r ->{
-                    this.businessProvider.createBusinessCategory(ConvertHelper.convert(r, BusinessCategory.class));
+                    BusinessCategory category = new BusinessCategory();
+                    category.setCategoryId(r.longValue());
+                    category.setOwnerId(business.getId());
+                    Category c = categoryProvider.findCategoryById(r.longValue());
+                    if(c != null)
+                        category.setCategoryPath(c.getPath());
+                    this.businessProvider.createBusinessCategory(category);
                 });
             }
-            
+           
             return null;
         });
     }
