@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -30,13 +32,17 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.ActionType;
 import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.organization.pm.PropCommunityContactDTO;
+import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.WebTokenGenerator;
 
 
 
@@ -54,8 +60,12 @@ public class BannerServiceImpl implements BannerService {
     private ContentServerService contentServerService;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    @Autowired
+    private OrganizationService organizationService;
+    @Autowired
+    private PropertyMgrService propertyMgrService;
     @Override
-    public List<BannerDTO> getBanners(GetBannersCommand cmd){
+    public List<BannerDTO> getBanners(GetBannersCommand cmd,HttpServletRequest request){
         if(cmd.getCommunityId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
@@ -71,7 +81,7 @@ public class BannerServiceImpl implements BannerService {
         long cityId = community.getCityId();
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+        //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),
                 BannerScopeType.COUNTRY.getCode(), 0L);
@@ -87,9 +97,10 @@ public class BannerServiceImpl implements BannerService {
         List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
            BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
            //third url add user token
-           if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
-               dto.setActionData(parserJson(token,communityId,dto));
-           }
+//           if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
+//               dto.setActionData(parserJson(communityId,dto));
+//           }
+           dto.setActionData(parserJson(userId,communityId,dto,request));
            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
            return dto;
         }).collect(Collectors.toList());
@@ -100,6 +111,91 @@ public class BannerServiceImpl implements BannerService {
         LOGGER.info("Query banner by communityId complete,communityId=" + communityId + ",size=" + size + ",esplse=" + (endTime - startTime));
         return result;
     }
+    
+    @SuppressWarnings("unchecked")
+    private String parserJson(long userId, long communityId,BannerDTO banner, HttpServletRequest request) {
+        JSONObject jsonObject = new JSONObject();
+        try{
+            //use handler instead of??
+            if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
+                jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
+                //处理phoneCall actionData
+                if(banner.getActionType() == ActionType.PHONE_CALL.getCode() &&
+                        banner.getBannerGroup().equals(LaunchPadConstants.GROUP_CALLPHONES)){ 
+                    jsonObject = processPhoneCall(communityId, jsonObject, banner);
+                }
+                else if(banner.getActionType() == ActionType.THIRDPART_URL.getCode()){
+                    Community community = communityProvider.findCommunityById(communityId);
+                    long cityId = community == null ? 0 : community.getCityId();
+                    String url = (String) jsonObject.get(LaunchPadConstants.URL);
+                    //处理收集地址url
+                    if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
+                        url = url + "&userId=" + userId + "&cityId=" + cityId;
+                    }
+                    jsonObject.put(LaunchPadConstants.URL, url);
+                }
+                else if(banner.getActionType() == ActionType.LAUNCH_APP.getCode()){
+                    jsonObject = processLaunchApp(jsonObject,request);
+                }
+                else if(banner.getActionType() == ActionType.POST_BY_CATEGORY.getCode()){
+                    jsonObject = processPostByCategory(communityId,jsonObject,banner);
+                }
+            }
+        }catch(Exception e){
+            LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
+        }
+        
+        return jsonObject.toJSONString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private JSONObject processPhoneCall(long communityId, JSONObject actionDataJson, BannerDTO banner){
+        if(actionDataJson.get(LaunchPadConstants.CALLPHONES) != null ){
+            
+            String location = banner.getBannerLocation();
+            if(location.lastIndexOf("/") == -1)
+                return actionDataJson;
+            String organizationType = location.substring(location.lastIndexOf("/") + 1).toUpperCase();
+            ListPropCommunityContactCommand cmd = new ListPropCommunityContactCommand();
+            cmd.setCommunityId(communityId);
+            cmd.setOrganizationType(organizationType);
+            List<String> contacts = new ArrayList<String>();
+            List<PropCommunityContactDTO> dtos = propertyMgrService.listPropertyCommunityContacts(cmd);
+            if(dtos != null && !dtos.isEmpty()){
+                dtos.forEach(r ->{
+                    if(r.getContactType() == IdentifierType.MOBILE.getCode()){
+                        contacts.add(r.getContactToken());
+                    }
+                });
+            }
+            actionDataJson.put(LaunchPadConstants.CALLPHONES,contacts);
+        }
+        return actionDataJson;
+    }
+    
+    private JSONObject processLaunchApp(JSONObject actionDataJson, HttpServletRequest request){
+        //区分访问平台，根据相应平台返回相应的数据
+        String header = request.getHeader("user-agent");
+        //"androidEmbedded_json":{"package":"mqq:open","download":"www.xx.com"}
+        if(header.contains("Android")){
+            JSONObject androidJson =  (JSONObject) actionDataJson.get(LaunchPadConstants.ANDROID_EMBEDDED);
+            if(androidJson != null)
+                return  androidJson;
+        }else if(header.contains("iOS")){
+            JSONObject iosJson =  (JSONObject)actionDataJson.get(LaunchPadConstants.IOS_EMBEDDED);
+            if(iosJson != null)
+                return iosJson;
+        }
+        return actionDataJson;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private JSONObject processPostByCategory(long communityId, JSONObject actionDataJson,BannerDTO banner) {
+        actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, banner.getName());
+        actionDataJson.put(LaunchPadConstants.COMMUNITY_ID, communityId);
+        return actionDataJson;
+    }
+    
     //sort banner with banner order asc
     private void sortBanner(List<BannerDTO> result){
         Collections.sort(result, new Comparator<BannerDTO>(){
@@ -121,15 +217,15 @@ public class BannerServiceImpl implements BannerService {
 
     }
     
-    private String parserJson(String userToken,long commnunityId,BannerDTO banner) {
-        
-        JSONObject jsonObject = new JSONObject();
-        if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
-            jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
-        }
-        
-        return jsonObject.toString();
-    }
+//    private String parserJson(long commnunityId,BannerDTO banner) {
+//        
+//        JSONObject jsonObject = new JSONObject();
+//        if(banner.getActionData() != null && !banner.getActionData().trim().equals("")){
+//            jsonObject = (JSONObject) JSONValue.parse(banner.getActionData());
+//        }
+//        
+//        return jsonObject.toString();
+//    }
     
     @Override
     public void createBanner(CreateBannerAdminCommand cmd){
