@@ -62,6 +62,13 @@ public class EhFeedbacksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
+	 * Fetch records that have <code>subject IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchBySubject(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFeedbacks.EH_FEEDBACKS.SUBJECT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>content IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFeedbacks> fetchByContent(java.lang.String... values) {
