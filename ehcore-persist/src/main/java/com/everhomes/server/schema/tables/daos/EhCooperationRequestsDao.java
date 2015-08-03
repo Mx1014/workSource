@@ -48,10 +48,10 @@ public class EhCooperationRequestsDao extends org.jooq.impl.DAOImpl<com.everhome
 	}
 
 	/**
-	 * Fetch records that have <code>realm_id IN (values)</code>
+	 * Fetch records that have <code>cooperation_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCooperationRequests> fetchByRealmId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS.REALM_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCooperationRequests> fetchByCooperationType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS.COOPERATION_TYPE, values);
 	}
 
 	/**

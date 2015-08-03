@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCooperationRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 843878832;
+	private static final long serialVersionUID = 2089178990;
 
 	private java.lang.Long   id;
-	private java.lang.Long   realmId;
+	private java.lang.String cooperationType;
 	private java.lang.String provinceName;
 	private java.lang.String cityName;
 	private java.lang.String areaName;
@@ -32,7 +32,7 @@ public class EhCooperationRequests implements java.io.Serializable {
 
 	public EhCooperationRequests(
 		java.lang.Long   id,
-		java.lang.Long   realmId,
+		java.lang.String cooperationType,
 		java.lang.String provinceName,
 		java.lang.String cityName,
 		java.lang.String areaName,
@@ -47,7 +47,7 @@ public class EhCooperationRequests implements java.io.Serializable {
 		java.lang.String applicantEmail
 	) {
 		this.id = id;
-		this.realmId = realmId;
+		this.cooperationType = cooperationType;
 		this.provinceName = provinceName;
 		this.cityName = cityName;
 		this.areaName = areaName;
@@ -70,12 +70,12 @@ public class EhCooperationRequests implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getRealmId() {
-		return this.realmId;
+	public java.lang.String getCooperationType() {
+		return this.cooperationType;
 	}
 
-	public void setRealmId(java.lang.Long realmId) {
-		this.realmId = realmId;
+	public void setCooperationType(java.lang.String cooperationType) {
+		this.cooperationType = cooperationType;
 	}
 
 	public java.lang.String getProvinceName() {
