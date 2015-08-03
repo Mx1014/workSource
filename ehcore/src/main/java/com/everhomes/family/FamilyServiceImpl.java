@@ -726,14 +726,16 @@ public class FamilyServiceImpl implements FamilyService {
         Group group = this.groupProvider.findGroupById(familyId);
         LOGGER.info("User approved family,operatorId=" + userId + ",memberId=" + memberUid + ",familyId=" + familyId);
         long startTime = System.currentTimeMillis();
-
-//        GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
-//                EntityType.USER.getCode(), userId);
-//        if(currMember == null || (currMember != null && currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode())){
-//            LOGGER.error("The status of user in family invalid.userId=" + userId);
-//            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_STATUS_INVALID, 
-//                    "The status of user in family invalid.");
-//        }
+        cmd.setOperatorRole(cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole());
+        if(cmd.getOperatorRole() != Role.ResourceAdmin){
+            GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
+                    EntityType.USER.getCode(), userId);
+            if(currMember == null || currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
+                LOGGER.error("User permission denied, userId=" + userId);
+                throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_STATUS_INVALID, 
+                        "User permission denied.");
+            }
+        }
         
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), memberUid);
@@ -765,7 +767,7 @@ public class FamilyServiceImpl implements FamilyService {
         });
         
         if(flag){
-            cmd.setOperatorRole(cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole());
+            
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
             else if(cmd.getOperatorRole().byteValue() == Role.ResourceAdmin)

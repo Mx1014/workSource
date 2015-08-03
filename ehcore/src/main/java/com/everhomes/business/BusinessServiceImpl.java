@@ -43,9 +43,9 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
-        if(cmd.getTargetId() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
-                    "Invalid paramter targetId,targetId is null");
+//        if(cmd.getTargetId() == null)
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+//                    "Invalid paramter targetId,targetId is null");
         if(cmd.getBizOwnerUid() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter ownerUid,ownerUid is null");
@@ -63,6 +63,7 @@ public class BusinessServiceImpl implements BusinessService {
         
         Business business = ConvertHelper.convert(cmd, Business.class);
         business.setCreatorUid(userId);
+        business.setDescription(cmd.getDescription() == null ? "" : cmd.getDescription());
         business.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         if(cmd.getLatitude() != null && cmd.getLongitude() != null){
             String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
@@ -72,10 +73,18 @@ public class BusinessServiceImpl implements BusinessService {
         this.dbProvider.execute((TransactionStatus status) -> {
             this.businessProvider.createBusiness(business);
             cmd.getScopes().forEach(r ->{
-                this.businessProvider.createBusinessVisibleScope(ConvertHelper.convert(r,BusinessVisibleScope.class));
+                BusinessVisibleScope scope = ConvertHelper.convert(r,BusinessVisibleScope.class);
+                scope.setOwnerId(business.getId());
+                this.businessProvider.createBusinessVisibleScope(scope);
             });
             cmd.getCategroies().forEach(r ->{
-                this.businessProvider.createBusinessCategory(ConvertHelper.convert(r, BusinessCategory.class));
+                BusinessCategory category = new BusinessCategory();
+                category.setCategoryId(r.longValue());
+                category.setOwnerId(business.getId());
+                Category c = categoryProvider.findCategoryById(r.longValue());
+                if(c != null)
+                    category.setCategoryPath(c.getPath());
+                this.businessProvider.createBusinessCategory(category);
             });
             return null;
         });

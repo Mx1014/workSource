@@ -12,14 +12,14 @@ import com.everhomes.util.StringHelper;
  */
 public class BusinessScope {
 
-    private String  scopeType;
+    private Byte  scopeType;
     private Long    scopeId;
-    
-    public String getScopeType() {
+
+    public Byte getScopeType() {
         return scopeType;
     }
 
-    public void setScopeType(String scopeType) {
+    public void setScopeType(Byte scopeType) {
         this.scopeType = scopeType;
     }
 

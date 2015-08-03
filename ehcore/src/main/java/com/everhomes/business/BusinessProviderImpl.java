@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.InsertQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,8 @@ import com.everhomes.server.schema.tables.daos.EhBusinessVisibleScopesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessesDao;
 import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
 import com.everhomes.server.schema.tables.pojos.EhBusinesses;
+import com.everhomes.server.schema.tables.records.EhBusinessesRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
 
 
@@ -34,9 +37,12 @@ public class BusinessProviderImpl implements BusinessProvider {
     @Override
     public void createBusiness(Business business) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        EhBusinessesDao dao = new EhBusinessesDao(context.configuration()); 
-        dao.insert(business); 
+        EhBusinessesRecord record = ConvertHelper.convert(business, EhBusinessesRecord.class);
+        InsertQuery<EhBusinessesRecord> query = context.insertQuery(Tables.EH_BUSINESSES);
+        query.setRecord(record);
+        query.setReturning(Tables.EH_BUSINESSES.ID);
+        query.execute();
+        business.setId(query.getReturnedRecord().getId());
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinesses.class, null); 
         
     }
