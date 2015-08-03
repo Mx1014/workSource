@@ -24,7 +24,6 @@ import com.everhomes.server.schema.tables.daos.EhBusinessesDao;
 import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
 import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.server.schema.tables.records.EhBusinessesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
 
 
@@ -217,6 +216,25 @@ public class BusinessProviderImpl implements BusinessProvider {
 
         EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
         return ConvertHelper.convert(dao.findById(id),BusinessCategory.class);
+    }
+    
+    @Override
+    public void deleteBusinessVisibleScopeByBusinessId(long businessId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        context.delete(Tables.EH_BUSINESS_VISIBLE_SCOPES).where(Tables.EH_BUSINESS_VISIBLE_SCOPES.OWNER_ID.eq(businessId)).execute();
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
+    }
+    
+    @Override
+    public void deleteBusinessCategoryByBusinessId(long businessId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        context.delete(Tables.EH_BUSINESS_CATEGORIES).where(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID.eq(businessId)).execute();
+      
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
+        
     }
 
 

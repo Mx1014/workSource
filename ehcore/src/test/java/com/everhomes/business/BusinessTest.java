@@ -63,4 +63,31 @@ public class BusinessTest extends CoreServerTestCase {
             System.out.println(businessDTOs);
     }
     
+    @Test
+    public void testUpdateBusiness(){
+        UpdateBusinessCommand cmd = new UpdateBusinessCommand();
+        cmd.setAddress("深圳");
+        cmd.setId(5L);
+        List<Long> categroies = new ArrayList<Long>();
+        categroies.add(3003L);
+        //categroies.add(3002L);
+        cmd.setCategroies(categroies);
+        cmd.setContact("15875300001");
+        cmd.setDisplayName("金融xx");
+        cmd.setLatitude(23.123);
+        cmd.setLongitude(108.123);
+        cmd.setName("金融xx");
+        cmd.setPhone("15875300001");
+        cmd.setTargetType((byte)2);
+        cmd.setTargetId("");
+        cmd.setUrl("http://www.baidu.com");
+        List<BusinessScope> scopes = new ArrayList<>();
+        BusinessScope scope = new BusinessScope();
+        scope.setScopeId(0L);
+        scope.setScopeType((byte)0);
+        scopes.add(scope);
+        //cmd.setScopes(scopes);
+        cmd.setDescription("xxxxxxxxxxxx");
+        businessService.updateBusiness(cmd);
+    }
 }

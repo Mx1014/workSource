@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.jasper.tagplugins.jstl.core.If;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,18 +182,28 @@ public class BusinessServiceImpl implements BusinessService {
             
         }
         this.dbProvider.execute((TransactionStatus status) -> {
-            this.businessProvider.createBusiness(business);
-            if(cmd.getScopes() != null){
+            this.businessProvider.updateBusiness(business);
+            if(cmd.getScopes() != null && !cmd.getScopes().isEmpty()){
+                this.businessProvider.deleteBusinessVisibleScopeByBusinessId(business.getId());
                 cmd.getScopes().forEach(r ->{
-                    this.businessProvider.createBusinessVisibleScope(ConvertHelper.convert(r,BusinessVisibleScope.class));
+                    BusinessVisibleScope scope = ConvertHelper.convert(r,BusinessVisibleScope.class);
+                    scope.setOwnerId(business.getId());
+                    this.businessProvider.createBusinessVisibleScope(scope);
                 });
             }
-            if(cmd.getCategroies() != null){
+            if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
+                this.businessProvider.deleteBusinessCategoryByBusinessId(business.getId());
                 cmd.getCategroies().forEach(r ->{
-                    this.businessProvider.createBusinessCategory(ConvertHelper.convert(r, BusinessCategory.class));
+                    BusinessCategory category = new BusinessCategory();
+                    category.setCategoryId(r.longValue());
+                    category.setOwnerId(business.getId());
+                    Category c = categoryProvider.findCategoryById(r.longValue());
+                    if(c != null)
+                        category.setCategoryPath(c.getPath());
+                    this.businessProvider.createBusinessCategory(category);
                 });
             }
-            
+           
             return null;
         });
     }
