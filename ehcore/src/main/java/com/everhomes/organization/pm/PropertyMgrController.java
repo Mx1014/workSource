@@ -298,7 +298,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>设置公寓状态：自住/出租/空闲/装修/待售/其它</p>
 	 * @return 设置的结果
 	 */
-	@RequestMapping("setAddressPMStatus")
+	@RequestMapping("setApartmentStatus")
 	@RestReturn(value=String.class)
 	public RestResponse setApartmentStatus(@Valid SetPropAddressStatusCommand cmd) {
 		propertyMgrService.setApartmentStatus(cmd);
