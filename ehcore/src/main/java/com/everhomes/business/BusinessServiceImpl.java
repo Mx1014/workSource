@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.jasper.tagplugins.jstl.core.If;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,9 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -40,6 +41,8 @@ public class BusinessServiceImpl implements BusinessService {
     private DbProvider dbProvider;
     @Autowired
     private CategoryProvider categoryProvider;
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
@@ -98,6 +101,8 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter categoryId,categoryId is null");
         }
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
         List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId());
         if(busineseCategories == null || busineseCategories.isEmpty())
             return null;
@@ -116,9 +121,22 @@ public class BusinessServiceImpl implements BusinessService {
             List<CategoryDTO> categories = new ArrayList<>();
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
+            dto.setLogoUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
             dtos.add(dto);
         });
         return dtos;
+    }
+    
+    private String parserUri(String uri,String ownerType, long ownerId){
+        try {
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+                return contentServerService.parserUri(uri,ownerType,ownerId);
+            
+        } catch (Exception e) {
+            LOGGER.error("Parser uri is error." + e.getMessage());
+        }
+        return null;
+
     }
 
     @Override
