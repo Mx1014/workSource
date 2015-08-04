@@ -835,7 +835,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
 				.where(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId)
-						.and(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_TYPE.eq(topicType)))
+						.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(topicType)))
 						.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
 						.limit(pageSize).offset((int)offset)
 						.fetch();

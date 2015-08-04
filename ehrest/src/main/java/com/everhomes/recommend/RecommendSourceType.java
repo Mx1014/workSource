@@ -1,7 +1,7 @@
 package com.everhomes.recommend;
 
 public enum RecommendSourceType {
-    USER(0l), GROUP(1l);
+    USER(0l), GROUP(1l), BANNER(2l);
     
     private long code;
     private RecommendSourceType(long code) {

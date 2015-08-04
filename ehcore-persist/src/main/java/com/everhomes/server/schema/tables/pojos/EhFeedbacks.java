@@ -11,11 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFeedbacks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 843485523;
+	private static final long serialVersionUID = 1161313147;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
 	private java.lang.String   contact;
+	private java.lang.String   subject;
 	private java.lang.String   content;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     feedbackType;
@@ -30,6 +31,7 @@ public class EhFeedbacks implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     ownerUid,
 		java.lang.String   contact,
+		java.lang.String   subject,
 		java.lang.String   content,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     feedbackType,
@@ -41,6 +43,7 @@ public class EhFeedbacks implements java.io.Serializable {
 		this.id = id;
 		this.ownerUid = ownerUid;
 		this.contact = contact;
+		this.subject = subject;
 		this.content = content;
 		this.createTime = createTime;
 		this.feedbackType = feedbackType;
@@ -72,6 +75,14 @@ public class EhFeedbacks implements java.io.Serializable {
 
 	public void setContact(java.lang.String contact) {
 		this.contact = contact;
+	}
+
+	public java.lang.String getSubject() {
+		return this.subject;
+	}
+
+	public void setSubject(java.lang.String subject) {
+		this.subject = subject;
 	}
 
 	public java.lang.String getContent() {

@@ -2218,6 +2218,7 @@ CREATE TABLE `eh_feedbacks` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `owner_uid` BIGINT DEFAULT 0,
   `contact` VARCHAR(128) DEFAULT '',
+  `subject` VARCHAR(512),
   `content` TEXT,
   `create_time` DATETIME,
   `feedback_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: report, 2-complaint, 3-correct',

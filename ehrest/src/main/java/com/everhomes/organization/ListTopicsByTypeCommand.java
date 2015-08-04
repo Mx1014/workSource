@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>pageOffset : 页码</li>
  *	<li>pageSize : 页大小</li>
- *	<li>topicType : 帖类型</li>
+ *	<li>topicType : 帖类型  详情{@link com.everhomes.organization.OrganizationTaskType}</li>
  *	<li>organizationId : 组织id</li>
  *</ul>
  *

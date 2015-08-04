@@ -43,6 +43,7 @@ import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.QueryOrganizationTopicCommand;
 import com.everhomes.group.Group;
 import com.everhomes.launchpad.ItemKind;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
@@ -130,6 +131,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
 	private RegionProvider regionProvider;
+	
+	@Autowired
+	LocaleTemplateService localeTemplateService;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -611,18 +615,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		comment.setCreatorUid(userId);
 		comment.setContentType(PostContentType.TEXT.getCode());
-		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
+		String template = this.getOrganizationAssignTopicForCommentTemplate(orgId,userId);
 		if(StringUtils.isEmpty(template)){
-			OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
-			if(orgMember == null)
-				return ;
-			template = "该问题已指定"+orgMember.getContactName()+"来处理。电话是"+orgMember.getContactToken()+"，业主也可以电话和维修员直接联系。";
+			template = "该请求已安排人员处理";
 		}
 		if (!StringUtils.isEmpty(template)) {
 			comment.setContent(template);
 			forumProvider.createPost(comment);
 		}
+	}
 
+	private String getOrganizationAssignTopicForCommentTemplate(long orgId,long userId) {
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
+		if(member != null){
+			map.put("memberName", member.getContactName());
+			map.put("memberContactToken", member.getContactToken());
+		}
+		
+		User user = userProvider.findUserById(member.getTargetId());
+        String locale = user.getLocale();
+        if(locale == null) 
+        	locale = "zh_CN";
+		
+		String notifyText = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_COMMENT, locale, map, "");
+		
+		return notifyText;
 	}
 
 	@Override
@@ -1121,22 +1140,52 @@ public class OrganizationServiceImpl implements OrganizationService {
 			communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
 			organizationProvider.updateOrganizationMember(communityPmMember);
 
-			String message = "管理员"+user.getNickName()+"同意了您加入"+organization.getName()+"的申请";
-			String message2 = "管理员"+user.getNickName()+"同意了"+communityPmMember.getContactName()+"加入"+organization.getName()+"的申请";
 			//给用户发审核结果通知
-			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),message);
+			String templateToUser = this.getOrganizationMemberApproveForApplicant(operOrgMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),templateToUser);
 			//给其他管理员发通知
 			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
 			if(orgMembers != null && !orgMembers.isEmpty()){
 				for(OrganizationMember member : orgMembers){
-					if(member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
-						sendOrganizationNotificationToUser(member.getTargetId(),message2);
+					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
+						String templateToManager = this.getOrganizationMemberApproveForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
+						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
 			}
 			return status;
 		});
+	}
+	
+	private String getOrganizationMemberApproveForManager(String operName, String userName, String orgName, Long managerId) {
+		User user = this.userProvider.findUserById(managerId);
+		String locale = user.getLocale();
+		if(locale == null)
+			locale = "zh_CN";
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("memberName", operName);
+		map.put("userName", userName);
+		map.put("orgName", orgName);
+		
+		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_APPROVE_FOR_MANAGER, locale, map, "");
+		return template;
+	}
 
+	private String getOrganizationMemberApproveForApplicant(String operName,String orgName,long userId) {
+		User user = this.userProvider.findUserById(userId);
+		String locale = user.getLocale();
+		if(locale == null)
+			locale = "zh_CN";
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("memberName", operName);
+		map.put("orgName", orgName);
+		
+		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_APPROVE_FOR_APPLICANT, locale, map, "");
+		return template;
 	}
 
 	private void sendOrganizationNotificationToUser(Long userId,String message) {
@@ -1186,21 +1235,52 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((status) -> {
 			organizationProvider.deleteOrganizationMember(communityPmMember);
 
-			String message = "管理员"+user.getNickName()+"拒绝了您加入"+organization.getName()+"的申请";
-			String message2 = "管理员"+user.getNickName()+"拒绝了"+communityPmMember.getContactName()+"加入"+organization.getName()+"的申请";
 			//给用户发审核结果通知
-			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),message);
+			String templateToUser = this.getOrganizationMemberRejectForApplicant(operOrgMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),templateToUser);
 			//给其他管理员发通知
 			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
 			if(orgMembers != null && !orgMembers.isEmpty()){
 				for(OrganizationMember member : orgMembers){
-					if(member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
-						sendOrganizationNotificationToUser(member.getTargetId(),message2);
+					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
+						String templateToManager = this.getOrganizationMemberRejectForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
 			}
 			return status;
 		});
+	}
+
+	private String getOrganizationMemberRejectForManager(String operName,String userName, String orgName, Long managerId) {
+		User user = this.userProvider.findUserById(managerId);
+		String locale = user.getLocale();
+		if(locale == null)
+			locale = "zh_CN";
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("memberName", operName);
+		map.put("userName", userName);
+		map.put("orgName", orgName);
+		
+		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_REJECT_FOR_MANAGER, locale, map, "");
+		return template;
+	}
+
+	private String getOrganizationMemberRejectForApplicant(String operName,String orgName, Long userId) {
+		User user = this.userProvider.findUserById(userId);
+		String locale = user.getLocale();
+		if(locale == null)
+			locale = "zh_CN";
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("memberName", operName);
+		map.put("orgName", orgName);
+		
+		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_REJECT_FOR_APPLICANT, locale, map, "");
+		return template;
 	}
 
 	@Override
@@ -1266,7 +1346,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(desOrgMember == null){
 			LOGGER.error("User is not in the organization.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"User is not the in organization.");
+					"User is not in the organization.");
 		}
 		User user = UserContext.current().getUser();
 		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),organization.getId());
@@ -1288,46 +1368,42 @@ public class OrganizationServiceImpl implements OrganizationService {
 			task.setOperatorUid(desOrgMember.getTargetId());;
 			this.organizationProvider.updateOrganizationTask(task);
 			//发送评论
-			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),user.getId(),topic.getCategoryId());
+			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),desOrgMember.getTargetId(),topic.getCategoryId());
 			//给分配的处理人员发任务分配短信
-			String message1 = "业主"+topic.getCreatorNickName()+"提交了请求，他/她的地址为"+""+"，请速与他/她联系";
-			sendSmToOrgMember(operOrgMember.getContactToken(),message1);
-			//给用户发请求正在处理短信
-			/*String message2 = "您的请求组织已分配人员处理";
-			sendMSMToUser(cmd.getUserId(),message2);*/
-			return null;
+			sendSmToOrgMemberForAssignOrgTopic(organization,operOrgMember,desOrgMember,task);
+			return status;
 		});
 	}
 
-	private void sendSmToOrgMember(String cellPhone, String message) {
-		if(cellPhone != null && !cellPhone.isEmpty()){
-			this.smsProvider.sendSms(cellPhone, message);
+	private void sendSmToOrgMemberForAssignOrgTopic(Organization organization,OrganizationMember operOrgMember, OrganizationMember desOrgMember,OrganizationTask task) {
+		
+		String locale = "zh_CN";
+		String template = null;
+		
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), organization.getId());
+		//组织代发求助帖
+		if(member != null){
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("orgName", organization.getName());
+			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
+			map.put("phone", operOrgMember.getContactToken());
+			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+					OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_BY_MANAGER_FOR_MEMBER, locale, map, "");
 		}
-	}
-	
-	/**
-	 * 
-	 * @param topicId
-	 * @param userId 维修人员id
-	 * @param owerId 业主id
-	 */
-	private void sendMSMToUser(long userId, String message) {
-		//给求助用户发消息，组织正在处理
-		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
-		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
-		userList.stream().filter((u) -> {
-			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
-				return false;
-			return true;
-		});
-		if(userList == null || userList.isEmpty()) return ;
-		String cellPhone = userList.get(0).getIdentifierToken();
-		if(StringUtils.isEmpty(template)){
-			template = "该物业已在处理";
+		else{//用户自己发求助帖
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
+			User user = this.userProvider.findUserById(task.getCreatorUid());
+			if(user != null){
+				UserIdentifier identify = userProvider.findIdentifierById(user.getId());
+				if(identify != null){
+					map.put("phone", identify.getIdentifierToken());
+				}
+			}
+			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
 		}
-		if (!StringUtils.isEmpty(cellPhone) && !StringUtils.isEmpty(template)) {
-			this.smsProvider.sendSms(cellPhone, template);
-		}
+		
+		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
 	}
 
 	@Override
@@ -1373,10 +1449,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(cmd.getStatus());
 			this.organizationProvider.updateOrganizationTask(task);
-			if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
+			/*if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论
 				sendComment(topicId,topic.getForumId(),organization.getId(),userId,topic.getCategoryId());
-			}
+			}*/
 			return status;
 		});
 	}
