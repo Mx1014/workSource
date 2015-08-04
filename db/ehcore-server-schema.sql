@@ -2434,4 +2434,20 @@ CREATE TABLE `eh_cooperation_requests` (
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_thirdpart_user`;
+CREATE TABLE `eh_thirdpart_user` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `vendor_tag` VARCHAR(64),
+    `name` VARCHAR(128) COMMENT 'name of user',
+    `phone` VARCHAR(64) COMMENT 'phone of user',
+    `city_name` VARCHAR(64) COMMENT 'city',
+    `area_name` VARCHAR(64) COMMENT 'area',
+    `community_names` TEXT COMMENT 'community name, split with comma if there are multiple communties',
+    `building_name` VARCHAR(128),
+    `unit_name` VARCHAR(64),
+    `apartment_name` VARCHAR(64),
+    `create_time` DATETIME,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 SET foreign_key_checks = 1;
