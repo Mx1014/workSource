@@ -21,7 +21,6 @@ import com.everhomes.util.StringHelper;
  * <li>phone: 商家所有在联系方式</li>
  * <li>longitude: 商家地址所在经度</li>
  * <li>latitude: 商家地址所在纬度</li>
- * <li>geohash: 经纬度生成的geohash值</li>
  * <li>address: 商家地址详情</li>
  * <li>description: 商家描述</li>
  * <li>scopes: 商家可见范围，参考{@link com.everhomes.business.BusinessScope}</li>
@@ -45,7 +44,6 @@ public class CreateBusinessCommand{
     private String phone;
     private Double   longitude;
     private Double   latitude;
-    private String  geohash;
     private String  address;
     private String  description;
     @ItemType(BusinessScope.class)
@@ -139,14 +137,6 @@ public class CreateBusinessCommand{
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
-    }
-
-    public String getGeohash() {
-        return geohash;
-    }
-
-    public void setGeohash(String geohash) {
-        this.geohash = geohash;
     }
 
     public String getAddress() {
