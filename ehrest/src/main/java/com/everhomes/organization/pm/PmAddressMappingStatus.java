@@ -1,4 +1,16 @@
 package com.everhomes.organization.pm;
+
+/**
+ * <ul>
+ * 	<li>DEFAULT : 0</li>
+ *	<li>LIVING : 1</li>
+ *	<li>RENT : 2</li>
+ *	<li>FREE : 3</li>
+ *	<li>DECORATE : 4</li>
+ *	<li>UNSALE : 5</li>
+ *</ul>
+ *
+ */
 public enum PmAddressMappingStatus {
     DEFAULT((byte)0), LIVING((byte)1), RENT((byte)2), FREE((byte)3), DECORATE((byte)4), UNSALE((byte)5);
     

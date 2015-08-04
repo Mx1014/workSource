@@ -6,10 +6,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>pageOffset : 页码</li>
+ * 	<li>pageOffset : 页码</li>
  *	<li>pageSize : 页大小</li>
- *	<li>topicType : 帖类型  详情{@link com.everhomes.organization.OrganizationTaskType}</li>
  *	<li>organizationId : 组织id</li>
+ *	<li>taskType : 任务类型 ，详情{@link com.everhomes.organization.OrganizationTaskType}</li>
+ *	<li>taskStatus : 任务状态，详情 {@link com.everhomes.organization.OrganizationTaskStatus}</li>
  *</ul>
  *
  */
@@ -18,10 +19,18 @@ public class ListTopicsByTypeCommand {
 	private Long pageOffset;
 	private Integer pageSize;
 	@NotNull
-	private String topicType;
-	@NotNull
 	private Long organizationId;
+	@NotNull
+	private String taskType;
+	@NotNull
+	private Byte taskStatus;
 	
+	public Byte getTaskStatus() {
+		return taskStatus;
+	}
+	public void setTaskStatus(Byte taskStatus) {
+		this.taskStatus = taskStatus;
+	}
 	public Long getPageOffset() {
 		return pageOffset;
 	}
@@ -34,11 +43,11 @@ public class ListTopicsByTypeCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	public String getTopicType() {
-		return topicType;
+	public String getTaskType() {
+		return taskType;
 	}
-	public void setTopicType(String topicType) {
-		this.topicType = topicType;
+	public void setTaskType(String taskType) {
+		this.taskType = taskType;
 	}
 	public Long getOrganizationId() {
 		return organizationId;

@@ -433,7 +433,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * @param files 要上传文件
 	 * @return 
 	 */
-	@RequestMapping(value="importPropertyBills2", method = RequestMethod.POST)
+	@RequestMapping(value="importPropertyBills", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
 	public RestResponse importPropertyBills(@Valid PropCommunityIdCommand cmd,
 			@RequestParam(value = "attachment") MultipartFile[] files) {
@@ -1121,7 +1121,7 @@ public class PropertyMgrController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /pm/findFamilyNewestBillByFamilyId
-	 * <p>根据家庭Id和日期查询家庭的账单
+	 * <p>根据家庭Id查询家庭的最新账单
 	 */
 	@RequestMapping("findFamilyNewestBillByFamilyId")
 	@RestReturn(value=PmBillsDTO.class)

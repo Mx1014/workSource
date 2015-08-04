@@ -830,12 +830,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationTask> listOrganizationTasksByOrgIdAndType(Long organizationId, String topicType, int pageSize, long offset) {
+	public List<OrganizationTask> listOrganizationTasksByOrgIdAndType(Long organizationId, String taskType, byte taskStatus, int pageSize, long offset) {
 		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
 				.where(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId)
-						.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(topicType)))
+						.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType))
+						.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus)))
 						.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
 						.limit(pageSize).offset((int)offset)
 						.fetch();
