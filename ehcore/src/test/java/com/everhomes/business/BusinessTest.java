@@ -58,9 +58,9 @@ public class BusinessTest extends CoreServerTestCase {
     public void testGetBusinessByCategory(){
         GetBusinessesByCategoryCommand cmd = new GetBusinessesByCategoryCommand();
         cmd.setCategoryId(3001L);
-        List<BusinessDTO> businessDTOs = businessService.getBusinessesByCategory(cmd);
-        if(businessDTOs != null)
-            System.out.println(businessDTOs);
+        GetBusinessesByCategoryCommandResponse response = businessService.getBusinessesByCategory(cmd);
+        if(response.getRequests() != null)
+            System.out.println(response.getRequests());
     }
     
     @Test
