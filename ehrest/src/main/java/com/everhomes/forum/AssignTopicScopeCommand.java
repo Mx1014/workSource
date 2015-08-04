@@ -27,10 +27,8 @@ public class AssignTopicScopeCommand {
     @NotNull
     private Byte assignedFlag;
     
-    @NotNull
     private Byte scopeCode;
     
-    @NotNull
     @ItemType(Long.class)
     private List<Long> scopeIds;
     
