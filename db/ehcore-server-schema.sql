@@ -2435,8 +2435,8 @@ CREATE TABLE `eh_cooperation_requests` (
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_thirdpart_user`;
-CREATE TABLE `eh_thirdpart_user` (
+DROP TABLE IF EXISTS `eh_thirdpart_users`;
+CREATE TABLE `eh_thirdpart_users` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `vendor_tag` VARCHAR(64),
     `name` VARCHAR(128) COMMENT 'name of user',
