@@ -95,11 +95,12 @@ public class BusinessProviderImpl implements BusinessProvider {
     }
     
     @Override
-    public List<BusinessCategory> findBusinessCategoriesByCategory(long category) {
+    public List<BusinessCategory> findBusinessCategoriesByCategory(long category, int offset, int pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
         List<BusinessCategory> businesses = new ArrayList<>();
         context.select().from(Tables.EH_BUSINESS_CATEGORIES)
                 .where(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(category))
+                .limit(pageSize).offset(offset)
                 .fetch().map(r ->{
                     businesses.add(ConvertHelper.convert(r, BusinessCategory.class));
                     return null;

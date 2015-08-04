@@ -32,11 +32,11 @@ public class BusinessController extends ControllerBase {
      * <p>根据分类获取该类别下的店铺列表</p>
      */
     @RequestMapping("getBusinessesByCategory")
-    @RestReturn(value=BusinessDTO.class,collection=true)
+    @RestReturn(value=GetBusinessesByCategoryCommandResponse.class)
     public RestResponse getBusinessesByCategory(@Valid GetBusinessesByCategoryCommand cmd) {
         
-        List<BusinessDTO> result = businessService.getBusinessesByCategory(cmd);
-        RestResponse response =  new RestResponse(result);
+        GetBusinessesByCategoryCommandResponse res = businessService.getBusinessesByCategory(cmd);
+        RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

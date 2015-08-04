@@ -18,14 +18,17 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 
@@ -44,7 +47,8 @@ public class BusinessServiceImpl implements BusinessService {
     private CategoryProvider categoryProvider;
     @Autowired
     private ContentServerService contentServerService;
-
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
 //        if(cmd.getTargetId() == null)
@@ -97,16 +101,23 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public List<BusinessDTO> getBusinessesByCategory(GetBusinessesByCategoryCommand cmd) {
+    public GetBusinessesByCategoryCommandResponse getBusinessesByCategory(GetBusinessesByCategoryCommand cmd) {
         if(cmd.getCategoryId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter categoryId,categoryId is null");
         }
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId());
+        
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
+        
+        GetBusinessesByCategoryCommandResponse response = new GetBusinessesByCategoryCommandResponse();
+        List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId(),offset,pageSize);
         if(busineseCategories == null || busineseCategories.isEmpty())
-            return null;
+            return response;
         List<Long> bizIds = busineseCategories.stream().map(r -> r.getOwnerId()).collect(Collectors.toList());
         List<Business> businesses = businessProvider.findBusinessByIds(bizIds);
         Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
@@ -125,7 +136,11 @@ public class BusinessServiceImpl implements BusinessService {
             dto.setLogoUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
             dtos.add(dto);
         });
-        return dtos;
+        if(busineseCategories != null && busineseCategories.size() == pageSize){
+            response.setNextPageOffset(pageOffset + 1);
+        }
+        response.setRequests(dtos);
+        return response;
     }
     
     private String parserUri(String uri,String ownerType, long ownerId){
