@@ -389,6 +389,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhTemplates EH_TEMPLATES = com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_thirdpart_users
+	 */
+	public static final com.everhomes.server.schema.tables.EhThirdpartUsers EH_THIRDPART_USERS = com.everhomes.server.schema.tables.EhThirdpartUsers.EH_THIRDPART_USERS;
+
+	/**
 	 * The table ehcore.eh_users
 	 */
 	public static final com.everhomes.server.schema.tables.EhUsers EH_USERS = com.everhomes.server.schema.tables.EhUsers.EH_USERS;
