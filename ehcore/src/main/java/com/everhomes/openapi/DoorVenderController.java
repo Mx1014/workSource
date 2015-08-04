@@ -1,5 +1,7 @@
 package com.everhomes.openapi;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +22,13 @@ import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.thirdpartuser.ThirdpartUser;
+import com.everhomes.thirdpartuser.ThirdpartUserProvider;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Door Vender Constroller", site="messaging")
@@ -38,6 +43,9 @@ public class DoorVenderController extends ControllerBase {
     
     @Autowired
     MessagingService messagingService;
+    
+    @Autowired
+    ThirdpartUserProvider thirdpartUserProvider;
     
     private void sendMessageToUser(User u, String content, Map<String, String> meta) {
         MessageDTO messageDto = new MessageDTO();
@@ -76,7 +84,7 @@ public class DoorVenderController extends ControllerBase {
     
     @RequestMapping("notifyDoorLock")
     @RestReturn(NotifyDoorMessageResponse.class)
-    public RestResponse notifyDoorLock(@Valid notifyDoorLockCommand cmd) {
+    public RestResponse notifyDoorLock(@Valid NotifyDoorLockCommand cmd) {
         NotifyDoorMessageResponse rsp = new NotifyDoorMessageResponse();
         for(String phone: cmd.getPhones()) {
             User u = userService.findUserByIndentifier(phone);
@@ -91,6 +99,20 @@ public class DoorVenderController extends ControllerBase {
             sendMessageToUser(u, "Open door", meta);
             rsp.getPhoneStatus().add(new PhoneStatus(phone, "OK"));
         }
+        RestResponse response = new RestResponse(rsp);
+        return response;
+    }
+    
+    @RequestMapping("syncuserinfo")
+    @RestReturn(SyncUserResponse.class)
+    public RestResponse syncUserInfo(@Valid SyncUserCommand cmd) {
+        ThirdpartUser user = ConvertHelper.convert(cmd, ThirdpartUser.class);
+        Date date = new Date(); 
+        Timestamp ts = new Timestamp(date.getTime());
+        user.setCreateTime(ts);
+        thirdpartUserProvider.createUser(user);
+        SyncUserResponse rsp = new SyncUserResponse();
+        rsp.setTimestamp(ts);
         RestResponse response = new RestResponse(rsp);
         return response;
     }
