@@ -25,6 +25,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -49,6 +50,8 @@ public class BusinessServiceImpl implements BusinessService {
     private ContentServerService contentServerService;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
 //        if(cmd.getTargetId() == null)
@@ -126,14 +129,19 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
                     "Invalid paramter categoryId,categoryId is null");
         }
-        
+        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
+                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
+            
             BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
             List<CategoryDTO> categories = new ArrayList<>();
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
+            if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
+                dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
+            }
             dtos.add(dto);
         });
         if(busineseCategories != null && busineseCategories.size() == pageSize){

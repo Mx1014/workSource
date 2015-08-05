@@ -28,6 +28,8 @@ import com.everhomes.util.StringHelper;
  * <li>scopes: 商家可见范围列表</li>
  * <li>createTime: 创建时间</li>
  * <li>deleteTime: 删除时间</li>
+ * <li>recommendStatus: 推荐状态,0-默认,1-推荐</li>
+ * <li>favoriteStatus: 收藏状态,0-默认,1-收藏</li>
  * </ul>
  */
 
@@ -54,6 +56,8 @@ public class BusinessDTO{
     private List<BusinessVisibleScopeDTO> scopes;
     private Timestamp createTime;
     private Timestamp deleteTime;
+    private Byte recommendStatus;
+    private Byte favoriteStatus;
 
     public Long getId() {
         return id;
@@ -213,6 +217,22 @@ public class BusinessDTO{
 
     public void setScopes(List<BusinessVisibleScopeDTO> scopes) {
         this.scopes = scopes;
+    }
+
+    public Byte getRecommendStatus() {
+        return recommendStatus;
+    }
+
+    public void setRecommendStatus(Byte recommendStatus) {
+        this.recommendStatus = recommendStatus;
+    }
+
+    public Byte getFavoriteStatus() {
+        return favoriteStatus;
+    }
+
+    public void setFavoriteStatus(Byte favoriteStatus) {
+        this.favoriteStatus = favoriteStatus;
     }
 
     @Override
