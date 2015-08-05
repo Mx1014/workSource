@@ -53,6 +53,8 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
                 task.setOrganizationType(organization.getOrganizationType());
                 task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
                 task.setApplyEntityId(0L); // 还没有帖子ID
+                task.setTargetType(post.getCreatorTag());
+                task.setTargetId(post.getCreatorUid());
                 task.setCreatorUid(post.getCreatorUid());
                 task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 

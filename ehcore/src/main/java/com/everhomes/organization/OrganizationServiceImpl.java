@@ -502,6 +502,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(cmd.getTargetTag() == null || "".equals(cmd.getCreatorTag())){
 			cmd.setTargetTag(PostEntityTag.USER.getCode());
 		}*/
+		cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
 	}

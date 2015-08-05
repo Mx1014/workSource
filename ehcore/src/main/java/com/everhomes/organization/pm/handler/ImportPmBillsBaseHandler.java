@@ -182,6 +182,8 @@ public abstract class ImportPmBillsBaseHandler {
 						}
 
 						propertyMgrProvider.createPropBill(bill);
+						//操作日志
+						this.createAuditLogByPmBill(user,bill);
 						List<CommunityPmBillItem> itemList =  bill.getItemList();
 						if(itemList != null && itemList.size() > 0){
 							for (CommunityPmBillItem communityPmBillItem : itemList) {
@@ -198,6 +200,11 @@ public abstract class ImportPmBillsBaseHandler {
 			});
 
 		}
+	}
+
+	private void createAuditLogByPmBill(User user, CommunityPmBill bill) {
+		
+		
 	}
 
 }
