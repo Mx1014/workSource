@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +43,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.core.AppConfig;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyBillingAccount;
@@ -94,7 +89,6 @@ import com.everhomes.organization.OrganizationBillingAccount;
 import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationBillingTransactions;
 import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationCommunityDTO;
 import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
@@ -103,9 +97,7 @@ import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.TxType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
+import com.everhomes.organization.pm.handler.ImportPmBillsBaseHandler;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -1773,17 +1765,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		//解析导入账单文件
 		if(parserName == null)
-			parserName = "DefaultImportPmBillsParser";
-		ImportPmBillsBaseParser parser = PlatformContext.getComponent(parserName);
+			parserName = ImportPmBillsBaseHandler.IMPORT_PM_BILLS_HANDLER_PREFIX+ImportPmBillsBaseHandler.HANDLER_2;
+
+		ImportPmBillsBaseHandler parser = PlatformContext.getComponent(parserName);
 		if(parser == null){
 			LOGGER.error("parser not found");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"parser not found");
 		}
 
-		List list = parser.verifyFiles(files);
-		List<CommunityPmBill> bills = parser.parse(list);
-		parser.createPmBills(bills,orgId);
+		parser.execute(files, orgId);
+
 	}
 
 	@Override
@@ -1802,8 +1794,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
-
-		Calendar cal = Calendar.getInstance();
 
 		ListPmBillsByConditionsCommandResponse result = new ListPmBillsByConditionsCommandResponse();
 		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
@@ -2357,6 +2347,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		PmBillsDTO dto = new PmBillsDTO();
 		List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
+		//List<PmBillItemDTO> billItemDtos = new ArrayList<PmBillItemDTO>();
 
 		java.sql.Date startDate = null;
 		java.sql.Date endDate = null;
@@ -2370,6 +2361,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			BigDecimal totalAmount = dto.getDueAmount().add(dto.getOweAmount());
 			BigDecimal payedAmount = BigDecimal.ZERO;
 
+			//账单缴费记录
 			List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(dto.getId());
 			if(payList != null && !payList.isEmpty()){
 				for(FamilyBillingTransactions payRecord : payList){
@@ -2386,9 +2378,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setPayedAmount(payedAmount);
 			dto.setWaitPayAmount(totalAmount.subtract(payedAmount));
 			dto.setTotalAmount(totalAmount);
+			//账单明细
+			/*List<CommunityPmBillItem> billItems = this.propertyMgrProvider.listOrganizationBillItemsByBillId(dto.getId());
+			if(billItems != null && !billItems.isEmpty()){
+				for(CommunityPmBillItem item : billItems)
+					billItemDtos.add(ConvertHelper.convert(item, PmBillItemDTO.class));
+			}*/
 		}
-		dto.setPayList(payDtoList);
 
+		dto.setPayList(payDtoList);
+		//dto.setBillItems(billItemDtos);
 		return dto;
 	}
 
@@ -2423,6 +2422,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			for(CommunityPmBill commBill : commBillList){
 				List<FamilyBillingTransactionDTO> payDtoList = new ArrayList<FamilyBillingTransactionDTO>();
+				//List<PmBillItemDTO> billItemDtos = new ArrayList<PmBillItemDTO>();
+
 				PmBillsDTO bill = ConvertHelper.convert(commBill, PmBillsDTO.class);
 				bill.setStartDate(commBill.getStartDate().getTime());
 				bill.setEndDate(commBill.getEndDate().getTime());
@@ -2430,6 +2431,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 				BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount());
 				BigDecimal paidAmount = BigDecimal.ZERO;
+				//账单缴费记录
 				List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(bill.getId());
 				if(payList != null && !payList.isEmpty()){
 					for(FamilyBillingTransactions payRecord : payList){
@@ -2447,6 +2449,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				bill.setWaitPayAmount(totalAmount.subtract(paidAmount));
 				bill.setTotalAmount(totalAmount);
 				bill.setPayList(payDtoList);
+				//账单明细
+				/*List<CommunityPmBillItem> billItems = this.propertyMgrProvider.listOrganizationBillItemsByBillId(bill.getId());
+				if(billItems != null && !billItems.isEmpty()){
+					for(CommunityPmBillItem item : billItems)
+						billItemDtos.add(ConvertHelper.convert(item, PmBillItemDTO.class));
+				}
+				bill.setBillItems(billItemDtos);*/
 				billList.add(bill);
 			}
 		}
@@ -2661,19 +2670,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the family don't owed pm fee.Should not send pm pay message.");
 		}
-		//发送物业缴费通知
-		String message = this.getPmPayMessage(bill,balance,payAmount);
-		this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),family.getIntegralTag1(),message);
-		//给注册用户发消息
-		//sendNoticeToFamilyById(cmd.getFamilyId(), message);
+		//短信发送物业缴费通知
+		this.dbProvider.execute(s -> {
+			String message = this.getPmPayMessage(bill,balance,payAmount);
+			this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),family.getIntegralTag1(),message);
+			bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
+			bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
+			this.organizationProvider.updateOrganizationBill(bill);
+
+			return s;
+		});
 	}
 
 	private void sendPmPayMessageToUnRegisterUserInFamily(Long organizationId,Long addressId,String message) {
 		List<OrganizationOwners> orgOwnerList = this.organizationProvider.listOrganizationOwnersByOrgIdAndAddressId(organizationId,addressId);
 		if(orgOwnerList != null && !orgOwnerList.isEmpty()){
 			for(OrganizationOwners orgOwner : orgOwnerList){
-				//UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(orgOwner.getContactToken());
-				//if(userIdentifier == null)
 				if(orgOwner.getContactToken() != null)
 					smsProvider.sendSms(orgOwner.getContactToken(), message);
 			}
@@ -2702,14 +2714,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				if(balance.compareTo(BigDecimal.ZERO) > 0){//该家庭欠费
 					Family family = this.familyProvider.findFamilyByAddressId(bill.getEntityId());
 					if(family != null){
-						//发送物业缴费通知
-						String message = this.getPmPayMessage(bill, balance, payAmount);
-						this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),family.getIntegralTag1(),message);
-						//给注册用户发消息
-						//sendNoticeToFamilyById(family.getId(), message);
+						//短信发送物业缴费通知
+						this.dbProvider.execute(s -> {
+							String message = this.getPmPayMessage(bill, balance, payAmount);
+							this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),family.getIntegralTag1(),message);
+							bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
+							bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
+							this.organizationProvider.updateOrganizationBill(bill);
+							return s;
+						});
 					}
 				}
 			}
+
 		}
 	}
 
@@ -2793,9 +2810,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(), OrganizationType.PM.getCode());
 		if(org == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + org.getId());
-			   throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-			     "Unable to find the organization.");
+			LOGGER.error("Unable to find the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
 		}
 		PmBillsDTO billDto = new PmBillsDTO();
 

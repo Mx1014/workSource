@@ -1285,10 +1285,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
-		if(cmd.getOrganizationId() == null || cmd.getTopicType() == null){
-			LOGGER.error("propterty organizationId or topicType paramter can not be null or empty");
+		if(cmd.getOrganizationId() == null || cmd.getTaskType() == null || cmd.getTaskType().isEmpty() || cmd.getTaskStatus() == null){
+			LOGGER.error("propterty organizationId or taskType or taskStatus paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty organizationId or topicType paramter can not be null or empty");
+					"propterty organizationId or taskType or taskStatus paramter can not be null or empty");
 		}
 		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		if(organization == null){
@@ -1305,7 +1305,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 
-		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(cmd.getOrganizationId(),cmd.getTopicType(),pageSize+1,offset);
+		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(cmd.getOrganizationId(),cmd.getTaskType(),cmd.getTaskStatus(),pageSize+1,offset);
 		if(orgTaskList != null && !orgTaskList.isEmpty()){
 			if(orgTaskList.size() == pageSize+1){
 				response.setNextPageOffset(cmd.getPageOffset()+1);

@@ -12,6 +12,9 @@ import com.everhomes.util.StringHelper;
  *<li>pointRuleUrl:积分规则url</li>
  *<li>level:用户等级</li>
  *<li>myCoupon:我的礼券</li>
+ *<li>myOrderUrl:我的订单</li>
+ *<li>applyShopUrl:申请开店</li>
+ *<li>isAppliedShop:是否已申请过开店</li>
  *</ul>
  */
 public class ListTreasureResponse {
@@ -22,6 +25,34 @@ public class ListTreasureResponse {
     private String pointRuleUrl;
     private Byte level;
     private String myCoupon;
+    private String myOrderUrl;
+    private String applyShopUrl;
+    private Integer isAppliedShop;
+    
+	public String getMyOrderUrl() {
+		return myOrderUrl;
+	}
+
+	public void setMyOrderUrl(String myOrderUrl) {
+		this.myOrderUrl = myOrderUrl;
+	}
+
+	public String getApplyShopUrl() {
+		return applyShopUrl;
+	}
+
+	public void setApplyShopUrl(String applyShopUrl) {
+		this.applyShopUrl = applyShopUrl;
+	}
+
+	public Integer getIsAppliedShop() {
+		return isAppliedShop;
+	}
+
+	public void setIsAppliedShop(Integer isAppliedShop) {
+		this.isAppliedShop = isAppliedShop;
+	}
+
 
     public Integer getPoints() {
         return points;

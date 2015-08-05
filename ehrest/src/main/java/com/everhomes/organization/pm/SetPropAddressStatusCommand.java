@@ -1,21 +1,23 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>organizationId: 组织id</li>
  * <li>addressId: 地址id</li>
- * <li>status: 该地址的居住状态</li>
+ * <li>status: 该地址的居住状态,{@link com.everhomes.organization.pm.PmAddressMappingStatus}</li>
  * </ul>
  */
 public class SetPropAddressStatusCommand {
-	
+	@NotNull
 	private Long organizationId;
-	
+	@NotNull
     private Long addressId;
-    
+    @NotNull
     private Byte status;
    
     public SetPropAddressStatusCommand() {

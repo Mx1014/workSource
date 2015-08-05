@@ -1281,4 +1281,19 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, mapping.getId());
 		
 	}
+
+	@Override
+	public List<CommunityPmBillItem> listOrganizationBillItemsByBillId(Long billId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<CommunityPmBillItem> result  = new ArrayList<CommunityPmBillItem>();
+		SelectQuery<EhOrganizationBillItemsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_BILL_ITEMS);
+		query.addConditions(Tables.EH_ORGANIZATION_BILL_ITEMS.BILL_ID.eq(billId));
+		query.addOrderBy(Tables.EH_ORGANIZATION_BILL_ITEMS.ID.asc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, CommunityPmBillItem.class));
+			return null;
+		});
+		return result;
+	}
 }

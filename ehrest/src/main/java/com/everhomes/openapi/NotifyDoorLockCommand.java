@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 
-public class notifyDoorLockCommand {
+public class NotifyDoorLockCommand {
     @NotNull
     private Long timestamp;
     

@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *	<li>description : 账单说明</li>
  *	
  *	<li>payList : 账单缴费记录,详见: {@link com.everhomes.family.FamilyBillingTransactionDTO}</li>
+ *	<li>billItems : 账单明细,详见: {@link com.everhomes.organization.pm.PmBillItemDTO}</li>
  *	
  *</ul>
  *
@@ -49,6 +50,9 @@ public class PmBillsDTO{
 	
 	@ItemType(FamilyBillingTransactionDTO.class)
 	private List<FamilyBillingTransactionDTO> payList;
+	
+	@ItemType(PmBillItemDTO.class)
+	private List<PmBillItemDTO> billItems;
 	
 	public BigDecimal getWaitPayAmount() {
 		return waitPayAmount;
@@ -169,6 +173,15 @@ public class PmBillsDTO{
 		this.payList = payList;
 	}
 	
+	
+	public List<PmBillItemDTO> getBillItems() {
+		return billItems;
+	}
+
+	public void setBillItems(List<PmBillItemDTO> billItems) {
+		this.billItems = billItems;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
