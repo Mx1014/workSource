@@ -1244,7 +1244,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(orgMembers != null && !orgMembers.isEmpty()){
 				for(OrganizationMember member : orgMembers){
 					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
-						String templateToManager = this.getOrganizationMemberRejectForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+						String templateToManager = this.getOrganizationMemberRejectForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
 						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
@@ -1603,5 +1603,65 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"community not found");
 		}
 		return community;
+	}
+
+	@Override
+	public void deleteOrgMember(OrganizationMemberCommand cmd) {
+		if(cmd.getOrganizationId() == null || cmd.getMemberId() == null){
+			LOGGER.error("propterty organizationId or memberId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty organizationId or memberId paramter can not be null or empty");
+		}
+		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(organization == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
+		}
+		OrganizationMember communityPmMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getMemberId(),cmd.getOrganizationId());
+		if(communityPmMember == null){
+			LOGGER.error("Unable to find the organization member.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Unable to find the organization member.");
+		}
+		User user = UserContext.current().getUser();
+		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),cmd.getOrganizationId());
+		if(operOrgMember == null){
+			LOGGER.error("Operator is not right to delete.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Operator is not right to delete.");
+		}
+
+		dbProvider.execute((status) -> {
+			organizationProvider.deleteOrganizationMember(communityPmMember);
+			//给其他管理员发通知
+			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
+			if(orgMembers != null && !orgMembers.isEmpty()){
+				for(OrganizationMember member : orgMembers){
+					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
+						String templateToManager = this.getOrganizationMemberDeleteForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
+						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
+					}
+				}
+			}
+			return status;
+		});
+		
+	}
+
+	private String getOrganizationMemberDeleteForManager(String operName,String userName, String orgName, Long managerId) {
+		User user = this.userProvider.findUserById(managerId);	
+		String locale = user.getLocale();
+		if(locale == null)
+			locale = "zh_CN";
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("memberName", operName);
+		map.put("userName", userName);
+		map.put("orgName", orgName);
+		
+		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_DELETE_FOR_MANAGER, locale, map, "");
+		return template;
 	}
 }

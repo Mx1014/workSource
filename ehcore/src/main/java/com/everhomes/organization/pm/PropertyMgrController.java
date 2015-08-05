@@ -161,7 +161,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>删除物业成员</p>
 	 * @return 删除的结果
 	 */
-	@RequestMapping("revokePMGroupMember")
+	/*@RequestMapping("revokePMGroupMember")
 	@RestReturn(value=String.class)
 	public RestResponse revokePMGroupMember(@Valid DeletePropMemberCommand cmd) {
 		propertyMgrService.revokePMGroupMember(cmd);
@@ -169,7 +169,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /pm/listApartmentMappings</b>
