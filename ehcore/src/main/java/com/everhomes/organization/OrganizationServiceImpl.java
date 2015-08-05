@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,6 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -206,6 +204,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"you not belong to the community.");
 		}
+		
 
 		GetOrgDetailCommand command = new GetOrgDetailCommand();
 		command.setCommunityId(cmd.getCommunityId());
@@ -305,6 +304,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(organization == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Unable to find the organization.");
+		}
+		if(organization.getOrganizationType().equals(OrganizationType.PM.getCode()) || organization.getOrganizationType().equals(OrganizationType.GARC.getCode())){
+			LOGGER.error("pm or garc could not create community mapping.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"pm or garc could not create community mapping.");
 		}
 		List<Long> communityIds = cmd.getCommunityIds();
 		if(communityIds != null && communityIds.size() > 0){
@@ -860,7 +864,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public  OrganizationDTO getUserCurrentOrganization() {
 		User user  = UserContext.current().getUser();
 		//权限控制
-		OrganizationDTO dto = null;
+		OrganizationDTO dto = new OrganizationDTO();
 		List<UserProfile> userProfiles = userActivityProvider.findProfileByUid(user.getId());
 		UserProfile userProfile = null;
 		if(userProfiles != null && userProfiles.size() > 0){
@@ -877,8 +881,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(organization != null){
 				dto = ConvertHelper.convert(organization, OrganizationDTO.class);
-				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode())){
-					Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(dto.getId());
+				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode()) || dto.getOrganizationType().equals(OrganizationType.GARC.getCode())){
 					OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(dto.getId());
 					if(orgComm != null){
 						Community community = this.communityProvider.findCommunityById(orgComm.getCommunityId());

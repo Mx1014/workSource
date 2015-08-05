@@ -431,7 +431,7 @@ public class OrganizationController extends ControllerBase {
 	 */
 	@RequestMapping("getOrganizationDetails")
 	@RestReturn(OrganizationDTO.class)
-	public RestResponse listUserRelatedOrganizations(@Valid GetOrgDetailCommand cmd) throws Exception {
+	public RestResponse getOrganizationDetails(@Valid GetOrgDetailCommand cmd) throws Exception {
 
 		OrganizationDTO org = organizationService.getOrganizationByComunityidAndOrgType(cmd);
 		RestResponse response = new RestResponse(org);
