@@ -5,19 +5,15 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
-
-
 import javax.annotation.PostConstruct;
-
-
-
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -29,8 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-
-
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.bus.LocalBus;
@@ -55,7 +50,6 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -72,7 +66,6 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
@@ -769,8 +762,61 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             return null;
         }).collect(Collectors.toList());
         response.setApartmentLivingCount(totalCount);
+        sortApartment(results);
         response.setApartmentList(results);
         return response;
+    }
+    
+    private static void sortApartment(List<ApartmentDTO> results){
+        if(results == null || results.isEmpty())
+            return;
+        String regexNum = "^\\d+$";
+        String regexNumChar = "^(\\d+)([a-zA-Z]+)$";
+        String regexNumCharNum = "^\\d+[A-Za-z]+$";
+        Pattern patternNum =  Pattern.compile(regexNum);
+        Pattern patternNumChar =  Pattern.compile(regexNumChar);
+        Pattern patternNumCharNum =  Pattern.compile(regexNumCharNum);
+        String apartmentName = results.get(0).getApartmentName();
+        try{
+            if(patternNum.matcher(apartmentName).matches()){
+                results.sort(new Comparator<ApartmentDTO>() {
+                    @Override
+                    public int compare(ApartmentDTO o1, ApartmentDTO o2) {
+                        return Integer.valueOf(o1.getApartmentName()) - Integer.valueOf(o2.getApartmentName());
+                    }
+                });
+            }else if(patternNumChar.matcher(apartmentName).matches()){
+                results.sort(new Comparator<ApartmentDTO>() {
+                    @Override
+                    public int compare(ApartmentDTO o1, ApartmentDTO o2) {
+                        
+                        String o1_num = getGroupValue(o1.getApartmentName(),1);
+                        String o2_num = getGroupValue(o2.getApartmentName(),1);
+                        if((Integer.valueOf(o1_num) - Integer.valueOf(o2_num)) == 0){
+                            String o1_c = getGroupValue(o1.getApartmentName(),2);
+                            String o2_c = getGroupValue(o2.getApartmentName(),2);
+                            return o1_c.compareTo(o2_c);
+                        }
+                        return Integer.valueOf(o1_num) - Integer.valueOf(o2_num);
+                    }
+                });
+                
+            }else if(patternNumCharNum.matcher(apartmentName).matches()){
+                
+            }
+            
+        }catch(NumberFormatException e){
+           System.out.println("Number format is error."+e.getMessage());
+        }catch(Exception e){
+            System.out.println("Format apartment is error."+e);
+        }
+        
+    }
+    
+    private static String getGroupValue(String apartmentName,int index){
+        Matcher m =  Pattern.compile("^(\\d+)([a-zA-Z]+)$").matcher(apartmentName);
+        m.find();
+        return m.group(index);
     }
     
     @Override

@@ -30,6 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>deleteTime: 删除时间</li>
  * <li>recommendStatus: 推荐状态,0-默认,1-推荐</li>
  * <li>favoriteStatus: 收藏状态,0-默认,1-收藏</li>
+ * <li>distance: 与用户的距离</li>
  * </ul>
  */
 
@@ -58,7 +59,7 @@ public class BusinessDTO{
     private Timestamp deleteTime;
     private Byte recommendStatus;
     private Byte favoriteStatus;
-
+    private Double distance;
     public Long getId() {
         return id;
     }
@@ -233,6 +234,14 @@ public class BusinessDTO{
 
     public void setFavoriteStatus(Byte favoriteStatus) {
         this.favoriteStatus = favoriteStatus;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 
     @Override

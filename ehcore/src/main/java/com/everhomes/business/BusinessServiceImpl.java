@@ -4,10 +4,11 @@ package com.everhomes.business;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.jasper.tagplugins.jstl.core.If;
+import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLocation;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -52,22 +55,24 @@ public class BusinessServiceImpl implements BusinessService {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private UserActivityProvider userActivityProvider;
+    @Autowired
+    private UserProvider userProvider;
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
 //        if(cmd.getTargetId() == null)
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
 //                    "Invalid paramter targetId,targetId is null");
         if(cmd.getBizOwnerUid() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter ownerUid,ownerUid is null");
         if(cmd.getName() == null || cmd.getName().trim().equals(""))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter name,name is null");
         if(cmd.getCategroies() == null || cmd.getCategroies().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter categories,categories is null");
         if(cmd.getScopes() == null || cmd.getScopes().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter scopes,scopes is null");
         User user = UserContext.current().getUser();
         long userId = user.getId();
@@ -106,7 +111,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public GetBusinessesByCategoryCommandResponse getBusinessesByCategory(GetBusinessesByCategoryCommand cmd) {
         if(cmd.getCategoryId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter categoryId,categoryId is null");
         }
         User user = UserContext.current().getUser();
@@ -126,11 +131,21 @@ public class BusinessServiceImpl implements BusinessService {
         Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
         if(category == null){
             LOGGER.error("Category is not found.categoryId=" + cmd.getCategoryId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter categoryId,categoryId is null");
         }
+        //user favorite
         List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
                 .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
+        //recommand to user
+        
+        UserLocation userLocation = null;
+        List<UserLocation> locations = this.userActivityProvider.findLocation(userId);
+        if(locations != null && !locations.isEmpty()){
+            userLocation = locations.get(0);
+        }
+        final double lat = userLocation != null ? userLocation.getLatitude() : 0;
+        final double lon = userLocation != null ? userLocation.getLongitude() : 0;
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -142,13 +157,51 @@ public class BusinessServiceImpl implements BusinessService {
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             }
+            dto.setRecommendStatus(BusinessRecommendStatus.NONE.getCode());
+            if(lat != 0 || lon != 0)
+                dto.setDistance(calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
+            else
+                dto.setDistance(0d);
+            
             dtos.add(dto);
         });
         if(busineseCategories != null && busineseCategories.size() == pageSize){
             response.setNextPageOffset(pageOffset + 1);
         }
+        
+        sortBusinesses(dtos);
+        
         response.setRequests(dtos);
         return response;
+    }
+    
+    private double calculateDistance(double latitude, double longitude, double lat, double lon){
+      //getDistanceMi计算的是英里
+        final double MILES_KILOMETRES_RATIO = 1.609344;
+        return DistanceUtils.getDistanceMi(latitude,longitude,lat , lon) * MILES_KILOMETRES_RATIO * 1000;
+    }
+    private List<BusinessDTO> sortBusinesses(List<BusinessDTO> dtos){
+        if(dtos == null || dtos.isEmpty())
+            return dtos;
+        
+        //sort by distance
+        dtos.sort(new Comparator<BusinessDTO>() {
+            @Override
+            public int compare(BusinessDTO o1, BusinessDTO o2) {
+                
+                return (int) (o1.getDistance() - o2.getDistance());
+            }
+        });
+        
+        //recommand business first
+        dtos.sort(new Comparator<BusinessDTO>() {
+            @Override
+            public int compare(BusinessDTO o1, BusinessDTO o2) {
+                return o2.getRecommendStatus() - o1.getRecommendStatus();
+            }
+        });
+        
+        return null;
     }
     
     private String parserUri(String uri,String ownerType, long ownerId){
@@ -166,7 +219,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public void updateBusiness(UpdateBusinessCommand cmd) {
         if(cmd.getId() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter id null,categoryId is null");
         Business business = this.businessProvider.findBusinessById(cmd.getId());
         if(business == null){
@@ -234,7 +287,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public void deleteBusiness(DeleteBusinessCommand cmd) {
         if(cmd.getId() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter id null,categoryId is null");
         Business business = this.businessProvider.findBusinessById(cmd.getId());
         if(business == null){
@@ -249,7 +302,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public BusinessDTO findBusinessById(Long id) {
         if(id == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter id null,categoryId is null");
         Business business = this.businessProvider.findBusinessById(id);
         if(business != null)
