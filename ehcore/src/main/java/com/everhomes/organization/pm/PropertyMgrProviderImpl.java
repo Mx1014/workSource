@@ -1296,4 +1296,17 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		});
 		return result;
 	}
+
+	@Override
+	public CommunityPmBill findOneNewestPmBillByOrgId(Long orgId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
+				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId))
+				.orderBy(Tables.EH_ORGANIZATION_BILLS.START_DATE.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc())
+				.fetch();
+		if(records != null && !records.isEmpty())
+			return ConvertHelper.convert(records.get(0), CommunityPmBill.class);
+		return null;
+	}
 }

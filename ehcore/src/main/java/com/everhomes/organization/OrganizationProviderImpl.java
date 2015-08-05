@@ -50,6 +50,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
 @Component
@@ -469,9 +470,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void createOrganizationTask(OrganizationTask task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-		EhOrganizationTasksDao dao = new EhOrganizationTasksDao(context.configuration());
-		dao.insert(task);
+		
+		InsertQuery<EhOrganizationTasksRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_TASKS);
+		query.setRecord(ConvertHelper.convert(task, EhOrganizationTasksRecord.class));
+		query.setReturning(Tables.EH_ORGANIZATION_TASKS.ID);
+		query.execute();
+		task.setId(query.getReturnedRecord().value1());
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null); 
 	}

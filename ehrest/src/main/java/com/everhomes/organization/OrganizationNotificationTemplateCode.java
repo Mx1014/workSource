@@ -13,6 +13,8 @@ public interface OrganizationNotificationTemplateCode {
 	static final int ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER = 6;//给被分配人员发短信:分配请求服务帖任务给处理员
 	static final int ORGANIZATION_ASSIGN_TOPIC_BY_MANAGER_FOR_MEMBER = 7;//给被分配人员发短信:分配请求服务帖任务给处理员,用户求助由管理员代发
 	
+	static final int ORGANIZATION_MEMBER_DELETE_FOR_MANAGER = 8;//通知其他管理员：删除组织成员
+	
 	
 
 }

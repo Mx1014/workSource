@@ -431,7 +431,7 @@ public class OrganizationController extends ControllerBase {
 	 */
 	@RequestMapping("getOrganizationDetails")
 	@RestReturn(OrganizationDTO.class)
-	public RestResponse listUserRelatedOrganizations(@Valid GetOrgDetailCommand cmd) throws Exception {
+	public RestResponse getOrganizationDetails(@Valid GetOrgDetailCommand cmd) throws Exception {
 
 		OrganizationDTO org = organizationService.getOrganizationByComunityidAndOrgType(cmd);
 		RestResponse response = new RestResponse(org);
@@ -631,6 +631,20 @@ public class OrganizationController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse rejectOrganizationMember(@Valid OrganizationMemberCommand cmd) {
 		organizationService.rejectOrganizationMember(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>/org/deleteOrgMember</b>
+	 * <p>删除组织成员</p>
+	 */
+	@RequestMapping("deleteOrgMember")
+	@RestReturn(value=String.class)
+	public RestResponse deleteOrgMember(@Valid OrganizationMemberCommand cmd) {
+		organizationService.deleteOrgMember(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

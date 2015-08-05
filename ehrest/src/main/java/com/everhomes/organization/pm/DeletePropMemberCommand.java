@@ -1,27 +1,24 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>communityId: 小区id</li>
- * <li>memberId: 物业成员表主键id</li>
+ * <li>communityId: 物业id</li>
+ * <li>memberId: 物业成员id</li>
  * </ul>
  */
 public class DeletePropMemberCommand {
+	@NotNull
     private Long communityId;
-    
+    @NotNull
     private Integer memberId;
    
     public DeletePropMemberCommand() {
     }
-
-  
-    public Long getCommunityId() {
-		return communityId;
-	}
-
 
 	public Integer getMemberId() {
 		return memberId;
@@ -32,11 +29,13 @@ public class DeletePropMemberCommand {
 		this.memberId = memberId;
 	}
 
+	public Long getCommunityId() {
+		return communityId;
+	}
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-
 
 	@Override
     public String toString() {

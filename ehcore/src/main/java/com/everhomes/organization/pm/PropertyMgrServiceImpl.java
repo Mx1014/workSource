@@ -1746,7 +1746,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void importPmBills(String parserName, Long orgId, MultipartFile[] files) {
+	public void importPmBills(Long orgId, MultipartFile[] files) {
 		if(orgId == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1764,6 +1764,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"files is null");
 		}
 		//解析导入账单文件
+		
+		String parserName = null;//
+		
 		if(parserName == null)
 			parserName = ImportPmBillsBaseHandler.IMPORT_PM_BILLS_HANDLER_PREFIX+ImportPmBillsBaseHandler.HANDLER_2;
 
@@ -1802,9 +1805,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 		java.sql.Date startDate = null;
 		java.sql.Date endDate = null;
-		if(!(cmd.getBillDate() == null || cmd.getBillDate().equals(""))){
+		if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
 			startDate = this.getFirstDayOfMonthByStr(cmd.getBillDate());
 			endDate = this.getLastDayOfMonthByStr(cmd.getBillDate());
+		}
+		else{//没有查询条件返回最新月份的账单
+			if(cmd.getAddress() == null || cmd.getAddress().isEmpty()){
+				CommunityPmBill tempBill = this.propertyMgrProvider.findOneNewestPmBillByOrgId(organization.getId());
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
+				String billDate = format.format(tempBill.getStartDate());
+				startDate = this.getFirstDayOfMonthByStr(billDate);
+				endDate = this.getLastDayOfMonthByStr(billDate);
+			}
 		}
 
 		List<CommunityPmBill> comBillList = this.propertyMgrProvider.listOrganizationBillsByAddressAndDate(organization.getId(),cmd.getAddress(),startDate,endDate,offset,pageSize+1);

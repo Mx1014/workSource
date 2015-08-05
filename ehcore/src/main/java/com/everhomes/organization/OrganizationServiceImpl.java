@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,6 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -206,6 +204,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"you not belong to the community.");
 		}
+		
 
 		GetOrgDetailCommand command = new GetOrgDetailCommand();
 		command.setCommunityId(cmd.getCommunityId());
@@ -305,6 +304,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(organization == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Unable to find the organization.");
+		}
+		if(organization.getOrganizationType().equals(OrganizationType.PM.getCode()) || organization.getOrganizationType().equals(OrganizationType.GARC.getCode())){
+			LOGGER.error("pm or garc could not create community mapping.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"pm or garc could not create community mapping.");
 		}
 		List<Long> communityIds = cmd.getCommunityIds();
 		if(communityIds != null && communityIds.size() > 0){
@@ -502,6 +506,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(cmd.getTargetTag() == null || "".equals(cmd.getCreatorTag())){
 			cmd.setTargetTag(PostEntityTag.USER.getCode());
 		}*/
+		cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
 	}
@@ -859,7 +864,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public  OrganizationDTO getUserCurrentOrganization() {
 		User user  = UserContext.current().getUser();
 		//权限控制
-		OrganizationDTO dto = null;
+		OrganizationDTO dto = new OrganizationDTO();
 		List<UserProfile> userProfiles = userActivityProvider.findProfileByUid(user.getId());
 		UserProfile userProfile = null;
 		if(userProfiles != null && userProfiles.size() > 0){
@@ -876,8 +881,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(organization != null){
 				dto = ConvertHelper.convert(organization, OrganizationDTO.class);
-				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode())){
-					Condition condition = Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(dto.getId());
+				if(dto.getOrganizationType().equals(OrganizationType.PM.getCode()) || dto.getOrganizationType().equals(OrganizationType.GARC.getCode())){
 					OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(dto.getId());
 					if(orgComm != null){
 						Community community = this.communityProvider.findCommunityById(orgComm.getCommunityId());
@@ -1243,7 +1247,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(orgMembers != null && !orgMembers.isEmpty()){
 				for(OrganizationMember member : orgMembers){
 					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
-						String templateToManager = this.getOrganizationMemberRejectForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+						String templateToManager = this.getOrganizationMemberRejectForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
 						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
@@ -1602,5 +1606,65 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"community not found");
 		}
 		return community;
+	}
+
+	@Override
+	public void deleteOrgMember(OrganizationMemberCommand cmd) {
+		if(cmd.getOrganizationId() == null || cmd.getMemberId() == null){
+			LOGGER.error("propterty organizationId or memberId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty organizationId or memberId paramter can not be null or empty");
+		}
+		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(organization == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
+		}
+		OrganizationMember communityPmMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getMemberId(),cmd.getOrganizationId());
+		if(communityPmMember == null){
+			LOGGER.error("Unable to find the organization member.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Unable to find the organization member.");
+		}
+		User user = UserContext.current().getUser();
+		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),cmd.getOrganizationId());
+		if(operOrgMember == null){
+			LOGGER.error("Operator is not right to delete.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Operator is not right to delete.");
+		}
+
+		dbProvider.execute((status) -> {
+			organizationProvider.deleteOrganizationMember(communityPmMember);
+			//给其他管理员发通知
+			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
+			if(orgMembers != null && !orgMembers.isEmpty()){
+				for(OrganizationMember member : orgMembers){
+					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
+						String templateToManager = this.getOrganizationMemberDeleteForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
+						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
+					}
+				}
+			}
+			return status;
+		});
+		
+	}
+
+	private String getOrganizationMemberDeleteForManager(String operName,String userName, String orgName, Long managerId) {
+		User user = this.userProvider.findUserById(managerId);	
+		String locale = user.getLocale();
+		if(locale == null)
+			locale = "zh_CN";
+		
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("memberName", operName);
+		map.put("userName", userName);
+		map.put("orgName", orgName);
+		
+		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
+				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_DELETE_FOR_MANAGER, locale, map, "");
+		return template;
 	}
 }
