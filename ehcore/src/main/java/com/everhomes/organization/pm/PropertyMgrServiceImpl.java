@@ -1746,7 +1746,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void importPmBills(String parserName, Long orgId, MultipartFile[] files) {
+	public void importPmBills(Long orgId, MultipartFile[] files) {
 		if(orgId == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1764,6 +1764,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"files is null");
 		}
 		//解析导入账单文件
+		
+		String parserName = null;//
+		
 		if(parserName == null)
 			parserName = ImportPmBillsBaseHandler.IMPORT_PM_BILLS_HANDLER_PREFIX+ImportPmBillsBaseHandler.HANDLER_2;
 

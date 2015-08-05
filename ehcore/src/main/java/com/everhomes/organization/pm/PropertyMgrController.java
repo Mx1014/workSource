@@ -933,7 +933,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse importPmBills(@Valid ImportPmBillsCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 
-		propertyMgrService.importPmBills(null,cmd.getOrganizationId(), files);
+		propertyMgrService.importPmBills(cmd.getOrganizationId(), files);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
