@@ -298,7 +298,7 @@ public class FamilyServiceImpl implements FamilyService {
             return null;
         }
         
-        return FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), buildingName, apartmentName);
+        return FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), buildingName, apartmentName);
         
     }
         
@@ -444,7 +444,7 @@ public class FamilyServiceImpl implements FamilyService {
                 family.setBuildingName(address.getBuildingName());
                 family.setApartmentName(address.getApartmentName());
                 family.setAddressStatus(address.getStatus());
-                String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
+                String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
                                 address.getBuildingName(), address.getApartmentName());
                 family.setDisplayName(addrStr);
                 family.setAddress(addrStr);

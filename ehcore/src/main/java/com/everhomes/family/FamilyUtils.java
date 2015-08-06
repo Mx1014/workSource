@@ -4,17 +4,19 @@ import org.apache.commons.lang.StringUtils;
 
 public class FamilyUtils {
     
-    public static String joinDisplayName(String cityName, String communityName ,String buildingName, String apartName){
+    public static String joinDisplayName(String cityName, String areaName, String communityName ,String buildingName, String apartName){
        
         StringBuilder strBuilder = new StringBuilder();
         
         if (!StringUtils.isEmpty(cityName)){
            strBuilder.append(cityName);
-       }
-
-       if (!StringUtils.isEmpty(communityName)){
-          strBuilder.append(communityName);
-       }
+        }
+        if(!StringUtils.isEmpty(areaName)){
+            strBuilder.append(areaName);
+        }
+        if (!StringUtils.isEmpty(communityName)){
+           strBuilder.append(communityName);
+        }
        
         if (!StringUtils.isEmpty(buildingName)){
             strBuilder.append(buildingName);

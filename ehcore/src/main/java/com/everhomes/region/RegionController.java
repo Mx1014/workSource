@@ -102,7 +102,7 @@ public class RegionController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /region/listChildren</b>
+     * <b>URL: /region/listDescendants</b>
      * 列出指定范围和状态的所有层孩子区域列表（可不填父亲区域ID）
      */
     @RequireAuthentication(false)

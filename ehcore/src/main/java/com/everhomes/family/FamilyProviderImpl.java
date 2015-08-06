@@ -274,7 +274,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 				family.setBuildingName(address.getBuildingName());
 				family.setApartmentName(address.getApartmentName());
 				family.setAddressStatus(address.getStatus());
-				String addrStr = FamilyUtils.joinDisplayName(community.getCityName(), community.getName(), 
+				String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
 						address.getBuildingName(), address.getApartmentName());
 				family.setDisplayName(addrStr);
 				family.setAddress(addrStr);
