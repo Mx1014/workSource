@@ -204,14 +204,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"you not belong to the community.");
 		}
-		
-
-		GetOrgDetailCommand command = new GetOrgDetailCommand();
-		command.setCommunityId(cmd.getCommunityId());
-		command.setOrganizationType(cmd.getOrganizationType());
-		OrganizationDTO organization = getOrganizationByComunityidAndOrgType(command);
-
-		OrganizationMember member = createOrganizationMember(user,organization.getId(),cmd.getContactDescription());
+		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
+		if(organization == null){
+			   LOGGER.error("Unable to find the organization.");
+			      throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			        "Unable to find the organization.");
+		}
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+		if(member != null){
+			LOGGER.error("User is in the organization.");
+		      throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		        "User is in the organization.");
+		}
+		member = createOrganizationMember(user,organization.getId(),cmd.getContactDescription());
 		organizationProvider.createOrganizationMember(member);
 	}
 

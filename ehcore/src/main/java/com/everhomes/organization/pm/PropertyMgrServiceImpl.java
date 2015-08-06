@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -12,11 +15,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +42,6 @@ import com.everhomes.address.ListAddressByKeywordCommand;
 import com.everhomes.address.ListBuildingByKeywordCommand;
 import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.app.AppConstants;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -97,7 +101,7 @@ import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationTaskStatus;
 import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.TxType;
-import com.everhomes.organization.pm.handler.ImportPmBillsBaseHandler;
+import com.everhomes.organization.pm.handler.HandlerCallable;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -1745,6 +1749,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return list;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void importPmBills(Long orgId, MultipartFile[] files) {
 		if(orgId == null){
@@ -1763,22 +1768,137 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"files is null");
 		}
-		//解析导入账单文件
-		
-		String parserName = null;//
-		
-		if(parserName == null)
-			parserName = ImportPmBillsBaseHandler.IMPORT_PM_BILLS_HANDLER_PREFIX+ImportPmBillsBaseHandler.HANDLER_2;
-
-		ImportPmBillsBaseHandler parser = PlatformContext.getComponent(parserName);
-		if(parser == null){
-			LOGGER.error("parser not found");
+		//启动单独的线程解析账单文件
+		String filePath = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".txt";
+		Future<String> threadReturn = null;
+		try {
+			ExecutorService executorService = Executors.newFixedThreadPool(20);
+			threadReturn = executorService.submit(new HandlerCallable(files[0].getInputStream(),orgId,filePath));
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"parser not found");
+					e.getMessage());
 		}
 
-		parser.execute(files, orgId);
+		//读取解析后的文件，将数据写入数据库:循环查找5次解析后的文件，找不到则让线程等待1秒.
+		try {
+			int i = 0;
+			File file = null;
+			while(i < 5){
+				file = new File(filePath);
+				if(!file.exists()){
+					Thread.sleep(1000);
+				}
+				else
+					break;
+				i++;
+			}
 
+			if(threadReturn != null && !threadReturn.get().equals("success")){
+				LOGGER.error(threadReturn.get());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						threadReturn.get());
+			}
+
+			if(file == null){
+				LOGGER.error("parse file failure.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"parse file failure.");
+			}
+
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+			List<CommunityPmBill> bills = (List<CommunityPmBill>) in.readObject();
+			in.close();
+			file.delete();
+			createPmBills(bills, orgId);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					e.getMessage());
+		}
+	}
+
+	/**
+	 * 将数据插入数据库
+	 */
+	public void createPmBills(List<CommunityPmBill> bills,Long orgId){
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		User user  = UserContext.current().getUser();
+		Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listOrganizationAddressMappingsByOrgId(orgId);
+		if(bills != null && bills.size() > 0){
+			this.dbProvider.execute( s -> {
+				for (CommunityPmBill bill : bills){
+					if(mappingList != null && mappingList.size() > 0)
+					{
+						CommunityAddressMapping mapping = null;
+						for (CommunityAddressMapping m : mappingList){
+							if(bill != null && bill.getAddress().equals(m.getOrganizationAddress())){
+								mapping = m;
+								break;
+							}
+						}
+						if(mapping == null){
+							LOGGER.error(bill.getAddress() + " not find in address mapping.");
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+									bill.getAddress() + " not find in address mapping.");
+						}
+
+						CommunityPmBill existedBill = this.propertyMgrProvider.findFamilyPmBillInStartDateToEndDate(mapping.getAddressId(),bill.getStartDate(),bill.getEndDate());
+						if(existedBill != null){
+							LOGGER.error("the bill is exist.please don't import repeat data.address="+bill.getAddress()+",startDate=" + format.format(bill.getStartDate())+",endDate="+format.format(bill.getEndDate()));
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+									"the bill is exist.please don't import repeat data.address="+bill.getAddress()+",startDate=" + format.format(bill.getStartDate())+",endDate="+format.format(bill.getEndDate()));
+						}
+
+						bill.setOrganizationId(orgId);
+						bill.setEntityId(mapping.getAddressId());
+						bill.setEntityType(PmBillEntityType.ADDRESS.getCode());
+						bill.setNotifyCount(0);
+						bill.setNotifyTime(null);
+
+						cal.setTimeInMillis(bill.getStartDate().getTime());
+						StringBuilder builder = new StringBuilder();
+						builder.append(cal.get(Calendar.YEAR) +"-");
+						if(cal.get(Calendar.MONTH)<9)
+							builder.append("0"+(cal.get(Calendar.MONTH)+1));
+						else
+							builder.append(cal.get(Calendar.MONTH)+1);
+						bill.setDateStr(builder.toString());
+						bill.setName(bill.getDateStr() + "月账单");
+						bill.setCreatorUid(user.getId());
+						bill.setCreateTime(timeStamp);
+						//往期欠款处理
+						if(bill.getOweAmount() == null){
+							CommunityPmBill beforeBill = this.propertyMgrProvider.findFamilyNewestBill(mapping.getAddressId(), orgId);
+							if(beforeBill != null){
+								//payAmount为负
+								BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(beforeBill.getId());
+								BigDecimal oweAmount = beforeBill.getDueAmount().add(beforeBill.getOweAmount()).add(payedAmount);
+								bill.setOweAmount(oweAmount);
+							}
+							else
+								bill.setOweAmount(BigDecimal.ZERO);
+						}
+
+						propertyMgrProvider.createPropBill(bill);
+						List<CommunityPmBillItem> itemList =  bill.getItemList();
+						if(itemList != null && itemList.size() > 0){
+							for (CommunityPmBillItem communityPmBillItem : itemList) {
+								communityPmBillItem.setBillId(bill.getId());
+								communityPmBillItem.setCreateTime(timeStamp);
+								communityPmBillItem.setCreatorUid(user.getId());
+								propertyMgrProvider.createPropBillItem(communityPmBillItem);
+							}
+						}
+					}
+				}
+
+				return s;
+			});
+
+		}
 	}
 
 	@Override
@@ -1812,10 +1932,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		else{//没有查询条件返回最新月份的账单
 			if(cmd.getAddress() == null || cmd.getAddress().isEmpty()){
 				CommunityPmBill tempBill = this.propertyMgrProvider.findOneNewestPmBillByOrgId(organization.getId());
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
-				String billDate = format.format(tempBill.getStartDate());
-				startDate = this.getFirstDayOfMonthByStr(billDate);
-				endDate = this.getLastDayOfMonthByStr(billDate);
+				if(tempBill != null){
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
+					String billDate = format.format(tempBill.getStartDate());
+					startDate = this.getFirstDayOfMonthByStr(billDate);
+					endDate = this.getLastDayOfMonthByStr(billDate);
+				}
 			}
 		}
 
@@ -2333,6 +2455,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		CommunityPmBill communityBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
 		if(communityBill != null){
 			billDto = ConvertHelper.convert(communityBill, PmBillsDTO.class);
+			billDto.setStartDate(communityBill.getStartDate().getTime());
+			billDto.setEndDate(communityBill.getEndDate().getTime());
+			billDto.setPayDate(communityBill.getPayDate().getTime());
 			BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(billDto.getId());
 			billDto.setPayedAmount(payedAmount.negate());
 			billDto.setWaitPayAmount(billDto.getDueAmount().add(billDto.getOweAmount()).add(payedAmount));
@@ -2370,6 +2495,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		CommunityPmBill communityPmBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
 		if(communityPmBill != null){
 			dto = ConvertHelper.convert(communityPmBill, PmBillsDTO.class);
+			dto.setStartDate(communityPmBill.getStartDate().getTime());
+			dto.setEndDate(communityPmBill.getEndDate().getTime());
+			dto.setPayDate(communityPmBill.getPayDate().getTime());
 			BigDecimal totalAmount = dto.getDueAmount().add(dto.getOweAmount());
 			BigDecimal payedAmount = BigDecimal.ZERO;
 

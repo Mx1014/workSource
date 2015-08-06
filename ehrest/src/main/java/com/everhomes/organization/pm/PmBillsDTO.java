@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *	<li>address : 楼栋-门牌号</li>
  * 	<li>dueAmount : 本月金额</li>
  *	<li>oweAmount : 往期欠款</li>
+ *	<li>payedAmount : 已付金额</li>
  *	<li>waitPayAmount : 应付金额</li>
  *	<li>totalAmount : 本月应付总额</li>
  *	<li>description : 账单说明</li>

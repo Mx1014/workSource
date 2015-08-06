@@ -1155,7 +1155,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>根据家庭id和日期查询家庭的所有账单和缴费记录
 	 */
 	@RequestMapping("listFamilyBillsAndPaysByFamilyId")
-	@RestReturn(value=PmBillsDTO.class,collection=true)
+	@RestReturn(ListFamilyBillsAndPaysByFamilyIdCommandResponse.class)
 	public RestResponse listFamilyBillsAndPaysByFamilyId(@Valid ListFamilyBillsAndPaysByFamilyIdCommand cmd) {
 
 		ListFamilyBillsAndPaysByFamilyIdCommandResponse result = propertyMgrService.listFamilyBillsAndPaysByFamilyId(cmd);

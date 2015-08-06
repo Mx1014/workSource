@@ -218,11 +218,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public int countCommunityPmMembers(long communityId, String contactToken) {
+	public int countCommunityPmMembers(long orgId, String contactToken) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS);
-		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId);
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId);
 		if(contactToken != null && !"".equals(contactToken)) {
 			condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
 		}
