@@ -1,6 +1,6 @@
 package com.everhomes.community;
 
-public class CommunityServiceErrorCode {
+public interface CommunityServiceErrorCode {
     static final String SCOPE = "community";
     
     

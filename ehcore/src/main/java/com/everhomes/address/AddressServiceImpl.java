@@ -806,9 +806,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
             
         }catch(NumberFormatException e){
-           System.out.println("Number format is error."+e.getMessage());
+           LOGGER.error("Number format is error."+e.getMessage());
         }catch(Exception e){
-            System.out.println("Format apartment is error."+e);
+            LOGGER.error("Format apartment is error."+e);
         }
         
     }

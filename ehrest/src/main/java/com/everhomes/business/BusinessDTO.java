@@ -59,7 +59,7 @@ public class BusinessDTO{
     private Timestamp deleteTime;
     private Byte recommendStatus;
     private Byte favoriteStatus;
-    private Double distance;
+    private Integer distance;
     public Long getId() {
         return id;
     }
@@ -236,11 +236,11 @@ public class BusinessDTO{
         this.favoriteStatus = favoriteStatus;
     }
 
-    public Double getDistance() {
+    public Integer getDistance() {
         return distance;
     }
 
-    public void setDistance(Double distance) {
+    public void setDistance(Integer distance) {
         this.distance = distance;
     }
 

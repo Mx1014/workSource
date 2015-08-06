@@ -19,6 +19,10 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityServiceErrorCode;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -28,7 +32,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -57,6 +60,9 @@ public class BusinessServiceImpl implements BusinessService {
     private UserActivityProvider userActivityProvider;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private CommunityProvider communityProvider;
+    
     @Override
     public void createBusiness(CreateBusinessCommand cmd) {
 //        if(cmd.getTargetId() == null)
@@ -114,6 +120,17 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter categoryId,categoryId is null");
         }
+        if(cmd.getCommunityId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter communityId,communityId is null");
+        }
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+        if(community == null){
+            LOGGER.error("Community is not exists,communityId=" + cmd.getCommunityId());
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+                    "Invalid paramter communityId,communityId is not exists.");
+        }
+            
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
@@ -138,14 +155,16 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
                 .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
         //recommand to user
+        //TODO
         
-        UserLocation userLocation = null;
-        List<UserLocation> locations = this.userActivityProvider.findLocation(userId);
-        if(locations != null && !locations.isEmpty()){
-            userLocation = locations.get(0);
+        List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+        if(points == null || points.isEmpty()){
+            LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
+            return response;
         }
-        final double lat = userLocation != null ? userLocation.getLatitude() : 0;
-        final double lon = userLocation != null ? userLocation.getLongitude() : 0;
+        CommunityGeoPoint point = points.get(0);
+        final double lat = point != null ? point.getLatitude() : 0;
+        final double lon = point != null ? point.getLongitude() : 0;
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -157,11 +176,12 @@ public class BusinessServiceImpl implements BusinessService {
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             }
+            
             dto.setRecommendStatus(BusinessRecommendStatus.NONE.getCode());
             if(lat != 0 || lon != 0)
-                dto.setDistance(calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
+                dto.setDistance((int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
             else
-                dto.setDistance(0d);
+                dto.setDistance(0);
             
             dtos.add(dto);
         });

@@ -16,6 +16,8 @@ import com.everhomes.util.StringHelper;
 public class GetBusinessesByCategoryCommand{
     @NotNull
     private Long categoryId;
+    @NotNull
+    private Long communityId;
     private Integer pageOffset;
     private Integer pageSize;
     
@@ -25,6 +27,14 @@ public class GetBusinessesByCategoryCommand{
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Integer getPageOffset() {
