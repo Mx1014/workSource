@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-08-04 16:41:43
+// generated at 2015-08-06 19:18:04
 package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.organization.pm.PmBillsDTO;
+import com.everhomes.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
 
 public class ListFamilyBillsAndPaysByFamilyIdRestResponse extends RestResponseBase {
 
-    private List<PmBillsDTO> response;
+    private ListFamilyBillsAndPaysByFamilyIdCommandResponse response;
 
     public ListFamilyBillsAndPaysByFamilyIdRestResponse () {
     }
 
-    public List<PmBillsDTO> getResponse() {
+    public ListFamilyBillsAndPaysByFamilyIdCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<PmBillsDTO> response) {
+    public void setResponse(ListFamilyBillsAndPaysByFamilyIdCommandResponse response) {
         this.response = response;
     }
 }
