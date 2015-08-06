@@ -44,6 +44,7 @@ import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
@@ -54,22 +55,24 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StatusChecker;
 import com.everhomes.util.Tuple;
+import com.everhomes.activity.ActivityLocalStringCode;
 
 
 @Component
 public class ActivityServiceImpl implements ActivityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivityServiceImpl.class);
+    
 
-    private static final String SIGNUP_AUTO_COMMENT = "signup.auto.comment";
-
-    private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
-    
-    private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
-    
-    private static final String CANCEL_AUTO_COMMENT="cancel.auto.comment";
-    
-    private static final String REJECT_AUTO_COMMENT="reject.auto.comment";
+//    private static final String SIGNUP_AUTO_COMMENT = "signup.auto.comment";
+//
+//    private static final String CHECKIN_AUTO_COMMENT = "checkin.auto.comment";
+//    
+//    private static final String CONFIRM_AUTO_COMMENT="confirm.auto.comment";
+//    
+//    private static final String CANCEL_AUTO_COMMENT="cancel.auto.comment";
+//    
+//    private static final String REJECT_AUTO_COMMENT="reject.auto.comment";
     private static final String DEFAULT_HOME_URL = "default.server.url";
     @Autowired
     private ForumService forumService;
@@ -103,6 +106,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private CategoryProvider categoryProvider;
+    
+    @Autowired
+    private LocaleStringService localeStringService;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -172,7 +178,12 @@ public class ActivityServiceImpl implements ActivityService {
             comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             comment.setCreatorUid(user.getId());
             comment.setContentType(PostContentType.TEXT.getCode());
-            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
+//            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
+            String template = localeStringService.getLocalizedString(
+            		ActivityLocalStringCode.SCOPE,
+                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
+                    UserContext.current().getUser().getLocale(),
+                    "");
 
             if (!StringUtils.isEmpty(template)) {
                 comment.setContent(template);
@@ -248,7 +259,9 @@ public class ActivityServiceImpl implements ActivityService {
            // groupService.leaveGroup(leaveCmd);
         }
         Post p = createPost(user.getId(), post, null, "");
-        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+//        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+        p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
         forumProvider.createPost(p);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
@@ -282,17 +295,27 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
+        
+        ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         dbProvider.execute(status->{
-            ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
-            Post p = createPost(user.getId(),post,null,"");
-            p.setContent(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
-            Long familyId = getFamilyId();
-            if (familyId != null)
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
-                    + (roster.getAdultCount() + roster.getChildCount()));
-            roster.setCheckinFlag((byte)1);
-            forumProvider.createPost(p);
+        	if(activity.getConfirmFlag() == null || activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() 
+        			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
+        		
+        		ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
+                Post p = createPost(user.getId(),post,null,"");
+//                p.setContent(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
+                p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CHECKIN), UserContext.current().getUser().getLocale(), ""));
+                Long familyId = getFamilyId();
+                if (familyId != null)
+                    activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
+                activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
+                        + (roster.getAdultCount() + roster.getChildCount()));
+                roster.setCheckinFlag((byte)1);
+                forumProvider.createPost(p);
+                
+        	}
+            
             return status;
         });
         
@@ -303,7 +326,24 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setProcessStatus(getStatus(activity).getCode());
-        dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
+//        //是否需要确认，要确认则确认后才能签到
+//        if(activity.getConfirmFlag()==null) {
+//        	dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
+//        }
+//        else {
+//        	if(activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode())
+//        		dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
+//        	if(activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode())
+//        		//tobecontinue
+//        		;
+//        }
+        
+        if(activity.getConfirmFlag() == null || activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() 
+    			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
+        	dto.setUserActivityStatus(ActivityStatus.CHECKEINED.getCode());
+        
+        }
+        
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
@@ -360,6 +400,10 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
+        /////////////////////////////////////
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        ////////////////////////////////////
         response.setActivity(dto);
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
@@ -513,7 +557,12 @@ public class ActivityServiceImpl implements ActivityService {
         Post post = new Post();
         post.setParentPostId(p.getId());
         post.setForumId(p.getForumId());
-        String template = configurationProvider.getValue(CONFIRM_AUTO_COMMENT, "");
+//        String template = configurationProvider.getValue(CONFIRM_AUTO_COMMENT, "");
+        String template = localeStringService.getLocalizedString(
+        		ActivityLocalStringCode.SCOPE,
+                String.valueOf(ActivityLocalStringCode.ACTIVITY_CONFIRM),
+                UserContext.current().getUser().getLocale(),
+                "");
         post.setContent(TemplatesConvert.convert(template, new HashMap<String, String>() {
             private static final long serialVersionUID = 1L;
 
@@ -621,7 +670,12 @@ public class ActivityServiceImpl implements ActivityService {
             //groupService.rejectJoinGroupRequest(rejectCmd);
         }
         Post comment = createPost(user.getId(), post, null, "");
-        String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
+//        String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
+        String template = localeStringService.getLocalizedString(
+        		ActivityLocalStringCode.SCOPE,
+                String.valueOf(ActivityLocalStringCode.ACTIVITY_REJECT),
+                UserContext.current().getUser().getLocale(),
+                "");
         comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
              * 
              */
