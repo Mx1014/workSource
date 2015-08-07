@@ -2574,7 +2574,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				//账单缴费记录
 				List<FamilyBillingTransactions> payList = this.familyProvider.listFamilyBillingTrransactionByBillId(bill.getId());
 				if(payList != null && !payList.isEmpty()){
-					for(FamilyBillingTransactions payRecord : payList){
+					for(int i = payList.size()-1;i>=0;i--){
+						FamilyBillingTransactions payRecord = payList.get(i);
 						FamilyBillingTransactionDTO fBillTxDto = new FamilyBillingTransactionDTO();
 						fBillTxDto.setBillType(payRecord.getTxType());
 						fBillTxDto.setChargeAmount(payRecord.getChargeAmount().negate());
