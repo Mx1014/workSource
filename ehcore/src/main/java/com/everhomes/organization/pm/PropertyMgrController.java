@@ -22,15 +22,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.family.FamilyMemberDTO;
-import com.everhomes.forum.CancelLikeTopicCommand;
 import com.everhomes.forum.DeleteCommentCommand;
 import com.everhomes.forum.DeleteTopicCommand;
-import com.everhomes.forum.GetTopicCommand;
-import com.everhomes.forum.LikeTopicCommand;
 import com.everhomes.forum.ListPostCommandResponse;
 import com.everhomes.forum.ListTopicCommand;
-import com.everhomes.forum.ListTopicCommentCommand;
-import com.everhomes.forum.NewCommentCommand;
 import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.organization.OrganizationBillingTransactionDTO;
@@ -39,7 +34,9 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
+import com.everhomes.util.IdToken;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/pm")
@@ -973,7 +970,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/updatePmBills
 	 * <p>更新物业缴费单
@@ -989,7 +986,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/insertPmBills
 	 * <p>新增物业缴费单
@@ -1005,7 +1002,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/deletePmBill
 	 * <p>删除物业缴费单
@@ -1021,7 +1018,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/updatePmBill
 	 * <p>更新物业缴费单
@@ -1037,7 +1034,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/insertPmBill
 	 * <p>新增物业缴费单
@@ -1053,7 +1050,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 
 	/**
 	 * <b>URL: /pm/listOrgBillingTransactionsByConditions
@@ -1118,7 +1115,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/findFamilyNewestBillByFamilyId
 	 * <p>根据家庭Id查询家庭的最新账单
@@ -1166,7 +1163,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-	//支付
+	//线下支付
 	/**
 	 * <b>URL: /pm/payPmBillByFamilyId
 	 * <p>缴费
@@ -1182,7 +1179,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/getPmPayStatistics
 	 * <p>物业缴费统计:年度收入，待收费,欠费户数
@@ -1191,13 +1188,13 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(GetPmPayStatisticsCommandResponse.class)
 	public RestResponse getPmPayStatistics (@Valid GetPmPayStatisticsCommand cmd){
 		GetPmPayStatisticsCommandResponse result = this.propertyMgrService.getPmPayStatistics(cmd);
-		
+
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/sendPmPayMessageToOneOweFamily
 	 * <p>给指定欠费家庭发缴费通知
@@ -1206,13 +1203,13 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse sendPmPayMessageToOneOweFamily (@Valid SendPmPayMessageToOneOweFamilyCommand cmd){
 		this.propertyMgrService.sendPmPayMessageToOneOweFamily(cmd);
-		
+
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /pm/sendPmPayMessageToAllOweFamilies
 	 * <p>给所有欠费家庭发缴费通知
@@ -1221,7 +1218,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse sendPmPayMessageToAllOweFamilies (@Valid SendPmPayMessageToAllOweFamiliesCommand cmd){
 		this.propertyMgrService.sendPmPayMessageToAllOweFamilies(cmd);
-		
+
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1240,5 +1237,34 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	//线上支付
+	/**
+	 * <b>URL: /pm/onlinePayPmBill
+	 * <p>物业费线上支付
+	 */
+	@RequestMapping("onlinePayPmBill")
+	@RestReturn(value=String.class)
+	public RestResponse onlinePayPmBill(@Valid OnlinePayPmBillCommand cmd) {
+		propertyMgrService.onlinePayPmBill(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	//根据订单号查询订单信息
+	/**
+	 * <b>URL: /pm/findPmBillByOrderNo
+	 * <p>根据订单号查询订单信息
+	 */
+	@RequestMapping("findPmBillByOrderNo")
+	@RestReturn(value=PmBillForOrderNoDTO.class)
+	public RestResponse findPmBillByOrderNo(@Valid FindPmBillByOrderNoCommand cmd) {
+		PmBillForOrderNoDTO bill = propertyMgrService.findPmBillByOrderNo(cmd);
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

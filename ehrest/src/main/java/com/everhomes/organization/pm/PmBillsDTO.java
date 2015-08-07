@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * 	<li>orderNo : 订单号,线上支付物业费传递的订单号</li>
+ * 	
  *	<li>id : 账单id</li>
  *
  *	<li>startDate : 账单开始日期</li>
@@ -30,6 +32,8 @@ import com.everhomes.util.StringHelper;
  */
 
 public class PmBillsDTO{
+	
+	private String orderNo;
 	
 	private java.lang.Long       id;
 	private java.lang.Long       organizationId;
@@ -55,6 +59,15 @@ public class PmBillsDTO{
 	@ItemType(PmBillItemDTO.class)
 	private List<PmBillItemDTO> billItems;
 	
+	
+	public String getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+
 	public BigDecimal getWaitPayAmount() {
 		return waitPayAmount;
 	}
