@@ -2,9 +2,10 @@
 package com.everhomes.organization.pm;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -15,13 +16,15 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +106,6 @@ import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.PaidType;
 import com.everhomes.organization.TxType;
 import com.everhomes.organization.VendorType;
-import com.everhomes.organization.pm.handler.HandlerCallable;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -1770,54 +1772,94 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"files is null");
 		}
-		//启动单独的线程解析账单文件
-		String filePath = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".txt";
-		Future<String> threadReturn = null;
-		try {
-			ExecutorService executorService = Executors.newFixedThreadPool(20);
-			threadReturn = executorService.submit(new HandlerCallable(files[0].getInputStream(),orgId,filePath));
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					e.getMessage());
-		}
 
-		//读取解析后的文件，将数据写入数据库:循环查找5次解析后的文件，找不到则让线程等待1秒.
+		String filePath1 = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".xlsx";
+		String filePath2 = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".xlsx";
+		StringBuilder builder = new StringBuilder();
+		//builder.append("java -jar D:/dev_documents/workspace2/ehparser/target/ehparser-0.0.1-SNAPSHOT.jar");
+		builder.append("java -jar /home/everhomes/ehproject/ehparser-0.0.1-SNAPSHOT.jar");
+		builder.append(" ");
+		builder.append(orgId);
+		builder.append(" ");
+		builder.append(filePath1);
+		builder.append(" ");
+		builder.append(filePath2);
+		String command = builder.toString();
+
 		try {
+			//将原文件暂存在服务器中
+			OutputStream out = new FileOutputStream(new File(filePath1));
+			InputStream in = files[0].getInputStream();
+			byte [] buffer = new byte [1024];
+			while(in.read(buffer) != -1){ 
+				out.write(buffer);
+			}
+			out.close();
+			in.close();
+			//启动进程解析原文件
+			Runtime.getRuntime().exec(command);
+			//读取解析后的文件
 			int i = 0;
-			File file = null;
+			File file2 = null;
 			while(i < 5){
-				file = new File(filePath);
-				if(!file.exists()){
-					Thread.sleep(1000);
-				}
-				else
-					break;
+				file2 = new File(filePath2);
+				if(!file2.exists())	Thread.sleep(1000);
+				else	break;
 				i++;
 			}
-
-			if(threadReturn != null && !threadReturn.get().equals("success")){
-				LOGGER.error(threadReturn.get());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						threadReturn.get());
-			}
-
-			if(file == null){
+			if(file2 == null || !file2.exists()){
 				LOGGER.error("parse file failure.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"parse file failure.");
 			}
-
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-			List<CommunityPmBill> bills = (List<CommunityPmBill>) in.readObject();
-			in.close();
-			file.delete();
+			List<CommunityPmBill> bills = this.convertExcelFileToPmBills(file2);
 			createPmBills(bills, orgId);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					e.getMessage());
+		} finally{
+			File file = new File(filePath1);
+			File file2 = new File(filePath2);
+			if(file.exists())	file.delete();
+			if(file2.exists())	file2.delete();
 		}
+	}
+
+	private List<CommunityPmBill> convertExcelFileToPmBills(File file) {
+		List<CommunityPmBill> bills = new ArrayList<CommunityPmBill>();
+		SimpleDateFormat format = new SimpleDateFormat("yyy-MM-dd");
+		try {
+			Workbook wb = WorkbookFactory.create(file);
+			Sheet sheet = wb.getSheetAt(0);
+			for(int i = sheet.getFirstRowNum()+1;i<=sheet.getLastRowNum();i++){
+				Row row = sheet.getRow(i);
+				CommunityPmBill bill = new CommunityPmBill();
+				bill.setStartDate(new java.sql.Date(format.parse(row.getCell(0).getStringCellValue().trim()).getTime()));
+				bill.setEndDate(new java.sql.Date(format.parse(row.getCell(1).getStringCellValue().trim()).getTime()));
+				bill.setPayDate(new java.sql.Date(format.parse(row.getCell(2).getStringCellValue().trim()).getTime()));
+				bill.setAddress(row.getCell(3).getStringCellValue().trim());
+				//dueAmount column
+				BigDecimal dueAmount = new BigDecimal(row.getCell(4).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_DOWN);
+				bill.setDueAmount(dueAmount);
+				//oweAmount column
+				Cell oweAmountCell = row.getCell(5);
+				if(oweAmountCell != null){
+					BigDecimal oweAmount = new BigDecimal(oweAmountCell.getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_DOWN);
+					bill.setOweAmount(oweAmount);
+				}
+				//description column
+				Cell descriptionCell = row.getCell(6);
+				if(descriptionCell != null)
+					bill.setDescription(descriptionCell.getStringCellValue().trim());
+				bills.add(bill);
+			}
+			wb.close();
+			file.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return bills;
 	}
 
 	/**
@@ -2982,7 +3024,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		return billDto;
 	}
-	
+
 	@Override
 	public void onlinePayPmBill(OnlinePayPmBillCommand cmd) {
 		if(cmd.getPayStatus().equals("failure")){
@@ -3011,10 +3053,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"vendor type is wrong.");
 		}
-		
-		
+
+
 		Timestamp createTimeStamp = new Timestamp(cmd.getPayTime());//支付时间
-		
+
 		User user = UserContext.current().getUser();
 		Date cunnentTime = new Date();
 		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
@@ -3115,10 +3157,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill not found.");
 		}
-		
+
 		BigDecimal payedAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
 		BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).add(payedAmount);
-		
+
 		PmBillForOrderNoDTO billDto = new PmBillForOrderNoDTO();
 		billDto.setOrderNo(cmd.getOrderNo());
 		billDto.setBillName(bill.getName());
