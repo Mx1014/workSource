@@ -352,7 +352,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         
-        params.put("appkey", this.appKey);
+        params.put("appKey", this.appKey);
         String signature = SignatureHelper.computeSignature(params, this.secretKey);
         params.put("signature", signature);
         
