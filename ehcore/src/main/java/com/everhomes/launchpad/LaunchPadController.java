@@ -45,7 +45,7 @@ public class LaunchPadController extends ControllerBase {
         RestResponse resp =  new RestResponse();
         if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
             int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
-            int resultCode = commandResponse.hashCode();
+            int resultCode = commandResponse.getLaunchPadItems().hashCode();
             LOGGER.info("result code : " + resultCode);
             hashCode = hashCode + resultCode;
             if(EtagHelper.checkHeaderEtagOnly(30,resultCode+"", request, response)) {
