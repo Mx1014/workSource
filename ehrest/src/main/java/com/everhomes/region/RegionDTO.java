@@ -98,7 +98,7 @@ public class RegionDTO {
     
     @Override
     public boolean equals(Object obj){
-        if (! (obj instanceof FamilyDTO)) {
+        if (! (obj instanceof RegionDTO)) {
             return false;
         }
         return EqualsBuilder.reflectionEquals(this, obj);

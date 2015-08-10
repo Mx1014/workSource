@@ -24,6 +24,8 @@ package com.everhomes.launchpad;
  * <li>LAUNCH_APP(18): 打开应用</li>
  * <li>POST_NEW(19): 发帖动作</li>
  * <li>PM_DETAILS(20): 物业详情</li>
+ * <li>OPEN_DOOR(21): 开门</li>
+ * <li>PAY(22): 支付</li>
  * </ul>
  */
 public enum ActionType {
@@ -31,7 +33,7 @@ public enum ActionType {
       WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),POST_DETAILS((byte)9),
       CHECKIN_ACTIVITY((byte)10),OPEN_MSG_SESSION((byte)11),SEND_MSG((byte)12),OFFICIAL_URL((byte)13),
       THIRDPART_URL((byte)14),POST_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),LAUNCH_APP((byte)18),
-      POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21);
+      POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22);
     
     private byte code;
     

@@ -68,7 +68,7 @@ import com.everhomes.visibility.VisibleRegionType;
 @Component
 public class LaunchPadServiceImpl implements LaunchPadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
-    private static final String OFFICIAL_PHONE = "400-838-4688";
+    private static final String OFFICIAL_PHONE = "";
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
