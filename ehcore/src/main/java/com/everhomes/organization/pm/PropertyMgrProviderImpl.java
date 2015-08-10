@@ -906,19 +906,19 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhOrganizationContacts.class, null);
 	}
 
-	@CacheEvict(value = "CommunityPmContact", key="#CommunityPmContact.id")
+	@CacheEvict(value = "CommunityPmContact", key="#communityPmContact.id")
 	@Override
 	public void updatePropContact(CommunityPmContact communityPmContact){
 		assert(communityPmContact.getId() == null);
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationContactsDao dao = new EhOrganizationContactsDao(context.configuration());
-		dao.update(communityPmContact);
+		dao.update(ConvertHelper.convert(communityPmContact, EhOrganizationContacts.class));
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationContacts.class, communityPmContact.getId());
 	}
 
-	@CacheEvict(value = "CommunityPmContact", key="#CommunityPmContact.id")
+	@CacheEvict(value = "CommunityPmContact", key="#communityPmContact.id")
 	@Override
 	public void deletePropContact(CommunityPmContact communityPmContact){
 
