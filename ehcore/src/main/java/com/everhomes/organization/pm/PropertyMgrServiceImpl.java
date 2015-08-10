@@ -3049,7 +3049,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"the bill not found.");
 		}
 		CommunityPmBill bill2 = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
-		if(bill2 == null){
+		if(bill2 == null || bill2.getId().compareTo(bill.getId()) != 0){
 			LOGGER.error("the bill is invalid.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is invalid.");
@@ -3064,7 +3064,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Timestamp createTimeStamp = new Timestamp(payTime);//支付时间
 		BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());
 
-		User user = UserContext.current().getUser();
+		//User user = UserContext.current().getUser();
+		User user = new User();
+		user.setId(1L);
+		
 		Date cunnentTime = new Date();
 		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
 		//账单欠费金额已缴齐,无需继续缴费
