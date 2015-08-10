@@ -7,11 +7,11 @@ import com.everhomes.rest.RestResponseBase;
 import java.util.List;
 import com.everhomes.forum.PostDTO;
 
-public class SearchRestResponse extends RestResponseBase {
+public class ListUserPostedTopicsRestResponse extends RestResponseBase {
 
     private List<PostDTO> response;
 
-    public SearchRestResponse () {
+    public ListUserPostedTopicsRestResponse () {
     }
 
     public List<PostDTO> getResponse() {
