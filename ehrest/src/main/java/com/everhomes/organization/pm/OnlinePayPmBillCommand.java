@@ -1,7 +1,5 @@
 package com.everhomes.organization.pm;
 
-import java.math.BigDecimal;
-
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -30,8 +28,8 @@ public class OnlinePayPmBillCommand {
 	private String orderNo;
 	private String vendorType;
 	
-	private Long payTime;
-	private BigDecimal payAmount;
+	private String payTime;
+	private String payAmount;
 	//private String feeType;
 	public String getPayStatus() {
 		return payStatus;
@@ -58,16 +56,17 @@ public class OnlinePayPmBillCommand {
 	public void setVendorType(String vendorType) {
 		this.vendorType = vendorType;
 	}
-	public Long getPayTime() {
+	
+	public String getPayTime() {
 		return payTime;
 	}
-	public void setPayTime(Long payTime) {
+	public void setPayTime(String payTime) {
 		this.payTime = payTime;
 	}
-	public BigDecimal getPayAmount() {
+	public String getPayAmount() {
 		return payAmount;
 	}
-	public void setPayAmount(BigDecimal payAmount) {
+	public void setPayAmount(String payAmount) {
 		this.payAmount = payAmount;
 	}
 	@Override

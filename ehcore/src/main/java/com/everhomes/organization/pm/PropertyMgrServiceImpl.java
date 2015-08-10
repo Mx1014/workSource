@@ -3032,14 +3032,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"payStatus is failure.");
 		}
-
 		//success
 		if(cmd.getOrderNo() == null || cmd.getOrderNo().equals("") || 
 				cmd.getVendorType() == null || cmd.getVendorType().equals("") ||
-				cmd.getPayAmount() == null){
-			LOGGER.error("orderNo or vendor or payAmount is null or empty.");
+				cmd.getPayAmount() == null || cmd.getPayAmount().equals("") ||
+				cmd.getPayTime() == null || cmd.getPayTime().equals("")){
+			LOGGER.error("orderNo or vendor or payAmount or payAmount is null or empty.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"orderNo or vendor or payAmount is null or empty.");
+					"orderNo or vendor or payAmount or payAmount is null or empty.");
 		}
 		Long billId = Long.valueOf(cmd.getOrderNo());
 		CommunityPmBill bill = this.organizationProvider.findOranizationBillById(billId);
@@ -3048,14 +3048,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill not found.");
 		}
+		CommunityPmBill bill2 = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
+		if(bill2 == null){
+			LOGGER.error("the bill is invalid.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the bill is invalid.");
+		}
 		if(VendorType.fromCode(cmd.getVendorType()) == null){
 			LOGGER.error("vendor type is wrong.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"vendor type is wrong.");
 		}
-
-
-		Timestamp createTimeStamp = new Timestamp(cmd.getPayTime());//支付时间
+		
+		Long payTime = Long.valueOf(cmd.getPayTime());
+		Timestamp createTimeStamp = new Timestamp(payTime);//支付时间
+		BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());
 
 		User user = UserContext.current().getUser();
 		Date cunnentTime = new Date();
@@ -3095,7 +3102,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
 			familyTx.setBillId(bill.getId());
 			familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
-			familyTx.setChargeAmount(cmd.getPayAmount().negate());
+			familyTx.setChargeAmount(waitPayAmount.negate());
 			familyTx.setCreateTime(createTimeStamp);
 			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
 				familyTx.setDescription(cmd.getDescription());
@@ -3116,7 +3123,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
 			orgTx.setBillId(bill.getId());
 			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
-			orgTx.setChargeAmount(cmd.getPayAmount());
+			orgTx.setChargeAmount(waitPayAmount);
 			orgTx.setCreateTime(createTimeStamp);
 			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
 				orgTx.setDescription(cmd.getDescription());
@@ -3135,7 +3142,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			this.organizationProvider.createOrganizationBillingTransaction(orgTx);
 
 			//线上支付,将金额存到物业账号中
-			oAccount.setBalance(oAccount.getBalance().add(cmd.getPayAmount()));
+			oAccount.setBalance(oAccount.getBalance().add(waitPayAmount));
 			oAccount.setUpdateTime(timestamp);
 			this.organizationProvider.updateOrganizationBillingAccount(oAccount);
 
