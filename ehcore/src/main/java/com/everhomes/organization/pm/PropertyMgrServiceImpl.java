@@ -2699,14 +2699,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		User user = UserContext.current().getUser();
 		Date cunnentTime = new Date();
 		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
-		//账单欠费金额已缴齐,无需继续缴费
-		BigDecimal paidAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
-		BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount()).add(paidAmount);
-		if(totalAmount.compareTo(BigDecimal.ZERO) <= 0){
-			/*LOGGER.error("bill owe amount had paid.billId="+bill.getId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"bill owe amount had paid.");*/
-		}
 
 		this.dbProvider.execute(s -> {
 			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
@@ -2779,12 +2771,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			orgTx.setVendor(cmd.getVendor());
 			this.organizationProvider.createOrganizationBillingTransaction(orgTx);
 
-			if(cmd.getTxType() == TxType.ONLINE.getCode()){//线上支付,将金额存到物业账号中
-				oAccount.setBalance(oAccount.getBalance().add(cmd.getPayAmount()));
-				oAccount.setUpdateTime(timestamp);
-				this.organizationProvider.updateOrganizationBillingAccount(oAccount);
-			}
-
 			return true;
 		});
 
@@ -2792,8 +2778,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public GetPmPayStatisticsCommandResponse getPmPayStatistics(
-			GetPmPayStatisticsCommand cmd) {
+	public GetPmPayStatisticsCommandResponse getPmPayStatistics(GetPmPayStatisticsCommand cmd) {
 		if(cmd.getOrganizationId() == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3027,130 +3012,135 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void onlinePayPmBill(OnlinePayPmBillCommand cmd) {
-		if(cmd.getPayStatus().equals("failure")){
+		/*if(cmd.getPayStatus().equals("fail")){
 			LOGGER.error("payStatus is failure.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"payStatus is failure.");
-		}
+		}*/
 		//success
-		if(cmd.getOrderNo() == null || cmd.getOrderNo().equals("") || 
-				cmd.getVendorType() == null || cmd.getVendorType().equals("") ||
-				cmd.getPayAmount() == null || cmd.getPayAmount().equals("") ||
-				cmd.getPayTime() == null || cmd.getPayTime().equals("")){
-			LOGGER.error("orderNo or vendor or payAmount or payAmount is null or empty.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"orderNo or vendor or payAmount or payAmount is null or empty.");
-		}
-		Long billId = Long.valueOf(cmd.getOrderNo());
-		CommunityPmBill bill = this.organizationProvider.findOranizationBillById(billId);
-		if(bill == null){
-			LOGGER.error("the bill not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the bill not found.");
-		}
-		CommunityPmBill bill2 = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
-		if(bill2 == null || bill2.getId().compareTo(bill.getId()) != 0){
-			LOGGER.error("the bill is invalid.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the bill is invalid.");
-		}
-		if(VendorType.fromCode(cmd.getVendorType()) == null){
-			LOGGER.error("vendor type is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"vendor type is wrong.");
-		}
-		
-		Long payTime = Long.valueOf(cmd.getPayTime());
-		Timestamp createTimeStamp = new Timestamp(payTime);//支付时间
-		BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());
-
-		//User user = UserContext.current().getUser();
-		User user = new User();
-		user.setId(1L);
-		
-		Date cunnentTime = new Date();
-		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
-		//账单欠费金额已缴齐,无需继续缴费
-		BigDecimal paidAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
-		BigDecimal totalAmount = bill.getDueAmount().add(bill.getOweAmount()).add(paidAmount);
-		if(totalAmount.compareTo(BigDecimal.ZERO) <= 0){
-			/*LOGGER.error("bill owe amount had paid.billId="+bill.getId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"bill owe amount had paid.");*/
-		}
-
-		this.dbProvider.execute(s -> {
-			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
-			if(fAccount == null){
-				fAccount = new FamilyBillingAccount();
-				fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
-				fAccount.setBalance(BigDecimal.ZERO);
-				fAccount.setCreateTime(timestamp);
-				fAccount.setOwnerId(bill.getEntityId());
-				this.familyProvider.createFamilyBillingAccount(fAccount);
+		if(cmd.getPayStatus().equals("success")){
+			if(cmd.getOrderNo() == null || cmd.getOrderNo().trim().equals("") || 
+					cmd.getVendorType() == null || cmd.getVendorType().trim().equals("") ||
+					cmd.getPayAmount() == null || cmd.getPayAmount().trim().equals("") ||
+					cmd.getPayTime() == null || cmd.getPayTime().trim().equals("") ||
+					cmd.getPayAccount() == null || cmd.getPayAccount().trim().equals("") ||
+					cmd.getPayObj() == null || cmd.getPayObj().trim().equals("")){
+				LOGGER.error("orderNo or vendor or payAmount or payAmount or payAccount or payObj is null or empty.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"orderNo or vendor or payAmount or payAmount or payAccount or payObj is null or empty.");
+			}
+			Long billId = Long.valueOf(cmd.getOrderNo());
+			CommunityPmBill bill = this.organizationProvider.findOranizationBillById(billId);
+			if(bill == null){
+				LOGGER.error("the bill not found.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the bill not found.");
+			}
+			if(VendorType.fromCode(cmd.getVendorType()) == null){
+				LOGGER.error("vendor type is wrong.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"vendor type is wrong.");
+			}
+			CommunityPmBill bill2 = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
+			if(bill2 == null || bill2.getId().compareTo(bill.getId()) != 0){
+				LOGGER.error("the bill is invalid.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+						"the bill is invalid.");
 			}
 
-			OrganizationBillingAccount oAccount = this.organizationProvider.findOrganizationBillingAccount(bill.getOrganizationId());
-			if(oAccount == null){
-				oAccount = new OrganizationBillingAccount();
-				oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
-				oAccount.setBalance(BigDecimal.ZERO);
-				oAccount.setCreateTime(timestamp);
-				oAccount.setOwnerId(bill.getOrganizationId());
-				this.organizationProvider.createOrganizationBillingAccount(oAccount);
+			Long payTime = Long.valueOf(cmd.getPayTime());
+			Timestamp createTimeStamp = new Timestamp(payTime);//支付时间
+			BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());//支付金额
+
+			Date cunnentTime = new Date();
+			Timestamp timestamp = new Timestamp(cunnentTime.getTime());
+			//账单欠费金额已缴齐,无需继续缴费
+			BigDecimal paidAmount = this.familyProvider.countFamilyTransactionBillingAmountByBillId(bill.getId());
+			BigDecimal billWaitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).add(paidAmount);
+			if(billWaitPayAmount.compareTo(BigDecimal.ZERO) <= 0){
+				LOGGER.error("the bill had paid.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+						"the bill had paid.");
 			}
+			if(billWaitPayAmount.compareTo(waitPayAmount) != 0){
+				LOGGER.error("the payAmount not equal to bill wait pay amount.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+						"the payAmount not equal to bill wait pay amount.");
+			}
+			
+			this.dbProvider.execute(s -> {
+				FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
+				if(fAccount == null){
+					fAccount = new FamilyBillingAccount();
+					fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
+					fAccount.setBalance(BigDecimal.ZERO);
+					fAccount.setCreateTime(timestamp);
+					fAccount.setOwnerId(bill.getEntityId());
+					this.familyProvider.createFamilyBillingAccount(fAccount);
+				}
 
-			String uuidStr = UUID.randomUUID().toString();
+				OrganizationBillingAccount oAccount = this.organizationProvider.findOrganizationBillingAccount(bill.getOrganizationId());
+				if(oAccount == null){
+					oAccount = new OrganizationBillingAccount();
+					oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
+					oAccount.setBalance(BigDecimal.ZERO);
+					oAccount.setCreateTime(timestamp);
+					oAccount.setOwnerId(bill.getOrganizationId());
+					this.organizationProvider.createOrganizationBillingAccount(oAccount);
+				}
 
-			FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
-			familyTx.setBillId(bill.getId());
-			familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
-			familyTx.setChargeAmount(waitPayAmount.negate());
-			familyTx.setCreateTime(createTimeStamp);
-			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-				familyTx.setDescription(cmd.getDescription());
-			familyTx.setOperatorUid(user.getId());
-			familyTx.setOwnerAccountId(fAccount.getId());
-			familyTx.setOwnerId(bill.getEntityId());
-			familyTx.setPaidType(PaidType.SELFPAY.getCode());
-			/*familyTx.setResultCodeId(1);
-			familyTx.setResultCodeScope("test");
-			familyTx.setResultDesc("test description");*/
-			familyTx.setTargetAccountId(oAccount.getId());
-			familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
-			familyTx.setTxSequence(uuidStr);
-			familyTx.setTxType(TxType.ONLINE.getCode());
-			familyTx.setVendor(cmd.getVendorType());
-			this.familyProvider.createFamilyBillingTransaction(familyTx);
+				String uuidStr = UUID.randomUUID().toString();
 
-			OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-			orgTx.setBillId(bill.getId());
-			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
-			orgTx.setChargeAmount(waitPayAmount);
-			orgTx.setCreateTime(createTimeStamp);
-			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-				orgTx.setDescription(cmd.getDescription());
-			orgTx.setOperatorUid(user.getId());
-			orgTx.setOwnerAccountId(oAccount.getId());
-			orgTx.setOwnerId(bill.getOrganizationId());
-			orgTx.setPaidType(PaidType.SELFPAY.getCode());
-			/*orgTx.setResultCodeId(1);
-			orgTx.setResultCodeScope("test");
-			orgTx.setResultDesc("test description");*/
-			orgTx.setTargetAccountId(fAccount.getId());
-			orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
-			orgTx.setTxSequence(uuidStr);
-			orgTx.setTxType(TxType.ONLINE.getCode());
-			orgTx.setVendor(cmd.getVendorType());
-			this.organizationProvider.createOrganizationBillingTransaction(orgTx);
+				FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
+				familyTx.setBillId(bill.getId());
+				familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+				familyTx.setChargeAmount(waitPayAmount.negate());
+				familyTx.setCreateTime(createTimeStamp);
+				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+					familyTx.setDescription(cmd.getDescription());
+				familyTx.setOperatorUid(0L);
+				familyTx.setOwnerAccountId(fAccount.getId());
+				familyTx.setOwnerId(bill.getEntityId());
+				familyTx.setPaidType(PaidType.SELFPAY.getCode());
+				/*familyTx.setResultCodeId(1);
+				familyTx.setResultCodeScope("test");
+				familyTx.setResultDesc("test description");*/
+				familyTx.setTargetAccountId(oAccount.getId());
+				familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
+				familyTx.setTxSequence(uuidStr);
+				familyTx.setTxType(TxType.ONLINE.getCode());
+				familyTx.setVendor(cmd.getVendorType());
+				this.familyProvider.createFamilyBillingTransaction(familyTx);
 
-			//线上支付,将金额存到物业账号中
-			oAccount.setBalance(oAccount.getBalance().add(waitPayAmount));
-			oAccount.setUpdateTime(timestamp);
-			this.organizationProvider.updateOrganizationBillingAccount(oAccount);
+				OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
+				orgTx.setBillId(bill.getId());
+				orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+				orgTx.setChargeAmount(waitPayAmount);
+				orgTx.setCreateTime(createTimeStamp);
+				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+					orgTx.setDescription(cmd.getDescription());
+				orgTx.setOperatorUid(0L);
+				orgTx.setOwnerAccountId(oAccount.getId());
+				orgTx.setOwnerId(bill.getOrganizationId());
+				orgTx.setPaidType(PaidType.SELFPAY.getCode());
+				/*orgTx.setResultCodeId(1);
+				orgTx.setResultCodeScope("test");
+				orgTx.setResultDesc("test description");*/
+				orgTx.setTargetAccountId(fAccount.getId());
+				orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
+				orgTx.setTxSequence(uuidStr);
+				orgTx.setTxType(TxType.ONLINE.getCode());
+				orgTx.setVendor(cmd.getVendorType());
+				this.organizationProvider.createOrganizationBillingTransaction(orgTx);
 
-			return true;
-		});
+				//线上支付,将金额存到物业账号中
+				oAccount.setBalance(oAccount.getBalance().add(waitPayAmount));
+				oAccount.setUpdateTime(timestamp);
+				this.organizationProvider.updateOrganizationBillingAccount(oAccount);
+
+				return true;
+			});
+		}
 	}
 
 	@Override

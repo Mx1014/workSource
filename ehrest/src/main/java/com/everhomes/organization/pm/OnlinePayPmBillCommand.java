@@ -8,14 +8,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>payStatus : 支付状态:success,failure</li>
- * 	<li>description : 描述</li>
- *
- *	<li>orderNo : 订单号</li>
+ * 	<li>payStatus : 支付状态:success,fail</li>
+ * 
  * 	<li>vendorType : 支付方式,10001-支付宝，10002-微信</li>
- *
+ *	<li>orderNo : 订单号</li>
  *	<li>payTime : 支付日期</li>
  *	<li>payAmount : 支付金额</li>
+ *	<li>payAccount : 支付账号</li>
+ * 	<li>description : 描述</li>
+ * 	<li>payObj : 第三方支付通知返回的所有参数key-value字符串</li>
  *</ul>
  *
  */
@@ -23,13 +24,18 @@ public class OnlinePayPmBillCommand {
 	
 	@NotNull
 	private String payStatus;
-	private String description;
-	
-	private String orderNo;
 	private String vendorType;
+	private String orderNo;
 	
 	private String payTime;
 	private String payAmount;
+	private String payAccount;
+	
+	private String description;
+	
+	private String payObj;
+	
+	
 	//private String feeType;
 	public String getPayStatus() {
 		return payStatus;
@@ -69,17 +75,20 @@ public class OnlinePayPmBillCommand {
 	public void setPayAmount(String payAmount) {
 		this.payAmount = payAmount;
 	}
+	public String getPayAccount() {
+		return payAccount;
+	}
+	public void setPayAccount(String payAccount) {
+		this.payAccount = payAccount;
+	}
+	public String getPayObj() {
+		return payObj;
+	}
+	public void setPayObj(String payObj) {
+		this.payObj = payObj;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
