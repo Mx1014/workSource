@@ -3,8 +3,8 @@ package com.everhomes.forum;
 
 /**
  * <ul>帖子是否公开标记
- * <li>PUBLIC: 公开</li>
- * <li>PRIVATE: 不公开</li>
+ * <li>PUBLIC(0): 公开</li>
+ * <li>PRIVATE(1): 不公开</li>
  * </ul>
  */
 public enum PostPrivacy {

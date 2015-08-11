@@ -666,6 +666,21 @@ public class OrganizationController extends ControllerBase {
 		return response;
 		
 	}
-	
+    
+    /**
+     * <b>URL: /org/updateTopicPrivacy</b>
+     * <p>设置帖子是否公开</p>
+     */
+    @RequestMapping("updateTopicPrivacy")
+    @RestReturn(value=String.class)
+    public RestResponse updateTopicPrivacy(UpdateTopicPrivacyCommand cmd){
+        this.organizationService.updateTopicPrivacy(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+        
+    }
 	
 }

@@ -39,6 +39,7 @@ import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
 import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.QueryOrganizationTopicCommand;
 import com.everhomes.group.Group;
 import com.everhomes.launchpad.ItemKind;
@@ -1655,6 +1656,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return status;
 		});
 		
+	}
+	
+	@Override
+	public void updateTopicPrivacy(UpdateTopicPrivacyCommand cmd) {
+	    Long forumId = cmd.getForumId();
+	    Long topicId = cmd.getTopicId();
+	    PostPrivacy privacy = PostPrivacy.fromCode(cmd.getPrivacy());
+	    this.forumService.updatePostPrivacy(forumId, topicId, privacy);
 	}
 
 	private String getOrganizationMemberDeleteForManager(String operName,String userName, String orgName, Long managerId) {
