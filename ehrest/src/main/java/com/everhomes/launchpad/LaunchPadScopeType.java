@@ -4,10 +4,10 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>参数类型
- * <li>COUNTRY: 全国</li>
- * <li>CITY: 城市</li>
- * <li>COMMUNITY: 小区</li>
- * <li>USERDEFINED: 用户自定义</li>
+ * <li>COUNTRY(country): 全国</li>
+ * <li>CITY(city): 城市</li>
+ * <li>COMMUNITY(community): 小区</li>
+ * <li>USERDEFINED(userDefined): 用户自定义</li>
  * </ul>
  */
 public enum LaunchPadScopeType {

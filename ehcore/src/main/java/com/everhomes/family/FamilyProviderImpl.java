@@ -547,6 +547,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 					.on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
 					.where(Tables.EH_GROUPS.INTEGRAL_TAG3.eq(cityId))
 					.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+					.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
 					.limit(pageSize).offset(offset)
 					.fetch().map((r) -> {
 						GroupMember member = new GroupMember();
@@ -577,6 +578,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 					.on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
 					.where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
 					.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+					.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
 					.limit(pageSize).offset(offset)
 					.fetch().map((r) -> {
 						GroupMember member = new GroupMember();
@@ -625,6 +627,36 @@ public class FamilyProviderImpl implements FamilyProvider {
 		return members;
 	}
 
+	   @Override
+	    public List<GroupMember> listAllFamilyMembers(int offset, int pageSize) {
+
+	        List<GroupMember> members = new ArrayList<GroupMember>();
+	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+	                (DSLContext context, Object reducingContext) -> {
+
+	                    context.select(Tables.EH_GROUP_MEMBERS.fields()).from(Tables.EH_GROUP_MEMBERS)
+	                    .leftOuterJoin(Tables.EH_GROUPS)
+	                    .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+	                    .where(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+	                    .limit(pageSize).offset(offset)
+	                    .fetch().map((r) -> {
+	                        GroupMember member = new GroupMember();
+	                        member.setId(r.getValue(Tables.EH_GROUP_MEMBERS.ID));
+	                        member.setGroupId(r.getValue(Tables.EH_GROUP_MEMBERS.GROUP_ID));
+	                        member.setMemberId(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+	                        member.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
+	                        member.setMemberAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
+	                        member.setMemberStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
+	                        member.setCreateTime(r.getValue(Tables.EH_GROUP_MEMBERS.CREATE_TIME));
+	                        members.add(member);
+	                        return null;
+	                    });
+
+	                    return true;
+	                });
+
+	        return members;
+	    }
 	@Override
 	public BigDecimal countFamilyTransactionBillingAmountByBillId(Long billId){
 		List<BigDecimal> list = new ArrayList<BigDecimal>();

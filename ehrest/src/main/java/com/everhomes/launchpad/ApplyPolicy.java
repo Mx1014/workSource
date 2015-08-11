@@ -3,9 +3,9 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>策略
- * <li>DEFAULT: 默认</li>
- * <li>OVERRIDE: 覆盖</li>
- * <li>REVERT: 恢复</li>
+ * <li>DEFAULT(0): 默认</li>
+ * <li>OVERRIDE(1): 覆盖</li>
+ * <li>REVERT(2): 恢复</li>
  * </ul>
  */
 public enum ApplyPolicy {

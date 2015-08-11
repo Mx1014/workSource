@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Null;
+
 import org.apache.lucene.spatial.DistanceUtils;
+import org.hibernate.dialect.Ingres10Dialect;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -49,6 +52,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.launchpad.LaunchPadItemDTO;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -1691,19 +1695,11 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public ListAllFamilyMembersCommandResponse listAllFamilyMembers(ListAllFamilyMembersAdminCommand cmd) {
         
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());  
+        int pageOffset = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
         
-        List<GroupMember> members = this.familyProvider.listFamilyMembers(locator, pageSize + 1,null);
-            
-        
-        Long nextPageAnchor = null;
-        
-        if(members != null && members.size() > pageSize) {
-            members.remove(members.size() - 1);
-            nextPageAnchor = members.get(members.size() -1).getId();
-        }
+        List<GroupMember> members = this.familyProvider.listAllFamilyMembers(offset, pageSize);
         
         List<FamilyMemberFullDTO> results = new ArrayList<FamilyMemberFullDTO>();
         if(members != null && !members.isEmpty()){
@@ -1731,6 +1727,7 @@ public class FamilyServiceImpl implements FamilyService {
                     if(address != null){
                         familyMember.setBuildingName(address.getBuildingName());
                         familyMember.setApartmentName(address.getApartmentName());
+                        familyMember.setAddressStatus(address.getStatus());
                         
                     }
                    
@@ -1742,7 +1739,9 @@ public class FamilyServiceImpl implements FamilyService {
             });
         }
         ListAllFamilyMembersCommandResponse response = new ListAllFamilyMembersCommandResponse();
-        response.setNextPageAnchor(nextPageAnchor);
+        if(results != null && results.size() == pageSize){
+            response.setNextPageOffset(pageOffset + 1);
+        }
         response.setRequests(results);
         
         return response;

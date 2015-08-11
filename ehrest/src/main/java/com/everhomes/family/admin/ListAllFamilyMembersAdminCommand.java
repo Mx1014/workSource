@@ -6,24 +6,24 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>
  * <ul>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageOffset: 当前页码</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
 public class ListAllFamilyMembersAdminCommand {
-    private Long pageAnchor;
+    private Integer pageOffset;
     
     private Integer pageSize;
     
     public ListAllFamilyMembersAdminCommand() {
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
+    public Integer getPageOffset() {
+        return pageOffset;
     }
 
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
+    public void setPageOffset(Integer pageOffset) {
+        this.pageOffset = pageOffset;
     }
 
     public Integer getPageSize() {

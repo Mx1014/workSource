@@ -3,12 +3,12 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>参数类型
- * <li>DEFAULT：默认组</li>
- * <li>GOVAGENCIES: 首页政府部门（物业，公安，居委等）</li>
- * <li>BIZS: 商家</li>
- * <li>GAACTIONS: 政府相关，发帖动作（报修，投诉，建议，缴费等）</li>
- * <li>ACTIONBARS: 工具栏</li>
- * <li>CALLPHONES: 电话</li>
+ * <li>DEFAULT(Default)：默认组</li>
+ * <li>GOVAGENCIES(GovAgencies): 首页政府部门（物业，公安，居委等）</li>
+ * <li>BIZS(Bizs): 商家</li>
+ * <li>GAACTIONS(GaActions): 政府相关，发帖动作（报修，投诉，建议，缴费等）</li>
+ * <li>ACTIONBARS(ActionBars): 工具栏</li>
+ * <li>CALLPHONES(CallPhones): 电话</li>
  * </ul>
  */
 public enum ItemGroup {

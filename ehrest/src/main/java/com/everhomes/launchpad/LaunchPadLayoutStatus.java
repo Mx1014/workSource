@@ -3,9 +3,9 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>服务市场风格状态
- * <li>INACTIVE: 无效的</li>
- * <li>WAITING_FOR_CONFIRMATION: 待确认</li>
- * <li>ACTIVE: 正常</li>
+ * <li>INACTIVE(0): 无效的</li>
+ * <li>WAITING_FOR_CONFIRMATION(1): 待确认</li>
+ * <li>ACTIVE(2): 正常</li>
  * </ul>
  */
 public enum LaunchPadLayoutStatus {
