@@ -11,6 +11,9 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.host
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('home.url', 'http://10.1.1.91:8080', 'the home url');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/html/score/score.html', 'the relative path for user score');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/app/static/share_post/share_post.html#', 'the relative path for sharing topic');
+
+
 
 ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, 'All');
