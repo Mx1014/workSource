@@ -4,12 +4,12 @@ package com.everhomes.forum;
 /**
  * <p>帖子创建者标签</p>
  * <ul>
- * <li>USER: 普通用户</li>
- * <li>BIZ: 商家</li>
- * <li>PM: 物业</li>
- * <li>GARC: 业委，Government Agency - Resident Committee</li>
- * <li>GANC: 居委，Government Agency - Neighbor Committee</li>
- * <li>GAPS: 公安，Government Agency - Police Station</li>
+ * <li>USER("USER"): 普通用户</li>
+ * <li>BIZ("BIZ"): 商家</li>
+ * <li>PM("PM"): 物业</li>
+ * <li>GARC("GARC"): 业委，Government Agency - Resident Committee</li>
+ * <li>GANC("GANC"): 居委，Government Agency - Neighbor Committee</li>
+ * <li>GAPS("GAPS"): 公安，Government Agency - Police Station</li>
  * </ul>
  */
 public enum PostEntityTag {

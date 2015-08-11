@@ -4,10 +4,10 @@ package com.everhomes.forum;
 /**
  * <p>帖子内容类型</p>
  * <ul>
- * <li>TEXT: 文本</li>
- * <li>IMAGE: 图片</li>
- * <li>AUDIO: 音频</li>
- * <li>VIDEO: 视频</li>
+ * <li>TEXT("text"): 文本</li>
+ * <li>IMAGE("image"): 图片</li>
+ * <li>AUDIO("audio"): 音频</li>
+ * <li>VIDEO("video"): 视频</li>
  * </ul>
  */
 public enum PostContentType {
