@@ -1,5 +1,7 @@
 package com.everhomes.sequence;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.schema.tables.pojos.EhContentShardMap;
@@ -43,6 +46,9 @@ import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
 import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
 import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -53,6 +59,9 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public void syncSequence() {
@@ -79,6 +88,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(EhUsers.class, EhUsers.class, Tables.EH_USERS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USERS.ID.max()).from(Tables.EH_USERS).fetchOne().value1(); 
         });
+        
+        // user account is a special field, it default to be number stype, but it can be changed to any character only if they are unique in db
+        syncUserAccountName();
         
         syncTableSequence(EhUsers.class, EhUserGroups.class, Tables.EH_USER_GROUPS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_GROUPS.ID.max()).from(Tables.EH_USER_GROUPS).fetchOne().value1(); 
@@ -229,6 +241,48 @@ public class SequenceServiceImpl implements SequenceService {
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Sync table sequence, tableName=" + tableName + ", key=" + key + ", newSequence=" + (result[0].longValue() + 1)
                 + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+        }
+    }
+    
+    private void syncUserAccountName() {
+        int pageCount = 1000;
+        int pageNum = 1;
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<User> userList = null;
+        long maxAccountSequence = 0;
+        long temp = 0;
+        long startTime = 0;
+        long endTime = 0;
+        do {
+            startTime = System.currentTimeMillis();
+            userList = userProvider.queryUsers(locator, pageCount, null);
+            for(User user : userList) {
+                try {
+                    temp = Long.parseLong(user.getAccountName());
+                    if(temp > maxAccountSequence) {
+                        maxAccountSequence = temp;
+                    }
+                } catch(Exception e) {
+                    // no need to log and do nothing
+                }
+            }
+            endTime = System.currentTimeMillis();
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Sync user account name sequence, pageNum=" + pageNum + ", pageCount=" + pageCount 
+                    + ", dbSize=" + userList.size() + ", elapse=" + (endTime - startTime));
+            }
+            pageNum++;
+        } while(userList == null || userList.size() == 0);
+        
+        if(maxAccountSequence > 0) {
+            String key = "usr";
+            long nextSequenceBeforeReset = sequenceProvider.getNextSequence(key);
+            sequenceProvider.resetSequence(key, maxAccountSequence + 1);
+            long nextSequenceAfterReset = sequenceProvider.getNextSequence(key);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Sync user account name sequence, key=" + key + ", newSequence=" + (maxAccountSequence + 1)
+                    + ", nextSequenceBeforeReset=" + nextSequenceBeforeReset + ", nextSequenceAfterReset=" + nextSequenceAfterReset);
+            }
         }
     }
 }
