@@ -62,6 +62,20 @@ public class EhRegionsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>pinyin_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByPinyinName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.PINYIN_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>pinyin_prefix IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByPinyinPrefix(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.PINYIN_PREFIX, values);
+	}
+
+	/**
 	 * Fetch records that have <code>path IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByPath(java.lang.String... values) {

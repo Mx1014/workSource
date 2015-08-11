@@ -11,11 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 277122060;
+	private static final long serialVersionUID = 728773330;
 
 	private java.lang.Long    id;
 	private java.lang.Long    parentId;
 	private java.lang.String  name;
+	private java.lang.String  pinyinName;
+	private java.lang.String  pinyinPrefix;
 	private java.lang.String  path;
 	private java.lang.Integer level;
 	private java.lang.Byte    scopeCode;
@@ -30,6 +32,8 @@ public class EhRegions implements java.io.Serializable {
 		java.lang.Long    id,
 		java.lang.Long    parentId,
 		java.lang.String  name,
+		java.lang.String  pinyinName,
+		java.lang.String  pinyinPrefix,
 		java.lang.String  path,
 		java.lang.Integer level,
 		java.lang.Byte    scopeCode,
@@ -41,6 +45,8 @@ public class EhRegions implements java.io.Serializable {
 		this.id = id;
 		this.parentId = parentId;
 		this.name = name;
+		this.pinyinName = pinyinName;
+		this.pinyinPrefix = pinyinPrefix;
 		this.path = path;
 		this.level = level;
 		this.scopeCode = scopeCode;
@@ -72,6 +78,22 @@ public class EhRegions implements java.io.Serializable {
 
 	public void setName(java.lang.String name) {
 		this.name = name;
+	}
+
+	public java.lang.String getPinyinName() {
+		return this.pinyinName;
+	}
+
+	public void setPinyinName(java.lang.String pinyinName) {
+		this.pinyinName = pinyinName;
+	}
+
+	public java.lang.String getPinyinPrefix() {
+		return this.pinyinPrefix;
+	}
+
+	public void setPinyinPrefix(java.lang.String pinyinPrefix) {
+		this.pinyinPrefix = pinyinPrefix;
 	}
 
 	public java.lang.String getPath() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRegionsRecord> {
 
-	private static final long serialVersionUID = -18260166;
+	private static final long serialVersionUID = 1952848895;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_regions</code>
@@ -40,6 +40,16 @@ public class EhRegions extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_regions.name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_regions.pinyin_name</code>. the full pinyin of the name
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.String> PINYIN_NAME = createField("pinyin_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the full pinyin of the name");
+
+	/**
+	 * The column <code>ehcore.eh_regions.pinyin_prefix</code>. the prefix letter of every pinyin word
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRegionsRecord, java.lang.String> PINYIN_PREFIX = createField("pinyin_prefix", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the prefix letter of every pinyin word");
 
 	/**
 	 * The column <code>ehcore.eh_regions.path</code>. path from the root

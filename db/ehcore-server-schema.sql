@@ -1003,6 +1003,8 @@ CREATE TABLE `eh_regions` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
     `parent_id` BIGINT COMMENT 'id of the parent region', 
 	`name` VARCHAR(64),
+	`pinyin_name` VARCHAR(64) COMMENT 'the full pinyin of the name',
+	`pinyin_prefix` VARCHAR(64) COMMENT 'the prefix letter of every pinyin word',
 	`path` VARCHAR(128) COMMENT 'path from the root',
 	`level` INTEGER NOT NULL DEFAULT 0,
     `scope_code` TINYINT COMMENT '0 : country, 1: state/province, 2: city, 3: area, 4: neighborhood (community)',
