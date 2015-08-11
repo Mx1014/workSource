@@ -35,7 +35,7 @@ public class OrganizationController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationController.class);
 
 	@Autowired
-	OrganizationService organizationService;
+	private OrganizationService organizationService;
 
 	/**
 	 * <b>URL: /org/getUserOwningOrganizations</b>
