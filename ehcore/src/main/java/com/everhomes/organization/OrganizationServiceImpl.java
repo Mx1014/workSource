@@ -39,6 +39,7 @@ import com.everhomes.forum.NewTopicCommand;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
 import com.everhomes.forum.PostDTO;
+import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.QueryOrganizationTopicCommand;
 import com.everhomes.group.Group;
@@ -473,48 +474,78 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public PostDTO createTopic(NewTopicCommand cmd) {
-		/*User user  = UserContext.current().getUser();
-		if(cmd.getVisibleRegionId() == null){
-			LOGGER.error("organizationId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"organizationId paramter can not be null or empty");
+		if(cmd.getForumId() == null || cmd.getVisibleRegionId() == null || 
+				cmd.getVisibleRegionType() == null || cmd.getContentCategory() == null ||
+				cmd.getCreatorTag() == null || cmd.getCreatorTag().equals("") ||
+				cmd.getTargetTag() == null || cmd.getTargetTag().equals("") || 
+				cmd.getSubject() == null || cmd.getSubject().equals("")){
+			LOGGER.error("ForumId or visibleRegionId or visibleRegionTpe or creatorTag or targetTag or subject is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ForumId or visibleRegionId or visibleRegionTpe or creatorTag or targetTag or subject is null or empty.");
 		}
-		Organization organization = organizationProvider.findOrganizationById(cmd.getVisibleRegionId());
+		Organization organization = getOrganization(cmd);
 		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getVisibleRegionId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			LOGGER.error("Unable to find the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 					"Unable to find the organization.");
 		}
-		//权限控制
-		cmd.setCreatorTag(PostEntityTag.fromCode(organization.getOrganizationType()).getCode());
-		if(organization.getOrganizationType() == OrganizationType.PM.getCode() || organization.getOrganizationType() == OrganizationType.GARC.getCode()){
-			//如果是物业或者业委会发帖  VisibleRegionType = VisibleRegionType.COMMUNITY.getCode()  getVisibleRegionId = communityId 物业和业委会对应一个小区
-			cmd.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-			Community community = propertyMgrService.findPropertyOrganizationcommunity(organization.getId());
-			if(community != null){
-				cmd.setVisibleRegionId(community.getId());
-			}
-			else{
-				LOGGER.error("Unable to find the organization community.organizationId=" + cmd.getVisibleRegionId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"Unable to find the organization community.");
-			}
-		}
-		else{
-			//如果是居委会或者公安发帖  VisibleRegionType = VisibleRegionType.REGION.getCode()  getVisibleRegionId = organizationId
-			cmd.setVisibleRegionType(VisibleRegionType.REGION.getCode());
-			cmd.setVisibleRegionId(organization.getId());
-		}
-
-		if(cmd.getPrivateFlag() == null|| "".equals(cmd.getCreatorTag())){
-			cmd.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
-		}
-		if(cmd.getTargetTag() == null || "".equals(cmd.getCreatorTag())){
-			cmd.setTargetTag(PostEntityTag.USER.getCode());
-		}*/
+		this.checkUserHaveRightToNewTopic(cmd,organization);
 		cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
+	}
+	
+	private void checkUserHaveRightToNewTopic(NewTopicCommand cmd,Organization organization) {
+		User user = UserContext.current().getUser();
+		PostEntityTag creatorTag = PostEntityTag.fromCode(cmd.getCreatorTag());
+		if(creatorTag == null){
+			LOGGER.error("creatorTag format is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"creatorTag format is wrong.");
+		}
+		if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
+			OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+			if(member == null){
+				LOGGER.error("could not found member in the organization.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"could not found member in the organization.");
+			}
+		}
+	}
+
+	
+	private Organization getOrganization(NewTopicCommand cmd) {
+		PostEntityTag creatorTag = PostEntityTag.fromCode(cmd.getCreatorTag());
+		PostEntityTag targetTag = PostEntityTag.fromCode(cmd.getTargetTag());
+
+		Organization organization = null;
+		if(creatorTag == null) {
+			LOGGER.error("creatorTag could not be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"creatorTag could not be null.");
+		}
+		if(targetTag == null) {
+			LOGGER.error("targetTag could not be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"targetTag could not be null.");
+		}
+		//PostEntityTag.USER
+		switch(targetTag){
+		case USER:
+			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+		case PM:
+		case GARC:
+			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
+		case GANC:
+		case GAPS:
+			organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
+		default:
+			LOGGER.error("creatorTag or targetTag format is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"creatorTag or targetTag format is wrong.");
+		}
+
+		return organization;
 	}
 
 	@Override

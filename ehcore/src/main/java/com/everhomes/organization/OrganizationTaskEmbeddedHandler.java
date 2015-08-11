@@ -14,8 +14,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostEntityTag;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -48,10 +46,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			Organization organization = getOrganization(post);
 			if(organization == null){
 				LOGGER.error("Unable to find the organization.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 						"Unable to find the organization.");
 			}
-			this.checkUserHaveRightToNewTopic(post,organization);
 			OrganizationTask task = new OrganizationTask();
 			task.setOrganizationId(organization.getId());
 			task.setOrganizationType(organization.getOrganizationType());
@@ -61,7 +58,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setTargetId(organization.getId());
 			task.setCreatorUid(post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+			
 			OrganizationTaskType taskType = getOrganizationTaskType(post);
 			if(taskType != null) {
 				task.setTaskType(taskType.getCode());
@@ -77,30 +74,11 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 		} catch(Exception e) {
 			LOGGER.error("Failed to pre-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
 					+ ", subject=" + post.getSubject(), e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+					"Failed to pre-process the organization task.");
 		}
 
 		return post;	
-	}
-
-
-
-	private void checkUserHaveRightToNewTopic(Post post,
-			Organization organization) {
-		User user = UserContext.current().getUser();
-		PostEntityTag creatorTag = PostEntityTag.fromCode(post.getCreatorTag());
-		if(creatorTag == null){
-			LOGGER.error("creatorTag format is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"creatorTag format is wrong.");
-		}
-		if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
-			OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
-			if(member == null){
-				LOGGER.error("could not found member in the organization.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"could not found member in the organization.");
-			}
-		}
 	}
 
 	@Override
@@ -141,6 +119,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 		//PostEntityTag.USER
 		switch(targetTag){
 		case USER:
+			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getCreatorTag());break;
 		case PM:
 		case GARC:
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getTargetTag());break;
@@ -148,9 +127,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 		case GAPS:
 			organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());break;
 		default:
-			LOGGER.error("targetTag format is wrong.");
+			LOGGER.error("creatorTag or targetTag format is wrong.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"targetTag format is wrong.");
+					"creatorTag or targetTag format is wrong.");
 		}
 
 		return organization;
