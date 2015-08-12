@@ -659,10 +659,11 @@ public class FamilyProviderImpl implements FamilyProvider {
 	    }
 	@Override
 	public BigDecimal countFamilyTransactionBillingAmountByBillId(Long billId){
-		List<BigDecimal> list = new ArrayList<BigDecimal>();
+		/*List<BigDecimal> list = new ArrayList<BigDecimal>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
 				(DSLContext context , Object obj) -> {
-					Result<Record1<BigDecimal>> records = context.select(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+					Result<Record1<BigDecimal>> records = 
+							context.select(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
 							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
 					if(records != null && !records.isEmpty()){
 						records.stream().map( r -> {
@@ -681,7 +682,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 			}
 			return total;
 		}
-		return BigDecimal.ZERO;
+		return BigDecimal.ZERO;*/
+		
+		return null;
 
 	}
 
@@ -689,7 +692,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	public FamilyBillingTransactions findLastFamilyBillingTransactionByBillId(
 			Long billId) {
 
-		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
+		/*List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
 
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
 				(DSLContext context , Object object) -> {
@@ -711,7 +714,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		if(list != null && !list.isEmpty()){
 			return list.get(0);
-		}
+		}*/
 		return null;
 	}
 
@@ -740,9 +743,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 	}
 
 	@Override
-	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByBillId(
-			Long billId) {
-		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
+	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByBillId(Long billId) {
+		/*List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
 
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
 				(DSLContext context , Object object) -> {
@@ -762,7 +764,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 					return true;
 				});
 
-		return list;
+		return list;*/
+		return null;
 	}
 
 	@Override

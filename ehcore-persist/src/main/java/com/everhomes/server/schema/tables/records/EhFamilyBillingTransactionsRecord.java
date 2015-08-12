@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhFamilyBillingTransactionsRecord> implements org.jooq.Record19<java.lang.Long, java.lang.String, java.lang.Byte, java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.Long, java.lang.Byte, java.lang.Long, java.math.BigDecimal, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Integer, java.lang.String, java.lang.Long, java.lang.Byte, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1477111465;
+	private static final long serialVersionUID = -854856665;
 
 	/**
 	 * Setter for <code>ehcore.eh_family_billing_transactions.id</code>. id of the record
@@ -112,30 +112,30 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_family_billing_transactions.bill_type</code>. 0: none, 1: bills in eh_organization_bills
+	 * Setter for <code>ehcore.eh_family_billing_transactions.order_type</code>. 0: none, 1: bills in eh_organization_bills
 	 */
-	public void setBillType(java.lang.Byte value) {
+	public void setOrderType(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_family_billing_transactions.bill_type</code>. 0: none, 1: bills in eh_organization_bills
+	 * Getter for <code>ehcore.eh_family_billing_transactions.order_type</code>. 0: none, 1: bills in eh_organization_bills
 	 */
-	public java.lang.Byte getBillType() {
+	public java.lang.Byte getOrderType() {
 		return (java.lang.Byte) getValue(7);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_family_billing_transactions.bill_id</code>.
+	 * Setter for <code>ehcore.eh_family_billing_transactions.order_id</code>.
 	 */
-	public void setBillId(java.lang.Long value) {
+	public void setOrderId(java.lang.Long value) {
 		setValue(8, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_family_billing_transactions.bill_id</code>.
+	 * Getter for <code>ehcore.eh_family_billing_transactions.order_id</code>.
 	 */
-	public java.lang.Long getBillId() {
+	public java.lang.Long getOrderId() {
 		return (java.lang.Long) getValue(8);
 	}
 
@@ -372,7 +372,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Byte> field8() {
-		return com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS.BILL_TYPE;
+		return com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS.ORDER_TYPE;
 	}
 
 	/**
@@ -380,7 +380,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field9() {
-		return com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID;
+		return com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS.ORDER_ID;
 	}
 
 	/**
@@ -524,7 +524,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	 */
 	@Override
 	public java.lang.Byte value8() {
-		return getBillType();
+		return getOrderType();
 	}
 
 	/**
@@ -532,7 +532,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	 */
 	@Override
 	public java.lang.Long value9() {
-		return getBillId();
+		return getOrderId();
 	}
 
 	/**
@@ -683,7 +683,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	 */
 	@Override
 	public EhFamilyBillingTransactionsRecord value8(java.lang.Byte value) {
-		setBillType(value);
+		setOrderType(value);
 		return this;
 	}
 
@@ -692,7 +692,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	 */
 	@Override
 	public EhFamilyBillingTransactionsRecord value9(java.lang.Long value) {
-		setBillId(value);
+		setOrderId(value);
 		return this;
 	}
 
@@ -808,7 +808,7 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 	/**
 	 * Create a detached, initialised EhFamilyBillingTransactionsRecord
 	 */
-	public EhFamilyBillingTransactionsRecord(java.lang.Long id, java.lang.String txSequence, java.lang.Byte txType, java.lang.Long ownerId, java.lang.Long ownerAccountId, java.lang.Byte targetAccountType, java.lang.Long targetAccountId, java.lang.Byte billType, java.lang.Long billId, java.math.BigDecimal chargeAmount, java.lang.String description, java.lang.String vendor, java.lang.String payAccount, java.lang.String resultCodeScope, java.lang.Integer resultCodeId, java.lang.String resultDesc, java.lang.Long operatorUid, java.lang.Byte paidType, java.sql.Timestamp createTime) {
+	public EhFamilyBillingTransactionsRecord(java.lang.Long id, java.lang.String txSequence, java.lang.Byte txType, java.lang.Long ownerId, java.lang.Long ownerAccountId, java.lang.Byte targetAccountType, java.lang.Long targetAccountId, java.lang.Byte orderType, java.lang.Long orderId, java.math.BigDecimal chargeAmount, java.lang.String description, java.lang.String vendor, java.lang.String payAccount, java.lang.String resultCodeScope, java.lang.Integer resultCodeId, java.lang.String resultDesc, java.lang.Long operatorUid, java.lang.Byte paidType, java.sql.Timestamp createTime) {
 		super(com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS);
 
 		setValue(0, id);
@@ -818,8 +818,8 @@ public class EhFamilyBillingTransactionsRecord extends org.jooq.impl.UpdatableRe
 		setValue(4, ownerAccountId);
 		setValue(5, targetAccountType);
 		setValue(6, targetAccountId);
-		setValue(7, billType);
-		setValue(8, billId);
+		setValue(7, orderType);
+		setValue(8, orderId);
 		setValue(9, chargeAmount);
 		setValue(10, description);
 		setValue(11, vendor);
