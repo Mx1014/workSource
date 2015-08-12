@@ -119,7 +119,12 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 		//PostEntityTag.USER
 		switch(targetTag){
 		case USER:
-			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getCreatorTag());break;
+			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
+				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getCreatorTag());break;
+			}
+			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
+				organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());break;
+			}
 		case PM:
 		case GARC:
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getTargetTag());break;

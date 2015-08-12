@@ -950,13 +950,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 
 	@Override
-	public List<CommunityPmContact> listCommunityPmContacts(Long communityId) {
+	public List<CommunityPmContact> listCommunityPmContacts(Long orgId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		List<CommunityPmContact> result  = new ArrayList<CommunityPmContact>();
 		SelectQuery<EhOrganizationContactsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_CONTACTS);
-		if(communityId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_CONTACTS.ORGANIZATION_ID.eq(communityId));
+		if(orgId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_CONTACTS.ORGANIZATION_ID.eq(orgId));
 
 		query.addOrderBy(Tables.EH_ORGANIZATION_CONTACTS.ID.desc());
 		query.fetch().map((r) -> {

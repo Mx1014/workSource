@@ -20,9 +20,7 @@ public class ListTopicsByTypeCommand {
 	private Integer pageSize;
 	@NotNull
 	private Long organizationId;
-	@NotNull
 	private String taskType;
-	@NotNull
 	private Byte taskStatus;
 	
 	public Byte getTaskStatus() {

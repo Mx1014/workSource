@@ -7,8 +7,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>organizationId：组织id。</li>
  * <li>contactName：联系名称</li>
- * <li>contactType：联系类型。0-手机号，1-邮箱 {@link com.everhomes.use.IdentifierType}</li>
- * <li>contactToken：联系方式:手机号/邮箱</li>
+ * <li>contactType：联系类型。0-手机号，1-邮箱 {@link com.everhomes.user.IdentifierType}</li>
+ * <li>contactToken：联系方式:手机号/邮箱</li>s
  * </ul>
  */
 public class CreateOrganizationContactCommand {

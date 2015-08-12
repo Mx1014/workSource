@@ -1,7 +1,12 @@
 package com.everhomes.organization;
 
 import javax.validation.constraints.NotNull;
-
+/**
+ * <ul>
+ * 	<li>organizationId : 组织id</li>
+ *</ul>
+ *
+ */
 public class SetCurrentOrganizationCommand {
     @NotNull
     private Long organizationId;
