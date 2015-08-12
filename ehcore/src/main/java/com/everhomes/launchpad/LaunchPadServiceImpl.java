@@ -36,6 +36,8 @@ import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.DeleteLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommand;
+import com.everhomes.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommandResponse;
+import com.everhomes.launchpad.admin.LaunchPadItemAdminDTO;
 import com.everhomes.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
@@ -778,23 +780,23 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
 
     @Override
-    public GetLaunchPadItemsByKeywordCommandResponse getLaunchPadItemsByKeyword(GetLaunchPadItemsByKeywordAdminCommand cmd) {
+    public GetLaunchPadItemsByKeywordAdminCommandResponse getLaunchPadItemsByKeyword(GetLaunchPadItemsByKeywordAdminCommand cmd) {
         
         final int size = this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
         final int pageOffset = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? size : cmd.getPageSize();
-        List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
+        List<LaunchPadItemAdminDTO> result = new ArrayList<LaunchPadItemAdminDTO>();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
         List<LaunchPadItem> launchPadItems = this.launchPadProvider.getLaunchPadItemsByKeyword(cmd.getKeyword(),offset,pageSize);
         if(launchPadItems != null && !launchPadItems.isEmpty()){
              launchPadItems.stream().map(r ->{
-                 result.add(ConvertHelper.convert(r, LaunchPadItemDTO.class));
+                 result.add(ConvertHelper.convert(r, LaunchPadItemAdminDTO.class));
                  return null;
             }).collect(Collectors.toList());
         }
       
-        GetLaunchPadItemsByKeywordCommandResponse response = new GetLaunchPadItemsByKeywordCommandResponse();
+        GetLaunchPadItemsByKeywordAdminCommandResponse response = new GetLaunchPadItemsByKeywordAdminCommandResponse();
         if(result.size() == pageSize){
             response.setNextPageOffset(pageOffset + 1);
         }

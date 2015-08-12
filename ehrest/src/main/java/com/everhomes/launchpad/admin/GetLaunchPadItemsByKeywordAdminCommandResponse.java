@@ -1,11 +1,12 @@
 // @formatter:off
-package com.everhomes.launchpad;
+package com.everhomes.launchpad.admin;
 
 
 
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.launchpad.LaunchPadItemDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,19 +14,19 @@ import com.everhomes.util.StringHelper;
  * <li>launchPadItems: item列表，参考{@link com.everhomes.launchpad.LaunchPadItemDTO}</li>
  * </ul>
  */
-public class GetLaunchPadItemsByKeywordCommandResponse {
+public class GetLaunchPadItemsByKeywordAdminCommandResponse {
     
-    @ItemType(LaunchPadItemDTO.class)
-    private List<LaunchPadItemDTO> launchPadItems;
+    @ItemType(LaunchPadItemAdminDTO.class)
+    private List<LaunchPadItemAdminDTO> launchPadItems;
     private Integer nextPageOffset;
-    public GetLaunchPadItemsByKeywordCommandResponse() {
+    public GetLaunchPadItemsByKeywordAdminCommandResponse() {
     }
     
-    public List<LaunchPadItemDTO> getLaunchPadItems() {
+    public List<LaunchPadItemAdminDTO> getLaunchPadItems() {
         return launchPadItems;
     }
 
-    public void setLaunchPadItems(List<LaunchPadItemDTO> launchPadItems) {
+    public void setLaunchPadItems(List<LaunchPadItemAdminDTO> launchPadItems) {
         this.launchPadItems = launchPadItems;
     }
 
