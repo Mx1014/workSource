@@ -662,7 +662,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 		List<BigDecimal> list = new ArrayList<BigDecimal>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
 				(DSLContext context , Object obj) -> {
-					Result<Record1<BigDecimal>> records = context.select(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+					Result<Record1<BigDecimal>> records = 
+							context.select(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
 							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
 					if(records != null && !records.isEmpty()){
 						records.stream().map( r -> {

@@ -97,6 +97,8 @@ import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationBillingTransactions;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationOrder;
+import com.everhomes.organization.OrganizationOrderStatus;
 import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -128,6 +130,7 @@ import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.visibility.VisibleRegionType;
+
 /*
  * //物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
  */
@@ -2697,17 +2700,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 
 		User user = UserContext.current().getUser();
-		Date cunnentTime = new Date();
-		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
+		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());//当前时间
+		Timestamp payTimeStamp = new Timestamp(cmd.getPayTime());//支付时间
+		String uuidStr = UUID.randomUUID().toString();//uuid
+		StringBuilder builder = new StringBuilder();
+		if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+			builder.append(cmd.getDescription()+" ");
+		if(cmd.getTelephone() != null && !cmd.getTelephone().isEmpty())
+			builder.append(cmd.getTelephone()+" ");
+		if(cmd.getOwnerName() != null && !cmd.getOwnerName().isEmpty())
+			builder.append(cmd.getOwnerName());
+		String description = builder.toString();//描述
 
 		this.dbProvider.execute(s -> {
 			//创建物业订单
+			OrganizationOrder order = new OrganizationOrder();
+			order.setAmount(cmd.getPayAmount());
+			order.setBillId(bill.getId());
+			order.setCreateTime(currentTimestamp);
+			order.setDescription(description);
+			order.setOwnerId(user.getId());
+			order.setPaidTime(payTimeStamp);
+			order.setPayerId(user.getId());
+			order.setStatus(OrganizationOrderStatus.PAID.getCode());
+			this.organizationProvider.createOrganizationOrder(order);
+			
 			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
 			if(fAccount == null){
 				fAccount = new FamilyBillingAccount();
 				fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
 				fAccount.setBalance(BigDecimal.ZERO);
-				fAccount.setCreateTime(timestamp);
+				fAccount.setCreateTime(currentTimestamp);
 				fAccount.setOwnerId(bill.getEntityId());
 				this.familyProvider.createFamilyBillingAccount(fAccount);
 			}
@@ -2717,26 +2740,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				oAccount = new OrganizationBillingAccount();
 				oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
 				oAccount.setBalance(BigDecimal.ZERO);
-				oAccount.setCreateTime(timestamp);
+				oAccount.setCreateTime(currentTimestamp);
 				oAccount.setOwnerId(bill.getOrganizationId());
 				this.organizationProvider.createOrganizationBillingAccount(oAccount);
 			}
 
-			Timestamp createTimeStamp = new Timestamp(cmd.getPayTime());
-			String uuidStr = UUID.randomUUID().toString();
-			StringBuilder builder = new StringBuilder();
-			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-				builder.append(cmd.getDescription()+" ");
-			if(cmd.getTelephone() != null && !cmd.getTelephone().isEmpty())
-				builder.append(cmd.getTelephone()+" ");
-			if(cmd.getOwnerName() != null && !cmd.getOwnerName().isEmpty())
-				builder.append(cmd.getOwnerName());
-
 			FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
-			familyTx.setBillId(bill.getId());
+			familyTx.setBillId(order.getId());
 			familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
 			familyTx.setChargeAmount(cmd.getPayAmount().negate());
-			familyTx.setCreateTime(createTimeStamp);
+			familyTx.setCreateTime(payTimeStamp);
 			familyTx.setDescription(builder.toString());
 			familyTx.setOperatorUid(user.getId());
 			familyTx.setOwnerAccountId(fAccount.getId());
@@ -2756,7 +2769,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			/*orgTx.setBillId(bill.getId());
 			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 			orgTx.setChargeAmount(cmd.getPayAmount());
-			orgTx.setCreateTime(createTimeStamp);
+			orgTx.setCreateTime(payTimeStamp);
 			orgTx.setDescription(builder.toString());
 			orgTx.setOperatorUid(user.getId());
 			orgTx.setOwnerAccountId(oAccount.getId());

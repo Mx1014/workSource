@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.swing.text.TabExpander;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -38,6 +40,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactions
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
@@ -45,11 +48,13 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransaction
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -892,6 +897,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(r != null)
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
+	}
+
+
+	@Override
+	public void createOrganizationOrder(OrganizationOrder order) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		InsertQuery<EhOrganizationOrdersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_ORDERS);
+		query.setRecord(ConvertHelper.convert(order, EhOrganizationOrdersRecord.class));
+		query.setReturning(Tables.EH_ORGANIZATION_ORDERS.ID);
+		query.execute();
+		order.setId(query.getReturnedRecord().getId());
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationOrders.class, null);
 	}
 
 }
