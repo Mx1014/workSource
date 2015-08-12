@@ -74,6 +74,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhBusinesses EH_BUSINESSES = com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES;
 
 	/**
+	 * The table ehcore.eh_business_assigned_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessAssignedScopes EH_BUSINESS_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhBusinessAssignedScopes.EH_BUSINESS_ASSIGNED_SCOPES;
+
+	/**
 	 * The table ehcore.eh_business_categories
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinessCategories EH_BUSINESS_CATEGORIES = com.everhomes.server.schema.tables.EhBusinessCategories.EH_BUSINESS_CATEGORIES;
@@ -312,6 +317,11 @@ public class Tables {
 	 * The table ehcore.eh_organization_members
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationMembers EH_ORGANIZATION_MEMBERS = com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS;
+
+	/**
+	 * The table ehcore.eh_organization_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationOrders EH_ORGANIZATION_ORDERS = com.everhomes.server.schema.tables.EhOrganizationOrders.EH_ORGANIZATION_ORDERS;
 
 	/**
 	 * The table ehcore.eh_organization_owners

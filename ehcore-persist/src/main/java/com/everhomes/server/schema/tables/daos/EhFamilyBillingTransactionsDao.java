@@ -125,6 +125,13 @@ public class EhFamilyBillingTransactionsDao extends org.jooq.impl.DAOImpl<com.ev
 	}
 
 	/**
+	 * Fetch records that have <code>pay_account IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyBillingTransactions> fetchByPayAccount(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhFamilyBillingTransactions.EH_FAMILY_BILLING_TRANSACTIONS.PAY_ACCOUNT, values);
+	}
+
+	/**
 	 * Fetch records that have <code>result_code_scope IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhFamilyBillingTransactions> fetchByResultCodeScope(java.lang.String... values) {

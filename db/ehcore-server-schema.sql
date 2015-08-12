@@ -1255,6 +1255,24 @@ CREATE TABLE `eh_organization_bills` (
 #
 # member of global partition
 #
+DROP TABLE IF EXISTS `eh_organization_orders`;
+CREATE TABLE `eh_organization_orders` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `bill_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to id of eh_organization_bills',
+    `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who make the order',
+    `payer_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who pay the order',
+	`paid_time` DATETIME COMMENT 'the pay time of the bill',
+	`amount` DECIMAL(10,2) COMMENT 'the paid money amount',
+	`description` TEXT,
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waiting for pay, 2: paid',
+    `create_time` DATETIME,
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global partition
+#
 DROP TABLE IF EXISTS `eh_organization_billing_accounts`;
 CREATE TABLE `eh_organization_billing_accounts` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
@@ -1286,6 +1304,7 @@ CREATE TABLE `eh_organization_billing_transactions` (
 	`charge_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
 	`description` TEXT COMMENT 'the description for the transaction',
 	`vendor` VARCHAR(128) DEFAULT '' COMMENT 'which third-part pay vendor is used',
+	`pay_account` VARCHAR(128) DEFAULT '' COMMENT 'the pay account from third-part pay vendor',
 	`result_code_scope` VARCHAR(128) DEFAULT '' COMMENT 'the scope of result code, defined in zuolin',
 	`result_code_id` INT NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
 	`result_desc` VARCHAR(2048) DEFAULT '' COMMENT 'the description of the transaction',
@@ -1450,6 +1469,7 @@ CREATE TABLE `eh_family_billing_transactions` (
 	`charge_amount` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT 'the amount of money paid to target(negative) or received from target(positive)',
 	`description` TEXT COMMENT 'the description for the transaction',
 	`vendor` VARCHAR(128) DEFAULT '' COMMENT 'which third-part pay vendor is used',
+	`pay_account` VARCHAR(128) DEFAULT '' COMMENT 'the pay account from third-part pay vendor',
 	`result_code_scope` VARCHAR(128) DEFAULT '' COMMENT 'the scope of result code, defined in zuolin',
 	`result_code_id` INT NOT NULL DEFAULT 0 COMMENT 'the code id occording to scope',
 	`result_desc` VARCHAR(2048) DEFAULT '' COMMENT 'the description of the transaction',
@@ -2265,6 +2285,24 @@ CREATE TABLE `eh_businesses` (
 #
 DROP TABLE IF EXISTS `eh_business_visible_scopes`;
 CREATE TABLE `eh_business_visible_scopes` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_id` BIGINT NOT NULL COMMENT 'owner business id',
+    `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city',
+    `scope_id` BIGINT,
+    
+    PRIMARY KEY (`id`),
+	UNIQUE `u_eh_scope_owner_code_id`(`owner_id`, `scope_code`, `scope_id`),
+    FOREIGN KEY `fk_eh_bussiness_scope_owner`(`owner_id`) REFERENCES `eh_businesses`(`id`) ON DELETE CASCADE,
+    INDEX `i_eh_bussiness_scope_owner_id`(`owner_id`),
+    INDEX `i_eh_bussiness_scope_target`(`scope_code`, `scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_business_assigned_scopes`;
+CREATE TABLE `eh_business_assigned_scopes` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_id` BIGINT NOT NULL COMMENT 'owner business id',
     `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city',

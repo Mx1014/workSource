@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBillingTransactions implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1872982668;
+	private static final long serialVersionUID = 1477114968;
 
 	private java.lang.Long       id;
 	private java.lang.String     txSequence;
@@ -25,6 +25,7 @@ public class EhOrganizationBillingTransactions implements java.io.Serializable {
 	private java.math.BigDecimal chargeAmount;
 	private java.lang.String     description;
 	private java.lang.String     vendor;
+	private java.lang.String     payAccount;
 	private java.lang.String     resultCodeScope;
 	private java.lang.Integer    resultCodeId;
 	private java.lang.String     resultDesc;
@@ -47,6 +48,7 @@ public class EhOrganizationBillingTransactions implements java.io.Serializable {
 		java.math.BigDecimal chargeAmount,
 		java.lang.String     description,
 		java.lang.String     vendor,
+		java.lang.String     payAccount,
 		java.lang.String     resultCodeScope,
 		java.lang.Integer    resultCodeId,
 		java.lang.String     resultDesc,
@@ -66,6 +68,7 @@ public class EhOrganizationBillingTransactions implements java.io.Serializable {
 		this.chargeAmount = chargeAmount;
 		this.description = description;
 		this.vendor = vendor;
+		this.payAccount = payAccount;
 		this.resultCodeScope = resultCodeScope;
 		this.resultCodeId = resultCodeId;
 		this.resultDesc = resultDesc;
@@ -168,6 +171,14 @@ public class EhOrganizationBillingTransactions implements java.io.Serializable {
 
 	public void setVendor(java.lang.String vendor) {
 		this.vendor = vendor;
+	}
+
+	public java.lang.String getPayAccount() {
+		return this.payAccount;
+	}
+
+	public void setPayAccount(java.lang.String payAccount) {
+		this.payAccount = payAccount;
 	}
 
 	public java.lang.String getResultCodeScope() {

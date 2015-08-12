@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBillingTransactions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord> {
 
-	private static final long serialVersionUID = -350363228;
+	private static final long serialVersionUID = 392985989;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_billing_transactions</code>
@@ -85,6 +85,11 @@ public class EhOrganizationBillingTransactions extends org.jooq.impl.TableImpl<c
 	 * The column <code>ehcore.eh_organization_billing_transactions.vendor</code>. which third-part pay vendor is used
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.String> VENDOR = createField("vendor", org.jooq.impl.SQLDataType.VARCHAR.length(128).defaulted(true), this, "which third-part pay vendor is used");
+
+	/**
+	 * The column <code>ehcore.eh_organization_billing_transactions.pay_account</code>. the pay account from third-part pay vendor
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.String> PAY_ACCOUNT = createField("pay_account", org.jooq.impl.SQLDataType.VARCHAR.length(128).defaulted(true), this, "the pay account from third-part pay vendor");
 
 	/**
 	 * The column <code>ehcore.eh_organization_billing_transactions.result_code_scope</code>. the scope of result code, defined in zuolin
