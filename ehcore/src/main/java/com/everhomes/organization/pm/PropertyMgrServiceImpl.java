@@ -2746,8 +2746,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 
 			FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
-			familyTx.setBillId(order.getId());
-			familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+			/*familyTx.setBillId(order.getId());
+			familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 			familyTx.setChargeAmount(cmd.getPayAmount().negate());
 			familyTx.setCreateTime(payTimeStamp);
 			familyTx.setDescription(builder.toString());
@@ -3106,8 +3106,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				String uuidStr = UUID.randomUUID().toString();
 
 				FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
-				familyTx.setBillId(bill.getId());
-				familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+				/*familyTx.setBillId(bill.getId());
+				familyTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 				familyTx.setChargeAmount(waitPayAmount.negate());
 				familyTx.setCreateTime(createTimeStamp);
 				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
