@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationBillingTransactions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord> {
 
-	private static final long serialVersionUID = 392985989;
+	private static final long serialVersionUID = 1993933557;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_billing_transactions</code>
@@ -62,14 +62,14 @@ public class EhOrganizationBillingTransactions extends org.jooq.impl.TableImpl<c
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Long> TARGET_ACCOUNT_ID = createField("target_account_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_organization_billing_transactions.bill_type</code>. 0: none, 1: bills in eh_organization_bills
+	 * The column <code>ehcore.eh_organization_billing_transactions.order_type</code>. 0: none, 1: orders in eh_organization_orders
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Byte> BILL_TYPE = createField("bill_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: bills in eh_organization_bills");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Byte> ORDER_TYPE = createField("order_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: orders in eh_organization_orders");
 
 	/**
-	 * The column <code>ehcore.eh_organization_billing_transactions.bill_id</code>.
+	 * The column <code>ehcore.eh_organization_billing_transactions.order_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Long> BILL_ID = createField("bill_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationBillingTransactionsRecord, java.lang.Long> ORDER_ID = createField("order_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organization_billing_transactions.charge_amount</code>. the amount of money paid to target(negative) or received from target(positive)
