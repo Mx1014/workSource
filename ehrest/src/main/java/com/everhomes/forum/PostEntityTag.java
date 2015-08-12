@@ -10,10 +10,11 @@ package com.everhomes.forum;
  * <li>GARC("GARC"): 业委，Government Agency - Resident Committee</li>
  * <li>GANC("GANC"): 居委，Government Agency - Neighbor Committee</li>
  * <li>GAPS("GAPS"): 公安，Government Agency - Police Station</li>
+ * <li>GACW("GACW"): 社区工作站，Government Agency - Community Workstation</li>
  * </ul>
  */
 public enum PostEntityTag {
-    USER("USER"), BIZ("BIZ"), PM("PM"), GARC("GARC"), GANC("GANC"), GAPS("GAPS");
+    USER("USER"), BIZ("BIZ"), PM("PM"), GARC("GARC"), GANC("GANC"), GAPS("GAPS"), GACW("GACW");
     
     private String code;
     private PostEntityTag(String code) {
