@@ -559,7 +559,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public BigDecimal getOrgBillTxAmountByBillId(Long billId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-		Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
+		/*Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
 				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
 
 		if(records != null && !records.isEmpty()){
@@ -571,7 +571,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return total;
 		}
 		else
-			return BigDecimal.ZERO;
+			return BigDecimal.ZERO;*/
+		return null;
 	}
 
 	@Cacheable(value="findOrganizationTaskById", key="#id", unless="#result == null")
@@ -689,7 +690,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		SelectQuery<Record> query = context.selectQuery();
 		query.addFrom(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS);
-		query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(Tables.EH_ORGANIZATION_BILLS.ID));
+		//query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(Tables.EH_ORGANIZATION_BILLS.ID));
 
 		if(startTime != null && endTime != null)
 			query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTime)

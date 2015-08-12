@@ -2701,6 +2701,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
 
 		this.dbProvider.execute(s -> {
+			//创建物业订单
 			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
 			if(fAccount == null){
 				fAccount = new FamilyBillingAccount();
