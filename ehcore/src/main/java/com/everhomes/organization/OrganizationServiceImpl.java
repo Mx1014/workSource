@@ -131,7 +131,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
 	private RegionProvider regionProvider;
-	
+
 	@Autowired
 	LocaleTemplateService localeTemplateService;
 
@@ -208,15 +208,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
 		if(organization == null){
-			   LOGGER.error("Unable to find the organization.");
-			      throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-			        "Unable to find the organization.");
+			LOGGER.error("Unable to find the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
 		}
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
 		if(member != null){
 			LOGGER.error("User is in the organization.");
-		      throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-		        "User is in the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"User is in the organization.");
 		}
 		member = createOrganizationMember(user,organization.getId(),cmd.getContactDescription());
 		organizationProvider.createOrganizationMember(member);
@@ -499,7 +499,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
 	}
-	
+
 	private void checkUserHaveRightToNewTopic(NewTopicCommand cmd,Organization organization) {
 		User user = UserContext.current().getUser();
 		PostEntityTag creatorTag = PostEntityTag.fromCode(cmd.getCreatorTag());
@@ -518,7 +518,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 	}
 
-	
+
 	private Organization getOrganization(NewTopicCommand cmd) {
 		PostEntityTag creatorTag = PostEntityTag.fromCode(cmd.getCreatorTag());
 		PostEntityTag targetTag = PostEntityTag.fromCode(cmd.getTargetTag());
@@ -540,9 +540,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
 				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
 			}
-			/*else if(creatorTag.getCode().equals(PostEntityTag.GANC.getCode()) || creatorTag.getCode().equals(PostEntityTag.GAPS.getCode())){
+			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
 				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
-			}*/
+			}
 		case PM:
 		case GARC:
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
@@ -660,7 +660,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
 	private void sendComment(long topicId, long forumId, long orgId, long userId, long category) {
-		
+
 		Post comment = new Post();
 		comment.setParentPostId(topicId);
 		comment.setForumId(forumId);
@@ -678,21 +678,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private String getOrganizationAssignTopicForCommentTemplate(long orgId,long userId) {
-		
+
 		Map<String,Object> map = new HashMap<String, Object>();
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
 		if(member != null){
 			map.put("memberName", member.getContactName());
 			map.put("memberContactToken", member.getContactToken());
 		}
-		
+
 		User user = userProvider.findUserById(member.getTargetId());
-        String locale = user.getLocale();
-        if(locale == null) 
-        	locale = "zh_CN";
-		
+		String locale = user.getLocale();
+		if(locale == null) 
+			locale = "zh_CN";
+
 		String notifyText = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_COMMENT, locale, map, "");
-		
+
 		return notifyText;
 	}
 
@@ -891,22 +891,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		User user  = UserContext.current().getUser();
 		//权限控制
 		String organizationId = String.valueOf(cmd.getOrganizationId());
-		//		List<UserProfile> userProfiles = userActivityProvider.findProfileByUid(user.getId());
-		//		String organizationId = String.valueOf(cmd.getOrganizationId());
-		//		
-		//		if(userProfiles != null && userProfiles.size() > 0){
-		//			for (UserProfile profile : userProfiles) {
-		//				if(organizationId.equals(profile.getItemValue())){
-		//					userProfile = profile;
-		//				}
-		//			}
-		//			UserProfile userProfile = userProfiles.get(0) ;
-		//			userProfile.setItemValue(organizationId);
-		//			
-		//		}
 		userActivityProvider.updateUserProfile(user.getId(), "currentOrganizationName", organizationId);
-
 	}
+
 	@Override
 	public  OrganizationDTO getUserCurrentOrganization() {
 		User user  = UserContext.current().getUser();
@@ -921,7 +908,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 			}
 			//			userProfile = userProfiles.get(0) ;
-
 		}
 		if(userProfile != null){
 			Long organizationId = Long.parseLong((userProfile.getItemValue()));
@@ -1069,46 +1055,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Unable to find the community.");
 		}
-
-		List<OrganizationCommunity> orgComunitys = this.organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
-
-		if(orgComunitys != null && !orgComunitys.isEmpty()){
-
-			Long organizationId = 0L;
-			for(int i=0;i<orgComunitys.size();i++){
-				Organization org = this.organizationProvider.findOrganizationById(orgComunitys.get(i).getOrganizationId());
-				if(org != null && org.getOrganizationType().equals(cmd.getOrganizationType())){
-					organizationId = org.getId();
-					break;
-				}
-			}
-
-			if(organizationId != 0){
-				User user = UserContext.current().getUser();
-				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
-				if(member != null){
-					member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
-					this.organizationProvider.updateOrganizationMember(member);
-					return 1;
-				}
-				else{
-					LOGGER.error("Unable to reject organization ，because userId = " + user.getId() +" is not in the organization : " + organizationId);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Unable to reject organization ，because user is not in the organization");
-				}
-			}
-			else{
-				LOGGER.error("Unable to reject organization ，because organization not found.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Unable to find the organization so can not reject");
-			}
-		}
-		else{
+		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
+		if(organization == null){
 			LOGGER.error("Unable to find the organization by communityId : " + cmd.getCommunityId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization by communityId : " + cmd.getCommunityId());
+					"Unable to find the organization.");
 		}
 
+		User user = UserContext.current().getUser();
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+		if(member == null){
+			LOGGER.error("Unable to reject organization ，because userId = " + user.getId() +" is not in the organization : " + organization.getId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to reject organization ，because user is not in the organization");
+		}
+		member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+		this.organizationProvider.updateOrganizationMember(member);
+		return 1;
 	}
 
 	@Override
@@ -1207,18 +1170,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return status;
 		});
 	}
-	
+
 	private String getOrganizationMemberApproveForManager(String operName, String userName, String orgName, Long managerId) {
 		User user = this.userProvider.findUserById(managerId);
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
-		
+
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("memberName", operName);
 		map.put("userName", userName);
 		map.put("orgName", orgName);
-		
+
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_APPROVE_FOR_MANAGER, locale, map, "");
 		return template;
@@ -1229,11 +1192,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
-		
+
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("memberName", operName);
 		map.put("orgName", orgName);
-		
+
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_APPROVE_FOR_APPLICANT, locale, map, "");
 		return template;
@@ -1308,12 +1271,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
-		
+
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("memberName", operName);
 		map.put("userName", userName);
 		map.put("orgName", orgName);
-		
+
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_REJECT_FOR_MANAGER, locale, map, "");
 		return template;
@@ -1324,11 +1287,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
-		
+
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("memberName", operName);
 		map.put("orgName", orgName);
-		
+
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_REJECT_FOR_APPLICANT, locale, map, "");
 		return template;
@@ -1336,10 +1299,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
-		if(cmd.getOrganizationId() == null || cmd.getTaskType() == null || cmd.getTaskType().isEmpty() || cmd.getTaskStatus() == null){
-			LOGGER.error("propterty organizationId or taskType or taskStatus paramter can not be null or empty");
+		if(cmd.getOrganizationId() == null){
+			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty organizationId or taskType or taskStatus paramter can not be null or empty");
+					"propterty organizationId paramter can not be null or empty");
 		}
 		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		if(organization == null){
@@ -1427,10 +1390,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void sendSmToOrgMemberForAssignOrgTopic(Organization organization,OrganizationMember operOrgMember, OrganizationMember desOrgMember,OrganizationTask task) {
-		
+
 		String locale = "zh_CN";
 		String template = null;
-		
+
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), organization.getId());
 		//组织代发求助帖
 		if(member != null){
@@ -1453,7 +1416,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
 		}
-		
+
 		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
 	}
 
@@ -1696,15 +1659,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			return status;
 		});
-		
+
 	}
-	
+
 	@Override
 	public void updateTopicPrivacy(UpdateTopicPrivacyCommand cmd) {
-	    Long forumId = cmd.getForumId();
-	    Long topicId = cmd.getTopicId();
-	    PostPrivacy privacy = PostPrivacy.fromCode(cmd.getPrivacy());
-	    this.forumService.updatePostPrivacy(forumId, topicId, privacy);
+		Long forumId = cmd.getForumId();
+		Long topicId = cmd.getTopicId();
+		PostPrivacy privacy = PostPrivacy.fromCode(cmd.getPrivacy());
+		this.forumService.updatePostPrivacy(forumId, topicId, privacy);
 	}
 
 	private String getOrganizationMemberDeleteForManager(String operName,String userName, String orgName, Long managerId) {
@@ -1712,12 +1675,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
-		
+
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("memberName", operName);
 		map.put("userName", userName);
 		map.put("orgName", orgName);
-		
+
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_DELETE_FOR_MANAGER, locale, map, "");
 		return template;

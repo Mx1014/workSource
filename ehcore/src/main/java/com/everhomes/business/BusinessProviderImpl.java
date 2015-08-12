@@ -3,28 +3,40 @@ package com.everhomes.business;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.region.Region;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhBusinessVisibleScopes;
+import com.everhomes.server.schema.tables.daos.EhBusinessAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessVisibleScopesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessesDao;
+import com.everhomes.server.schema.tables.pojos.EhBusinessAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
 import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.server.schema.tables.records.EhBusinessesRecord;
 import com.everhomes.util.ConvertHelper;
+
+import freemarker.core.ReturnInstruction.Return;
 
 
 @Component
@@ -87,10 +99,8 @@ public class BusinessProviderImpl implements BusinessProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
         List<Business> businesses = context.select().from(Tables.EH_BUSINESSES)
         .where(Tables.EH_BUSINESSES.ID.in(ids))
-        .fetch().map(r ->{
-            return ConvertHelper.convert(r, Business.class);
-        });
-        
+        .fetch().stream().map(r ->ConvertHelper.convert(r, Business.class)).collect(Collectors.toList());
+
         return businesses;
     }
     
@@ -237,6 +247,173 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
         
     }
+    
+    @Override
+    public Business findBusinessByTargetId(String targetId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        List<Business> businesses = context.select().from(Tables.EH_BUSINESSES)
+        .where(Tables.EH_BUSINESSES.TARGET_ID.eq(targetId))
+        .fetch().map(r ->{
+            return ConvertHelper.convert(r, Business.class);
+        });
+        if(businesses == null || businesses.isEmpty())
+            return null;
+        return businesses.get(0);
+    }
+    @Override
+    public List<Business> findBusinessByCategroyAndScopeId(long categoryId, byte scopeType, long scopeId, List<String> geoHashList) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        Condition c = null;
+        for(String geoHashStr : geoHashList){
+            if(c == null) {
+                c = Tables.EH_BUSINESSES.GEOHASH.like(geoHashStr + "%");
+            } else {
+                c = c.or(Tables.EH_BUSINESSES.GEOHASH.like(geoHashStr + "%"));
+            }
+        }
+        //List<Business> businesses = new ArrayList<>();
+        return context.select(Tables.EH_BUSINESSES.fields()).from(Tables.EH_BUSINESSES)
+        .rightOuterJoin(Tables.EH_BUSINESS_CATEGORIES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID))
+        .rightOuterJoin(Tables.EH_BUSINESS_VISIBLE_SCOPES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_VISIBLE_SCOPES.OWNER_ID))
+        .where(Tables.EH_BUSINESS_VISIBLE_SCOPES.SCOPE_CODE.eq(scopeType))
+        .and(Tables.EH_BUSINESS_VISIBLE_SCOPES.SCOPE_ID.eq(scopeId))
+        .and(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(categoryId))
+        .and(c)
+        .fetch().stream().map(r ->{
+                Business b = new Business();
+                b.setId(r.getValue(Tables.EH_BUSINESSES.ID));
+                b.setAddress(r.getValue(Tables.EH_BUSINESSES.ADDRESS));
+                b.setBizOwnerUid(r.getValue(Tables.EH_BUSINESSES.BIZ_OWNER_UID));
+                b.setContact(r.getValue(Tables.EH_BUSINESSES.CONTACT));
+                b.setCreateTime(r.getValue(Tables.EH_BUSINESSES.CREATE_TIME));
+                b.setCreatorUid(r.getValue(Tables.EH_BUSINESSES.CREATOR_UID));
+                b.setDescription(r.getValue(Tables.EH_BUSINESSES.DESCRIPTION));
+                b.setDisplayName(r.getValue(Tables.EH_BUSINESSES.DISPLAY_NAME));
+                b.setGeohash(r.getValue(Tables.EH_BUSINESSES.GEOHASH));
+                b.setLatitude(r.getValue(Tables.EH_BUSINESSES.LATITUDE));
+                b.setLongitude(r.getValue(Tables.EH_BUSINESSES.LONGITUDE));
+                b.setLogoUri(r.getValue(Tables.EH_BUSINESSES.LOGO_URI));
+                b.setName(r.getValue(Tables.EH_BUSINESSES.NAME));
+                b.setPhone(r.getValue(Tables.EH_BUSINESSES.PHONE));
+                b.setTargetId(r.getValue(Tables.EH_BUSINESSES.TARGET_ID));
+                b.setTargetType(r.getValue(Tables.EH_BUSINESSES.TARGET_TYPE));
+                b.setUrl(r.getValue(Tables.EH_BUSINESSES.URL));
+                return b;
+        }
+        ).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<Business> findBusinessByCreatorId(long userId) {
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        List<Business> businesses = context.select().from(Tables.EH_BUSINESSES)
+        .where(Tables.EH_BUSINESSES.CREATOR_UID.eq(userId))
+        .fetch().map(r ->{
+            return ConvertHelper.convert(r, Business.class);
+        });
+        
+        return businesses;
+    }
+    
+    @Override
+    public List<Business> listBusinessesByKeyword(String keyword, int offset,int pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_BUSINESSES);
+        Condition condition = null;
+        if(keyword != null && !keyword.trim().equals("")){
+            condition = Tables.EH_BUSINESSES.NAME.like("%" + keyword + "%");
+        }
+        if(condition != null)
+            selectStep.where(condition);
+        selectStep.limit(pageSize).offset(offset);
+        
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        List<Business> result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_BUSINESSES.recordType(), Business.class)
+            );
+        return result;
+    }
 
+    @Override
+    public void createBusinessAssignedScope(BusinessAssignedScope businessAssignedScope) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessAssignedScopes.class));
+        businessAssignedScope.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
+        EhBusinessAssignedScopesDao dao = new EhBusinessAssignedScopesDao(context.configuration()); 
+        dao.insert(businessAssignedScope); 
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessAssignedScopes.class, null); 
+    }
+    
+    @Override
+    public void updateBusinessAssignedScope(BusinessAssignedScope businessAssignedScope) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessAssignedScopesDao dao = new EhBusinessAssignedScopesDao(context.configuration()); 
+        dao.update(businessAssignedScope);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedScopes.class, null);
+        
+    }
+    
+    @Override
+    public void deleteBusinessAssignedScope(BusinessAssignedScope businessAssignedScope) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessAssignedScopesDao dao = new EhBusinessAssignedScopesDao(context.configuration()); 
+        dao.delete(businessAssignedScope);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedScopes.class, null);
+        
+    }
+    
+    @Override
+    public void deleteBusinessAssignedScope(long id) {
+        BusinessProvider self = PlatformContext.getComponent(BusinessProvider.class);
+        BusinessAssignedScope businessAssignedScope = self.findBusinessAssignedScopeById(id);
+        if(businessAssignedScope != null)
+            self.deleteBusinessAssignedScope(businessAssignedScope);
+        
+    }
+    
+    @Override
+    public BusinessAssignedScope findBusinessAssignedScopeById(long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessAssignedScopesDao dao = new EhBusinessAssignedScopesDao(context.configuration()); 
+        return ConvertHelper.convert(dao.findById(id),BusinessAssignedScope.class);
+    }
+
+    @Override
+    public void deleteBusinessAssignedScopeByBusinessId(long businessId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        context.delete(Tables.EH_BUSINESS_ASSIGNED_SCOPES).where(Tables.EH_BUSINESS_ASSIGNED_SCOPES.OWNER_ID.eq(businessId)).execute();
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedScopes.class, null);
+    }
+    @Override
+    public List<BusinessAssignedScope> findBusinessAssignedScopeByScope(long cityId, long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_BUSINESS_ASSIGNED_SCOPES);
+        Condition condition = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(BusinessScopeType.ALL.getCode());
+        condition = condition.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(0L));
+        if(cityId != 0){
+            Condition conCity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(BusinessScopeType.CITY.getCode());
+            conCity = conCity.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(cityId));
+            condition.or(conCity);
+        }
+        if(communityId != 0){
+            Condition conCommunity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(BusinessScopeType.COMMUNITY.getCode());
+            conCommunity = conCommunity.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(communityId));
+            condition.or(conCommunity);
+        }
+        selectStep.where(condition);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        List<BusinessAssignedScope> result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_BUSINESS_ASSIGNED_SCOPES.recordType(), BusinessAssignedScope.class)
+            );
+        return result;
+    }
 }

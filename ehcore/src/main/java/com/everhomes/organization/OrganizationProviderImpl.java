@@ -31,7 +31,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
-import com.everhomes.organization.pm.CommunityPmMember;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
@@ -560,7 +559,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public BigDecimal getOrgBillTxAmountByBillId(Long billId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-		Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
+		/*Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
 				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
 
 		if(records != null && !records.isEmpty()){
@@ -572,7 +571,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return total;
 		}
 		else
-			return BigDecimal.ZERO;
+			return BigDecimal.ZERO;*/
+		return null;
 	}
 
 	@Cacheable(value="findOrganizationTaskById", key="#id", unless="#result == null")
@@ -690,7 +690,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		SelectQuery<Record> query = context.selectQuery();
 		query.addFrom(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS);
-		query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(Tables.EH_ORGANIZATION_BILLS.ID));
+		//query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(Tables.EH_ORGANIZATION_BILLS.ID));
 
 		if(startTime != null && endTime != null)
 			query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTime)
@@ -835,16 +835,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationTask> listOrganizationTasksByOrgIdAndType(Long organizationId, String taskType, byte taskStatus, int pageSize, long offset) {
+	public List<OrganizationTask> listOrganizationTasksByOrgIdAndType(Long organizationId, String taskType, Byte taskStatus, int pageSize, long offset) {
 		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
+		if(taskType != null && !taskType.isEmpty())
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
+		if(taskStatus != null)
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus));
+		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
-				.where(Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId)
-						.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType))
-						.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus)))
-						.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
-						.limit(pageSize).offset((int)offset)
-						.fetch();
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
+				.limit(pageSize).offset((int)offset)
+				.fetch();
 		if(records != null && !records.isEmpty()){
 			for(Record r : records){
 				list.add(ConvertHelper.convert(r, OrganizationTask.class));

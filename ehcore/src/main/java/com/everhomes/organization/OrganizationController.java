@@ -169,7 +169,6 @@ public class OrganizationController extends ControllerBase {
 	/**
 	 * <b>URL: /org/newOrgTopic</b>
 	 * <p>政府人员发帖</p>
-	 * @return 发帖的内容
 	 */
 	@RequestMapping("newOrgTopic")
 	@RestReturn(value=PostDTO.class)
@@ -183,8 +182,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/queryOrgTopicsByCategory</b>
-	 * <p>查询的机构可看的帖子列表（仅查询社区论坛），如果不提供类型则查询全部，
-	 * 若指定类型则查询指定类型的</p>
+	 * <p>查询的组织可看的帖子列表（仅查询社区论坛），如果不提供类型则查询全部，若指定类型则查询指定类型的</p>
 	 */
 	@RequestMapping("queryOrgTopicsByCategory")
 	@RestReturn(value=ListPostCommandResponse.class)
@@ -214,7 +212,6 @@ public class OrganizationController extends ControllerBase {
 	/**
 	 * <b>URL: /org/deleteOrgTopic</b>
 	 * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
-	 * @return 删除结果
 	 */
 	@RequestMapping("deleteOrgTopic")
 	@RestReturn(value=String.class)
@@ -227,58 +224,9 @@ public class OrganizationController extends ControllerBase {
 		return response;
 	}
 
-	//    /**
-	//     * <b>URL: /org/forwardTopic</b>
-	//     * <p>转发帖子</p>
-	//     * @return 转发结果
-	//     */
-	//    @RequestMapping("forwardTopic")
-	//    @RestReturn(value=Long.class)
-	//    public RestResponse forwardTopic(@Valid ForwardTopicCommand cmd) {
-	//        
-	//        // ???
-	//        RestResponse response = new RestResponse();
-	//        response.setErrorCode(ErrorCodes.SUCCESS);
-	//        response.setErrorDescription("OK");
-	//        return response;
-	//    }
-	//    
-	//    /**
-	//     * <b>URL: /org/makeTop</b>
-	//     * <p>置顶帖子</p>
-	//     * @return 置顶结果
-	//     */
-	//    @RequestMapping("makeTop")
-	//    @RestReturn(value=String.class)
-	//    public RestResponse makeTop(@Valid MakeTopCommand cmd) {
-	//        
-	//        // ???
-	//        RestResponse response = new RestResponse();
-	//        response.setErrorCode(ErrorCodes.SUCCESS);
-	//        response.setErrorDescription("OK");
-	//        return response;
-	//    }
-	//    
-	//    /**
-	//     * <b>URL: /org/search</b>
-	//     * <p>按指定条件查询符合条件的帖子列表</p>
-	//     */
-	//    @RequestMapping("search")
-	//    @RestReturn(value=ListPostCommandResponse.class)
-	//    public RestResponse search(SearchTopicCommand cmd) {
-	//        ListPostCommandResponse cmdResponse = postSearcher.query(cmd);
-	//        
-	//        RestResponse response = new RestResponse();
-	//        response.setResponseObject(cmdResponse);
-	//        response.setErrorCode(ErrorCodes.SUCCESS);
-	//        response.setErrorDescription("OK");
-	//        return response;
-	//    }
-
 	/**
 	 * <b>URL: /org/deleteOrgComment</b>
 	 * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
-	 * @return 删除结果
 	 */
 	@RequestMapping("deleteOrgComment")
 	@RestReturn(value=String.class)
@@ -294,7 +242,7 @@ public class OrganizationController extends ControllerBase {
 	//行政热线
 	/**
 	 * <b>URL: /org/createOrgContact</b>
-	 * <p>添加政府机构联系电话</p>
+	 * <p>添加组织联系电话</p>
 	 * @return 
 	 */
 	@RequestMapping("createOrgContact")
@@ -309,7 +257,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/updateOrgContact</b>
-	 * <p>修改政府机构联系电话</p>
+	 * <p>修改组织联系电话</p>
 	 * @return 
 	 */
 	@RequestMapping("updateOrgContact")
@@ -324,7 +272,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/deleteOrgContact</b>
-	 * <p>删除府机构联系电话</p>
+	 * <p>删除组织联系电话</p>
 	 * @return 
 	 */
 	@RequestMapping("deleteOrgContact")
@@ -339,7 +287,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/listOrgContact</b>
-	 * <p>查询政府机构联系电话列表</p>
+	 * <p>查询组织联系电话列表</p>
 	 */
 	@RequestMapping("listOrgContact")
 	@RestReturn(value=ListOrganizationContactCommandResponse.class)
@@ -353,8 +301,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/sendOrgMessage</b>
-	 * 发通知给所辖小区用户
-	 * @return 发通知的结果
+	 * <p>发通知组织管辖的小区用户</p>
 	 */
 	@RequestMapping("sendOrgMessage")
 	@RestReturn(value=String.class)
@@ -368,9 +315,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/getCurrentOrganization</b>
-	 * <p>设置政府用户当前政府（切换政府）</p>
-	 * @param organizationId 小区ID
-	 * @return 
+	 * <p>获取用户当前的组织</p>
 	 */
 	@RequestMapping("getCurrentOrganization")
 	@RestReturn(OrganizationDTO.class)
@@ -385,16 +330,13 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/setCurrentOrganization</b>
-	 * <p>获得用户当前政府（切换政府）</p>
-	 * @param organizationId 小区ID
-	 * @return OK
+	 * <p>设置用户当前组织</p>
 	 */
 	@RequestMapping("setCurrentOrganization")
 	@RestReturn(String.class)
 	public RestResponse setCurrentOrganization(@Valid SetCurrentOrganizationCommand cmd) throws Exception {
 		organizationService.setCurrentOrganization(cmd);
 		RestResponse response = new RestResponse();
-
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -422,8 +364,6 @@ public class OrganizationController extends ControllerBase {
 	/**
 	 * <b>URL: /org/getOrganizationDetails</b>
 	 * <p>根据小区Id和组织类型查询对应的组织</p>
-	 * @param  communityId : 小区id,	organizationType : 组织类型
-	 * @return 
 	 */
 	@RequestMapping("getOrganizationDetails")
 	@RestReturn(OrganizationDTO.class)
@@ -439,7 +379,6 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/rejectOrganization</b>
-	 * @return 
 	 */
 	@RequestMapping("rejectOrganization")
 	@RestReturn(String.class)

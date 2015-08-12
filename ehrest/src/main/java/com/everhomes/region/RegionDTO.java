@@ -17,6 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>isoCode: 国际编号</li>
  * <li>telCode: 区号</li>
  * <li>status: 状态，参考{@link com.everhomes.region.RegionAdminStatus}</li>
+ * <li>pinyinName: 名字全拼</li>
+ * <li>pinyinPrefix: 名字首字母</li>
  * </ul>
  */
 public class RegionDTO {
@@ -28,6 +30,8 @@ public class RegionDTO {
     private String  isoCode;
     private String  telCode;
     private Byte    status;
+    private String  pinyinName;
+    private String  pinyinPrefix;
 
     public RegionDTO() {
     }
@@ -96,6 +100,22 @@ public class RegionDTO {
         this.status = status;
     }
     
+    public String getPinyinName() {
+        return pinyinName;
+    }
+
+    public void setPinyinName(String pinyinName) {
+        this.pinyinName = pinyinName;
+    }
+
+    public String getPinyinPrefix() {
+        return pinyinPrefix;
+    }
+
+    public void setPinyinPrefix(String pinyinPrefix) {
+        this.pinyinPrefix = pinyinPrefix;
+    }
+
     @Override
     public boolean equals(Object obj){
         if (! (obj instanceof RegionDTO)) {

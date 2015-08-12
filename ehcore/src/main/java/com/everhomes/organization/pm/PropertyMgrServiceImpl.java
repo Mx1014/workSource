@@ -2701,6 +2701,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
 
 		this.dbProvider.execute(s -> {
+			//创建物业订单
 			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
 			if(fAccount == null){
 				fAccount = new FamilyBillingAccount();
@@ -2752,8 +2753,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			this.familyProvider.createFamilyBillingTransaction(familyTx);
 
 			OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-			orgTx.setBillId(bill.getId());
-			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+			/*orgTx.setBillId(bill.getId());
+			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 			orgTx.setChargeAmount(cmd.getPayAmount());
 			orgTx.setCreateTime(createTimeStamp);
 			orgTx.setDescription(builder.toString());
@@ -3113,8 +3114,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				this.familyProvider.createFamilyBillingTransaction(familyTx);
 
 				OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-				orgTx.setBillId(bill.getId());
-				orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+				/*orgTx.setBillId(bill.getId());
+				orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 				orgTx.setChargeAmount(waitPayAmount);
 				orgTx.setCreateTime(createTimeStamp);
 				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())

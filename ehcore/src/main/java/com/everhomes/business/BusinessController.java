@@ -41,21 +41,7 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /business/createBusiness</b>
-     * <p>创建店铺</p>
-     */
-    @RequestMapping("createBusiness")
-    @RestReturn(value=String.class)
-    public RestResponse createBusinesses(@Valid CreateBusinessCommand cmd) {
-        
-        businessService.createBusiness(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+
     
     /**
      * <b>URL: /business/updateBusiness</b>
