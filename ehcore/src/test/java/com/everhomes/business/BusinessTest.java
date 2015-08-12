@@ -106,4 +106,11 @@ public class BusinessTest extends CoreServerTestCase {
         cmd.setScopes(scopes);
         businessService.recommendBusiness(cmd);
     }
+    
+    @Test
+    public void testDeleteBusiness(){
+        SyncDeleteBusinessCommand cmd = new SyncDeleteBusinessCommand();
+        cmd.setId(String.valueOf("1002"));
+        businessService.syncDeleteBusiness(cmd);
+    }
 }
