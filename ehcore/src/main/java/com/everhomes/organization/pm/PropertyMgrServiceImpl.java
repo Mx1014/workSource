@@ -2752,8 +2752,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			this.familyProvider.createFamilyBillingTransaction(familyTx);
 
 			OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-			orgTx.setBillId(bill.getId());
-			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+			/*orgTx.setBillId(bill.getId());
+			orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 			orgTx.setChargeAmount(cmd.getPayAmount());
 			orgTx.setCreateTime(createTimeStamp);
 			orgTx.setDescription(builder.toString());
@@ -3113,8 +3113,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				this.familyProvider.createFamilyBillingTransaction(familyTx);
 
 				OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-				orgTx.setBillId(bill.getId());
-				orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());
+				/*orgTx.setBillId(bill.getId());
+				orgTx.setBillType(OrganizationBillType.ORGANIZATION_BILLS.getCode());*/
 				orgTx.setChargeAmount(waitPayAmount);
 				orgTx.setCreateTime(createTimeStamp);
 				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
