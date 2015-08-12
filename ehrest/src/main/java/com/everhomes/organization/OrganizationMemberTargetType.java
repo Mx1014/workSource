@@ -8,7 +8,7 @@ package com.everhomes.organization;
  * </ul>
  */
 public enum OrganizationMemberTargetType {
-    USER("user"), UNTRACK("untrack");
+    USER("USER"), UNTRACK("UNTRACK");
     
     private String code;
     private OrganizationMemberTargetType(String code) {

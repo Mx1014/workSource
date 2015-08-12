@@ -67,8 +67,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/applyOrganizationMember</b>
-	 * <p>申请组织管理员</p>
-	 * @return 添加的结果
+	 * <p>申请成为组织管理员:注册用户申请自己小区的组织管理员</p>
 	 */
 	@RequestMapping("applyOrganizationMember")
 	@RestReturn(value=String.class)
@@ -83,8 +82,7 @@ public class OrganizationController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /org/addOrgMemberByPhone</b>
-	 * <p>通过手机添加府机构成员</p>
-	 * @return 添加的结果
+	 * <p>直接成为组织管理员，注册用户只需填orgId，userId，memberGroup。未注册用户信息尽可能详细，最少有前面的字段，另加联系方式</p>
 	 */
 	@RequestMapping("addOrgMemberByPhone")
 	@RestReturn(value=String.class)
@@ -98,8 +96,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/deleteOrganizationMember</b>
-	 * <p>删除政府机构成员</p>
-	 * @return 删除的结果
+	 * <p>删除组织成员：组织成员表的主键来删</p>
 	 */
 	@RequestMapping("deleteOrganizationMember")
 	@RestReturn(value=String.class)
@@ -113,8 +110,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/createOrganizationCommunity</b>
-	 * <p>创建政府机构对应的小区列表</p>
-	 * @return 添加的结果
+	 * <p>添加组织管辖的小区，物业和业委不能自己添加</p>
 	 */
 	@RequestMapping("createOrganizationCommunity")
 	@RestReturn(value=String.class)
@@ -127,7 +123,7 @@ public class OrganizationController extends ControllerBase {
 	}
 	/**
 	 * <b>URL: /org/deleteOrganizationCommunity</b>
-	 * <p>删除政府机构管辖的小区列表</p>
+	 * <p>删除组织管辖的小区</p>
 	 * @return 
 	 */
 	@RequestMapping("deleteOrganizationCommunity")
@@ -141,8 +137,8 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: org/listOrganizationCommunities</b>
-	 * <p>列出政府机构表（）</p>
+	 * <b>URL: /org/listOrganizationCommunities</b>
+	 * <p>列出某个组织的信息，包括管辖的小区名</p>
 	 */
 	@RequestMapping("listOrganizationCommunities")
 	@RestReturn(value=ListOrganizationCommunityCommandResponse.class)

@@ -163,7 +163,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationMembersRecord record = ConvertHelper.convert(departmentMember, EhOrganizationMembersRecord.class);
 		InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.setRecord(record);
-		query.setReturning(Tables.EH_ORGANIZATIONS.ID);
+		query.setReturning(Tables.EH_ORGANIZATION_MEMBERS.ID);
 		query.execute();
 
 		departmentMember.setId(query.getReturnedRecord().getId());

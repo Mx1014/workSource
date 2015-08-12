@@ -7,10 +7,11 @@ package com.everhomes.organization;
  * <li>GARC: 业委，Government Agency - Resident Committee</li>
  * <li>GANC: 居委，Government Agency - Neighbor Committee</li>
  * <li>GAPS: 公安，Government Agency - Police Station</li>
+ * <li>GACW: 社区工作站，Government Agency - Community Workstation</li>
  * </ul>
  */
 public enum OrganizationType {
-    PM("PM"), GARC("GARC"), GANC("GANC"), GAPS("GAPS");
+    PM("PM"), GARC("GARC"), GANC("GANC"), GAPS("GAPS"),GACW("GACW");
     
     private String code;
     private OrganizationType(String code) {

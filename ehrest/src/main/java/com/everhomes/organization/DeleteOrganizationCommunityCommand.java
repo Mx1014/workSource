@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
 
- * <li>organizationId：机构id</li>
+ * <li>organizationId：组织id</li>
  * <li>communityIds：小区id列表</li>
  * </ul>
  */

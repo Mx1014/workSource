@@ -279,8 +279,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 					OrganizationMember departmentMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 					departmentMember.setStatus(PmMemberStatus.ACTIVE.getCode());
 					departmentMember.setContactName(addUser.getAccountName());
-					departmentMember.setContactToken(identifier.getIdentifierToken());
-					departmentMember.setContactType(IdentifierType.MOBILE.getCode());
+					if(identifier != null){
+						departmentMember.setContactToken(identifier.getIdentifierToken());
+						departmentMember.setContactType(IdentifierType.MOBILE.getCode());
+					}
 					organizationProvider.createOrganizationMember(departmentMember);
 				}
 				else{
@@ -346,12 +348,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationCommunity orgCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), id);
 				if(orgCommunity == null){
 					LOGGER.error("OrganizationCommunity is not found,organizationId=" + cmd.getOrganizationId() + ",communityId=" + id);
-					return;
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+							"OrganizationCommunity is not found.");
 				}
 				organizationProvider.deleteOrganizationCommunity(orgCommunity);
 			});
 		}catch(Exception e){
 			LOGGER.error("Fail to delete OrganizationCommunity,organizationId=" + cmd.getOrganizationId() + "," + e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Fail to delete OrganizationCommunity.");
 		}
 	}
 
@@ -405,7 +410,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		User user  = UserContext.current().getUser();
 		//权限控制
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
-		List<OrganizationMember> reslut = organizationProvider.listOrganizationMembers (user.getId());
+		List<OrganizationMember> reslut = organizationProvider.listOrganizationMembers(user.getId());
 		if(reslut != null && reslut.size() > 0){
 			List<OrganizationMemberDTO> members =  new ArrayList<OrganizationMemberDTO>();
 			for (OrganizationMember organizationMember : reslut) {
@@ -532,7 +537,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//PostEntityTag.USER
 		switch(targetTag){
 		case USER:
-			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
+				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getCreatorTag());break;
+			}
+			/*else if(creatorTag.getCode().equals(PostEntityTag.GANC.getCode()) || creatorTag.getCode().equals(PostEntityTag.GAPS.getCode())){
+				organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
+			}*/
 		case PM:
 		case GARC:
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
