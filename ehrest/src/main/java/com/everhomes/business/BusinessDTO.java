@@ -31,13 +31,14 @@ import com.everhomes.util.StringHelper;
  * <li>recommendStatus: 推荐状态,0-默认,1-推荐</li>
  * <li>favoriteStatus: 收藏状态,0-默认,1-收藏</li>
  * <li>distance: 与用户的距离</li>
+ * <li>serviceType: 是否是服务类型,0-默认,1-服务类型</li>
  * </ul>
  */
 
 public class BusinessDTO{
     private Long     id;
     private Byte     targetType;
-    private Long     targetId;
+    private String     targetId;
     private Long     bizOwnerUid;
     private String   name;
     private String   displayName;
@@ -76,11 +77,11 @@ public class BusinessDTO{
         this.targetType = targetType;
     }
 
-    public Long getTargetId() {
+    public String getTargetId() {
         return targetId;
     }
 
-    public void setTargetId(Long targetId) {
+    public void setTargetId(String targetId) {
         this.targetId = targetId;
     }
 

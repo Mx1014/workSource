@@ -3,9 +3,9 @@ package com.everhomes.business;
 
 /**
  * <ul>
- * <li>ALL: 国家</li>
- * <li>CITY: 城市</li>
- * <li>COMMUNITY: 小区</li>
+ * <li>ALL(0): 国家</li>
+ * <li>CITY(2): 城市</li>
+ * <li>COMMUNITY(1): 小区</li>
  * </ul>
  */
 public enum BusinessScopeType {

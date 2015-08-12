@@ -7,6 +7,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ch.qos.logback.core.joran.action.ActionUtil.Scope;
+
+import com.everhomes.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -18,7 +21,7 @@ public class BusinessTest extends CoreServerTestCase {
     @Before
     public void setup() {
         User user = new User();
-        user.setId(10001L);
+        user.setId(152719L);
         UserContext.current().setUser(user);
     }
     
@@ -29,7 +32,8 @@ public class BusinessTest extends CoreServerTestCase {
     
     @Test
     public void testCreateBusiness(){
-        CreateBusinessCommand cmd = new CreateBusinessCommand();
+        SyncBusinessCommand cmd = new SyncBusinessCommand();
+        cmd.setUserId(152719L);;
         cmd.setAddress("深圳");
         cmd.setBizOwnerUid(1001l);
         List<Long> categroies = new ArrayList<Long>();
@@ -37,13 +41,13 @@ public class BusinessTest extends CoreServerTestCase {
         //categroies.add(3002L);
         cmd.setCategroies(categroies);
         cmd.setContact("15875300001");
-        cmd.setDisplayName("金融");
+        cmd.setDisplayName("校验加油");
         cmd.setLatitude(23.123);
         cmd.setLongitude(108.123);
-        cmd.setName("金融");
+        cmd.setName("校验加油");
         cmd.setPhone("15875300001");
         cmd.setTargetType((byte)2);
-        cmd.setTargetId("");
+        cmd.setTargetId("1002");
         cmd.setUrl("http://www.baidu.com");
         List<BusinessScope> scopes = new ArrayList<>();
         BusinessScope scope = new BusinessScope();
@@ -52,7 +56,7 @@ public class BusinessTest extends CoreServerTestCase {
         scopes.add(scope);
         cmd.setScopes(scopes);
         cmd.setDescription("xxxxxxxxxxxx");
-        businessService.createBusiness(cmd);
+        businessService.syncBusiness(cmd);
     }
     @Test
     public void testGetBusinessByCategory(){
@@ -89,5 +93,17 @@ public class BusinessTest extends CoreServerTestCase {
         //cmd.setScopes(scopes);
         cmd.setDescription("xxxxxxxxxxxx");
         businessService.updateBusiness(cmd);
+    }
+    @Test
+    public void testRecommandBusiness(){
+        RecommendBusinessesAdminCommand cmd = new RecommendBusinessesAdminCommand();
+        cmd.setId(14L);
+        BusinessScope scope = new BusinessScope();
+        scope.setScopeId(0l);
+        scope.setScopeType((byte)0);
+        List<BusinessScope> scopes = new ArrayList<>();
+        scopes.add(scope);
+        cmd.setScopes(scopes);
+        businessService.recommendBusiness(cmd);
     }
 }

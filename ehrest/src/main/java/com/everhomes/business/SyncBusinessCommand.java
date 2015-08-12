@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>userId: 当前用户id</li>
  * <li>targetType: 商家来源类型,参考{@link com.everhomes.business.BusinessTargetType}</li>
  * <li>targetId: 商家原始id</li>
  * <li>bizOwnerUid: 商家拥有者id</li>
@@ -28,7 +29,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 
-public class CreateBusinessCommand{
+public class SyncBusinessCommand{
+    private Long    userId;
     private Byte     targetType;
     @NotNull
     private String     targetId;
@@ -41,7 +43,7 @@ public class CreateBusinessCommand{
     private String   logoUri;
     private String   url;
     private String   contact;
-    private String phone;
+    private String   phone;
     private Double   longitude;
     private Double   latitude;
     private String  address;
@@ -51,6 +53,14 @@ public class CreateBusinessCommand{
     @ItemType(Long.class)
     private List<Long> categroies;
     
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public Byte getTargetType() {
         return targetType;
     }

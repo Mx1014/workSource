@@ -1,41 +1,28 @@
-package com.everhomes.business;
+package com.everhomes.business.admin;
 
 
-import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>categoryId: 商家类别id</li>
- * <li>communityId: 小区id</li>
+ * <li>keyword: 关键字</li>
  * <li>pageOffset: 当前页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
 
-public class GetBusinessesByCategoryCommand{
-    @NotNull
-    private Long categoryId;
-    @NotNull
-    private Long communityId;
+public class ListBusinessesByKeywordAdminCommand{
+    private String keyword;
     private Integer pageOffset;
     private Integer pageSize;
-    
-    public Long getCategoryId() {
-        return categoryId;
+
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     public Integer getPageOffset() {

@@ -132,16 +132,29 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
+       
+        //TODO get the businesses with the user create
+        List<Business> businesses = this.businessProvider.findBusinessByCreatorId(userId);
+        if(businesses != null && !businesses.isEmpty())
+            businesses = businesses.stream().map(r -> {
+                if(r.getCreatorUid().longValue() == userId)
+                    r.setDisplayName(r.getDisplayName() + "(商铺)");
+                return r;
+            }).collect(Collectors.toList());
+        //get the business with the user favorite
         List<Long> bizIds = userActivityProvider.findFavorite(userId).stream()
                 .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
-        //TODO get the businesses with the user create
-        
-        //TODO get the business with the user join in
-        //get the business with the user favorite
         if(bizIds != null && !bizIds.isEmpty()){
-            List<Business> businesses = businessProvider.findBusinessByIds(bizIds);
-            if(businesses == null || businesses.isEmpty())
-                return null;
+            List<Business> favoriteBusiness = businessProvider.findBusinessByIds(bizIds);
+            
+            if(favoriteBusiness != null && !favoriteBusiness.isEmpty()){
+                if(businesses == null)
+                    businesses = new ArrayList<Business>();
+                businesses.addAll(favoriteBusiness);
+            }
+           
+        }
+        if(businesses != null && !businesses.isEmpty()){
             int index = 1;
             for(Business r : businesses){
                 LaunchPadItemDTO dto = new LaunchPadItemDTO();
@@ -158,7 +171,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 dto.setItemWidth(1);
                 dto.setDefaultOrder(index ++);
                 dto.setItemName(r.getName());
-                dto.setItemLabel(r.getDisplayName() + "(商铺)");
+                dto.setItemLabel(r.getDisplayName());
                 dto.setItemLocation(cmd.getItemLocation());
                 result.add(dto);
             }

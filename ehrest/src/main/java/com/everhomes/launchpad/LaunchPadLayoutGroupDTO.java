@@ -5,6 +5,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.everhomes.util.StringHelper;
+import com.google.gson.JsonObject;
 
 /**
  * <ul>
@@ -20,11 +21,11 @@ import com.everhomes.util.StringHelper;
 public class LaunchPadLayoutGroupDTO {
     private String groupName;
     private String widget;
-    private String instanceConfig;
+    private JsonObject instanceConfig;
     private String style;
     private Integer defaultOrder;
     private Integer separatorFlag;
-    private String separatorHeight;
+    private Double separatorHeight;
 
    
     public String getGroupName() {
@@ -43,11 +44,11 @@ public class LaunchPadLayoutGroupDTO {
         this.widget = widget;
     }
 
-    public String getInstanceConfig() {
+    public JsonObject getInstanceConfig() {
         return instanceConfig;
     }
 
-    public void setInstanceConfig(String instanceConfig) {
+    public void setInstanceConfig(JsonObject instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
 
@@ -75,11 +76,11 @@ public class LaunchPadLayoutGroupDTO {
         this.separatorFlag = separatorFlag;
     }
 
-    public String getSeparatorHeight() {
+    public Double getSeparatorHeight() {
         return separatorHeight;
     }
 
-    public void setSeparatorHeight(String separatorHeight) {
+    public void setSeparatorHeight(Double separatorHeight) {
         this.separatorHeight = separatorHeight;
     }
 

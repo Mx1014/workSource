@@ -3,8 +3,8 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>
- * <li>HIDE: 隐藏</li>
- * <li>DISPLAY: 显示</li>
+ * <li>HIDE(0): 隐藏</li>
+ * <li>DISPLAY(1): 显示</li>
  * </ul>
  */
 public enum ItemDisplayFlag {
