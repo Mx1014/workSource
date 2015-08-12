@@ -29,6 +29,8 @@ import com.everhomes.server.schema.tables.pojos.EhForums;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhGroupOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhOauth2Codes;
+import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
 import com.everhomes.server.schema.tables.pojos.EhPollItems;
 import com.everhomes.server.schema.tables.pojos.EhPollVotes;
 import com.everhomes.server.schema.tables.pojos.EhPolls;
@@ -191,6 +193,14 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhQrcodes.class, Tables.EH_QRCODES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_QRCODES.ID.max()).from(Tables.EH_QRCODES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhOauth2Codes.class, Tables.EH_OAUTH2_CODES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_OAUTH2_CODES.ID.max()).from(Tables.EH_OAUTH2_CODES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhOauth2Tokens.class, Tables.EH_OAUTH2_TOKENS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_OAUTH2_TOKENS.ID.max()).from(Tables.EH_OAUTH2_TOKENS).fetchOne().value1(); 
         });
         
         syncTableSequence(null, EhVersionRealm.class, Tables.EH_VERSION_REALM.getName(), (dbContext) -> { 
