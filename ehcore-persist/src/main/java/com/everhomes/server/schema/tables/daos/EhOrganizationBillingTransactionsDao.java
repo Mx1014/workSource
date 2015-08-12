@@ -90,17 +90,17 @@ public class EhOrganizationBillingTransactionsDao extends org.jooq.impl.DAOImpl<
 	}
 
 	/**
-	 * Fetch records that have <code>bill_type IN (values)</code>
+	 * Fetch records that have <code>order_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions> fetchByBillType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions> fetchByOrderType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS.ORDER_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>bill_id IN (values)</code>
+	 * Fetch records that have <code>order_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions> fetchByBillId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions> fetchByOrderId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS.ORDER_ID, values);
 	}
 
 	/**
