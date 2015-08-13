@@ -627,99 +627,39 @@ public class FamilyProviderImpl implements FamilyProvider {
 		return members;
 	}
 
-	   @Override
-	    public List<GroupMember> listAllFamilyMembers(int offset, int pageSize) {
-
-	        List<GroupMember> members = new ArrayList<GroupMember>();
-	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-	                (DSLContext context, Object reducingContext) -> {
-
-	                    context.select(Tables.EH_GROUP_MEMBERS.fields()).from(Tables.EH_GROUP_MEMBERS)
-	                    .leftOuterJoin(Tables.EH_GROUPS)
-	                    .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
-	                    .where(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
-	                    .limit(pageSize).offset(offset)
-	                    .fetch().map((r) -> {
-	                        GroupMember member = new GroupMember();
-	                        member.setId(r.getValue(Tables.EH_GROUP_MEMBERS.ID));
-	                        member.setGroupId(r.getValue(Tables.EH_GROUP_MEMBERS.GROUP_ID));
-	                        member.setMemberId(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
-	                        member.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
-	                        member.setMemberAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
-	                        member.setMemberStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
-	                        member.setCreateTime(r.getValue(Tables.EH_GROUP_MEMBERS.CREATE_TIME));
-	                        members.add(member);
-	                        return null;
-	                    });
-
-	                    return true;
-	                });
-
-	        return members;
-	    }
 	@Override
-	public BigDecimal countFamilyTransactionBillingAmountByBillId(Long billId){
-		/*List<BigDecimal> list = new ArrayList<BigDecimal>();
+	public List<GroupMember> listAllFamilyMembers(int offset, int pageSize) {
+
+		List<GroupMember> members = new ArrayList<GroupMember>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
-				(DSLContext context , Object obj) -> {
-					Result<Record1<BigDecimal>> records = 
-							context.select(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
-							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
-					if(records != null && !records.isEmpty()){
-						records.stream().map( r -> {
-							list.add(r.value1());
-							return null;
-						}).toArray();
-					}
-					return true;
-				});
+				(DSLContext context, Object reducingContext) -> {
 
-		if(list != null && !list.isEmpty()){
-			BigDecimal total = BigDecimal.ZERO;
-			for(int i = 0; i<list.size();i++){
-				if(list.get(i) != null)
-					total = total.add(list.get(i));
-			}
-			return total;
-		}
-		return BigDecimal.ZERO;*/
-		
-		return null;
-
-	}
-
-	@Override
-	public FamilyBillingTransactions findLastFamilyBillingTransactionByBillId(
-			Long billId) {
-
-		/*List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
-
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
-				(DSLContext context , Object object) -> {
-
-					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
-							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID.eq(billId))
-							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
-							.fetch();
-
-					if(records != null && !records.isEmpty()){
-						records.stream().map(r -> {
-							list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
-							return null;
-						}).toArray();
-					}
+					context.select(Tables.EH_GROUP_MEMBERS.fields()).from(Tables.EH_GROUP_MEMBERS)
+					.leftOuterJoin(Tables.EH_GROUPS)
+					.on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+					.where(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+					.limit(pageSize).offset(offset)
+					.fetch().map((r) -> {
+						GroupMember member = new GroupMember();
+						member.setId(r.getValue(Tables.EH_GROUP_MEMBERS.ID));
+						member.setGroupId(r.getValue(Tables.EH_GROUP_MEMBERS.GROUP_ID));
+						member.setMemberId(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
+						member.setMemberNickName(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_NICK_NAME));
+						member.setMemberAvatar(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_AVATAR));
+						member.setMemberStatus(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS));
+						member.setCreateTime(r.getValue(Tables.EH_GROUP_MEMBERS.CREATE_TIME));
+						members.add(member);
+						return null;
+					});
 
 					return true;
 				});
 
-		if(list != null && !list.isEmpty()){
-			return list.get(0);
-		}*/
-		return null;
+		return members;
 	}
 
 	@Override
-	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByAddressId(
+	public List<FamilyBillingTransactions> listFamilyBillingTransactionByAddressId(
 			Long addresssId,int pageSize, long offset) {
 		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
@@ -743,28 +683,32 @@ public class FamilyProviderImpl implements FamilyProvider {
 	}
 
 	@Override
-	public List<FamilyBillingTransactions> listFamilyBillingTrransactionByBillId(Long billId) {
-		/*List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
+	public FamilyBillingTransactions findFamilyBillTxByOrderId(Long orderId,Long familyId) {
+		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
 
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
-				(DSLContext context , Object object) -> {
-
-					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
-							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.BILL_ID.eq(billId))
-							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
-							.fetch();
-
-					if(records != null && !records.isEmpty()){
-						records.stream().map(r -> {
-							list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
-							return null;
-						}).toArray();
-					}
-
-					return true;
+		if(familyId != null){
+			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class,familyId));
+			context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+			.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.ORDER_ID.eq(orderId))
+			.fetch().map(r -> {
+				list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
+				return null;
+			});
+		}
+		else{
+			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,(DSLContext context , Object object) -> {
+				context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
+				.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.ORDER_ID.eq(orderId))
+				.fetch().map(r -> {
+					list.add(ConvertHelper.convert(r, FamilyBillingTransactions.class));
+					return null;
 				});
-
-		return list;*/
+				return true;
+			});
+		}
+		
+		if(list != null && !list.isEmpty())
+			return list.get(0);
 		return null;
 	}
 
@@ -861,9 +805,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 		cal.set(Calendar.MONTH, 0);
 		cal.set(Calendar.DAY_OF_MONTH, 0);
 		Timestamp startStampInYear = new Timestamp(cal.getTime().getTime());
-		
+
 		BigDecimal [] totalChargeAmount = new BigDecimal [1];
-		totalChargeAmount[0] = BigDecimal.ZERO;
 
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
 				(DSLContext context , Object object) -> {
@@ -871,13 +814,13 @@ public class FamilyProviderImpl implements FamilyProvider {
 							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addressId)
 									.and(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startStampInYear))
 									.and(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(endStampInYear)))
-							.fetch();
+									.fetch();
 					if(records != null && !records.isEmpty()){
 						totalChargeAmount[0] = records.get(0).value1();
 					}
 					return true;
 				});
-		
+
 		if(totalChargeAmount[0] == null)
 			return BigDecimal.ZERO;
 		return totalChargeAmount[0];
