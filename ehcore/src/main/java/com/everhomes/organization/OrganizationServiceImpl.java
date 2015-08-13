@@ -716,6 +716,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationCommunityDTO dto = ConvertHelper.convert(organizationCommunity, OrganizationCommunityDTO.class);
 				Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
 				dto.setCommunityName(community.getName());
+				dto.setCityName(community.getCityName());
+				dto.setAreaName(community.getAreaName());
+				dto.setStatus(community.getStatus());
 				members.add(dto);
 			}
 		}
