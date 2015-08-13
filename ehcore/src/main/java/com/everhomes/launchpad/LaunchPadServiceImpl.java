@@ -473,7 +473,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid item scopes paramter.");
         }
-        
+        if(cmd.getActionType() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid actionType paramter.");
+        }
+        if(cmd.getItemGroup() == null || cmd.getItemGroup().trim().equals("")){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemGroup paramter.");
+        }
+        if(cmd.getItemLabel() == null || cmd.getItemLabel().trim().equals("")){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemLabel paramter.");
+        }
+        if(cmd.getItemLocation() == null || cmd.getItemLocation().trim().equals("")){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid itemLocation paramter.");
+        }
         List<ItemScope> itemScopes = cmd.getItemScopes();
         LOGGER.info("Item scope size is " + itemScopes.size());
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();

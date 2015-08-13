@@ -41,13 +41,13 @@ public class BusinessTest extends CoreServerTestCase {
         //categroies.add(3002L);
         cmd.setCategroies(categroies);
         cmd.setContact("15875300001");
-        cmd.setDisplayName("校验加油");
+        cmd.setDisplayName("asdfw");
         cmd.setLatitude(23.123);
         cmd.setLongitude(108.123);
-        cmd.setName("校验加油");
+        cmd.setName("asdgfwee");
         cmd.setPhone("15875300001");
         cmd.setTargetType((byte)2);
-        cmd.setTargetId("1002");
+        cmd.setTargetId("1005");
         cmd.setUrl("http://www.baidu.com");
         List<BusinessScope> scopes = new ArrayList<>();
         BusinessScope scope = new BusinessScope();

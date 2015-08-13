@@ -9,10 +9,12 @@ package com.everhomes.launchpad;
  * <li>GAACTIONS(GaActions): 政府相关，发帖动作（报修，投诉，建议，缴费等）</li>
  * <li>ACTIONBARS(ActionBars): 工具栏</li>
  * <li>CALLPHONES(CallPhones): 电话</li>
+ * <li>PAYACTIONS(PayActions): 缴费</li>
  * </ul>
  */
 public enum ItemGroup {
-    DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones");
+    DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones"),
+    PAYACTIONS("PayActions");
     
     private String code;
        

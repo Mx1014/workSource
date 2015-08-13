@@ -13,6 +13,9 @@ import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -45,6 +48,8 @@ public class BusinessProviderImpl implements BusinessProvider {
 	private DbProvider dbProvider;
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+//	@Caching(evict = { @CacheEvict(value="BusinessesByCreatorId", key="#business.creatorUid") })
     @Override
     public void createBusiness(Business business) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -57,6 +62,8 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinesses.class, null); 
         
     }
+//	@Caching(evict = { @CacheEvict(value="BusinessesByCreatorId", key="#business.creatorUid"),
+//	        @CacheEvict(value="Business", key="#business.id"),@CacheEvict(value="BusinessByTargetId", key="#business.targetId") })
     @Override
     public void updateBusiness(Business business) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -67,6 +74,8 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinesses.class, null);
         
     }
+//	@Caching(evict = { @CacheEvict(value="BusinessesByCreatorId", key="#business.creatorUid"),
+//	        @CacheEvict(value="Business", key="#business.id"),@CacheEvict(value="BusinessByTargetId", key="#business.targetId")})
     @Override
     public void deleteBusiness(Business business) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -84,7 +93,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusiness(business);
         
     }
-    
+//    @Cacheable(value="Business", key="#id")
     @Override
     public Business findBusinessById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -117,6 +126,8 @@ public class BusinessProviderImpl implements BusinessProvider {
                 });
         return businesses;
     }
+    
+//    @Cacheable(value="BusinessVisibleScopesOfScope", key="{#scopeId,#scopeType}")
     @Override
     public List<BusinessVisibleScope> findBusinessVisibleScopesByScope(long scopeId, byte scopeType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinessVisibleScopes.class));
@@ -129,6 +140,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         return businessVisibleScopes;
     }
     
+//    @Caching(evict = { @CacheEvict(value="BusinessVisibleScopesOfScope", key="{#businessVisibleScope.scopeCode,#businessVisibleScope.scopeId}")})
     @Override
     public void createBusinessVisibleScope(BusinessVisibleScope businessVisibleScope) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessVisibleScopes.class));
@@ -140,6 +152,8 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessVisibleScopes.class, null); 
     }
     
+//    @Caching(evict = { @CacheEvict(value="BusinessVisibleScopesOfScope", key="{#businessVisibleScope.scopeCode,#businessVisibleScope.scopeId}"),
+//            @CacheEvict(value="BusinessVisibleScopesOfScope", key="#businessVisibleScope.id")})
     @Override
     public void updateBusinessVisibleScope(BusinessVisibleScope businessVisibleScope) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -150,7 +164,8 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
         
     }
-    
+//    @Caching(evict = { @CacheEvict(value="BusinessVisibleScopesOfScope", key="{#businessVisibleScope.scopeCode,#businessVisibleScope.scopeId}"),
+//            @CacheEvict(value="BusinessVisibleScopesOfScope", key="#businessVisibleScope.id")})
     @Override
     public void deleteBusinessVisibleScope(BusinessVisibleScope businessVisibleScope) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -170,7 +185,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusinessVisibleScope(businessVisibleScope);
         
     }
-    
+//    @Cacheable(value="BusinessVisibleScope", key="#id")
     @Override
     public BusinessVisibleScope findBusinessVisibleScopeById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -178,7 +193,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         EhBusinessVisibleScopesDao dao = new EhBusinessVisibleScopesDao(context.configuration()); 
         return ConvertHelper.convert(dao.findById(id),BusinessVisibleScope.class);
     }
-    
+   
     @Override
     public void createBusinessCategory(BusinessCategory businessCategory) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessCategories.class));
@@ -190,7 +205,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessCategories.class, null); 
         
     }
-    
+//    @Caching(evict = { @CacheEvict(value="BusinessCategory", key="#businessCategory.id")})
     @Override
     public void updateBusinessCategory(BusinessCategory businessCategory) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -200,7 +215,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
         
     }
-    
+//    @Caching(evict = { @CacheEvict(value="BusinessCategory", key="#businessCategory.id")})
     @Override
     public void deleteBusinessCategory(BusinessCategory businessCategory) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -220,7 +235,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusinessCategory(businessCategory);
         
     }
-    
+//    @Cacheable(value="BusinessCategory", key="#id")
     @Override
     public BusinessCategory findBusinessCategoryById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -230,24 +245,35 @@ public class BusinessProviderImpl implements BusinessProvider {
     }
     
     @Override
-    public void deleteBusinessVisibleScopeByBusinessId(long businessId) {
+    public void deleteBusinessVisibleScopeByBusiness(Business business) {
+        assert(business != null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        context.delete(Tables.EH_BUSINESS_VISIBLE_SCOPES).where(Tables.EH_BUSINESS_VISIBLE_SCOPES.OWNER_ID.eq(businessId)).execute();
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
+        
+        //context.delete(Tables.EH_BUSINESS_VISIBLE_SCOPES).where(Tables.EH_BUSINESS_VISIBLE_SCOPES.OWNER_ID.eq(business.getId())).execute();
+        EhBusinessVisibleScopesDao dao = new EhBusinessVisibleScopesDao(context.configuration()); 
+        List<com.everhomes.server.schema.tables.pojos.EhBusinessVisibleScopes>  scopes = dao.fetchByOwnerId(business.getId());
+        if(scopes != null && !scopes.isEmpty()){
+            scopes.forEach(r -> deleteBusinessVisibleScope(r.getId()));
+        }
+            
+        //DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessVisibleScopes.class, null);
     }
     
     @Override
-    public void deleteBusinessCategoryByBusinessId(long businessId) {
+    public void deleteBusinessCategoryByBusiness(Business business) {
+        assert(business != null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhBusinessCategoriesDao dao = new EhBusinessCategoriesDao(context.configuration()); 
+        List<EhBusinessCategories> categories = dao.fetchByOwnerId(business.getId());
+        if(categories != null && !categories.isEmpty()){
+            categories.forEach(r -> deleteBusinessCategory(r.getId()));
+        }
 
-        context.delete(Tables.EH_BUSINESS_CATEGORIES).where(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID.eq(businessId)).execute();
-      
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
+//        context.delete(Tables.EH_BUSINESS_CATEGORIES).where(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID.eq(business.getId())).execute();
+//        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
         
     }
-    
+    @Cacheable(value="BusinessByTargetId", key="#targetId")
     @Override
     public Business findBusinessByTargetId(String targetId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
@@ -303,6 +329,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         ).collect(Collectors.toList());
     }
     
+//    @Cacheable(value="BusinessesByCreatorId", key="#userId")
     @Override
     public List<Business> findBusinessByCreatorId(long userId) {
         
@@ -346,6 +373,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessAssignedScopes.class, null); 
     }
     
+//    @Caching(evict = { @CacheEvict(value="BusinessAssignedScope", key="#businessAssignedScope.id")})
     @Override
     public void updateBusinessAssignedScope(BusinessAssignedScope businessAssignedScope) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -356,7 +384,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedScopes.class, null);
         
     }
-    
+//    @Caching(evict = { @CacheEvict(value="BusinessAssignedScope", key="#businessAssignedScope.id")})
     @Override
     public void deleteBusinessAssignedScope(BusinessAssignedScope businessAssignedScope) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -376,7 +404,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusinessAssignedScope(businessAssignedScope);
         
     }
-    
+//    @Cacheable(value="BusinessAssignedScope", key="#id")
     @Override
     public BusinessAssignedScope findBusinessAssignedScopeById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -388,11 +416,16 @@ public class BusinessProviderImpl implements BusinessProvider {
     @Override
     public void deleteBusinessAssignedScopeByBusinessId(long businessId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-        context.delete(Tables.EH_BUSINESS_ASSIGNED_SCOPES).where(Tables.EH_BUSINESS_ASSIGNED_SCOPES.OWNER_ID.eq(businessId)).execute();
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedScopes.class, null);
+        EhBusinessAssignedScopesDao dao = new EhBusinessAssignedScopesDao(context.configuration()); 
+        List<EhBusinessAssignedScopes> assignedScopes = dao.fetchByOwnerId(businessId);
+        if(assignedScopes != null && !assignedScopes.isEmpty()){
+            assignedScopes.forEach(r -> deleteBusinessAssignedScope(r.getId()));
+        }
+        //context.delete(Tables.EH_BUSINESS_ASSIGNED_SCOPES).where(Tables.EH_BUSINESS_ASSIGNED_SCOPES.OWNER_ID.eq(businessId)).execute();
+        //DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedScopes.class, null);
+        
     }
+    
     @Override
     public List<BusinessAssignedScope> findBusinessAssignedScopeByScope(long cityId, long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
