@@ -3128,7 +3128,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				this.familyProvider.createFamilyBillingTransaction(familyTx);
 
 				OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-				orgTx.setOrderId(bill.getId());
+				orgTx.setOrderId(order.getId());
 				orgTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
 				orgTx.setChargeAmount(waitPayAmount);
 				orgTx.setCreateTime(payTimeStamp);
@@ -3191,7 +3191,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public OrganizationOrderDTO createPmBillOrder(CreatePmBillOrderCommand cmd) {
-		if(cmd.getBillId() == null){
+		if(cmd.getBillId() == null || cmd.getAmount() == null){
 			LOGGER.error("billId or amount is null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"billId or amount is null.");
@@ -3208,17 +3208,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is invalid.");
 		}
-		BigDecimal payedAmount = this.countBillTxAmount(bill.getId());
+		/*BigDecimal payedAmount = this.countBillTxAmount(bill.getId());
 		BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(payedAmount);
 		if(waitPayAmount.compareTo(BigDecimal.ZERO) == 0){
 			LOGGER.error("the bill had pay.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill had pay.");
-		}
+		}*/
 		
 		User user = UserContext.current().getUser();
 		OrganizationOrder order = new OrganizationOrder();
-		order.setAmount(waitPayAmount);
+		order.setAmount(cmd.getAmount());
 		order.setBillId(bill.getId());
 		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		if(cmd.getDescription() != null && !cmd.getDescription().equals(""))
@@ -3231,7 +3231,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		OrganizationOrderDTO dto = new OrganizationOrderDTO();
 		String orderNo = String.valueOf(order.getId());
 		dto.setOrderNo(orderNo);
-		dto.setAmount(waitPayAmount);
+		dto.setAmount(cmd.getAmount());
 		dto.setName(bill.getName());
 		dto.setDescription(order.getDescription());
 		return dto;

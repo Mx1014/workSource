@@ -1,12 +1,15 @@
 package com.everhomes.organization.pm;
 
+import java.math.BigDecimal;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>billId : 账单id</li>
+ * 	<li>billId : 账单id</li>
+ * 	<li>amount : 金额</li>
  *	<li>description : 描述</li>
  *</ul>
  *
@@ -15,6 +18,7 @@ public class CreatePmBillOrderCommand {
 	
 	@NotNull
 	private Long billId;
+	private BigDecimal amount;
 	private String description;
 	
 	public Long getBillId() {
@@ -23,7 +27,12 @@ public class CreatePmBillOrderCommand {
 	public void setBillId(Long billId) {
 		this.billId = billId;
 	}
-	
+	public BigDecimal getAmount() {
+		return amount;
+	}
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
 	public String getDescription() {
 		return description;
 	}

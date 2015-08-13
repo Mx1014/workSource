@@ -34,9 +34,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
-import com.everhomes.util.IdToken;
 import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/pm")
@@ -1251,9 +1249,6 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
-	public static void main(String[] args) {
-		System.out.println(System.currentTimeMillis());
 	}
 	//根据订单号查询订单信息
 	/**
