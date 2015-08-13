@@ -1,17 +1,17 @@
 // @formatter:off
 // generated at 2015-08-13 10:45:22
-package com.everhomes.category;
+package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
 import com.everhomes.category.CategoryDTO;
 
-public class ListActionCategoriesRestResponse extends RestResponseBase {
+public class ListBizCategoriesRestResponse extends RestResponseBase {
 
     private List<CategoryDTO> response;
 
-    public ListActionCategoriesRestResponse () {
+    public ListBizCategoriesRestResponse () {
     }
 
     public List<CategoryDTO> getResponse() {
