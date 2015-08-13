@@ -951,6 +951,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					break;
 				case GANC:
 				case GAPS:
+				case GACW:
 					map.put(type.getCode(), organization.getId());
 					break;
 				default:
