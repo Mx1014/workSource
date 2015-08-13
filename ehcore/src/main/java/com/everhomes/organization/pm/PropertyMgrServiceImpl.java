@@ -3038,6 +3038,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"the order not found.");
 			}
+			BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());//支付金额
+			if(order.getAmount().compareTo(waitPayAmount) != 0){
+				LOGGER.error("order amount not equal payAmount.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"order amount not equal payAmount.");
+			}
 			CommunityPmBill bill = this.organizationProvider.findOranizationBillById(order.getBillId());
 			if(bill == null){
 				LOGGER.error("the bill not found.");
@@ -3058,12 +3064,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			Long payTime = Long.valueOf(cmd.getPayTime());
 			Timestamp payTimeStamp = new Timestamp(payTime);//支付时间
-			BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());//支付金额
 
 			Date cunnentTime = new Date();
 			Timestamp timestamp = new Timestamp(cunnentTime.getTime());
 			//账单欠费金额已缴齐,无需继续缴费
-			BigDecimal paidAmount = this.countBillTxAmount(bill.getId());
+			/*BigDecimal paidAmount = this.countBillTxAmount(bill.getId());
 			BigDecimal billWaitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(paidAmount);
 			if(billWaitPayAmount.compareTo(BigDecimal.ZERO) <= 0){
 				LOGGER.error("the bill had paid.");
@@ -3074,7 +3079,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				LOGGER.error("the payAmount not equal to bill wait pay amount.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 						"the payAmount not equal to bill wait pay amount.");
-			}
+			}*/
 			
 			this.dbProvider.execute(s -> {
 				
