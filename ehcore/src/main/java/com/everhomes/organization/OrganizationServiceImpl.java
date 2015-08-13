@@ -548,6 +548,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
 		case GANC:
 		case GAPS:
+		case GACW:
 			organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
 		default:
 			LOGGER.error("creatorTag or targetTag format is wrong.");
@@ -950,6 +951,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					break;
 				case GANC:
 				case GAPS:
+				case GACW:
 					map.put(type.getCode(), organization.getId());
 					break;
 				default:

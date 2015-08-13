@@ -4,12 +4,12 @@ package com.everhomes.forum;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>对于物业、业委、居委、公安相关的帖，有两种不同角度的查询：一是普通用户查询自己小区范围内有关物业/业委/居委/公安等的帖子；
- *    二是物业/业委/居委/公安等以管理员的身份查询自己所有能够管理的帖子；
+ * <ul>对于物业、业委、居委、公安、社区工作站相关的帖，有两种不同角度的查询：一是普通用户查询自己小区范围内有关物业/业委/居委/公安/社区工作站等的帖子；
+ *    二是物业/业委/居委/公安/社区工作站等以管理员的身份查询自己所有能够管理的帖子；
  * <li>由于这些帖都是放在社区论坛，故只从社区论坛里查询，即论坛ID恒填ForumConstants.SYSTEM_FORUM(1)；</li>   
- * <li>对于第一种情况：entityTag填URSER，entityId填用户当前所在的小区ID，targetTag则填所要查询的实体类型（从物业、业委、居委、公安等中选一种）；
+ * <li>对于第一种情况：entityTag填URSER，entityId填用户当前所在的小区ID，targetTag则填所要查询的实体类型（从物业、业委、居委、公安、社区工作站等中选一种）；
  *                   contentCategory选报修/咨询与求助/投诉与建议，actionCategory不填；</li>   
- * <li>对于第二种情况：entityTag填物业、业委、居委、公安等的一种、entityId填其对应的机构ID，targetTag可不填，若填的话则公告类型填USER，报修/咨询与求助/投诉与建议则填物业、业委、居委、公安等的一种；</li>   
+ * <li>对于第二种情况：entityTag填物业、业委、居委、公安、社区工作站等的一种、entityId填其对应的机构ID，targetTag可不填，若填的话则公告类型填USER，报修/咨询与求助/投诉与建议则填物业、业委、居委、公安、社区工作站等的一种；</li>   
  * </ul>
  * <ul>字段参数：
  * <li>forumId: 论坛ID，只支持社区论坛</li>

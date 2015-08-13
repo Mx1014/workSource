@@ -130,6 +130,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getTargetTag());break;
 		case GANC:
 		case GAPS:
+		case GACW:
 			organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());break;
 		default:
 			LOGGER.error("creatorTag or targetTag format is wrong.");

@@ -34,9 +34,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
-import com.everhomes.util.IdToken;
 import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/pm")
@@ -1179,7 +1177,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
+	
 	/**
 	 * <b>URL: /pm/getPmPayStatistics
 	 * <p>物业缴费统计:年度收入，待收费,欠费户数
@@ -1262,6 +1260,20 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse findPmBillByOrderNo(@Valid FindPmBillByOrderNoCommand cmd) {
 		PmBillForOrderNoDTO bill = propertyMgrService.findPmBillByOrderNo(cmd);
 		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/createPmBillOrder
+	 * <p>线上支付下订单
+	 */
+	@RequestMapping("createPmBillOrder")
+	@RestReturn(value=OrganizationOrderDTO.class)
+	public RestResponse createPmBillOrder(@Valid CreatePmBillOrderCommand cmd) {
+		OrganizationOrderDTO order = propertyMgrService.createPmBillOrder(cmd);
+		RestResponse response = new RestResponse(order);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

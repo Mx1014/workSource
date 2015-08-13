@@ -475,7 +475,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void createOrganizationTask(OrganizationTask task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		
+
 		InsertQuery<EhOrganizationTasksRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_TASKS);
 		query.setRecord(ConvertHelper.convert(task, EhOrganizationTasksRecord.class));
 		query.setReturning(Tables.EH_ORGANIZATION_TASKS.ID);
@@ -560,26 +560,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
-	@Override
-	public BigDecimal getOrgBillTxAmountByBillId(Long billId){
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-		/*Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT).from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
-				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(billId)).fetch();
-
-		if(records != null && !records.isEmpty()){
-			BigDecimal total = BigDecimal.ZERO;
-			for(int i=0;i<records.size();i++){
-				if(records.get(0) != null && records.get(0).value1() != null)
-					total = total.add(records.get(i).value1());
-			}
-			return total;
-		}
-		else
-			return BigDecimal.ZERO;*/
-		return null;
-	}
-
 	@Cacheable(value="findOrganizationTaskById", key="#id", unless="#result == null")
 	public OrganizationTask findOrganizationTaskById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -655,7 +635,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<CommunityPmOwner> listOrganizationOwnerByOrgIdAndAddressId(
+	public List<CommunityPmOwner> listOrgOwnerByOrgIdAndAddressId(
 			Long organizationId, Long addressId) {
 		List<CommunityPmOwner> list = new ArrayList<CommunityPmOwner>();
 
@@ -687,15 +667,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationBillingTransactionDTO> listOrganizationBillingTransactionsByTimeAndAddress(
-			Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
+	public List<OrganizationBillingTransactionDTO> listOrgBillTxByAddressAndTime(Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
 
 		List<OrganizationBillingTransactionDTO> list = new ArrayList<OrganizationBillingTransactionDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
+		
 		SelectQuery<Record> query = context.selectQuery();
 		query.addFrom(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS);
-		//query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.BILL_ID.eq(Tables.EH_ORGANIZATION_BILLS.ID));
+		query.addJoin(Tables.EH_ORGANIZATION_ORDERS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.ORDER_ID.eq(Tables.EH_ORGANIZATION_ORDERS.ID));
+		query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLS.ID.eq(Tables.EH_ORGANIZATION_ORDERS.BILL_ID));
 
 		if(startTime != null && endTime != null)
 			query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTime)
@@ -703,8 +683,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(address != null && !address.equals(""))
 			query.addConditions(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+address+"%"));
 
-		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc());
+		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ADDRESS.asc());
 		query.addLimit((int)offset, pageSize);
+		System.out.println(query.getSQL());
 		query.execute();
 
 		Result<Record> records = query.getResult();
@@ -847,7 +828,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
 		if(taskStatus != null)
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus));
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
 				.where(condition)
@@ -908,8 +889,47 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.setReturning(Tables.EH_ORGANIZATION_ORDERS.ID);
 		query.execute();
 		order.setId(query.getReturnedRecord().getId());
-		
+
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationOrders.class, null);
+	}
+
+
+	@Override
+	public List<OrganizationOrder> listOrganizationOrdersByBillId(Long billId,Byte status) {
+		List<OrganizationOrder> list = new ArrayList<OrganizationOrder>();
+		Condition condition = Tables.EH_ORGANIZATION_ORDERS.BILL_ID.eq(billId);
+		if(status != null)
+			condition = condition.and(Tables.EH_ORGANIZATION_ORDERS.STATUS.eq(status));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select().from(Tables.EH_ORGANIZATION_ORDERS).where(condition)
+		.fetch().map(r -> {
+			list.add(ConvertHelper.convert(r, OrganizationOrder.class));
+			return null;
+		});
+		return list;
+	}
+
+
+	@Override
+	public OrganizationOrder findOrganizationOrderById(Long orderId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_ORGANIZATION_ORDERS)
+				.where(Tables.EH_ORGANIZATION_ORDERS.ID.eq(orderId))
+				.fetchOne();
+		if(record != null)
+			return ConvertHelper.convert(record, OrganizationOrder.class);
+		return null;
+	}
+
+
+	@Override
+	public void updateOrganizationOrder(OrganizationOrder order) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationOrdersDao dao = new EhOrganizationOrdersDao(context.configuration());
+		dao.update(ConvertHelper.convert(order, EhOrganizationOrders.class));
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOrders.class, order.getId());
+		
 	}
 
 }
