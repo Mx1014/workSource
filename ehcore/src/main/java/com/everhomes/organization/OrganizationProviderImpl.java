@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.swing.text.TabExpander;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -671,7 +673,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		SelectQuery<Record> query = context.selectQuery();
-		query.addFrom(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS,Tables.EH_ORGANIZATION_BILLS);
+		query.addFrom(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS);
+		query.addJoin(Tables.EH_ORGANIZATION_ORDERS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.ORDER_ID.eq(Tables.EH_ORGANIZATION_ORDERS.ID));
+		query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLS.ID.eq(Tables.EH_ORGANIZATION_ORDERS.BILL_ID));
 
 		if(startTime != null && endTime != null)
 			query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTime)
@@ -681,6 +685,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ADDRESS.asc());
 		query.addLimit((int)offset, pageSize);
+		System.out.println(query.getSQL());
 		query.execute();
 
 		Result<Record> records = query.getResult();
