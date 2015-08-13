@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
- * <li>members：物业账单信息，参考{@link com.everhomes.pm.PropOwnerDTO}</li>
+ * <li>members：业主列表信息，参考{@link com.everhomes.organization.pm.PropOwnerDTO}</li>
  * </ul>
  */
 public class ListPropOwnerCommandResponse {

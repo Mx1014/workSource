@@ -92,7 +92,6 @@ import com.everhomes.organization.BillingAccountHelper;
 import com.everhomes.organization.BillingAccountType;
 import com.everhomes.organization.GetOrgDetailCommand;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationOrderType;
 import com.everhomes.organization.OrganizationBillingAccount;
 import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationBillingTransactions;
@@ -100,6 +99,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationOrder;
 import com.everhomes.organization.OrganizationOrderStatus;
+import com.everhomes.organization.OrganizationOrderType;
 import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -112,6 +112,7 @@ import com.everhomes.organization.VendorType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
+import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -479,22 +480,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
+		if(cmd.getCommunityId() == null){
+			LOGGER.error("communityId paramter is null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"communityId paramter is null or empty");
+		}
+		Community community = this.checkCommunity(cmd.getCommunityId());
+		
 		ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
 		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
 		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
+		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(community.getId(),OrganizationType.PM.getCode());
+		//将communityId转为organizationId
+		cmd.setCommunityId(org.getId());
 		int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -507,6 +505,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return commandResponse;
 	}
+	
+	private Community checkCommunity(Long communityId) {
+		Community community = communityProvider.findCommunityById(communityId);
+		if(community == null){
+			LOGGER.error("Unable to find the community");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Unable to find the community.");
+		}
+		return community;
+	}
+
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
 
@@ -1288,7 +1297,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						//4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
 						userIds.add(userPhone.getId());
 					}
-
 				}
 			}
 		}
@@ -1313,11 +1321,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_FAMILY);
 		messageDto.setSenderUid(UserContext.current().getUser().getId());
-		messageDto.setChannels(new MessageChannel("group", String.valueOf(familyId)));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.GROUP.getCode(), String.valueOf(familyId)));
 		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "group", 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, MessageChannelType.GROUP.getCode(), 
 				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 
@@ -1325,11 +1333,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_FAMILY);
 		messageDto.setSenderUid(UserContext.current().getUser().getId());
-		messageDto.setChannels(new MessageChannel("user", String.valueOf(userId)));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(userId)));
 		messageDto.setMetaAppId(AppConstants.APPID_USER);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, "user", 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, MessageChannelType.USER.getCode(), 
 				String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 

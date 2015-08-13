@@ -234,8 +234,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping(value="importPMPropertyOwnerInfo", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
-	public RestResponse importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,
-			@RequestParam(value = "attachment") MultipartFile[] files) {
+	public RestResponse importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
 		propertyMgrService.importPMPropertyOwnerInfo(cmd,files);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

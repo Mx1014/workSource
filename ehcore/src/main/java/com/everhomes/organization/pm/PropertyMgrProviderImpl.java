@@ -536,13 +536,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityPmOwner> listCommunityPmOwners(Long communityId, String address, String contactToken,Integer pageOffset,Integer pageSize) {
+	public List<CommunityPmOwner> listCommunityPmOwners(Long organizationId, String address, String contactToken,Integer pageOffset,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
-		if(communityId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(communityId));
+		if(organizationId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId));
 		if(address != null && !"".equals(address)) {
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS.eq(address));
 		}
@@ -562,13 +562,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityPmOwner> listCommunityPmOwners(Long communityId, Long addressId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+	public List<CommunityPmOwner> listCommunityPmOwners(Long organizationId, Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
-		if(communityId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(communityId));
+		if(organizationId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId));
 		if(addressId != null && !"".equals(addressId)) {
 			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
 		}
