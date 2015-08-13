@@ -12,6 +12,14 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.t
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('home.url', 'http://10.1.1.91:8080', 'the home url');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/html/score/score.html', 'the relative path for user score');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/app/static/share_post/share_post.html#', 'the relative path for sharing topic');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.vcode.templateid', '9547', 'vcode sms template id');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.account.sid', 'b0b423e8f630d920aaba8aafe8f37701', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.token', '1527ed4b1bb855fab12a5683bb3c7ead', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.appid', '89f85f91ed974429992831fb662dbb83', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.version', '2014-06-30', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.server', 'api.ucpaas.com', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('mw.vcode.template.content', '欢迎注册左邻,您的验证码${vcode},10内分钟有效。', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('marketdata.item.version', '2015080311', '服务市场版本号');
 
 
 

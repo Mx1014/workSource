@@ -212,6 +212,12 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'family.notification', 18, 'zh_CN', '某家人被踢出家庭，通知操作人', '您已将${userName}移出家庭${address}。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'family.notification', 19, 'zh_CN', '某家人被踢出家庭，通知家庭其它成员', '${operatorName}已将${userName}移出家庭${address}。');
 
+
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'community.notification', 1, 'zh_CN', '有人填加小区（小区地址不存在），通知申请人等待审核', '您已经提交小区${communityName}，请耐心等待管理员的审核。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'community.notification', 2, 'zh_CN', '管理员通过用户填写的小区，用户收到的通知', '管理员通过了您填写的小区${communityName}，您现在可以填写地址啦。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'community.notification', 3, 'zh_CN', '管理员驳回用户填写的小区，用户收到的通知', '管理员驳回了您填写的小区${communityName}，请确认填写信息的正确性。');
+
+
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'user.notification', 1, 'zh_CN', '新用户注册', '小左等您好久啦，已经为您准备好了精彩的社区生活…');
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '1', 'zh_CN', '你有新消息');
