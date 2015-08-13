@@ -1110,7 +1110,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		Record1<BigDecimal> record = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT.sum())
 				.from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
-				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear)
+				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(organizationId)
+						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear))
 						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
 						.fetchOne();
 
@@ -1120,7 +1121,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public BigDecimal countPmBillsDueAmountInYear(Long orgId, Long addressId) {
+	public BigDecimal countFamilyPmBillDueAmountInYear(Long orgId, Long addressId) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(System.currentTimeMillis());
 		cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
@@ -1148,7 +1149,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public CommunityPmBill findFirstPmBillInYear(Long orgId, Long addressId) {
+	public CommunityPmBill findFamilyFirstPmBillInYear(Long orgId, Long addressId) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(System.currentTimeMillis());
 		cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
@@ -1179,8 +1180,6 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	@Override
 	public CommunityPmBill findFamilyPmBillInStartDateToEndDate(Long addressId,
 			Date startDate, Date endDate) {
-		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
-		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)
