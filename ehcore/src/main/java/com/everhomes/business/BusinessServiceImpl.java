@@ -76,18 +76,7 @@ public class BusinessServiceImpl implements BusinessService {
         if(cmd.getUserId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter uerId,uerId is null");
-        if(cmd.getBizOwnerUid() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter ownerUid,ownerUid is null");
-        if(cmd.getName() == null || cmd.getName().trim().equals(""))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter name,name is null");
-        if(cmd.getCategroies() == null || cmd.getCategroies().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter categories,categories is null");
-        if(cmd.getScopes() == null || cmd.getScopes().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter scopes,scopes is null");
+        
         User user = userProvider.findUserById(cmd.getUserId());
         if(user == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -117,6 +106,19 @@ public class BusinessServiceImpl implements BusinessService {
     }
     
     private Business createBusiness(SyncBusinessCommand cmd, long userId){
+        if(cmd.getBizOwnerUid() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter ownerUid,ownerUid is null");
+        if(cmd.getName() == null || cmd.getName().trim().equals(""))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter name,name is null");
+        if(cmd.getCategroies() == null || cmd.getCategroies().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter categories,categories is null");
+        if(cmd.getScopes() == null || cmd.getScopes().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter scopes,scopes is null");
+        
         Business business = ConvertHelper.convert(cmd, Business.class);
         business.setCreatorUid(userId);
         business.setTargetId(cmd.getTargetId() == null ? "" : cmd.getTargetId());
