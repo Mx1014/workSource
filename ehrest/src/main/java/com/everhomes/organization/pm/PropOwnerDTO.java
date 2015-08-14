@@ -9,14 +9,14 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: id</li>
  * <li>communityId: 小区id</li>
- * <li>contactType: 业主类型</li>
- * <li>contactToken: 业主标示</li>
- * <li>contactName: 地址</li>
- * <li>contactDescription: 页码</li>
- * <li>addressId: 每页大小</li>
- * <li>address: 页码</li>
- * <li>creatorUid: 每页大小</li>
- * <li>createTime: 每页大小</li>
+ * <li>contactType: 联系类型</li>
+ * <li>contactToken: 联系信息</li>
+ * <li>contactName: 姓名</li>
+ * <li>contactDescription: 描述</li>
+ * <li>addressId: 地址id</li>
+ * <li>address: 地址</li>
+ * <li>creatorUid: 创建的用户id</li>
+ * <li>createTime: 创建时间</li>
  * </ul>
  */
 public class PropOwnerDTO {
