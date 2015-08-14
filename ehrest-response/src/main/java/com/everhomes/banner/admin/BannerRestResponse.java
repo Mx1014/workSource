@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-08-14 10:20:50
+// generated at 2015-08-14 13:59:48
 package com.everhomes.banner.admin;
 
 import com.everhomes.rest.RestResponseBase;
