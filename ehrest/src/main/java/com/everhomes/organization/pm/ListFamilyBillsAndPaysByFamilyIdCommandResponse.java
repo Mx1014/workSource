@@ -10,6 +10,11 @@ import com.everhomes.util.StringHelper;
  * <li>billDate : 指定的月份</li>
  * <li>nextPageOffset : 下一页码</li>
  * <li>requests : 账单和缴费记录列表,详见 {@link com.everhomes.organization.pm.PmBillsDTO}</li>
+ * 
+ * <li>orgTelephone : 组织电话</li>
+ * <li>orgName : 组织名称</li>
+ * <li>zlTelephone : 左邻电话</li>
+ * <li>zlName : 左邻名称</li>
  *</ul>
  *
  */
@@ -19,6 +24,11 @@ public class ListFamilyBillsAndPaysByFamilyIdCommandResponse {
 	private String billDate;
 
 	private Long nextPageOffset;
+	
+	private String orgTelephone;
+	private String orgName;
+	private String zlTelephone;
+	private String zlName;
 	
 	@ItemType(PmBillsDTO.class)
 	private List<PmBillsDTO> requests;
@@ -36,6 +46,38 @@ public class ListFamilyBillsAndPaysByFamilyIdCommandResponse {
 
 	public void setNextPageOffset(Long nextPageOffset) {
 		this.nextPageOffset = nextPageOffset;
+	}
+	
+	public String getOrgTelephone() {
+		return orgTelephone;
+	}
+
+	public void setOrgTelephone(String orgTelephone) {
+		this.orgTelephone = orgTelephone;
+	}
+
+	public String getOrgName() {
+		return orgName;
+	}
+
+	public void setOrgName(String orgName) {
+		this.orgName = orgName;
+	}
+
+	public String getZlTelephone() {
+		return zlTelephone;
+	}
+
+	public void setZlTelephone(String zlTelephone) {
+		this.zlTelephone = zlTelephone;
+	}
+
+	public String getZlName() {
+		return zlName;
+	}
+
+	public void setZlName(String zlName) {
+		this.zlName = zlName;
 	}
 
 	public List<PmBillsDTO> getRequests() {
