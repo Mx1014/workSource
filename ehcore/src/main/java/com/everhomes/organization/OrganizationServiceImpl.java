@@ -497,7 +497,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"Unable to find the organization.");
 		}
 		this.checkUserHaveRightToNewTopic(cmd,organization);
-		cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
+		if(cmd.getEmbeddedAppId() == null)
+			cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
 	}
