@@ -2651,7 +2651,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				billList.add(billDto);
 			}
 		}
-
+		//物业名称和电话
+		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(), OrganizationType.PM.getCode());
+		if(organization != null){
+			response.setOrgName(organization.getName());
+			List<CommunityPmContact> contacts = this.propertyMgrProvider.listCommunityPmContacts(organization.getId());
+			if(contacts != null && !contacts.isEmpty()){
+				for(CommunityPmContact contact : contacts)
+					if(contact.getContactType().compareTo(IdentifierType.MOBILE.getCode()) == 0)
+						response.setOrgTelephone(contact.getContactToken());
+			}
+		}
+		//左邻名称和电话
+		response.setZlName("深圳市永佳天成科技发展有限公司");
+		response.setZlTelephone("4008384688");
+		
 		response.setRequests(billList);
 		return response;
 	}
