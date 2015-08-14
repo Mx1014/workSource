@@ -6,11 +6,11 @@ import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.forum.ListPostCommandResponse;
 
-public class SearchRestResponse extends RestResponseBase {
+public class QueryTopicsByEntityAndCategoryRestResponse extends RestResponseBase {
 
     private ListPostCommandResponse response;
 
-    public SearchRestResponse () {
+    public QueryTopicsByEntityAndCategoryRestResponse () {
     }
 
     public ListPostCommandResponse getResponse() {

@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-08-13 10:45:22
+// generated at 2015-08-14 09:54:22
 package com.everhomes.ecard;
 
 import com.everhomes.rest.RestResponseBase;
