@@ -46,7 +46,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
    
     @Override
     public URI confirmAuthorization(User user, AuthorizationCommand cmd) {
-        if(!"code".equals(cmd.getResponseType()))
+        if(!"code".equals(cmd.getresponse_type()))
             throw RuntimeErrorException.errorWith(OAuth2ServiceErrorCode.SCOPE, OAuth2ServiceErrorCode.ERROR_UNSUPPORTED_RESPONSE_TYPE,
                     "Only code response type is supported");
 

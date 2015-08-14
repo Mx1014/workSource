@@ -41,7 +41,7 @@ public class OAuth2ApiController extends ControllerBase {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
 
         //UserInfo info = this.userService.getUserInfo(accessToken.getGrantorUid());
-        UserInfo info = this.userService.getUserSnapshotInfo(accessToken.getGrantorUid());
+        UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
 
         return new RestResponse(info);
     }
