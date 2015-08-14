@@ -93,7 +93,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusiness(business);
         
     }
-//    @Cacheable(value="Business", key="#id")
+//    @Cacheable(value="Business", key="#id",unless="#result==null")
     @Override
     public Business findBusinessById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -127,7 +127,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         return businesses;
     }
     
-//    @Cacheable(value="BusinessVisibleScopesOfScope", key="{#scopeId,#scopeType}")
+//    @Cacheable(value="BusinessVisibleScopesOfScope", key="{#scopeId,#scopeType},unless="#result.size() == 0")
     @Override
     public List<BusinessVisibleScope> findBusinessVisibleScopesByScope(long scopeId, byte scopeType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinessVisibleScopes.class));
@@ -185,7 +185,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusinessVisibleScope(businessVisibleScope);
         
     }
-//    @Cacheable(value="BusinessVisibleScope", key="#id")
+//    @Cacheable(value="BusinessVisibleScope", key="#id",unless="#result==null")
     @Override
     public BusinessVisibleScope findBusinessVisibleScopeById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -235,7 +235,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusinessCategory(businessCategory);
         
     }
-//    @Cacheable(value="BusinessCategory", key="#id")
+//    @Cacheable(value="BusinessCategory", key="#id",unless="#result==null")
     @Override
     public BusinessCategory findBusinessCategoryById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -273,7 +273,7 @@ public class BusinessProviderImpl implements BusinessProvider {
 //        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessCategories.class, null);
         
     }
-    @Cacheable(value="BusinessByTargetId", key="#targetId")
+//    @Cacheable(value="BusinessByTargetId", key="#targetId",unless="#result==null")
     @Override
     public Business findBusinessByTargetId(String targetId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
@@ -329,7 +329,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         ).collect(Collectors.toList());
     }
     
-//    @Cacheable(value="BusinessesByCreatorId", key="#userId")
+//    @Cacheable(value="BusinessesByCreatorId", key="#userId",unless="#result.size()==0")
     @Override
     public List<Business> findBusinessByCreatorId(long userId) {
         
@@ -404,7 +404,7 @@ public class BusinessProviderImpl implements BusinessProvider {
             self.deleteBusinessAssignedScope(businessAssignedScope);
         
     }
-//    @Cacheable(value="BusinessAssignedScope", key="#id")
+//    @Cacheable(value="BusinessAssignedScope", key="#id",unless="#result==null")
     @Override
     public BusinessAssignedScope findBusinessAssignedScopeById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

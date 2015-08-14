@@ -75,14 +75,17 @@ public class BusinessServiceImpl implements BusinessService {
     public void syncBusiness(SyncBusinessCommand cmd) {
         if(cmd.getUserId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter uerId,uerId is null");
+                    "Invalid paramter userId,userId is null");
         
         User user = userProvider.findUserById(cmd.getUserId());
         if(user == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter uerId,uerId is not found");
+                    "Invalid paramter userId,userId is not found");
         }
-        
+        if(cmd.getTargetId() == null || cmd.getTargetId().trim().equals("")){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter targetId,targetId is null");
+        }
         long userId = user.getId();
         this.dbProvider.execute((TransactionStatus status) -> {
             Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
