@@ -41,13 +41,13 @@ public class BusinessTest extends CoreServerTestCase {
         //categroies.add(3002L);
         cmd.setCategroies(categroies);
         cmd.setContact("15875300001");
-        cmd.setDisplayName("校验加油");
+        cmd.setDisplayName("asdfw");
         cmd.setLatitude(23.123);
         cmd.setLongitude(108.123);
-        cmd.setName("校验加油");
+        cmd.setName("asdgfwee");
         cmd.setPhone("15875300001");
         cmd.setTargetType((byte)2);
-        cmd.setTargetId("1002");
+        cmd.setTargetId("1005");
         cmd.setUrl("http://www.baidu.com");
         List<BusinessScope> scopes = new ArrayList<>();
         BusinessScope scope = new BusinessScope();
@@ -105,5 +105,12 @@ public class BusinessTest extends CoreServerTestCase {
         scopes.add(scope);
         cmd.setScopes(scopes);
         businessService.recommendBusiness(cmd);
+    }
+    
+    @Test
+    public void testDeleteBusiness(){
+        SyncDeleteBusinessCommand cmd = new SyncDeleteBusinessCommand();
+        cmd.setId(String.valueOf("1002"));
+        businessService.syncDeleteBusiness(cmd);
     }
 }

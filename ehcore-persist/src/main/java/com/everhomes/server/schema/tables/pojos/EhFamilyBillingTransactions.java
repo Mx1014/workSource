@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhFamilyBillingTransactions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1134484969;
+	private static final long serialVersionUID = -1606518667;
 
 	private java.lang.Long       id;
 	private java.lang.String     txSequence;
@@ -20,8 +20,8 @@ public class EhFamilyBillingTransactions implements java.io.Serializable {
 	private java.lang.Long       ownerAccountId;
 	private java.lang.Byte       targetAccountType;
 	private java.lang.Long       targetAccountId;
-	private java.lang.Byte       billType;
-	private java.lang.Long       billId;
+	private java.lang.Byte       orderType;
+	private java.lang.Long       orderId;
 	private java.math.BigDecimal chargeAmount;
 	private java.lang.String     description;
 	private java.lang.String     vendor;
@@ -43,8 +43,8 @@ public class EhFamilyBillingTransactions implements java.io.Serializable {
 		java.lang.Long       ownerAccountId,
 		java.lang.Byte       targetAccountType,
 		java.lang.Long       targetAccountId,
-		java.lang.Byte       billType,
-		java.lang.Long       billId,
+		java.lang.Byte       orderType,
+		java.lang.Long       orderId,
 		java.math.BigDecimal chargeAmount,
 		java.lang.String     description,
 		java.lang.String     vendor,
@@ -63,8 +63,8 @@ public class EhFamilyBillingTransactions implements java.io.Serializable {
 		this.ownerAccountId = ownerAccountId;
 		this.targetAccountType = targetAccountType;
 		this.targetAccountId = targetAccountId;
-		this.billType = billType;
-		this.billId = billId;
+		this.orderType = orderType;
+		this.orderId = orderId;
 		this.chargeAmount = chargeAmount;
 		this.description = description;
 		this.vendor = vendor;
@@ -133,20 +133,20 @@ public class EhFamilyBillingTransactions implements java.io.Serializable {
 		this.targetAccountId = targetAccountId;
 	}
 
-	public java.lang.Byte getBillType() {
-		return this.billType;
+	public java.lang.Byte getOrderType() {
+		return this.orderType;
 	}
 
-	public void setBillType(java.lang.Byte billType) {
-		this.billType = billType;
+	public void setOrderType(java.lang.Byte orderType) {
+		this.orderType = orderType;
 	}
 
-	public java.lang.Long getBillId() {
-		return this.billId;
+	public java.lang.Long getOrderId() {
+		return this.orderId;
 	}
 
-	public void setBillId(java.lang.Long billId) {
-		this.billId = billId;
+	public void setOrderId(java.lang.Long orderId) {
+		this.orderId = orderId;
 	}
 
 	public java.math.BigDecimal getChargeAmount() {

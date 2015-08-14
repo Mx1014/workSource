@@ -75,25 +75,17 @@ public class BusinessServiceImpl implements BusinessService {
     public void syncBusiness(SyncBusinessCommand cmd) {
         if(cmd.getUserId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter uerId,uerId is null");
-        if(cmd.getBizOwnerUid() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter ownerUid,ownerUid is null");
-        if(cmd.getName() == null || cmd.getName().trim().equals(""))
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter name,name is null");
-        if(cmd.getCategroies() == null || cmd.getCategroies().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter categories,categories is null");
-        if(cmd.getScopes() == null || cmd.getScopes().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter scopes,scopes is null");
+                    "Invalid paramter userId,userId is null");
+        
         User user = userProvider.findUserById(cmd.getUserId());
         if(user == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter uerId,uerId is not found");
+                    "Invalid paramter userId,userId is not found");
         }
-        
+        if(cmd.getTargetId() == null || cmd.getTargetId().trim().equals("")){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter targetId,targetId is null");
+        }
         long userId = user.getId();
         this.dbProvider.execute((TransactionStatus status) -> {
             Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
@@ -106,10 +98,10 @@ public class BusinessServiceImpl implements BusinessService {
             
             long id = business.getId();
             if(cmd.getScopes() != null && !cmd.getScopes().isEmpty()){
-                createBusinessScopes(id, cmd.getScopes());
+                createBusinessScopes(business, cmd.getScopes());
             }
             if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
-                createBusinessCategories(id, cmd.getCategroies());
+                createBusinessCategories(business, cmd.getCategroies());
             }
             return true;
         });
@@ -117,6 +109,19 @@ public class BusinessServiceImpl implements BusinessService {
     }
     
     private Business createBusiness(SyncBusinessCommand cmd, long userId){
+        if(cmd.getBizOwnerUid() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter ownerUid,ownerUid is null");
+        if(cmd.getName() == null || cmd.getName().trim().equals(""))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter name,name is null");
+        if(cmd.getCategroies() == null || cmd.getCategroies().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter categories,categories is null");
+        if(cmd.getScopes() == null || cmd.getScopes().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter scopes,scopes is null");
+        
         Business business = ConvertHelper.convert(cmd, Business.class);
         business.setCreatorUid(userId);
         business.setTargetId(cmd.getTargetId() == null ? "" : cmd.getTargetId());
@@ -165,21 +170,21 @@ public class BusinessServiceImpl implements BusinessService {
         this.businessProvider.updateBusiness(business);
     }
     
-    private void createBusinessScopes(long bizId, List<BusinessScope> scopes){
-        this.businessProvider.deleteBusinessVisibleScopeByBusinessId(bizId);
+    private void createBusinessScopes(Business business, List<BusinessScope> scopes){
+        this.businessProvider.deleteBusinessVisibleScopeByBusiness(business);
         scopes.forEach(r ->{
             BusinessVisibleScope scope = ConvertHelper.convert(r,BusinessVisibleScope.class);
-            scope.setOwnerId(bizId);
+            scope.setOwnerId(business.getId());
             this.businessProvider.createBusinessVisibleScope(scope);
         });
     }
     
-    private void createBusinessCategories(long bizId, List<Long> categories){
-        this.businessProvider.deleteBusinessCategoryByBusinessId(bizId);
+    private void createBusinessCategories(Business business, List<Long> categories){
+        this.businessProvider.deleteBusinessCategoryByBusiness(business);
         categories.forEach(r ->{
             BusinessCategory category = new BusinessCategory();
             category.setCategoryId(r.longValue());
-            category.setOwnerId(bizId);
+            category.setOwnerId(business.getId());
             Category c = categoryProvider.findCategoryById(r.longValue());
             if(c != null)
                 category.setCategoryPath(c.getPath());
@@ -398,7 +403,7 @@ public class BusinessServiceImpl implements BusinessService {
         this.dbProvider.execute((TransactionStatus status) -> {
             this.businessProvider.updateBusiness(business);
             if(cmd.getScopes() != null && !cmd.getScopes().isEmpty()){
-                this.businessProvider.deleteBusinessVisibleScopeByBusinessId(business.getId());
+                this.businessProvider.deleteBusinessVisibleScopeByBusiness(business);
                 cmd.getScopes().forEach(r ->{
                     BusinessVisibleScope scope = ConvertHelper.convert(r,BusinessVisibleScope.class);
                     scope.setOwnerId(business.getId());
@@ -406,7 +411,7 @@ public class BusinessServiceImpl implements BusinessService {
                 });
             }
             if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
-                this.businessProvider.deleteBusinessCategoryByBusinessId(business.getId());
+                this.businessProvider.deleteBusinessCategoryByBusiness(business);
                 cmd.getCategroies().forEach(r ->{
                     BusinessCategory category = new BusinessCategory();
                     category.setCategoryId(r.longValue());

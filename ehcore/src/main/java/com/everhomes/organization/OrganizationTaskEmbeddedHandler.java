@@ -55,10 +55,13 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
 			task.setApplyEntityId(0L); // 还没有帖子ID
 			task.setTargetType(post.getTargetTag());
-			task.setTargetId(organization.getId());
+			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
+				task.setTargetId(0L);
+			else
+				task.setTargetId(organization.getId());
 			task.setCreatorUid(post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			
+
 			OrganizationTaskType taskType = getOrganizationTaskType(post);
 			if(taskType != null) {
 				task.setTaskType(taskType.getCode());
@@ -130,6 +133,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getTargetTag());break;
 		case GANC:
 		case GAPS:
+		case GACW:
 			organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());break;
 		default:
 			LOGGER.error("creatorTag or targetTag format is wrong.");
@@ -166,22 +170,24 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 	private String getOrganizationTaskRenderString(Post post) {
 		String str = post.getEmbeddedJson();
 
-		try {
-			Long taskId = post.getEmbeddedId();
-			if(taskId == null) {
-				LOGGER.error("Failed to render the organization task, task id is null, postId=" + post.getId());
-			} else {
-				OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
-				if(task != null) {
-					OrganizationTaskDTO taskDto = ConvertHelper.convert(task, OrganizationTaskDTO.class);
-					str = StringHelper.toJsonString(taskDto);
+		if(str == null){
+			try {
+				Long taskId = post.getEmbeddedId();
+				if(taskId == null) {
+					LOGGER.error("Failed to render the organization task, task id is null, postId=" + post.getId());
 				} else {
-					LOGGER.error("Failed to render the organization task, task not found, postId=" + post.getId() + ", taskId=" + taskId);
+					OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
+					if(task != null) {
+						OrganizationTaskDTO taskDto = ConvertHelper.convert(task, OrganizationTaskDTO.class);
+						str = StringHelper.toJsonString(taskDto);
+					} else {
+						LOGGER.error("Failed to render the organization task, task not found, postId=" + post.getId() + ", taskId=" + taskId);
+					}
 				}
+			} catch(Exception e) {
+				LOGGER.error("Failed to post-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
+						+ ", subject=" + post.getSubject(), e);
 			}
-		} catch(Exception e) {
-			LOGGER.error("Failed to post-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
-					+ ", subject=" + post.getSubject(), e);
 		}
 
 		return str;

@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
  * <li>defaultOrder: 组排列顺序</li>
  * <li>separatorFlag: 组底部是否有分隔条，0: no, 1: yes"</li>
  * <li>separatorHeight: 组底部分隔条高度</li>
+ * <li>columnCount: 组件一行显示的图标数，目前针对Navigator</li>
  * </ul>
  */
 public class LaunchPadLayoutGroupDTO {
@@ -26,6 +27,7 @@ public class LaunchPadLayoutGroupDTO {
     private Integer defaultOrder;
     private Integer separatorFlag;
     private Double separatorHeight;
+    private Integer columnCount;
 
    
     public String getGroupName() {
@@ -82,6 +84,14 @@ public class LaunchPadLayoutGroupDTO {
 
     public void setSeparatorHeight(Double separatorHeight) {
         this.separatorHeight = separatorHeight;
+    }
+
+    public Integer getColumnCount() {
+        return columnCount;
+    }
+
+    public void setColumnCount(Integer columnCount) {
+        this.columnCount = columnCount;
     }
 
     @Override

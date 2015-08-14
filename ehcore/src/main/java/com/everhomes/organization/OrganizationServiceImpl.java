@@ -479,14 +479,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public PostDTO createTopic(NewTopicCommand cmd) {
-		if(cmd.getForumId() == null || cmd.getVisibleRegionId() == null || 
-				cmd.getVisibleRegionType() == null || cmd.getContentCategory() == null ||
+		if(cmd.getForumId() == null || 
+				cmd.getVisibleRegionId() == null || 
+				cmd.getVisibleRegionType() == null || 
+				cmd.getContentCategory() == null ||
 				cmd.getCreatorTag() == null || cmd.getCreatorTag().equals("") ||
 				cmd.getTargetTag() == null || cmd.getTargetTag().equals("") || 
 				cmd.getSubject() == null || cmd.getSubject().equals("")){
-			LOGGER.error("ForumId or visibleRegionId or visibleRegionTpe or creatorTag or targetTag or subject is null or empty.");
+			LOGGER.error("ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"ForumId or visibleRegionId or visibleRegionTpe or creatorTag or targetTag or subject is null or empty.");
+					"ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
 		}
 		Organization organization = getOrganization(cmd);
 		if(organization == null){
@@ -548,6 +550,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getVisibleRegionId(), cmd.getTargetTag());break;
 		case GANC:
 		case GAPS:
+		case GACW:
 			organization = this.organizationProvider.findOrganizationById(cmd.getVisibleRegionId());break;
 		default:
 			LOGGER.error("creatorTag or targetTag format is wrong.");
@@ -713,6 +716,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationCommunityDTO dto = ConvertHelper.convert(organizationCommunity, OrganizationCommunityDTO.class);
 				Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
 				dto.setCommunityName(community.getName());
+				dto.setCityName(community.getCityName());
+				dto.setAreaName(community.getAreaName());
+				dto.setStatus(community.getStatus());
 				members.add(dto);
 			}
 		}
@@ -950,6 +956,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					break;
 				case GANC:
 				case GAPS:
+				case GACW:
 					map.put(type.getCode(), organization.getId());
 					break;
 				default:
@@ -1299,17 +1306,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
-		if(cmd.getOrganizationId() == null){
-			LOGGER.error("propterty organizationId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty organizationId paramter can not be null or empty");
-		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
+		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
 
@@ -1319,7 +1318,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 
-		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(cmd.getOrganizationId(),cmd.getTaskType(),cmd.getTaskStatus(),pageSize+1,offset);
+		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(organization.getId(),cmd.getTaskType(),cmd.getTaskStatus(),pageSize+1,offset);
 		if(orgTaskList != null && !orgTaskList.isEmpty()){
 			if(orgTaskList.size() == pageSize+1){
 				response.setNextPageOffset(cmd.getPageOffset()+1);
@@ -1337,6 +1336,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return response;
 	}
 
+	private void checkOrganizationIdIsNull(Long organizationId) {
+		if(organizationId == null){
+			LOGGER.error("propterty organizationId paramter can not be null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"propterty organizationId paramter can not be null or empty");
+		}
+	}
+
 	@Override
 	public void assignOrgTopic(AssginOrgTopicCommand cmd) {
 		if(cmd.getOrganizationId() == null || cmd.getTopicId() == null || cmd.getUserId() == null){
@@ -1344,37 +1351,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty organizationId or topicId or userId paramter can not be null or empty.");
 		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
-		Post topic = this.forumProvider.findPostById(cmd.getTopicId());
-		if(topic == null){
-			LOGGER.error("Unable to find the topic.topicId=" + cmd.getTopicId());
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TOPIC, 
-					"Unable to find the topic.");
-		}
-		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(),organization.getId());
-		if(desOrgMember == null){
-			LOGGER.error("User is not in the organization.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"User is not in the organization.");
-		}
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		Post topic = this.checkTopic(cmd.getTopicId());
+		OrganizationMember desOrgMember = this.checkDesOrgMember(cmd.getUserId(),organization.getId());
 		User user = UserContext.current().getUser();
-		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),organization.getId());
-		if(operOrgMember == null){
-			LOGGER.error("Operator not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Operator not found.");
-		}
-		OrganizationTask task = this.organizationProvider.findOrgTaskByOrgIdAndEntityId(organization.getId(), cmd.getTopicId());
-		if(task == null){
-			LOGGER.error("Unable to find the topic task.");
-			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK, 
-					"Unable to find the topic task.");
-		}
+		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(),organization.getId());
+		OrganizationTask task = this.checkOrgTask(organization.getId(), cmd.getTopicId());
 
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
@@ -1387,6 +1369,46 @@ public class OrganizationServiceImpl implements OrganizationService {
 			sendSmToOrgMemberForAssignOrgTopic(organization,operOrgMember,desOrgMember,task);
 			return status;
 		});
+	}
+
+	private OrganizationTask checkOrgTask(Long orgId, Long topicId) {
+		OrganizationTask task = this.organizationProvider.findOrgTaskByOrgIdAndEntityId(orgId,topicId);
+		if(task == null){
+			LOGGER.error("Unable to find the topic task.");
+			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TASK, 
+					"Unable to find the topic task.");
+		}
+		return task;
+	}
+
+	private OrganizationMember checkOperOrgMember(Long userId, Long orgId) {
+		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
+		if(operOrgMember == null){
+			LOGGER.error("Operator not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Operator not found.");
+		}
+		return operOrgMember;
+	}
+
+	private OrganizationMember checkDesOrgMember(Long userId, Long orgId) {
+		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
+		if(desOrgMember == null){
+			LOGGER.error("User is not in the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is not in the organization.");
+		}
+		return desOrgMember;
+	}
+
+	private Post checkTopic(Long topicId) {
+		Post topic = this.forumProvider.findPostById(topicId);
+		if(topic == null){
+			LOGGER.error("Unable to find the topic.");
+			throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_INVALID_TOPIC, 
+					"Unable to find the topic.");
+		}
+		return topic;
 	}
 
 	private void sendSmToOrgMemberForAssignOrgTopic(Organization organization,OrganizationMember operOrgMember, OrganizationMember desOrgMember,OrganizationTask task) {
@@ -1416,6 +1438,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
 		}
+		
+		if(template == null) template = "您的请求已安排人员处理";
 
 		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
 	}
@@ -1427,48 +1451,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty organizationId or status or topicId paramter can not be null or empty");
 		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		User user  = UserContext.current().getUser();
-		long userId = user.getId();
-		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
-		if(operOrgMember == null){
-			LOGGER.error("Operator not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Operator not found.");
-		}
-		long topicId = cmd.getTopicId();
-		Post topic = this.forumProvider.findPostById(topicId);
-		if(topic == null){ 
-			LOGGER.error("Topic is not found.topicId=" + topicId + ",userId=" + userId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Topic is not found.");
-		}
-		OrganizationTask task = this.organizationProvider.findOrgTaskByOrgIdAndEntityId(cmd.getOrganizationId(),topicId);
-		if(task == null){
-			LOGGER.error("Task is not found.topicId=" + topicId + ",userId=" + userId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Task is not found.");
-		}
-		if(OrganizationTaskStatus.fromCode(cmd.getStatus()) == null){
-			LOGGER.error("status is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"status is wrong.");
-		}
+		this.checkOperOrgMember(user.getId(), organization.getId());
+		Post topic = this.checkTopic(cmd.getTopicId());
+		OrganizationTask task = this.checkOrgTask(organization.getId(),topic.getId());
+		OrganizationTaskStatus taskSatus = this.checkTaskStatus(cmd.getStatus());
 
 		dbProvider.execute((status) -> {
-			task.setTaskStatus(cmd.getStatus());
+			task.setTaskStatus(taskSatus.getCode());
 			this.organizationProvider.updateOrganizationTask(task);
-			/*if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
+			if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论
-				sendComment(topicId,topic.getForumId(),organization.getId(),userId,topic.getCategoryId());
-			}*/
+				sendComment(topic.getId(),topic.getForumId(),organization.getId(),user.getId(),topic.getCategoryId());
+			}
 			return status;
 		});
+	}
+
+	private OrganizationTaskStatus checkTaskStatus(Byte status) {
+		OrganizationTaskStatus taskStatus = OrganizationTaskStatus.fromCode(status);
+		if(taskStatus == null){
+			LOGGER.error("task status is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"task status is wrong.");
+		}
+		return taskStatus;
 	}
 
 	@Override
