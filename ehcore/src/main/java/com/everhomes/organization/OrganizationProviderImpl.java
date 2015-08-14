@@ -1,13 +1,10 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.swing.text.TabExpander;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -897,16 +894,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<OrganizationOrder> listOrganizationOrdersByBillId(Long billId,Byte status) {
 		List<OrganizationOrder> list = new ArrayList<OrganizationOrder>();
-		Condition condition = Tables.EH_ORGANIZATION_ORDERS.BILL_ID.eq(billId);
+		
+		Condition condition = null;
+		if(billId != null)
+			condition = Tables.EH_ORGANIZATION_ORDERS.BILL_ID.eq(billId);
 		if(status != null)
 			condition = condition.and(Tables.EH_ORGANIZATION_ORDERS.STATUS.eq(status));
-
+		
+		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		context.select().from(Tables.EH_ORGANIZATION_ORDERS).where(condition)
-		.fetch().map(r -> {
+		
+		SelectQuery<EhOrganizationOrdersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ORDERS);
+		if(condition != null){
+			query.addConditions(condition);
+		}
+		query.fetch().map(r -> {
 			list.add(ConvertHelper.convert(r, OrganizationOrder.class));
 			return null;
 		});
+
 		return list;
 	}
 
@@ -930,6 +936,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.update(ConvertHelper.convert(order, EhOrganizationOrders.class));
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOrders.class, order.getId());
 		
+	}
+
+	@Override
+	public List<OrganizationOrder> listOrganizationOrdersByStatus(Byte status) {
+		List<OrganizationOrder> list = new ArrayList<OrganizationOrder>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		context.select().from(Tables.EH_ORGANIZATION_ORDERS).where(Tables.EH_ORGANIZATION_ORDERS.STATUS.eq(status))
+		.fetch().map(r -> {
+			list.add(ConvertHelper.convert(r, OrganizationOrder.class));
+			return null;
+		});
+
+		return list;
 	}
 
 }
