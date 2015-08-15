@@ -147,14 +147,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<Long> bizIds = userActivityProvider.findFavorite(userId).stream()
                 .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
         if(bizIds != null && !bizIds.isEmpty()){
-            List<Business> favoriteBusiness = businessProvider.findBusinessByIds(bizIds);
-            
-            if(favoriteBusiness != null && !favoriteBusiness.isEmpty()){
-                if(businesses == null)
-                    businesses = new ArrayList<Business>();
-                businesses.addAll(favoriteBusiness);
+            for(long bizId : bizIds){
+                Business b = businessProvider.findBusinessById(bizId);
+                if(b != null)
+                    businesses.add(b);
             }
-           
         }
         if(businesses != null && !businesses.isEmpty()){
             int index = 1;

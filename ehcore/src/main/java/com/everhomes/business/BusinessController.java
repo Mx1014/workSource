@@ -2,12 +2,8 @@ package com.everhomes.business;
 
 
 
-import java.util.List;
 
 import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +18,6 @@ import com.everhomes.rest.RestResponse;
 @RestController
 @RequestMapping("/business")
 public class BusinessController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessController.class);
     
     @Autowired
     private BusinessService businessService;
@@ -72,8 +67,5 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
-
 
 }

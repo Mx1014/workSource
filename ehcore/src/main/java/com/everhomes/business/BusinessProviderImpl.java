@@ -287,7 +287,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         return businesses.get(0);
     }
     @Override
-    public List<Business> findBusinessByCategroyAndScopeId(long categoryId, byte scopeType, long scopeId, List<String> geoHashList) {
+    public List<Business> findBusinessByCategroy(long categoryId, List<String> geoHashList) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
         Condition c = null;
         for(String geoHashStr : geoHashList){
@@ -300,10 +300,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         //List<Business> businesses = new ArrayList<>();
         return context.select(Tables.EH_BUSINESSES.fields()).from(Tables.EH_BUSINESSES)
         .rightOuterJoin(Tables.EH_BUSINESS_CATEGORIES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID))
-        .rightOuterJoin(Tables.EH_BUSINESS_VISIBLE_SCOPES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_VISIBLE_SCOPES.OWNER_ID))
-        .where(Tables.EH_BUSINESS_VISIBLE_SCOPES.SCOPE_CODE.eq(scopeType))
-        .and(Tables.EH_BUSINESS_VISIBLE_SCOPES.SCOPE_ID.eq(scopeId))
-        .and(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(categoryId))
+        .where(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(categoryId))
         .and(c)
         .fetch().stream().map(r ->{
                 Business b = new Business();
@@ -448,5 +445,15 @@ public class BusinessProviderImpl implements BusinessProvider {
                 new DefaultRecordMapper(Tables.EH_BUSINESS_ASSIGNED_SCOPES.recordType(), BusinessAssignedScope.class)
             );
         return result;
+    }
+    
+    @Override
+    public List<BusinessCategory> findBusinessCategoriesByIdAndOwnerIds(long id, List<Long> recommendBizIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        List<BusinessCategory> businessCategories = context.select().from(Tables.EH_BUSINESS_CATEGORIES)
+        .where(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID.in(recommendBizIds))
+        .and(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(id))
+        .fetch().stream().map(r ->ConvertHelper.convert(r, BusinessCategory.class)).collect(Collectors.toList());
+        return businessCategories;
     }
 }

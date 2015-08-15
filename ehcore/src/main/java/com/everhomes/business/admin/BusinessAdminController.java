@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.business.BusinessService;
+import com.everhomes.business.DeleteBusinessCommand;
+import com.everhomes.business.SyncBusinessCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -42,6 +44,21 @@ public class BusinessAdminController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /admin/business/createBusiness</b>
+     * <p>创建服务店铺</p>
+     */
+    @RequestMapping("createBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse createBusiness(@Valid CreateBusinessAdminCommand cmd) {
+        
+        businessService.createBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 
     /**
      * <b>URL: /admin/business/recommendBusiness</b>
@@ -51,6 +68,21 @@ public class BusinessAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse recommendBusiness(@Valid RecommendBusinessesAdminCommand cmd) {
         businessService.recommendBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/business/deleteBusiness</b>
+     * <p>删除店铺</p>
+     */
+    @RequestMapping("deleteBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse deleteBusiness(@Valid DeleteBusinessCommand cmd) {
+        
+        businessService.deleteBusiness(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
