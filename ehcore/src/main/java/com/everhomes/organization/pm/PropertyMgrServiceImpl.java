@@ -1802,11 +1802,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"files is null");
 		}
 
-		String filePath1 = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".xlsx";
-		String filePath2 = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".xlsx";
+		String rootPath = System.getProperty("user.dir");
+		String filePath1 = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		String filePath2 = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		/*int index = rootPath.lastIndexOf(File.separator);
+		String jarDirPath = rootPath.substring(0, index);*/
+		String jarPath =rootPath+File.separator+"ehparser-0.0.1-SNAPSHOT.jar";
+		LOGGER.error("jarPath="+jarPath);
+		
 		StringBuilder builder = new StringBuilder();
 		//builder.append("java -jar D:/dev_documents/workspace2/ehparser/target/ehparser-0.0.1-SNAPSHOT.jar");
-		builder.append("java -jar /home/everhomes/ehproject/ehparser-0.0.1-SNAPSHOT.jar");
+		
+		builder.append("java -jar"+" "+jarPath);
 		builder.append(" ");
 		builder.append(orgId);
 		builder.append(" ");
