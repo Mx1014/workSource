@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -109,6 +111,10 @@ import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.PaidType;
 import com.everhomes.organization.TxType;
 import com.everhomes.organization.VendorType;
+import com.everhomes.organization.pm.pay.BaseVo;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.organization.pm.pay.RestUtil;
+import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -486,7 +492,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"communityId paramter is null or empty");
 		}
 		Community community = this.checkCommunity(cmd.getCommunityId());
-		
+
 		ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
 		User user  = UserContext.current().getUser();
 		//权限控制
@@ -505,7 +511,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return commandResponse;
 	}
-	
+
 	private Community checkCommunity(Long communityId) {
 		Community community = communityProvider.findCommunityById(communityId);
 		if(community == null){
@@ -1796,11 +1802,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"files is null");
 		}
 
-		String filePath1 = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".xlsx";
-		String filePath2 = System.getProperty("user.dir")+File.separator+UUID.randomUUID().toString()+".xlsx";
+		String rootPath = System.getProperty("user.dir");
+		String filePath1 = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		String filePath2 = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		/*int index = rootPath.lastIndexOf(File.separator);
+		String jarDirPath = rootPath.substring(0, index);*/
+		String jarPath =rootPath+File.separator+"ehparser-0.0.1-SNAPSHOT.jar";
+		LOGGER.error("jarPath="+jarPath);
+		
 		StringBuilder builder = new StringBuilder();
 		//builder.append("java -jar D:/dev_documents/workspace2/ehparser/target/ehparser-0.0.1-SNAPSHOT.jar");
-		builder.append("java -jar /home/everhomes/ehproject/ehparser-0.0.1-SNAPSHOT.jar");
+		
+		builder.append("java -jar"+" "+jarPath);
 		builder.append(" ");
 		builder.append(orgId);
 		builder.append(" ");
@@ -1969,8 +1982,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public ListPmBillsByConditionsCommandResponse listPmBillsByConditions(
-			ListPmBillsByConditionsCommand cmd) {
+	public ListPmBillsByConditionsCommandResponse listPmBillsByConditions(ListPmBillsByConditionsCommand cmd) {
 		if(cmd.getOrganizationId() == null){
 			LOGGER.error("propterty organizationId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -1982,9 +1994,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Unable to find the organization.");
 		}
+		remoteRefreshOrgOrderStatus();
+
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
-
 		ListPmBillsByConditionsCommandResponse result = new ListPmBillsByConditionsCommandResponse();
 		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
 
@@ -2028,6 +2041,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		result.setRequests(billList);
 		return result;	
+	}
+
+	private void remoteRefreshOrgOrderStatus() {
+		try{
+			List<OrganizationOrder> orders = this.organizationProvider.listOrganizationOrdersByStatus(OrganizationOrderStatus.WAITING_FOR_PAY.getCode());
+			if(orders != null && !orders.isEmpty()){
+				for(OrganizationOrder order : orders){
+					String orderNo = this.convertOrderIdToOrderNo(order.getId());
+					this.remoteUpdateOrgOrderByOrderNo(orderNo);
+				}
+			}
+		}
+		catch(Exception e){
+			LOGGER.error("remote refresh organization order fail.message="+e.getMessage());
+		}
 	}
 
 	private java.sql.Date getLastDayOfMonthByStr(String billDate) {
@@ -2596,7 +2624,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-		
+
 		if(payDtoList != null && !payDtoList.isEmpty()){
 			payDtoList.sort(new Comparator<FamilyBillingTransactionDTO>() {
 				public int compare(FamilyBillingTransactionDTO o1,FamilyBillingTransactionDTO o2) {
@@ -2608,7 +2636,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			});
 		}
-		
+
 		billDto.setPayedAmount(payedAmount);
 		billDto.setWaitPayAmount(totalAmount.subtract(payedAmount));
 		billDto.setTotalAmount(totalAmount);
@@ -2629,6 +2657,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the family is not exist");
 		}
+		remoteRefreshOrgOrderStatus();
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2651,6 +2680,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				billList.add(billDto);
 			}
 		}
+		//物业名称和电话
+		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(), OrganizationType.PM.getCode());
+		if(organization != null){
+			response.setOrgName(organization.getName());
+			List<CommunityPmContact> contacts = this.propertyMgrProvider.listCommunityPmContacts(organization.getId());
+			if(contacts != null && !contacts.isEmpty()){
+				for(CommunityPmContact contact : contacts)
+					if(contact.getContactType().compareTo(IdentifierType.MOBILE.getCode()) == 0)
+						response.setOrgTelephone(contact.getContactToken());
+			}
+		}
+		//左邻名称和电话
+		response.setZlName("深圳市永佳天成科技发展有限公司");
+		response.setZlTelephone("4008384688");
 
 		response.setRequests(billList);
 		return response;
@@ -2723,7 +2766,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			order.setPayerId(user.getId());
 			order.setStatus(OrganizationOrderStatus.PAID.getCode());
 			this.organizationProvider.createOrganizationOrder(order);
-			
+
 			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
 			if(fAccount == null){
 				fAccount = new FamilyBillingAccount();
@@ -3022,154 +3065,235 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void onlinePayPmBill(OnlinePayPmBillCommand cmd) {
-		/*if(cmd.getPayStatus().equals("fail")){
-			LOGGER.error("payStatus is failure.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"payStatus is failure.");
-		}*/
+		//fail
+		if(cmd.getPayStatus().equals("fail"))
+			this.onlinePayPmBillFail(cmd);
 		//success
-		if(cmd.getPayStatus().equals("success")){
-			if(cmd.getOrderNo() == null || cmd.getOrderNo().trim().equals("") || 
-					cmd.getVendorType() == null || cmd.getVendorType().trim().equals("") ||
-					cmd.getPayAmount() == null || cmd.getPayAmount().trim().equals("") ||
-					cmd.getPayTime() == null || cmd.getPayTime().trim().equals("") ||
-					cmd.getPayAccount() == null || cmd.getPayAccount().trim().equals("") ||
-					cmd.getPayObj() == null || cmd.getPayObj().trim().equals("")){
-				LOGGER.error("orderNo or vendor or payAmount or payAmount or payAccount or payObj is null or empty.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"orderNo or vendor or payAmount or payAmount or payAccount or payObj is null or empty.");
-			}
-			Long orderId = Long.valueOf(cmd.getOrderNo());
-			OrganizationOrder order = this.organizationProvider.findOrganizationOrderById(orderId);
-			if(order == null){
-				LOGGER.error("the order not found.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"the order not found.");
-			}
-			BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());//支付金额
-			if(order.getAmount().compareTo(waitPayAmount) != 0){
-				LOGGER.error("order amount not equal payAmount.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"order amount not equal payAmount.");
-			}
-			CommunityPmBill bill = this.organizationProvider.findOranizationBillById(order.getBillId());
-			if(bill == null){
-				LOGGER.error("the bill not found.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"the bill not found.");
-			}
-			if(VendorType.fromCode(cmd.getVendorType()) == null){
-				LOGGER.error("vendor type is wrong.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"vendor type is wrong.");
-			}
-			CommunityPmBill bill2 = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
-			if(bill2 == null || bill2.getId().compareTo(bill.getId()) != 0){
-				LOGGER.error("the bill is invalid.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-						"the bill is invalid.");
-			}
+		if(cmd.getPayStatus().equals("success"))
+			this.onlinePayPmBillSuccess(cmd);
+	}
 
-			Long payTime = Long.valueOf(cmd.getPayTime());
-			Timestamp payTimeStamp = new Timestamp(payTime);//支付时间
+	private void onlinePayPmBillFail(OnlinePayPmBillCommand cmd) {
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
+		OrganizationOrder order = this.checkOrder(orderId);
 
-			Date cunnentTime = new Date();
-			Timestamp timestamp = new Timestamp(cunnentTime.getTime());
-			//账单欠费金额已缴齐,无需继续缴费
-			/*BigDecimal paidAmount = this.countBillTxAmount(bill.getId());
-			BigDecimal billWaitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(paidAmount);
-			if(billWaitPayAmount.compareTo(BigDecimal.ZERO) <= 0){
-				LOGGER.error("the bill had paid.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-						"the bill had paid.");
-			}
-			if(billWaitPayAmount.compareTo(waitPayAmount) != 0){
-				LOGGER.error("the payAmount not equal to bill wait pay amount.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-						"the payAmount not equal to bill wait pay amount.");
-			}*/
-			
-			this.dbProvider.execute(s -> {
-				
-				order.setPaidTime(payTimeStamp);
-				order.setPayerId(0L);
-				order.setStatus(OrganizationOrderStatus.PAID.getCode());
-				this.organizationProvider.updateOrganizationOrder(order);
-				
-				FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
-				if(fAccount == null){
-					fAccount = new FamilyBillingAccount();
-					fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
-					fAccount.setBalance(BigDecimal.ZERO);
-					fAccount.setCreateTime(timestamp);
-					fAccount.setOwnerId(bill.getEntityId());
-					this.familyProvider.createFamilyBillingAccount(fAccount);
-				}
+		Date cunnentTime = new Date();
+		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
 
-				OrganizationBillingAccount oAccount = this.organizationProvider.findOrganizationBillingAccount(bill.getOrganizationId());
-				if(oAccount == null){
-					oAccount = new OrganizationBillingAccount();
-					oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
-					oAccount.setBalance(BigDecimal.ZERO);
-					oAccount.setCreateTime(timestamp);
-					oAccount.setOwnerId(bill.getOrganizationId());
-					this.organizationProvider.createOrganizationBillingAccount(oAccount);
-				}
+		this.updateOrderStatus(order,0L,timestamp,OrganizationOrderStatus.INACTIVE.getCode());
+	}
 
-				String uuidStr = UUID.randomUUID().toString();
+	private void onlinePayPmBillSuccess(OnlinePayPmBillCommand cmd) {
 
-				FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
-				familyTx.setOrderId(order.getId());
-				familyTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
-				familyTx.setChargeAmount(waitPayAmount.negate());
-				familyTx.setCreateTime(payTimeStamp);
-				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-					familyTx.setDescription(cmd.getDescription());
-				familyTx.setOperatorUid(0L);
-				familyTx.setOwnerAccountId(fAccount.getId());
-				familyTx.setOwnerId(bill.getEntityId());
-				familyTx.setPaidType(PaidType.SELFPAY.getCode());
-				familyTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
-				//familyTx.setResultCodeScope("test");
-				familyTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
-				familyTx.setTargetAccountId(oAccount.getId());
-				familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
-				familyTx.setTxSequence(uuidStr);
-				familyTx.setTxType(TxType.ONLINE.getCode());
-				familyTx.setVendor(cmd.getVendorType());
-				familyTx.setPayAccount(cmd.getPayAccount());
-				this.familyProvider.createFamilyBillingTransaction(familyTx);
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		this.checkVendorTypeIsNull(cmd.getVendorType());
+		this.checkPayAmountIsNull(cmd.getPayAmount());
+		this.checkPayTimeIsNull(cmd.getPayTime());
+		this.checkPayAccountIsNull(cmd.getPayAccount());
 
-				OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
-				orgTx.setOrderId(order.getId());
-				orgTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
-				orgTx.setChargeAmount(waitPayAmount);
-				orgTx.setCreateTime(payTimeStamp);
-				if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-					orgTx.setDescription(cmd.getDescription());
-				orgTx.setOperatorUid(0L);
-				orgTx.setOwnerAccountId(oAccount.getId());
-				orgTx.setOwnerId(bill.getOrganizationId());
-				orgTx.setPaidType(PaidType.SELFPAY.getCode());
-				orgTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
-				//orgTx.setResultCodeScope("test");
-				orgTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
-				orgTx.setTargetAccountId(fAccount.getId());
-				orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
-				orgTx.setTxSequence(uuidStr);
-				orgTx.setTxType(TxType.ONLINE.getCode());
-				orgTx.setVendor(cmd.getVendorType());
-				orgTx.setPayAccount(cmd.getPayAccount());
-				this.organizationProvider.createOrganizationBillingTransaction(orgTx);
-
-				//线上支付,将金额存到物业账号中
-				oAccount.setBalance(oAccount.getBalance().add(waitPayAmount));
-				oAccount.setUpdateTime(timestamp);
-				this.organizationProvider.updateOrganizationBillingAccount(oAccount);
-
-				return true;
-			});
+		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
+		OrganizationOrder order = this.checkOrder(orderId);
+		BigDecimal waitPayAmount = new BigDecimal(cmd.getPayAmount());//支付金额
+		//this.checkAmountIsEqual(order.getAmount(),waitPayAmount);
+		CommunityPmBill bill = this.checkPmBill(order.getBillId());
+		this.checkVendorTypeFormat(cmd.getVendorType());
+		CommunityPmBill bill2 = this.propertyMgrProvider.findFamilyNewestBill(bill.getEntityId(), bill.getOrganizationId());
+		if(bill2 == null || bill2.getId().compareTo(bill.getId()) != 0){
+			LOGGER.error("the bill is invalid.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+					"the bill is invalid.");
 		}
+		
+		Long payTime = Long.valueOf(cmd.getPayTime());
+		Timestamp payTimeStamp = new Timestamp(payTime);//支付时间
+
+		Date cunnentTime = new Date();
+		Timestamp timestamp = new Timestamp(cunnentTime.getTime());
+
+		this.dbProvider.execute(s -> {
+			order.setAmount(waitPayAmount);
+			this.updateOrderStatus(order,0L,payTimeStamp,OrganizationOrderStatus.PAID.getCode());
+
+			FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(bill.getEntityId());
+			if(fAccount == null)	fAccount = this.newFBillAcount(bill.getEntityId(),timestamp);
+
+			OrganizationBillingAccount oAccount = this.organizationProvider.findOrganizationBillingAccount(bill.getOrganizationId());
+			if(oAccount == null)	oAccount = this.newOBillAccount(bill.getOrganizationId(),timestamp);
+
+			String uuidStr = UUID.randomUUID().toString();
+
+			FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
+			familyTx.setOrderId(order.getId());
+			familyTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
+			familyTx.setChargeAmount(waitPayAmount.negate());
+			familyTx.setCreateTime(payTimeStamp);
+			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+				familyTx.setDescription(cmd.getDescription());
+			familyTx.setOperatorUid(0L);
+			familyTx.setOwnerAccountId(fAccount.getId());
+			familyTx.setOwnerId(bill.getEntityId());
+			familyTx.setPaidType(PaidType.SELFPAY.getCode());
+			familyTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
+			//familyTx.setResultCodeScope("test");
+			familyTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
+			familyTx.setTargetAccountId(oAccount.getId());
+			familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
+			familyTx.setTxSequence(uuidStr);
+			familyTx.setTxType(TxType.ONLINE.getCode());
+			familyTx.setVendor(cmd.getVendorType());
+			familyTx.setPayAccount(cmd.getPayAccount());
+			this.familyProvider.createFamilyBillingTransaction(familyTx);
+
+			OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
+			orgTx.setOrderId(order.getId());
+			orgTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
+			orgTx.setChargeAmount(waitPayAmount);
+			orgTx.setCreateTime(payTimeStamp);
+			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+				orgTx.setDescription(cmd.getDescription());
+			orgTx.setOperatorUid(0L);
+			orgTx.setOwnerAccountId(oAccount.getId());
+			orgTx.setOwnerId(bill.getOrganizationId());
+			orgTx.setPaidType(PaidType.SELFPAY.getCode());
+			orgTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
+			//orgTx.setResultCodeScope("test");
+			orgTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
+			orgTx.setTargetAccountId(fAccount.getId());
+			orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
+			orgTx.setTxSequence(uuidStr);
+			orgTx.setTxType(TxType.ONLINE.getCode());
+			orgTx.setVendor(cmd.getVendorType());
+			orgTx.setPayAccount(cmd.getPayAccount());
+			this.organizationProvider.createOrganizationBillingTransaction(orgTx);
+
+			//线上支付,将金额存到物业账号中
+			oAccount.setBalance(oAccount.getBalance().add(waitPayAmount));
+			oAccount.setUpdateTime(timestamp);
+			this.organizationProvider.updateOrganizationBillingAccount(oAccount);
+
+			return true;
+		});
+
+	}
+
+	private OrganizationBillingAccount newOBillAccount(Long orgId,Timestamp timestamp) {
+		OrganizationBillingAccount oAccount = new OrganizationBillingAccount();
+		oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
+		oAccount.setBalance(BigDecimal.ZERO);
+		oAccount.setCreateTime(timestamp);
+		oAccount.setOwnerId(orgId);
+		this.organizationProvider.createOrganizationBillingAccount(oAccount);
+		return oAccount;
+	}
+
+	private FamilyBillingAccount newFBillAcount(Long entityId,Timestamp timestamp) {
+		FamilyBillingAccount fAccount = new FamilyBillingAccount();
+		fAccount = new FamilyBillingAccount();
+		fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
+		fAccount.setBalance(BigDecimal.ZERO);
+		fAccount.setCreateTime(timestamp);
+		fAccount.setOwnerId(entityId);
+		this.familyProvider.createFamilyBillingAccount(fAccount);
+		return fAccount;
+	}
+
+	private void updateOrderStatus(OrganizationOrder order, long payerId,Timestamp payTimeStamp, byte code) {
+		order.setPayerId(0L);
+		order.setPaidTime(payTimeStamp);
+		order.setStatus(code);
+		this.organizationProvider.updateOrganizationOrder(order);
+	}
+
+	private void checkVendorTypeFormat(String vendorType) {
+		if(VendorType.fromCode(vendorType) == null){
+			LOGGER.error("vendor type is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"vendor type is wrong.");
+		}
+
+	}
+
+	private CommunityPmBill checkPmBill(Long billId) {
+		CommunityPmBill bill = this.organizationProvider.findOranizationBillById(billId);
+		if(bill == null){
+			LOGGER.error("the bill not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the bill not found.");
+		}
+		return bill;
+	}
+
+	private void checkAmountIsEqual(BigDecimal amount, BigDecimal waitPayAmount) {
+		if(amount.compareTo(waitPayAmount) != 0){
+			LOGGER.error("order amount not equal payAmount.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"order amount not equal payAmount.");
+		}
+
+	}
+
+	private OrganizationOrder checkOrder(Long orderId) {
+		OrganizationOrder order = this.organizationProvider.findOrganizationOrderById(orderId);
+		if(order == null){
+			LOGGER.error("the order not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the order not found.");
+		}
+		return order;
+	}
+
+	private void checkPayAccountIsNull(String payAccount) {
+		if(payAccount == null || payAccount.trim().equals("")){
+			LOGGER.error("payAccount is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"payAccount is null or empty.");
+		}
+
+	}
+
+	private void checkPayTimeIsNull(String payTime) {
+		if(payTime == null || payTime.trim().equals("")){
+			LOGGER.error("payTime is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"payTime is null or empty.");
+		}
+
+	}
+
+	private void checkPayAmountIsNull(String payAmount) {
+		if(payAmount == null || payAmount.trim().equals("")){
+			LOGGER.error("payAmount is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"payAmount or is null or empty.");
+		}
+
+	}
+
+	private void checkVendorTypeIsNull(String vendorType) {
+		if(vendorType == null || vendorType.trim().equals("")){
+			LOGGER.error("vendorType is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"vendorType is null or empty.");
+		}
+
+	}
+
+	private void checkOrderNoIsNull(String orderNo) {
+		if(orderNo == null || orderNo.trim().equals("")){
+			LOGGER.error("orderNo is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"orderNo is null or empty.");
+		}
+
+	}
+
+	private Long convertOrderNoToOrderId(String orderNo) {
+		return Long.valueOf(orderNo);
+	}
+
+	private String convertOrderIdToOrderNo(Long orderId) {
+		return Long.toString(orderId);
 	}
 
 	@Override
@@ -3179,7 +3303,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"orderNo is null or empty.");
 		}
-		Long orderId = Long.valueOf(cmd.getOrderNo());
+		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
 		OrganizationOrder order = this.organizationProvider.findOrganizationOrderById(orderId);
 		if(order == null){
 			LOGGER.error("the order not found.");
@@ -3221,14 +3345,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is invalid.");
 		}
-		/*BigDecimal payedAmount = this.countBillTxAmount(bill.getId());
-		BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(payedAmount);
-		if(waitPayAmount.compareTo(BigDecimal.ZERO) == 0){
-			LOGGER.error("the bill had pay.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the bill had pay.");
-		}*/
-		
+
 		User user = UserContext.current().getUser();
 		OrganizationOrder order = new OrganizationOrder();
 		order.setAmount(cmd.getAmount());
@@ -3240,14 +3357,97 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		order.setPayerId(user.getId());
 		order.setStatus(OrganizationOrderStatus.WAITING_FOR_PAY.getCode());
 		this.organizationProvider.createOrganizationOrder(order);
-		
+
 		OrganizationOrderDTO dto = new OrganizationOrderDTO();
-		String orderNo = String.valueOf(order.getId());
+		String orderNo = this.convertOrderIdToOrderNo(order.getId());
 		dto.setOrderNo(orderNo);
 		dto.setAmount(cmd.getAmount());
 		dto.setName(bill.getName());
 		dto.setDescription(order.getDescription());
 		return dto;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes"})
+	@Override
+	public void remoteUpdateOrgOrderByOrderNo(String orderNo) {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		String restUrl = "http://alitestserver.zuolin.com:8081/EDS_PAY/rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
+
+		try {
+			BaseVo<Map> bvo=new BaseVo<Map>();
+			Map<String,String> map=new HashMap<String,String>();
+			map.put("orderNo", orderNo);
+			map.put("orderType", "wuye");
+			bvo.setBody(map);
+			String json=RestUtil.restWan(GsonUtil.toJson(bvo), restUrl);
+
+			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+			this.checkResultHolderIsNull(resultHolder,orderNo);
+			if(resultHolder.isSuccess()){
+				Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+				String payStatus = (String) data.get("payStatus");//waiting:未支付、succes:支付成功、fail:支付失败
+				this.checkPayStatusIsNull(payStatus,orderNo);
+				if(payStatus.equals("fail")){
+					OnlinePayPmBillCommand command = new OnlinePayPmBillCommand();
+					command.setPayStatus(payStatus);
+					command.setOrderNo(orderNo);
+					this.onlinePayPmBill(command);
+				}
+				else if(payStatus.equals("success")){
+					//verdorType
+					String verdorTypeStr = (String) data.get("onlinePayStyleNo");//alipay、支付宝  wechat、微信
+					String verdorType = this.convertToVerdorType(verdorTypeStr);
+					//amount
+					Double amountDouble = (Double) data.get("payAmount");
+					String amount = Double.toString(amountDouble);
+					//patTime
+					String payTimeStr = (String) data.get("payDate");
+					String payTime = Long.toString(format.parse(payTimeStr).getTime());
+					//patAccount
+					String payAccount = (String) data.get("payAccount");
+					if(payAccount == null)
+						payAccount = "test account";
+					String payObj = "{testPayObj}";
+
+					OnlinePayPmBillCommand command = new OnlinePayPmBillCommand();
+					command.setPayStatus(payStatus);
+					command.setOrderNo(orderNo);
+					command.setPayAccount(payAccount);
+					command.setPayAmount(amount);
+					command.setPayObj(payObj);
+					command.setPayTime(payTime);
+					command.setVendorType(verdorType);
+					this.onlinePayPmBill(command);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					e.getMessage());
+		}
+	}
+
+	private String convertToVerdorType(String verdorTypeStr) {
+		if(verdorTypeStr.equals("alipay"))
+			return "10001";
+		return "10002";
+	}
+
+	private void checkPayStatusIsNull(String payStatus,String orderNo) {
+		if(payStatus == null){
+			LOGGER.error("payStatus is null.orderNo="+orderNo);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"payStatus is null.");
+		}
+	}
+
+	private void checkResultHolderIsNull(ResultHolder resultHolder,String orderNo) {
+		if(resultHolder == null){
+			LOGGER.error("remote search pay order return null.orderNo="+orderNo);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"remote search pay order return null.");
+		}
 	}
 
 }

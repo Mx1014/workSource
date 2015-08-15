@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 public class AuthorizationCommand {
 
     @NotNull
-    private String responseType;
+    private String response_type;
 
     @NotNull
     private String client_id;
@@ -21,15 +21,6 @@ public class AuthorizationCommand {
 
     public AuthorizationCommand() {
     }
-
-    public String getResponseType() {
-        return responseType;
-    }
-
-    public void setResponseType(String responseType) {
-        this.responseType = responseType;
-    }
-    
     
     public String getclient_id() {
         return client_id;
@@ -61,6 +52,14 @@ public class AuthorizationCommand {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getresponse_type() {
+        return response_type;
+    }
+
+    public void setresponse_type(String response_type) {
+        this.response_type = response_type;
     }
 
     @Override

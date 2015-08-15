@@ -70,7 +70,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
         }
 
         AuthorizationCommand cmd = new AuthorizationCommand();
-        cmd.setResponseType(responseType);
+        cmd.setresponse_type(responseType);
         cmd.setclient_id(clientId);
         cmd.setredirect_uri(redirectUri);
         cmd.setScope(scope);

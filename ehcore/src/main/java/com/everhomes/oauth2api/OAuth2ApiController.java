@@ -40,7 +40,8 @@ public class OAuth2ApiController extends ControllerBase {
     public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
 
-        UserInfo info = this.userService.getUserInfo(accessToken.getGrantorUid());
+        //UserInfo info = this.userService.getUserInfo(accessToken.getGrantorUid());
+        UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
 
         return new RestResponse(info);
     }
