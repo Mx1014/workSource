@@ -28,7 +28,16 @@ public class ListTreasureResponse {
     private String myOrderUrl;
     private String applyShopUrl;
     private Integer isAppliedShop;
+    private String scoreUrl;
     
+	public String getScoreUrl() {
+		return scoreUrl;
+	}
+
+	public void setScoreUrl(String scoreUrl) {
+		this.scoreUrl = scoreUrl;
+	}
+
 	public String getMyOrderUrl() {
 		return myOrderUrl;
 	}
