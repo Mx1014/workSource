@@ -17,6 +17,8 @@ public class SearchCommunityCommand {
     @NotNull
     private Long cityId;
     
+    private Long areaId;
+    
     @NotNull
     private String keyword;
     
@@ -25,6 +27,14 @@ public class SearchCommunityCommand {
     private Integer pageSize;
     
     public SearchCommunityCommand() {
+    }
+
+    public Long getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Long areaId) {
+        this.areaId = areaId;
     }
 
     public Long getCityId() {
