@@ -13,7 +13,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/appkey")
 public class AppController extends ControllerBase {
     
     // TODO, we need to maintain the trust list in database
