@@ -1087,7 +1087,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public BigDecimal countPmYearIncomeByOrganizationId(Long organizationId) {
+	public BigDecimal countPmYearIncomeByOrganizationId(Long organizationId,Integer resultCodeId) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new java.util.Date());
 
@@ -1106,13 +1106,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		Timestamp lastDateOfYear = new Timestamp(cal.getTime().getTime());
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear))
+				.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear));
+		if(resultCodeId != null)
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.RESULT_CODE_ID.eq(resultCodeId));
 
 		Record1<BigDecimal> record = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT.sum())
 				.from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
-				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(organizationId)
-						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear))
-						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
-						.fetchOne();
+				.where(condition)
+				.fetchOne();
 
 		if(record != null && record.value1() != null)
 			return record.value1();

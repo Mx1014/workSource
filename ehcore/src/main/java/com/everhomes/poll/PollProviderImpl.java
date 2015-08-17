@@ -157,4 +157,14 @@ public class PollProviderImpl implements PollProvider {
         });
         return polls[0];
     }
+
+	@Override
+	public PollItem findPollItemById(Long id) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPollItems.class, id));
+        EhPollItemsDao dao=new EhPollItemsDao(context.configuration());
+        PollItem result = ConvertHelper.convert(dao.fetchOneById(id), PollItem.class);
+		
+		return result;
+	}
 }

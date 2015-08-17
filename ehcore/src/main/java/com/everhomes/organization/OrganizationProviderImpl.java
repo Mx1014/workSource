@@ -537,12 +537,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<CommunityPmOwner> findOrganizationMemberByAddressIdAndOrgId(
+	public List<CommunityPmOwner> listOrganizationOwnerByAddressIdAndOrgId(
 			Long addressId, Long organizationId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
-				.where(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId).and(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId)))
+				.where(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId)))
 				.fetch();
 
 		List<CommunityPmOwner> list = new ArrayList<CommunityPmOwner>();
@@ -684,7 +684,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ADDRESS.asc());
 		query.addLimit((int)offset, pageSize);
-		System.out.println(query.getSQL());
+		//System.out.println(query.getSQL());
 		query.execute();
 
 		Result<Record> records = query.getResult();

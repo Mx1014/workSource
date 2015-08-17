@@ -1164,6 +1164,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			//给用户发审核结果通知
 			String templateToUser = this.getOrganizationMemberApproveForApplicant(operOrgMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+			if(templateToUser == null)
+				templateToUser = "管理员已同意您加入组织";
 			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),templateToUser);
 			//给其他管理员发通知
 			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
@@ -1171,6 +1173,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				for(OrganizationMember member : orgMembers){
 					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
 						String templateToManager = this.getOrganizationMemberApproveForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
+						if(templateToManager == null)
+							templateToManager = "管理员同意用户加入组织";
 						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
@@ -1259,6 +1263,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			//给用户发审核结果通知
 			String templateToUser = this.getOrganizationMemberRejectForApplicant(operOrgMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+			if(templateToUser == null)
+				templateToUser = "管理员拒绝您加入组织";
 			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),templateToUser);
 			//给其他管理员发通知
 			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
@@ -1266,6 +1272,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				for(OrganizationMember member : orgMembers){
 					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
 						String templateToManager = this.getOrganizationMemberRejectForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
+						if(templateToManager == null)
+							templateToManager = "管理员拒绝用户加入组织";
 						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
@@ -1307,9 +1315,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
-		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
+		User user = UserContext.current().getUser();
+		Long commuId = user.getCommunityId();
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
-		
+
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
 
@@ -1326,10 +1335,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				orgTaskList.remove(orgTaskList.size()-1);
 			}
 			for(OrganizationTask task : orgTaskList){
-				Post topic = this.forumProvider.findPostById(task.getApplyEntityId());
-				if(topic != null){
-					list.add(ConvertHelper.convert(topic, PostDTO.class));
-				}
+				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+				list.add(dto);
 			}
 		}
 
@@ -1439,8 +1446,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
 		}
-		
-		if(template == null) template = "您的请求已安排人员处理";
+
+		if(template == null) template = "您有新的任务";
 
 		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
 	}
@@ -1462,10 +1469,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(taskSatus.getCode());
 			this.organizationProvider.updateOrganizationTask(task);
-			if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
+			/*if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论
 				sendComment(topic.getId(),topic.getForumId(),organization.getId(),user.getId(),topic.getCategoryId());
-			}
+			}*/
 			return status;
 		});
 	}

@@ -2489,7 +2489,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private void setOweFamilyOwnerInfo(OweFamilyDTO family, Long addressId, Long organizationId) {
-		List<CommunityPmOwner> orgMemberList = this.organizationProvider.findOrganizationMemberByAddressIdAndOrgId(addressId,organizationId);
+		List<CommunityPmOwner> orgMemberList = this.organizationProvider.listOrganizationOwnerByAddressIdAndOrgId(addressId,organizationId);
 		if(orgMemberList != null && !orgMemberList.isEmpty()){
 			family.setOwnerTelephone(orgMemberList.get(0).getContactToken());
 		}
@@ -2856,7 +2856,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-		yearIncomeAmount = this.propertyMgrProvider.countPmYearIncomeByOrganizationId(cmd.getOrganizationId());
+		yearIncomeAmount = this.propertyMgrProvider.countPmYearIncomeByOrganizationId(cmd.getOrganizationId(),BillTransactionResult.SUCCESS.getCode());
 		if(yearIncomeAmount == null)
 			yearIncomeAmount = BigDecimal.ZERO;
 
