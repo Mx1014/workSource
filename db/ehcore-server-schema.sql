@@ -2072,9 +2072,9 @@ CREATE TABLE if NOT exists `eh_user_activities` (
 DROP TABLE IF EXISTS `eh_content_server_resources`;
 CREATE  TABLE  `eh_content_server_resources` (
 	`id` BIGINT NOT NULL COMMENT "the id of record",
-     `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+    `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
 	`resource_id` TEXT NOT NULL,
-	`resource_md5` VARCHAR(40) NOT NULL,
+	`resource_md5` VARCHAR(256) NOT NULL,
 	`resource_type` INT NOT NULL COMMENT 'current support audio,image and video',
 	`resource_size` INT NOT NULL,
 	`resource_name` VARCHAR(128) NOT NULL, 
