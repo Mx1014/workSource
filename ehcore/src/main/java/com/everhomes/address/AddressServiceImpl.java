@@ -139,25 +139,28 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public CommunitySummaryDTO suggestCommunity(SuggestCommunityCommand cmd) {
-        if(cmd.getCityId() == null || cmd.getAreaId() == null || cmd.getName() == null || cmd.getName().isEmpty())
+        if(cmd.getCityId() == null || cmd.getName() == null || cmd.getName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid parameter, cityId, areaId and name should not be null or empty");
+                    "Invalid parameter, cityId and name should not be null or empty");
         
         Region city = this.regionProvider.findRegionById(cmd.getCityId());
         if(city == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid cityId parameter, could not find the city");
-        
-        Region area = this.regionProvider.findRegionById(cmd.getAreaId());
-        if(area == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid areaId parameter, could not find the ");
+        Region area = null;
+        if(cmd.getAreaId() != null){
+            area = this.regionProvider.findRegionById(cmd.getAreaId());
+            if(area == null)
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                        "Invalid areaId parameter, could not find the ");
+        }
         
         Community community = new Community();
         community.setCityId(cmd.getCityId());
         community.setCityName(city.getName());
         community.setAreaId(cmd.getAreaId());
-        community.setAreaName(area.getName());
+        if(area != null)
+            community.setAreaName(area.getName());
         community.setName(cmd.getName());
         community.setAddress(cmd.getAddress());
         

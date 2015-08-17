@@ -19,7 +19,6 @@ public class SuggestCommunityCommand {
     @NotNull
     private Long cityId;
     
-    @NotNull
     private Long areaId;
     
     @NotNull
@@ -29,7 +28,7 @@ public class SuggestCommunityCommand {
     private Double longitude;
     private Double latitude;
     
-    private SuggestCommunityCommand() {
+    public SuggestCommunityCommand() {
     }
 
     public Long getCityId() {
