@@ -27,6 +27,11 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
             "cityId": {
                 "type": "long",
                 "index": "not_analyzed"
+                },
+            "areaName":{"type":"string","index":"no", "store":"yes"},
+            "areaId": {
+                "type": "long",
+                "index": "not_analyzed"
                 }
             }
         }

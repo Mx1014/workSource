@@ -1037,26 +1037,25 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<CommunityPmBill> listOweFamilyBillsByOrgIdAndAddress(Long organizationId,String address) {
-
+	public List<CommunityPmBill> listFamilyNewestBillsByOrgId(Long organizationId,String address) {
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
-
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		
-		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId);
-		if(address != null && !address.isEmpty())
-			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
-
 		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
 				.from(Tables.EH_ORGANIZATION_BILLS)
 				.groupBy(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID).asTable("t2");
+		
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId);
+		
+		if(address != null && !address.isEmpty())
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.join(table2)
 				.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
-						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
-						.where(condition)
-						.fetch();
+					.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
+				.where(condition)
+				.fetch();
 
 		if(records != null && !records.isEmpty()){
 			records.stream().map(r -> {
@@ -1088,7 +1087,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public BigDecimal countPmYearIncomeByOrganizationId(Long organizationId) {
+	public BigDecimal countPmYearIncomeByOrganizationId(Long organizationId,Integer resultCodeId) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new java.util.Date());
 
@@ -1107,13 +1106,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		Timestamp lastDateOfYear = new Timestamp(cal.getTime().getTime());
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear))
+				.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear));
+		if(resultCodeId != null)
+			condition = condition.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.RESULT_CODE_ID.eq(resultCodeId));
 
 		Record1<BigDecimal> record = context.select(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CHARGE_AMOUNT.sum())
 				.from(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS)
-				.where(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(organizationId)
-						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(firstDateOfYear))
-						.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(lastDateOfYear)))
-						.fetchOne();
+				.where(condition)
+				.fetchOne();
 
 		if(record != null && record.value1() != null)
 			return record.value1();

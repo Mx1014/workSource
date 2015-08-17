@@ -53,6 +53,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.organization.BillTransactionResult;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
@@ -382,7 +383,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 									.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()))
 									.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()));
 
-					if(comunityId == null){
+					if(comunityId != null){
 						step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
 					}
 					step.orderBy(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI.desc())
@@ -659,13 +660,13 @@ public class FamilyProviderImpl implements FamilyProvider {
 	}
 
 	@Override
-	public List<FamilyBillingTransactions> listFamilyBillingTransactionByAddressId(
-			Long addresssId,int pageSize, long offset) {
+	public List<FamilyBillingTransactions> listFBillTxByConditions(int resultCodeId,Long addresssId,int pageSize, long offset) {
 		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
 				(DSLContext context , Object object) -> {
 					Result<Record> records = context.select().from(Tables.EH_FAMILY_BILLING_TRANSACTIONS)
-							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addresssId))
+							.where(Tables.EH_FAMILY_BILLING_TRANSACTIONS.OWNER_ID.eq(addresssId)
+									.and(Tables.EH_FAMILY_BILLING_TRANSACTIONS.RESULT_CODE_ID.eq(resultCodeId)))
 							.orderBy(Tables.EH_FAMILY_BILLING_TRANSACTIONS.CREATE_TIME.desc())
 							.limit(pageSize).offset((int)offset)
 							.fetch();

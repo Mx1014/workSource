@@ -45,11 +45,14 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     }
     
     private XContentBuilder createDoc(Community community){
+        
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("name", community.getName());
             b.field("cityId", community.getCityId());
             b.field("cityName", community.getCityName());
+            b.field("areaId", community.getAreaId());
+            b.field("areaName", community.getAreaName());
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -99,32 +102,32 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         feedDoc(community.getId().toString(), source);
     }
 
-    @Override
-    public List<String> search(String keyword) {
-        return search(keyword, 0l, 80);
-    }
-
-    @Override
-    public List<String> search(String keyword, Long cityId) {
-        return search(keyword, cityId, 80);
-    }
-
-    @Override
-    public List<String> search(String keyword, Long cityId, int pageSize) {
-        List<CommunityDoc> comIds = searchDocs(keyword, cityId, 0, pageSize);
-        List<String> results = new ArrayList<String>();
-        
-        for(CommunityDoc c : comIds) {
-            try {
-                results.add(c.getName());
-            }
-            catch(Exception e) {
-                
-            }
-        }
-        
-        return results;
-    }
+//    @Override
+//    public List<String> search(String keyword) {
+//        return search(keyword, 0l, 80);
+//    }
+//
+//    @Override
+//    public List<String> search(String keyword, Long cityId) {
+//        return search(keyword, cityId, 80);
+//    }
+//
+//    @Override
+//    public List<String> search(String keyword, Long cityId, int pageSize) {
+//        List<CommunityDoc> comIds = searchDocs(keyword, cityId, 0, pageSize);
+//        List<String> results = new ArrayList<String>();
+//        
+//        for(CommunityDoc c : comIds) {
+//            try {
+//                results.add(c.getName());
+//            }
+//            catch(Exception e) {
+//                
+//            }
+//        }
+//        
+//        return results;
+//    }
 
     @Override
     public void deleteById(Long id) {
@@ -150,7 +153,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     }
 
     @Override
-    public List<CommunityDoc> searchDocs(String queryString, Long cityId, int pageNum, int pageSize) {
+    public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long areaId, int pageNum, int pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
         
         QueryBuilder qb;
@@ -165,6 +168,10 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         FilterBuilder fb = null;
         if((null != cityId) && (cityId > 0)) {
             fb = FilterBuilders.termFilter("cityId", cityId);
+        }
+        
+        if((null != areaId) && (areaId > 0)) {
+            fb = FilterBuilders.termFilter("areaId", areaId);
         }
         
         if(null != fb) {

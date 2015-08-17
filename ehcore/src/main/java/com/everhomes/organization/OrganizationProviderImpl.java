@@ -537,12 +537,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<CommunityPmOwner> findOrganizationMemberByAddressIdAndOrgId(
+	public List<CommunityPmOwner> listOrganizationOwnerByAddressIdAndOrgId(
 			Long addressId, Long organizationId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_OWNERS)
-				.where(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId).and(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId)))
+				.where(Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId)))
 				.fetch();
 
 		List<CommunityPmOwner> list = new ArrayList<CommunityPmOwner>();
@@ -664,7 +664,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationBillingTransactionDTO> listOrgBillTxByAddressAndTime(Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
+	public List<OrganizationBillingTransactionDTO> listOrgBillTxByConditions(int resultCode,Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
 
 		List<OrganizationBillingTransactionDTO> list = new ArrayList<OrganizationBillingTransactionDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -679,10 +679,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(endTime)));
 		if(address != null && !address.equals(""))
 			query.addConditions(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+address+"%"));
+		
+		query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.RESULT_CODE_ID.eq(resultCode));
 
 		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ADDRESS.asc());
 		query.addLimit((int)offset, pageSize);
-		System.out.println(query.getSQL());
+		//System.out.println(query.getSQL());
 		query.execute();
 
 		Result<Record> records = query.getResult();
@@ -740,11 +742,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public void deleteOrganizationBillsById(Long id) {
+	public void deleteOrganizationBillById(Long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhOrganizationBillsDao dao = new EhOrganizationBillsDao(context.configuration());
 		dao.deleteById(id);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, null);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationBills.class, id);
 	}
 
 
