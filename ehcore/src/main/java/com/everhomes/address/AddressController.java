@@ -42,9 +42,9 @@ public class AddressController extends ControllerBase {
      * <p>添加小区</p>
      */
     @RequestMapping("suggestCommunity")
-    @RestReturn(value=CommunitySummaryDTO.class)
+    @RestReturn(value=SuggestCommunityDTO.class)
     public RestResponse addCommunity(@Valid SuggestCommunityCommand cmd) {
-        CommunitySummaryDTO result = this.addressService.suggestCommunity(cmd);
+        SuggestCommunityDTO result = this.addressService.suggestCommunity(cmd);
         RestResponse response =  new RestResponse(result);
 
         response.setErrorCode(ErrorCodes.SUCCESS);

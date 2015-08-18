@@ -138,7 +138,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     @Override
-    public CommunitySummaryDTO suggestCommunity(SuggestCommunityCommand cmd) {
+    public SuggestCommunityDTO suggestCommunity(SuggestCommunityCommand cmd) {
         if(cmd.getRegionId() == null || cmd.getName() == null || cmd.getName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, regionId and name should not be null or empty");
@@ -192,7 +192,10 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             return null;
         });
         
-        return ConvertHelper.convert(community, CommunitySummaryDTO.class);
+        SuggestCommunityDTO dto = ConvertHelper.convert(community, SuggestCommunityDTO.class);
+        dto.setRegionId(region.getId());
+        dto.setRegionName(region.getName());
+        return dto;
     }
     
     @Override
