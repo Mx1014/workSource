@@ -1195,7 +1195,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public OrganizationCommunity findOrganizationCommunityByOrgId(Long orgId) {
+	public OrganizationCommunity findPmCommunityByOrgId(Long orgId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_COMMUNITIES)
