@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-08-14 13:59:48
+// generated at 2015-08-18 15:16:38
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.CommunitySummaryDTO;
+import com.everhomes.address.SuggestCommunityDTO;
 
 public class SuggestCommunityRestResponse extends RestResponseBase {
 
-    private CommunitySummaryDTO response;
+    private SuggestCommunityDTO response;
 
     public SuggestCommunityRestResponse () {
     }
 
-    public CommunitySummaryDTO getResponse() {
+    public SuggestCommunityDTO getResponse() {
         return response;
     }
 
-    public void setResponse(CommunitySummaryDTO response) {
+    public void setResponse(SuggestCommunityDTO response) {
         this.response = response;
     }
 }
