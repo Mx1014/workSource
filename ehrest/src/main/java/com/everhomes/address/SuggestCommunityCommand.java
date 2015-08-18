@@ -7,8 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>cityId: 城市Id</li>
- * <li>areaId: 区域Id</li>
+ * <li>regionId: 区域Id(城市，区县等)</li>
  * <li>name: 小区名称</li>
  * <li>address: 小区地址</li>
  * <li>longitude: 经度</li>
@@ -17,9 +16,9 @@ import com.everhomes.util.StringHelper;
  */
 public class SuggestCommunityCommand {
     @NotNull
-    private Long cityId;
+    private Long regionId;
     
-    private Long areaId;
+    //private Long areaId;
     
     @NotNull
     private String name;
@@ -31,20 +30,12 @@ public class SuggestCommunityCommand {
     public SuggestCommunityCommand() {
     }
 
-    public Long getCityId() {
-        return cityId;
+    public Long getRegionId() {
+        return regionId;
     }
 
-    public void setCityId(Long cityId) {
-        this.cityId = cityId;
-    }
-
-    public Long getAreaId() {
-        return areaId;
-    }
-
-    public void setAreaId(Long areaId) {
-        this.areaId = areaId;
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
     public String getName() {

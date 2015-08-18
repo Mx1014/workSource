@@ -139,28 +139,37 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public CommunitySummaryDTO suggestCommunity(SuggestCommunityCommand cmd) {
-        if(cmd.getCityId() == null || cmd.getName() == null || cmd.getName().isEmpty())
+        if(cmd.getRegionId() == null || cmd.getName() == null || cmd.getName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid parameter, cityId and name should not be null or empty");
+                    "Invalid parameter, regionId and name should not be null or empty");
         
-        Region city = this.regionProvider.findRegionById(cmd.getCityId());
-        if(city == null)
+        Region region = this.regionProvider.findRegionById(cmd.getRegionId());
+        if(region == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid cityId parameter, could not find the city");
-        Region area = null;
-        if(cmd.getAreaId() != null){
-            area = this.regionProvider.findRegionById(cmd.getAreaId());
-            if(area == null)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                        "Invalid areaId parameter, could not find the ");
-        }
-        
+                    "Invalid regionId parameter, could not find the region");
         Community community = new Community();
-        community.setCityId(cmd.getCityId());
-        community.setCityName(city.getName());
-        community.setAreaId(cmd.getAreaId());
-        if(area != null)
-            community.setAreaName(area.getName());
+        byte scopeCode = region.getScopeCode();
+        if(scopeCode == RegionScope.AREA.getCode()){
+            Region city = this.regionProvider.findRegionById(region.getParentId());
+            if(city == null)
+                throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+                        "Invalid cityId parameter, could not find the region");
+            community.setCityId(city.getId());
+            community.setCityName(city.getName());
+            community.setAreaId(region.getId());
+            community.setAreaName(region.getName());
+        }
+        else if(scopeCode == RegionScope.CITY.getCode()){
+            community.setCityId(region.getId());
+            community.setCityName(region.getName());
+            community.setAreaId(0L);
+            community.setAreaName("");
+        }
+        else{
+            throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+                    "Invalid regionId parameter, could not find the region");
+        }
+
         community.setName(cmd.getName());
         community.setAddress(cmd.getAddress());
         
