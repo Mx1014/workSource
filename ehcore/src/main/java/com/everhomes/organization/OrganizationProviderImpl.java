@@ -894,7 +894,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationOrder> listOrganizationOrdersByBillId(Long billId,Byte status) {
+	public List<OrganizationOrder> listOrgBillOrders(Long billId,Byte status) {
 		List<OrganizationOrder> list = new ArrayList<OrganizationOrder>();
 		
 		Condition condition = null;

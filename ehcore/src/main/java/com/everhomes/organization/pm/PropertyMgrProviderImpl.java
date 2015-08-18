@@ -1209,8 +1209,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public CommunityAddressMapping findOrganiztionAddressMappingByAddressId(
-			Long organizationId, Long addressId) {
+	public CommunityAddressMapping findAddressMappingByAddressId(Long organizationId, Long addressId) {
 		final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
@@ -1226,7 +1225,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityAddressMapping> listOrganizationAddressMappingsByOrgId(
+	public List<CommunityAddressMapping> listAddressMappingsByOrgId(
 			Long orgId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -1243,7 +1242,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityPmBill> listOrganizationBillsByAddressAndDate(Long orgId,String address,Date startDate, Date endDate, long offset, int pageSize) {
+	public List<CommunityPmBill> listPmBillsByAddressAndDate(Long orgId,String address,Date startDate, Date endDate, long offset, int pageSize) {
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
 		
 		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId);
