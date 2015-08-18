@@ -223,16 +223,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private OrganizationMember createOrganizationMember(User user, Long organizationId, String contactDescription) {
-		UserIdentifier identifier = null; 
-		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(user.getId());
-		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
-			for (UserIdentifier userIdentifier : userIndIdentifiers) {
-				if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
-					identifier = userIdentifier;
-					break;
-				}
-			}
-		}
+		UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
 		OrganizationMember member = new OrganizationMember();
 		member.setContactDescription(contactDescription);
 		member.setContactName(user.getAccountName());
@@ -247,6 +238,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 		member.setTargetType(OrganizationMemberTargetType.USER.getCode());
 
 		return member;
+	}
+
+	private UserIdentifier getUserMobileIdentifier(Long userId) {
+		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(userId);
+		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
+			for (UserIdentifier userIdentifier : userIndIdentifiers) {
+				if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
+					return userIdentifier;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -674,6 +677,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String template = this.getOrganizationAssignTopicForCommentTemplate(orgId,userId);
 		if(StringUtils.isEmpty(template)){
 			template = "该请求已安排人员处理";
+		}
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.error("sendComment_template="+template);
 		}
 		if (!StringUtils.isEmpty(template)) {
 			comment.setContent(template);
@@ -1439,7 +1445,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
 			User user = this.userProvider.findUserById(task.getCreatorUid());
 			if(user != null){
-				UserIdentifier identify = userProvider.findIdentifierById(user.getId());
+				UserIdentifier identify = this.getUserMobileIdentifier(user.getId());
 				if(identify != null){
 					map.put("phone", identify.getIdentifierToken());
 				}
@@ -1565,7 +1571,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			orgMember = new OrganizationMember();
 			orgMember.setContactDescription(cmd.getDescription());
 			orgMember.setContactName(user.getNickName());
-			UserIdentifier identifier = this.userProvider.findIdentifierById(user.getId());
+			UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
 			if(identifier != null){
 				orgMember.setContactToken(identifier.getIdentifierToken());
 				orgMember.setContactType(identifier.getIdentifierType());
@@ -1663,12 +1669,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		dbProvider.execute((status) -> {
 			organizationProvider.deleteOrganizationMember(communityPmMember);
+			//给用户发审核结果通知
+			String templateToUser = this.getOrganizationMemberRejectForApplicant(operOrgMember.getContactName(),organization.getName(),communityPmMember.getTargetId());
+			if(templateToUser == null)
+				templateToUser = "管理员拒绝您加入组织";
+			sendOrganizationNotificationToUser(communityPmMember.getTargetId(),templateToUser);
 			//给其他管理员发通知
 			List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembersByOrgId(organization.getId());
 			if(orgMembers != null && !orgMembers.isEmpty()){
 				for(OrganizationMember member : orgMembers){
 					if(member.getTargetId().compareTo(communityPmMember.getTargetId()) != 0 && member.getTargetId().compareTo(operOrgMember.getTargetId()) != 0 && member.getMemberGroup().equals(PmMemberGroup.MANAGER.getCode())){
 						String templateToManager = this.getOrganizationMemberDeleteForManager(operOrgMember.getContactName(),communityPmMember.getContactName(),organization.getName(),member.getTargetId());
+						if(templateToManager == null)
+							templateToManager = "管理员拒绝用户加入组织";
 						sendOrganizationNotificationToUser(member.getTargetId(),templateToManager);
 					}
 				}
