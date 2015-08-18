@@ -10,7 +10,7 @@
 <title>Core Server Rest API list</title>
 
 <frameset cols="25%,*">
-  <frame src="/api-menu">
-  <frame src="/api-panel?index=${index}">
+  <frame src="api-menu">
+  <frame src="api-panel?index=${index}">
 </frameset>
 </html>

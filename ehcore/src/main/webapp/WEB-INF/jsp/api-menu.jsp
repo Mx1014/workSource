@@ -13,7 +13,7 @@
 	<c:forEach var="element" items="${restMethods}" varStatus="loop">
 	<tr>
 		<td>
-		    <a name="${element.uri}" href="/api?index=${loop.index}" target="_top">${element.uri}</a>
+		    <a name="${element.uri}" href="api?index=${loop.index}" target="_top">${element.uri}</a>
 		</td>
 	</tr>
 	</c:forEach>

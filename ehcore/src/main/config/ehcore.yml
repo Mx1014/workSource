@@ -22,6 +22,12 @@ logging.level.: INFO
 #server.ssl.keyStoreType: PKCS12
 #server.ssl.keyAlias: tomcat
 
+#
+# Uncommit follow to use a different context path other than /
+#
+#server.contextPath: /evh
+
+
 upload.max.size: 10000000
 heartbeat.interval: 10000
 scheduler.pool.size: 100
@@ -91,7 +97,7 @@ redis.store.master.port: 6379
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8
+db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: true

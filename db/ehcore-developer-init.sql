@@ -8,5 +8,5 @@ INSERT INTO `eh_servers` (`id`, `address_uri`, `address_port`, `server_type`, `s
 INSERT INTO `eh_servers` (`id`, `address_uri`, `address_port`, `server_type`, `status`, `config_tag`, `description`) 
     VALUES(3, 'redis-cache', 6379, 2, 1, 'RedisCache', 'Redis Cache');
 INSERT INTO `eh_content_server` (`name`, `description`, `private_address`, `private_port`, `public_address`, `public_port`) 
-    VALUES('content server', 'content server', '10.1.1.90', 5000, '10.1.1.90', 5000,);
+    VALUES('content server', 'content server', '10.1.1.90', 5000, '10.1.1.90', 5000);
 

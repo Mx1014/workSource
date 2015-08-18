@@ -15,7 +15,7 @@
 </td></tr>
 <tr><td>
 
-<form method="POST" action="${restMethod.uri}" enctype="multipart/form-data">
+<form method="POST" action="${contextPath}${restMethod.uri}" enctype="multipart/form-data">
 
 <table border="1" width="100%">
 <c:forEach var="p" items="${restMethod.params}">
