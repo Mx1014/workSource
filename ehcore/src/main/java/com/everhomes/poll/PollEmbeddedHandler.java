@@ -21,7 +21,8 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
-        PollShowResultResponse result = pollService.showResult(post.getId());
+//        PollShowResultResponse result = pollService.showResult(post.getId());
+    	PollDTO result = pollService.showResultBrief(post.getId());
         if (result == null) {
             return null;
         }

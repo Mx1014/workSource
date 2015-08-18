@@ -314,4 +314,31 @@ public class PollServiceImpl implements PollService {
             return new Date();
         }
     }
+
+	@Override
+	public PollDTO showResultBrief(Long postId) {
+		Poll poll=pollProvider.findByPostId(postId);
+        if(poll==null){
+            return null;
+        }
+        PollDTO dto=new PollDTO();
+        try{
+            BeanUtils.copyProperties(poll, dto);
+        }catch(Exception e){
+            //skip
+        }
+        User user=UserContext.current().getUser();
+        PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
+        dto.setStartTime(poll.getStartTime().toString());
+        dto.setStopTime(poll.getEndTime().toString());
+        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
+        dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        dto.setPollId(poll.getId());
+        if(votes==null){
+            dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
+        }
+        dto.setProcessStatus(getStatus(poll).getCode());
+        return dto;
+	}
 }
