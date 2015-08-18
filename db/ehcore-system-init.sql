@@ -10,7 +10,7 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.user
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.host','61.145.229.29','mw host ,special line');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('home.url', 'http://10.1.1.91:8080', 'the home url');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/html/score/score.html', 'the relative path for user score');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/static/score/score.html', 'the relative path for user score');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/app/static/share_post/share_post.html#', 'the relative path for sharing topic');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.vcode.templateid', '9547', 'vcode sms template id');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.account.sid', 'b0b423e8f630d920aaba8aafe8f37701', NULL);
@@ -19,7 +19,12 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.ap
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.version', '2014-06-30', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.server', 'api.ucpaas.com', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('mw.vcode.template.content', '欢迎注册左邻,您的验证码${vcode},10内分钟有效。', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('marketdata.item.version', '2015080311', '服务市场版本号');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('marketdata.item.version', '2015080311', 'the version of all luanchpad items');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.order.url', '/app/static/indent/indent.html', 'the relative path for user order');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('apply.shop.url', '/app/static/apply_store/apply_store.html', 'the relative path for user shop apply');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('manage.shop.url', '/app/static/my_store/my_store.html', 'the relative path for user shop manage');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.coupon.url', '/app/static/coupon/coupon.html', 'the relative path for user coupon');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('app.agreements.url', '/app/static/app_agreements/app_agreements.html', 'the relative path for app agreements');
 
 
 
