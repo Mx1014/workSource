@@ -128,7 +128,9 @@ public class CategoryProviderImpl implements CategoryProvider {
             Tuple<String, SortOrder>... orderBy) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         //暂不向客户端开放排序字段指定 20150519
-        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
+        SortField[] orderByFields = null;
+        if(orderBy != null && orderBy[0] != null)
+            orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
         List<Category> result;
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
@@ -137,7 +139,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         if(parentId != null)
             condition = Tables.EH_CATEGORIES.PARENT_ID.eq(parentId.longValue());
         else
-            condition = Tables.EH_CATEGORIES.PARENT_ID.isNull();
+            condition = Tables.EH_CATEGORIES.PARENT_ID.isNull().or(Tables.EH_CATEGORIES.PARENT_ID.eq(0L));
             
         if(status != null)
             condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(status.getCode()));
@@ -146,18 +148,18 @@ public class CategoryProviderImpl implements CategoryProvider {
             selectStep.where(condition);
         }
         
-//        if(orderByFields != null) {
-//            result = selectStep.orderBy(orderByFields).fetch().map(
-//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
-//            );
-//        } else {
-//            result = selectStep.fetch().map(
-//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
-//            );
-//        }
-        result = selectStep.fetch().map(
+        if(orderByFields != null) {
+            result = selectStep.orderBy(orderByFields).fetch().map(
                 new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
             );
+        } else {
+            result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+            );
+        }
+//        result = selectStep.fetch().map(
+//                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+//            );
         
         return result;
     }

@@ -297,11 +297,12 @@ public class BusinessProviderImpl implements BusinessProvider {
                 c = c.or(Tables.EH_BUSINESSES.GEOHASH.like(geoHashStr + "%"));
             }
         }
+        c = c.and(Tables.EH_BUSINESSES.TARGET_TYPE.eq(BusinessTargetType.ZUOLIN.getCode()));
         //List<Business> businesses = new ArrayList<>();
         return context.select(Tables.EH_BUSINESSES.fields()).from(Tables.EH_BUSINESSES)
         .rightOuterJoin(Tables.EH_BUSINESS_CATEGORIES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID))
         .where(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(categoryId))
-        .and(c)
+        .and(c.or(Tables.EH_BUSINESSES.TARGET_TYPE.eq(BusinessTargetType.THIRDPART.getCode())))
         .fetch().stream().map(r ->{
                 Business b = new Business();
                 b.setId(r.getValue(Tables.EH_BUSINESSES.ID));

@@ -51,7 +51,7 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 public class BusinessServiceImpl implements BusinessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessServiceImpl.class);
-    
+    private static final String PREFIX_URL = "business.url.prefix";
     @Autowired
     private BusinessProvider businessProvider;
     @Autowired
@@ -245,7 +245,7 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
                 .map(r->r.getOwnerId()).collect(Collectors.toList());
         
-        
+        final String prefix = configurationProvider.getValue(PREFIX_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -254,6 +254,7 @@ public class BusinessServiceImpl implements BusinessService {
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(processLogoUrl(r, userId));
+            dto.setUrl(processUrl(r,prefix));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -285,6 +286,12 @@ public class BusinessServiceImpl implements BusinessService {
                 + ",communityId=" + cmd.getCommunityId() + ",elapse=" + (endTime - startTime));
         
         return response;
+    }
+    
+    private String processUrl(Business business, String prefix){
+        if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
+            return prefix + business.getTargetId();
+        return business.getUrl();
     }
     
     private void processRecommendBusinesses( List<Long> recommendBizIds, List<BusinessDTO> dtos, 

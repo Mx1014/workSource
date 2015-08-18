@@ -37,7 +37,7 @@ import com.everhomes.util.Tuple;
 @RequestMapping("/category")
 public class CategoryController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
-
+    private static final String DEFAULT_SORT = "default_order";
     @Autowired
     private CategoryProvider categoryProvider;    
     
@@ -154,7 +154,7 @@ public class CategoryController extends ControllerBase {
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listInterestCategories(HttpServletRequest request, HttpServletResponse response) {
         
-        Tuple<String, SortOrder> orderBy = null;
+        Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_INTEREST,
                 CategoryAdminStatus.ACTIVE, orderBy);

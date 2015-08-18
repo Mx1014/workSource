@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
+import com.everhomes.business.BusinessTargetType;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -71,6 +72,7 @@ import com.everhomes.visibility.VisibleRegionType;
 public class LaunchPadServiceImpl implements LaunchPadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
     private static final String OFFICIAL_PHONE = "";
+    private static final String PREFIX_URL = "business.url.prefix";
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
@@ -153,6 +155,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     businesses.add(b);
             }
         }
+        String prefix = configurationProvider.getValue(PREFIX_URL, "");
         if(businesses != null && !businesses.isEmpty()){
             int index = 1;
             for(Business r : businesses){
@@ -160,7 +163,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 dto.setIconUri(r.getLogoUri());
                 dto.setIconUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LaunchPadConstants.URL, r.getUrl());
+                jsonObject.put(LaunchPadConstants.URL, processUrl(r, prefix));
                 jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
                 dto.setActionData(jsonObject.toJSONString());
                 dto.setActionType(ActionType.BIZ_DETAILS.getCode());
@@ -183,6 +186,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         });
         return result;
         
+    }
+    private String processUrl(Business business, String prefix){
+        if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
+            return prefix + business.getTargetId();
+        return business.getUrl();
     }
 
     private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community, HttpServletRequest request){
