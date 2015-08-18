@@ -383,7 +383,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 									.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()))
 									.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()));
 
-					if(comunityId != null){
+					if(comunityId != null && comunityId != 0){
 						step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
 					}
 					step.orderBy(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI.desc())
