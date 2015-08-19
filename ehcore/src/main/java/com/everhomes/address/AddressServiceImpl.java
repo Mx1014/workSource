@@ -714,15 +714,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid keyword paramter.");
         }
-        if(cmd.getCityId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid cityId paramter.");
-        }
         int pageNum = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
-        return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(), cmd.getAreaId(), pageNum - 1, pageSize);
+        return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(), cmd.getRegionId(), pageNum - 1, pageSize);
     }
 
     private void checkUserPrivilege(long userId, long communityId) {

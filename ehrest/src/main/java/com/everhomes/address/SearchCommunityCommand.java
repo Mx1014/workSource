@@ -14,10 +14,9 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class SearchCommunityCommand {
-    @NotNull
     private Long cityId;
     
-    private Long areaId;
+    private Long regionId;
     
     @NotNull
     private String keyword;
@@ -29,12 +28,12 @@ public class SearchCommunityCommand {
     public SearchCommunityCommand() {
     }
 
-    public Long getAreaId() {
-        return areaId;
+    public Long getRegionId() {
+        return regionId;
     }
 
-    public void setAreaId(Long areaId) {
-        this.areaId = areaId;
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
     public Long getCityId() {

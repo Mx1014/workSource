@@ -74,6 +74,9 @@ public class GroupIterateTest extends LoginAuthTestCase {
     @Autowired
     private PostSearcher postSearcher;
     
+    @Autowired
+    private CommunitySearcher communitySearcher;
+    
     private String phone;
     
     private String password;
@@ -138,8 +141,8 @@ public class GroupIterateTest extends LoginAuthTestCase {
             for(int i = 0; i < groupInfoArray.length; i++) {
                 //createGroup(groupInfoArray[i][0], groupInfoArray[i][1]);
                 Group group = new Group();
-                group.setName(groupInfoArray[i][0]);
-                group.setTag(groupInfoArray[i][1]);
+                //group.setName(groupInfoArray[i][0]);syncDb
+                //group.setTag(groupInfoArray[i][1]);
                 group.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
                 group.setDiscriminator(GroupDiscriminator.GROUP.getCode());
                 group.setPrivateFlag(GroupPrivacy.PUBLIC.getCode());
@@ -176,7 +179,8 @@ public class GroupIterateTest extends LoginAuthTestCase {
     
     @Test
     public void testIterateGroup() {
-        this.groupSearcher.syncFromDb();
+        //this.groupSearcher.syncFromDb();
+        this.communitySearcher.syncDb();
         
         /* GroupQueryFilter filter = new GroupQueryFilter();
         filter.setQueryString("深圳");

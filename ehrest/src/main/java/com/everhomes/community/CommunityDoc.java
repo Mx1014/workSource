@@ -14,6 +14,7 @@ public class CommunityDoc {
     private Long cityId;
     private String name;
     private String cityName;
+    private Long regionId;
     
     public Long getId() {
         return id;
@@ -39,4 +40,11 @@ public class CommunityDoc {
     public void setCityName(String cityName) {
         this.cityName = cityName;
     }
+    public Long getRegionId() {
+        return regionId;
+    }
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
 }
