@@ -894,7 +894,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationOrder> listOrgBillOrders(Long billId,Byte status) {
+	public List<OrganizationOrder> listOrgOrdersByBillIdAndStatus(Long billId,Byte status) {
 		List<OrganizationOrder> list = new ArrayList<OrganizationOrder>();
 		
 		Condition condition = null;
@@ -941,7 +941,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationOrder> listOrganizationOrdersByStatus(Byte status) {
+	public List<OrganizationOrder> listOrgOrdersByStatus(Byte status) {
 		List<OrganizationOrder> list = new ArrayList<OrganizationOrder>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		

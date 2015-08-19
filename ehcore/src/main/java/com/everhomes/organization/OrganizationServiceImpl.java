@@ -1549,7 +1549,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					org.setParentId(0L);
 					org.setPath("/"+cmd.getName());
 				}
-				org.setStatus(OrganizationStatus.ACTIVE.getCode());
+				org.setStatus(OrganizationStatus.INACTIVE.getCode());
 				org.setDescription(cmd.getDescription());
 				this.organizationProvider.createOrganization(org);
 				//创建组织小区关联
@@ -1562,26 +1562,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 			}
 			//创建组织成员
-			OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), org.getId());
-			if(orgMember != null){
-				LOGGER.error("user have be organization member.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"user have be organization member.");
+			if(cmd.isUserJoin()){
+				OrganizationMember orgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), org.getId());
+				if(orgMember != null){
+					LOGGER.error("user have be organization member.");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"user have be organization member.");
+				}
+				orgMember = new OrganizationMember();
+				orgMember.setContactDescription(cmd.getDescription());
+				orgMember.setContactName(user.getNickName());
+				UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
+				if(identifier != null){
+					orgMember.setContactToken(identifier.getIdentifierToken());
+					orgMember.setContactType(identifier.getIdentifierType());
+				}
+				if(cmd.getMemberType() == null || cmd.getMemberType().trim().equals(""))
+					orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+				else {
+					OrganizationMemberGroupType type = OrganizationMemberGroupType.fromCode(cmd.getMemberType());
+					if(type != null)	orgMember.setMemberGroup(type.getCode());
+					else	orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+				}
+				orgMember.setOrganizationId(org.getId());
+				orgMember.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
+				orgMember.setTargetId(user.getId());
+				orgMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+				this.organizationProvider.createOrganizationMember(orgMember);
 			}
-			orgMember = new OrganizationMember();
-			orgMember.setContactDescription(cmd.getDescription());
-			orgMember.setContactName(user.getNickName());
-			UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
-			if(identifier != null){
-				orgMember.setContactToken(identifier.getIdentifierToken());
-				orgMember.setContactType(identifier.getIdentifierType());
-			}
-			orgMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
-			orgMember.setOrganizationId(org.getId());
-			orgMember.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
-			orgMember.setTargetId(user.getId());
-			orgMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
-			this.organizationProvider.createOrganizationMember(orgMember);
 
 			return status;
 		});

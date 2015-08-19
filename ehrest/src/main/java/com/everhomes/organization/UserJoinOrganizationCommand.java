@@ -6,6 +6,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * 	<li>userJoin : 是否将当前用户添加进组织成员,true-加入,false-不加入,只创建组织</li>
+ * 	<li>memberType : 加入组织成员组类型,默认为manager,详情:{@link com.everhomes.organization.OrganizationMemberGroupType}
  * 	<li>cityId : 城市id</li>
  * 	<li>areaId : 区县id</li>
  *	<li>address : 地址</li>
@@ -32,6 +34,9 @@ public class UserJoinOrganizationCommand {
 	private Long parentId;
 	
 	private String description;
+	@NotNull
+	private boolean userJoin;
+	private String memberType;
 
 	public Long getCityId() {
 		return cityId;
@@ -95,6 +100,22 @@ public class UserJoinOrganizationCommand {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public boolean isUserJoin() {
+		return userJoin;
+	}
+
+	public void setUserJoin(boolean userJoin) {
+		this.userJoin = userJoin;
+	}
+
+	public String getMemberType() {
+		return memberType;
+	}
+
+	public void setMemberType(String memberType) {
+		this.memberType = memberType;
 	}
 
 	@Override

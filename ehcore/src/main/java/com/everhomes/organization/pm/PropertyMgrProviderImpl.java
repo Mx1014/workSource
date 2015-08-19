@@ -1004,11 +1004,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public CommunityPmBill findFamilyNewestBill(Long addressId, Long organizationId) {
+	public CommunityPmBill findFamilyNewestBill(Long addressId) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId)
-				.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId));
+		Condition condition = Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId);
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(condition)
 				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.desc())
@@ -1037,25 +1036,25 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<CommunityPmBill> listFamilyNewestBillsByOrgId(Long organizationId,String address) {
+	public List<CommunityPmBill> listNewestPmBillsByOrgId(Long organizationId,String address) {
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
+
 		org.jooq.Table<Record2<Long, Date>> table2 = context.select(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.as("t2One"),Tables.EH_ORGANIZATION_BILLS.END_DATE.max().as("t2Two"))
 				.from(Tables.EH_ORGANIZATION_BILLS)
 				.groupBy(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID).asTable("t2");
-		
+
 		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(organizationId);
-		
+
 		if(address != null && !address.isEmpty())
 			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%" + address + "%"));
 
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.join(table2)
 				.on(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.equal((Field<Long>) table2.field("t2One"))
-					.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
-				.where(condition)
-				.fetch();
+						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.equal((Field<Date>) table2.field("t2Two"))))
+						.where(condition)
+						.fetch();
 
 		if(records != null && !records.isEmpty()){
 			records.stream().map(r -> {
@@ -1136,14 +1135,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		cal.set(Calendar.MONTH, 0);
 		cal.set(Calendar.DAY_OF_MONTH, 0);
 		java.sql.Date startDateInYear = new java.sql.Date(cal.getTime().getTime());
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record1<BigDecimal>> records = context.select(Tables.EH_ORGANIZATION_BILLS.DUE_AMOUNT.sum()).from(Tables.EH_ORGANIZATION_BILLS)
 				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId)
 						.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
 						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDateInYear))
 						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDateInYear)))
-				.fetch();
+						.fetch();
 
 		if(records != null && !records.isEmpty() && records.get(0).value1() != null)
 			return records.get(0).value1();
@@ -1171,8 +1170,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 						.and(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId))
 						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDateInYear))
 						.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDateInYear)))
-				.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.asc())
-				.fetch();
+						.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.asc())
+						.fetch();
 
 		if(records != null && !records.isEmpty())
 			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
@@ -1186,8 +1185,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId)
 						.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate)).and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)))
-				.fetch();
-		
+						.fetch();
+
 		if(records != null && !records.isEmpty()){
 			return ConvertHelper.convert(records.get(0),CommunityPmBill.class);
 		}
@@ -1203,18 +1202,16 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.fetch();
 
 		if(records != null && !records.isEmpty()){
-				return ConvertHelper.convert(records.get(0), OrganizationCommunity.class);
+			return ConvertHelper.convert(records.get(0), OrganizationCommunity.class);
 		}
 		return null;
 	}
 
 	@Override
-	public CommunityAddressMapping findAddressMappingByAddressId(Long organizationId, Long addressId) {
+	public CommunityAddressMapping findAddressMappingByAddressId(Long addressId) {
 		final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
-		if(organizationId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId));
 		query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
 		query.fetch().map((r) -> {
 			if(r != null)
@@ -1225,8 +1222,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityAddressMapping> listAddressMappingsByOrgId(
-			Long orgId) {
+	public List<CommunityAddressMapping> listAddressMappingsByOrgId(Long orgId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
@@ -1242,9 +1238,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityPmBill> listPmBillsByAddressAndDate(Long orgId,String address,Date startDate, Date endDate, long offset, int pageSize) {
+	public List<CommunityPmBill> listPmBillsByOrgId(Long orgId,String address,Date startDate, Date endDate, long offset, int pageSize) {
 		List<CommunityPmBill> list = new ArrayList<CommunityPmBill>();
-		
+
 		Condition condition = Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId);
 		if(!(address == null || address.isEmpty())){
 			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+address+"%"));
@@ -1253,7 +1249,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			condition = condition.and(Tables.EH_ORGANIZATION_BILLS.START_DATE.greaterOrEqual(startDate)
 					.and(Tables.EH_ORGANIZATION_BILLS.END_DATE.lessOrEqual(endDate)));
 		}
-		
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
 				.where(condition)
@@ -1279,7 +1275,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		dao.update(mapping);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, mapping.getId());
-		
+
 	}
 
 	@Override
@@ -1295,18 +1291,5 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			return null;
 		});
 		return result;
-	}
-
-	@Override
-	public CommunityPmBill findOneNewestPmBillByOrgId(Long orgId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		
-		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
-				.where(Tables.EH_ORGANIZATION_BILLS.ORGANIZATION_ID.eq(orgId))
-				.orderBy(Tables.EH_ORGANIZATION_BILLS.START_DATE.desc(),Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.asc())
-				.fetch();
-		if(records != null && !records.isEmpty())
-			return ConvertHelper.convert(records.get(0), CommunityPmBill.class);
-		return null;
 	}
 }

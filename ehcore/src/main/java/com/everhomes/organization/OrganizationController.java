@@ -601,7 +601,7 @@ public class OrganizationController extends ControllerBase {
 		return response;
 		
 	}
-    
+	
     /**
      * <b>URL: /org/updateTopicPrivacy</b>
      * <p>设置帖子是否公开</p>
