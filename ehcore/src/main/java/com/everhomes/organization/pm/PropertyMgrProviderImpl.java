@@ -1004,7 +1004,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public CommunityPmBill findFamilyNewestBill(Long addressId) {
+	public CommunityPmBill findNewestBillByAddressId(Long addressId) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Condition condition = Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.eq(addressId);
@@ -1179,7 +1179,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public CommunityPmBill findFamilyPmBillInStartDateToEndDate(Long addressId,
+	public CommunityPmBill findPmBillByAddressIdAndTime(Long addressId,
 			Date startDate, Date endDate) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_BILLS)
@@ -1223,7 +1223,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Override
 	public List<CommunityAddressMapping> listAddressMappingsByOrgId(Long orgId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
 		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);

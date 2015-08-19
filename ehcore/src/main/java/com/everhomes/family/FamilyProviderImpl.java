@@ -660,7 +660,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	}
 
 	@Override
-	public List<FamilyBillingTransactions> listFBillTxByConditions(int resultCodeId,Long addresssId,int pageSize, long offset) {
+	public List<FamilyBillingTransactions> listFBillTx(int resultCodeId,Long addresssId,int pageSize, long offset) {
 		List<FamilyBillingTransactions> list = new ArrayList<FamilyBillingTransactions>();
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null,
 				(DSLContext context , Object object) -> {

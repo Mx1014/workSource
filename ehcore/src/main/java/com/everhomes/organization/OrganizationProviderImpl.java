@@ -664,7 +664,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationBillingTransactionDTO> listOrgBillTxByConditions(int resultCode,Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
+	public List<OrganizationBillingTransactionDTO> listOrgBillTxByOrgId(Long orgId,int resultCode,Timestamp startTime, Timestamp endTime, String address, long offset, int pageSize) {
 
 		List<OrganizationBillingTransactionDTO> list = new ArrayList<OrganizationBillingTransactionDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -674,13 +674,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addJoin(Tables.EH_ORGANIZATION_ORDERS, Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.ORDER_ID.eq(Tables.EH_ORGANIZATION_ORDERS.ID));
 		query.addJoin(Tables.EH_ORGANIZATION_BILLS, Tables.EH_ORGANIZATION_BILLS.ID.eq(Tables.EH_ORGANIZATION_ORDERS.BILL_ID));
 
+		query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.OWNER_ID.eq(orgId));
+		query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.RESULT_CODE_ID.eq(resultCode));
 		if(startTime != null && endTime != null)
 			query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.greaterOrEqual(startTime)
 					.and(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.lessOrEqual(endTime)));
 		if(address != null && !address.equals(""))
 			query.addConditions(Tables.EH_ORGANIZATION_BILLS.ADDRESS.like("%"+address+"%"));
 		
-		query.addConditions(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.RESULT_CODE_ID.eq(resultCode));
 
 		query.addOrderBy(Tables.EH_ORGANIZATION_BILLING_TRANSACTIONS.CREATE_TIME.desc(),Tables.EH_ORGANIZATION_BILLS.ADDRESS.asc());
 		query.addLimit((int)offset, pageSize);
