@@ -112,9 +112,6 @@ public class BusinessServiceImpl implements BusinessService {
     }
     
     private Business createBusiness(BusinessCommand cmd, long userId){
-        if(cmd.getBizOwnerUid() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter ownerUid,ownerUid is null");
         if(cmd.getName() == null || cmd.getName().trim().equals(""))
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter name,name is null");
@@ -124,6 +121,7 @@ public class BusinessServiceImpl implements BusinessService {
         
         Business business = ConvertHelper.convert(cmd, Business.class);
         business.setCreatorUid(userId);
+        business.setBizOwnerUid(cmd.getBizOwnerUid() == null ? userId : cmd.getBizOwnerUid());
         business.setTargetId(cmd.getTargetId() == null ? "" : cmd.getTargetId());
         business.setDescription(cmd.getDescription() == null ? "" : cmd.getDescription());
         business.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

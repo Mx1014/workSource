@@ -32,7 +32,6 @@ public class BusinessCommand{
     private Byte     targetType;
     @NotNull
     private String     targetId;
-    @NotNull
     private Long     bizOwnerUid;
     @NotNull
     private String   name;

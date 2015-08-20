@@ -77,6 +77,9 @@ public class CategoryController extends ControllerBase {
         // if(cmd.getSortBy() != null)
         // orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(),
         // SortOrder.fromCode(cmd.getSortOrder()));
+        if(cmd.getSortOrder() == null){
+            orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
+        }
 
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(),
