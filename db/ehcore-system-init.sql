@@ -18,7 +18,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.to
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.appid', '89f85f91ed974429992831fb662dbb83', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.version', '2014-06-30', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.server', 'api.ucpaas.com', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('mw.vcode.template.content', '欢迎注册左邻,您的验证码${vcode},10内分钟有效。', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('mw.vcode.template.content', '您的验证码为${vcode}，10分钟内有效，感谢您的使用。', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('marketdata.item.version', '2015080311', 'the version of all luanchpad items');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.order.url', '/app/static/indent/indent.html', 'the relative path for user order');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('apply.shop.url', '/app/static/apply_store/apply_store.html', 'the relative path for user shop apply');
