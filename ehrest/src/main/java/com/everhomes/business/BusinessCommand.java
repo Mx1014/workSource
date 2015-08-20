@@ -11,26 +11,24 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>targetType: 商家来源类型,参考{@link com.everhomes.business.BusinessTargetType}</li>
- * <li>targetId: 商家原始id</li>
- * <li>bizOwnerUid: 商家拥有者id</li>
+ * <li>targetId: 商家原始id,电商版同步时，必填</li>
+ * <li>bizOwnerUid: 商家拥有者id，电商版同步时，必填</li>
  * <li>name: 商家名字</li>
  * <li>displayName: 商家显示名</li>
  * <li>logoUri: 商家logo/li>
- * <li>url: 访问商家信息的url</li>
+ * <li>url: 访问商家信息的url，后台管理添加服务商家时，必填</li>
  * <li>contact: 商家拥有者名字</li>
  * <li>phone: 商家所有在联系方式</li>
  * <li>longitude: 商家地址所在经度</li>
  * <li>latitude: 商家地址所在纬度</li>
  * <li>address: 商家地址详情</li>
  * <li>description: 商家描述</li>
- * <li>scopes: 商家可见范围，参考{@link com.everhomes.business.BusinessScope}</li>
- * <li>categroies: 商家归属的分类列表</li>
+ * <li>categroies: 商家归属的分类列表{@link com.everhomes.category.CategoryConstants}</li>
  * </ul>
  */
 
 public class BusinessCommand{
     private Byte     targetType;
-    @NotNull
     private String     targetId;
     private Long     bizOwnerUid;
     @NotNull
