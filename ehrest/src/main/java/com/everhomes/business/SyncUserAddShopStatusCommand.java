@@ -7,24 +7,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 商家ID</li>
  * <li>userId: 用户ID</li>
  * </ul>
  */
 
-public class SyncDeleteBusinessCommand{
-    @NotNull
-    private String id;
+public class SyncUserAddShopStatusCommand{
     @NotNull
     private Long userId;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public Long getUserId() {
         return userId;

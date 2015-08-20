@@ -72,7 +72,8 @@ import com.everhomes.visibility.VisibleRegionType;
 public class LaunchPadServiceImpl implements LaunchPadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
     private static final String OFFICIAL_PHONE = "";
-    private static final String PREFIX_URL = "business.url.prefix";
+    private static final String BUSINESS_URL_PREFIX = "business.url.prefix";
+    private static final String AUTHENTICATE_URL_PREFIX = "authenticate.url.prefix";
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
@@ -155,7 +156,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     businesses.add(b);
             }
         }
-        String prefix = configurationProvider.getValue(PREFIX_URL, "");
+        String businessPrefix = configurationProvider.getValue(BUSINESS_URL_PREFIX, "");
+        if(businessPrefix.trim().equals(""))
+            LOGGER.error("Business url prefix is empty");
+        String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_URL_PREFIX, "");
         if(businesses != null && !businesses.isEmpty()){
             int index = 1;
             for(Business r : businesses){
@@ -163,7 +167,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 dto.setIconUri(r.getLogoUri());
                 dto.setIconUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LaunchPadConstants.URL, processUrl(r, prefix));
+                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessPrefix,authenticatePrefix));
                 jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
                 dto.setActionData(jsonObject.toJSONString());
                 dto.setActionType(ActionType.BIZ_DETAILS.getCode());
@@ -187,9 +191,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return result;
         
     }
-    private String processUrl(Business business, String prefix){
+    private String processUrl(Business business, String prefix,String authenticatePrefix){
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
-            return prefix + business.getTargetId();
+            return authenticatePrefix.trim() + prefix.trim() + business.getTargetId();
         return business.getUrl();
     }
 

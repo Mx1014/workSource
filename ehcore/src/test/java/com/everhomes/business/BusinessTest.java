@@ -39,8 +39,8 @@ public class BusinessTest extends CoreServerTestCase {
         List<Long> categroies = new ArrayList<Long>();
         categroies.add(3001L);
         //categroies.add(3002L);
-        //cmd.setCategroies(categroies);
-        cmd.setTargetId("1006");
+        cmd.setCategroies(categroies);
+        cmd.setTargetId("1009");
         cmd.setContact("15875300001");
         cmd.setDisplayName("水管水管第三帝国");
         cmd.setLatitude(23.123);
@@ -48,7 +48,7 @@ public class BusinessTest extends CoreServerTestCase {
         cmd.setName("safsdfsadf");
         cmd.setPhone("15875300001");
         cmd.setTargetType((byte)2);
-        cmd.setTargetId("1006");
+        //cmd.setTargetId("1006");
         cmd.setUrl("http://www.baidu.com");
         List<BusinessScope> scopes = new ArrayList<>();
         BusinessScope scope = new BusinessScope();

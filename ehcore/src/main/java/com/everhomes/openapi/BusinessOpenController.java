@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
 import com.everhomes.business.SyncDeleteBusinessCommand;
+import com.everhomes.business.SyncUserAddShopStatusCommand;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
@@ -22,6 +23,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -43,6 +45,9 @@ public class BusinessOpenController extends ControllerBase {
     
     @Autowired
     private CategoryProvider categoryProvider;
+    
+    @Autowired
+    private UserActivityService userActivityService;
     
     /**
      * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -87,6 +92,21 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse syncDeleteBusiness(@Valid SyncDeleteBusinessCommand cmd) {
         
         businessService.syncDeleteBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/syncUserAddShopStatus</b>
+     * <p>同步开店状态</p>
+     */
+    @RequestMapping("syncUserAddShopStatus")
+    @RestReturn(value=String.class)
+    public RestResponse syncUserAppliedShopStatus(SyncUserAddShopStatusCommand cmd) {
+        
+        userActivityService.addUserShop(cmd.getUserId());
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

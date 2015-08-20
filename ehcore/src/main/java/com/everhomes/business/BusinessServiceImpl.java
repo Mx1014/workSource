@@ -37,6 +37,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -51,7 +52,8 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 public class BusinessServiceImpl implements BusinessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessServiceImpl.class);
-    private static final String PREFIX_URL = "business.url.prefix";
+    private static final String BUSINESS_URL_PREFIX = "business.url.prefix";
+    private static final String AUTHENTICATE_URL_PREFIX = "authenticate.url.prefix";
     @Autowired
     private BusinessProvider businessProvider;
     @Autowired
@@ -68,6 +70,8 @@ public class BusinessServiceImpl implements BusinessService {
     private UserProvider userProvider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    private UserActivityService userActivityService;
     
     @Override
     public void syncBusiness(SyncBusinessCommand cmd) {
@@ -245,7 +249,10 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
                 .map(r->r.getOwnerId()).collect(Collectors.toList());
         
-        final String prefix = configurationProvider.getValue(PREFIX_URL, "");
+        final String businessPrefix = configurationProvider.getValue(BUSINESS_URL_PREFIX, "");
+        if(businessPrefix == null || businessPrefix.trim().equals(""))
+            LOGGER.error("Business url prefix is empty.");
+        final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_URL_PREFIX, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -254,7 +261,7 @@ public class BusinessServiceImpl implements BusinessService {
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(processLogoUrl(r, userId));
-            dto.setUrl(processUrl(r,prefix));
+            dto.setUrl(processUrl(r,businessPrefix,authenticatePrefix));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -288,9 +295,9 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
     
-    private String processUrl(Business business, String prefix){
+    private String processUrl(Business business, String prefix,String authenticatePrefix){
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
-            return prefix + business.getTargetId();
+            return authenticatePrefix.trim() + prefix.trim() + business.getTargetId();
         return business.getUrl();
     }
     
@@ -540,7 +547,14 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
                     "Business is not exists.");
         }
+        User user = userProvider.findUserById(cmd.getUserId());
+        if(user == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter userId,userId is not found");
+        }
         this.businessProvider.deleteBusiness(business.getId());
+        this.userActivityService.cancelShop(user.getId());
+        
     }
 
     @Override
