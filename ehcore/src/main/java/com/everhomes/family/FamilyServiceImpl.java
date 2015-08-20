@@ -30,7 +30,9 @@ import ch.hsr.geohash.GeoHash;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.address.AddressServiceErrorCode;
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -901,6 +903,25 @@ public class FamilyServiceImpl implements FamilyService {
         }else {
             updateUserContext(userId, familyId);
         }
+    }
+    
+
+    @Override
+    public void adminApproveMember(ApproveMemberCommand cmd) {
+        cmd.setOperatorRole(Role.ResourceAdmin);
+        //if address status is unactive,change status
+        Address address = getAddressByFamilyId(cmd.getId());
+        if(address == null){
+            LOGGER.error("Address is not exists,find by familyId.familyId=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
+                    "Address is not exists.");
+        }
+        if(address.getStatus().byteValue() != AddressAdminStatus.ACTIVE.getCode()){
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            this.addressProvider.updateAddress(address);
+        }
+        approveMember(cmd);
+        
     }
 
     @Override
@@ -1805,6 +1826,7 @@ public class FamilyServiceImpl implements FamilyService {
         
         return result;
     }
+
 
 
 }

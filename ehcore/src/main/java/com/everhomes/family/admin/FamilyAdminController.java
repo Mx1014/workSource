@@ -54,8 +54,7 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("adminApproveMember")
     @RestReturn(value=String.class)
     public RestResponse adminApproveMember(@Valid ApproveMemberCommand cmd) {
-        cmd.setOperatorRole(Role.ResourceAdmin);
-        this.familyService.approveMember(cmd);
+        this.familyService.adminApproveMember(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
