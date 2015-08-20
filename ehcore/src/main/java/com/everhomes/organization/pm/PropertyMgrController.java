@@ -944,11 +944,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping(value="listPmBillsByConditions",method = RequestMethod.POST)
 	@RestReturn(value=PmBillsDTO.class,collection=true)
 	public RestResponse listPmBillsByConditions(@Valid ListPmBillsByConditionsCommand cmd) {
-
 		ListPmBillsByConditionsCommandResponse result = propertyMgrService.listPmBillsByConditions(cmd);
-		
-		String str = UUID.randomUUID().toString();
-
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

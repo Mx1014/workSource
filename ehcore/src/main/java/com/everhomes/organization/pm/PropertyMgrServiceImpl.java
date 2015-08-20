@@ -1739,16 +1739,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			//将原文件暂存在服务器中
 			this.storeFile(files[0],filePath1);
 			//启动进程解析原文件
-			Runtime.getRuntime().exec(command);
-			//读取解析后的文件
-			int i = 0;
-			File file2 = null;
-			while(i < 5){
-				file2 = new File(filePath2);
-				if(!file2.exists())	Thread.sleep(1000);
-				else	break;
+			Process process = Runtime.getRuntime().exec(command);
+			int i = 1;
+			while(process.isAlive()){
+				if(LOGGER.isDebugEnabled()){
+					System.out.println("isAliveTime="+i*1000);
+					LOGGER.info("isAliveTime="+i*1000);
+				}
+				Thread.sleep(i*1000);
 				i++;
+				if(i>10)	break;
 			}
+			File file2 = new File(filePath2);
 			if(file2 == null || !file2.exists()){
 				LOGGER.error("parse file failure.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -1931,7 +1933,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			if(fileList != null && fileList.length > 0){
 				for(File file : fileList){
 					String name = file.getName();
-					LOGGER.error("jarFileName="+name);
+					if(LOGGER.isDebugEnabled())
+						LOGGER.error("jarFileName="+name);
+					
 					if(name.startsWith("ehparser") && name.endsWith(".jar")){
 						jarPath = rootPath+File.separator+file.getName();
 						break;
@@ -1939,7 +1943,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-		LOGGER.error("jarPath="+jarPath);
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("jarPath="+jarPath);
 		return jarPath;
 	}
 
@@ -2540,9 +2545,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+
 		Group family = this.checkFamily(cmd.getFamilyId());
-		Long addresssId = family.getIntegralTag1();
-		List<FamilyBillingTransactions> familyTransactionList = this.familyProvider.listFBillTx(BillTransactionResult.SUCCESS.getCode(),addresssId,pageSize+1,offset);
+		Long addressId = family.getIntegralTag1();
+		
+		List<FamilyBillingTransactions> familyTransactionList = this.familyProvider.listFBillTx(BillTransactionResult.SUCCESS.getCode(),addressId,pageSize+1,offset);
 		if(familyTransactionList != null && familyTransactionList.size() == pageSize+1){
 			response.setNextPageOffset(cmd.getPageOffset()+1);
 			familyTransactionList.remove(familyTransactionList.size()-1);
@@ -2597,13 +2604,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		PmBillsDTO billDto = new PmBillsDTO();
 
 		Group family = this.checkFamily(cmd.getFamilyId());
+		Long addressId = family.getIntegralTag1();
+		
 		java.sql.Date startDate = null;
 		java.sql.Date endDate = null;
 		if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
 			startDate = new java.sql.Date(this.getFirstDayOfMonthByStr(cmd.getBillDate()).getTime());
 			endDate =  new java.sql.Date(this.getLastDayOfMonthByStr(cmd.getBillDate()).getTime());
 		}
-		CommunityPmBill communityBill = this.propertyMgrProvider.findPmBillByAddressAndDate(family.getIntegralTag1(),startDate,endDate);
+		CommunityPmBill communityBill = this.propertyMgrProvider.findPmBillByAddressAndDate(addressId,startDate,endDate);
 		if(communityBill != null){
 			billDto = this.convertBillToDto(communityBill);
 			BigDecimal payedAmount = this.countPmBillPaidAmount(billDto.getId());
