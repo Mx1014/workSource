@@ -52,8 +52,9 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 public class BusinessServiceImpl implements BusinessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessServiceImpl.class);
-    private static final String BUSINESS_URL_PREFIX = "business.url.prefix";
-    private static final String AUTHENTICATE_URL_PREFIX = "authenticate.url.prefix";
+    private static final String BUSINESS_HOME_URL = "business.home.url";
+    private static final String BUSINESS_DETAIL_URL = "business.detail.url";
+    private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
     @Autowired
     private BusinessProvider businessProvider;
     @Autowired
@@ -249,10 +250,9 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
                 .map(r->r.getOwnerId()).collect(Collectors.toList());
         
-        final String businessPrefix = configurationProvider.getValue(BUSINESS_URL_PREFIX, "");
-        if(businessPrefix == null || businessPrefix.trim().equals(""))
-            LOGGER.error("Business url prefix is empty.");
-        final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_URL_PREFIX, "");
+        final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
+        final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
+        final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -261,7 +261,7 @@ public class BusinessServiceImpl implements BusinessService {
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(processLogoUrl(r, userId));
-            dto.setUrl(processUrl(r,businessPrefix,authenticatePrefix));
+            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -295,9 +295,15 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
     
-    private String processUrl(Business business, String prefix,String authenticatePrefix){
+    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
+        if(businessHomeUrl.trim().equals(""))
+            LOGGER.error("Buiness home url is empty.");
+        if(prefix.trim().equals(""))
+            LOGGER.error("Buiness detail url is empty.");
+        if(authenticatePrefix.trim().equals(""))
+            LOGGER.error("Buiness authenticate prefix url is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
-            return authenticatePrefix.trim() + prefix.trim() + business.getTargetId();
+            return businessHomeUrl.trim() + authenticatePrefix.trim() + prefix.trim() + business.getTargetId();
         return business.getUrl();
     }
     
