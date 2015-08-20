@@ -38,7 +38,7 @@ public class ListFamilyBillingTransactionsByFamilyIdCommand {
 		this.pageSize = pageSize;
 	}
 
-		public Long getFamilyId() {
+	public Long getFamilyId() {
 		return familyId;
 	}
 
