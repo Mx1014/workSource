@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>familyId : 家庭Id</li>
+ * 	<li>addressId : 地址Id</li>
  *	<li>payTime : 支付日期</li>
  *	<li>payAmount : 支付金额</li>
  *	<li>description : 描述</li>
@@ -25,7 +25,7 @@ import com.everhomes.util.StringHelper;
 public class PayPmBillByFamilyIdCommand {
 	
 	@NotNull
-	private Long familyId;
+	private Long addressId;
 	@NotNull
 	private Long payTime;
 	@NotNull
@@ -61,14 +61,12 @@ public class PayPmBillByFamilyIdCommand {
 	public void setPaidType(Byte paidType) {
 		this.paidType = paidType;
 	}
-	
-	public Long getFamilyId() {
-		return familyId;
+	public Long getAddressId() {
+		return addressId;
 	}
-	public void setFamilyId(Long familyId) {
-		this.familyId = familyId;
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
-	
 	public Long getPayTime() {
 		return payTime;
 	}

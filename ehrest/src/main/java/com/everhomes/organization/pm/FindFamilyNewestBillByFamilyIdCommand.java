@@ -5,20 +5,20 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
- * <li>familyId : 家庭Id</li>
+ * <li>addressId : 地址Id</li>
  *</ul>
  *
  */
 public class FindFamilyNewestBillByFamilyIdCommand {
 	@NotNull
-	private Long familyId;
+	private Long addressId;
 
-	public Long getFamilyId() {
-		return familyId;
+	public Long getAddressId() {
+		return addressId;
 	}
 
-	public void setFamilyId(Long familyId) {
-		this.familyId = familyId;
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 
 	@Override

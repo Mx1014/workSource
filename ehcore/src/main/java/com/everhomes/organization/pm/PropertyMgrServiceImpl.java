@@ -208,7 +208,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private CoordinationProvider coordinationProvider;
-	
+
 	@Autowired
 	private AuditLogProvider auditLogProvider;
 
@@ -870,7 +870,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		long offset = PaginationHelper.offsetFromPageOffset(Long.valueOf(cmd.getPageOffset()), pageSize);
 		int pageCount = getPageCount(totalCount, pageSize);
-		
+
 		List<FamilyDTO>  entityResultList = familyProvider.listWaitApproveFamily(cmd.getCommunityId(), offset, new Long(pageSize));
 		commandResponse.setMembers( entityResultList.stream()
 				.map(r->{ return r; })
@@ -1935,7 +1935,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					String name = file.getName();
 					if(LOGGER.isDebugEnabled())
 						LOGGER.error("jarFileName="+name);
-					
+
 					if(name.startsWith("ehparser") && name.endsWith(".jar")){
 						jarPath = rootPath+File.separator+file.getName();
 						break;
@@ -2149,9 +2149,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.dbProvider.execute(s -> {
 			if(cmd.getIds() != null && !cmd.getIds().isEmpty()){
 				for(Long billId : cmd.getIds()){
-						DeletePmBillCommand command = new DeletePmBillCommand();
-						command.setId(billId);
-						this.deletePmBill(command);
+					DeletePmBillCommand command = new DeletePmBillCommand();
+					command.setId(billId);
+					this.deletePmBill(command);
 				}
 			}
 			return true;
@@ -2210,7 +2210,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			this.createPmOperLog(bill.getId(),PmBillOperLogType.INSERT.getCode(),content);
 			return true;
 		});
-		
+
 	}
 
 	@Override
@@ -2536,7 +2536,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public ListFamilyBillingTransactionsByFamilyIdCommandResponse listFamilyBillingTransactionByFamilyId(ListFamilyBillingTransactionsByFamilyIdCommand cmd) {
-		this.checkFamilyIdIsNull(cmd.getFamilyId());
+		this.checkAddressIdIsNull(cmd.getAddressId());
+		this.checkAddress(cmd.getAddressId());
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
 
@@ -2546,9 +2547,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Long addressId = family.getIntegralTag1();
-		
+		Long addressId = cmd.getAddressId();
+
 		List<FamilyBillingTransactions> familyTransactionList = this.familyProvider.listFBillTx(BillTransactionResult.SUCCESS.getCode(),addressId,pageSize+1,offset);
 		if(familyTransactionList != null && familyTransactionList.size() == pageSize+1){
 			response.setNextPageOffset(cmd.getPageOffset()+1);
@@ -2593,19 +2593,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 	}
 
+	private void checkAddressIdIsNull(Long addressId) {
+		if(addressId == null){
+			LOGGER.error("addressId paramter is null or empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"addressId paramter is null or empty");
+		}
+	}
+
 	@Override
 	public PmBillsDTO findFamilyBillByFamilyIdAndTime(FindFamilyBillByFamilyIdAndTimeCommand cmd) {
-		if(cmd.getFamilyId() == null || cmd.getBillDate() == null || cmd.getBillDate().equals("")){
-			LOGGER.error("propterty familyId or billDate paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty familyId or billDate paramter can not be null or empty");
-		}
+		this.checkAddressIdIsNull(cmd.getAddressId());
+		this.checkBillDate(cmd.getBillDate());
+		this.checkAddress(cmd.getAddressId());
 
 		PmBillsDTO billDto = new PmBillsDTO();
 
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Long addressId = family.getIntegralTag1();
-		
+		Long addressId = cmd.getAddressId();
+
 		java.sql.Date startDate = null;
 		java.sql.Date endDate = null;
 		if(cmd.getBillDate() != null && !cmd.getBillDate().equals("")){
@@ -2621,11 +2626,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return billDto;
 	}
 
+	private void checkBillDate(String billDate) {
+		if(billDate == null || billDate.equals("")){
+			LOGGER.error("billDate paramter is empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"billDate paramter is empty");
+		}
+
+	}
+
 	@Override
 	public PmBillsDTO findFamilyBillAndPaysByFamilyIdAndTime(FindFamilyBillAndPaysByFamilyIdAndTimeCommand cmd) {
+		this.checkFamilyIdIsNull(cmd.getFamilyId());
+		Group family = this.checkFamily(cmd.getFamilyId());
 		FindFamilyBillByFamilyIdAndTimeCommand command = new FindFamilyBillByFamilyIdAndTimeCommand();
 		command.setBillDate(cmd.getBillDate());
-		command.setFamilyId(cmd.getFamilyId());
+		command.setAddressId(family.getIntegralTag1());
 		PmBillsDTO billDto = this.findFamilyBillByFamilyIdAndTime(command);
 		if(billDto != null){
 			//账单缴费记录
@@ -2683,6 +2699,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public ListFamilyBillsAndPaysByFamilyIdCommandResponse listFamilyBillsAndPaysByFamilyId(ListFamilyBillsAndPaysByFamilyIdCommand cmd) {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		Group family = this.checkFamily(cmd.getFamilyId());
+		Long addressId = family.getIntegralTag1();
+		
 		//向统一支付发请求,查询订单支付状态
 		LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
 		remoteRefreshOrgOrderStatus();
@@ -2696,7 +2714,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
 		response.setBillDate(cmd.getBillDate());
 
-		List<CommunityPmBill> commBillList = this.organizationProvider.listOrganizationBillsByAddressId(family.getIntegralTag1(), offset, pageSize+1);
+		List<CommunityPmBill> commBillList = this.organizationProvider.listOrganizationBillsByAddressId(addressId, offset, pageSize+1);
 		if(commBillList != null && !commBillList.isEmpty()){
 			if(commBillList.size()==pageSize+1){
 				commBillList.remove(commBillList.size()-1);
@@ -2751,22 +2769,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public int payPmBillByFamilyId(PayPmBillByFamilyIdCommand cmd) {
 		if(cmd.getPaidType() == null || cmd.getPayAmount() == null || cmd.getPayTime() == null || cmd.getTxType() == null){
-			LOGGER.error("propterty paidType or payAmount or payTime or txType paramter can not be null or empty");
+			LOGGER.error("paidType or payAmount or payTime or txType paramteris empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"propterty paidType or payAmount or payTime or txType paramter can not be null or empty");
+					"paidType or payAmount or payTime or txType paramter is empty");
 		}
-		this.checkFamilyIdIsNull(cmd.getFamilyId());
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(),OrganizationType.PM.getCode());
+		this.checkAddressIdIsNull(cmd.getAddressId());
+		this.checkAddress(cmd.getAddressId());
+		Long addressId = cmd.getAddressId();
+
+		Organization org = this.findOrganizationByAddressId(addressId);
 		if(org == null){
 			LOGGER.error("have not pm organization in the community.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"have not pm organization in the community.");
 		}
 
-		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(family.getIntegralTag1());
+		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
 		if(bill == null){
-			LOGGER.error("the bill is not exist by addressId="+family.getIntegralTag1());
+			LOGGER.error("the bill is not exist by addressId="+addressId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is not exist");
 		}
@@ -2848,7 +2868,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public GetPmPayStatisticsCommandResponse getPmPayStatistics(GetPmPayStatisticsCommand cmd) {
 		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
-		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		this.checkOrganization(cmd.getOrganizationId());
 
 		GetPmPayStatisticsCommandResponse result = new GetPmPayStatisticsCommandResponse();
 		int oweFamilyCount = 0;
@@ -2878,17 +2898,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void sendPmPayMessageToOneOweFamily(SendPmPayMessageToOneOweFamilyCommand cmd) {
-		this.checkFamilyIdIsNull(cmd.getFamilyId());
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(),OrganizationType.PM.getCode());
+		this.checkAddressIdIsNull(cmd.getAddressId());
+		this.checkAddress(cmd.getAddressId());
+		Long addressId = cmd.getAddressId();
+		
+		Organization org = this.findOrganizationByAddressId(addressId);
 		if(org == null){
 			LOGGER.error("have not pm organization in the community.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"have not pm organization in the community.");
 		}
-		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(family.getIntegralTag1());
+		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
 		if(bill == null){
-			LOGGER.error("the bill is not exist by addressId="+family.getIntegralTag1());
+			LOGGER.error("the bill is not exist by addressId="+addressId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill is not exist");
 		}
@@ -2903,13 +2925,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//短信发送物业缴费通知
 		this.dbProvider.execute(s -> {
 			String message = this.getPmPayMessage(bill,waitPayAmount,payAmount);
-			this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),family.getIntegralTag1(),message);
+			this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),addressId,message);
 			bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
 			bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
 			this.organizationProvider.updateOrganizationBill(bill);
 
 			return s;
 		});
+	}
+
+	private Organization findOrganizationByAddressId(Long addressId) {
+		CommunityAddressMapping addressMapping = this.organizationProvider.findOrganizationAddressMappingByAddressId(addressId);
+		if(addressMapping != null){
+			return this.organizationProvider.findOrganizationById(addressMapping.getOrganizationId());
+		}
+		return null;
 	}
 
 	private void sendPmPayMessageToUnRegisterUserInFamily(Long organizationId,Long addressId,String message) {
@@ -2933,18 +2963,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				BigDecimal paidAmount = this.countPmBillPaidAmount(bill.getId());
 				BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(paidAmount);
 				if(waitPayAmount.compareTo(BigDecimal.ZERO) > 0){//欠费
-					Family family = this.familyProvider.findFamilyByAddressId(bill.getEntityId());
-					if(family != null){
-						//短信发送物业缴费通知
-						this.dbProvider.execute(s -> {
-							String message = this.getPmPayMessage(bill, waitPayAmount, paidAmount);
-							this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),family.getIntegralTag1(),message);
-							bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
-							bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
-							this.organizationProvider.updateOrganizationBill(bill);
-							return s;
-						});
-					}
+					Long addressId = bill.getEntityId();
+					//短信发送物业缴费通知
+					this.dbProvider.execute(s -> {
+						String message = this.getPmPayMessage(bill, waitPayAmount, paidAmount);
+						this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),addressId,message);
+						bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
+						bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
+						this.organizationProvider.updateOrganizationBill(bill);
+						return s;
+					});
 				}
 			}
 
@@ -2984,9 +3012,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public GetFamilyStatisticCommandResponse getFamilyStatistic(
 			GetFamilyStatisticCommand cmd) {
-		this.checkFamilyIdIsNull(cmd.getFamilyId());
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(), OrganizationType.PM.getCode());
+		this.checkAddressIdIsNull(cmd.getAddressId());
+		this.checkAddress(cmd.getAddressId());
+		Long addressId = cmd.getAddressId();
+		
+		Organization org = this.findOrganizationByAddressId(addressId);
 		if(org == null){
 			LOGGER.error("the family PM organization is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2994,11 +3024,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 
 		GetFamilyStatisticCommandResponse response = new GetFamilyStatisticCommandResponse();
-		BigDecimal totalDueOweAmount = this.countFamilyPmBillDueAndOweAmountInYear(org.getId(),family.getIntegralTag1());
-		BigDecimal totalPaidAmount = this.familyProvider.countFamilyBillTxChargeAmountInYear(family.getIntegralTag1());
+		BigDecimal totalDueOweAmount = this.countFamilyPmBillDueAndOweAmountInYear(org.getId(),addressId);
+		BigDecimal totalPaidAmount = this.familyProvider.countFamilyBillTxChargeAmountInYear(addressId);
 		BigDecimal nowWaitPayAmount = BigDecimal.ZERO;
 
-		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(family.getIntegralTag1());
+		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
 		if(bill != null){
 			BigDecimal paidAmount = this.countPmBillPaidAmount(bill.getId());
 			nowWaitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(paidAmount);
@@ -3012,24 +3042,31 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public PmBillsDTO findFamilyNewestBillByFamilyId(FindFamilyNewestBillByFamilyIdCommand cmd) {
-		this.checkFamilyIdIsNull(cmd.getFamilyId());
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(family.getIntegralTag2(), OrganizationType.PM.getCode());
-		if(org == null){
-			LOGGER.error("Unable to find the organization.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
+		this.checkAddressIdIsNull(cmd.getAddressId());
+		this.checkAddress(cmd.getAddressId());
+		Long addressId = cmd.getAddressId();
+		
 		PmBillsDTO billDto = new PmBillsDTO();
 
-		CommunityPmBill communityBill = this.propertyMgrProvider.findNewestBillByAddressId(family.getIntegralTag1());
+		CommunityPmBill communityBill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
 		if(communityBill != null){
-			billDto = ConvertHelper.convert(communityBill, PmBillsDTO.class);
+			billDto = this.convertBillToDto(communityBill);
 			BigDecimal payedAmount = this.countPmBillPaidAmount(billDto.getId());
 			this.setPmBillAmounts(billDto, payedAmount);
 		}
 
 		return billDto;
+	}
+
+	private Address checkAddress(Long addressId) {
+		Address address = this.addressProvider.findAddressById(addressId);
+		if(address == null){
+			LOGGER.error("Unable to find the address.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the address.");
+		}
+		return address;
+
 	}
 
 	@Override

@@ -6,20 +6,20 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>familyId : 家庭id	</li>
+ * <li>addressId : 地址id	</li>
  *</ul>
  *
  */
 public class GetFamilyStatisticCommand {
 	@NotNull
-	private Long familyId;
+	private Long addressId;
 
-	public Long getFamilyId() {
-		return familyId;
+	public Long getAddressId() {
+		return addressId;
 	}
 
-	public void setFamilyId(Long familyId) {
-		this.familyId = familyId;
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 
 	@Override
