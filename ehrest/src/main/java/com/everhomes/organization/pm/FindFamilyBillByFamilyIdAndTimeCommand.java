@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>billDate : 账单日期</li>
- * <li>familyId : 家庭Id</li>
+ * <li>addressId : 地址Id</li>
  *</ul>
  *
  */
@@ -17,7 +17,7 @@ public class FindFamilyBillByFamilyIdAndTimeCommand {
 	@NotNull
 	private String billDate;
 	@NotNull
-	private Long familyId;
+	private Long addressId;
 	
 	public String getBillDate() {
 		return billDate;
@@ -26,11 +26,11 @@ public class FindFamilyBillByFamilyIdAndTimeCommand {
 		this.billDate = billDate;
 	}
 	
-	public Long getFamilyId() {
-		return familyId;
+	public Long getAddressId() {
+		return addressId;
 	}
-	public void setFamilyId(Long familyId) {
-		this.familyId = familyId;
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 	@Override
 	public String toString() {

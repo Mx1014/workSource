@@ -955,4 +955,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+
+	@Override
+	public CommunityAddressMapping findOrganizationAddressMappingByAddressId(Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId)).fetch();
+
+		if(records != null && !records.isEmpty()){
+			return ConvertHelper.convert(records.get(0), CommunityAddressMapping.class);
+		}
+		return null;
+	}
+
 }
