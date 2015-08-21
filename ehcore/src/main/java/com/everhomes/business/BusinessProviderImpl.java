@@ -457,4 +457,13 @@ public class BusinessProviderImpl implements BusinessProvider {
         .fetch().stream().map(r ->ConvertHelper.convert(r, BusinessCategory.class)).collect(Collectors.toList());
         return businessCategories;
     }
+    
+    @Override
+    public List<BusinessAssignedScope> findBusinessAssignedScopesByBusinessId(long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhBusinessAssignedScopesDao dao = new EhBusinessAssignedScopesDao(context.configuration()); 
+        return dao.fetchByOwnerId(id).stream().map(r -> 
+            ConvertHelper.convert(r, BusinessAssignedScope.class)).collect(Collectors.toList());
+    }
 }

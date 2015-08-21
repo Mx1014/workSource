@@ -75,6 +75,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
     private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
+    private static final String HOME_URL = "home.url";
+    private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private LaunchPadProvider launchPadProvider;
     @Autowired
@@ -157,17 +159,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     businesses.add(b);
             }
         }
-        final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
-        final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
-        final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
+       
         if(businesses != null && !businesses.isEmpty()){
             int index = 1;
+            final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
+            final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
+            final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
+            final String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
             for(Business r : businesses){
                 LaunchPadItemDTO dto = new LaunchPadItemDTO();
                 dto.setIconUri(r.getLogoUri());
-                dto.setIconUrl(parserUri(r.getLogoUri(),EntityType.USER.getCode(),userId));
+                dto.setIconUrl(processLogoUrl(r,userId,imageUrl));
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix));
+                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix,homeUrl));
                 jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
                 dto.setActionData(jsonObject.toJSONString());
                 dto.setActionType(ActionType.BIZ_DETAILS.getCode());
@@ -191,15 +196,25 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return result;
         
     }
-    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
+    
+    private String processLogoUrl(Business business, long userId,String imageUrl){
+        if(business.getLogoUri() == null || business.getLogoUri().trim().equals(""))
+            return null;
+        if(business.getTargetType() != BusinessTargetType.ZUOLIN.getCode())
+            return parserUri(business.getLogoUri(),EntityType.USER.getCode(),userId);
+        return imageUrl.trim() + business.getLogoUri();
+    }
+    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix,String homeUrl){
         if(businessHomeUrl.trim().equals(""))
             LOGGER.error("Buiness home url is empty.");
         if(prefix.trim().equals(""))
             LOGGER.error("Buiness detail url is empty.");
         if(authenticatePrefix.trim().equals(""))
             LOGGER.error("Buiness authenticate prefix url is empty.");
+        if(homeUrl.trim().equals(""))
+            LOGGER.error("homeUrl is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
-            return businessHomeUrl.trim() + authenticatePrefix.trim() + prefix.trim() + business.getTargetId();
+            return homeUrl.trim() + authenticatePrefix.trim() + businessHomeUrl.trim() + prefix.trim() + business.getTargetId();
         return business.getUrl();
     }
 

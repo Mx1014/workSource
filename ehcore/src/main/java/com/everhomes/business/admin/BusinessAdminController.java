@@ -62,7 +62,7 @@ public class BusinessAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/business/recommendBusiness</b>
-     * <p>根据关键字查询店铺列表</p>
+     * <p>根据推荐店铺</p>
      */
     @RequestMapping("recommendBusiness")
     @RestReturn(value=String.class)

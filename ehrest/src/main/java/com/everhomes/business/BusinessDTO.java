@@ -54,13 +54,15 @@ public class BusinessDTO{
     private String  description;
     @ItemType(CategoryDTO.class)
     private List<CategoryDTO> categories;
-    @ItemType(BusinessVisibleScopeDTO.class)
-    private List<BusinessVisibleScopeDTO> scopes;
+//    @ItemType(BusinessVisibleScopeDTO.class)
+//    private List<BusinessVisibleScopeDTO> scopes;
     private Timestamp createTime;
     private Timestamp deleteTime;
     private Byte recommendStatus;
     private Byte favoriteStatus;
     private Integer distance;
+    @ItemType(BusinessAssignedScopeDTO.class)
+    private List<BusinessAssignedScopeDTO> assignedScopes;
     public Long getId() {
         return id;
     }
@@ -213,13 +215,13 @@ public class BusinessDTO{
         this.categories = categories;
     }
 
-    public List<BusinessVisibleScopeDTO> getScopes() {
-        return scopes;
-    }
-
-    public void setScopes(List<BusinessVisibleScopeDTO> scopes) {
-        this.scopes = scopes;
-    }
+//    public List<BusinessVisibleScopeDTO> getScopes() {
+//        return scopes;
+//    }
+//
+//    public void setScopes(List<BusinessVisibleScopeDTO> scopes) {
+//        this.scopes = scopes;
+//    }
 
     public Byte getRecommendStatus() {
         return recommendStatus;
@@ -243,6 +245,14 @@ public class BusinessDTO{
 
     public void setDistance(Integer distance) {
         this.distance = distance;
+    }
+
+    public List<BusinessAssignedScopeDTO> getAssignedScopes() {
+        return assignedScopes;
+    }
+
+    public void setAssignedScopes(List<BusinessAssignedScopeDTO> assignedScopes) {
+        this.assignedScopes = assignedScopes;
     }
 
     @Override

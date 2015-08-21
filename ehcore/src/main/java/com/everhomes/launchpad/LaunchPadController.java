@@ -42,15 +42,15 @@ public class LaunchPadController extends ControllerBase {
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd,request);
-        RestResponse resp =  new RestResponse();
-        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
-            //int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
-            int resultCode = commandResponse.hashCode();
-            LOGGER.info("result code : " + resultCode);
-            if(EtagHelper.checkHeaderEtagOnly(30,resultCode+"", request, response)) {
-                resp.setResponseObject(commandResponse);
-            }
-        }
+        RestResponse resp =  new RestResponse(commandResponse);
+//        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
+//            //int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
+//            int resultCode = commandResponse.hashCode();
+//            LOGGER.info("result code : " + resultCode);
+//            if(EtagHelper.checkHeaderEtagOnly(30,resultCode+"", request, response)) {
+//                resp.setResponseObject(commandResponse);
+//            }
+//        }
        
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");

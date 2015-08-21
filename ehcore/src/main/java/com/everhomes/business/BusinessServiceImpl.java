@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import ch.hsr.geohash.GeoHash;
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.business.admin.CreateBusinessAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommand;
@@ -35,6 +36,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserActivityService;
@@ -55,6 +58,8 @@ public class BusinessServiceImpl implements BusinessService {
     private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
     private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
+    private static final String HOME_URL = "home.url";
+    private static final String BUSINESS_IMAGE = "/imageService/";
     @Autowired
     private BusinessProvider businessProvider;
     @Autowired
@@ -73,6 +78,8 @@ public class BusinessServiceImpl implements BusinessService {
     private CommunityProvider communityProvider;
     @Autowired
     private UserActivityService userActivityService;
+    @Autowired
+    private RegionProvider regionProvider;
     
     @Override
     public void syncBusiness(SyncBusinessCommand cmd) {
@@ -251,6 +258,7 @@ public class BusinessServiceImpl implements BusinessService {
         final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
         final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
         final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
+        final String homeUrl = configurationProvider.getValue(HOME_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -258,8 +266,8 @@ public class BusinessServiceImpl implements BusinessService {
             List<CategoryDTO> categories = new ArrayList<>();
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
-            dto.setLogoUrl(processLogoUrl(r, userId));
-            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix));
+            dto.setLogoUrl(processLogoUrl(r, userId,homeUrl));
+            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix,homeUrl));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -293,15 +301,17 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
     
-    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
+    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix,String homeUrl){
         if(businessHomeUrl.trim().equals(""))
             LOGGER.error("Buiness home url is empty.");
         if(prefix.trim().equals(""))
             LOGGER.error("Buiness detail url is empty.");
         if(authenticatePrefix.trim().equals(""))
             LOGGER.error("Buiness authenticate prefix url is empty.");
+        if(homeUrl.trim().equals(""))
+            LOGGER.error("homeUrl is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
-            return businessHomeUrl.trim() + authenticatePrefix.trim() + prefix.trim() + business.getTargetId();
+            return homeUrl.trim() + authenticatePrefix.trim() + businessHomeUrl.trim() + prefix.trim() + business.getTargetId();
         return business.getUrl();
     }
     
@@ -313,12 +323,13 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> bizIds = businessCategories.stream().map(r -> r.getOwnerId()).collect(Collectors.toList());
         List<Business> recomBusinesses = this.businessProvider.findBusinessByIds(bizIds);
         if(recomBusinesses != null && !recomBusinesses.isEmpty()){
+            String businessUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
             recomBusinesses.forEach(r ->{
                 BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
                 List<CategoryDTO> categories = new ArrayList<>();
                 categories.add(ConvertHelper.convert(category, CategoryDTO.class));
                 dto.setCategories(categories);
-                dto.setLogoUrl(processLogoUrl(r,userId));
+                dto.setLogoUrl(processLogoUrl(r,userId,businessUrl));
                 if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                     dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
                 else
@@ -331,12 +342,12 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
     
-    private String processLogoUrl(Business business, long userId){
+    private String processLogoUrl(Business business, long userId,String businessUrl){
         if(business.getLogoUri() == null || business.getLogoUri().trim().equals(""))
             return null;
         if(business.getTargetType() != BusinessTargetType.ZUOLIN.getCode())
             return parserUri(business.getLogoUri(),EntityType.USER.getCode(),userId);
-        return business.getLogoUri();
+        return businessUrl.trim() + BUSINESS_IMAGE + business.getLogoUri();
     }
     
     private double calculateDistance(double latitude, double longitude, double lat, double lon){
@@ -503,12 +514,48 @@ public class BusinessServiceImpl implements BusinessService {
         List<BusinessDTO> result = null;
         List<Business> businesses = this.businessProvider.listBusinessesByKeyword(cmd.getKeyword() , offset , pageSize);
         if(businesses != null && !businesses.isEmpty())
-            result = businesses.stream().map(r -> ConvertHelper.convert(r, BusinessDTO.class)).collect(Collectors.toList());
+            result = businesses.stream().map(r -> {
+                    BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
+                    //set recommend status
+                    processRecommendStatus(dto);
+                    
+                    return dto;
+                    }
+            ).collect(Collectors.toList());
+        
+        
         ListBusinessesByKeywordAdminCommandResponse response = new ListBusinessesByKeywordAdminCommandResponse();
         response.setRequests(result);
         if(result != null && result.size() == pageSize)
             response.setNextPageOffset(pageOffset + 1);
         return response;
+    }
+
+    private void processRecommendStatus(BusinessDTO dto) {
+        List<BusinessAssignedScope> assignedScopes = this.businessProvider.findBusinessAssignedScopesByBusinessId(dto.getId());
+        if(assignedScopes != null && !assignedScopes.isEmpty()){
+            dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());
+            List<BusinessAssignedScopeDTO> scopes = new ArrayList<>();
+            assignedScopes.forEach(a ->{
+                
+                BusinessAssignedScopeDTO scopeDTO = ConvertHelper.convert(a,BusinessAssignedScopeDTO.class);
+                if(a.getScopeCode().byteValue() == BusinessScopeType.ALL.getCode())
+                    scopeDTO.setRegionName("全国");
+                else if(a.getScopeCode().byteValue() == BusinessScopeType.CITY.getCode()){
+                    Region region = this.regionProvider.findRegionById(scopeDTO.getScopeId());
+                    if(region != null)
+                        scopeDTO.setRegionName(region.getName());
+                }
+                else{
+                    Community community = this.communityProvider.findCommunityById(scopeDTO.getScopeId());
+                    if(community != null)
+                        scopeDTO.setRegionName(community.getName());
+                }
+                scopes.add(scopeDTO);
+            });
+            dto.setAssignedScopes(scopes);
+        }
+        
     }
 
     @Override
