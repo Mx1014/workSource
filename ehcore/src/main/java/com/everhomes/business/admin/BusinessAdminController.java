@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.DeleteBusinessCommand;
-import com.everhomes.business.SyncBusinessCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -62,7 +61,7 @@ public class BusinessAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/business/recommendBusiness</b>
-     * <p>根据推荐店铺</p>
+     * <p>推荐/取消推荐服务店铺</p>
      */
     @RequestMapping("recommendBusiness")
     @RestReturn(value=String.class)

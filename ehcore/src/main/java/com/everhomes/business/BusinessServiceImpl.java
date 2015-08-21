@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import ch.hsr.geohash.GeoHash;
-import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.business.admin.CreateBusinessAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommand;
@@ -108,10 +107,6 @@ public class BusinessServiceImpl implements BusinessService {
                 updateBusiness(cmd, business);
             }
             
-//            long id = business.getId();
-//            if(cmd.getScopes() != null && !cmd.getScopes().isEmpty()){
-//                createBusinessScopes(business, cmd.getScopes());
-//            }
             if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
                 createBusinessCategories(business, cmd.getCategroies());
             }
@@ -520,13 +515,14 @@ public class BusinessServiceImpl implements BusinessService {
         int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
         int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
-        
+        User user = UserContext.current().getUser();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
         List<BusinessDTO> result = null;
         List<Business> businesses = this.businessProvider.listBusinessesByKeyword(cmd.getKeyword() , offset , pageSize);
         if(businesses != null && !businesses.isEmpty())
             result = businesses.stream().map(r -> {
                     BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
+                    dto.setLogoUrl(processLogoUrl(r,user.getId(),null));
                     //set recommend status
                     processRecommendStatus(dto);
                     
@@ -588,11 +584,13 @@ public class BusinessServiceImpl implements BusinessService {
         
         this.dbProvider.execute((TransactionStatus status) -> {
             this.businessProvider.deleteBusinessAssignedScopeByBusinessId(cmd.getId());
-            cmd.getScopes().forEach(r ->{
-                BusinessAssignedScope scope = ConvertHelper.convert(r,BusinessAssignedScope.class);
-                scope.setOwnerId(cmd.getId());
-                this.businessProvider.createBusinessAssignedScope(scope);
-            });
+            if(cmd.getRecommendStatus().byteValue() == BusinessRecommendStatus.RECOMMEND.getCode()){
+                cmd.getScopes().forEach(r ->{
+                    BusinessAssignedScope scope = ConvertHelper.convert(r,BusinessAssignedScope.class);
+                    scope.setOwnerId(cmd.getId());
+                    this.businessProvider.createBusinessAssignedScope(scope);
+                });
+            }
             return true;
         });
         
@@ -629,6 +627,8 @@ public class BusinessServiceImpl implements BusinessService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         this.dbProvider.execute((TransactionStatus status) -> {
+            cmd.setLatitude(0D);
+            cmd.setLongitude(0D);
             Business business = createBusiness(cmd, userId);
             
             if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){

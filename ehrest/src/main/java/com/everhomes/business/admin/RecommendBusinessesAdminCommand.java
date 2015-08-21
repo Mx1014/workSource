@@ -11,12 +11,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 店铺id</li>
- *  <li>scopes: 店铺推荐范围列表，参考{@link com.everhomes.business.BusinessScope}</li>
+ * <li>recommendStatus: 是否推荐，参考{@link com.everhomes.business.BusinessRecommendStatus}</li>
+ * <li>scopes: 店铺推荐范围列表，参考{@link com.everhomes.business.BusinessScope}</li>
  * </ul>
  */
 
 public class RecommendBusinessesAdminCommand{
     private Long id;
+    private Byte recommendStatus;
     @ItemType(BusinessScope.class)
     private List<BusinessScope> scopes;
 
@@ -26,6 +28,14 @@ public class RecommendBusinessesAdminCommand{
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Byte getRecommendStatus() {
+        return recommendStatus;
+    }
+
+    public void setRecommendStatus(Byte recommendStatus) {
+        this.recommendStatus = recommendStatus;
     }
 
     public List<BusinessScope> getScopes() {
