@@ -8,20 +8,21 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>requests : 帖子列表,详见 {@link com.everhomes.forum.PostDTO}</li>
+ * <li>requests : 帖子列表,详见 {@link com.everhomes.organization.OrganizationTaskDTO2}</li>
  *	<li>nextPageOffset : 下一页码</li>
  *</ul>
  *
  */
 public class ListTopicsByTypeCommandResponse {
 	
-	@ItemType(PostDTO.class)
-	List<PostDTO> requests;
+	@ItemType(OrganizationTaskDTO2.class)
+	List<OrganizationTaskDTO2> requests;
 	Long nextPageOffset;
-	public List<PostDTO> getRequests() {
+	
+	public List<OrganizationTaskDTO2> getRequests() {
 		return requests;
 	}
-	public void setRequests(List<PostDTO> requests) {
+	public void setRequests(List<OrganizationTaskDTO2> requests) {
 		this.requests = requests;
 	}
 	public Long getNextPageOffset() {

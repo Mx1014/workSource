@@ -1329,7 +1329,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			cmd.setPageOffset(1L);
 
 		ListTopicsByTypeCommandResponse response = new ListTopicsByTypeCommandResponse();
-		List<PostDTO> list = new ArrayList<PostDTO>();
+		List<OrganizationTaskDTO2> list = new ArrayList<OrganizationTaskDTO2>();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
@@ -1342,12 +1342,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			for(OrganizationTask task : orgTaskList){
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-				list.add(dto);
+				OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
+				this.convertTaskToDto(task,taskDto);
+				list.add(taskDto);
 			}
 		}
 
 		response.setRequests(list);
 		return response;
+	}
+
+	private void convertTaskToDto(OrganizationTask task,
+			OrganizationTaskDTO2 taskDto) {
+		taskDto.setTaskId(task.getId());
+		taskDto.setOrganizationId(task.getOrganizationId());
+		taskDto.setOrganizationType(task.getOrganizationType());
+		taskDto.setApplyEntityType(task.getApplyEntityType());
+		taskDto.setApplyEntityId(task.getApplyEntityId());
+		taskDto.setTargetType(task.getTargetType());
+		taskDto.setTargetId(task.getTargetId());
+		taskDto.setTaskType(task.getTaskType());
+		taskDto.setDescription(task.getDescription());
+		taskDto.setTaskStatus(task.getTaskStatus());
+		taskDto.setOperatorUid(task.getOperatorUid());
+		taskDto.setOperateTime(task.getOperateTime());
+		taskDto.setTaskCreatorUid(task.getCreatorUid());
+		taskDto.setTaskCreateTime(task.getCreateTime());
 	}
 
 	private void checkOrganizationIdIsNull(Long organizationId) {
@@ -1474,6 +1494,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		dbProvider.execute((status) -> {
 			task.setTaskStatus(taskSatus.getCode());
+			task.setOperatorUid(user.getId());
+			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			this.organizationProvider.updateOrganizationTask(task);
 			/*if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论

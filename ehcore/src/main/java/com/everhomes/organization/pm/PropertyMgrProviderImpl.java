@@ -31,6 +31,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMemberTargetType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
@@ -690,7 +691,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 						Long count = context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
 								.leftOuterJoin(Tables.EH_USERS)
 								.on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
-										.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
+										.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
 										.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
 										.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId))
 										.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(likeVal)

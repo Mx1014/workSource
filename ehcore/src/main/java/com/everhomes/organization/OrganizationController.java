@@ -433,7 +433,7 @@ public class OrganizationController extends ControllerBase {
 	 * <p>获取指定论坛里指定帖子下的评论列表</p>
 	 */
 	@RequestMapping("listOrgTopicComments")
-	@RestReturn(value=PostDTO.class, collection=true)
+	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse listOrgTopicComments(@Valid ListTopicCommentCommand cmd) {
 		ListPostCommandResponse cmdResponse = organizationService.listTopicComments(cmd);
 		
@@ -502,7 +502,7 @@ public class OrganizationController extends ControllerBase {
 	 * <p>查询指定帖子类型的帖子列表</p>
 	 */
 	@RequestMapping("listTopicsByType")
-	@RestReturn(value=String.class)
+	@RestReturn(value=ListTopicsByTypeCommandResponse.class)
 	public RestResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
 		ListTopicsByTypeCommandResponse result= organizationService.listTopicsByType(cmd);//forumService.getTopic(cmd)
 		RestResponse response = new RestResponse(result);
