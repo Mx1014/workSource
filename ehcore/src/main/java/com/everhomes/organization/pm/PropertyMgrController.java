@@ -616,8 +616,6 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/setPropCurrentCommunity</b>
 	 * <p>设置物业用户当前小区（切换物业）</p>
-	 * @param communityId 小区ID
-	 * @return OK
 	 */
 	@RequestMapping("setPropCurrentCommunity")
 	@RestReturn(String.class)
@@ -633,7 +631,6 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/listPropFamilyWaitingMember</b>
 	 * <p>查询小区的待审核家庭成员列表</p>
-	 * @param communityId 小区ID
 	 */
 	@RequestMapping("listPropFamilyWaitingMember")
 	@RestReturn(value=ListPropFamilyWaitingMemberCommandResponse.class)
@@ -649,7 +646,6 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/findFamilyByAddressId</b>
 	 * <p>根据addressId查询family</p>
-	 * @param communityId 小区ID
 	 */
 	@RequestMapping("findFamilyByAddressId")
 	@RestReturn(value=PropFamilyDTO.class)
