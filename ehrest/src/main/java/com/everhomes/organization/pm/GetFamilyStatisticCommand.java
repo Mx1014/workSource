@@ -6,26 +6,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>addressId : 地址id	</li>
+ * <li>familyId : 家庭id	</li>
  *</ul>
  *
  */
 public class GetFamilyStatisticCommand {
 	@NotNull
-	private Long addressId;
+	private Long familyId;
 
-	public Long getAddressId() {
-		return addressId;
+	public Long getFamilyId() {
+		return familyId;
 	}
 
-	public void setAddressId(Long addressId) {
-		this.addressId = addressId;
+	public void setFamilyId(Long familyId) {
+		this.familyId = familyId;
 	}
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 
 }

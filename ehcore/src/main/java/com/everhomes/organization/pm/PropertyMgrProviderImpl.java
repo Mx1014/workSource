@@ -297,14 +297,14 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return ConvertHelper.convert(dao.findById(id), CommunityAddressMapping.class);
 	}
 
-	@Cacheable(value="CommunityAddressMappingByAddressId", key="{#communityId,#addressId}")
+	@Cacheable(value="CommunityAddressMappingByAddressId", key="{#organizationId,#addressId}")
 	@Override
-	public CommunityAddressMapping findPropAddressMappingByAddressId(Long communityId,Long addressId){
+	public CommunityAddressMapping findPropAddressMappingByAddressId(Long organizationId,Long addressId){
 		final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
-		if(communityId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId));
+		if(organizationId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId));
 		query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
 		query.fetch().map((r) -> {
 			if(r != null)
