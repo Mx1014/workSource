@@ -129,8 +129,8 @@ public class CategoryProviderImpl implements CategoryProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         //暂不向客户端开放排序字段指定 20150519
         SortField[] orderByFields = null;
-        if(orderBy != null && orderBy[0] != null)
-            orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
+        if(orderBy != null && orderBy.length != 0 && orderBy[0] != null)
+        		orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
         List<Category> result;
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
