@@ -1070,12 +1070,12 @@ public class PropertyMgrController extends ControllerBase {
 
 	//web-family	
 	/**
-	 * <b>URL: /pm/listFamilyBillingTransactionsByFamilyId
+	 * <b>URL: /pm/listBillTxByAddressd
 	 * <p>根据家庭Id查询家庭的缴费记录
 	 */
-	@RequestMapping("listFamilyBillingTransactionsByFamilyId")
+	@RequestMapping("listBillTxByAddressd")
 	@RestReturn(value=FamilyBillingTransactionDTO.class,collection=true)
-	public RestResponse listFamilyBillingTransactionByFamilyId(@Valid ListFamilyBillingTransactionsByFamilyIdCommand cmd) {
+	public RestResponse listBillTxByAddressd(@Valid ListFamilyBillingTransactionsByFamilyIdCommand cmd) {
 
 		ListFamilyBillingTransactionsByFamilyIdCommandResponse result = propertyMgrService.listFamilyBillingTransactionByFamilyId(cmd);
 
@@ -1086,12 +1086,12 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/findFamilyBillByFamilyIdAndTime
+	 * <b>URL: /pm/findBillByAddressIdAndTime
 	 * <p>根据家庭Id和日期查询家庭的账单
 	 */
-	@RequestMapping("findFamilyBillByFamilyIdAndTime")
+	@RequestMapping("findBillByAddressIdAndTime")
 	@RestReturn(value=PmBillsDTO.class)
-	public RestResponse findFamilyBillByFamilyIdAndTime(@Valid FindFamilyBillByFamilyIdAndTimeCommand cmd) {
+	public RestResponse findBillByAddressIdAndTime(@Valid FindFamilyBillByFamilyIdAndTimeCommand cmd) {
 
 		PmBillsDTO bill = propertyMgrService.findFamilyBillByFamilyIdAndTime(cmd);
 		RestResponse response = new RestResponse(bill);
@@ -1149,12 +1149,12 @@ public class PropertyMgrController extends ControllerBase {
 
 	//线下支付
 	/**
-	 * <b>URL: /pm/payPmBillByFamilyId
+	 * <b>URL: /pm/payPmBillByAddressId
 	 * <p>缴费
 	 */
-	@RequestMapping("payPmBillByFamilyId")
+	@RequestMapping("payPmBillByAddressId")
 	@RestReturn(value=String.class)
-	public RestResponse payPmBillByFamilyId(@Valid PayPmBillByFamilyIdCommand cmd) {
+	public RestResponse payPmBillByAddressId(@Valid PayPmBillByFamilyIdCommand cmd) {
 
 		propertyMgrService.payPmBillByFamilyId(cmd);
 
@@ -1180,12 +1180,12 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/sendPmPayMessageToOneOweFamily
+	 * <b>URL: /pm/sendPmPayMessageByAddressId
 	 * <p>给指定欠费家庭发缴费通知
 	 */
-	@RequestMapping("sendPmPayMessageToOneOweFamily")
+	@RequestMapping("sendPmPayMessageByAddressId")
 	@RestReturn(String.class)
-	public RestResponse sendPmPayMessageToOneOweFamily (@Valid SendPmPayMessageToOneOweFamilyCommand cmd){
+	public RestResponse sendPmPayMessageByAddressId (@Valid SendPmPayMessageToOneOweFamilyCommand cmd){
 		this.propertyMgrService.sendPmPayMessageToOneOweFamily(cmd);
 
 		RestResponse response = new RestResponse();
