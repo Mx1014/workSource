@@ -58,8 +58,8 @@ public class BusinessServiceImpl implements BusinessService {
     private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
     private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
-    private static final String HOME_URL = "home.url";
-    private static final String BUSINESS_IMAGE = "/imageService/";
+    private static final String PREFIX_URL = "prefix.url";
+    private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private BusinessProvider businessProvider;
     @Autowired
@@ -258,7 +258,8 @@ public class BusinessServiceImpl implements BusinessService {
         final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
         final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
         final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
-        final String homeUrl = configurationProvider.getValue(HOME_URL, "");
+        final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+        final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
             
@@ -266,8 +267,8 @@ public class BusinessServiceImpl implements BusinessService {
             List<CategoryDTO> categories = new ArrayList<>();
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
-            dto.setLogoUrl(processLogoUrl(r, userId,homeUrl));
-            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix,homeUrl));
+            dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
+            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix,prefixUrl));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -323,13 +324,13 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> bizIds = businessCategories.stream().map(r -> r.getOwnerId()).collect(Collectors.toList());
         List<Business> recomBusinesses = this.businessProvider.findBusinessByIds(bizIds);
         if(recomBusinesses != null && !recomBusinesses.isEmpty()){
-            String businessUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
+            String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
             recomBusinesses.forEach(r ->{
                 BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
                 List<CategoryDTO> categories = new ArrayList<>();
                 categories.add(ConvertHelper.convert(category, CategoryDTO.class));
                 dto.setCategories(categories);
-                dto.setLogoUrl(processLogoUrl(r,userId,businessUrl));
+                dto.setLogoUrl(processLogoUrl(r,userId,imageUrl));
                 if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                     dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
                 else
@@ -342,12 +343,12 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
     
-    private String processLogoUrl(Business business, long userId,String businessUrl){
+    private String processLogoUrl(Business business, long userId,String imageUrl){
         if(business.getLogoUri() == null || business.getLogoUri().trim().equals(""))
             return null;
         if(business.getTargetType() != BusinessTargetType.ZUOLIN.getCode())
             return parserUri(business.getLogoUri(),EntityType.USER.getCode(),userId);
-        return businessUrl.trim() + BUSINESS_IMAGE + business.getLogoUri();
+        return imageUrl.trim() + business.getLogoUri();
     }
     
     private double calculateDistance(double latitude, double longitude, double lat, double lon){

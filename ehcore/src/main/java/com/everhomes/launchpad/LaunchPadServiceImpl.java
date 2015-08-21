@@ -75,7 +75,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
     private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
-    private static final String HOME_URL = "home.url";
+    private static final String PREFIX_URL = "prefix.url";
     private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private LaunchPadProvider launchPadProvider;
@@ -165,14 +165,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
             final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
-            final String homeUrl = configurationProvider.getValue(HOME_URL, "");
+            final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
             final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
             for(Business r : businesses){
                 LaunchPadItemDTO dto = new LaunchPadItemDTO();
                 dto.setIconUri(r.getLogoUri());
                 dto.setIconUrl(processLogoUrl(r,userId,imageUrl));
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix,homeUrl));
+                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix,prefixUrl));
                 jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
                 dto.setActionData(jsonObject.toJSONString());
                 dto.setActionType(ActionType.BIZ_DETAILS.getCode());
