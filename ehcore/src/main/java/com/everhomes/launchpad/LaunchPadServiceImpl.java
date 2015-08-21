@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -213,8 +215,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             LOGGER.error("Buiness authenticate prefix url is empty.");
         if(homeUrl.trim().equals(""))
             LOGGER.error("homeUrl is empty.");
-        if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode())
-            return homeUrl.trim() + authenticatePrefix.trim() + businessHomeUrl.trim() + prefix.trim() + business.getTargetId();
+        if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
+            String businessDetailUrl = null;
+            try {
+                businessDetailUrl = URLEncoder.encode(businessHomeUrl.trim() + prefix.trim() + business.getTargetId(), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("unsported encoding.");
+            }
+            return homeUrl.trim() + authenticatePrefix.trim() + businessDetailUrl;
+        }
         return business.getUrl();
     }
 
