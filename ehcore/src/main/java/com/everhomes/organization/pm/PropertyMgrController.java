@@ -1070,14 +1070,14 @@ public class PropertyMgrController extends ControllerBase {
 
 	//web-family	
 	/**
-	 * <b>URL: /pm/listBillTxByAddressd
+	 * <b>URL: /pm/listBillTxByAddressId
 	 * <p>根据家庭Id查询家庭的缴费记录
 	 */
-	@RequestMapping("listBillTxByAddressd")
+	@RequestMapping("listBillTxByAddressId")
 	@RestReturn(value=FamilyBillingTransactionDTO.class,collection=true)
-	public RestResponse listBillTxByAddressd(@Valid ListFamilyBillingTransactionsByFamilyIdCommand cmd) {
+	public RestResponse listBillTxByAddressId(@Valid ListBillTxByAddressIdCommand cmd) {
 
-		ListFamilyBillingTransactionsByFamilyIdCommandResponse result = propertyMgrService.listFamilyBillingTransactionByFamilyId(cmd);
+		ListBillTxByAddressIdCommandResponse result = propertyMgrService.listBillTxByAddressId(cmd);
 
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1091,9 +1091,9 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("findBillByAddressIdAndTime")
 	@RestReturn(value=PmBillsDTO.class)
-	public RestResponse findBillByAddressIdAndTime(@Valid FindFamilyBillByFamilyIdAndTimeCommand cmd) {
+	public RestResponse findBillByAddressIdAndTime(@Valid FindBillByAddressIdAndTimeCommand cmd) {
 
-		PmBillsDTO bill = propertyMgrService.findFamilyBillByFamilyIdAndTime(cmd);
+		PmBillsDTO bill = propertyMgrService.findBillByAddressIdAndTime(cmd);
 		RestResponse response = new RestResponse(bill);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1101,14 +1101,14 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /pm/findFamilyNewestBillByFamilyId
+	 * <b>URL: /pm/findNewestBillByAddressId
 	 * <p>根据家庭Id查询家庭的最新账单
 	 */
-	@RequestMapping("findFamilyNewestBillByFamilyId")
+	@RequestMapping("findNewestBillByAddressId")
 	@RestReturn(value=PmBillsDTO.class)
-	public RestResponse findFamilyNewestBillByFamilyId(@Valid FindFamilyNewestBillByFamilyIdCommand cmd) {
+	public RestResponse findNewestBillByAddressId(@Valid FindNewestBillByAddressIdCommand cmd) {
 
-		PmBillsDTO bill = propertyMgrService.findFamilyNewestBillByFamilyId(cmd);
+		PmBillsDTO bill = propertyMgrService.findNewestBillByAddressId(cmd);
 		RestResponse response = new RestResponse(bill);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1154,9 +1154,9 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("payPmBillByAddressId")
 	@RestReturn(value=String.class)
-	public RestResponse payPmBillByAddressId(@Valid PayPmBillByFamilyIdCommand cmd) {
+	public RestResponse payPmBillByAddressId(@Valid PayPmBillByAddressIdCommand cmd) {
 
-		propertyMgrService.payPmBillByFamilyId(cmd);
+		propertyMgrService.payPmBillByAddressId(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1185,8 +1185,8 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("sendPmPayMessageByAddressId")
 	@RestReturn(String.class)
-	public RestResponse sendPmPayMessageByAddressId (@Valid SendPmPayMessageToOneOweFamilyCommand cmd){
-		this.propertyMgrService.sendPmPayMessageToOneOweFamily(cmd);
+	public RestResponse sendPmPayMessageByAddressId (@Valid SendPmPayMessageByAddressIdCommand cmd){
+		this.propertyMgrService.sendPmPayMessageByAddressId(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

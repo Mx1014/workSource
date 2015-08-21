@@ -2468,13 +2468,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public ListFamilyBillingTransactionsByFamilyIdCommandResponse listFamilyBillingTransactionByFamilyId(ListFamilyBillingTransactionsByFamilyIdCommand cmd) {
+	public ListBillTxByAddressIdCommandResponse listBillTxByAddressId(ListBillTxByAddressIdCommand cmd) {
 		this.checkAddressIdIsNull(cmd.getAddressId());
 		this.checkAddress(cmd.getAddressId());
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
 
-		ListFamilyBillingTransactionsByFamilyIdCommandResponse response = new ListFamilyBillingTransactionsByFamilyIdCommandResponse();
+		ListBillTxByAddressIdCommandResponse response = new ListBillTxByAddressIdCommandResponse();
 		List<FamilyBillingTransactionDTO> transactionList = new ArrayList<FamilyBillingTransactionDTO>();
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2535,7 +2535,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public PmBillsDTO findFamilyBillByFamilyIdAndTime(FindFamilyBillByFamilyIdAndTimeCommand cmd) {
+	public PmBillsDTO findBillByAddressIdAndTime(FindBillByAddressIdAndTimeCommand cmd) {
 		this.checkAddressIdIsNull(cmd.getAddressId());
 		this.checkBillDate(cmd.getBillDate());
 		this.checkAddress(cmd.getAddressId());
@@ -2572,10 +2572,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public PmBillsDTO findFamilyBillAndPaysByFamilyIdAndTime(FindFamilyBillAndPaysByFamilyIdAndTimeCommand cmd) {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		Group family = this.checkFamily(cmd.getFamilyId());
-		FindFamilyBillByFamilyIdAndTimeCommand command = new FindFamilyBillByFamilyIdAndTimeCommand();
+		FindBillByAddressIdAndTimeCommand command = new FindBillByAddressIdAndTimeCommand();
 		command.setBillDate(cmd.getBillDate());
 		command.setAddressId(family.getIntegralTag1());
-		PmBillsDTO billDto = this.findFamilyBillByFamilyIdAndTime(command);
+		PmBillsDTO billDto = this.findBillByAddressIdAndTime(command);
 		if(billDto != null){
 			//账单缴费记录
 			this.setBillTx(billDto,cmd.getFamilyId());
@@ -2700,7 +2700,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public int payPmBillByFamilyId(PayPmBillByFamilyIdCommand cmd) {
+	public int payPmBillByAddressId(PayPmBillByAddressIdCommand cmd) {
 		if(cmd.getPaidType() == null || cmd.getPayAmount() == null || cmd.getPayTime() == null || cmd.getTxType() == null){
 			LOGGER.error("paidType or payAmount or payTime or txType paramteris empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2830,7 +2830,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void sendPmPayMessageToOneOweFamily(SendPmPayMessageToOneOweFamilyCommand cmd) {
+	public void sendPmPayMessageByAddressId(SendPmPayMessageByAddressIdCommand cmd) {
 		this.checkAddressIdIsNull(cmd.getAddressId());
 		this.checkAddress(cmd.getAddressId());
 		Long addressId = cmd.getAddressId();
@@ -2973,7 +2973,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public PmBillsDTO findFamilyNewestBillByFamilyId(FindFamilyNewestBillByFamilyIdCommand cmd) {
+	public PmBillsDTO findNewestBillByAddressId(FindNewestBillByAddressIdCommand cmd) {
 		this.checkAddressIdIsNull(cmd.getAddressId());
 		this.checkAddress(cmd.getAddressId());
 		Long addressId = cmd.getAddressId();
