@@ -13,6 +13,7 @@ import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
 import com.everhomes.business.SyncDeleteBusinessCommand;
 import com.everhomes.business.SyncUserAddShopStatusCommand;
+import com.everhomes.business.SyncUserFavoriteCommand;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
@@ -113,4 +114,47 @@ public class BusinessOpenController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /openapi/syncUserAddShopStatus</b>
+     * <p>同步用户收藏</p>
+     */
+    @RequestMapping("syncUserFavorite")
+    @RestReturn(value=String.class)
+    public RestResponse syncUserFavorite(SyncUserFavoriteCommand cmd) {
+        
+        businessService.syncUserFavorite(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/syncUserAddShopStatus</b>
+     * <p>同步用户取消收藏</p>
+     */
+    @RequestMapping("syncUserCancelFavorite")
+    @RestReturn(value=String.class)
+    public RestResponse syncUserCancelFavorite(SyncUserFavoriteCommand cmd) {
+        
+        businessService.syncUserCancelFavorite(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/findBusinessFavoriteStatus</b>
+     * <p>获取收藏状态</p>
+     */
+    @RequestMapping("findBusinessFavoriteStatus")
+    @RestReturn(value=String.class)
+    public RestResponse findBusinessFavoriteStatus(SyncUserFavoriteCommand cmd) {
+        
+        RestResponse response =  new RestResponse(businessService.findBusinessFavoriteStatus(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

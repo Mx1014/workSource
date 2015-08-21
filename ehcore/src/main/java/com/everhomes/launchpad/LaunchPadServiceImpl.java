@@ -77,7 +77,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
     private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
-    private static final String PREFIX_URL = "prefix.url";
+    //private static final String PREFIX_URL = "prefix.url";
     private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private LaunchPadProvider launchPadProvider;
@@ -167,14 +167,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
             final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
-            final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+            //final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
             final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
             for(Business r : businesses){
                 LaunchPadItemDTO dto = new LaunchPadItemDTO();
                 dto.setIconUri(r.getLogoUri());
                 dto.setIconUrl(processLogoUrl(r,userId,imageUrl));
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix,prefixUrl));
+                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix));
                 jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
                 dto.setActionData(jsonObject.toJSONString());
                 dto.setActionType(ActionType.BIZ_DETAILS.getCode());
@@ -206,15 +206,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             return parserUri(business.getLogoUri(),EntityType.USER.getCode(),userId);
         return imageUrl.trim() + business.getLogoUri();
     }
-    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix,String homeUrl){
+    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
         if(businessHomeUrl.trim().equals(""))
             LOGGER.error("Buiness home url is empty.");
         if(prefix.trim().equals(""))
             LOGGER.error("Buiness detail url is empty.");
         if(authenticatePrefix.trim().equals(""))
             LOGGER.error("Buiness authenticate prefix url is empty.");
-        if(homeUrl.trim().equals(""))
-            LOGGER.error("homeUrl is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
             String businessDetailUrl = null;
             try {
@@ -222,7 +220,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("unsported encoding.");
             }
-            return homeUrl.trim() + authenticatePrefix.trim() + businessDetailUrl;
+            return authenticatePrefix.trim() + businessDetailUrl;
         }
         return business.getUrl();
     }

@@ -43,6 +43,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserFavorite;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -59,7 +60,7 @@ public class BusinessServiceImpl implements BusinessService {
     private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
     private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
-    private static final String PREFIX_URL = "prefix.url";
+    //private static final String PREFIX_URL = "prefix.url";
     private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private BusinessProvider businessProvider;
@@ -255,7 +256,7 @@ public class BusinessServiceImpl implements BusinessService {
         final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
         final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
         final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
-        final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+        //final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
         final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
@@ -265,7 +266,7 @@ public class BusinessServiceImpl implements BusinessService {
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
-            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix,prefixUrl));
+            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -299,15 +300,13 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
     
-    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix,String homeUrl){
+    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
         if(businessHomeUrl.trim().equals(""))
             LOGGER.error("Buiness home url is empty.");
         if(prefix.trim().equals(""))
             LOGGER.error("Buiness detail url is empty.");
         if(authenticatePrefix.trim().equals(""))
             LOGGER.error("Buiness authenticate prefix url is empty.");
-        if(homeUrl.trim().equals(""))
-            LOGGER.error("homeUrl is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
             String businessDetailUrl = null;
             try {
@@ -315,7 +314,7 @@ public class BusinessServiceImpl implements BusinessService {
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("unsported encoding.");
             }
-            return homeUrl.trim() + authenticatePrefix.trim() + businessDetailUrl;
+            return authenticatePrefix.trim() + businessDetailUrl;
         }
             
         return business.getUrl();
@@ -636,6 +635,64 @@ public class BusinessServiceImpl implements BusinessService {
             }
             return true;
         });
+    }
+
+    @Override
+    public void syncUserFavorite(SyncUserFavoriteCommand cmd) {
+        isValiad(cmd);
+        User user = userProvider.findUserById(cmd.getUserId());
+        Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
+        UserFavorite userFavorite = new UserFavorite();
+        userFavorite.setOwnerUid(user.getId());
+        userFavorite.setTargetType("biz");
+        userFavorite.setTargetId(business.getId());
+        userFavorite.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        userActivityProvider.addUserFavorite(userFavorite);
+        
+    }
+    
+    private boolean isValiad(SyncUserFavoriteCommand cmd){
+        if(cmd.getUserId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter userId,userId is not found");
+        }
+        User user = userProvider.findUserById(cmd.getUserId());
+        if(user == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter userId,userId is not found");
+        }
+        if(cmd.getId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter id null,categoryId is null");
+        Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
+        if(business == null){
+            LOGGER.error("Business is not exists.id=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");
+        }
+        return true;
+    }
+
+    @Override
+    public void syncUserCancelFavorite(SyncUserFavoriteCommand cmd) {
+        isValiad(cmd);
+        User user = userProvider.findUserById(cmd.getUserId());
+        Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
+        userActivityProvider.deleteFavorite(user.getId(), business.getId(), "biz");
+        
+    }
+
+    @Override
+    public Byte findBusinessFavoriteStatus(SyncUserFavoriteCommand cmd) {
+        isValiad(cmd);
+        User user = userProvider.findUserById(cmd.getUserId());
+        Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
+        List<Long> ret = userActivityProvider.findFavorite(user.getId()).stream()
+                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
+        if(ret != null && !ret.isEmpty()&& ret.contains(business.getId())){
+            return BusinessFavoriteStatus.FAVORITE.getCode();
+        }
+        return BusinessFavoriteStatus.NONE.getCode();
     }
  
 }
