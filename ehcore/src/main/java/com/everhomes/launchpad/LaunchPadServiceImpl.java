@@ -186,6 +186,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 dto.setItemName(r.getName());
                 dto.setItemLabel(r.getDisplayName());
                 dto.setItemLocation(cmd.getItemLocation());
+                dto.setScaleType(ScaleType.TAILOR.getCode());
                 result.add(dto);
             }
         }

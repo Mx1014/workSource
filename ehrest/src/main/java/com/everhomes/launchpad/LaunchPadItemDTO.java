@@ -28,6 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>displayFlag: 是否显示{@link com.everhomes.launchpad.ItemDisplayFlag}</li>
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * <li>bgcolor: item的背景颜色</li>
+ * <li>scaleType: 图标是否需要裁剪0-不需要，1-需要</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -52,6 +53,7 @@ public class LaunchPadItemDTO {
     private Byte    displayFlag;
     private String  displayLayout;
     private Integer    bgcolor;
+    private Byte    scaleType;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -211,6 +213,14 @@ public class LaunchPadItemDTO {
 
     public void setBgcolor(Integer bgcolor) {
         this.bgcolor = bgcolor;
+    }
+
+    public Byte getScaleType() {
+        return scaleType;
+    }
+
+    public void setScaleType(Byte scaleType) {
+        this.scaleType = scaleType;
     }
 
     @Override
