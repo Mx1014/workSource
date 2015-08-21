@@ -1,128 +1,156 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>id: 任务ID</li>
  * <li>organizationId: 机构id </li>
- * <li>entityType: 承载任务的实体类型，参考{@link com.everhomes.organization.OrganizationTaskApplyEnityType}</li>
- * <li>entityId: 承载任务的实体类型对应的ID，如帖子id</li>
+ * <li>organizationType : 机构类型，参考{@link com.everhomes.organization.OrganizationType}
+ * <li>applyEntityType: 承载任务的实体类型，参考{@link com.everhomes.organization.OrganizationTaskApplyEnityType}</li>
+ * <li>applyEntityId: 承载任务的实体类型对应的ID，如帖子id</li>
  * <li>targetType: 任务被指派的目标类型，参考{@link com.everhomes.organization.OrganizationTaskTargetType}</li>
  * <li>targetId: 任务被指派的目标类型对应的ID，如用户ID</li>
  * <li>taskType: 任务所属类型，参考{@link com.everhomes.organization.OrganizationTaskType}</li>
  * <li>description: 任务描述</li>
  * <li>taskStatus: 任务状态，参考{@link com.everhomes.organization.OrganizationTaskStatus}</li>
+ * <li>operatorUid : 任务操作user</li>
+ * <li>operateTime : 操作时间</li>
+ * <li>creatorUid : 创建用户</li>
+ * <li>createTime : 创建时间</li>
  * </ul>
  */
 public class OrganizationTaskDTO {
-    private Long id;
-    private Long organizationId;
-    private String organizationType;
-    private String entityType;
-    private Long entityId;
-    private String targetType;
-    private Long targetId;
-    private String taskType;
-    private String description;
-    private Byte taskStatus;
-    private Timestamp createTime;
-    
-	public OrganizationTaskDTO() {
-    }
+	//task
+	private java.lang.Long     id;
+	private java.lang.Long     organizationId;
+	private java.lang.String   organizationType;
+	private java.lang.String   applyEntityType;
+	private java.lang.Long     applyEntityId;
+	private java.lang.String   targetType;
+	private java.lang.Long     targetId;
+	private java.lang.String   taskType;
+	private java.lang.String   description;
+	private java.lang.Byte     taskStatus;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
+	
+    public java.lang.Long getId() {
+		return id;
+	}
 
-	public Long getId() {
-        return id;
-    }
+	public void setId(java.lang.Long id) {
+		this.id = id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public java.lang.Long getOrganizationId() {
+		return organizationId;
+	}
 
-    public Long getOrganizationId() {
-        return organizationId;
-    }
+	public void setOrganizationId(java.lang.Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
-    }
+	public java.lang.String getOrganizationType() {
+		return organizationType;
+	}
 
-    public String getOrganizationType() {
-        return organizationType;
-    }
+	public void setOrganizationType(java.lang.String organizationType) {
+		this.organizationType = organizationType;
+	}
 
-    public void setOrganizationType(String organizationType) {
-        this.organizationType = organizationType;
-    }
+	public java.lang.String getApplyEntityType() {
+		return applyEntityType;
+	}
 
-    public String getEntityType() {
-        return entityType;
-    }
+	public void setApplyEntityType(java.lang.String applyEntityType) {
+		this.applyEntityType = applyEntityType;
+	}
 
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
-    }
+	public java.lang.Long getApplyEntityId() {
+		return applyEntityId;
+	}
 
-    public Long getEntityId() {
-        return entityId;
-    }
+	public void setApplyEntityId(java.lang.Long applyEntityId) {
+		this.applyEntityId = applyEntityId;
+	}
 
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
-    }
+	public java.lang.String getTargetType() {
+		return targetType;
+	}
 
-    public String getTargetType() {
-        return targetType;
-    }
+	public void setTargetType(java.lang.String targetType) {
+		this.targetType = targetType;
+	}
 
-    public void setTargetType(String targetType) {
-        this.targetType = targetType;
-    }
+	public java.lang.Long getTargetId() {
+		return targetId;
+	}
 
-    public Long getTargetId() {
-        return targetId;
-    }
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
+	}
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
-    }
+	public java.lang.String getTaskType() {
+		return taskType;
+	}
 
-    public String getTaskType() {
-        return taskType;
-    }
+	public void setTaskType(java.lang.String taskType) {
+		this.taskType = taskType;
+	}
 
-    public void setTaskType(String taskType) {
-        this.taskType = taskType;
-    }
+	public java.lang.String getDescription() {
+		return description;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public void setDescription(java.lang.String description) {
+		this.description = description;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public java.lang.Byte getTaskStatus() {
+		return taskStatus;
+	}
 
-    public Byte getTaskStatus() {
-        return taskStatus;
-    }
+	public void setTaskStatus(java.lang.Byte taskStatus) {
+		this.taskStatus = taskStatus;
+	}
 
-    public void setTaskStatus(Byte taskStatus) {
-        this.taskStatus = taskStatus;
-    }
+	public java.lang.Long getOperatorUid() {
+		return operatorUid;
+	}
 
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
 
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
-    }
+	public java.sql.Timestamp getOperateTime() {
+		return operateTime;
+	}
 
-    @Override
+	public void setOperateTime(java.sql.Timestamp operateTime) {
+		this.operateTime = operateTime;
+	}
+
+	public java.lang.Long getCreatorUid() {
+		return creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
