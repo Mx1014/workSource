@@ -36,6 +36,7 @@ import com.everhomes.util.Tuple;
 @Component
 public class CategoryProviderImpl implements CategoryProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryProviderImpl.class);
+    private static final String CATEGORY_PATH = "path";
     
     @Autowired
     private DbProvider dbProvider;
@@ -148,14 +149,17 @@ public class CategoryProviderImpl implements CategoryProvider {
         SortField[] sortFields = null;
         if(parentId != null){
             Category parentCategory = this.findCategoryById(parentId);
-            if(parentCategory == null)
+            if(parentCategory == null){
                 LOGGER.error("Parent category is not found.parentId={}",parentId);
+                return null;
+            }
+            
             condition = condition.or(Tables.EH_CATEGORIES.PATH.like(parentCategory.getName() + "/%"));
             if(orderByFields != null){
                 sortFields = new SortField[orderByFields.length + 1];
                 System.arraycopy(orderByFields, 0, sortFields, 0, orderByFields.length);
                 sortFields[orderByFields.length] = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, 
-                        new Tuple<String, SortOrder>("path", SortOrder.ASC))[0];
+                        new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC))[0];
             }
         }
         if(condition != null) {
