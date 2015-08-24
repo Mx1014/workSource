@@ -3,15 +3,13 @@ package com.everhomes.organization.pm;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>addressId : 地址Id</li>
  *</ul>
  *
  */
-
-public class SendPmPayMessageToOneOweFamilyCommand {
+public class FindNewestBillByAddressIdCommand {
 	@NotNull
 	private Long addressId;
 
@@ -27,8 +25,6 @@ public class SendPmPayMessageToOneOweFamilyCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
-	
 	
 	
 

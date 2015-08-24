@@ -22,7 +22,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class PayPmBillByFamilyIdCommand {
+public class PayPmBillByAddressIdCommand {
 	
 	@NotNull
 	private Long addressId;

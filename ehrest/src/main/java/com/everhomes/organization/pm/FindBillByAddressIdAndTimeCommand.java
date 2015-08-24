@@ -7,50 +7,38 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>pageOffset : 页码</li>
- * <li>pageSize : 页大小</li>
+ * <li>billDate : 账单日期</li>
  * <li>addressId : 地址Id</li>
  *</ul>
  *
  */
-public class ListFamilyBillingTransactionsByFamilyIdCommand {
+public class FindBillByAddressIdAndTimeCommand {
 	
-	private Long pageOffset;
-	
-	private Integer pageSize;
-	
+	@NotNull
+	private String billDate;
 	@NotNull
 	private Long addressId;
 	
-	public Long getPageOffset() {
-		return pageOffset;
+	public String getBillDate() {
+		return billDate;
 	}
-
-	public void setPageOffset(Long pageOffset) {
-		this.pageOffset = pageOffset;
+	public void setBillDate(String billDate) {
+		this.billDate = billDate;
 	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-
+	
 	public Long getAddressId() {
 		return addressId;
 	}
-
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
-
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 	
 	
+	
+	 
 
 }
