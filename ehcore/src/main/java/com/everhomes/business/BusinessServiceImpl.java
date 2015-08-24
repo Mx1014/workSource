@@ -517,11 +517,12 @@ public class BusinessServiceImpl implements BusinessService {
         User user = UserContext.current().getUser();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
         List<BusinessDTO> result = null;
+        final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
         List<Business> businesses = this.businessProvider.listBusinessesByKeyword(cmd.getKeyword() , offset , pageSize);
         if(businesses != null && !businesses.isEmpty())
             result = businesses.stream().map(r -> {
                     BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
-                    dto.setLogoUrl(processLogoUrl(r,user.getId(),null));
+                    dto.setLogoUrl(processLogoUrl(r,user.getId(),imageUrl));
                     //set recommend status
                     processRecommendStatus(dto);
                     
