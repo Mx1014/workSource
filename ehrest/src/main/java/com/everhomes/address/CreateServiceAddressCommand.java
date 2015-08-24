@@ -7,39 +7,43 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>cityId: 城市id</li>
- * <li>areaId: 区县id</li>
+ * <li>regionId: 区域id(城市或区县的id)</li>
+ * <li>communityId: 小区id</li>
  * <li>address: 服务地址详情</li>
  * </ul>
  */
 public class CreateServiceAddressCommand {
     
+//    @NotNull
+//    private Long cityId;
+//    
+//    @NotNull
+//    private Long areaId;
     @NotNull
-    private Long cityId;
+    private Long regionId;
     
-    @NotNull
-    private Long areaId;
+    private Long communityId;
     
     @NotNull
     private String address;
 
     public CreateServiceAddressCommand() {
     }
-    
-    public Long getCityId() {
-        return cityId;
+
+    public Long getRegionId() {
+        return regionId;
     }
 
-    public void setCityId(Long cityId) {
-        this.cityId = cityId;
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
-    public Long getAreaId() {
-        return areaId;
+    public Long getCommunityId() {
+        return communityId;
     }
 
-    public void setAreaId(Long areaId) {
-        this.areaId = areaId;
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getAddress() {

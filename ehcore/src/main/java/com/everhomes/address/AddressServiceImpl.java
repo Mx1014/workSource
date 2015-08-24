@@ -832,45 +832,59 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public AddressDTO createServiceAddress(CreateServiceAddressCommand cmd) {
-        if(cmd.getCityId() == null){
+        if(cmd.getRegionId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid cityId, cityId parameter");
-        }
-        if(cmd.getAreaId() == null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid areaId, areaId parameter");
+                    "Invalid regionId, regionId parameter");
         }
         if(cmd.getAddress() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid address, address parameter");
         }
-        Region city = this.regionProvider.findRegionById(cmd.getCityId());
-        if(city == null){
+        Region region = this.regionProvider.findRegionById(cmd.getRegionId());
+        if(region == null){
             throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
-                    "City is not found");
+                    "Region is not found");
         }
-        Region area = this.regionProvider.findRegionById(cmd.getAreaId());
-        if(area == null){
-            throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
-                    "Area is not found");
+        long cityId = 0;
+        String cityName = null;
+        long areaId = 0;
+        String areaName = null;
+        if(region.getScopeCode().byteValue() == RegionScope.CITY.getCode()){
+            cityId = region.getId();
+            cityName = region.getName();
+        }else if(region.getScopeCode().byteValue() == RegionScope.AREA.getCode()){
+            Region city = this.regionProvider.findRegionById(region.getParentId());
+            if(city == null)
+                throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
+                    "Region is not found");
+            cityId = city.getId();
+            cityName = city.getName();
+            areaId = region.getId();
+            areaName = region.getName();
         }
+        
         User user = UserContext.current().getUser();
         long userId = user.getId();
         
-        Address address = this.addressProvider.findAddressByRegionAndAddress(cmd.getCityId(),cmd.getAreaId(),cmd.getAddress());
+        Address address = this.addressProvider.findAddressByRegionAndAddress(cityId,areaId,cmd.getAddress());
         
         if(address == null) {
+            final long fcityId = cityId;
+            final long fareaId = areaId;
+            final String fcityName = cityName;
+            final String fareaName = areaName;
             // optimize with double-lock pattern 
             Tuple<Address, Boolean> result = this.coordinationProvider
                      .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
-                Address addr = this.addressProvider.findAddressByRegionAndAddress(cmd.getCityId(),cmd.getAreaId(),cmd.getAddress());;
+                Address addr = this.addressProvider.findAddressByRegionAndAddress(fcityId,fareaId,cmd.getAddress());;
                 long lcStartTime = System.currentTimeMillis();
                 if(addr == null) {
                      addr = new Address();
-                     addr.setCityId(cmd.getCityId());
-                     addr.setCityName(city.getName());
-                     addr.setAreaId(cmd.getAreaId());
-                     addr.setAreaName(area.getName());
+                     addr.setCityId(fcityId);
+                     addr.setCityName(fcityName);
+                     addr.setAreaId(fareaId);
+                     addr.setAreaName(fareaName);
+                     addr.setCommunityId(cmd.getCommunityId());
                      addr.setAddress(cmd.getAddress());
                      addr.setAddressAlias(cmd.getAddress());
                      addr.setStatus(AddressAdminStatus.ACTIVE.getCode());
@@ -880,7 +894,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                      //insert user_service_addresses
                      UserServiceAddress serviceAddress = new UserServiceAddress();
                      serviceAddress.setAddressId(addr.getId());
-                     serviceAddress.setOwnerUid(userId);;
+                     serviceAddress.setOwnerUid(userId);
                      this.userActivityProvider.addUserServiceAddress(serviceAddress);
                 }
                 long lcEndTime = System.currentTimeMillis();
