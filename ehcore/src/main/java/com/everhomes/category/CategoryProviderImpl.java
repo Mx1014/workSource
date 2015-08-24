@@ -136,6 +136,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
         Condition condition = null;
         
+        
         if(parentId != null)
             condition = Tables.EH_CATEGORIES.PARENT_ID.eq(parentId.longValue());
         else
@@ -143,13 +144,26 @@ public class CategoryProviderImpl implements CategoryProvider {
             
         if(status != null)
             condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(status.getCode()));
-        
+
+        SortField[] sortFields = null;
+        if(parentId != null){
+            Category parentCategory = this.findCategoryById(parentId);
+            if(parentCategory == null)
+                LOGGER.error("Parent category is not found.parentId={}",parentId);
+            condition = condition.or(Tables.EH_CATEGORIES.PATH.like(parentCategory.getName() + "/%"));
+            if(orderByFields != null){
+                sortFields = new SortField[orderByFields.length + 1];
+                System.arraycopy(orderByFields, 0, sortFields, 0, orderByFields.length);
+                sortFields[orderByFields.length] = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, 
+                        new Tuple<String, SortOrder>("path", SortOrder.ASC))[0];
+            }
+        }
         if(condition != null) {
             selectStep.where(condition);
         }
         
-        if(orderByFields != null) {
-            result = selectStep.orderBy(orderByFields).fetch().map(
+        if(sortFields != null) {
+            result = selectStep.orderBy(sortFields).fetch().map(
                 new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
             );
         } else {

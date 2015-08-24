@@ -1,5 +1,6 @@
 package com.everhomes.category;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,6 +69,7 @@ public class CategoryController extends ControllerBase {
     /**
      * <b>URL: /category/listChildren</b> 列出指定类型的第一层孩子类型
      */
+    @SuppressWarnings("unchecked")
     @RequireAuthentication(false)
     @RequestMapping("listChildren")
     @RestReturn(value = CategoryDTO.class, collection = true)
@@ -81,7 +83,6 @@ public class CategoryController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
         }
 
-        @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(),
                 CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
 
