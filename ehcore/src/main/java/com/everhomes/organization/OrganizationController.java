@@ -41,6 +41,7 @@ public class OrganizationController extends ControllerBase {
 	 * <b>URL: /org/getUserOwningOrganizations</b>
 	 * <p>查询用户加入的政府机构</p>
 	 */
+	//no use
 	@RequestMapping("getUserOwningOrganizations")
 	@RestReturn(value=ListOrganizationMemberCommandResponse.class)
 	public RestResponse getUserOwningOrganizations() {
@@ -58,7 +59,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("listOrgMembers")
 	@RestReturn(value=ListOrganizationMemberCommandResponse.class)
 	public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
-		ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrganizationMembers(cmd);
+		ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -82,7 +83,7 @@ public class OrganizationController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /org/addOrgMemberByPhone</b>
-	 * <p>直接成为组织管理员，注册用户只需填orgId，userId，memberGroup。未注册用户信息尽可能详细，最少有前面的字段，另加联系方式</p>
+	 * <p>申请成为组织管理员，直接在orgMember表新增记录</p>
 	 */
 	@RequestMapping("addOrgMemberByPhone")
 	@RestReturn(value=String.class)
@@ -138,7 +139,7 @@ public class OrganizationController extends ControllerBase {
 
 	/**
 	 * <b>URL: /org/listOrganizationCommunities</b>
-	 * <p>列出某个组织的信息，包括管辖的小区名</p>
+	 * <p>列出某个组织的信息,已管辖小区划分</p>
 	 */
 	@RequestMapping("listOrganizationCommunities")
 	@RestReturn(value=ListOrganizationCommunityCommandResponse.class)

@@ -31,6 +31,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMemberStatus;
 import com.everhomes.organization.OrganizationMemberTargetType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
@@ -105,12 +106,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityPmMember> findPmMemberByCommunityAndTarget(long communityId, String targetType, long targetId) {
+	public List<CommunityPmMember> findPmMemberByCommunityAndTarget(long organizationId, String targetType, long targetId) {
 		final List<CommunityPmMember> groups = new ArrayList<CommunityPmMember>();
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(targetType));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId));
 
@@ -674,9 +675,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return groups;
 	}
 	@Override
-	public ListPropInvitedUserCommandResponse listInvitedUsers(Long communityId,String contactToken, Long pageOffset, Long pageSize) {
+	public ListPropInvitedUserCommandResponse listInvitedUsers(Long organizationId,String contactToken, Long pageOffset, Long pageSize) {
 
-		final List<PropInvitedUserDTO> results = new ArrayList<>();
+		/*final List<PropInvitedUserDTO> results = new ArrayList<>();
 		ListPropInvitedUserCommandResponse response = new ListPropInvitedUserCommandResponse();
 		long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
 		long size = pageSize;
@@ -692,8 +693,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 								.leftOuterJoin(Tables.EH_USERS)
 								.on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.ID)
 										.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
-										.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
-										.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId))
+										.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())))
+										.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
 										.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(likeVal)
 												.or(Tables.EH_USERS.ACCOUNT_NAME.like(likeVal)))
 												.fetchOne(0, Long.class);
@@ -728,9 +729,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 					context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
 					.leftOuterJoin(Tables.EH_USERS)
 					.on(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(Tables.EH_USERS.INVITOR_UID)
-							.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(EntityType.USER.getCode()))
-							.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(PmMemberStatus.ACTIVE.getCode())))
-							.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId))
+							.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+							.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())))
+							.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
 							.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.like(likeVal)
 									.or(Tables.EH_USERS.ACCOUNT_NAME.like(likeVal)))
 									.limit((int)size).offset((int)off)
@@ -758,7 +759,9 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			response.setMembers(results);
 			return response;
 		}
-		return response;
+		return response;*/
+		
+		return null;
 
 	}
 

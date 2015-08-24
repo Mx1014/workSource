@@ -129,7 +129,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listOrgMembers")
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
-    	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrganizationMembers(cmd);
+    	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
