@@ -2,7 +2,6 @@
 package com.everhomes.organization.pm;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -23,12 +22,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.family.FamilyMemberDTO;
-import com.everhomes.forum.DeleteCommentCommand;
-import com.everhomes.forum.DeleteTopicCommand;
-import com.everhomes.forum.ListPostCommandResponse;
-import com.everhomes.forum.ListTopicCommand;
-import com.everhomes.forum.NewTopicCommand;
-import com.everhomes.forum.PostDTO;
 import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.rest.RestResponse;
@@ -658,7 +651,6 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 
-
 	/**
 	 * <b>URL: /pm/listFamilyMembersByFamilyId</b>
 	 * <p>查询家庭的成员列表</p>
@@ -678,7 +670,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listPropBillDateStr</b>
 	 * <p>查询物业账单的时间列表</p>
 	 */
-	@RequestMapping("listPropBillDateStr")
+	/*@RequestMapping("listPropBillDateStr")
 	@RestReturn(value=String.class, collection=true)
 	public RestResponse listPropBillDateStr(@Valid PropCommunityIdCommand cmd) {
 		List<String> results = propertyMgrProvider.listPropBillDateStr(cmd.getCommunityId());
@@ -687,14 +679,14 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /pm/newPmTopic</b>
 	 * <p>物业人员发帖</p>
 	 * @return 发帖的内容
 	 */
-	@RequestMapping("newPmTopic")
+	/*@RequestMapping("newPmTopic")
 	@RestReturn(value=PostDTO.class)
 	public RestResponse newPmTopic(@Valid NewTopicCommand cmd) {
 		PostDTO postDto = propertyMgrService.createTopic(cmd);
@@ -702,13 +694,13 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /pm/queryPmTopicsByCategory</b>
 	 * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
 	 */
-	@RequestMapping("queryPmTopicsByCategory")
+	/*@RequestMapping("queryPmTopicsByCategory")
 	@RestReturn(value=ListPropPostCommandResponse.class)
 	public RestResponse queryPmTopicsByCategory(QueryPropTopicByCategoryCommand cmd) {
 		ListPropPostCommandResponse  cmdResponse = propertyMgrService.queryTopicsByCategory(cmd);
@@ -716,13 +708,13 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /pm/listPmTopics</b>
 	 * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
 	 */
-	@RequestMapping("listPmTopics")
+	/*@RequestMapping("listPmTopics")
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse listPmTopics(ListTopicCommand cmd) {
 		ListPostCommandResponse cmdResponse = propertyMgrService.listTopics(cmd);
@@ -731,7 +723,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /pm/getPmTopic</b>
@@ -785,7 +777,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
 	 * @return 删除结果
 	 */
-	@RequestMapping("deletePmTopic")
+	/*@RequestMapping("deletePmTopic")
 	@RestReturn(value=String.class)
 	public RestResponse deletePmTopic(DeleteTopicCommand cmd) {
 
@@ -794,7 +786,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	//    /**
 	//     * <b>URL: /pm/forwardTopic</b>
@@ -879,7 +871,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
 	 * @return 删除结果
 	 */
-	@RequestMapping("deletePmComment")
+	/*@RequestMapping("deletePmComment")
 	@RestReturn(value=String.class)
 	public RestResponse deletePmComment(DeleteCommentCommand cmd) {
 
@@ -888,7 +880,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	} 
+	}*/ 
 
 	/**
 	 * <b>URL: /pm/listPropApartmentsByKeyword</b>

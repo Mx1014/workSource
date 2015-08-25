@@ -55,6 +55,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.PaginationHelper;
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
@@ -203,21 +204,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationMember> listOrganizationMembers(Long departmentId, Long memberUid,Integer pageOffset,Integer pageSize) {
+	public List<OrganizationMember> listOrganizationMembers(Long orgId, Long memberUid,Long offset,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		if(departmentId != null && departmentId > 0){
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(departmentId));
+		if(orgId != null && orgId > 0){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId));
 		}
 		if(memberUid != null && memberUid > 0) {
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
 		}
-
-		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-		query.addLimit(offset, pageSize);
+		query.addLimit(offset.intValue(), pageSize);
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;

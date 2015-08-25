@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -254,50 +255,43 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void createOrganizationMember(CreateOrganizationMemberCommand cmd) {
-		User user  = UserContext.current().getUser();
-
-		//权限控制
 		//先判断，后台管理员才能创建。状态直接设为正常
-		PmMemberTargetType targetType = PmMemberTargetType.fromCode(cmd.getTargetType());
-		if(targetType == PmMemberTargetType.USER){
-			//添加已注册用户为管理员。
+		this.convertCreateOrganizationMemberCommand(cmd);
+		OrganizationMemberTargetType targetType = OrganizationMemberTargetType.fromCode(cmd.getTargetType());
+		if(targetType == OrganizationMemberTargetType.USER){//添加已注册用户为管理员。
 			Long addUserId =  cmd.getTargetId();
 			if(addUserId != null && addUserId != 0){
-				List<OrganizationMember> list = organizationProvider.listOrganizationMembers(cmd.getOrganizationId(), addUserId, 1, 20);
-				if(list == null || list.size() == 0)
-				{
-					UserIdentifier identifier = null; 
-					List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(addUserId);
-					if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
-						for (UserIdentifier userIdentifier : userIndIdentifiers) {
-							if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
-								identifier = userIdentifier;
-								break;
-							}
+				List<OrganizationMember> list = organizationProvider.listOrganizationMembers(cmd.getOrganizationId(), addUserId, (long)1, 20);
+				if(list != null && list.size() != 0){
+					LOGGER.error("the user is in the organization.");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+							"the user is in the organization.");
+				}
+				
+				UserIdentifier identifier = null;
+				List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(addUserId);
+				if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
+					for (UserIdentifier userIdentifier : userIndIdentifiers) {
+						if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
+							identifier = userIdentifier;
+							break;
 						}
 					}
-					User addUser = userProvider.findUserById(addUserId);
-					PmMemberGroup memberGroup = PmMemberGroup.fromCode(cmd.getMemberGroup());
-					cmd.setMemberGroup(memberGroup.getCode());
-					OrganizationMember departmentMember = ConvertHelper.convert(cmd, OrganizationMember.class);
-					departmentMember.setStatus(PmMemberStatus.ACTIVE.getCode());
-					departmentMember.setContactName(addUser.getAccountName());
-					if(identifier != null){
-						departmentMember.setContactToken(identifier.getIdentifierToken());
-						departmentMember.setContactType(IdentifierType.MOBILE.getCode());
-					}
-					organizationProvider.createOrganizationMember(departmentMember);
 				}
-				else{
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-							"the user is  Organization member.");
+				User addUser = userProvider.findUserById(addUserId);
+				OrganizationMemberGroupType memberGroup = OrganizationMemberGroupType.fromCode(cmd.getMemberGroup());
+				cmd.setMemberGroup(memberGroup.getCode());
+				OrganizationMember departmentMember = ConvertHelper.convert(cmd, OrganizationMember.class);
+				departmentMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+				departmentMember.setContactName(addUser.getNickName());
+				if(identifier != null){
+					departmentMember.setContactToken(identifier.getIdentifierToken());
 				}
+				departmentMember.setContactType(IdentifierType.MOBILE.getCode());
+				organizationProvider.createOrganizationMember(departmentMember);
 			}
 		}
-		else{
-			//添加未注册用户为管理员。
-			PmMemberGroup memberGroup = PmMemberGroup.fromCode(cmd.getMemberGroup());
-			cmd.setMemberGroup(memberGroup.getCode());
+		else{//添加未注册用户为管理员。
 			OrganizationMember departmentMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 			departmentMember.setStatus(PmMemberStatus.ACTIVE.getCode());
 			departmentMember.setContactType(IdentifierType.MOBILE.getCode());
@@ -306,17 +300,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 	}
 
+	private void convertCreateOrganizationMemberCommand(CreateOrganizationMemberCommand cmd) {
+		OrganizationMemberGroupType memberGroup = OrganizationMemberGroupType.fromCode(cmd.getMemberGroup());
+		if(memberGroup == null)
+			memberGroup = OrganizationMemberGroupType.MANAGER;
+		cmd.setMemberGroup(memberGroup.getCode());
+		if(cmd.getTargetType() != null)
+			cmd.setTargetType(cmd.getTargetType().toUpperCase());
+	}
+
 	@Override
 	public void createOrganizationCommunity(CreateOrganizationCommunityCommand cmd) {
-		User user  = UserContext.current().getUser();
-
-		//权限控制
-		//先判断，后台管理员才能创建。状态直接设为正常
-		Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the organization.");
-		}
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		if(organization.getOrganizationType().equals(OrganizationType.PM.getCode()) || organization.getOrganizationType().equals(OrganizationType.GARC.getCode())){
 			LOGGER.error("pm or garc could not create community mapping.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -325,12 +320,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<Long> communityIds = cmd.getCommunityIds();
 		if(communityIds != null && communityIds.size() > 0){
 			for (Long id : communityIds) {
-				Community community = communityProvider.findCommunityById(id);
-				if(community == null) {
-					LOGGER.error("Unable to find the community.communityId=" + id);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-							"Unable to find the community.");
-				}
+				this.checkCommunity(id);
 				OrganizationCommunity departmentCommunity = new OrganizationCommunity();
 				departmentCommunity.setCommunityId(id);
 				departmentCommunity.setOrganizationId(cmd.getOrganizationId());
@@ -458,25 +448,26 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public ListOrganizationMemberCommandResponse listOrganizationMembers(ListOrganizationMemberCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
+	public ListOrganizationMemberCommandResponse listOrgMembers(ListOrganizationMemberCommand cmd) {
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
-		int totalCount = organizationProvider.countOrganizationMembers(cmd.getOrganizationId(), null);
-		if(totalCount == 0) return response;
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		int pageCount = getPageCount(totalCount, pageSize);
-		List<OrganizationMember> reslut = organizationProvider.listOrganizationMembers(cmd.getOrganizationId(), null, cmd.getPageOffset(), pageSize);
-		response.setMembers(reslut.stream()
-				.map(r->{ 
-					OrganizationMemberDTO dto =  ConvertHelper.convert(r,OrganizationMemberDTO.class); 
-					Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
-					dto.setOrganizationName(organization.getName());
-					return dto;
-				})
-				.collect(Collectors.toList()));
-		response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset().longValue(), pageSize);
+
+		List<OrganizationMember> result = organizationProvider.listOrganizationMembers(cmd.getOrganizationId(), null, offset, pageSize+1);
+		if(result != null && !result.isEmpty()){
+			if(result.size() == pageSize+1){
+				result.remove(result.size()-1);
+				response.setNextPageOffset(cmd.getPageOffset()+1);
+			}
+			response.setMembers(result.stream()
+					.map(r->{ 
+						OrganizationMemberDTO dto =  ConvertHelper.convert(r,OrganizationMemberDTO.class); 
+						Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
+						dto.setOrganizationName(organization.getName());
+						return dto;
+					}).collect(Collectors.toList()));
+		}
 		return response;
 	}
 
@@ -679,7 +670,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			template = "该请求已安排人员处理";
 		}
 		if(LOGGER.isDebugEnabled()){
-			LOGGER.error("sendComment_template="+template);
+			try {
+				LOGGER.error("sendComment_template="+(new String(template.getBytes(),"UTF-8")));
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error(e.getMessage());
+			}
 		}
 		if (!StringUtils.isEmpty(template)) {
 			comment.setContent(template);
@@ -708,8 +703,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListOrganizationCommunityCommandResponse listOrganizationCommunities(ListOrganizationCommunityCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
 		ListOrganizationCommunityCommandResponse response = new ListOrganizationCommunityCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
 		int totalCount = organizationProvider.countOrganizationCommunitys(cmd.getOrganizationId());
@@ -842,8 +835,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void sendOrgMessage(SendOrganizationMessageCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
 		if(cmd.getCommunityIds() == null){
 			LOGGER.error("organization communityId paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -891,11 +882,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_FAMILY);
 		messageDto.setSenderUid(UserContext.current().getUser().getId());
-		messageDto.setChannels(new MessageChannel("group", String.valueOf(familyId)));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.GROUP.getCode(), String.valueOf(familyId)));
 		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, "group", 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, MessageChannelType.GROUP.getCode(), 
 				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 
@@ -1143,26 +1134,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty organizationId or memberId paramter can not be null or empty");
 		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
-		OrganizationMember communityPmMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getMemberId(),cmd.getOrganizationId());
-		if(communityPmMember == null || communityPmMember.getStatus() != PmMemberStatus.CONFIRMING.getCode())
-		{
-			LOGGER.error("Unable to find the organization member or the organization member status is not confirming.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the organization member or the organization member status is not confirming.");
-		}
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		OrganizationMember communityPmMember = this.checkDesOrgMember(cmd.getMemberId(), cmd.getOrganizationId());
 		User user = UserContext.current().getUser();
-		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),cmd.getOrganizationId());
-		if(operOrgMember == null){
-			LOGGER.error("Operator not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Operator not found.");
-		}
+		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getOrganizationId());
 
 		dbProvider.execute((status) -> {
 			communityPmMember.setStatus(PmMemberStatus.ACTIVE.getCode());
@@ -1202,6 +1177,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_APPROVE_FOR_MANAGER, locale, map, "");
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.error("approveForManager_template="+template);
+		}
 		return template;
 	}
 
@@ -1217,6 +1195,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_APPROVE_FOR_APPLICANT, locale, map, "");
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.error("approveForApplicant_template="+template);
+		}
 		return template;
 	}
 
@@ -1243,26 +1224,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty organizationId or memberId paramter can not be null or empty");
 		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
-		OrganizationMember communityPmMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getMemberId(),cmd.getOrganizationId());
-		if(communityPmMember == null || communityPmMember.getStatus() != PmMemberStatus.CONFIRMING.getCode())
-		{
-			LOGGER.error("Unable to find the organization member or the organization member status is not confirming.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the organization member or the organization member status is not confirming.");
-		}
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		OrganizationMember communityPmMember = this.checkDesOrgMember(cmd.getMemberId(), cmd.getOrganizationId());
 		User user = UserContext.current().getUser();
-		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),cmd.getOrganizationId());
-		if(operOrgMember == null){
-			LOGGER.error("Operator is not right to reject.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Operator is not right to reject.");
-		}
+		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getOrganizationId());
 
 		dbProvider.execute((status) -> {
 			organizationProvider.deleteOrganizationMember(communityPmMember);
@@ -1301,6 +1266,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_REJECT_FOR_MANAGER, locale, map, "");
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.error("rejectForManager_template="+template);
+		}
 		return template;
 	}
 
@@ -1316,6 +1284,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_REJECT_FOR_APPLICANT, locale, map, "");
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.error("rejectForApllicant_template="+template);
+		}
 		return template;
 	}
 
@@ -1677,25 +1648,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty organizationId or memberId paramter can not be null or empty");
 		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
-		OrganizationMember communityPmMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getMemberId(),cmd.getOrganizationId());
-		if(communityPmMember == null){
-			LOGGER.error("Unable to find the organization member.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the organization member.");
-		}
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		OrganizationMember communityPmMember = this.checkDesOrgMember(cmd.getMemberId(),cmd.getOrganizationId());
 		User user = UserContext.current().getUser();
-		OrganizationMember operOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),cmd.getOrganizationId());
-		if(operOrgMember == null){
-			LOGGER.error("Operator is not right to delete.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Operator is not right to delete.");
-		}
+		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getOrganizationId());
 
 		dbProvider.execute((status) -> {
 			organizationProvider.deleteOrganizationMember(communityPmMember);
