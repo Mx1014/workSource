@@ -27,6 +27,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.forum.AttachmentDescriptor;
 import com.everhomes.forum.CancelLikeTopicCommand;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
@@ -484,6 +485,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
 		}
+		this.convertNewTopicCommand(cmd);
 		Organization organization = getOrganization(cmd);
 		if(organization == null){
 			LOGGER.error("Unable to find the organization.");
@@ -495,6 +497,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 			cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);
 		PostDTO post = forumService.createTopic(cmd);
 		return post;
+	}
+
+	private void convertNewTopicCommand(NewTopicCommand cmd) {
+		//convert attachments contentType to upper case.
+		List<AttachmentDescriptor> attachments = cmd.getAttachments();
+		if(attachments != null && !attachments.isEmpty()){
+			for(AttachmentDescriptor r : attachments){
+				if(r.getContentType() != null && !r.getContentType().equals(""))
+					r.setContentType(r.getContentType().toUpperCase());
+			}
+		}
+		
 	}
 
 	private void checkUserHaveRightToNewTopic(NewTopicCommand cmd,Organization organization) {

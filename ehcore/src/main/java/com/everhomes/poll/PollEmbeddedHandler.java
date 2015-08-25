@@ -1,5 +1,8 @@
 package com.everhomes.poll;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +29,9 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
         if (result == null) {
             return null;
         }
-        return StringHelper.toJsonString(result);
+        Map<String,PollDTO> obj = new HashMap<String, PollDTO>();
+        obj.put("poll", result);
+        return StringHelper.toJsonString(obj);
     }
 
     @Override
@@ -35,7 +40,9 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
         if (poll == null) {
             return null;
         }
-        return StringHelper.toJsonString(poll);
+        Map<String,PollShowResultResponse> obj = new HashMap<String, PollShowResultResponse>();
+        obj.put("poll", poll);
+        return StringHelper.toJsonString(obj);
     }
 
     @Override
