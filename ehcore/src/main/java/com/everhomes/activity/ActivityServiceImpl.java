@@ -427,6 +427,13 @@ public class ActivityServiceImpl implements ActivityService {
                 if (currentUser != null) {
                     d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
                     d.setUserName(currentUser.getNickName());
+                    
+                    List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
+                    
+                    List<String> phones = identifiers.stream().filter((a)-> { return IdentifierType.fromCode(a.getIdentifierType()) == IdentifierType.MOBILE; })
+                            .map((a) -> { return a.getIdentifierToken(); })
+                            .collect(Collectors.toList());
+                    d.setPhone(phones);
                 }
 
             }
