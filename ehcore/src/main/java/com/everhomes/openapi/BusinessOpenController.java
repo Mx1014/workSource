@@ -1,6 +1,7 @@
 package com.everhomes.openapi;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.app.AppConstants;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
 import com.everhomes.business.SyncDeleteBusinessCommand;
@@ -23,7 +25,14 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.messaging.MessageBodyType;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingConstants;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.MessageChannelType;
+import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
@@ -50,6 +59,9 @@ public class BusinessOpenController extends ControllerBase {
     
     @Autowired
     private UserActivityService userActivityService;
+    
+    @Autowired
+    MessagingService messagingService;
     
     /**
      * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -154,6 +166,33 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse findBusinessFavoriteStatus(UserFavoriteCommand cmd) {
         
         RestResponse response =  new RestResponse(businessService.findBusinessFavoriteStatus(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    private void sendMessageToUser(Long userId, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+    
+    @RequestMapping("sendMessageToUser")
+    @RestReturn(value=String.class)
+    public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
+        sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
+        
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
