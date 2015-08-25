@@ -148,9 +148,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void createOrganization(CreateOrganizationCommand cmd) {
-		User user  = UserContext.current().getUser();
-
-		//权限控制
 		//先判断，后台管理员才能创建。状态直接设为正常
 		OrganizationType organizationType = OrganizationType.fromCode(cmd.getOrganizationType());
 		cmd.setOrganizationType(organizationType.getCode());
@@ -171,8 +168,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		department.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organizationProvider.createOrganization(department);
-
-
 	}
 
 
@@ -189,55 +184,79 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void applyOrganizationMember(ApplyOrganizationMemberCommand cmd) {
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunity(cmd.getCommunityId());
 		User user  = UserContext.current().getUser();
+		this.checkCommunityIdIsEqual(user.getCommunityId().longValue(),cmd.getCommunityId().longValue());
+		Organization organization = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
 
-		Long communityId = user.getCommunityId();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("ApplyOrganizationMemberCommand communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"ApplyOrganizationMemberCommand communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		if(!communityId .equals( cmd.getCommunityId())){
-			LOGGER.error("you not belong to the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"you not belong to the community.");
-		}
-		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
-		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
-		if(member != null){
-			LOGGER.error("User is in the organization.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"User is in the organization.");
-		}
-		member = createOrganizationMember(user,organization.getId(),cmd.getContactDescription());
+		this.checkUserInOrg(user.getId(), organization.getId());
+		OrganizationMember member = this.createOrganizationMember(user,organization.getId(),cmd.getContactDescription());
 		organizationProvider.createOrganizationMember(member);
 	}
 
-	private OrganizationMember createOrganizationMember(User user, Long organizationId, String contactDescription) {
-		UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
-		OrganizationMember member = new OrganizationMember();
-		member.setContactDescription(contactDescription);
-		member.setContactName(user.getAccountName());
-		if(identifier != null){
-			member.setContactToken(identifier.getIdentifierToken());
-			member.setContactType(identifier.getIdentifierType());
+	private OrganizationMember checkUserNotInOrg(Long userId, Long orgId) {
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
+		if(member == null){
+			LOGGER.error("User is not in the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is not in the organization.");
 		}
-		member.setMemberGroup(OrganizationGroup.MANAGER.getCode());
+		return member;
+	}
+
+	private void checkUserInOrg(Long userId, Long orgId) {
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
+		if(member != null){
+			LOGGER.error("User is in the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is in the organization.");
+		}
+	}
+
+	private Organization checkOrganizationByCommIdAndOrgType(Long communityId,String orgType) {
+		Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(communityId, orgType);
+		if(org == null) {
+			LOGGER.error("organization can not find by communityId and orgType.communityId="+communityId+",orgType="+orgType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"organization can not find by communityId and orgType.");
+		}
+		return org;
+	}
+
+	private void checkCommunityIdIsNull(Long communityId) {
+		if(communityId == null){
+			LOGGER.error("communityId paramter is empty");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"communityId paramter is empty");
+		}
+
+	}
+
+	private void checkCommunityIdIsEqual(long longValue, long longValue2) {
+		if(longValue != longValue2){
+			LOGGER.error("communityId not equal.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"communityId not equal.");
+		}
+	}
+
+	private OrganizationMember createOrganizationMember(User user, Long organizationId, String contactDescription) {
+		OrganizationMember member = new OrganizationMember();
+
+		member.setContactDescription(contactDescription);
+		member.setContactName(user.getNickName());
+		member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 		member.setOrganizationId(organizationId);
 		member.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
 		member.setTargetId(user.getId());
 		member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+
+		UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
+		if(identifier != null){
+			member.setContactToken(identifier.getIdentifierToken());
+			member.setContactType(identifier.getIdentifierType());
+		}
 
 		return member;
 	}
@@ -246,7 +265,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(userId);
 		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
 			for (UserIdentifier userIdentifier : userIndIdentifiers) {
-				if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
+				if(userIdentifier.getIdentifierType().byteValue() == IdentifierType.MOBILE.getCode()){
 					return userIdentifier;
 				}
 			}
@@ -261,30 +280,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 		OrganizationMemberTargetType targetType = OrganizationMemberTargetType.fromCode(cmd.getTargetType());
 		if(targetType == OrganizationMemberTargetType.USER){//添加已注册用户为管理员。
 			Long addUserId =  cmd.getTargetId();
-			if(addUserId != null && addUserId != 0){
-				List<OrganizationMember> list = organizationProvider.listOrganizationMembers(cmd.getOrganizationId(), addUserId, (long)1, 20);
-				if(list != null && list.size() != 0){
-					LOGGER.error("the user is in the organization.");
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-							"the user is in the organization.");
-				}
-				
-				UserIdentifier identifier = null;
-				List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(addUserId);
-				if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
-					for (UserIdentifier userIdentifier : userIndIdentifiers) {
-						if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
-							identifier = userIdentifier;
-							break;
-						}
-					}
-				}
+			if(addUserId != null && addUserId.longValue() != 0){
+				this.checkUserInOrg(addUserId, cmd.getOrganizationId());
 				User addUser = userProvider.findUserById(addUserId);
+
 				OrganizationMemberGroupType memberGroup = OrganizationMemberGroupType.fromCode(cmd.getMemberGroup());
 				cmd.setMemberGroup(memberGroup.getCode());
+
 				OrganizationMember departmentMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 				departmentMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 				departmentMember.setContactName(addUser.getNickName());
+
+				UserIdentifier identifier = this.getUserMobileIdentifier(addUserId);
 				if(identifier != null){
 					departmentMember.setContactToken(identifier.getIdentifierToken());
 				}
@@ -304,8 +311,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private void convertCreateOrganizationMemberCommand(CreateOrganizationMemberCommand cmd) {
 		OrganizationMemberGroupType memberGroup = OrganizationMemberGroupType.fromCode(cmd.getMemberGroup());
 		if(memberGroup == null)
-			memberGroup = OrganizationMemberGroupType.MANAGER;
-		cmd.setMemberGroup(memberGroup.getCode());
+			cmd.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 		if(cmd.getTargetType() != null)
 			cmd.setTargetType(cmd.getTargetType().toUpperCase());
 	}
@@ -332,69 +338,74 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void deleteOrganizationCommunity(DeleteOrganizationCommunityCommand cmd) {
-		if(cmd.getOrganizationId() == null || cmd.getCommunityIds() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid organizationId or communityIds paramter.");
-		}
-		try{
-			List<Long> communityIds = cmd.getCommunityIds();
-			communityIds.forEach(id ->{
-				OrganizationCommunity orgCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), id);
-				if(orgCommunity == null){
-					LOGGER.error("OrganizationCommunity is not found,organizationId=" + cmd.getOrganizationId() + ",communityId=" + id);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-							"OrganizationCommunity is not found.");
-				}
+		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
+		this.checkCommunityIdsIsNull(cmd.getCommunityIds());
+		this.dbProvider.execute(s -> {
+			for(Long id : cmd.getCommunityIds()){
+				OrganizationCommunity orgCommunity = this.checkOrgCommuByOrgIdAndCommId(cmd.getOrganizationId(), id);
 				organizationProvider.deleteOrganizationCommunity(orgCommunity);
-			});
-		}catch(Exception e){
-			LOGGER.error("Fail to delete OrganizationCommunity,organizationId=" + cmd.getOrganizationId() + "," + e.getMessage());
+			}
+			return s;
+		});
+
+	}
+
+	private OrganizationCommunity checkOrgCommuByOrgIdAndCommId(Long organizationId, Long communityId) {
+		OrganizationCommunity orgCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(organizationId, communityId);
+		if(orgCommunity == null){
+			LOGGER.error("organization community not found.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Fail to delete OrganizationCommunity.");
+					"organization community not found.");
 		}
+		return orgCommunity;
+	}
+
+	private void checkCommunityIdsIsNull(List<Long> communityIds) {
+		if(communityIds == null || communityIds.isEmpty()){
+			LOGGER.error("communityIds is empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"communityIds is empty.");
+		}
+
 	}
 
 	@Override
 	public void createPropertyOrganization(CreatePropertyOrganizationCommand cmd) {
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("organizationId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"organizationId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		Organization organization = new Organization();
-		organization.setLevel(0);
-		organization.setAddressId(0l);
-		organization.setName(community.getName()+"物业");
-		organization.setOrganizationType(OrganizationType.PM.getCode());
-		organization.setParentId(0l);
-		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
-		organizationProvider.createOrganization(organization);
-		OrganizationCommunity departmentCommunity = new OrganizationCommunity();
-		departmentCommunity.setCommunityId(community.getId());
-		departmentCommunity.setOrganizationId(organization.getId());
-		organizationProvider.createOrganizationCommunity(departmentCommunity);
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		Community community = this.checkCommunity(cmd.getCommunityId());
+
+		this.dbProvider.execute(s -> {
+			Organization organization = new Organization();
+			organization.setLevel(0);
+			organization.setAddressId(0l);
+			organization.setName(community.getName()+"物业");
+			organization.setOrganizationType(OrganizationType.PM.getCode());
+			organization.setParentId(0l);
+			organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+			organizationProvider.createOrganization(organization);
+			OrganizationCommunity departmentCommunity = new OrganizationCommunity();
+			departmentCommunity.setCommunityId(community.getId());
+			departmentCommunity.setOrganizationId(organization.getId());
+			organizationProvider.createOrganizationCommunity(departmentCommunity);
+			
+			return s;
+		});
 	}
 
 	@Override
 	public ListOrganizationsCommandResponse listOrganizations(ListOrganizationsCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
 		ListOrganizationsCommandResponse response = new ListOrganizationsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
-		int totalCount = organizationProvider.countOrganizations(cmd.getName());
+		int totalCount = organizationProvider.countOrganizations(cmd.getOrganizationType(),cmd.getName());
 		if(totalCount == 0) return response;
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
+		
 		List<Organization> result = organizationProvider.listOrganizations(cmd.getOrganizationType(),cmd.getName(), cmd.getPageOffset(), pageSize);
 		response.setMembers( result.stream()
-				.map(r->{ return ConvertHelper.convert(r,OrganizationDTO.class); })
-				.collect(Collectors.toList()));
+				.map(r->{ return ConvertHelper.convert(r,OrganizationDTO.class); }).collect(Collectors.toList()));
+		
 		response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return response;
 	}
@@ -402,12 +413,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListOrganizationMemberCommandResponse getUserOwningOrganizations() {
 		User user  = UserContext.current().getUser();
-		//权限控制
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
-		List<OrganizationMember> reslut = organizationProvider.listOrganizationMembers(user.getId());
-		if(reslut != null && reslut.size() > 0){
+		List<OrganizationMember> result = organizationProvider.listOrganizationMembers(user.getId());
+		if(result != null && result.size() > 0){
 			List<OrganizationMemberDTO> members =  new ArrayList<OrganizationMemberDTO>();
-			for (OrganizationMember organizationMember : reslut) {
+			for (OrganizationMember organizationMember : result) {
 				Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
 				if(OrganizationType.PM != OrganizationType.fromCode(organization.getOrganizationType())){
 					OrganizationMemberDTO dto =ConvertHelper.convert(organizationMember,OrganizationMemberDTO.class);
@@ -451,6 +461,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListOrganizationMemberCommandResponse listOrgMembers(ListOrganizationMemberCommand cmd) {
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset().longValue(), pageSize);
@@ -461,6 +472,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				result.remove(result.size()-1);
 				response.setNextPageOffset(cmd.getPageOffset()+1);
 			}
+
 			response.setMembers(result.stream()
 					.map(r->{ 
 						OrganizationMemberDTO dto =  ConvertHelper.convert(r,OrganizationMemberDTO.class); 
@@ -508,7 +520,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					r.setContentType(r.getContentType().toUpperCase());
 			}
 		}
-		
+
 	}
 
 	private void checkUserHaveRightToNewTopic(NewTopicCommand cmd,Organization organization) {
@@ -573,65 +585,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListPostCommandResponse  queryTopicsByCategory(QueryOrganizationTopicCommand cmd) {
 		return this.forumService.queryOrganizationTopics(cmd);
-		//		ListPropPostCommandResponse response = new ListPropPostCommandResponse();
-		//		User user  = UserContext.current().getUser();
-		//    	Long communityId = cmd.getCommunityId();
-		//    	if(communityId == null){
-		//    		LOGGER.error("organizationId paramter can not be null or empty");
-		//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-		//                    "organizationId paramter can not be null or empty");
-		//    	}
-		//    	Community community = communityProvider.findCommunityById(communityId);
-		//    	if(community == null){
-		//    		LOGGER.error("Unable to find the community.communityId=" + communityId);
-		//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-		//                     "Unable to find the community.");
-		//    	}
-		//    	
-		//    	//权限控制
-		//    	int totalCount = propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
-		//    	if(totalCount == 0) return response;
-		//    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		//    	int pageCount = getPageCount(totalCount, pageSize);
-		//    	cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		//    	List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
-		//    	List<CommunityPmTasks> tasks = propertyMgrProvider.listCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus(), cmd.getPageOffset(), pageSize);
-		//    	if(tasks != null && tasks.size() > 0){
-		//    		for (CommunityPmTasks task : tasks) {
-		//				PostDTO post = forumService.getTopicById(task.getEntityId(), communityId, false);		
-		//				PropertyPostDTO dto = ConvertHelper.convert(post, PropertyPostDTO.class);
-		//				dto.setCommunityId(task.getOrganizationId());
-		//				dto.setEntityType(task.getEntityType());
-		//				dto.setEntityId(task.getEntityId());
-		//				dto.setTargetType(task.getTargetType());
-		//				dto.setTargetId(task.getTargetId());
-		//				dto.setTaskType(task.getTaskType());
-		//				dto.setTaskStatus(task.getTaskStatus());
-		//				results.add(dto);
-		//			}
-		//    	}
-		//    	response.setPosts(results);
-		//    	response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
-		//    	return response;
 	}
 
 	@Override
 	public ListPostCommandResponse listTopics(ListTopicCommand cmd) {
-		User user  = UserContext.current().getUser();
 		Long communityId = cmd.getCommunityId();
-		if(communityId == null){
-			LOGGER.error("organizationId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"organizationId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(communityId);
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-
-		//权限控制
+		this.checkCommunityIdIsNull(communityId);
+		this.checkCommunity(communityId);
 		return forumService.listTopics(cmd);
 	}
 
@@ -718,13 +678,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListOrganizationCommunityCommandResponse listOrganizationCommunities(ListOrganizationCommunityCommand cmd) {
 		ListOrganizationCommunityCommandResponse response = new ListOrganizationCommunityCommandResponse();
+
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
 		int totalCount = organizationProvider.countOrganizationCommunitys(cmd.getOrganizationId());
 		if(totalCount == 0) return response;
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
+
 		List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId(),cmd.getPageOffset(),pageSize);
-		List<OrganizationCommunityDTO> members = new ArrayList<OrganizationCommunityDTO>();
+		List<OrganizationCommunityDTO> orgComms = new ArrayList<OrganizationCommunityDTO>();
 		if(result != null && result.size() > 0){
 			for (OrganizationCommunity organizationCommunity : result) {
 				OrganizationCommunityDTO dto = ConvertHelper.convert(organizationCommunity, OrganizationCommunityDTO.class);
@@ -733,10 +696,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setCityName(community.getCityName());
 				dto.setAreaName(community.getAreaName());
 				dto.setStatus(community.getStatus());
-				members.add(dto);
+				orgComms.add(dto);
 			}
 		}
-		response.setCommunities(members);
+		response.setCommunities(orgComms);
 		response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return response;
 	}
@@ -761,8 +724,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void createOrgContact(CreateOrganizationContactCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
 		if(cmd.getContactType() == null){
 			cmd.setContactType(IdentifierType.MOBILE.getCode());
 		}
@@ -776,8 +737,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void updateOrgContact(UpdateOrganizationContactCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
 		if(cmd.getContactType() == null){
 			cmd.setContactType(IdentifierType.MOBILE.getCode());
 		}
@@ -791,11 +750,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void deleteOrgContact(DeleteOrganizationIdCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
 		CommunityPmContact contact = propertyMgrProvider.findPropContactById(cmd.getId());
 		if(contact == null){ 
-			LOGGER.error("contact is not found.contactId=" + cmd.getId() + ",userId=" + user.getId());
+			LOGGER.error("organization contact not found.");
 		}
 		else{
 			propertyMgrProvider.deletePropContact(cmd.getId());
@@ -804,13 +761,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListOrganizationContactCommandResponse listOrgContact(ListOrganizationContactCommand cmd) {
-		User user  = UserContext.current().getUser();
 		//权限控制
 		ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
-		//	    	int totalCount = organizationProvider.countOrganizations(cmd.getName());
-		//	    	if(totalCount == 0) return response;
-		//	    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		//	    	int pageCount = getPageCount(totalCount, pageSize);
 
 		List<CommunityPmContact> result = propertyMgrProvider.listCommunityPmContacts(cmd.getOrganizationId());
 		response.setMembers( result.stream()
@@ -821,16 +773,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void deleteOrganization(DeleteOrganizationIdCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//权限控制
-		Organization organization = organizationProvider.findOrganizationById(cmd.getId());
-		if(organization == null){ 
-			LOGGER.error("organization is not found.organizationId=" + cmd.getId() + ",userId=" + user.getId());
-		}
-		else{
-			organizationProvider.deleteOrganizationById(cmd.getId());
-		}
-
+		this.checkOrganizationIdIsNull(cmd.getId());
+		this.checkOrganization(cmd.getId());
+		organizationProvider.deleteOrganizationById(cmd.getId());
 	}
 
 	@Override
@@ -849,13 +794,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void sendOrgMessage(SendOrganizationMessageCommand cmd) {
-		if(cmd.getCommunityIds() == null){
-			LOGGER.error("organization communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"organization communityId paramter can not be null or empty");
-		}
+		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
+		this.checkCommunityIdsIsNull(cmd.getCommunityIds());
+		this.checkOrganization(cmd.getOrganizationId());
+
 		List<Long> familyIds = new ArrayList<Long>();
 		List<Long> communityIds = cmd.getCommunityIds();
+
 		if(communityIds == null || communityIds.size() == 0){
 			List<OrganizationCommunity> organizationCommunityList =  organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
 			if(organizationCommunityList != null && organizationCommunityList.size() > 0){
@@ -907,7 +852,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void setCurrentOrganization(SetCurrentOrganizationCommand cmd) {
 		User user  = UserContext.current().getUser();
-		//权限控制
 		String organizationId = String.valueOf(cmd.getOrganizationId());
 		userActivityProvider.updateUserProfile(user.getId(), "currentOrganizationName", organizationId);
 	}
@@ -915,18 +859,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public  OrganizationDTO getUserCurrentOrganization() {
 		User user  = UserContext.current().getUser();
-		//权限控制
+
 		OrganizationDTO dto = new OrganizationDTO();
-		List<UserProfile> userProfiles = userActivityProvider.findProfileByUid(user.getId());
-		UserProfile userProfile = null;
-		if(userProfiles != null && userProfiles.size() > 0){
-			for (UserProfile profile : userProfiles) {
-				if("currentOrganizationName".equals(profile.getItemName())){
-					userProfile = profile;
-				}
-			}
-			//			userProfile = userProfiles.get(0) ;
-		}
+		UserProfile userProfile = this.getUserProfileByUidAndItemName(user.getId(),"currentOrganizationName");
+
 		if(userProfile != null){
 			Long organizationId = Long.parseLong((userProfile.getItemValue()));
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
@@ -945,6 +881,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 		}
 		return dto;
+	}
+
+	private UserProfile getUserProfileByUidAndItemName(Long userId, String itemName) {
+		List<UserProfile> userProfiles = userActivityProvider.findProfileByUid(userId);
+		UserProfile userProfile = null;
+		if(userProfiles != null && userProfiles.size() > 0){
+			for (UserProfile profile : userProfiles) {
+				if(itemName.equals(profile.getItemName())){
+					userProfile = profile;
+				}
+			}
+		}
+		return userProfile;
 	}
 
 	public Map<String, Long> getOrganizationRegionMap(Long communityId) {
@@ -987,18 +936,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {
 		User user = UserContext.current().getUser();
-		if(user == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,"user is null");
 
 		List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 
 		if(orgMembers != null && !orgMembers.isEmpty()){
 			orgMembers.stream().map(orgMember -> {
-
 				Organization org = this.organizationProvider.findOrganizationById(orgMember.getOrganizationId());
 				if (org != null){
-
 					if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
 						if(org.getOrganizationType().equals(cmd.getOrganiztionType())){
 							OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
@@ -1016,7 +961,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 						if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
 							this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
 						}
-
 						orgs.add(tempSimpleOrgDTO);
 					}
 
@@ -1041,17 +985,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public OrganizationDTO getOrganizationByComunityidAndOrgType(
-			GetOrgDetailCommand cmd) {
+	public OrganizationDTO getOrganizationByComunityidAndOrgType(GetOrgDetailCommand cmd) {
 		List<OrganizationCommunityDTO> orgCommunitys = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
-
 		if(orgCommunitys != null && !orgCommunitys.isEmpty()){
 			for(int i=0;i<orgCommunitys.size();i++){
 				OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(),cmd.getOrganizationType());
 				if(org != null){
 					User user = UserContext.current().getUser();
 					OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(),org.getId());
-
 					if(member != null && member.getStatus() !=null)
 						org.setMemberStatus(member.getStatus());
 					else
@@ -1061,33 +1002,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 			}
 		}
-
 		return null;
 	}
 
 	@Override
 	public int rejectOrganization(RejectOrganizationCommand cmd) {
-
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the community.");
-		}
-		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization by communityId : " + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunity(cmd.getCommunityId());
+		Organization organization = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
 
 		User user = UserContext.current().getUser();
-		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
-		if(member == null){
-			LOGGER.error("Unable to reject organization ，because userId = " + user.getId() +" is not in the organization : " + organization.getId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to reject organization ，because user is not in the organization");
-		}
+		OrganizationMember member = this.checkUserNotInOrg(user.getId(), organization.getId());
 		member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 		this.organizationProvider.updateOrganizationMember(member);
 		return 1;
@@ -1095,50 +1020,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public int userExitOrganization(UserExitOrganizationCommand cmd) {
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the community.");
-		}
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunity(cmd.getCommunityId());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), cmd.getOrganizationType());
 
-		List<OrganizationCommunity> orgComunitys = this.organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
-
-		if(orgComunitys != null && !orgComunitys.isEmpty()){
-			Long organizationId = 0L;
-			for(int i=0;i<orgComunitys.size();i++){
-				Organization org = this.organizationProvider.findOrganizationById(orgComunitys.get(i).getOrganizationId());
-				if(org != null && org.getOrganizationType().equals(cmd.getOrganizationType())){
-					organizationId = org.getId();
-					break;
-				}
-			}
-
-			//根据communityId找到该小区下的物业:organizationId
-			if(organizationId != 0){
-				User user = UserContext.current().getUser();
-				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
-				if(member != null){
-					this.organizationProvider.deleteOrganizationMember(member);
-					return 1;
-				}
-				else{
-					LOGGER.error("Unable to exit organization ，because user is not in the organization. userId=" + user.getId() + ",organizationId=" + organizationId);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Unable to exit organization ，because user is not in the organization");
-				}
-			}
-			else{
-				LOGGER.error("Unable to exit the organization.Because organization not found.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Unable to exit the organization.Because organization not found.");
-			}
-		}
-		else{
-			LOGGER.error("Unable to find the organization by communityId : " + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization by communityId");
-		}
+		Long organizationId = org.getId();
+		User user = UserContext.current().getUser();
+		OrganizationMember member = this.checkUserNotInOrg(user.getId(), organizationId);
+		this.organizationProvider.deleteOrganizationMember(member);
+		return 1;
 	}
 
 	@Override
@@ -1641,11 +1531,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private Community checkCommunity(Long communityId) {
-		if(communityId == null){
-			LOGGER.error("communityId could not be null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"communityId could not be null");
-		}
 		Community community = this.communityProvider.findCommunityById(communityId);
 		if(community == null){
 			LOGGER.error("community not found");
