@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.user.User;
@@ -33,6 +34,8 @@ public class AddressTest extends CoreServerTestCase {
     
     @Autowired
     private RegionProvider regionProvider;
+    @Autowired
+    private FamilyProvider familyProvider;
     
     private List<Community> communityCleanupList = new ArrayList<>();
     private List<CommunityGeoPoint> communityGeopointsCleanupList = new ArrayList<>();
@@ -311,31 +314,8 @@ public class AddressTest extends CoreServerTestCase {
 //    }
     
     @Test
-    public void geoHash(){
-        List<String> list = new ArrayList<String>();
-        list.add("24206890946790527 24206890946790527 NULL             116.464483      39.99117");
-        list.add("24206890946790622 24206890946790624 NULL                116.469       39.9972");
-        list.add("24206890946790772 24206890946790774 NULL             116.243044     40.218246");
-        list.add("24206890946790973 24206890946790975 NULL                116.518       39.9492");
-        list.add("24206890946791796 24206890946791798 NULL                116.374       40.0713");
-        list.add("24206890946792671 24206890946792673 NULL                 116.62       39.9306");
-        list.add("24206890946793325 24206890946793327 NULL                116.247       39.9286");
-        list.add("24206890946793330 24206890946793332 NULL                116.245       39.9293");
-        list.add("24206890946793735 24206890946793737 NULL                116.708       39.8881");
-        list.add("24206890946793740 24206890946793742 NULL                116.705       39.8792");
-        list.add("24206890946795339 24206890946795352 NULL        116.2792663574 39.901473999");
-        list.add("24206890946796358 24206890946796375 NULL              39.879318    116.703015");
-        list.add("24206890946797054 24206890946797067 NULL             116.265314     40.214079");
-        list.add("24209300423443704 24209300423443704 NULL             120.371088     30.273112");
-        list.add("24209300423443969 24209300423443969 NULL             120.202812     30.358188");
-        
-        for(String str : list) {
-            String[] segs = str.split("\t");
-            double latitude = Double.parseDouble(segs[4].trim());
-            double longitude = Double.parseDouble(segs[3].trim());
-            String geohash = GeoHashUtils.encode(latitude, longitude);
-            System.out.println(segs[1] + "\t" + geohash);
-        }
-        
+    public void testCountWaitFamily(){
+        int count = familyProvider.countWaitApproveFamily(8L);
+        System.out.println(count);
     }
 }

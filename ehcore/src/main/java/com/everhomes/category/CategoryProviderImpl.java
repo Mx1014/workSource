@@ -107,7 +107,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         return ConvertHelper.convert(dao.findById(id), Category.class);
     }
     
-    @Cacheable(value = "listAllCategory")
+    @Cacheable(value = "listAllCategory", unless="#result.size() == 0")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<Category> listAllCategories() {
@@ -122,7 +122,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         return result;
     }
 
-    @Cacheable(value = "listChildCategory")
+    @Cacheable(value = "listChildCategory" , unless="#result.size() == 0")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<Category> listChildCategories(Long parentId, CategoryAdminStatus status,
@@ -182,7 +182,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         return result;
     }
 
-    @Cacheable(value = "listDescendantCategory")
+    @Cacheable(value = "listDescendantCategory" , unless="#result.size() == 0")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<Category> listDescendantCategories(Long ancestorId, CategoryAdminStatus status,
@@ -250,7 +250,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         return categories;
     }
     
-    @Cacheable(value = "listContentCategories")
+    @Cacheable(value = "listContentCategories", unless="#result.size() == 0")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<Category> listContentCategories() {
@@ -274,7 +274,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         return result;
     }
 
-    @Cacheable(value = "listActionCategories")
+    @Cacheable(value = "listActionCategories", unless="#result.size() == 0")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<Category> listActionCategories(Long parentId) {

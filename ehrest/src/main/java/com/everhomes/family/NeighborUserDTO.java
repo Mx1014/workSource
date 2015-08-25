@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.family;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -91,7 +94,16 @@ public class NeighborUserDTO {
     public void setOccupation(String occupation) {
         this.occupation = occupation;
     }
+    
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

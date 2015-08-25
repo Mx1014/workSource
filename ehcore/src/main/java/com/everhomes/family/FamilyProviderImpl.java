@@ -432,19 +432,33 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 	@Override
 	public int countWaitApproveFamily(Long comunityId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
-
-		SelectConditionStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_GROUP_MEMBERS)
-				.leftOuterJoin(Tables.EH_GROUPS)
-				.on(Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID))
-				.where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
-						.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
-
-		if(comunityId != null){
-			step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
-		}
-
-		return step.fetchOneInto(Integer.class);
+	    final Integer[] count = new Integer[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+                null, (DSLContext context, Object reducingContext) -> {
+                    Integer c = context.selectCount().from(Tables.EH_GROUP_MEMBERS)
+                    .leftOuterJoin(Tables.EH_GROUPS)
+                    .on(Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID))
+                    .where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
+                            .eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()))
+                    .and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId))
+                    .fetchOne(0,Integer.class);
+                    count[0] = c;
+                    return true;
+                });
+        return count[0];
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+//
+//		SelectConditionStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_GROUP_MEMBERS)
+//				.leftOuterJoin(Tables.EH_GROUPS)
+//				.on(Tables.EH_GROUPS.ID.eq(Tables.EH_GROUP_MEMBERS.GROUP_ID))
+//				.where(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS
+//						.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
+//
+//		if(comunityId != null){
+//			step.and(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(comunityId));
+//		}
+//
+//		return step.fetchOneInto(Integer.class);
 	}
 
 	private String parserUri(String uri,String ownerType, Long ownerId){
