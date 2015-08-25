@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 
-public class SyncUserFavoriteCommand{
+public class UserFavoriteCommand{
     @NotNull
     private Long userId;
     @NotNull

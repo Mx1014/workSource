@@ -13,7 +13,7 @@ import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
 import com.everhomes.business.SyncDeleteBusinessCommand;
 import com.everhomes.business.SyncUserAddShopStatusCommand;
-import com.everhomes.business.SyncUserFavoriteCommand;
+import com.everhomes.business.UserFavoriteCommand;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
@@ -120,7 +120,7 @@ public class BusinessOpenController extends ControllerBase {
      */
     @RequestMapping("syncUserFavorite")
     @RestReturn(value=String.class)
-    public RestResponse syncUserFavorite(SyncUserFavoriteCommand cmd) {
+    public RestResponse syncUserFavorite(UserFavoriteCommand cmd) {
         
         businessService.syncUserFavorite(cmd);
         RestResponse response =  new RestResponse();
@@ -135,7 +135,7 @@ public class BusinessOpenController extends ControllerBase {
      */
     @RequestMapping("syncUserCancelFavorite")
     @RestReturn(value=String.class)
-    public RestResponse syncUserCancelFavorite(SyncUserFavoriteCommand cmd) {
+    public RestResponse syncUserCancelFavorite(UserFavoriteCommand cmd) {
         
         businessService.syncUserCancelFavorite(cmd);
         RestResponse response =  new RestResponse();
@@ -150,7 +150,7 @@ public class BusinessOpenController extends ControllerBase {
      */
     @RequestMapping("findBusinessFavoriteStatus")
     @RestReturn(value=String.class)
-    public RestResponse findBusinessFavoriteStatus(SyncUserFavoriteCommand cmd) {
+    public RestResponse findBusinessFavoriteStatus(UserFavoriteCommand cmd) {
         
         RestResponse response =  new RestResponse(businessService.findBusinessFavoriteStatus(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

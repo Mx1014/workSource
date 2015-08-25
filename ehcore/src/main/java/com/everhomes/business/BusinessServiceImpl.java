@@ -130,7 +130,7 @@ public class BusinessServiceImpl implements BusinessService {
         business.setTargetId(cmd.getTargetId() == null ? "" : cmd.getTargetId());
         business.setDescription(cmd.getDescription() == null ? "" : cmd.getDescription());
         business.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        if(cmd.getLatitude() != null && cmd.getLongitude() != null){
+        if(cmd.getLatitude() != null && cmd.getLongitude() != null && cmd.getLatitude() != 0 && cmd.getLongitude() != 0){
             String geohash = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude());
             business.setGeohash(geohash);
         }
@@ -639,7 +639,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public void syncUserFavorite(SyncUserFavoriteCommand cmd) {
+    public void syncUserFavorite(UserFavoriteCommand cmd) {
         isValiad(cmd);
         User user = userProvider.findUserById(cmd.getUserId());
         Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
@@ -652,7 +652,7 @@ public class BusinessServiceImpl implements BusinessService {
         
     }
     
-    private boolean isValiad(SyncUserFavoriteCommand cmd){
+    private boolean isValiad(UserFavoriteCommand cmd){
         if(cmd.getUserId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter userId,userId is not found");
@@ -675,7 +675,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public void syncUserCancelFavorite(SyncUserFavoriteCommand cmd) {
+    public void syncUserCancelFavorite(UserFavoriteCommand cmd) {
         isValiad(cmd);
         User user = userProvider.findUserById(cmd.getUserId());
         Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
@@ -684,7 +684,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public Byte findBusinessFavoriteStatus(SyncUserFavoriteCommand cmd) {
+    public Byte findBusinessFavoriteStatus(UserFavoriteCommand cmd) {
         isValiad(cmd);
         User user = userProvider.findUserById(cmd.getUserId());
         Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
