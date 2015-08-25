@@ -35,6 +35,7 @@ import com.everhomes.util.Tuple;
 @RestController
 @RequestMapping("/openapi")
 public class BusinessOpenController extends ControllerBase {
+    private static final String DEFAULT_SORT = "default_order";
     @Autowired
     private UserService userService;
 
@@ -57,7 +58,7 @@ public class BusinessOpenController extends ControllerBase {
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listBizCategories() {
         
-        Tuple<String, SortOrder> orderBy = null;
+        Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
                 CategoryAdminStatus.ACTIVE, orderBy);
@@ -115,7 +116,7 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /openapi/syncUserAddShopStatus</b>
+     * <b>URL: /openapi/syncUserFavorite</b>
      * <p>同步用户收藏</p>
      */
     @RequestMapping("syncUserFavorite")
@@ -130,7 +131,7 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /openapi/syncUserAddShopStatus</b>
+     * <b>URL: /openapi/syncUserCancelFavorite</b>
      * <p>同步用户取消收藏</p>
      */
     @RequestMapping("syncUserCancelFavorite")
