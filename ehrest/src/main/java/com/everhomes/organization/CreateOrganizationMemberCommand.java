@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactType：联系类型：{@link com.everhomes.user.IdentifierType}</li>
  * <li>contactToken：联系信息</li>
  * <li>contactDescription：描述</li>
+ * <li>必填：organizationId，targetType。注册用户：targetId，memberGroup。未注册：memberGroup，contactType，contactToken，contactName</li>
  * </ul>
  */
 public class CreateOrganizationMemberCommand {
@@ -22,7 +23,6 @@ public class CreateOrganizationMemberCommand {
     private Long   organizationId;
    
 	private String targetType;
-    @NotNull
 	private Long   targetId;
 
 	private String memberGroup;

@@ -36,7 +36,6 @@ public class OrganizationAdminController extends ControllerBase {
 	/**
      * <b>URL: /admin/org/createOrganization</b>
      * <p>创建政府机构</p>
-     * @return 添加的结果
      */
     @RequestMapping("createOrganization")
     @RestReturn(value=String.class)
@@ -51,7 +50,6 @@ public class OrganizationAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/org/createOrganizationMember</b>
      * <p>创建政府机构成员</p>
-     * @return 添加的结果
      */
     @RequestMapping("createOrganizationMember")
     @RestReturn(value=String.class)
@@ -139,7 +137,6 @@ public class OrganizationAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/org/deleteOrganizationMember</b>
      * <p>删除政府机构成员</p>
-     * @return 删除的结果
      */
     @RequestMapping("deleteOrganizationMember")
     @RestReturn(value=String.class)

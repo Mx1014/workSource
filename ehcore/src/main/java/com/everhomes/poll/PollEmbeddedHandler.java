@@ -40,9 +40,7 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
         if (poll == null) {
             return null;
         }
-        Map<String,PollShowResultResponse> obj = new HashMap<String, PollShowResultResponse>();
-        obj.put("poll", poll);
-        return StringHelper.toJsonString(obj);
+        return StringHelper.toJsonString(poll);
     }
 
     @Override

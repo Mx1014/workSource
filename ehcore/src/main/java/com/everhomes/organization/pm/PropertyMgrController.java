@@ -45,6 +45,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/findPropertyOrganization</b>
 	 * <p>获取物业组织</p>
 	 */
+	//checked
 	@RequestMapping("findPropertyOrganization")
 	@RestReturn(value=OrganizationDTO.class)
 	public RestResponse findPropertyOrganization(@Valid PropCommunityIdCommand  cmd) {
@@ -59,6 +60,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/getUserOwningProperties</b>
 	 * <p>查询用户加入的物业</p>
 	 */
+	//checked
 	@RequestMapping("getUserOwningProperties")
 	@RestReturn(value=ListPropMemberCommandResponse.class)
 	public RestResponse getUserOwningProperties() {
@@ -73,6 +75,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listPMGroupMembers</b>
 	 * <p>查询物业成员列表</p>
 	 */
+	//checked
 	@RequestMapping("listPMGroupMembers")
 	@RestReturn(value=ListPropMemberCommandResponse.class)
 	public RestResponse listPropertyMembers(@Valid ListPropMemberCommand cmd) {
@@ -87,7 +90,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/applyPropertyMember</b>
 	 * <p>当前用户申请物业管理员</p>
 	 */
-	//未做用户已存在organizationMember的校验，不能重复申请
+	//checked
 	@RequestMapping("applyPropertyMember")
 	@RestReturn(value=String.class)
 	public RestResponse applyPropertyMember(@Valid applyPropertyMemberCommand cmd) {
@@ -102,8 +105,8 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/addPropertyMemberByPhone</b>
 	 * <p>通过手机添加物业成员</p>
-	 * @return 添加的结果
 	 */
+	//checked
 	@RequestMapping("addPMGroupMemberByPhone")
 	@RestReturn(value=String.class)
 	public RestResponse addPropertyMemberByPhone(@Valid CreatePropMemberCommand cmd) {
@@ -164,39 +167,42 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listApartmentMappings</b>
 	 * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
 	 */
+	//checked
 	@RequestMapping("listPMAddressMapping")
 	@RestReturn(value=ListPropAddressMappingCommandResponse.class)
 	public RestResponse listApartmentMappings(@Valid ListPropAddressMappingCommand cmd) {
-		ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.ListAddressMappings(cmd);
+		ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.listAddressMappings(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/getPMAddressMapping</b>
+	 * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
+	 */
+	//checked
+	/*@RequestMapping("getPMAddressMapping")
+	@RestReturn(value=ListPropAddressMappingCommandResponse.class)
+	public RestResponse getPMAddressMapping(@Valid ListPropAddressMappingCommand cmd) {
+		ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.listAddressMappings(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}*/
 
 	/**
 	 * <b>URL: /pm/importPMAddressMapping</b>
 	 * <p>导入左邻系统和物业自有系统的门牌号映射</p>
 	 */
+	//checked
 	@RequestMapping("importPMAddressMapping")
 	@RestReturn(value=String.class)
 	public RestResponse importPMAddressMapping(@Valid PropCommunityIdCommand cmd) {
 		propertyMgrService.importPMAddressMapping(cmd);
 		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /pm/getPMAddressMapping</b>
-	 * <p>列出公寓门牌号映射表（左邻系统和物业自有系统的门牌号映射）</p>
-	 */
-	@RequestMapping("getPMAddressMapping")
-	@RestReturn(value=ListPropAddressMappingCommandResponse.class)
-	public RestResponse getPMAddressMapping(@Valid ListPropAddressMappingCommand cmd) {
-		ListPropAddressMappingCommandResponse commandResponse = propertyMgrService.ListAddressMappings(cmd);
-		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -221,6 +227,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/importPMPropertyOwnerInfo</b>
 	 * <p>上传业主信息</p>
 	 */
+	//checked
 	@RequestMapping(value="importPMPropertyOwnerInfo", method = RequestMethod.POST)
 	@RestReturn(value=String.class)
 	public RestResponse importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,@RequestParam(value = "attachment") MultipartFile[] files) {
@@ -235,6 +242,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/ListPropOwnerCommandResponse</b>
 	 * <p>列出业主信息表</p>
 	 */
+	//checked
 	@RequestMapping("listPMPropertyOwnerInfo")
 	@RestReturn(value=ListPropOwnerCommandResponse.class)
 	public RestResponse listPMPropertyOwnerInfo(@Valid ListPropOwnerCommand cmd) {
@@ -280,6 +288,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>设置公寓状态：自住/出租/空闲/装修/待售/其它</p>
 	 * @return 设置的结果
 	 */
+	//checked
 	@RequestMapping("setApartmentStatus")
 	@RestReturn(value=String.class)
 	public RestResponse setApartmentStatus(@Valid SetPropAddressStatusCommand cmd) {
@@ -294,6 +303,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/getApartmentStatistics</b>
 	 * <p>小区公寓统计信息：公寓统计（总数、入住公寓数量、入住用户数量、自住/出租/空闲/装修/待售/其它等数量）</p>
 	 */
+	//checked
 	@RequestMapping("getApartmentStatistics")
 	@RestReturn(value=PropAptStatisticDTO.class)
 	public RestResponse getApartmentStatistics(@Valid PropCommunityIdCommand cmd) {
@@ -338,6 +348,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/getPMTopicStatistics</b>
 	 * <p>根据时间和状态获取物业维修帖统计信息：未处理、处理中、已处理、其它</p>
 	 */
+	//checked
 	@RequestMapping("getPMTopicStatistics")
 	@RestReturn(value=ListPropTopicStatisticCommandResponse.class)
 	public RestResponse getPMTopicStatistics(@Valid ListPropTopicStatisticCommand  cmd) {
@@ -352,6 +363,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/sendMsgToPMGroup</b>
 	 * 发消息给物业组所有成员
 	 */
+	//checked
 	@RequestMapping("sendMsgToPMGroup")
 	@RestReturn(value=String.class)
 	public RestResponse sendMsgToPMGroup(@Valid PropCommunityIdMessageCommand cmd) {
@@ -397,6 +409,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * 物业一键推送消息（是左邻用户则发消息、不是左邻用户则发短信）。
 	 * 按小区，楼栋，门牌号范围
 	 */
+	//checked
 	@RequestMapping("sendNoticeToFamily")
 	@RestReturn(value=String.class)
 	public RestResponse sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
@@ -506,7 +519,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listInvitedUsers</b>
 	 * 查询邀请加入左邻的用户列表
 	 */
-	@RequestMapping("listInvitedUsers")
+	/*@RequestMapping("listInvitedUsers")
 	@RestReturn(value=ListPropInvitedUserCommandResponse.class)
 	public RestResponse listInvitedUsers(@Valid ListPropInvitedUserCommand cmd) {
 		ListPropInvitedUserCommandResponse  commandResponse = this.propertyMgrService.listInvitedUsers(cmd);
@@ -514,7 +527,7 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}
+	}*/
 
 	/**
 	 * <b>URL: /pm/searchInvitedUsers</b>
@@ -533,8 +546,8 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/approvePropFamilyMember</b>
 	 * <p>批准家庭成员</p>
-	 * @return 批准的结果
 	 */
+	//checked
 	@RequestMapping("approvePropFamilyMember")
 	@RestReturn(value=String.class)
 	public RestResponse approvePropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
@@ -550,6 +563,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <p>拒绝家庭成员</p>
 	 * @return 拒绝的结果
 	 */
+	//checked
 	@RequestMapping("rejectPropFamilyMember")
 	@RestReturn(value=String.class)
 	public RestResponse rejectPropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
@@ -563,8 +577,8 @@ public class PropertyMgrController extends ControllerBase {
 	/**
 	 * <b>URL: /pm/revokePropFamilyMember</b>
 	 * <p>踢出家庭成员</p>
-	 * @return 踢出的结果
 	 */
+	//checked
 	@RequestMapping("revokePropFamilyMember")
 	@RestReturn(value=String.class)
 	public RestResponse revokePropFamilyMember(@Valid CommunityPropFamilyMemberCommand cmd) {
@@ -579,6 +593,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listPropBuildingsByKeyword</b>
 	 * <p>根据小区Id和关键字查询小区楼栋(物业)</p>
 	 */
+	//checked
 	@RequestMapping("listPropBuildingsByKeyword")
 	@RestReturn(value=BuildingDTO.class, collection=true)
 	public RestResponse listPropBuildingsByKeyword(@Valid ListBuildingByKeywordCommand cmd) {
@@ -595,6 +610,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/findUserByIndentifier</b>
 	 * <p>根据用户token查询用户信息</p>
 	 */
+	//checked
 	@RequestMapping("findUserByIndentifier")
 	@RestReturn(value=UserTokenCommandResponse.class)
 	public RestResponse findUserByIndentifier(@Valid UserTokenCommand cmd) {
@@ -610,12 +626,12 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/setPropCurrentCommunity</b>
 	 * <p>设置物业用户当前小区（切换物业）</p>
 	 */
+	//checked
 	@RequestMapping("setPropCurrentCommunity")
 	@RestReturn(String.class)
 	public RestResponse setPropCurrentCommunity(@Valid SetCurrentCommunityCommand cmd) throws Exception {
 		propertyMgrService.setPropCurrentCommunity(cmd);
 		RestResponse response = new RestResponse();
-
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -625,6 +641,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listPropFamilyWaitingMember</b>
 	 * <p>查询小区的待审核家庭成员列表</p>
 	 */
+	//checked
 	@RequestMapping("listPropFamilyWaitingMember")
 	@RestReturn(value=ListPropFamilyWaitingMemberCommandResponse.class)
 	public RestResponse listPropFamilyWaitingMember(@Valid ListPropFamilyWaitingMemberCommand cmd) throws Exception {
@@ -640,6 +657,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/findFamilyByAddressId</b>
 	 * <p>根据addressId查询family</p>
 	 */
+	//checked
 	@RequestMapping("findFamilyByAddressId")
 	@RestReturn(value=PropFamilyDTO.class)
 	public RestResponse findFamilyByAddressId(@Valid ListPropCommunityAddressCommand cmd) throws Exception {
@@ -655,6 +673,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listFamilyMembersByFamilyId</b>
 	 * <p>查询家庭的成员列表</p>
 	 */
+	//checked
 	@RequestMapping("listFamilyMembersByFamilyId")
 	@RestReturn(value=FamilyMemberDTO.class, collection=true)
 	public RestResponse listFamilyMembersByFamilyId(@Valid ListPropFamilyMemberCommand cmd) {

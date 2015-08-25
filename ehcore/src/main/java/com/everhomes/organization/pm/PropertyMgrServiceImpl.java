@@ -55,7 +55,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.Family;
@@ -106,6 +105,7 @@ import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberGroupType;
 import com.everhomes.organization.OrganizationMemberStatus;
+import com.everhomes.organization.OrganizationMemberTargetType;
 import com.everhomes.organization.OrganizationOrder;
 import com.everhomes.organization.OrganizationOrderStatus;
 import com.everhomes.organization.OrganizationOrderType;
@@ -122,7 +122,6 @@ import com.everhomes.organization.pm.pay.BaseVo;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.RestUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -220,53 +219,53 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
 		User user  = UserContext.current().getUser();
 		Long communityId = user.getCommunityId();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		if(!communityId .equals( cmd.getCommunityId())){
-			LOGGER.error("you not belong to the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"you not belong to the community.");
-		}
-		//物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
-		long organizationId = findPropertyOrganizationId(communityId);
-		CommunityPmMember communityPmMember = createCommunityPmMember(organizationId,cmd.getContactDescription(),user);
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunity(cmd.getCommunityId());
+		this.checkCommunityIdIsEqual(cmd.getCommunityId().longValue(), communityId.longValue());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		long organizationId = org.getId();
+		this.checkUserInOrg(user.getId(),organizationId);
+		CommunityPmMember communityPmMember = this.createCommunityPmMember(organizationId,cmd.getContactDescription(),user);
 		propertyMgrProvider.createPropMember(communityPmMember);
-
+	}
+	
+	private void checkUserInOrg(Long userId, Long orgId) {
+		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
+		if(member != null){
+			LOGGER.error("User is in the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is in the organization.");
+		}
 	}
 
-	public CommunityPmMember createCommunityPmMember(Long communityId,String description,User user) {
-		UserIdentifier identifier = null; 
-		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(user.getId());
-		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
-			for (UserIdentifier userIdentifier : userIndIdentifiers) {
-				if(userIdentifier.getIdentifierType() == IdentifierType.MOBILE.getCode()){
-					identifier = userIdentifier;
-					break;
-				}
-			}
-		}
+	public CommunityPmMember createCommunityPmMember(Long orgId,String description,User user) {
+		
 		CommunityPmMember communityPmMember = new CommunityPmMember();
-		communityPmMember.setOrganizationId(communityId);
+		communityPmMember.setOrganizationId(orgId);
 		communityPmMember.setContactName(user.getNickName());
+		communityPmMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+		communityPmMember.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
+		communityPmMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+		communityPmMember.setTargetId(user.getId());
+		communityPmMember.setContactDescription(description);
+		UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
 		if(identifier != null){
 			communityPmMember.setContactToken(identifier.getIdentifierToken());
 			communityPmMember.setContactType(identifier.getIdentifierType());
 		}
-		communityPmMember.setMemberGroup(PmMemberGroup.MANAGER.getCode());
-		communityPmMember.setStatus(PmMemberStatus.CONFIRMING.getCode());
-		communityPmMember.setTargetType(PmMemberTargetType.USER.getCode());
-		communityPmMember.setTargetId(user.getId());
-		communityPmMember.setContactDescription(description);
 		return communityPmMember;
+	}
+	
+	private UserIdentifier getUserMobileIdentifier(Long userId) {
+		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(userId);
+		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
+			for (UserIdentifier userIdentifier : userIndIdentifiers) {
+				if(userIdentifier.getIdentifierType().byteValue() == IdentifierType.MOBILE.getCode()){
+					return userIdentifier;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -307,21 +306,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ListPropMemberCommandResponse commandResponse = new ListPropMemberCommandResponse();
 		User user  = UserContext.current().getUser();
 
-
 		List<CommunityPmMember> entityResultList = propertyMgrProvider.listUserCommunityPmMembers(user.getId());
 		List<PropertyMemberDTO> members =  new ArrayList<PropertyMemberDTO>();
-		//    	commandResponse.setMembers( entityResultList.stream()
-		//                 .map(r->{ 
-		//                	 PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
-		//                	 Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
-		//                	 if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM ){
-		//                		 dto.setOrganizationName(organization.getName());
-		//                		 Community community = findPropertyOrganizationcommunity(organization.getId());
-		//                		 dto.setCommunityId(community.getId());
-		//                		 dto.setCommunityName(community.getName());
-		//                	 }
-		//                	 return dto; })
-		//                 .collect(Collectors.toList()));
 		if(entityResultList != null && entityResultList.size() > 0){
 			for (CommunityPmMember communityPmMember : entityResultList) {
 				Organization organization = organizationProvider.findOrganizationById(communityPmMember.getOrganizationId());
@@ -342,21 +328,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropMemberCommandResponse listCommunityPmMembers(ListPropMemberCommand cmd) {
 		ListPropMemberCommandResponse commandResponse = new ListPropMemberCommandResponse();
-		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		Community community = this.checkCommunity(cmd.getCommunityId());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		Long organizationId = org.getId();
+		
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = propertyMgrProvider.countCommunityPmMembers(organizationId, null);
 		if(totalCount == 0) return commandResponse;
@@ -364,39 +340,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
 
-		List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId(), null, cmd.getPageOffset(),pageSize);
+		List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(organizationId, null, cmd.getPageOffset(),pageSize);
 		commandResponse.setMembers( entityResultList.stream()
 				.map(r->{ 
 					PropertyMemberDTO dto =ConvertHelper.convert(r, PropertyMemberDTO.class);
 					Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
-					dto.setOrganizationName(organization.getName());
-					if(organization != null && OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM ){
+					if(organization != null){
 						dto.setOrganizationName(organization.getName());
-						dto.setCommunityId(community.getId());
-						dto.setCommunityName(community.getName());
+						if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
+							dto.setCommunityId(community.getId());
+							dto.setCommunityName(community.getName());
+						}
 					}
-					return dto; })
-					.collect(Collectors.toList()));
+					return dto; 
+				}).collect(Collectors.toList()));
 		commandResponse.setPageCount(pageCount);
 		return commandResponse;
 	}
 
 	@Override
 	public void importPMAddressMapping(PropCommunityIdCommand cmd) {
-		User user  = UserContext.current().getUser();
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		//只需要导入一次。先查询总数如果没有，继续导入。
-		List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), 1, 10);
-		if(entityResultList == null || entityResultList.size() == 0)
-		{
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		Community community = this.checkCommunity(cmd.getCommunityId());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		long organizationId = org.getId();
+		List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(organizationId, 1, 10);
+		if(entityResultList == null || entityResultList.size() == 0) {
 			ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
 			comand.setCommunityId(community.getId());
 			comand.setKeyword("");
@@ -410,7 +379,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					m.setOrganizationId(organizationId);
 					m.setCommunityId(community.getId());
 					m.setOrganizationAddress(address.getAddress());
-					m.setLivingStatus((byte)0);
+					m.setLivingStatus(PmAddressMappingStatus.DEFAULT.getCode());
 					propertyMgrProvider.createPropAddressMapping(m);
 				}
 			}
@@ -419,37 +388,28 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public ListPropAddressMappingCommandResponse ListAddressMappings(ListPropAddressMappingCommand cmd) {
+	public ListPropAddressMappingCommandResponse listAddressMappings(ListPropAddressMappingCommand cmd) {
 		ListPropAddressMappingCommandResponse commandResponse = new ListPropAddressMappingCommandResponse();
-		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		int totalCount = propertyMgrProvider.countCommunityAddressMappings(cmd.getCommunityId(),(byte)0);
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		this.checkCommunity(cmd.getCommunityId());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		long organizationId = org.getId();
+		
+		int totalCount = propertyMgrProvider.countCommunityAddressMappings(organizationId,null);
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
-		List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(cmd.getCommunityId(), cmd.getPageOffset(), pageSize);
+		
+		List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(organizationId, cmd.getPageOffset(), pageSize);
 		commandResponse.setMembers( entityResultList.stream()
 				.map(r->{ 
 					PropAddressMappingDTO dto = ConvertHelper.convert(r, PropAddressMappingDTO.class);
 					Address address = addressProvider.findAddressById(dto.getAddressId());
 					if(address != null)
 						dto.setAddressName(address.getAddress());
-					return  dto;})
-					.collect(Collectors.toList()));
+					return  dto;
+				}).collect(Collectors.toList()));
 		commandResponse.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return commandResponse;
 	}
@@ -498,25 +458,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public ListPropOwnerCommandResponse  listPMPropertyOwnerInfo(ListPropOwnerCommand cmd) {
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("communityId paramter is null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"communityId paramter is null or empty");
-		}
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		Community community = this.checkCommunity(cmd.getCommunityId());
 
 		ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
-		User user  = UserContext.current().getUser();
-		//权限控制
 		Organization org = this.checkOrganizationByCommIdAndOrgType(community.getId(),OrganizationType.PM.getCode());
-		//将communityId转为organizationId
-		cmd.setCommunityId(org.getId());
-		int totalCount = propertyMgrProvider.countCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken());
+		long organizationId = org.getId();
+		
+		int totalCount = propertyMgrProvider.countCommunityPmOwners(organizationId,cmd.getAddress(),cmd.getContactToken());
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
-		List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(cmd.getCommunityId(),cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
+		
+		List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(organizationId,cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
 		commandResponse.setMembers( entityResultList.stream()
 				.map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
 				.collect(Collectors.toList()));
@@ -729,15 +684,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		{
 
 		}
-
 	}
 
 	@Override
 	public void approvePropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
-		User user  = UserContext.current().getUser();
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
-		Community community = this.checkCommunity(cmd.getCommunityId());
-		//权限控制--admin角色
+		this.checkCommunity(cmd.getCommunityId());
 		Group family = this.checkFamily(cmd.getFamilyId());
 		this.checkCommunityIdIsEqual(family.getIntegralTag2().longValue(),cmd.getCommunityId().longValue());
 
@@ -746,15 +698,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		comand.setMemberUid(cmd.getUserId());
 		comand.setOperatorRole(Role.ResourceAdmin);
 		familySerivce.approveMember(comand);
-
-
 	}
 
 	private void checkCommunityIdIsEqual(long longValue, long longValue2) {
 		if(longValue != longValue2){
-			LOGGER.error("family is not belong to the community");
+			LOGGER.error("communityId not equal.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"family is not belong to the community.");
+					"communityId not equal.");
 		}
 	}
 
@@ -762,7 +712,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public void rejectPropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
-		//权限控制--admin角色
 		Group family = this.checkFamily(cmd.getFamilyId());
 		this.checkCommunityIdIsEqual(family.getIntegralTag2().longValue(),cmd.getCommunityId().longValue());
 
@@ -789,13 +738,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public void revokePropFamilyMember(CommunityPropFamilyMemberCommand cmd) {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
-		//权限控制--admin角色
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		Group family = this.checkFamily(cmd.getFamilyId());
 		this.checkCommunityIdIsEqual(family.getIntegralTag2().longValue(),cmd.getCommunityId().longValue());
 
 		String reason = "";
-		//    	familyProvider.revokeMember(cmd.getFamilyId(), cmd.getUserId(), reason,Role.ResourceAdmin);
 		RevokeMemberCommand comand = new RevokeMemberCommand();
 		comand.setId(cmd.getFamilyId());
 		comand.setMemberUid(cmd.getUserId());
@@ -828,19 +775,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void setPropCurrentCommunity(SetCurrentCommunityCommand cmd) {
-		User user  = UserContext.current().getUser();
-		//根据communityId 和userId 判断权限
-
 		userService.setUserCurrentCommunity(cmd.getCommunityId());
 	}
 
 	@Override
 	public ListPropFamilyWaitingMemberCommandResponse listPropFamilyWaitingMember(ListPropFamilyWaitingMemberCommand cmd) {
 		ListPropFamilyWaitingMemberCommandResponse commandResponse = new ListPropFamilyWaitingMemberCommandResponse();
-
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
-
+		
 		int totalCount = familyProvider.countWaitApproveFamily(cmd.getCommunityId());
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -858,28 +801,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void setApartmentStatus(SetPropAddressStatusCommand cmd) {
-		User user  = UserContext.current().getUser();
 		if(cmd.getOrganizationId() == null || cmd.getAddressId() == null || cmd.getStatus() == null){
 			LOGGER.error("propterty organizationId or addressId or status paramter can not be null or empty");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"propterty organizationId or addressId or status paramter can not be null or empty");
 		}
-		Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		if(organization == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
+		
+		this.checkOrganization(cmd.getOrganizationId());
+		CommunityAddressMapping mapping = this.checkAddressMappingByAddressId(cmd.getAddressId());
 
-		CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(cmd.getAddressId());
-		if(mapping == null){
-			LOGGER.error("address is not find.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"address is not find.");
-		}
 		mapping.setLivingStatus(cmd.getStatus());
 		propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+	}
 
+	private CommunityAddressMapping checkAddressMappingByAddressId(Long addressId) {
+		CommunityAddressMapping mapping = this.propertyMgrProvider.findAddressMappingByAddressId(addressId);
+		if(mapping == null){
+			LOGGER.error("address mapping is not find.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"address mapping is not find.");
+		}
+		return mapping;
 	}
 
 	@Override
@@ -902,7 +844,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setAddressId(family.getAddressId());
 		dto.setAddress(family.getName());
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(),OrganizationType.PM.getCode());
-		
 		CommunityAddressMapping mapping = propertyMgrProvider.findPropAddressMappingByAddressId(org.getId(), cmd.getAddressId());
 		if(mapping != null){
 			dto.setLivingStatus(mapping.getLivingStatus());
@@ -945,22 +886,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return results;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void importPMPropertyOwnerInfo(@Valid PropCommunityIdCommand cmd,
 			MultipartFile[] files) {
 		User user  = UserContext.current().getUser();
 		Long communityId = cmd.getCommunityId();
-		if(communityId == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(communityId);
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
+		this.checkCommunityIdIsNull(communityId);
+		this.checkCommunity(cmd.getCommunityId());
 
 		ArrayList resultList = new ArrayList();
 		try {
@@ -969,7 +902,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			e.printStackTrace();
 		}
 		List<CommunityPmOwner> contactList = PropMrgOwnerHandler.processorPropMgrContact(user.getId(), communityId, resultList);
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		long organizationId = org.getId();
 
 		List<CommunityAddressMapping> mappingList = propertyMgrProvider.listCommunityAddressMappings(organizationId);
 		if(contactList != null && contactList.size() > 0) {
@@ -983,12 +917,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						}
 					}
 				}
+				if(addressId == 0)	continue;
 				contact.setOrganizationId(organizationId);
 				contact.setAddressId(addressId);
 				propertyMgrProvider.createPropOwner(contact);
 			}
 		}
-
 	}
 
 	@Override
@@ -1265,9 +1199,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void sendMsgToPMGroup(PropCommunityIdMessageCommand cmd) {
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		List<CommunityPmMember> memberList = propertyMgrProvider.listCommunityPmMembers(cmd.getCommunityId());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		long organizationId = org.getId();
+		List<CommunityPmMember> memberList = propertyMgrProvider.listCommunityPmMembers(organizationId);
 		if(memberList != null && memberList.size() > 0){
 			for (CommunityPmMember communityPmMember : memberList) {
 				sendNoticeToUserById(communityPmMember.getTargetId(), cmd.getMessage());
@@ -1414,9 +1348,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		String taskType = null; // OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		Long communityId = cmd.getCommunityId();
+		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
+		long organizationId = org.getId();
 		/** 当天数量列表*/
 		List<Integer> todayList = new ArrayList<Integer>();
 
@@ -1437,10 +1370,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Date weekStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 7, false);
 		Date yesterdayStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 1, false);
 		Date monthStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 30, false);
-		createList(communityId,taskType,todayList,currentStartDate.getTime(), date.getTime());
-		createList(communityId,taskType,yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
-		createList(communityId,taskType,weekList,weekStartDate.getTime(), date.getTime());
-		createList(communityId,taskType,monthList,monthStartDate.getTime(), date.getTime());
+		createList(organizationId,taskType,todayList,currentStartDate.getTime(), date.getTime());
+		createList(organizationId,taskType,yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
+		createList(organizationId,taskType,weekList,weekStartDate.getTime(), date.getTime());
+		createList(organizationId,taskType,monthList,monthStartDate.getTime(), date.getTime());
 
 		if(!StringUtils.isEmpty(startStrTime) && !StringUtils.isEmpty(endStrTime))
 		{
@@ -1449,7 +1382,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			try {
 				startTime = DateStatisticHelper.parseDateStr(startStrTime);
 				endTime = DateStatisticHelper.parseDateStr(endStrTime);
-				createList(communityId,taskType,dateList,startTime.getTime(), endTime.getTime());
+				createList(organizationId,taskType,dateList,startTime.getTime(), endTime.getTime());
 			} catch (ParseException e) {
 				LOGGER.error("failed to parse date.startStrTime=" + startStrTime +",endStrTime=" + endStrTime);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -1468,32 +1401,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public PropAptStatisticDTO getApartmentStatistics(PropCommunityIdCommand cmd) {
 		PropAptStatisticDTO dto = new PropAptStatisticDTO();
-		User user  = UserContext.current().getUser();
 		Long communityId = cmd.getCommunityId();
-		if(communityId == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(communityId);
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + communityId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
+		this.checkCommunityIdIsNull(communityId);
+		Community community = this.checkCommunity(communityId);
 
-		//权限控制
 		int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
 		int userCount = familyProvider.countUserByCommunityId(communityId);
-		long organizationId = findPropertyOrganizationId(cmd.getCommunityId());
-		cmd.setCommunityId(organizationId);
-		communityId = cmd.getCommunityId();
-		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.DEFAULT.getCode());
-		int liveCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.LIVING.getCode());
-		int rentCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.RENT.getCode());
-		int freeCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.FREE.getCode());
-		int decorateCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.DECORATE.getCode());
-		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(communityId, PmAddressMappingStatus.UNSALE.getCode());
+		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
+		long organizationId = org.getId();
+		
+		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.DEFAULT.getCode());
+		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.LIVING.getCode());
+		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.RENT.getCode());
+		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.FREE.getCode());
+		int decorateCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.DECORATE.getCode());
+		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.UNSALE.getCode());
 		dto.setAptCount(community.getAptCount()==null ?0 : community.getAptCount());
 		dto.setFamilyCount(familyCount);
 		dto.setUserCount(userCount);
@@ -1508,20 +1430,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public OrganizationDTO findPropertyOrganization(PropCommunityIdCommand cmd) {
+		this.checkCommunityIdIsNull(cmd.getCommunityId());
+		Community community = this.checkCommunity(cmd.getCommunityId());
+		
 		OrganizationDTO dto = new OrganizationDTO();
-		User user  = UserContext.current().getUser();
-		if(cmd.getCommunityId() == null){
-			LOGGER.error("propterty communityId paramter can not be null or empty");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"propterty communityId paramter can not be null or empty");
-		}
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		if(community == null){
-			LOGGER.error("Unable to find the community.communityId=" + cmd.getCommunityId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Unable to find the community.");
-		}
-		//权限控制
 		List<OrganizationCommunity>   organizationCommunityList = organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
 		if(organizationCommunityList != null && organizationCommunityList.size() > 0){
 			for (OrganizationCommunity organizationCommunity : organizationCommunityList) {
@@ -1985,14 +1897,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	}
 
-	private void createList(Long communityId,String taskType,List<Integer> todayList, long startTime, long endTime)
+	private void createList(Long organizationId,String taskType,List<Integer> todayList, long startTime, long endTime)
 	{
-		int todayCount = propertyMgrProvider.countCommunityPmTasks(communityId, taskType,null,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+		int todayCount = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,null,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 		todayList.add(todayCount);
 		int num = OrganizationTaskStatus.PROCESSED.getCode();
 		for (int i = 0; i <= num ; i++)
 		{
-			int count = propertyMgrProvider.countCommunityPmTasks(communityId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+			int count = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 			todayList.add(count);
 		}
 	}

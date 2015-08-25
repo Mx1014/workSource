@@ -57,30 +57,23 @@ public class PropMrgOwnerHandler
 	
 	public static List<CommunityPmOwner> processorPropMgrContact(long userId, long communityId,ArrayList resultList) {
 		List<CommunityPmOwner> contactList = new ArrayList<CommunityPmOwner>();
-		if(resultList != null && resultList.size() > 0)
-		{
+		if(resultList != null && resultList.size() > 0) {
 			int row = resultList.size();
-			
-			if(resultList != null && resultList.size() > 0)
-			{
-			
+			if(resultList != null && resultList.size() > 0) {
 				for (int rowIndex = 1; rowIndex < row ; rowIndex++) {
-						
 						RowResult result = (RowResult)resultList.get(rowIndex);
 						CommunityPmOwner owner = new CommunityPmOwner();
-						owner.setAddress(RowResult.trimString(result.getD()));
 						owner.setContactName(RowResult.trimString(result.getA()));
-						owner.setContactDescription(RowResult.trimString(result.getE()));
-						owner.setContactToken(RowResult.trimString(result.getC()));
 						owner.setContactType(processtype(RowResult.trimString(result.getB())));
+						owner.setContactToken(RowResult.trimString(result.getC()));
+						owner.setAddress(RowResult.trimString(result.getD()));
+						owner.setContactDescription(RowResult.trimString(result.getE()));
 						owner.setCreatorUid(userId);
 						owner.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						owner.setOrganizationId(communityId);
-						
 						contactList.add(owner);
 				}
 			}
-			
 		}
 		else
 		{

@@ -180,13 +180,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	//@Cacheable(value = "CommunityPmMemberList", key="#communityId")
 	@Override
-	public List<CommunityPmMember> listCommunityPmMembers(Long communityId, String contactToken,Integer pageOffset,Integer pageSize) {  
+	public List<CommunityPmMember> listCommunityPmMembers(Long organizationId, String contactToken,Integer pageOffset,Integer pageSize) {  
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		List<CommunityPmMember> result  = new ArrayList<CommunityPmMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-		if(communityId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(communityId));
+		if(organizationId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
 
 		if(contactToken != null && !"".equals(contactToken)) {
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
@@ -316,13 +316,13 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public List<CommunityAddressMapping> listCommunityAddressMappings(Long communityId,Integer pageOffset,Integer pageSize) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+	public List<CommunityAddressMapping> listCommunityAddressMappings(Long organizationId,Integer pageOffset,Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<CommunityAddressMapping> result  = new ArrayList<CommunityAddressMapping>();
 		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
-		if(communityId != null)
-			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId));
+		if(organizationId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId));
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
 		query.addOrderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc());
 		query.addLimit(offset, pageSize);
@@ -334,12 +334,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public int countCommunityAddressMappings(long communityId,Byte livingStatus) {
+	public int countCommunityAddressMappings(long organizationId,Byte livingStatus) {
 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
-		Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(communityId);
+		Condition condition = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId);
 		if(livingStatus != null) {
 			condition = condition.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus));
 		}
@@ -539,7 +539,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Override
 	public List<CommunityPmOwner> listCommunityPmOwners(Long organizationId, String address, String contactToken,Integer pageOffset,Integer pageSize) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<CommunityPmOwner> result  = new ArrayList<CommunityPmOwner>();
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
@@ -583,11 +583,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public int countCommunityPmOwners(long communityId, String address, String contactToken) {
+	public int countCommunityPmOwners(long organizationId, String address, String contactToken) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_OWNERS);
-		Condition condition = Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(communityId);
+		Condition condition = Tables.EH_ORGANIZATION_OWNERS.ORGANIZATION_ID.eq(organizationId);
 		if(address != null && !"".equals(address)) {
 			condition = condition.and(Tables.EH_ORGANIZATION_OWNERS.ADDRESS.eq(address));
 		}
@@ -955,7 +955,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 	@Override
 	public List<CommunityPmContact> listCommunityPmContacts(Long orgId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<CommunityPmContact> result  = new ArrayList<CommunityPmContact>();
 		SelectQuery<EhOrganizationContactsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_CONTACTS);
@@ -971,12 +971,12 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
-	public int countCommunityPmTasks(Long communityId, Long entityId,String entityType, Long targetId, String targetType,
+	public int countCommunityPmTasks(Long organizationId, Long entityId,String entityType, Long targetId, String targetType,
 			String taskType, Byte status) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_TASKS);
-		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId);
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
 		if(entityId != null && entityId > 0)
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.APPLY_ENTITY_ID.eq(entityId));
 		if(entityType != null && !entityType .equals(""))
@@ -992,11 +992,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		return step.where(condition).fetchOneInto(Integer.class);
 	}
 	@Override
-	public int countCommunityPmTasks(Long communityId,String taskType,Byte status,String startTime,String endTime) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+	public int countCommunityPmTasks(Long organizationId,String taskType,Byte status,String startTime,String endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATION_TASKS);
-		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(communityId);
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
 		if(!StringUtils.isEmpty(taskType))
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
 
@@ -1214,7 +1214,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	@Override
 	public CommunityAddressMapping findAddressMappingByAddressId(Long addressId) {
 		final CommunityAddressMapping[] result = new CommunityAddressMapping[1];
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationAddressMappingsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS);
 		query.addConditions(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId));
 		query.fetch().map((r) -> {
