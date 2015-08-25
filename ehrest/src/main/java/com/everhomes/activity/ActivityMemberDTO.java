@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.util.List;
+
 import com.everhomes.util.StringHelper;
 /**
  * 
@@ -20,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *<li>creatorFlag:创建人标识</li>
  *<li>lotteryWinnerFlag:中奖标识</li>
  *<li>lotteryWonTime:中奖时间</li>
+ *<li>phone:用户电话号码</li>
  *</ul>
  */
 public class ActivityMemberDTO {
@@ -38,8 +41,17 @@ public class ActivityMemberDTO {
     private Integer creatorFlag;
     private Integer lotteryWinnerFlag;
     private String lotteryWonTime;
+    private List<String> phone;
     
-    public ActivityMemberDTO() {
+    public List<String> getPhone() {
+		return phone;
+	}
+
+	public void setPhone(List<String> phone) {
+		this.phone = phone;
+	}
+
+	public ActivityMemberDTO() {
     }
 
     public Long getId() {
