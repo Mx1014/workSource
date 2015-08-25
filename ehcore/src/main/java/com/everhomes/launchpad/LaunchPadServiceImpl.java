@@ -302,7 +302,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     if(url.indexOf(LaunchPadConstants.USER_REQUEST_LIST) != -1){
                         url = url + "&userId=" + userId + "&cityId=" + cityId;
                     }
-                    jsonObject.put(LaunchPadConstants.URL, url);
+                    jsonObject.put(LaunchPadConstants.URL, URLEncoder.encode(url, "utf-8"));
                 }
                 else if(launchPadItem.getActionType() == ActionType.LAUNCH_APP.getCode()){
                     jsonObject = processLaunchApp(jsonObject,request);

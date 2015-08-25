@@ -658,6 +658,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long startTime = System.currentTimeMillis();
         Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
         this.dbProvider.execute((TransactionStatus status) -> {
+            Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
+            if(family == null){
+                LOGGER.error("Family is not found with addressId=" + cmd.getAddressId());
+                return null;
+            }
+            long addrId = 0L;
+            Group group = ConvertHelper.convert(family, Group.class); 
             if(addr == null || addr.getId().longValue() == address.getId().longValue()){
                 address.setBuildingName(cmd.getBuildingName());
                 address.setApartmentName(cmd.getApartmentName());
@@ -667,10 +674,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 address.setOperatorUid(userId);
                 address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 this.addressProvider.updateAddress(address);
-                //approve members of this address
-//                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-//                if(family != null)
-//                    this.familyService.approveMembersByFamily(family);
+                
+                addrId = address.getId();
                 Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
                 if(community != null){
                     community.setAptCount(community.getAptCount() + 1);
@@ -678,17 +683,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 }
                 
             }else {
-                Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
-                if(family == null){
-                    LOGGER.error("Family is not found with addressId=" + cmd.getAddressId());
-                    return null;
-                }
-                Group group = ConvertHelper.convert(family, Group.class); 
-                group.setIntegralTag1(addr.getId());
-                this.groupProvider.updateGroup(group);
                 //this.familyService.approveMembersByFamily(family);
                 this.addressProvider.deleteAddress(address);
+                addrId = addr.getId();
             }
+            group.setIntegralTag1(addrId);
+            this.groupProvider.updateGroup(group);
+            
             return null;
         });
         long endTime = System.currentTimeMillis();
