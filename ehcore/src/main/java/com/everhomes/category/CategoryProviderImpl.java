@@ -130,7 +130,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         //暂不向客户端开放排序字段指定 20150519
         SortField[] orderByFields = null;
-        if(orderBy != null && orderBy.length != 0 && orderBy[0] != null)
+        if(orderBy != null && orderBy.length != 0)
         		orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
         List<Category> result;
         
@@ -146,7 +146,6 @@ public class CategoryProviderImpl implements CategoryProvider {
         if(status != null)
             condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(status.getCode()));
 
-        SortField[] sortFields = null;
         if(parentId != null){
             Category parentCategory = this.findCategoryById(parentId);
             if(parentCategory == null){
@@ -155,19 +154,19 @@ public class CategoryProviderImpl implements CategoryProvider {
             }
             
             condition = condition.or(Tables.EH_CATEGORIES.PATH.like(parentCategory.getName() + "/%"));
-            if(orderByFields != null){
-                sortFields = new SortField[orderByFields.length + 1];
-                System.arraycopy(orderByFields, 0, sortFields, 0, orderByFields.length);
-                sortFields[orderByFields.length] = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, 
-                        new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC))[0];
-            }
+//            if(orderByFields != null){
+//                sortFields = new SortField[orderByFields.length + 1];
+//                System.arraycopy(orderByFields, 0, sortFields, 0, orderByFields.length);
+//                sortFields[orderByFields.length] = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, 
+//                        new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC))[0];
+//            }
         }
         if(condition != null) {
             selectStep.where(condition);
         }
         
-        if(sortFields != null) {
-            result = selectStep.orderBy(sortFields).fetch().map(
+        if(orderByFields != null) {
+            result = selectStep.orderBy(orderByFields).fetch().map(
                 new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
             );
         } else {

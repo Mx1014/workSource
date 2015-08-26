@@ -1,6 +1,5 @@
 package com.everhomes.category;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +38,7 @@ import com.everhomes.util.Tuple;
 public class CategoryController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
     private static final String DEFAULT_SORT = "default_order";
+    private static final String CATEGORY_PATH = "path";
     @Autowired
     private CategoryProvider categoryProvider;    
     
@@ -74,13 +74,14 @@ public class CategoryController extends ControllerBase {
     @RequestMapping("listChildren")
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listChildren(@Valid ListCategoryCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-        Tuple<String, SortOrder> orderBy = null;
+        Tuple[] orderBy = null;
         // 暂不向客户端开放排序字段指定 by lqs 20150505
         // if(cmd.getSortBy() != null)
         // orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(),
         // SortOrder.fromCode(cmd.getSortOrder()));
+        
         if(cmd.getSortOrder() == null){
-            orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
+            orderBy = defaultSort();
         }
 
         List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(),
@@ -97,6 +98,14 @@ public class CategoryController extends ControllerBase {
             }
         }
         return new RestResponse();
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private Tuple[] defaultSort(){
+        Tuple[] tuples = new Tuple[2]; 
+        tuples[0] = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
+        tuples[1] = new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC);
+        return tuples;
     }
 
     /**
@@ -158,7 +167,8 @@ public class CategoryController extends ControllerBase {
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listInterestCategories(HttpServletRequest request, HttpServletResponse response) {
         
-        Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
+        @SuppressWarnings("rawtypes")
+        Tuple[] orderBy = defaultSort();
         @SuppressWarnings("unchecked")
         List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_INTEREST,
                 CategoryAdminStatus.ACTIVE, orderBy);
