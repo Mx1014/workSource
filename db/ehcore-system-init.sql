@@ -61,6 +61,8 @@ ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 #
 INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (1, 'root', 'system user', 1, 
     NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');
+INSERT INTO `eh_users`(`id`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (2, 'system assistant', '系统小助手', 1, 
+    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');	
 
 #
 # Reserve IDs
