@@ -74,10 +74,10 @@ import com.everhomes.visibility.VisibleRegionType;
 public class LaunchPadServiceImpl implements LaunchPadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadServiceImpl.class);
     private static final String OFFICIAL_PHONE = "";
-    private static final String BUSINESS_HOME_URL = "business.home.url";
+    //private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
-    private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
-    //private static final String PREFIX_URL = "prefix.url";
+    //private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
+    private static final String PREFIX_URL = "prefix.url";
     private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private LaunchPadProvider launchPadProvider;
@@ -164,17 +164,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        
         if(businesses != null && !businesses.isEmpty()){
             int index = 1;
-            final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
+            //final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
-            final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
-            //final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+            //final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
+            final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
             final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
             for(Business r : businesses){
                 LaunchPadItemDTO dto = new LaunchPadItemDTO();
                 dto.setIconUri(r.getLogoUri());
                 dto.setIconUrl(processLogoUrl(r,userId,imageUrl));
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LaunchPadConstants.URL, processUrl(r, businessHomeUrl,businessDetailUrl,authenticatePrefix));
+                jsonObject.put(LaunchPadConstants.URL, processUrl(r, prefixUrl,businessDetailUrl));
                 jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
                 dto.setActionData(jsonObject.toJSONString());
                 dto.setActionType(ActionType.BIZ_DETAILS.getCode());
@@ -207,17 +207,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             return parserUri(business.getLogoUri(),EntityType.USER.getCode(),userId);
         return imageUrl.trim() + business.getLogoUri();
     }
-    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
-        if(businessHomeUrl.trim().equals(""))
-            LOGGER.error("Buiness home url is empty.");
-        if(prefix.trim().equals(""))
+    private String processUrl(Business business, String authenticatePrefix,String detailUrl){
+        if(detailUrl.trim().equals(""))
             LOGGER.error("Buiness detail url is empty.");
         if(authenticatePrefix.trim().equals(""))
             LOGGER.error("Buiness authenticate prefix url is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
             String businessDetailUrl = null;
             try {
-                businessDetailUrl = URLEncoder.encode(businessHomeUrl.trim() + prefix.trim() + business.getTargetId(), "utf-8");
+                businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("unsported encoding.");
             }

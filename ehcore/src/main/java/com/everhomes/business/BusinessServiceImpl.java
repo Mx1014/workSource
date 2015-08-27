@@ -57,10 +57,10 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 public class BusinessServiceImpl implements BusinessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessServiceImpl.class);
-    private static final String BUSINESS_HOME_URL = "business.home.url";
+    //private static final String BUSINESS_HOME_URL = "business.home.url";
     private static final String BUSINESS_DETAIL_URL = "business.detail.url";
-    private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
-    //private static final String PREFIX_URL = "prefix.url";
+    //private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
+    private static final String PREFIX_URL = "prefix.url";
     private static final String BUSINESS_IMAGE_URL = "business.image.url";
     @Autowired
     private BusinessProvider businessProvider;
@@ -253,10 +253,10 @@ public class BusinessServiceImpl implements BusinessService {
         List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
                 .map(r->r.getOwnerId()).collect(Collectors.toList());
         
-        final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
+        //final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
         final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
-        final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
-        //final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+        //final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
+        final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
         final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
         businesses.forEach(r ->{
@@ -266,7 +266,7 @@ public class BusinessServiceImpl implements BusinessService {
             categories.add(ConvertHelper.convert(category, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
-            dto.setUrl(processUrl(r,businessHomeUrl,businessDetailUrl,authenticatePrefix));
+            dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
             else
@@ -300,17 +300,15 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
     
-    private String processUrl(Business business, String businessHomeUrl,String prefix,String authenticatePrefix){
-        if(businessHomeUrl.trim().equals(""))
-            LOGGER.error("Buiness home url is empty.");
-        if(prefix.trim().equals(""))
-            LOGGER.error("Buiness detail url is empty.");
+    private String processUrl(Business business, String authenticatePrefix,String detailUrl){
         if(authenticatePrefix.trim().equals(""))
             LOGGER.error("Buiness authenticate prefix url is empty.");
+        if(detailUrl.trim().equals(""))
+            LOGGER.error("Buiness detail url  is empty.");
         if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
             String businessDetailUrl = null;
             try {
-                businessDetailUrl = URLEncoder.encode(businessHomeUrl.trim() + prefix.trim() + business.getTargetId(), "utf-8");
+                businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("unsported encoding.");
             }
