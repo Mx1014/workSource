@@ -31,7 +31,7 @@ import com.everhomes.util.StringHelper;
  * <li>recommendStatus: 推荐状态,0-默认,1-推荐</li>
  * <li>favoriteStatus: 收藏状态,0-默认,1-收藏</li>
  * <li>distance: 与用户的距离</li>
- * <li>serviceType: 是否是服务类型,0-默认,1-服务类型</li>
+ * <li>scaleType: 图标是否需要裁剪0-不需要，1-需要</li>
  * </ul>
  */
 
@@ -63,6 +63,8 @@ public class BusinessDTO{
     private Integer distance;
     @ItemType(BusinessAssignedScopeDTO.class)
     private List<BusinessAssignedScopeDTO> assignedScopes;
+    private Byte scaleType;
+    
     public Long getId() {
         return id;
     }
@@ -253,6 +255,14 @@ public class BusinessDTO{
 
     public void setAssignedScopes(List<BusinessAssignedScopeDTO> assignedScopes) {
         this.assignedScopes = assignedScopes;
+    }
+
+    public Byte getScaleType() {
+        return scaleType;
+    }
+
+    public void setScaleType(Byte scaleType) {
+        this.scaleType = scaleType;
     }
 
     @Override

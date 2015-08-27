@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.jasper.tagplugins.jstl.core.If;
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.launchpad.ScaleType;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.user.User;
@@ -284,6 +286,10 @@ public class BusinessServiceImpl implements BusinessService {
                 dto.setDistance((int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
             else
                 dto.setDistance(0);
+            //店铺图标需要裁剪
+            if(r.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode()){
+                dto.setScaleType(ScaleType.TAILOR.getCode());
+            }
             
             dtos.add(dto);
         });
