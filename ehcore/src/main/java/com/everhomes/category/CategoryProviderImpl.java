@@ -36,7 +36,6 @@ import com.everhomes.util.Tuple;
 @Component
 public class CategoryProviderImpl implements CategoryProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryProviderImpl.class);
-    private static final String CATEGORY_PATH = "path";
     
     @Autowired
     private DbProvider dbProvider;
