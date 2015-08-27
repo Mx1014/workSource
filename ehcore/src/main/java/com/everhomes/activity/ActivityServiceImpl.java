@@ -155,6 +155,18 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         activityProvider.createActity(activity);
+        
+        ActivityRoster roster = new ActivityRoster();
+        roster.setFamilyId(user.getAddressId());
+        roster.setUid(user.getId());
+        roster.setUuid(UUID.randomUUID().toString());
+        roster.setActivityId(activity.getId());
+        roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        roster.setConfirmFamilyId(user.getAddressId());
+        roster.setAdultCount(0);
+        roster.setChildCount(0);
+        activityProvider.createActivityRoster(roster);
+        
     }
 
     @Override

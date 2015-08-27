@@ -321,6 +321,8 @@ public class ActivityProviderImpl implements ActivityProivider {
                 query.addConditions(condition1);
             }
             
+
+            query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
             query.addLimit(count - activities.size());
 
             query.fetch().map((r) -> {
