@@ -238,6 +238,8 @@ public class ActivityProviderImpl implements ActivityProivider {
             if (conditons != null) {
                 query.addConditions(conditons);
             }
+            
+            query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc());
             query.addLimit(count - rosters.size());
 
             query.fetch().map((r) -> {
