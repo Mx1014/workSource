@@ -411,7 +411,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     private List<String> getGeoHashCodeList(double latitude, double longitude){
         
-        GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+        GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 4);
         GeoHash[] adjacents = geo.getAdjacent();
         List<String> geoHashCodes = new ArrayList<String>();
         geoHashCodes.add(geo.toBase32());
