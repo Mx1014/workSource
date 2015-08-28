@@ -154,6 +154,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 				if(m != null) {
 					// retrieve family info after membership changes
 					this.groupProvider.deleteGroupMember(m);
+					
 					family = findFamilyByAddressId(address.getId());
 					List<GroupMember> groupMembers = this.groupProvider.findGroupMemberByGroupId(family.getId());
 					if(groupMembers == null || groupMembers.isEmpty()) {
@@ -168,8 +169,11 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 								family.setCreatorUid(newCreator.getMemberId());
 							}
-
 						}
+						//删除正常家庭成员，成员数-1
+	                    if(m.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
+	                        family.setMemberCount(family.getMemberCount() - 1);
+	                    }
 						this.groupProvider.updateGroup(family);
 					}
 				}
@@ -182,6 +186,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 		});
 
 	}
+    
 
 	private GroupMember pickOneMemberToPromote(Family family) {
 		CrossShardListingLocator locator = new CrossShardListingLocator(family.getId());

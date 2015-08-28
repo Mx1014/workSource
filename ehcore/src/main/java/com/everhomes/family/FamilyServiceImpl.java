@@ -95,6 +95,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
+import freemarker.core.ReturnInstruction.Return;
+
 
 
 /**
@@ -750,29 +752,34 @@ public class FamilyServiceImpl implements FamilyService {
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
                     "User has not apply join in family, or other approve the user.");
         }
-        boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
-            
-            member.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-            member.setOperatorUid(UserContext.current().getUser().getId());
-            this.groupProvider.updateGroupMember(member);
-            
-            List<UserGroup> list = this.userProvider.listUserGroups(memberUid, GroupDiscriminator.FAMILY.getCode());
-            list = list.stream().filter((userGroup) ->{
-                return userGroup.getGroupId().longValue() == group.getId().longValue();
+        Tuple<Boolean,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
+            this.dbProvider.execute((TransactionStatus status) -> {
                 
-            }).collect(Collectors.toList());
-            if(list != null && !list.isEmpty()){
-                UserGroup userGroup = list.get(0);
-                userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-                this.userProvider.updateUserGroup(userGroup);
-            }
-            
-            return true;
-            
+                member.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                member.setOperatorUid(UserContext.current().getUser().getId());
+                this.groupProvider.updateGroupMember(member);
+                
+                List<UserGroup> list = this.userProvider.listUserGroups(memberUid, GroupDiscriminator.FAMILY.getCode());
+                list = list.stream().filter((userGroup) ->{
+                    return userGroup.getGroupId().longValue() == group.getId().longValue();
+                    
+                }).collect(Collectors.toList());
+                if(list != null && !list.isEmpty()){
+                    UserGroup userGroup = list.get(0);
+                    userGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+                    this.userProvider.updateUserGroup(userGroup);
+                }
+                group.setMemberCount(group.getMemberCount() + 1);
+                groupProvider.updateGroup(group);
+                
+                return true;
+                
+            });
+           return true;
         });
-        
-        if(flag){
+       
+        if(tuple.second()){
             
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
