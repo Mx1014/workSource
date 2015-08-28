@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>orgName : 组织名称</li>
  * <li>zlTelephone : 左邻电话</li>
  * <li>zlName : 左邻名称</li>
+ * <li>orgIsExist : 物业是否入驻小区,0-否,1-是</li>
  *</ul>
  *
  */
@@ -29,10 +30,19 @@ public class ListFamilyBillsAndPaysByFamilyIdCommandResponse {
 	private String orgName;
 	private String zlTelephone;
 	private String zlName;
+	private Byte orgIsExist;
 	
 	@ItemType(PmBillsDTO.class)
 	private List<PmBillsDTO> requests;
 	
+	public Byte getOrgIsExist() {
+		return orgIsExist;
+	}
+
+	public void setOrgIsExist(Byte orgIsExist) {
+		this.orgIsExist = orgIsExist;
+	}
+
 	public String getBillDate() {
 		return billDate;
 	}

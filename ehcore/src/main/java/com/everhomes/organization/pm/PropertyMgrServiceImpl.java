@@ -228,7 +228,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		CommunityPmMember communityPmMember = this.createCommunityPmMember(organizationId,cmd.getContactDescription(),user);
 		propertyMgrProvider.createPropMember(communityPmMember);
 	}
-	
+
 	private void checkUserInOrg(Long userId, Long orgId) {
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId,orgId);
 		if(member != null){
@@ -239,7 +239,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	public CommunityPmMember createCommunityPmMember(Long orgId,String description,User user) {
-		
+
 		CommunityPmMember communityPmMember = new CommunityPmMember();
 		communityPmMember.setOrganizationId(orgId);
 		communityPmMember.setContactName(user.getNickName());
@@ -255,7 +255,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		return communityPmMember;
 	}
-	
+
 	private UserIdentifier getUserMobileIdentifier(Long userId) {
 		List<UserIdentifier> userIndIdentifiers  = userProvider.listUserIdentifiersOfUser(userId);
 		if(userIndIdentifiers != null && userIndIdentifiers.size() > 0){
@@ -332,7 +332,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Community community = this.checkCommunity(cmd.getCommunityId());
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
 		Long organizationId = org.getId();
-		
+
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = propertyMgrProvider.countCommunityPmMembers(organizationId, null);
 		if(totalCount == 0) return commandResponse;
@@ -394,13 +394,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunity(cmd.getCommunityId());
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
 		long organizationId = org.getId();
-		
+
 		int totalCount = propertyMgrProvider.countCommunityAddressMappings(organizationId,null);
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
-		
+
 		List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(organizationId, cmd.getPageOffset(), pageSize);
 		commandResponse.setMembers( entityResultList.stream()
 				.map(r->{ 
@@ -464,13 +464,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ListPropOwnerCommandResponse commandResponse = new ListPropOwnerCommandResponse();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(community.getId(),OrganizationType.PM.getCode());
 		long organizationId = org.getId();
-		
+
 		int totalCount = propertyMgrProvider.countCommunityPmOwners(organizationId,cmd.getAddress(),cmd.getContactToken());
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
-		
+
 		List<CommunityPmOwner> entityResultList = propertyMgrProvider.listCommunityPmOwners(organizationId,cmd.getAddress(),cmd.getContactToken(), cmd.getPageOffset(), pageSize);
 		commandResponse.setMembers( entityResultList.stream()
 				.map(r->{ return ConvertHelper.convert(r, PropOwnerDTO.class); })
@@ -550,17 +550,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
-		
+
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		if(cmd.getPageSize() == null)
 			cmd.setPageSize(20L);
-		
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize().intValue());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-		
+
 		ListPropInvitedUserCommandResponse response = new ListPropInvitedUserCommandResponse();
 		List<PropInvitedUserDTO> users = new ArrayList<PropInvitedUserDTO>();
-		
+
 		List<OrganizationMember> result = this.organizationProvider.listOrganizationMembers(org.getId(), null, offset, pageSize+1);
 		if(result != null && !result.isEmpty()){
 			if(result.size() == pageSize+1){
@@ -572,7 +572,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				user.setContactType(r.getContactType());
 				user.setContactToken(r.getContactToken());
 				user.setInvitorName(r.getContactName());
-				
+
 				if(r.getTargetId() != null && r.getTargetId().longValue() != 0L){
 					User u = this.userProvider.findUserById(r.getTargetId());
 					user.setUserId(u.getId());
@@ -584,7 +584,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				users.add(user);
 			}
 		}
-		
+
 		response.setMembers(users);
 		return response;
 	}
@@ -783,7 +783,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ListPropFamilyWaitingMemberCommandResponse commandResponse = new ListPropFamilyWaitingMemberCommandResponse();
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
-		
+
 		int totalCount = familyProvider.countWaitApproveFamily(cmd.getCommunityId());
 		if(totalCount == 0) return commandResponse;
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -806,7 +806,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"propterty organizationId or addressId or status paramter can not be null or empty");
 		}
-		
+
 		this.checkOrganization(cmd.getOrganizationId());
 		CommunityAddressMapping mapping = this.checkAddressMappingByAddressId(cmd.getAddressId());
 
@@ -869,7 +869,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		this.checkCommunity(cmd.getCommunityId());
-		
+
 		List<GroupMember> entityResultList = groupProvider.findGroupMemberByGroupId(cmd.getFamilyId());
 		List<FamilyMemberDTO> results = new ArrayList<FamilyMemberDTO>();
 
@@ -1409,7 +1409,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int userCount = familyProvider.countUserByCommunityId(communityId);
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		long organizationId = org.getId();
-		
+
 		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.DEFAULT.getCode());
 		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.LIVING.getCode());
 		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, PmAddressMappingStatus.RENT.getCode());
@@ -1432,7 +1432,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public OrganizationDTO findPropertyOrganization(PropCommunityIdCommand cmd) {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		Community community = this.checkCommunity(cmd.getCommunityId());
-		
+
 		OrganizationDTO dto = new OrganizationDTO();
 		List<OrganizationCommunity>   organizationCommunityList = organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
 		if(organizationCommunityList != null && organizationCommunityList.size() > 0){
@@ -2558,8 +2558,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		Group family = this.checkFamily(cmd.getFamilyId());
 		Long addressId = family.getIntegralTag1();
-		
-		this.checkOrganizationByAddressId(addressId);
 
 		//向统一支付发请求,查询订单支付状态
 		LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
@@ -2573,6 +2571,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ListFamilyBillsAndPaysByFamilyIdCommandResponse response = new ListFamilyBillsAndPaysByFamilyIdCommandResponse();
 		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
 		response.setBillDate(cmd.getBillDate());
+		//物业名称和电话
+		this.setPmInfoToResponse(response,family.getIntegralTag2());
+		//左邻名称和电话
+		this.setZlInfoToResponse(response);
 
 		List<CommunityPmBill> commBillList = this.organizationProvider.listOrganizationBillsByAddressId(addressId, offset, pageSize+1);
 		if(commBillList != null && !commBillList.isEmpty()){
@@ -2587,11 +2589,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				billList.add(billDto);
 			}
 		}
-		//物业名称和电话
-		this.setPmInfoToResponse(response,family.getIntegralTag2());
-		//左邻名称和电话
-		this.setZlInfoToResponse(response);
-
 		response.setRequests(billList);
 		return response;
 	}
@@ -2599,9 +2596,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private Organization checkOrganizationByAddressId(Long addressId) {
 		Organization org = this.findOrganizationByAddressId(addressId);
 		if(org == null){
-			LOGGER.error("the family PM organization is not exist.");
+			LOGGER.error("could not found organization by addressId.addressId="+addressId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the family PM organization is not exist");
+					"could not found organization by addressId.");
 		}
 		return org;
 	}
@@ -2614,6 +2611,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private void setPmInfoToResponse(ListFamilyBillsAndPaysByFamilyIdCommandResponse response,Long communityId) {
 		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		if(organization != null){
+			response.setOrgIsExist(Byte.valueOf((byte)1));
 			response.setOrgName(organization.getName());
 			List<CommunityPmContact> contacts = this.propertyMgrProvider.listCommunityPmContacts(organization.getId());
 			if(contacts != null && !contacts.isEmpty()){
@@ -2622,6 +2620,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						response.setOrgTelephone(contact.getContactToken());
 			}
 		}
+		else
+			response.setOrgIsExist(Byte.valueOf((byte)0));
 	}
 
 	private BigDecimal countFamilyPmBillDueAndOweAmountInYear(Long orgId,Long addressId) {
@@ -2766,12 +2766,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkAddress(cmd.getAddressId());
 		Long addressId = cmd.getAddressId();
 
-		Organization org = this.findOrganizationByAddressId(addressId);
-		if(org == null){
-			LOGGER.error("have not pm organization in the community.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"have not pm organization in the community.");
-		}
+		Organization org = this.checkOrganizationByAddressId(addressId);
+
 		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
 		if(bill == null){
 			LOGGER.error("the bill is not exist by addressId="+addressId);
@@ -2879,12 +2875,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Group family = this.checkFamily(cmd.getFamilyId());
 		Long addressId = family.getIntegralTag1();
 
-		Organization org = this.findOrganizationByAddressId(addressId);
-		if(org == null){
-			LOGGER.error("the family PM organization is not exist.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the family PM organization is not exist");
-		}
+		Organization org = this.checkOrganizationByAddressId(addressId);
 
 		GetFamilyStatisticCommandResponse response = new GetFamilyStatisticCommandResponse();
 		BigDecimal totalDueOweAmount = this.countFamilyPmBillDueAndOweAmountInYear(org.getId(),addressId);
@@ -3276,7 +3267,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setDescription(order.getDescription());
 		return dto;
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes"})
 	@Override
 	public void remoteUpdateOrgOrderByOrderNo(String orderNo) {
