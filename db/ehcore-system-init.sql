@@ -25,6 +25,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('apply.
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('manage.shop.url', '/app/static/my_store/my_store.html', 'the relative path for user shop manage');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.coupon.url', '/app/static/coupon/coupon.html', 'the relative path for user coupon');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('app.agreements.url', '/app/static/app_agreements/app_agreements.html', 'the relative path for app agreements');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.detail.url', '/web/app/user/index.html#/store/details/', 'business details');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.image.url', 'http://121.199.69.107:8081/imageService/', 'business image url');
 
 
 
