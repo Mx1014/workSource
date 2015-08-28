@@ -2558,6 +2558,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		Group family = this.checkFamily(cmd.getFamilyId());
 		Long addressId = family.getIntegralTag1();
+		
+		this.checkOrganizationByAddressId(addressId);
 
 		//向统一支付发请求,查询订单支付状态
 		LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
@@ -2594,6 +2596,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return response;
 	}
 
+	private Organization checkOrganizationByAddressId(Long addressId) {
+		Organization org = this.findOrganizationByAddressId(addressId);
+		if(org == null){
+			LOGGER.error("the family PM organization is not exist.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the family PM organization is not exist");
+		}
+		return org;
+	}
+
 	private void setZlInfoToResponse(ListFamilyBillsAndPaysByFamilyIdCommandResponse response) {
 		response.setZlName("深圳市永佳天成科技发展有限公司");
 		response.setZlTelephone("4008384688");
@@ -2610,7 +2622,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						response.setOrgTelephone(contact.getContactToken());
 			}
 		}
-
 	}
 
 	private BigDecimal countFamilyPmBillDueAndOweAmountInYear(Long orgId,Long addressId) {
@@ -2635,12 +2646,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkAddress(cmd.getAddressId());
 		Long addressId = cmd.getAddressId();
 
-		Organization org = this.findOrganizationByAddressId(addressId);
-		if(org == null){
-			LOGGER.error("have not pm organization in the community.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"have not pm organization in the community.");
-		}
+		this.checkOrganizationByAddressId(addressId);
 
 		CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
 		if(bill == null){
@@ -3277,7 +3283,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		//String restUrl = "http://alitestserver.zuolin.com:8081/EDS_PAY/rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
-		String restUrl = "http://everhomes.asuscomm.com:18888/EDS_PAY/rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
+		String restUrl = "http://testpay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
 
 		try {
 			BaseVo<Map> bvo=new BaseVo<Map>();

@@ -32,7 +32,7 @@ public class ListFamilyBillsAndPaysByFamilyIdCommandResponse {
 	
 	@ItemType(PmBillsDTO.class)
 	private List<PmBillsDTO> requests;
-
+	
 	public String getBillDate() {
 		return billDate;
 	}
