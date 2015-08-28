@@ -763,7 +763,7 @@ CREATE TABLE `eh_group_members` (
     `member_id` BIGINT,
     `member_role` BIGINT NOT NULL DEFAULT 7 COMMENT 'Default to ResourceUser role',
     `member_avatar` VARCHAR(128) COMMENT 'avatar image identifier in storage sub-system',
-  	`member_nick_name` VARCHAR(32) COMMENT 'member nick name within the group',
+  	`member_nick_name` VARCHAR(128) COMMENT 'member nick name within the group',
     `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     `creator_uid` BIGINT COMMENT 'record creator user id',

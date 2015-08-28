@@ -337,6 +337,30 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
+	public void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd) {
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		if(organization.getOrganizationType().equals(OrganizationType.PM.getCode()) || organization.getOrganizationType().equals(OrganizationType.GARC.getCode())){
+			OrganizationCommunity  orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(cmd.getOrganizationId());
+			if(orgComm != null){
+				LOGGER.error("pm or garc community mapping was created.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"pm or garc community mapping was created.");
+			}
+		}
+		List<Long> communityIds = cmd.getCommunityIds();
+		if(communityIds != null && communityIds.size() > 0){
+			for (Long id : communityIds) {
+				this.checkCommunity(id);
+				OrganizationCommunity departmentCommunity = new OrganizationCommunity();
+				departmentCommunity.setCommunityId(id);
+				departmentCommunity.setOrganizationId(cmd.getOrganizationId());
+				organizationProvider.createOrganizationCommunity(departmentCommunity);
+			}
+		}
+
+	}
+
+	@Override
 	public void deleteOrganizationCommunity(DeleteOrganizationCommunityCommand cmd) {
 		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
 		this.checkCommunityIdsIsNull(cmd.getCommunityIds());
@@ -387,7 +411,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			departmentCommunity.setCommunityId(community.getId());
 			departmentCommunity.setOrganizationId(organization.getId());
 			organizationProvider.createOrganizationCommunity(departmentCommunity);
-			
+
 			return s;
 		});
 	}
@@ -398,14 +422,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
 		int totalCount = organizationProvider.countOrganizations(cmd.getOrganizationType(),cmd.getName());
 		if(totalCount == 0) return response;
-		
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
-		
+
 		List<Organization> result = organizationProvider.listOrganizations(cmd.getOrganizationType(),cmd.getName(), cmd.getPageOffset(), pageSize);
 		response.setMembers( result.stream()
 				.map(r->{ return ConvertHelper.convert(r,OrganizationDTO.class); }).collect(Collectors.toList()));
-		
+
 		response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return response;
 	}
@@ -1599,4 +1623,5 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_DELETE_FOR_MANAGER, locale, map, "");
 		return template;
 	}
+
 }
