@@ -6,11 +6,11 @@ import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.organization.pm.PmBillsDTO;
 
-public class FindFamilyBillAndPaysByFamilyIdAndTimeRestResponse extends RestResponseBase {
+public class FindNewestBillByAddressIdRestResponse extends RestResponseBase {
 
     private PmBillsDTO response;
 
-    public FindFamilyBillAndPaysByFamilyIdAndTimeRestResponse () {
+    public FindNewestBillByAddressIdRestResponse () {
     }
 
     public PmBillsDTO getResponse() {
