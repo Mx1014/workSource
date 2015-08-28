@@ -84,7 +84,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganizationCommunity")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationCommunity(@Valid CreateOrganizationCommunityCommand cmd) {
-    	organizationService.createOrganizationCommunity(cmd);
+    	organizationService.createOrganizationCommunityByAdmin(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
