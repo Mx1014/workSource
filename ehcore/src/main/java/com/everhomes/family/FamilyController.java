@@ -106,12 +106,12 @@ public class FamilyController extends ControllerBase {
     public RestResponse getUserOwningFamilies(HttpServletRequest request,HttpServletResponse response) {
         
         List<FamilyDTO> results = familyService.getUserOwningFamilies();
-        RestResponse resp = new RestResponse();
-        if(results != null){
-            if(EtagHelper.checkHeaderEtagOnly(30,results.hashCode()+"", request, response)) {
-                resp.setResponseObject(results);
-            }
-        }
+        RestResponse resp = new RestResponse(results);
+//        if(results != null){
+//            if(EtagHelper.checkHeaderEtagOnly(30,results.hashCode()+"", request, response)) {
+//                resp.setResponseObject(results);
+//            }
+//        }
         
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
