@@ -55,7 +55,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PmMemberGroup;
 import com.everhomes.organization.pm.PmMemberStatus;
-import com.everhomes.organization.pm.PmMemberTargetType;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
@@ -1622,6 +1621,61 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
 				OrganizationNotificationTemplateCode.ORGANIZATION_MEMBER_DELETE_FOR_MANAGER, locale, map, "");
 		return template;
+	}
+
+	@Override
+	public void createOrganizationByAdmin(CreateOrganizationByAdminCommand cmd) {
+		this.checkOrgNameIsNull(cmd.getName());
+		OrganizationType organizationType = this.checkOrgType(cmd.getOrganizationType());
+		//先判断，后台管理员才能创建。状态直接设为正常
+		cmd.setOrganizationType(organizationType.getCode());
+		Organization org  = ConvertHelper.convert(cmd, Organization.class);
+		if(cmd.getParentId() == null)
+		{
+			org.setParentId(0L);
+			org.setPath("/"+org.getName());
+			org.setLevel(1);
+		}
+		else{
+			Organization parOrg = this.checkOrganization(cmd.getParentId());
+			org.setPath(parOrg.getPath()+"/"+org.getName());
+			org.setLevel(parOrg.getLevel()+1);
+		}
+		if(cmd.getAddressId() == null){
+			org.setAddressId(0L);
+		}
+		org.setStatus(OrganizationStatus.ACTIVE.getCode());
+		this.dbProvider.execute(s -> {
+			organizationProvider.createOrganization(org);
+			if(cmd.getOrganizationType().equals(OrganizationType.PM.getCode()) || cmd.getOrganizationType().equals(OrganizationType.GARC.getCode())){
+				this.checkCommunityIdIsNull(cmd.getCommunityId());
+				this.checkCommunity(cmd.getCommunityId());
+				OrganizationCommunity orgComm = new OrganizationCommunity();
+				orgComm.setCommunityId(cmd.getCommunityId());
+				orgComm.setOrganizationId(org.getId());
+				organizationProvider.createOrganizationCommunity(orgComm);
+			}
+			return s;
+		});
+	}
+
+	private OrganizationType checkOrgType(String orgType) {
+		OrganizationType type = OrganizationType.fromCode(orgType);
+		if(type == null){
+			LOGGER.error("orgType is wrong.orgType=" + orgType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"orgType is wrong.");
+		}
+		return type;
+		
+	}
+
+	private void checkOrgNameIsNull(String orgName) {
+		if(orgName == null || !orgName.equals("")){
+			LOGGER.error("orgName is empty.orgName=" + orgName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"orgName is empty.");
+		}
 	}
 
 }

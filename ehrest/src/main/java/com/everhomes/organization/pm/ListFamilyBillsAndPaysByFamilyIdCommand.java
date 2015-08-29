@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *	<li>pageSize : 页大小</li>
  *	<li>billDate : 优先显示该月份的账单</li>
  *	<li>familyId : 家庭Id</li>
+ *	<li>communityId : 小区id</li>
  *</ul>
  *
  */

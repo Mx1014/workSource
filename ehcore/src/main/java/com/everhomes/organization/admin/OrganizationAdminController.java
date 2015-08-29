@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.organization.CreateOrganizationCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
@@ -39,8 +40,8 @@ public class OrganizationAdminController extends ControllerBase {
      */
     @RequestMapping("createOrganization")
     @RestReturn(value=String.class)
-    public RestResponse createOrganization(@Valid CreateOrganizationCommand cmd) {
-    	organizationService.createOrganization(cmd);
+    public RestResponse createOrganizationByAdmin(@Valid CreateOrganizationByAdminCommand cmd) {
+    	organizationService.createOrganizationByAdmin(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -84,7 +85,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganizationCommunity")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationCommunity(@Valid CreateOrganizationCommunityCommand cmd) {
-    	organizationService.createOrganizationCommunityByAdmin(cmd);
+    	organizationService.createOrganizationCommunity(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
