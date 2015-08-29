@@ -194,6 +194,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
         defaultItems.forEach(r ->{
             LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+            itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
             result.add(itemDTO);
         });
         return result;
