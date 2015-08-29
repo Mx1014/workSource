@@ -3,6 +3,7 @@ package com.everhomes.organization.pm;
 import javax.validation.constraints.NotNull;
 
 
+
 /**
  * <ul>
  * <li>pageOffset : 页码</li>
@@ -20,8 +21,18 @@ public class ListFamilyBillsAndPaysByFamilyIdCommand {
 	
 	private String billDate;
 	
-	@NotNull
 	private Long familyId;
+	
+	@NotNull
+	private Long communityId;
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 
 	public Long getFamilyId() {
 		return familyId;

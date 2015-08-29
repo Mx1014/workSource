@@ -2555,40 +2555,51 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public ListFamilyBillsAndPaysByFamilyIdCommandResponse listFamilyBillsAndPaysByFamilyId(ListFamilyBillsAndPaysByFamilyIdCommand cmd) {
-		this.checkFamilyIdIsNull(cmd.getFamilyId());
-		Group family = this.checkFamily(cmd.getFamilyId());
-		Long addressId = family.getIntegralTag1();
-
-		//向统一支付发请求,查询订单支付状态
-		LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
-		remoteRefreshOrgOrderStatus();
-
-		if(cmd.getPageOffset() == null)
-			cmd.setPageOffset(1L);
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-
+		//this.checkFamilyIdIsNull(cmd.getFamilyId());
 		ListFamilyBillsAndPaysByFamilyIdCommandResponse response = new ListFamilyBillsAndPaysByFamilyIdCommandResponse();
 		List<PmBillsDTO> billList = new ArrayList<PmBillsDTO>();
 		response.setBillDate(cmd.getBillDate());
-		//物业名称和电话
-		this.setPmInfoToResponse(response,family.getIntegralTag2());
 		//左邻名称和电话
 		this.setZlInfoToResponse(response);
-
-		List<CommunityPmBill> commBillList = this.organizationProvider.listOrganizationBillsByAddressId(addressId, offset, pageSize+1);
-		if(commBillList != null && !commBillList.isEmpty()){
-			if(commBillList.size()==pageSize+1){
-				commBillList.remove(commBillList.size()-1);
-				response.setNextPageOffset(cmd.getPageOffset()+1);
+		//物业名称和电话
+		this.setPmInfoToResponse(response,cmd.getCommunityId());
+		
+		if(cmd.getFamilyId() == null){
+			LOGGER.error("familyId paramter is null or empty");
+		}
+		else{
+			//Group family = this.checkFamily(cmd.getFamilyId());
+			Group family = this.groupProvider.findGroupById(cmd.getFamilyId());
+			if(family == null){
+				LOGGER.error("the family is not exist.");
 			}
-			for(CommunityPmBill commBill : commBillList){
-				PmBillsDTO billDto = this.convertBillToDto(commBill);
-				//账单缴费记录
-				this.setBillTx(billDto,family.getId());
-				billList.add(billDto);
+			else{
+				Long addressId = family.getIntegralTag1();
+				//向统一支付发请求,查询订单支付状态
+				LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
+				remoteRefreshOrgOrderStatus();
+				
+				if(cmd.getPageOffset() == null)
+					cmd.setPageOffset(1L);
+				int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+				long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+				
+				List<CommunityPmBill> commBillList = this.organizationProvider.listOrganizationBillsByAddressId(addressId, offset, pageSize+1);
+				if(commBillList != null && !commBillList.isEmpty()){
+					if(commBillList.size()==pageSize+1){
+						commBillList.remove(commBillList.size()-1);
+						response.setNextPageOffset(cmd.getPageOffset()+1);
+					}
+					for(CommunityPmBill commBill : commBillList){
+						PmBillsDTO billDto = this.convertBillToDto(commBill);
+						//账单缴费记录
+						this.setBillTx(billDto,family.getId());
+						billList.add(billDto);
+					}
+				}
 			}
 		}
+
 		response.setRequests(billList);
 		return response;
 	}
@@ -2609,6 +2620,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private void setPmInfoToResponse(ListFamilyBillsAndPaysByFamilyIdCommandResponse response,Long communityId) {
+		if(communityId == null)
+			return ;
 		Organization organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		if(organization != null){
 			response.setOrgIsExist(Byte.valueOf((byte)1));
