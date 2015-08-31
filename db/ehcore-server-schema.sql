@@ -72,7 +72,7 @@ DROP TABLE IF EXISTS `eh_certs`;
 #
 # member of global partition
 #
-CREATE TABLE `ehcore`.`eh_certs` (
+CREATE TABLE `eh_certs` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(32) NOT NULL,
   `cert_type` INT NOT NULL,
@@ -281,6 +281,8 @@ CREATE TABLE `eh_launch_pad_items` (
 	`display_layout` VARCHAR(128) DEFAULT '1' COMMENT 'how many grids it takes at the layout, format: 2x3',
 	`bgcolor` INTEGER NOT NULL DEFAULT 0,
     `tag` VARCHAR(1024),
+    `target_type` VARCHAR(32),
+    `target_id` BIGINT COMMENT 'the entity id linked back to the orginal resource',
 
     PRIMARY KEY (`id`),
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
@@ -415,7 +417,11 @@ CREATE TABLE `eh_users` (
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. may be valuable for user to restore account',
     `last_login_time` DATETIME,
-    `last_login_ip` VARCHAR(16),
+    `last_login_ip` VARCHAR(64),
+    `reg_ip` VARCHAR(64) DEFAULT '' COMMENT 'the channel at the time of register',
+    `reg_city_id` BIGINT DEFAULT 0 COMMENT 'the city at the time of register',
+    `reg_channel_id` BIGINT DEFAULT 0 COMMENT 'the channel at the time of register',
+    `original_avatar` VARCHAR(128) COMMENT 'the path of avatar in 2.8 version, keep it for migration',
 
     `salt` VARCHAR(64),
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
@@ -973,6 +979,7 @@ CREATE TABLE `eh_forum_attachments` (
     `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
     `creator_uid` BIGINT NOT NULL,
     `create_time` DATETIME NOT NULL,
+    `orignial_path` VARCHAR(1024) COMMENT 'attachment file path in 2.8 version, keep it for migration',
     PRIMARY KEY (`id`),
     INDEX `i_eh_frmatt_create_time`(`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
