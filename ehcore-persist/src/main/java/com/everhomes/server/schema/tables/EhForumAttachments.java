@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord> {
 
-	private static final long serialVersionUID = 416988935;
+	private static final long serialVersionUID = 533184175;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_attachments</code>
@@ -55,6 +55,11 @@ public class EhForumAttachments extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_forum_attachments.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_forum_attachments.orignial_path</code>. attachment file path in 2.8 version, keep it for migration
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord, java.lang.String> ORIGNIAL_PATH = createField("orignial_path", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "attachment file path in 2.8 version, keep it for migration");
 
 	/**
 	 * Create a <code>ehcore.eh_forum_attachments</code> table reference

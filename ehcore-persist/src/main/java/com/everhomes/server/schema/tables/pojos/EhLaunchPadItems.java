@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -659592051;
+	private static final long serialVersionUID = 198066977;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -34,6 +34,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.String  displayLayout;
 	private java.lang.Integer bgcolor;
 	private java.lang.String  tag;
+	private java.lang.String  targetType;
+	private java.lang.Long    targetId;
 
 	public EhLaunchPadItems() {}
 
@@ -58,7 +60,9 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Byte    displayFlag,
 		java.lang.String  displayLayout,
 		java.lang.Integer bgcolor,
-		java.lang.String  tag
+		java.lang.String  tag,
+		java.lang.String  targetType,
+		java.lang.Long    targetId
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -81,6 +85,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.displayLayout = displayLayout;
 		this.bgcolor = bgcolor;
 		this.tag = tag;
+		this.targetType = targetType;
+		this.targetId = targetId;
 	}
 
 	public java.lang.Long getId() {
@@ -249,5 +255,21 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setTag(java.lang.String tag) {
 		this.tag = tag;
+	}
+
+	public java.lang.String getTargetType() {
+		return this.targetType;
+	}
+
+	public void setTargetType(java.lang.String targetType) {
+		this.targetType = targetType;
+	}
+
+	public java.lang.Long getTargetId() {
+		return this.targetId;
+	}
+
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhContentServerResources extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhContentServerResourcesRecord> {
 
-	private static final long serialVersionUID = -722990704;
+	private static final long serialVersionUID = 1268766741;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_content_server_resources</code>
@@ -44,7 +44,7 @@ public class EhContentServerResources extends org.jooq.impl.TableImpl<com.everho
 	/**
 	 * The column <code>ehcore.eh_content_server_resources.resource_md5</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhContentServerResourcesRecord, java.lang.String> RESOURCE_MD5 = createField("resource_md5", org.jooq.impl.SQLDataType.VARCHAR.length(40).nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhContentServerResourcesRecord, java.lang.String> RESOURCE_MD5 = createField("resource_md5", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_content_server_resources.resource_type</code>. current support audio,image and video

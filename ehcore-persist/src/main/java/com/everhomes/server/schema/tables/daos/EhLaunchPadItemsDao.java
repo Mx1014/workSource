@@ -186,4 +186,18 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByTag(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.TAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>target_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByTargetType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.TARGET_ID, values);
+	}
 }

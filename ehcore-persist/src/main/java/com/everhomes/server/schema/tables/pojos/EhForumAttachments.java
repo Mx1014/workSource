@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAttachments implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1997699862;
+	private static final long serialVersionUID = -1925303912;
 
 	private java.lang.Long     id;
 	private java.lang.Long     postId;
@@ -19,6 +19,7 @@ public class EhForumAttachments implements java.io.Serializable {
 	private java.lang.String   contentUri;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.String   orignialPath;
 
 	public EhForumAttachments() {}
 
@@ -28,7 +29,8 @@ public class EhForumAttachments implements java.io.Serializable {
 		java.lang.String   contentType,
 		java.lang.String   contentUri,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.String   orignialPath
 	) {
 		this.id = id;
 		this.postId = postId;
@@ -36,6 +38,7 @@ public class EhForumAttachments implements java.io.Serializable {
 		this.contentUri = contentUri;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.orignialPath = orignialPath;
 	}
 
 	public java.lang.Long getId() {
@@ -84,5 +87,13 @@ public class EhForumAttachments implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getOrignialPath() {
+		return this.orignialPath;
+	}
+
+	public void setOrignialPath(java.lang.String orignialPath) {
+		this.orignialPath = orignialPath;
 	}
 }

@@ -81,4 +81,11 @@ public class EhForumAttachmentsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumAttachments> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>orignial_path IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumAttachments> fetchByOrignialPath(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumAttachments.EH_FORUM_ATTACHMENTS.ORIGNIAL_PATH, values);
+	}
 }
