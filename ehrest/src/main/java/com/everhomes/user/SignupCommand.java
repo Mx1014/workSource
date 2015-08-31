@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *<li>type:标识类型,email或者mobile</li>
  *<li>identifierToken:手机号或者邮箱</li>
  *<li>ifExistsThenOverride:如果identifier已经存在是否进行覆盖</li>
+ *<li>channel_id:渠道</li>
  *<ul>
  */
 public class SignupCommand {
@@ -22,10 +23,20 @@ public class SignupCommand {
     @NotNull
     String token;
     
+    Integer channel_id;
+    
     
     Integer ifExistsThenOverride;
     
-    public SignupCommand() {
+    public Integer getChannel_id() {
+		return channel_id;
+	}
+
+	public void setChannel_id(Integer channel_id) {
+		this.channel_id = channel_id;
+	}
+
+	public SignupCommand() {
     }
 
     public String getType() {
