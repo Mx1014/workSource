@@ -48,7 +48,9 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
         LOGGER.info("Request message={}", request);
         switch (request.getMessageType()) {
         case UPLOADED:
+            LOGGER.info("content url(before handleUpload), url=" + request.getUrl());
             handleUpload(session, request, frame);
+            LOGGER.info("content url(after handleUpload), url=" + request.getUrl());
             return;
         case LOOKUP:
             // skip
@@ -88,7 +90,9 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doRequest(ContentServerMananger contentServerManager) throws Exception {
+                LOGGER.info("content url(before handleUpload doRequest), url=" + request.getUrl());
                 contentServerManager.upload(request);
+                LOGGER.info("content url(after handleUpload doRequest), url=" + request.getUrl());
 
             }
 
@@ -96,7 +100,12 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
             protected void doResponse(String errMsg, int errCode) throws Exception {
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("send upload success to server");
-                session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                LOGGER.info("content url(before handleUpload doResponse), url=" + request.getUrl());
+                PduFrame pdu = createPduFrame(errCode, errMsg, frame, request);
+                session.sendMessage(new TextMessage(pdu.toJson()));
+                LOGGER.info("content url(after handleUpload doResponse), url=" + request.getUrl());
+                LOGGER.info("content url(after handleUpload doResponse), pdu=" + pdu.toJson());
+                
             }
         });
     }
@@ -123,6 +132,8 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
         rsp.setErrCode(errCode);
         rsp.setErrMsg(errMsg);
         rsp.setObjectId(request.getObjectId());
+
+        LOGGER.info("content url(before createPduFrame), url=" + rsp.getUrl());
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("send response message to content server responese={}", rsp);

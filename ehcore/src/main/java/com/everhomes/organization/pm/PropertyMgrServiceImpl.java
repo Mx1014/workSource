@@ -2563,7 +2563,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.setZlInfoToResponse(response);
 		//物业名称和电话
 		this.setPmInfoToResponse(response,cmd.getCommunityId());
-		
+
 		if(cmd.getFamilyId() == null){
 			LOGGER.error("familyId paramter is null or empty");
 		}
@@ -2578,12 +2578,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				//向统一支付发请求,查询订单支付状态
 				LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
 				remoteRefreshOrgOrderStatus();
-				
+
 				if(cmd.getPageOffset() == null)
 					cmd.setPageOffset(1L);
 				int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 				long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-				
+
 				List<CommunityPmBill> commBillList = this.organizationProvider.listOrganizationBillsByAddressId(addressId, offset, pageSize+1);
 				if(commBillList != null && !commBillList.isEmpty()){
 					if(commBillList.size()==pageSize+1){
@@ -2974,8 +2974,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkVendorTypeFormat(cmd.getVendorType());
 
 		Long payTime = System.currentTimeMillis();
-		if(cmd.getPayTime() != null)
-			payTime = Long.valueOf(cmd.getPayTime());
+		/*if(cmd.getPayTime() != null)
+			payTime = Long.valueOf(cmd.getPayTime());*/
 		Timestamp payTimeStamp = new Timestamp(payTime);//支付时间
 
 		Long cunnentTime = System.currentTimeMillis();
@@ -3286,8 +3286,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public void remoteUpdateOrgOrderByOrderNo(String orderNo) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		//String restUrl = "http://alitestserver.zuolin.com:8081/EDS_PAY/rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
-		String restUrl = "http://testpay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
+		String restUrl = this.configurationProvider.getValue("common.pay.url", "http://testpay.zuolin.com/EDS_PAY/");
+		restUrl = restUrl + "rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
+
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("remoteUpdateOrgOrderByOrderNo-restUrl"+restUrl);
 
 		try {
 			BaseVo<Map> bvo=new BaseVo<Map>();
@@ -3331,25 +3334,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					//amount
 					Double amountDouble = (Double) data.get("payAmount");
 					String amount = Double.toString(amountDouble);
-					//patTime
+					//payTime
 					if(LOGGER.isDebugEnabled())
 						LOGGER.error("payDate="+(String) data.get("payDate"));
-
-					String payTimeStr = (String) data.get("payDate");
-					String payTime = Long.toString(format.parse(payTimeStr).getTime());
+					
+					/*String payTimeStr = (String) data.get("payDate");
+					String payTime = Long.toString(format.parse(payTimeStr).getTime());*/
 					//patAccount
 					String payAccount = (String) data.get("payAccount");
 					if(payAccount == null)
 						payAccount = "test account";
-					String payObj = "{testPayObj}";
+					//String payObj = "{testPayObj}";
 
 					OnlinePayPmBillCommand command = new OnlinePayPmBillCommand();
 					command.setPayStatus(payStatus);
 					command.setOrderNo(orderNo);
 					command.setPayAccount(payAccount);
 					command.setPayAmount(amount);
-					command.setPayObj(payObj);
-					command.setPayTime(payTime);
+					command.setPayObj(null);
+					command.setPayTime(null);
 					command.setVendorType(verdorType);
 
 					if(LOGGER.isDebugEnabled())
@@ -3359,9 +3362,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					e.getMessage());
+			LOGGER.error("remoteUpdateOrgOrderByOrderNo-error.orderNo="+orderNo+".exception message="+e.getMessage());
 		}
 	}
 
