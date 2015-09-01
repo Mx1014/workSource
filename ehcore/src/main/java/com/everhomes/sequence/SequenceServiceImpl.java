@@ -282,7 +282,7 @@ public class SequenceServiceImpl implements SequenceService {
                     + ", dbSize=" + userList.size() + ", elapse=" + (endTime - startTime));
             }
             pageNum++;
-        } while(userList == null || userList.size() == 0);
+        } while(userList != null && userList.size() > 0);
         
         if(maxAccountSequence > 0) {
             String key = "usr";
