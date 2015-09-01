@@ -1712,7 +1712,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		//向统一支付发请求,查询订单支付状态
 		LOGGER.error("listPmBillsByConditions-remoteUpdate");
-		remoteRefreshOrgOrderStatus();
+		//remoteRefreshOrgOrderStatus();
 
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
@@ -2577,7 +2577,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				Long addressId = family.getIntegralTag1();
 				//向统一支付发请求,查询订单支付状态
 				LOGGER.error("listFamilyBillsAndPaysByFamilyId-remoteUpdate");
-				remoteRefreshOrgOrderStatus();
+				//remoteRefreshOrgOrderStatus();
 
 				if(cmd.getPageOffset() == null)
 					cmd.setPageOffset(1L);
