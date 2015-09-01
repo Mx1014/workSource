@@ -6,6 +6,7 @@ public class RestResponseBase {
     protected String errorScope;
     protected Integer errorCode;
     protected String errorDescription;
+    protected String errorDetails;
 
     public RestResponseBase() {
         version = RestVersion.current().toString();
@@ -59,5 +60,13 @@ public class RestResponseBase {
 
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
+    }
+
+    public String getErrorDetails() {
+        return errorDetails;
+    }
+
+    public void setErrorDetails(String errorDetails) {
+        this.errorDetails = errorDetails;
     }
 }
