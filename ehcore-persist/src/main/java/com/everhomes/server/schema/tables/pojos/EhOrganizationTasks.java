@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1290025376;
+	private static final long serialVersionUID = 976689606;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -25,6 +25,9 @@ public class EhOrganizationTasks implements java.io.Serializable {
 	private java.lang.Byte     taskStatus;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.sql.Timestamp unprocessedTime;
+	private java.sql.Timestamp processingTime;
+	private java.sql.Timestamp processedTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 
@@ -43,6 +46,9 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		java.lang.Byte     taskStatus,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
+		java.sql.Timestamp unprocessedTime,
+		java.sql.Timestamp processingTime,
+		java.sql.Timestamp processedTime,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime
 	) {
@@ -58,6 +64,9 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		this.taskStatus = taskStatus;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.unprocessedTime = unprocessedTime;
+		this.processingTime = processingTime;
+		this.processedTime = processedTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 	}
@@ -156,6 +165,30 @@ public class EhOrganizationTasks implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.sql.Timestamp getUnprocessedTime() {
+		return this.unprocessedTime;
+	}
+
+	public void setUnprocessedTime(java.sql.Timestamp unprocessedTime) {
+		this.unprocessedTime = unprocessedTime;
+	}
+
+	public java.sql.Timestamp getProcessingTime() {
+		return this.processingTime;
+	}
+
+	public void setProcessingTime(java.sql.Timestamp processingTime) {
+		this.processingTime = processingTime;
+	}
+
+	public java.sql.Timestamp getProcessedTime() {
+		return this.processedTime;
+	}
+
+	public void setProcessedTime(java.sql.Timestamp processedTime) {
+		this.processedTime = processedTime;
 	}
 
 	public java.lang.Long getCreatorUid() {

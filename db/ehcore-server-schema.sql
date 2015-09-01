@@ -1208,6 +1208,9 @@ CREATE TABLE `eh_organization_tasks` (
     `task_status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: unprocessed, 2: processing；3 已处理；4 其他',
 	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'uid of the user who process the task',
     `operate_time` DATETIME,
+    `unprocessed_time` DATETIME,
+    `processing_time` DATETIME,
+    `processed_time` DATETIME,
 	`creator_uid` BIGINT COMMENT 'uid of the user who create the task',
     `create_time` DATETIME,
 	

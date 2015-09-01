@@ -125,6 +125,27 @@ public class EhOrganizationTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
+	 * Fetch records that have <code>unprocessed_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByUnprocessedTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.UNPROCESSED_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>processing_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByProcessingTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.PROCESSING_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>processed_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByProcessedTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.PROCESSED_TIME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>creator_uid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByCreatorUid(java.lang.Long... values) {
