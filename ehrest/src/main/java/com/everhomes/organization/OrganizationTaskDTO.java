@@ -19,6 +19,9 @@ import com.everhomes.util.StringHelper;
  * <li>operateTime : 操作时间</li>
  * <li>creatorUid : 创建用户</li>
  * <li>createTime : 创建时间</li>
+ * <li>unprocessedTime : 任务未处理时间</li>
+ * <li>processingTime : 任务处理中时间</li>
+ * <li>processedTime : 任务已处理时间</li>
  * </ul>
  */
 public class OrganizationTaskDTO {
@@ -37,6 +40,9 @@ public class OrganizationTaskDTO {
 	private java.sql.Timestamp operateTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp unprocessedTime;
+	private java.sql.Timestamp processingTime;
+	private java.sql.Timestamp processedTime;
 	
     public java.lang.Long getId() {
 		return id;
@@ -148,6 +154,31 @@ public class OrganizationTaskDTO {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	
+	public java.sql.Timestamp getUnprocessedTime() {
+		return unprocessedTime;
+	}
+
+	public void setUnprocessedTime(java.sql.Timestamp unprocessedTime) {
+		this.unprocessedTime = unprocessedTime;
+	}
+
+	public java.sql.Timestamp getProcessingTime() {
+		return processingTime;
+	}
+
+	public void setProcessingTime(java.sql.Timestamp processingTime) {
+		this.processingTime = processingTime;
+	}
+
+	public java.sql.Timestamp getProcessedTime() {
+		return processedTime;
+	}
+
+	public void setProcessedTime(java.sql.Timestamp processedTime) {
+		this.processedTime = processedTime;
 	}
 
 	@Override
