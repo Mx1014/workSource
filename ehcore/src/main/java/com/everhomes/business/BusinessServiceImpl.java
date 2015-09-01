@@ -73,6 +73,8 @@ public class BusinessServiceImpl implements BusinessService {
     //private static final String AUTHENTICATE_PREFIX_URL = "authenticate.prefix.url";
     private static final String PREFIX_URL = "prefix.url";
     private static final String BUSINESS_IMAGE_URL = "business.image.url";
+    private static final long CATEOGRY_RECOMMEND = 9999L;
+    private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
     @Autowired
     private BusinessProvider businessProvider;
     @Autowired
@@ -235,9 +237,9 @@ public class BusinessServiceImpl implements BusinessService {
         
         GetBusinessesByCategoryCommandResponse response = new GetBusinessesByCategoryCommandResponse();
         //只作校验用
-        List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId(),offset,pageSize);
-        if(busineseCategories == null || busineseCategories.isEmpty())
-            return response;
+//        List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId(),offset,pageSize);
+//        if(busineseCategories == null || busineseCategories.isEmpty())
+//            return response;
 
         List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
         if(points == null || points.isEmpty()){
@@ -249,23 +251,29 @@ public class BusinessServiceImpl implements BusinessService {
         final double lon = point != null ? point.getLongitude() : 0;
 
         List<String> geoHashList = getGeoHashCodeList(lat, lon);
+        List<Business> businesses = null;
         
-        //获取指定类型的服务
-        List<Business> businesses  = this.businessProvider.findBusinessByCategroy(cmd.getCategoryId(),geoHashList);
+        //recommend to user
+        List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
+                .map(r->r.getOwnerId()).collect(Collectors.toList());
+        //查询推荐列表
+        if(cmd.getCategoryId() == CATEOGRY_RECOMMEND){
+            businesses = this.businessProvider.findBusinessByIds(recommendBizIds);
+        }else{
+          //获取指定类型的服务
+            businesses = this.businessProvider.findBusinessByCategroy(cmd.getCategoryId(),geoHashList);
+        }
         
         Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
-        if(category == null){
-            LOGGER.error("Category is not found.categoryId=" + cmd.getCategoryId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid paramter categoryId,categoryId is null");
+        if(cmd.getCategoryId() == CATEOGRY_RECOMMEND){
+            category = new Category();
+            category.setId(CATEOGRY_RECOMMEND);
+            category.setName(CATEOGRY_RECOMMEND_NAME);
         }
         //user favorite
 //        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
 //                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
         List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
-        //recommend to user
-        List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
-                .map(r->r.getOwnerId()).collect(Collectors.toList());
         
         //final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
         final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
@@ -273,11 +281,11 @@ public class BusinessServiceImpl implements BusinessService {
         final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
         final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
         List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
+        final Category c = category;
         businesses.forEach(r ->{
-            
             BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
             List<CategoryDTO> categories = new ArrayList<>();
-            categories.add(ConvertHelper.convert(category, CategoryDTO.class));
+            categories.add(ConvertHelper.convert(c, CategoryDTO.class));
             dto.setCategories(categories);
             dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
             dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
@@ -805,14 +813,16 @@ public class BusinessServiceImpl implements BusinessService {
         if(list != null && list.size() > 0){
               item = list.get(0);
         }
-        if(item == null){
-            LOGGER.error("Launchpad item is not exists.targetType=biz,targetId="+businessId);
-            return ;
-        }
         //如果是用户自定义的直接删除,否则增加用户自定义项，并将displayFlag设为不可见
-        if(item.getScopeType().equalsIgnoreCase(LaunchPadScopeType.USER.getCode()))
+        if(item != null){
             this.launchPadProvider.deleteLaunchPadItem(item);
+        }
         else{
+            List<LaunchPadItem> bizItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, null, 0);
+            if(bizItems != null && bizItems.size() > 0){
+                  item = bizItems.get(0);
+            }
+            item.setId(0L);
             item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
             item.setScopeId(userId);
             item.setScopeType(LaunchPadScopeType.USER.getCode());

@@ -145,21 +145,15 @@ public class CategoryProviderImpl implements CategoryProvider {
         if(status != null)
             condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(status.getCode()));
 
-        if(parentId != null){
-            Category parentCategory = this.findCategoryById(parentId);
-            if(parentCategory == null){
-                LOGGER.error("Parent category is not found.parentId={}",parentId);
-                return null;
-            }
-            
-            condition = condition.or(Tables.EH_CATEGORIES.PATH.like(parentCategory.getName() + "/%"));
-//            if(orderByFields != null){
-//                sortFields = new SortField[orderByFields.length + 1];
-//                System.arraycopy(orderByFields, 0, sortFields, 0, orderByFields.length);
-//                sortFields[orderByFields.length] = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, 
-//                        new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC))[0];
+//        if(parentId != null){
+//            Category parentCategory = this.findCategoryById(parentId);
+//            if(parentCategory == null){
+//                LOGGER.error("Parent category is not found.parentId={}",parentId);
+//                return null;
 //            }
-        }
+//            
+//            condition = condition.or(Tables.EH_CATEGORIES.PATH.like(parentCategory.getName() + "/%"));
+//        }
         if(condition != null) {
             selectStep.where(condition);
         }

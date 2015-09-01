@@ -1,5 +1,6 @@
 package com.everhomes.category;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,8 @@ public class CategoryController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
     private static final String DEFAULT_SORT = "default_order";
     private static final String CATEGORY_PATH = "path";
+    private static final long CATEOGRY_RECOMMEND = 9999L;
+    private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
     @Autowired
     private CategoryProvider categoryProvider;    
     
@@ -102,9 +105,9 @@ public class CategoryController extends ControllerBase {
     
     @SuppressWarnings("rawtypes")
     private Tuple[] defaultSort(){
-        Tuple[] tuples = new Tuple[2]; 
+        Tuple[] tuples = new Tuple[1]; 
         tuples[0] = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);
-        tuples[1] = new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC);
+        //tuples[1] = new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC);
         return tuples;
     }
 
@@ -221,6 +224,40 @@ public class CategoryController extends ControllerBase {
             cmd.setParentId(1l);
         List<Category> entityResultList = this.categoryProvider.listActionCategories(cmd.getParentId());
 
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
+    }
+    
+    
+    /**
+     * <b>URL: /category/listBusinessCategories</b> 列出商家分类列表
+     */
+    @SuppressWarnings("unchecked")
+    @RequireAuthentication(false)
+    @RequestMapping("listBusinessCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listBusinessCategories(HttpServletRequest request, HttpServletResponse response) {
+        Tuple[] orderBy = defaultSort();
+        Category category = new Category();
+        category.setParentId(CategoryConstants.CATEGORY_ID_SERVICE);
+        category.setId(CATEOGRY_RECOMMEND);
+        category.setName(CATEOGRY_RECOMMEND_NAME);
+        category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
+        List<Category> entityResultList = new ArrayList<Category>();
+        entityResultList.add(category);
+        List<Category> result = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+                CategoryAdminStatus.ACTIVE, orderBy);
+        if(result != null && !result.isEmpty())
+            entityResultList.addAll(result);
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
             return ConvertHelper.convert(r, CategoryDTO.class);
         }).collect(Collectors.toList());
