@@ -21,6 +21,8 @@ import org.springframework.transaction.TransactionStatus;
 
 import ch.hsr.geohash.GeoHash;
 
+import com.everhomes.business.admin.BusinessAdminDTO;
+import com.everhomes.business.admin.BusinessPromoteScopeDTO;
 import com.everhomes.business.admin.CreateBusinessAdminCommand;
 import com.everhomes.business.admin.DeletePromoteBusinessAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommand;
@@ -39,6 +41,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.ActionType;
 import com.everhomes.launchpad.ApplyPolicy;
@@ -575,15 +578,17 @@ public class BusinessServiceImpl implements BusinessService {
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         User user = UserContext.current().getUser();
         int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
-        List<BusinessDTO> result = null;
+        List<BusinessAdminDTO> result = null;
         final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
         List<Business> businesses = this.businessProvider.listBusinessesByKeyword(cmd.getKeyword() , offset , pageSize);
         if(businesses != null && !businesses.isEmpty())
             result = businesses.stream().map(r -> {
-                    BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
+                    BusinessAdminDTO dto = ConvertHelper.convert(r, BusinessAdminDTO.class);
                     dto.setLogoUrl(processLogoUrl(r,user.getId(),imageUrl));
                     //set recommend status
                     processRecommendStatus(dto);
+                    
+                    processPromoteFlag(dto);
                     
                     return dto;
                     }
@@ -597,7 +602,54 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
 
-    private void processRecommendStatus(BusinessDTO dto) {
+    private void processPromoteFlag(BusinessAdminDTO dto) {
+        List<LaunchPadItem> countryItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                dto.getId(), LaunchPadScopeType.COUNTRY.getCode(),0);
+        List<BusinessPromoteScopeDTO> promoteScopes = new ArrayList<>();
+        if(countryItems != null && !countryItems.isEmpty()){
+            dto.setPromoteFlag((byte)1);
+            BusinessPromoteScopeDTO scope = new BusinessPromoteScopeDTO();
+            scope.setRegionName("全国");
+            scope.setScopeCode(BusinessScopeType.ALL.getCode());
+            promoteScopes.add(scope);
+            dto.setPromoteScopes(promoteScopes);
+            return ;
+        }
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                dto.getId(), LaunchPadScopeType.CITY.getCode(),0);
+        if(cityItems != null && !cityItems.isEmpty()){
+            dto.setPromoteFlag((byte)1);
+            cityItems.forEach(c ->{
+                Region region = this.regionProvider.findRegionById(c.getScopeId());
+                BusinessPromoteScopeDTO scope = new BusinessPromoteScopeDTO();
+                if(region != null){
+                    scope.setRegionName(region.getName());
+                    scope.setScopeCode(BusinessScopeType.CITY.getCode());
+                    promoteScopes.add(scope);
+                }
+            });
+            dto.setPromoteScopes(promoteScopes);
+        }
+        List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                dto.getId(), LaunchPadScopeType.COMMUNITY.getCode(),0);
+        if(cmmtyItems != null && !cmmtyItems.isEmpty()){
+            dto.setPromoteFlag((byte)1);
+            cmmtyItems.forEach(c ->{
+                Community community = this.communityProvider.findCommunityById(c.getScopeId());
+                BusinessPromoteScopeDTO scope = new BusinessPromoteScopeDTO();
+                if(community != null){
+                    scope.setRegionName(community.getName());
+                    scope.setScopeCode(BusinessScopeType.COMMUNITY.getCode());
+                    promoteScopes.add(scope);
+                }
+            });
+        }
+        
+        
+        
+    }
+
+    private void processRecommendStatus(BusinessAdminDTO dto) {
         List<BusinessAssignedScope> assignedScopes = this.businessProvider.findBusinessAssignedScopesByBusinessId(dto.getId());
         if(assignedScopes != null && !assignedScopes.isEmpty()){
             dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());

@@ -11,21 +11,21 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>requests: 商家列表，参考{@link com.everhomes.business.BusinessDTO}</li>
+ * <li>requests: 商家列表，参考{@link com.everhomes.business.admin.BusinessAdminDTO}</li>
  * <li>nextPageOffset: 下一页页码</li>
  * </ul>
  */
 
 public class ListBusinessesByKeywordAdminCommandResponse{
-    @ItemType(BusinessDTO.class)
-    private List<BusinessDTO> requests;
+    @ItemType(BusinessAdminDTO.class)
+    private List<BusinessAdminDTO> requests;
     private Integer nextPageOffset;
 
-    public List<BusinessDTO> getRequests() {
+    public List<BusinessAdminDTO> getRequests() {
         return requests;
     }
 
-    public void setRequests(List<BusinessDTO> requests) {
+    public void setRequests(List<BusinessAdminDTO> requests) {
         this.requests = requests;
     }
 

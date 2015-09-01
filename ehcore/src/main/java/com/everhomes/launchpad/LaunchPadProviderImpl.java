@@ -234,7 +234,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         Condition condition = null;
         if(scopeType != null){
             condition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType);
-            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+            if(scopeId != 0)
+                condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
         }
         
         if(targetType != null){
