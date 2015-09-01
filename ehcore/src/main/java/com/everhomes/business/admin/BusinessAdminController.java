@@ -102,4 +102,19 @@ public class BusinessAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/business/deletePromoteBusiness</b>
+     * <p>删除店铺广场可见</p>
+     */
+    @RequestMapping("deletePromoteBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse deletePromoteBusiness(@Valid DeletePromoteBusinessAdminCommand cmd) {
+        
+        businessService.deletePromoteBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

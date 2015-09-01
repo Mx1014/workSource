@@ -114,6 +114,7 @@ public class BusinessTest extends CoreServerTestCase {
     public void testDeleteBusiness(){
         SyncDeleteBusinessCommand cmd = new SyncDeleteBusinessCommand();
         cmd.setId(String.valueOf("1002"));
+        cmd.setUserId(152719L);
         businessService.syncDeleteBusiness(cmd);
     }
     

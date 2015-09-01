@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionStatus;
 import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.business.admin.CreateBusinessAdminCommand;
+import com.everhomes.business.admin.DeletePromoteBusinessAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommandResponse;
 import com.everhomes.business.admin.PromoteBusinessAdminCommand;
@@ -41,6 +42,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.ActionType;
 import com.everhomes.launchpad.ApplyPolicy;
+import com.everhomes.launchpad.Item;
 import com.everhomes.launchpad.ItemDisplayFlag;
 import com.everhomes.launchpad.ItemTargetType;
 import com.everhomes.launchpad.LaunchPadConstants;
@@ -545,7 +547,8 @@ public class BusinessServiceImpl implements BusinessService {
                     "Business is not exists.");
         }
         this.businessProvider.deleteBusiness(business);
-        
+        //删除服务市场item
+        this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(),business.getId());
     }
 
     @Override
@@ -668,8 +671,14 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter userId,userId is not found");
         }
-        this.businessProvider.deleteBusiness(business.getId());
-        this.userActivityService.cancelShop(user.getId());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            this.businessProvider.deleteBusiness(business.getId());
+            this.userActivityService.cancelShop(user.getId());
+            //删除服务市场item
+            this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(),business.getId());
+            return true;
+        });
+        
         
     }
 
@@ -874,6 +883,18 @@ public class BusinessServiceImpl implements BusinessService {
         });
        
         this.launchPadProvider.createLaunchPadItems(items);
+    }
+
+    @Override
+    public void deletePromoteBusiness(DeletePromoteBusinessAdminCommand cmd) {
+        if(cmd.getIds() == null || !cmd.getIds().isEmpty()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter ids null.");
+        }
+        cmd.getIds().forEach(r ->{
+            this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(), r);
+        });
+        
     }
  
 }
