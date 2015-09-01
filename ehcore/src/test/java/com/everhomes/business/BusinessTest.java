@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
 
+import com.everhomes.business.admin.PromoteBusinessAdminCommand;
 import com.everhomes.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.launchpad.ItemScope;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 
@@ -113,5 +115,34 @@ public class BusinessTest extends CoreServerTestCase {
         SyncDeleteBusinessCommand cmd = new SyncDeleteBusinessCommand();
         cmd.setId(String.valueOf("1002"));
         businessService.syncDeleteBusiness(cmd);
+    }
+    
+    @Test
+    public void testPromoteBusiness(){
+        PromoteBusinessAdminCommand cmd = new PromoteBusinessAdminCommand();
+        cmd.setId(2L);
+        ItemScope scope = new ItemScope();
+        scope.setScopeId(8L);
+        scope.setScopeType("community");
+        List<ItemScope> scopes = new ArrayList<>();
+        scopes.add(scope);
+        cmd.setItemScopes(scopes);
+        businessService.promoteBusiness(cmd);
+    }
+    
+    @Test
+    public void testFavoriteBusiness(){
+        FavoriteBusinessCommand cmd = new FavoriteBusinessCommand();
+        cmd.setId(2L);
+        businessService.favoriteBusiness(cmd);
+        
+    }
+    
+    @Test
+    public void testCancelFavoriteBusiness(){
+        CancelFavoriteBusinessCommand cmd = new CancelFavoriteBusinessCommand();
+        cmd.setId(2L);
+        businessService.cancelFavoriteBusiness(cmd);
+        
     }
 }

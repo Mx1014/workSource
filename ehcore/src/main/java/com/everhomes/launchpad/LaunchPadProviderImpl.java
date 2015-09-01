@@ -225,6 +225,37 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 		return list;
 	}
+    @Override
+    public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,String scopeType, long scopeId) {
+        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+
+        Condition condition = null;
+        if(scopeType != null){
+            condition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE.eq(scopeType);
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+        }
+        
+        if(targetType != null){
+            if(condition != null){
+                condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType));
+                if(targetId != 0)
+                    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+            }else{
+                condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
+                if(targetId != 0)
+                    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+            }
+        }
+       
+        step.where(condition).fetch().map(r ->{
+            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
+    }
 
 
 }

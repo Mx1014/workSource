@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id: id</li>
  * <li>namespaceId: 命名空间</li>
  * <li>appId: 应用Id</li>
  * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
@@ -32,7 +33,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class LaunchPadItemDTO {
-
+    private Long    id;
     private Integer namespaceId;
     private Long    appId;
     private String  scopeType;
@@ -54,6 +55,14 @@ public class LaunchPadItemDTO {
     private String  displayLayout;
     private Integer    bgcolor;
     private Byte    scaleType;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

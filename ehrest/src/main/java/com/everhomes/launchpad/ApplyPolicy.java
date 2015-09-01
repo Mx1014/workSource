@@ -33,6 +33,7 @@ public enum ApplyPolicy {
         
         case 2: 
             return REVERT;
+            
         default :
             assert(false);
             break;

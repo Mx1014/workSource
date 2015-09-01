@@ -4,6 +4,7 @@ package com.everhomes.business;
 
 
 import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,6 +63,36 @@ public class BusinessController extends ControllerBase {
     public RestResponse deleteBusiness(@Valid DeleteBusinessCommand cmd) {
         
         businessService.deleteBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /business/favoriteBusiness</b>
+     * <p>店铺收藏（放到服务市场首页）</p>
+     */
+    @RequestMapping("favoriteBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse favoriteBusiness(FavoriteBusinessCommand cmd) {
+        
+        businessService.favoriteBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /business/cancelFavoriteBusiness</b>
+     * <p>用户取消收藏</p>
+     */
+    @RequestMapping("cancelFavoriteBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse cancelFavoriteBusiness(CancelFavoriteBusinessCommand cmd) {
+        
+        businessService.cancelFavoriteBusiness(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

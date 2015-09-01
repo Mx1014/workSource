@@ -124,11 +124,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         long startTime = System.currentTimeMillis();
         GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
         List<LaunchPadItemDTO> result = null;
-        if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
-            result = getBusinessItems(cmd,community);
-        }else{
-            result = getLaunchPadItems(cmd,community,request);
-        }
+//        if(cmd.getItemGroup().equals(ItemGroup.BIZS.getCode())){
+//            result = getBusinessItems(cmd,community);
+//        }else{
+//            result = getLaunchPadItems(cmd,community,request);
+//        }
+        result = getLaunchPadItems(cmd,community,request);
         response.setLaunchPadItems(result);
         long endTime = System.currentTimeMillis();
         LOGGER.info("Query launch pad complete,communityId=" + communityId 
@@ -225,6 +226,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return business.getUrl();
     }
 
+    @SuppressWarnings("unchecked")
     private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community, HttpServletRequest request){
         User user = UserContext.current().getUser();
         long userId = user.getId();
@@ -233,7 +235,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
         List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId(),null);
         List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),community.getId(),null);
-        List<LaunchPadItem> userItems = getUserItems(user.getId());
+        List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(), cmd.getItemGroup(), LaunchPadScopeType.USER.getCode(), userId, null);
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
         if(defaultItems == null || defaultItems.isEmpty()){
@@ -262,11 +264,26 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             if(adminItems != null && !adminItems.isEmpty())
                 allItems.addAll(adminItems);
         }
-        try{
+        try{ 
+            final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
+            final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+            final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
                 itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
-                itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+                if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
+                    Business b = this.businessProvider.findBusinessById(r.getTargetId());
+                    if(b != null){
+                        itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
+                        jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
+                        itemDTO.setActionData(jsonObject.toJSONString());
+                        if(b.getCreatorUid().longValue() == userId)
+                            itemDTO.setItemLabel(itemDTO.getItemLabel() + "(店铺)");
+                    }
+                }else
+                    itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 result.add(itemDTO);
                
             });
@@ -572,11 +589,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         this.dbProvider.execute((TransactionStatus status) -> {
             
             //delete before
-            List<UserProfile> userProfiles = this.userActivityProvider.findProfileByUid(userId);
-            userProfiles.forEach((UserProfile p) ->{
-                if(p.getItemKind().byteValue() == ItemKind.JSON.getCode())
-                    this.userActivityProvider.deleteProfile(p);
-            });
+            UserProfile profile = this.userActivityProvider.findUserProfileBySpecialKey(userId, UserProfileContstant.LaunchPadName);
+            this.userActivityProvider.deleteProfile(profile);
             
             JSONArray array = new JSONArray();
             items.forEach((Item item) ->{
@@ -590,7 +604,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 }
                 launchPadItem.setDefaultOrder(item.getOrderIndex());
                 launchPadItem.setApplyPolicy(item.getApplyPolicy());
-                launchPadItem.setScopeType(LaunchPadScopeType.USERDEFINED.getCode());
+                launchPadItem.setScopeType(LaunchPadScopeType.USER.getCode());
                 launchPadItem.setScopeId(userId);
                 launchPadItem.setDisplayFlag(item.getDisplayFlag());
                 array.add(launchPadItem);

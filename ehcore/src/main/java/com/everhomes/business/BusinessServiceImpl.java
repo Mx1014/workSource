@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.jasper.tagplugins.jstl.core.If;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.DistanceUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -24,6 +24,7 @@ import ch.hsr.geohash.GeoHash;
 import com.everhomes.business.admin.CreateBusinessAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommand;
 import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommandResponse;
+import com.everhomes.business.admin.PromoteBusinessAdminCommand;
 import com.everhomes.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
@@ -38,6 +39,14 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.launchpad.ActionType;
+import com.everhomes.launchpad.ApplyPolicy;
+import com.everhomes.launchpad.ItemDisplayFlag;
+import com.everhomes.launchpad.ItemTargetType;
+import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadProvider;
+import com.everhomes.launchpad.LaunchPadScopeType;
 import com.everhomes.launchpad.ScaleType;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -84,6 +93,8 @@ public class BusinessServiceImpl implements BusinessService {
     private UserActivityService userActivityService;
     @Autowired
     private RegionProvider regionProvider;
+    @Autowired
+    private LaunchPadProvider launchPadProvider;
     
     @Override
     public void syncBusiness(SyncBusinessCommand cmd) {
@@ -249,8 +260,9 @@ public class BusinessServiceImpl implements BusinessService {
                     "Invalid paramter categoryId,categoryId is null");
         }
         //user favorite
-        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
-                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
+//        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
+//                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
+        List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
         //recommend to user
         List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
                 .map(r->r.getOwnerId()).collect(Collectors.toList());
@@ -271,8 +283,9 @@ public class BusinessServiceImpl implements BusinessService {
             dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
             if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
                 dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
-            else
+            else{
                 dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
+            }
             
             if(recommendBizIds != null && recommendBizIds.contains(r.getId())){
                 dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());
@@ -419,6 +432,37 @@ public class BusinessServiceImpl implements BusinessService {
             geoHashCodes.add(g.toBase32());
         }
         return geoHashCodes;
+    }
+    
+    private List<Long> getFavoriteBizIds(long userId,long cmmtyId,long cityId){
+        List<Long> removeIds = new ArrayList<>();
+        List<Long> userBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                0, LaunchPadScopeType.USER.getCode(), userId).stream()
+                .filter(r ->{
+                    if(r.getDisplayFlag().byteValue() == ItemDisplayFlag.DISPLAY.getCode())
+                        return true;
+                    removeIds.add(r.getTargetId());
+                    return false;
+                }).map(r ->r.getTargetId()).collect(Collectors.toList());
+        List<Long> cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                0, LaunchPadScopeType.COMMUNITY.getCode(), cmmtyId).stream()
+                .filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+        List<Long> cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                0, LaunchPadScopeType.CITY.getCode(), cityId).stream()
+                .filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+        List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                0, LaunchPadScopeType.COUNTRY.getCode(), 0).stream()
+                .filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+        List<Long> favoriteBizIds = new ArrayList<Long>();
+        if(userBizIds != null && !userBizIds.isEmpty())
+            favoriteBizIds.addAll(userBizIds);
+        if(cmmtyBizIds != null && !cmmtyBizIds.isEmpty())
+            favoriteBizIds.addAll(cmmtyBizIds);
+        if(cityBizIds != null && !cityBizIds.isEmpty())
+            favoriteBizIds.addAll(cityBizIds);
+        if(countyBizIds != null && !countyBizIds.isEmpty())
+            favoriteBizIds.addAll(countyBizIds);
+        return favoriteBizIds;
     }
     
     @Override
@@ -645,14 +689,8 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public void syncUserFavorite(UserFavoriteCommand cmd) {
         isValiad(cmd);
-        User user = userProvider.findUserById(cmd.getUserId());
         Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-        UserFavorite userFavorite = new UserFavorite();
-        userFavorite.setOwnerUid(user.getId());
-        userFavorite.setTargetType("biz");
-        userFavorite.setTargetId(business.getId());
-        userFavorite.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        userActivityProvider.addUserFavorite(userFavorite);
+        favoriteBusiness(cmd.getUserId(), business.getId());
         
     }
     
@@ -681,9 +719,8 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public void syncUserCancelFavorite(UserFavoriteCommand cmd) {
         isValiad(cmd);
-        User user = userProvider.findUserById(cmd.getUserId());
-        Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-        userActivityProvider.deleteFavorite(user.getId(), business.getId(), "biz");
+        Business business = this.businessProvider.findBusinessByTargetId(cmd.getId()); 
+        cancelFavoriteBusiness(cmd.getUserId(), business.getId());
         
     }
 
@@ -698,6 +735,135 @@ public class BusinessServiceImpl implements BusinessService {
             return BusinessFavoriteStatus.FAVORITE.getCode();
         }
         return BusinessFavoriteStatus.NONE.getCode();
+    }
+
+    @Override
+    public void favoriteBusiness(FavoriteBusinessCommand cmd) {
+        if(cmd.getId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter id null,categoryId is null");
+        
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        favoriteBusiness(userId, cmd.getId());
+        
+    }
+    
+    private void favoriteBusiness(long userId,long businessId){
+        Business business = this.businessProvider.findBusinessById(businessId);
+        if(business == null){
+            LOGGER.error("Business is not exists.id=" + businessId);
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");
+        }
+        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        LaunchPadItem item = new LaunchPadItem();
+        item.setAppId(0L);
+        item.setItemName(StringUtils.upperCase(business.getName()));
+        item.setItemLabel(business.getDisplayName());
+        item.setActionType(ActionType.THIRDPART_URL.getCode());
+        item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+        item.setItemGroup(LaunchPadConstants.GROUP_BIZS);
+        item.setItemLocation(LaunchPadConstants.ITEM_LOCATION);
+        item.setIconUri(business.getLogoUri());
+        item.setItemWidth(1);
+        item.setItemHeight(1);
+        item.setNamespaceId(0);
+        item.setScopeType(LaunchPadScopeType.USER.getCode());
+        item.setScopeId(userId);
+        item.setDefaultOrder(0);
+        item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+        item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+        item.setBgcolor(0);
+        item.setTargetType(ItemTargetType.BIZ.getCode());
+        item.setTargetId(businessId);
+        items.add(item);
+        this.launchPadProvider.createLaunchPadItems(items);
+    }
+    
+
+    @Override
+    public void cancelFavoriteBusiness(CancelFavoriteBusinessCommand cmd) {
+        if(cmd.getId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter id null,categoryId is null");
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        cancelFavoriteBusiness(userId, cmd.getId());
+    }
+    
+    private void cancelFavoriteBusiness(long userId, long businessId){
+        Business business = this.businessProvider.findBusinessById(businessId);
+        if(business == null){
+            LOGGER.error("Business is not exists.id=" + businessId);
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");
+        }
+        
+        List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, LaunchPadScopeType.USER.getCode(), userId);
+        LaunchPadItem item = null;
+        if(list != null && list.size() > 0){
+              item = list.get(0);
+        }
+        if(item == null){
+            LOGGER.error("Launchpad item is not exists.targetType=biz,targetId="+businessId);
+            return ;
+        }
+        //如果是用户自定义的直接删除,否则增加用户自定义项，并将displayFlag设为不可见
+        if(item.getScopeType().equalsIgnoreCase(LaunchPadScopeType.USER.getCode()))
+            this.launchPadProvider.deleteLaunchPadItem(item);
+        else{
+            item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+            item.setScopeId(userId);
+            item.setScopeType(LaunchPadScopeType.USER.getCode());
+            this.launchPadProvider.createLaunchPadItem(item);
+        }
+    }
+
+    @Override
+    public void promoteBusiness(PromoteBusinessAdminCommand cmd) {
+        if(cmd.getId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid paramter id null,categoryId is null");
+        
+        Business business = this.businessProvider.findBusinessById(cmd.getId());
+        if(business == null){
+            LOGGER.error("Business is not exists.id=" + cmd.getId());
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");
+        }
+        if(cmd.getItemScopes() == null || cmd.getItemScopes().isEmpty()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid item scopes paramter.");
+        }
+        
+        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        cmd.getItemScopes().forEach((itemScope) ->{
+            LaunchPadItem item = new LaunchPadItem();
+            item.setAppId(0L);
+            item.setItemName(StringUtils.upperCase(business.getName()));
+            item.setItemLabel(business.getDisplayName());
+            item.setActionType(ActionType.THIRDPART_URL.getCode());
+            item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+            item.setItemGroup(LaunchPadConstants.GROUP_BIZS);
+            item.setItemLocation(LaunchPadConstants.ITEM_LOCATION);
+            item.setIconUri(business.getLogoUri());
+            item.setItemWidth(1);
+            item.setItemHeight(1);
+            item.setNamespaceId(0);
+            item.setScopeType(itemScope.getScopeType());
+            item.setScopeId(itemScope.getScopeId());
+            item.setDefaultOrder(0);
+            item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+            item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+            item.setBgcolor(0);
+            item.setTargetType(ItemTargetType.BIZ.getCode());
+            item.setTargetId(cmd.getId());
+            items.add(item);
+            
+        });
+       
+        this.launchPadProvider.createLaunchPadItems(items);
     }
  
 }

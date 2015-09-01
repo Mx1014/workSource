@@ -31,6 +31,8 @@ public interface LaunchPadConstants {
     public static final String GROUP_ACTIONBARS = "ActionBars";
     public static final String GROUP_CALLPHONES = "CallPhones";
     
+    public static final String ITEM_LOCATION = "/home";
+    
     //收集地址
     public static final String USER_REQUEST_LIST = "userRequest_list";
     

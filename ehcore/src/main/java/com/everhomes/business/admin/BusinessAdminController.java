@@ -87,4 +87,19 @@ public class BusinessAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/business/promoteBusiness</b>
+     * <p>设置店铺广场可见</p>
+     */
+    @RequestMapping("promoteBusiness")
+    @RestReturn(value=String.class)
+    public RestResponse promoteBusiness(@Valid PromoteBusinessAdminCommand cmd) {
+        
+        businessService.promoteBusiness(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
