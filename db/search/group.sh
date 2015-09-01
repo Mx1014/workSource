@@ -1,4 +1,4 @@
-ELASTIC=127.0.0.1:9200
+ELASTIC=elasticsearch:9200
 
 curl -XPUT "http://$ELASTIC/everhomesv3" -d '
     "settings" : {
