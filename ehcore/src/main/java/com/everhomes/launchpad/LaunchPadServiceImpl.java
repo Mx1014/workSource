@@ -281,6 +281,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                         itemDTO.setActionData(jsonObject.toJSONString());
                         if(b.getCreatorUid().longValue() == userId)
                             itemDTO.setItemLabel(itemDTO.getItemLabel() + "(店铺)");
+                        if(b.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode())
+                            itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                     }
                 }else
                     itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
