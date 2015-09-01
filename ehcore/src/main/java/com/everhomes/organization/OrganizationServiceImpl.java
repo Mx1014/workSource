@@ -1266,6 +1266,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		taskDto.setOperateTime(task.getOperateTime());
 		taskDto.setTaskCreatorUid(task.getCreatorUid());
 		taskDto.setTaskCreateTime(task.getCreateTime());
+		taskDto.setUnprocessedTime(task.getUnprocessedTime());
+		taskDto.setProcessingTime(task.getProcessingTime());
+		taskDto.setProcessedTime(task.getProcessedTime());
 	}
 
 	private void checkOrganizationIdIsNull(Long organizationId) {
@@ -1294,6 +1297,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(desOrgMember.getTargetId());;
+			task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
 			this.organizationProvider.updateOrganizationTask(task);
 			//发送评论
 			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),desOrgMember.getTargetId(),topic.getCategoryId());
@@ -1394,6 +1398,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			task.setTaskStatus(taskSatus.getCode());
 			task.setOperatorUid(user.getId());
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
+			this.setOrgTaskTimeByStatus(task,taskSatus.getCode());
 			this.organizationProvider.updateOrganizationTask(task);
 			/*if(cmd.getStatus() == OrganizationTaskStatus.PROCESSING.getCode()){
 				//发送评论
@@ -1401,6 +1406,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}*/
 			return status;
 		});
+	}
+
+	private void setOrgTaskTimeByStatus(OrganizationTask task,byte code) {
+		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+		if(OrganizationTaskStatus.UNPROCESSED.getCode() == code)
+			task.setUnprocessedTime(currentTimestamp);
+		if(OrganizationTaskStatus.PROCESSING.getCode() == code)
+			task.setProcessingTime(currentTimestamp);
+		if(OrganizationTaskStatus.PROCESSED.getCode() == code)
+			task.setProcessedTime(currentTimestamp);
 	}
 
 	private OrganizationTaskStatus checkTaskStatus(Byte status) {

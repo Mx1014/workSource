@@ -61,6 +61,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 				task.setTargetId(organization.getId());
 			task.setCreatorUid(post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 			OrganizationTaskType taskType = getOrganizationTaskType(post);
 			if(taskType != null) {
@@ -168,26 +169,23 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 	}
 
 	private String getOrganizationTaskRenderString(Post post) {
-		String str = post.getEmbeddedJson();
-
-		if(str == null){
-			try {
-				Long taskId = post.getEmbeddedId();
-				if(taskId == null) {
-					LOGGER.error("Failed to render the organization task, task id is null, postId=" + post.getId());
+		String str = null;
+		try {
+			Long taskId = post.getEmbeddedId();
+			if(taskId == null) {
+				LOGGER.error("Failed to render the organization task, task id is null, postId=" + post.getId());
+			} else {
+				OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
+				if(task != null) {
+					OrganizationTaskDTO taskDto = ConvertHelper.convert(task, OrganizationTaskDTO.class);
+					str = StringHelper.toJsonString(taskDto);
 				} else {
-					OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
-					if(task != null) {
-						OrganizationTaskDTO taskDto = ConvertHelper.convert(task, OrganizationTaskDTO.class);
-						str = StringHelper.toJsonString(taskDto);
-					} else {
-						LOGGER.error("Failed to render the organization task, task not found, postId=" + post.getId() + ", taskId=" + taskId);
-					}
+					LOGGER.error("Failed to render the organization task, task not found, postId=" + post.getId() + ", taskId=" + taskId);
 				}
-			} catch(Exception e) {
-				LOGGER.error("Failed to post-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
-						+ ", subject=" + post.getSubject(), e);
 			}
+		} catch(Exception e) {
+			LOGGER.error("Failed to post-process the organization task, postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
+					+ ", subject=" + post.getSubject(), e);
 		}
 
 		return str;

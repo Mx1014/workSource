@@ -31,6 +31,10 @@ public class OrganizationTaskDTO2 {
 	private java.sql.Timestamp operateTime;
 	private java.lang.Long     taskCreatorUid;
 	private java.sql.Timestamp taskCreateTime;
+	
+	private java.sql.Timestamp unprocessedTime;
+	private java.sql.Timestamp processingTime;
+	private java.sql.Timestamp processedTime;
 
 	//PostDTO
 	private Long id;
@@ -525,6 +529,30 @@ public class OrganizationTaskDTO2 {
 
 	public void setPrivateFlag(Byte privateFlag) {
 		this.privateFlag = privateFlag;
+	}
+	
+	public java.sql.Timestamp getUnprocessedTime() {
+		return unprocessedTime;
+	}
+
+	public void setUnprocessedTime(java.sql.Timestamp unprocessedTime) {
+		this.unprocessedTime = unprocessedTime;
+	}
+
+	public java.sql.Timestamp getProcessingTime() {
+		return processingTime;
+	}
+
+	public void setProcessingTime(java.sql.Timestamp processingTime) {
+		this.processingTime = processingTime;
+	}
+
+	public java.sql.Timestamp getProcessedTime() {
+		return processedTime;
+	}
+
+	public void setProcessedTime(java.sql.Timestamp processedTime) {
+		this.processedTime = processedTime;
 	}
 
 	@Override

@@ -7,11 +7,11 @@ import com.everhomes.rest.RestResponseBase;
 import java.util.List;
 import com.everhomes.category.CategoryDTO;
 
-public class ListDescendantsRestResponse extends RestResponseBase {
+public class ListBusinessCategoriesRestResponse extends RestResponseBase {
 
     private List<CategoryDTO> response;
 
-    public ListDescendantsRestResponse () {
+    public ListBusinessCategoriesRestResponse () {
     }
 
     public List<CategoryDTO> getResponse() {
