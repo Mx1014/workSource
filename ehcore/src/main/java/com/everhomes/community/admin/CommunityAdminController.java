@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.address.CommunityDTO;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.ApproveCommunityCommand;
 import com.everhomes.community.CommunityService;
 import com.everhomes.community.GetCommunityByIdCommand;
@@ -30,6 +31,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="Community admin controller", site="core")
 @RestController
@@ -51,6 +54,9 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=ListCommunitesByStatusCommandResponse.class)
     public RestResponse listCommunitiesByStatus(@Valid ListCommunitesByStatusCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         ListCommunitesByStatusCommandResponse cmdResponse = this.communityService.listCommunitiesByStatus(cmd);
         
         RestResponse response =  new RestResponse(cmdResponse);
@@ -66,6 +72,9 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("approveCommunity")
     @RestReturn(value=String.class)
     public RestResponse approveCommunity(@Valid ApproveCommunityAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.approveCommuniy(cmd);
         
@@ -83,6 +92,9 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse rejectCommunity(@Valid RejectCommunityAdminCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.communityService.rejectCommunity(cmd);
         
         RestResponse response =  new RestResponse();
@@ -98,6 +110,9 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("updateCommunity")
     @RestReturn(value=String.class)
     public RestResponse updateCommunity(@Valid UpdateCommunityAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.updateCommunity(cmd);
         
@@ -115,8 +130,10 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=CommunityDTO.class)
     public RestResponse getCommunityById(@Valid GetCommunityByIdCommand cmd) {
         
-        CommunityDTO community = this.communityService.getCommunityById(cmd);
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
+        CommunityDTO community = this.communityService.getCommunityById(cmd);
         RestResponse response =  new RestResponse(community);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -131,8 +148,10 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=CommunityDTO.class)
     public RestResponse getCommunityByUuid(@Valid GetCommunityByUuidCommand cmd) {
         
-        CommunityDTO community = this.communityService.getCommunityByUuid(cmd);
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
+        CommunityDTO community = this.communityService.getCommunityByUuid(cmd);
         RestResponse response =  new RestResponse(community);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -147,8 +166,10 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse syncIndex() {
 
-        this.searchSyncManager.SyncDb(SearchSyncType.COMMUNITY);
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
+        this.searchSyncManager.SyncDb(SearchSyncType.COMMUNITY);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -163,6 +184,10 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("getNearbyCommunitiesById")
     @RestReturn(value=CommunityDTO.class, collection=true)
     public RestResponse getNearbyCommunitiesById(@Valid GetNearbyCommunitiesByIdCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         List<CommunityDTO> results = this.communityService.getNearbyCommunityById(cmd);
         RestResponse response =  new RestResponse(results);
 
@@ -179,8 +204,10 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
     public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordAdminCommand cmd) {
     	
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
-    	
     	RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -34,6 +34,7 @@ import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressServiceErrorCode;
 import com.everhomes.app.AppConstants;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -88,6 +89,7 @@ import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -624,7 +626,7 @@ public class FamilyServiceImpl implements FamilyService {
         Group group = this.groupProvider.findGroupById(familyId);
         cmd.setOperatorRole((cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole()));
         //家庭成员拒绝
-        if(cmd.getOperatorRole() != Role.ResourceAdmin){
+        if(cmd.getOperatorRole() != Role.SystemAdmin){
             GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                     EntityType.USER.getCode(), userId);
             if(member == null || member.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode()){
@@ -657,14 +659,14 @@ public class FamilyServiceImpl implements FamilyService {
         
         if(cmd.getOperatorRole() == Role.ResourceOperator)
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);
-        else if(cmd.getOperatorRole() == Role.ResourceAdmin)
+        else if(cmd.getOperatorRole() == Role.SystemAdmin)
             sendFamilyNotificationForMemberRejectFamilyByAdmin(address,group,member,userId);
     }
     
     private void sendFamilyNotificationForMemberRejectFamilyByAdmin(Address address, Group group, GroupMember member,long operatorId) {
         // send notification to the applicant
         try {
-            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceAdmin);
+            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.SystemAdmin);
             
             User user = userProvider.findUserById(member.getMemberId());
             String locale = user.getLocale();
@@ -735,7 +737,7 @@ public class FamilyServiceImpl implements FamilyService {
         LOGGER.info("User approved family,operatorId=" + userId + ",memberId=" + memberUid + ",familyId=" + familyId);
         long startTime = System.currentTimeMillis();
         cmd.setOperatorRole(cmd.getOperatorRole() == null ? Role.ResourceOperator : cmd.getOperatorRole());
-        if(cmd.getOperatorRole() != Role.ResourceAdmin){
+        if(cmd.getOperatorRole() != Role.SystemAdmin){
             GroupMember currMember = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                     EntityType.USER.getCode(), userId);
             if(currMember == null || currMember.getMemberStatus().byteValue() != GroupMemberStatus.ACTIVE.getCode()){
@@ -783,7 +785,7 @@ public class FamilyServiceImpl implements FamilyService {
             
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
-            else if(cmd.getOperatorRole().byteValue() == Role.ResourceAdmin)
+            else if(cmd.getOperatorRole().byteValue() == Role.SystemAdmin)
                 sendFamilyNotificationForApproveMemberByAdmin(null,group,member,userId);
             //update current family
             setCurrentFamilyAfterApproval(memberUid,familyId,0);
@@ -840,7 +842,7 @@ public class FamilyServiceImpl implements FamilyService {
         // send notification to the applicant
         try {
             
-            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceAdmin);
+            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.SystemAdmin);
             
             User user = userProvider.findUserById(member.getMemberId());
             String locale = user.getLocale();
@@ -875,7 +877,7 @@ public class FamilyServiceImpl implements FamilyService {
         map.put("userName", member.getMemberNickName());
         
         if(operatorId != 0){
-            if(operatorRole != Role.ResourceAdmin){
+            if(operatorRole != Role.SystemAdmin){
                 GroupMember operator = this.groupProvider.findGroupMemberByMemberInfo(group.getId(), 
                     EntityType.USER.getCode(), operatorId);
                 assert(operator != null);
@@ -915,7 +917,7 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public void adminApproveMember(ApproveMemberCommand cmd) {
-        cmd.setOperatorRole(Role.ResourceAdmin);
+        cmd.setOperatorRole(Role.SystemAdmin);
         //if address status is unactive,change status
         Address address = getAddressByFamilyId(cmd.getId());
         if(address == null){
@@ -1475,6 +1477,7 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public ListWaitApproveFamilyCommandResponse listWaitApproveFamily(ListWaitApproveFamilyAdminCommand cmd) {
+
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1L : pageOffset;
         
@@ -1628,7 +1631,7 @@ public class FamilyServiceImpl implements FamilyService {
         // send notification to the applicant
         try {
             
-            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.ResourceAdmin);
+            Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,operatorId,Role.SystemAdmin);
             
             User user = userProvider.findUserById(member.getMemberId());
             String locale = user.getLocale();

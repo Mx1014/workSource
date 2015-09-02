@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.Role;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -21,6 +22,9 @@ import com.everhomes.family.ListWaitApproveFamilyCommand;
 import com.everhomes.family.ListWaitApproveFamilyCommandResponse;
 import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="Family admin controller", site="core")
 @RestController
@@ -39,6 +43,9 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("listWaitApproveFamily")
     @RestReturn(value=ListWaitApproveFamilyCommandResponse.class, collection=true)
     public RestResponse listWaitApproveFamily(@Valid ListWaitApproveFamilyAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         ListWaitApproveFamilyCommandResponse cmdResponse = this.familyService.listWaitApproveFamily(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
@@ -54,6 +61,10 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("adminApproveMember")
     @RestReturn(value=String.class)
     public RestResponse adminApproveMember(@Valid ApproveMemberCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.familyService.adminApproveMember(cmd);
         
         RestResponse response = new RestResponse();
@@ -69,7 +80,11 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("adminRejectMember")
     @RestReturn(value=String.class)
     public RestResponse adminRejectMember(@Valid RejectMemberCommand cmd) {
-        cmd.setOperatorRole(Role.ResourceAdmin);
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        cmd.setOperatorRole(Role.SystemAdmin);
         this.familyService.rejectMember(cmd);
         
         RestResponse response = new RestResponse();
@@ -85,6 +100,10 @@ public class FamilyAdminController extends ControllerBase {
     @RequestMapping("listAllFamilyMembers")
     @RestReturn(value=ListAllFamilyMembersCommandResponse.class)
     public RestResponse listAllFamilyMembers(ListAllFamilyMembersAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         ListAllFamilyMembersCommandResponse cmdResponse = this.familyService.listAllFamilyMembers(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);

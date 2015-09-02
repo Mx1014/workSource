@@ -126,7 +126,7 @@ public class UserServiceTest extends CoreServerTestCase {
         SignupCommand cmd = new SignupCommand();
         cmd.setType("mobile");
         cmd.setToken("14081234567");
-        SignupToken token = this.userService.signup(cmd);
+        SignupToken token = this.userService.signup(cmd,null);
         System.out.println("Signup token: " + WebTokenGenerator.getInstance().toWebToken(token));
     }
     

@@ -13,12 +13,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.AddressService;
 import com.everhomes.address.CorrectAddressCommand;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="Address admin controller", site="core")
 @RestController
@@ -38,6 +42,10 @@ public class AddressAdminController extends ControllerBase {
     @RequestMapping("correctAddress")
     @RestReturn(value=String.class)
     public RestResponse correctAddress(@Valid CorrectAddressAdminCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.addressService.correctAddress(cmd);
         RestResponse response = new RestResponse(null);
         
@@ -55,6 +63,10 @@ public class AddressAdminController extends ControllerBase {
     @RequestMapping(value="importCommunityInfos", method = RequestMethod.POST)
     @RestReturn(value=String.class)
     public RestResponse importCommunityInfos(@RequestParam(value = "attachment") MultipartFile[] files) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	addressService.importCommunityInfos(files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -70,6 +82,9 @@ public class AddressAdminController extends ControllerBase {
     @RequestMapping(value="importAddressInfos", method = RequestMethod.POST)
     @RestReturn(value=String.class)
     public RestResponse importAddressInfos(@RequestParam(value = "attachment") MultipartFile[] files) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	addressService.importAddressInfos(files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

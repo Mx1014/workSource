@@ -12,10 +12,14 @@ import com.everhomes.activity.ActivityDTO;
 import com.everhomes.activity.ActivityService;
 import com.everhomes.activity.ListActivitiesCommand;
 import com.everhomes.activity.ListActivitiesReponse;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.PaginationCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 
@@ -29,6 +33,10 @@ public class ActivityAdminController extends ControllerBase {
     @RequestMapping("list")
     @RestReturn(value = ListActivitiesReponse.class)
     public RestResponse listActivities(@Valid PaginationCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         ListActivitiesCommand c = new ListActivitiesCommand();
         c.setAnchor(cmd.getAnchor());
         Tuple<Long, List<ActivityDTO>> result = activityService.listActivities(c);

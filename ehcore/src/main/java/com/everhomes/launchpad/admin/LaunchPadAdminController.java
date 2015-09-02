@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -28,6 +29,8 @@ import com.everhomes.launchpad.ListLaunchPadLayoutCommandResponse;
 import com.everhomes.launchpad.UpdateLaunchPadItemCommand;
 import com.everhomes.launchpad.UpdateLaunchPadLayoutCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="LaunchPad admin controller", site="core")
 @RestController
@@ -46,6 +49,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsByKeywordAdminCommandResponse.class)
     public RestResponse getLaunchPadItemsByKeyword(@Valid GetLaunchPadItemsByKeywordAdminCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         GetLaunchPadItemsByKeywordAdminCommandResponse cmdResponse = this.launchPadService.getLaunchPadItemsByKeyword(cmd);
         RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -60,6 +66,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("getLaunchPadItemById")
     @RestReturn(value=LaunchPadItemDTO.class)
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemByIdCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         LaunchPadItemDTO launchPadItem = launchPadService.getLaunchPadItemById(cmd);
         RestResponse resp =  new RestResponse(launchPadItem);
@@ -77,6 +86,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createLaunchPadItem(@Valid CreateLaunchPadItemAdminCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         launchPadService.createLaunchPadItem(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -91,6 +103,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("deleteLaunchPadItem")
     @RestReturn(value=String.class)
     public RestResponse deleteLaunchPadItem(@Valid DeleteLaunchPadItemAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.launchPadService.deleteLaunchPadItem(cmd);
         RestResponse response =  new RestResponse();
@@ -107,6 +122,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateLaunchPadItem(@Valid UpdateLaunchPadItemAdminCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.launchPadService.updateLaunchPadItem(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -121,6 +139,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("createLaunchPadLayout")
     @RestReturn(value=String.class)
     public RestResponse createLaunchPadLayout(@Valid CreateLaunchPadLayoutAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.launchPadService.createLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -135,6 +156,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("deleteLaunchPadLayout")
     @RestReturn(value=String.class)
     public RestResponse deleteLaunchPadLayout(@Valid DeleteLaunchPadLayoutAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.launchPadService.deleteLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -149,6 +173,10 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("updateLaunchPadLayout")
     @RestReturn(value=String.class)
     public RestResponse updateLaunchPadLayout(@Valid UpdateLaunchPadLayoutAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         this.launchPadService.updateLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -163,6 +191,10 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("getLaunchPadLayout")
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse getLaunchPadLayout(@Valid GetLaunchPadLayoutCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         LaunchPadLayoutDTO dto = this.launchPadService.getLaunchPadLayout(cmd);
         RestResponse response =  new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -177,6 +209,9 @@ public class LaunchPadAdminController extends ControllerBase {
     @RequestMapping("listLaunchPadLayoutByKeyword")
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse listLaunchPadLayoutByKeyword(@Valid ListLaunchPadLayoutAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	ListLaunchPadLayoutCommandResponse result = this.launchPadService.listLaunchPadLayoutByKeyword(cmd);
         RestResponse response =  new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);

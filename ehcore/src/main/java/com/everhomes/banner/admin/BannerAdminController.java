@@ -20,11 +20,15 @@ import com.everhomes.banner.DeleteBannerCommand;
 import com.everhomes.banner.GetBannerByIdCommand;
 import com.everhomes.banner.GetBannersCommand;
 import com.everhomes.banner.UpdateBannerCommand;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="Banner controller", site="core")
 @RestController
@@ -42,6 +46,9 @@ public class BannerAdminController extends ControllerBase {
     @RequestMapping("createBanner")
     @RestReturn(value=String.class)
     public RestResponse createBanner(@Valid CreateBannerAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         bannerService.createBanner(cmd);
         RestResponse response =  new RestResponse();

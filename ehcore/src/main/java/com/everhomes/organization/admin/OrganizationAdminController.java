@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -23,8 +24,10 @@ import com.everhomes.organization.ListOrganizationsCommand;
 import com.everhomes.organization.ListOrganizationsCommandResponse;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -41,6 +44,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganization")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationByAdmin(@Valid CreateOrganizationByAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	organizationService.createOrganizationByAdmin(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -55,6 +61,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganizationMember")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationMember(@Valid CreateOrganizationMemberCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -69,6 +78,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("findUserByIndentifier")
     @RestReturn(value=UserTokenCommandResponse.class)
     public RestResponse findUserByIndentifier(@Valid UserTokenCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         UserTokenCommandResponse commandResponse = organizationService.findUserByIndentifier(cmd);
         RestResponse response = new RestResponse(commandResponse);
         
@@ -85,6 +97,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createOrganizationCommunity")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationCommunity(@Valid CreateOrganizationCommunityCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	organizationService.createOrganizationCommunity(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -100,6 +115,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("createPropertyOrganization")
     @RestReturn(value=String.class)
     public RestResponse createPropertyOrganization(@Valid CreatePropertyOrganizationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	organizationService.createPropertyOrganization(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -114,6 +132,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listOrganizations")
     @RestReturn(value=ListOrganizationsCommandResponse.class)
     public RestResponse listOrganizations(@Valid ListOrganizationsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	ListOrganizationsCommandResponse commandResponse = organizationService.listOrganizations(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -128,6 +149,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listOrgMembers")
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -142,6 +166,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteOrganizationMember")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationMember(@Valid DeleteOrganizationIdCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	organizationService.deleteOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -157,6 +184,9 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteOrganization")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganization(@Valid DeleteOrganizationIdCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	organizationService.deleteOrganization(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

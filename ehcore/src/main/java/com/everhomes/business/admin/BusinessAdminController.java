@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.DeleteBusinessCommand;
 import com.everhomes.constants.ErrorCodes;
@@ -18,6 +19,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="Business admin controller", site="core")
 @RestController
@@ -36,6 +39,9 @@ public class BusinessAdminController extends ControllerBase {
     @RestReturn(value=ListBusinessesByKeywordAdminCommandResponse.class)
     public RestResponse listBusinessesByKeyword(@Valid ListBusinessesByKeywordAdminCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         ListBusinessesByKeywordAdminCommandResponse res = businessService.listBusinessesByKeyword(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -50,6 +56,9 @@ public class BusinessAdminController extends ControllerBase {
     @RequestMapping("createBusiness")
     @RestReturn(value=String.class)
     public RestResponse createBusiness(@Valid CreateBusinessAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         businessService.createBusiness(cmd);
         RestResponse response =  new RestResponse();
@@ -66,6 +75,10 @@ public class BusinessAdminController extends ControllerBase {
     @RequestMapping("recommendBusiness")
     @RestReturn(value=String.class)
     public RestResponse recommendBusiness(@Valid RecommendBusinessesAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         businessService.recommendBusiness(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -80,6 +93,9 @@ public class BusinessAdminController extends ControllerBase {
     @RequestMapping("deleteBusiness")
     @RestReturn(value=String.class)
     public RestResponse deleteBusiness(@Valid DeleteBusinessCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         businessService.deleteBusiness(cmd);
         RestResponse response =  new RestResponse();
@@ -96,6 +112,9 @@ public class BusinessAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse promoteBusiness(@Valid PromoteBusinessAdminCommand cmd) {
         
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         businessService.promoteBusiness(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -110,6 +129,9 @@ public class BusinessAdminController extends ControllerBase {
     @RequestMapping("deletePromoteBusiness")
     @RestReturn(value=String.class)
     public RestResponse deletePromoteBusiness(@Valid DeletePromoteBusinessAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         businessService.deletePromoteBusiness(cmd);
         RestResponse response =  new RestResponse();

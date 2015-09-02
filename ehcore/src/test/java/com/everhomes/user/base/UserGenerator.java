@@ -54,7 +54,7 @@ public class UserGenerator extends CoreServerTestCase {
         cmd.setToken(phone);
         cmd.setType("mobile");
         try {
-            SignupToken rsp = userService.signup(cmd);
+            SignupToken rsp = userService.signup(cmd,null);
             DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserIdentifiers.class));
             EhUserIdentifiersDao dao = new EhUserIdentifiersDao(cxt.configuration());
             com.everhomes.server.schema.tables.pojos.EhUserIdentifiers ret = dao.fetchByIdentifierToken(phone).stream()
