@@ -6,6 +6,7 @@ package com.everhomes.launchpad;
  * <li>NONE(0): 无</li>
  * <li>BIZ(1): 更多按钮</li>
  * <li>NAVIGATION(2): 跳下一层</li>
+ * <li>OPEN_DOOR(21): 门禁</li>
  * </ul>
  */
 public enum ActionType {
