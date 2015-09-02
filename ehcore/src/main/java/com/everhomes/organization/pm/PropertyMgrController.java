@@ -29,6 +29,7 @@ import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/pm")
@@ -1286,5 +1287,17 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	@RequestMapping("getWebToken")
+    @RestReturn(value=String.class)
+    public RestResponse getWebToken(@Valid FindPmBillByOrderNoCommand cmd){
+		String str = cmd.getOrderNo();
+		String encodeStr = WebTokenGenerator.getInstance().toWebToken(str);
+        RestResponse response = new RestResponse(encodeStr);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+        
+    }
 
 }

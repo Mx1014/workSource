@@ -1686,7 +1686,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void checkOrgNameIsNull(String orgName) {
-		if(orgName == null || !orgName.equals("")){
+		if(orgName == null || orgName.equals("")){
 			LOGGER.error("orgName is empty.orgName=" + orgName);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"orgName is empty.");

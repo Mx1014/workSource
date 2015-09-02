@@ -14,8 +14,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.forum.CancelLikeTopicCommand;
-import com.everhomes.forum.DeleteCommentCommand;
-import com.everhomes.forum.DeleteTopicCommand;
 import com.everhomes.forum.GetTopicCommand;
 import com.everhomes.forum.LikeTopicCommand;
 import com.everhomes.forum.ListPostCommandResponse;
@@ -631,5 +629,4 @@ public class OrganizationController extends ControllerBase {
         return response;
         
     }
-	
 }
