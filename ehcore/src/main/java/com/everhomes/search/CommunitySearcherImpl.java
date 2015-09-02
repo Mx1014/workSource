@@ -144,7 +144,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         }
         
         if((null != regionId) && (regionId > 0)) {
-            fb = FilterBuilders.termFilter("regionId", regionId);
+            fb = FilterBuilders.orFilter(FilterBuilders.termFilter("cityId", regionId)
+                    , FilterBuilders.termFilter("regionId", regionId));
         }
         
         if(null != fb) {
