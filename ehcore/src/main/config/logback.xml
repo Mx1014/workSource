@@ -5,7 +5,7 @@
     -->
     <appender name="filelog"
         class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>core-server.log</file>
+        <file>logs/core-server.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
                 %d{yyyy-MM-dd hh:MM:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
@@ -26,7 +26,7 @@
 
     <appender name="restlog"
         class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>core-server-rest.log</file>
+        <file>logs/core-server-rest.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
                 %d{yyyy-MM-dd hh:MM:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n
@@ -42,6 +42,17 @@
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
+    </appender>
+    
+    <appender name="statisticslog"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>statistics/useractivities.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd hh:MM:ss.SSS}  %-5level [%X{ip}] [%X{uid}] [%X{uri}] - %msg%n
+            </Pattern>
+        </encoder>
+
     </appender>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
@@ -63,6 +74,9 @@
     <logger name="com.everhomes" level="DEBUG">
         <appender-ref ref="console" />
         <appender-ref ref="filelog" />
+    </logger>
+    <logger name="statisticslog" level="INFO" additivity="false">
+    	<appender-ref ref="statisticslog"/>
     </logger>
     <logger name="org.apache" level="WARN"/>
     <logger name="org.springframework" level="WARN"/>

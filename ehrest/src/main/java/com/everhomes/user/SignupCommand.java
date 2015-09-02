@@ -23,16 +23,16 @@ public class SignupCommand {
     @NotNull
     String token;
     
-    Integer channel_id;
+    Long channel_id;
     
     
     Integer ifExistsThenOverride;
     
-    public Integer getChannel_id() {
+    public Long getChannel_id() {
 		return channel_id;
 	}
 
-	public void setChannel_id(Integer channel_id) {
+	public void setChannel_id(Long channel_id) {
 		this.channel_id = channel_id;
 	}
 
