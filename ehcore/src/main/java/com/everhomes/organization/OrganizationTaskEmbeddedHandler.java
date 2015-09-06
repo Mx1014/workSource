@@ -42,12 +42,13 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 	@Override
 	public Post preProcessEmbeddedObject(Post post) {
 		try {
-
 			Organization organization = getOrganization(post);
 			if(organization == null){
-				LOGGER.error("Unable to find the organization.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
-						"Unable to find the organization.");
+				LOGGER.warn("Unable to find the organization.postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
+					+ ", subject=" + post.getSubject());
+				return post;
+				/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+						"Unable to find the organization.");*/
 			}
 			OrganizationTask task = new OrganizationTask();
 			task.setOrganizationId(organization.getId());
@@ -89,9 +90,10 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 	public Post postProcessEmbeddedObject(Post post) {
 		Long taskId = post.getEmbeddedId();
 		if(taskId == null) {
-			LOGGER.error("could not get taskId.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"could not get taskId.");
+			LOGGER.warn("could not get taskId.");
+			return post;
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"could not get taskId.");*/
 		} 
 		OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
 		if(task == null) {
@@ -174,6 +176,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			Long taskId = post.getEmbeddedId();
 			if(taskId == null) {
 				LOGGER.error("Failed to render the organization task, task id is null, postId=" + post.getId());
+				return post.getEmbeddedJson();
 			} else {
 				OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
 				if(task != null) {
