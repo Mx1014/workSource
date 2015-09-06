@@ -339,4 +339,11 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messa
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '3', 'zh_CN', '你有新的图片消息');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '4', 'zh_CN', '你有新的视频消息');
 
+
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (100,NULL,'b86ddb3b-ac77-4a65-ae03-7e8482a3db70','2-0cDFNOq-zPzYGtdS8xxqnkR8PRgNhpHcWoku6Ob49NdBw8D9-Q72MLsCidI43IKhP1D_43ujSFbatGPWuVBQ','SystemExtension',NULL,1,'2015-08-24 14:14:16');
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (101,1,'d80e06ca-3766-11e5-b18f-b083fe4e159f','g1JOZUM3BYzWpZD5Q7p3z+i/z0nj2TcokTFx2ic53FCMRIKbMhSUCi7fSu9ZklFCZ9tlj68unxur9qmOji4tNg==','test','dianshang test',1,'2015-08-24 14:17:53');
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (102,1,'93e8275c-31e2-11e5-b7ad-b083fe4e159f','2nDpmzJj63Un0GzXyeZKUKlVSOKzNHv4FidFL9uCpNaLq6rqE0VAOv3uPaR0jWIRMNqedgci3vzLPAkaX1jg6Q==','door','door open',1,'2015-09-01 14:39:18');
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (103,1,'cePPQVM-I4cN73W_ZQZ6VkISDgHNAvUBZPjH2J','Jm38pWr5XEvdXnHmNuBb4PbzaP-sIpEZvcmvxC9S4ypDVRql-KUbN0Dq_Djv-GxZ','common-pay','',1,'2015-09-01 17:43:53');
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (104,1,'93e8275c-31e2-11e5-b7ad-b083fe4e159f','2nDpmzJj63Un0GzXyeZKUKlVSOKzNHv4FidFL9uCpNaLq6rqE0VAOv3uPaR0jWIRMNqedgci3vzLPAkaX1jg6Q==','app','app',1,'2015-09-01 14:39:18');
+
 SET foreign_key_checks = 1;
