@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.FileSet;
@@ -234,6 +235,9 @@ public class AdminController extends ControllerBase {
             for(RestMethod restMethod: apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             
+            // generate API constants
+            generator.generateApiConstants(apiMethods, context);
+            
             File srcDir = new File(this.destinationDir);
             File dstFile = srcDir.getParentFile();
             if(!dstFile.exists()) {
@@ -249,6 +253,14 @@ public class AdminController extends ControllerBase {
             List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
             for (RestMethod restMethod : apiMethods)
                 generator.generateControllerPojos(restMethod, context);
+            
+            // generate API constants
+            String packageName = this.getClass().getPackage().getName();
+            String[] tokens = packageName.split("\\.");
+            tokens[tokens.length - 1] = "rest";
+
+            context.setContextParam("ApiConstantPackage", StringUtils.join(tokens, '.'));
+            generator.generateApiConstants(apiMethods, context);
         }
         return new RestResponse("OK");
     }
