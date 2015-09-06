@@ -21,6 +21,8 @@ public class AppController extends ControllerBase {
     
     static {
         s_trustedApps.add(AppConstants.APPKEY_BORDER);
+        s_trustedApps.add(AppConstants.APPKEY_BIZ);
+        s_trustedApps.add(AppConstants.APPKEY_APP);
     }
     
     @RequestMapping("isTrustedApp")
