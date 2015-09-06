@@ -271,6 +271,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
                 itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
+                itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                 if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
                     Business b = this.businessProvider.findBusinessById(r.getTargetId());
                     if(b != null){
@@ -281,8 +282,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                         itemDTO.setActionData(jsonObject.toJSONString());
                         if(b.getCreatorUid().longValue() == userId)
                             itemDTO.setItemLabel(itemDTO.getItemLabel() + "(店铺)");
-                        if(b.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode())
-                            itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                     }
                 }else
                     itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));

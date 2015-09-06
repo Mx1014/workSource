@@ -396,20 +396,27 @@ public class FamilyProviderImpl implements FamilyProvider {
 					.fetch().map((r) ->{
 
 						Address address = this.addressProvider.findAddressById(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
-						if (address == null) return null;
+						if (address == null) {
+						    LOGGER.error("Address is not found,addressId=" + r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
+						}
 						Community community = this.communityProvider.findCommunityById(address.getCommunityId());
-						if(community == null) return null;
+						if(community == null) {
+						    LOGGER.error("Community is not found,communityId=" + address.getCommunityId());
+						}
 						FamilyDTO f = new FamilyDTO();
-						f.setAddress(address.getAddress());
-						f.setAddressId(address.getId());
-						f.setApartmentName(address.getApartmentName());
-						f.setBuildingName(address.getBuildingName());
-						f.setAddressStatus(address.getStatus());
-
-						f.setCityName(community.getCityName());
-						f.setAreaName(community.getAreaName());
-						f.setCommunityId(community.getId());
-						f.setCommunityName(community.getName());
+						if(address != null){
+    						f.setAddress(address.getAddress());
+    						f.setAddressId(address.getId());
+    						f.setApartmentName(address.getApartmentName());
+    						f.setBuildingName(address.getBuildingName());
+    						f.setAddressStatus(address.getStatus());
+						}
+						if(community != null){
+						    f.setCityName(community.getCityName());
+	                        f.setAreaName(community.getAreaName());
+	                        f.setCommunityId(community.getId());
+	                        f.setCommunityName(community.getName());
+						}
 						f.setId(r.getValue(Tables.EH_GROUPS.ID));
 						f.setMemberCount(r.getValue(Tables.EH_GROUPS.MEMBER_COUNT));
 						f.setMemberUid(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));

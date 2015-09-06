@@ -348,7 +348,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(cmd.getKeyword() == null)
             cmd.setKeyword("");;
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
-        
+        long startTime = System.currentTimeMillis();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
@@ -368,7 +368,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     
                 return true;
             });
-        
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("List buildings by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<BuildingDTO>>(ErrorCodes.SUCCESS, results);
     }
 
@@ -381,6 +382,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             cmd.setKeyword("");
         List<ApartmentDTO> results = new ArrayList<>();
         String likeVal = "%" + cmd.getKeyword() + "%";
+        long startTime = System.currentTimeMillis();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
@@ -400,7 +402,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     
                 return true;
             });
-        
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
     

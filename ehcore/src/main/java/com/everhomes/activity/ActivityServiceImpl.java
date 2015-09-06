@@ -55,6 +55,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SortOrder;
 import com.everhomes.util.StatusChecker;
 import com.everhomes.util.Tuple;
 import com.everhomes.activity.ActivityLocalStringCode;
@@ -792,7 +793,9 @@ public class ActivityServiceImpl implements ActivityService {
     @SuppressWarnings("unchecked")
     @Override
     public List<Category> listActivityCategories() {
-        List<Category> result = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE);
+        Tuple[] orderBy = new Tuple[1]; 
+        orderBy[0] = new Tuple<String, SortOrder>("default_order", SortOrder.ASC);
+        List<Category> result = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
         return result;
     }
 
