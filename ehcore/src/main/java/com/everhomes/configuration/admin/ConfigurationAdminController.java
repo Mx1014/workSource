@@ -40,7 +40,7 @@ public class ConfigurationAdminController extends ControllerBase {
      * <b>URL: /admin/configuration/updateConfiguration</b>
      * <p>更新配置</p>
      */
-    @RequestMapping("updateBanner")
+    @RequestMapping("updateConfiguration")
     @RestReturn(value=String.class)
     public RestResponse updateConfiguration(@Valid UpdateConfigurationAdminCommand cmd) {
         if(cmd.getName() == null){
