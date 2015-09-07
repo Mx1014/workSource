@@ -22,7 +22,7 @@ public interface GroupAdminNotificationTemplateCode {
     static final int GROUP_ADMINROLE_INVITATION_REJECT_FOR_OTHER = 16; // 邀请别人成为圈管理员，被邀请人拒绝时，通知其它人
     static final int GROUP_ADMINROLE_LEAVE_FOR_OPERATOR = 17; // 圈管理员主动辞去管理员身份，通知操作人
     static final int GROUP_ADMINROLE_LEAVE_FOR_OTHER = 18; // 圈管理员主动辞去管理员身份，通知其它管理员
-    static final int GROUP_ADMINROLE_INVOKE_FOR_APPLICANT = 19; // 某管理员被收回管理员权限，通知操作者
-    static final int GROUP_ADMINROLE_INVOKE_FOR_OPERATOR = 20; // 某管理员被收回管理员权限，通知被收回权限的人
+    static final int GROUP_ADMINROLE_INVOKE_FOR_APPLICANT = 20; // 某管理员被收回管理员权限，通知被收回权限的人
+    static final int GROUP_ADMINROLE_INVOKE_FOR_OPERATOR = 19; // 某管理员被收回管理员权限，通知操作者
     static final int GROUP_ADMINROLE_INVOKE_FOR_OTHER = 21; // 某管理员被收回管理员权限，通知其它人
 }
