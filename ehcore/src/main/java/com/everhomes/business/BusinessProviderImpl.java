@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.common.ScopeType;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -428,15 +429,15 @@ public class BusinessProviderImpl implements BusinessProvider {
     public List<BusinessAssignedScope> findBusinessAssignedScopeByScope(long cityId, long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_BUSINESS_ASSIGNED_SCOPES);
-        Condition condition = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(BusinessScopeType.ALL.getCode());
+        Condition condition = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(ScopeType.ALL.getCode());
         condition = condition.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(0L));
         if(cityId != 0){
-            Condition conCity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(BusinessScopeType.CITY.getCode());
+            Condition conCity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(ScopeType.CITY.getCode());
             conCity = conCity.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(cityId));
             condition.or(conCity);
         }
         if(communityId != 0){
-            Condition conCommunity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(BusinessScopeType.COMMUNITY.getCode());
+            Condition conCommunity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode());
             conCommunity = conCommunity.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(communityId));
             condition.or(conCommunity);
         }

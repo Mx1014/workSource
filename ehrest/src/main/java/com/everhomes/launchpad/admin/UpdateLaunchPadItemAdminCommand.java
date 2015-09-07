@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: item的id</li>
  * <li>namespaceId: 命名空间</li>
  * <li>appId: 应用Id，参考{@link com.everhomes.app.AppConstants}</li>
- * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
+ * <li>scopeType: item可见范围类型 参考{@link com.everhomes.common.ScopeType}</li>
  * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
  * <li>defaultOrder: 默认顺序</li>
  * <li>applyPolicy: 应用策略{@link com.everhomes.launchpad.ApplyPolicy}</li>
@@ -33,7 +33,7 @@ public class UpdateLaunchPadItemAdminCommand {
     private Long    id;
     private Integer namespaceId;
     private Long    appId;
-    private String  scopeType;
+    private Byte  scopeCode;
     private Long    scopeId;
     private Integer defaultOrder;
     private Byte    applyPolicy;
@@ -89,12 +89,12 @@ public class UpdateLaunchPadItemAdminCommand {
         this.appId = appId;
     }
 
-    public String getScopeType() {
-        return scopeType;
+    public Byte getScopeCode() {
+        return scopeCode;
     }
 
-    public void setScopeType(String scopeType) {
-        this.scopeType = scopeType;
+    public void setScopeCode(Byte scopeCode) {
+        this.scopeCode = scopeCode;
     }
 
     public Long getScopeId() {

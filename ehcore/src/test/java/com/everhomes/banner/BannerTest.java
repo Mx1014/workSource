@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.banner.admin.CreateBannerAdminCommand;
+import com.everhomes.common.ScopeType;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.launchpad.ItemGroup;
 import com.everhomes.user.User;
@@ -45,7 +46,7 @@ public class BannerTest extends CoreServerTestCase {
         BannerScope scope = new BannerScope();
         scope.setOrder(0);
         scope.setScopeId(0L);
-        scope.setScopeType(BannerScopeType.COUNTRY.getCode());
+        scope.setScopeType(ScopeType.ALL.getCode());
         List<BannerScope> scopes = new ArrayList<BannerScope>();
         scopes.add(scope);
         cmd.setScopes(scopes);

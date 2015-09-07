@@ -357,7 +357,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
-                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))        
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))
+                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                         .fetch().map((r) -> {
                             BuildingDTO building = new BuildingDTO();
                             building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
@@ -392,6 +393,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                        .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                         .fetch().map((r) -> {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));

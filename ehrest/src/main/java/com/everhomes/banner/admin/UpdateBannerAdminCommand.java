@@ -25,7 +25,7 @@ public class UpdateBannerAdminCommand {
     @NotNull
     private Long id;
     private String posterPath;
-    private String scopeType;
+    private Byte scopeCode;
     private Long scopeId;
     private Byte actionType;
     private String actionData;
@@ -50,12 +50,12 @@ public class UpdateBannerAdminCommand {
         this.posterPath = posterPath;
     }
 
-    public String getScopeType() {
-        return scopeType;
+    public Byte getScopeCode() {
+        return scopeCode;
     }
 
-    public void setScopeType(String scopeType) {
-        this.scopeType = scopeType;
+    public void setScopeCode(Byte scopeCode) {
+        this.scopeCode = scopeCode;
     }
 
     public Long getScopeId() {

@@ -25,6 +25,7 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.business.BusinessTargetType;
+import com.everhomes.common.ScopeType;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -192,7 +193,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             }
         }
        
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
         defaultItems.forEach(r ->{
             LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
             itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
@@ -232,10 +233,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         long userId = user.getId();
         String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,null);
-        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.CITY.getCode(),community.getCityId(),null);
-        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COMMUNITY.getCode(),community.getId(),null);
-        List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(), cmd.getItemGroup(), LaunchPadScopeType.USER.getCode(), userId, null);
+        List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
+        List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
+        List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
         List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
         if(defaultItems == null || defaultItems.isEmpty()){
@@ -260,7 +261,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         if(dtos != null && !dtos.isEmpty()){
             List<String> tags = new  ArrayList<String>();
             dtos.forEach(r -> tags.add(r.getOrganizationType()));
-            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),LaunchPadScopeType.COUNTRY.getCode(),0L,tags);
+            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,tags);
             if(adminItems != null && !adminItems.isEmpty())
                 allItems.addAll(adminItems);
         }
@@ -561,7 +562,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             item.setItemWidth(cmd.getItemWidth() == null ? 1 : cmd.getItemWidth());
             item.setItemHeight(cmd.getItemHeight() == null ? 1 : cmd.getItemHeight());
             item.setNamespaceId(cmd.getNamespaceId() == null ? 0 : cmd.getNamespaceId());
-            item.setScopeType(itemScope.getScopeType());
+            item.setScopeCode(itemScope.getScopeCode());
             item.setScopeId(itemScope.getScopeId());
             item.setDefaultOrder(itemScope.getDefaultOrder() == null ? 0 : itemScope.getDefaultOrder());
             item.setApplyPolicy(itemScope.getApplyPolicy());
@@ -606,7 +607,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 }
                 launchPadItem.setDefaultOrder(item.getOrderIndex());
                 launchPadItem.setApplyPolicy(item.getApplyPolicy());
-                launchPadItem.setScopeType(LaunchPadScopeType.USER.getCode());
+                launchPadItem.setScopeCode(ScopeType.USER.getCode());
                 launchPadItem.setScopeId(userId);
                 launchPadItem.setDisplayFlag(item.getDisplayFlag());
                 array.add(launchPadItem);
@@ -838,8 +839,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         if(cmd.getScopeId() != null){
             launchPadItem.setScopeId(cmd.getScopeId());
         }
-        if(cmd.getScopeType() != null && !cmd.getScopeType().trim().equals("")){
-            launchPadItem.setScopeType(cmd.getScopeType());
+        if(cmd.getScopeCode() != null){
+            launchPadItem.setScopeCode(cmd.getScopeCode());
         }
         if(cmd.getTag() != null && !cmd.getTag().trim().equals("")){
             launchPadItem.setTag(cmd.getTag());

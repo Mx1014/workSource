@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.cfg.annotations.Nullability;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -129,13 +130,13 @@ public class RegionProviderImpl implements RegionProvider {
         Condition condition = null;
         if(scope != null)
             condition = Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode());
-        
-        if(status != null) {
-            if(condition != null)
-                condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
-            else
-                condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
+        if(status == null){
+            status = RegionAdminStatus.ACTIVE;
         }
+        if(condition != null)
+            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+        else
+            condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
         
         if(condition != null) {
             selectStep.where(condition);
@@ -178,8 +179,13 @@ public class RegionProviderImpl implements RegionProvider {
         if(scope != null)
             condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
         
-        if(status != null)
+        if(status == null){
+            status = RegionAdminStatus.ACTIVE;
+        }
+        if(condition != null)
             condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+        else
+            condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
         
         if(condition != null) {
             selectStep.where(condition);
@@ -239,8 +245,13 @@ public class RegionProviderImpl implements RegionProvider {
         if(scope != null)
             condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
         
-        if(status != null)
+        if(status == null){
+            status = RegionAdminStatus.ACTIVE;
+        }
+        if(condition != null)
             condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+        else
+            condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
         
         if(condition != null) {
             selectStep.where(condition);

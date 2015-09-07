@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 
 import ch.qos.logback.core.util.ContextUtil;
 
+import com.everhomes.common.ScopeType;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
@@ -103,7 +104,7 @@ public class LaunchPadTest extends CoreServerTestCase {
         scope1.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
         scope1.setDefaultOrder(0);
         scope1.setScopeId(5636106L);
-        scope1.setScopeType(LaunchPadScopeType.CITY.getCode());
+        scope1.setScopeCode(ScopeType.CITY.getCode());
         itemScopes.add(scope1);
         
 //        ItemScope scope2 = new ItemScope();

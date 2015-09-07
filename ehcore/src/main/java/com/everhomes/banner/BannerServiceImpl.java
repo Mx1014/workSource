@@ -23,6 +23,7 @@ import com.everhomes.banner.admin.DeleteBannerAdminCommand;
 import com.everhomes.banner.admin.ListBannersAdminCommand;
 import com.everhomes.banner.admin.ListBannersAdminCommandResponse;
 import com.everhomes.banner.admin.UpdateBannerAdminCommand;
+import com.everhomes.common.ScopeType;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -84,9 +85,9 @@ public class BannerServiceImpl implements BannerService {
         //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),
-                BannerScopeType.COUNTRY.getCode(), 0L);
-        List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),BannerScopeType.CITY.getCode(), cityId);
-        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),BannerScopeType.COMMUNITY.getCode(), communityId);
+                ScopeType.ALL.getCode(), 0L);
+        List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),ScopeType.CITY.getCode(), cityId);
+        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),ScopeType.COMMUNITY.getCode(), communityId);
         List<Banner> allBanners = new ArrayList<Banner>();
         if(countryBanners != null)
             allBanners.addAll(countryBanners);
@@ -264,7 +265,7 @@ public class BannerServiceImpl implements BannerService {
                 banner.setEndTime(new Timestamp(cmd.getEndTime()));
             banner.setStatus(cmd.getStatus());
             banner.setPosterPath(cmd.getPosterPath());
-            banner.setScopeType(scope.getScopeType());
+            banner.setScopeCode(scope.getScopeType());
             banner.setScopeId(scope.getScopeId());
             banner.setOrder(scope.getOrder());
             banner.setVendorTag(cmd.getVendorTag());
@@ -299,8 +300,9 @@ public class BannerServiceImpl implements BannerService {
             banner.setOrder(cmd.getOrder());
         if(cmd.getPosterPath() != null)
             banner.setPosterPath(cmd.getPosterPath());
-        if(cmd.getScopeType() != null)
-            banner.setScopeType(cmd.getScopeType());
+        
+        if(cmd.getScopeCode() != null)
+            banner.setScopeCode(cmd.getScopeCode());
         if(cmd.getScopeId() != null)
             banner.setScopeId(cmd.getScopeId());
         if(cmd.getStatus() != null)

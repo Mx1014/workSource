@@ -1,19 +1,20 @@
 // @formatter:off
-package com.everhomes.business;
+package com.everhomes.common;
 
 /**
  * <ul>
  * <li>ALL(0): 国家</li>
  * <li>CITY(2): 城市</li>
  * <li>COMMUNITY(1): 小区</li>
+ * <li>USER(3): 用户</li>
  * </ul>
  */
-public enum BusinessScopeType {
-    ALL((byte)0), COMMUNITY((byte)1), CITY((byte)2);
+public enum ScopeType {
+    ALL((byte)0), COMMUNITY((byte)1), CITY((byte)2),USER((byte)3);
     
     private byte code;
     
-    private BusinessScopeType(byte code) {
+    private ScopeType(byte code) {
         this.code = code;
     }
     
@@ -21,11 +22,11 @@ public enum BusinessScopeType {
         return this.code;
     }
 
-    public static BusinessScopeType fromCode(Byte code) {
+    public static ScopeType fromCode(Byte code) {
         if(code == null)
             return null;
-        BusinessScopeType[] values = BusinessScopeType.values();
-        for(BusinessScopeType value : values){
+        ScopeType[] values = ScopeType.values();
+        for(ScopeType value : values){
             if(value.getCode() == code.byteValue())
                 return value;
         }

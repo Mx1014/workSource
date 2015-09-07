@@ -124,7 +124,7 @@ public class BusinessTest extends CoreServerTestCase {
         cmd.setId(2L);
         ItemScope scope = new ItemScope();
         scope.setScopeId(8L);
-        scope.setScopeType("community");
+        scope.setScopeCode((byte)1);
         List<ItemScope> scopes = new ArrayList<>();
         scopes.add(scope);
         cmd.setItemScopes(scopes);

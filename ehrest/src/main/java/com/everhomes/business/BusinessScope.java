@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>scopeType: 可见范围类型 参考{@link com.everhomes.business.BusinessScopeType}</li>
+ * <li>scopeType: 可见范围类型 参考{@link com.everhomes.common.ScopeType}</li>
  * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
  * </ul>
  */

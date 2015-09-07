@@ -32,6 +32,7 @@ import com.everhomes.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.common.ScopeType;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
@@ -41,17 +42,14 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.ActionType;
 import com.everhomes.launchpad.ApplyPolicy;
-import com.everhomes.launchpad.Item;
 import com.everhomes.launchpad.ItemDisplayFlag;
 import com.everhomes.launchpad.ItemTargetType;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
-import com.everhomes.launchpad.LaunchPadScopeType;
 import com.everhomes.launchpad.ScaleType;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -59,7 +57,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserFavorite;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -450,7 +447,7 @@ public class BusinessServiceImpl implements BusinessService {
     private List<Long> getFavoriteBizIds(long userId,long cmmtyId,long cityId){
         List<Long> removeIds = new ArrayList<>();
         List<Long> userBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                0, LaunchPadScopeType.USER.getCode(), userId).stream()
+                0, ScopeType.USER.getCode(), userId).stream()
                 .filter(r ->{
                     if(r.getDisplayFlag().byteValue() == ItemDisplayFlag.DISPLAY.getCode())
                         return true;
@@ -458,13 +455,13 @@ public class BusinessServiceImpl implements BusinessService {
                     return false;
                 }).map(r ->r.getTargetId()).collect(Collectors.toList());
         List<Long> cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                0, LaunchPadScopeType.COMMUNITY.getCode(), cmmtyId).stream()
+                0, ScopeType.COMMUNITY.getCode(), cmmtyId).stream()
                 .filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
         List<Long> cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                0, LaunchPadScopeType.CITY.getCode(), cityId).stream()
+                0, ScopeType.CITY.getCode(), cityId).stream()
                 .filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
         List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                0, LaunchPadScopeType.COUNTRY.getCode(), 0).stream()
+                0, ScopeType.ALL.getCode(), 0).stream()
                 .filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
         List<Long> favoriteBizIds = new ArrayList<Long>();
         if(userBizIds != null && !userBizIds.isEmpty())
@@ -604,19 +601,19 @@ public class BusinessServiceImpl implements BusinessService {
 
     private void processPromoteFlag(BusinessAdminDTO dto) {
         List<LaunchPadItem> countryItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                dto.getId(), LaunchPadScopeType.COUNTRY.getCode(),0);
+                dto.getId(), ScopeType.ALL.getCode(),0);
         List<BusinessPromoteScopeDTO> promoteScopes = new ArrayList<>();
         if(countryItems != null && !countryItems.isEmpty()){
             dto.setPromoteFlag((byte)1);
             BusinessPromoteScopeDTO scope = new BusinessPromoteScopeDTO();
             scope.setRegionName("全国");
-            scope.setScopeCode(BusinessScopeType.ALL.getCode());
+            scope.setScopeCode(ScopeType.ALL.getCode());
             promoteScopes.add(scope);
             dto.setPromoteScopes(promoteScopes);
             return ;
         }
         List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                dto.getId(), LaunchPadScopeType.CITY.getCode(),0);
+                dto.getId(), ScopeType.CITY.getCode(),0);
         if(cityItems != null && !cityItems.isEmpty()){
             dto.setPromoteFlag((byte)1);
             cityItems.forEach(c ->{
@@ -624,14 +621,14 @@ public class BusinessServiceImpl implements BusinessService {
                 BusinessPromoteScopeDTO scope = new BusinessPromoteScopeDTO();
                 if(region != null){
                     scope.setRegionName(region.getName());
-                    scope.setScopeCode(BusinessScopeType.CITY.getCode());
+                    scope.setScopeCode(ScopeType.CITY.getCode());
                     promoteScopes.add(scope);
                 }
             });
             dto.setPromoteScopes(promoteScopes);
         }
         List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-                dto.getId(), LaunchPadScopeType.COMMUNITY.getCode(),0);
+                dto.getId(), ScopeType.COMMUNITY.getCode(),0);
         if(cmmtyItems != null && !cmmtyItems.isEmpty()){
             dto.setPromoteFlag((byte)1);
             cmmtyItems.forEach(c ->{
@@ -639,7 +636,7 @@ public class BusinessServiceImpl implements BusinessService {
                 BusinessPromoteScopeDTO scope = new BusinessPromoteScopeDTO();
                 if(community != null){
                     scope.setRegionName(community.getName());
-                    scope.setScopeCode(BusinessScopeType.COMMUNITY.getCode());
+                    scope.setScopeCode(ScopeType.COMMUNITY.getCode());
                     promoteScopes.add(scope);
                 }
             });
@@ -657,9 +654,9 @@ public class BusinessServiceImpl implements BusinessService {
             assignedScopes.forEach(a ->{
                 
                 BusinessAssignedScopeDTO scopeDTO = ConvertHelper.convert(a,BusinessAssignedScopeDTO.class);
-                if(a.getScopeCode().byteValue() == BusinessScopeType.ALL.getCode())
+                if(a.getScopeCode().byteValue() == ScopeType.ALL.getCode())
                     scopeDTO.setRegionName("全国");
-                else if(a.getScopeCode().byteValue() == BusinessScopeType.CITY.getCode()){
+                else if(a.getScopeCode().byteValue() == ScopeType.CITY.getCode()){
                     Region region = this.regionProvider.findRegionById(scopeDTO.getScopeId());
                     if(region != null)
                         scopeDTO.setRegionName(region.getName());
@@ -838,7 +835,7 @@ public class BusinessServiceImpl implements BusinessService {
         item.setItemWidth(1);
         item.setItemHeight(1);
         item.setNamespaceId(0);
-        item.setScopeType(LaunchPadScopeType.USER.getCode());
+        item.setScopeCode(ScopeType.USER.getCode());
         item.setScopeId(userId);
         item.setDefaultOrder(0);
         item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
@@ -869,7 +866,7 @@ public class BusinessServiceImpl implements BusinessService {
                     "Business is not exists.");
         }
         
-        List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, LaunchPadScopeType.USER.getCode(), userId);
+        List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId);
         LaunchPadItem item = null;
         if(list != null && list.size() > 0){
               item = list.get(0);
@@ -886,7 +883,7 @@ public class BusinessServiceImpl implements BusinessService {
             item.setId(0L);
             item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
             item.setScopeId(userId);
-            item.setScopeType(LaunchPadScopeType.USER.getCode());
+            item.setScopeCode(ScopeType.USER.getCode());
             this.launchPadProvider.createLaunchPadItem(item);
         }
     }
@@ -922,7 +919,7 @@ public class BusinessServiceImpl implements BusinessService {
             item.setItemWidth(1);
             item.setItemHeight(1);
             item.setNamespaceId(0);
-            item.setScopeType(itemScope.getScopeType());
+            item.setScopeCode(itemScope.getScopeCode());
             item.setScopeId(itemScope.getScopeId());
             item.setDefaultOrder(0);
             item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
