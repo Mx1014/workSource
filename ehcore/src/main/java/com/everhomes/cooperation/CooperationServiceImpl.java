@@ -1,23 +1,16 @@
 package com.everhomes.cooperation;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.banner.admin.ListBannersAdminCommandResponse;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.cooperation.admin.CooperationDTO;
-import com.everhomes.cooperation.admin.ListCooperationAdminCommand;
-import com.everhomes.cooperation.admin.ListCooperationAdminCommandResponse;
-import com.everhomes.core.AppConfig;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.PaginationHelper;
+//import com.everhomes.cooperation.admin.CooperationDTO;
+//import com.everhomes.cooperation.admin.ListCooperationAdminCommand;
+//import com.everhomes.cooperation.admin.ListCooperationAdminCommandResponse;
 
 @Component
 public class CooperationServiceImpl implements CooperationService {
@@ -40,37 +33,37 @@ public class CooperationServiceImpl implements CooperationService {
 		cooperationProvider.newCooperation(cooperationRequests);
 	}
 
-	@Override
-	public ListCooperationAdminCommandResponse listCooperation(
-			ListCooperationAdminCommand cmd) {
-//		User user = UserContext.current().getUser();
-//		long userId = user.getId();
-		if (cmd.getKeyword() == null)
-			cmd.setKeyword("");
-		if (cmd.getCooperationType() == null)
-			return null;
-		final long pageSize = cmd.getPageSize() == null ? this.configurationProvider
-				.getIntValue("pagination.page.size",
-						AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd
-				.getPageSize();
-		long pageOffset = cmd.getPageOffset() == null ? 1L : cmd
-				.getPageOffset();
-		long offset = PaginationHelper.offsetFromPageOffset(pageOffset,
-				pageSize);
-		List<CooperationDTO> result = cooperationProvider
-				.listCooperation(cmd.getKeyword(), cmd.getCooperationType(),
-						offset, pageSize)
-				.stream()
-				.map((CooperationRequests r) -> {
-					CooperationDTO dto = ConvertHelper.convert(r,
-							CooperationDTO.class);
-					return dto;
-				}).collect(Collectors.toList());
-		ListCooperationAdminCommandResponse response = new ListCooperationAdminCommandResponse();
-		if (result != null && result.size() >= pageSize) {
-			response.setNextPageOffset((int) pageOffset + 1);
-		}
-		response.setRequests(result);
-		return response;
-	}
+//	@Override
+//	public ListCooperationAdminCommandResponse listCooperation(
+//			ListCooperationAdminCommand cmd) {
+////		User user = UserContext.current().getUser();
+////		long userId = user.getId();
+//		if (cmd.getKeyword() == null)
+//			cmd.setKeyword("");
+//		if (cmd.getCooperationType() == null)
+//			return null;
+//		final long pageSize = cmd.getPageSize() == null ? this.configurationProvider
+//				.getIntValue("pagination.page.size",
+//						AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd
+//				.getPageSize();
+//		long pageOffset = cmd.getPageOffset() == null ? 1L : cmd
+//				.getPageOffset();
+//		long offset = PaginationHelper.offsetFromPageOffset(pageOffset,
+//				pageSize);
+//		List<CooperationDTO> result = cooperationProvider
+//				.listCooperation(cmd.getKeyword(), cmd.getCooperationType(),
+//						offset, pageSize)
+//				.stream()
+//				.map((CooperationRequests r) -> {
+//					CooperationDTO dto = ConvertHelper.convert(r,
+//							CooperationDTO.class);
+//					return dto;
+//				}).collect(Collectors.toList());
+//		ListCooperationAdminCommandResponse response = new ListCooperationAdminCommandResponse();
+//		if (result != null && result.size() >= pageSize) {
+//			response.setNextPageOffset((int) pageOffset + 1);
+//		}
+//		response.setRequests(result);
+//		return response;
+//	}
 }
