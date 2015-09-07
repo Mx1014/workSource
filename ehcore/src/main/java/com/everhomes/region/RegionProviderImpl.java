@@ -300,6 +300,8 @@ public class RegionProviderImpl implements RegionProvider {
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
         Condition condition = Tables.EH_REGIONS.NAME.like(likeVal);
+        condition = condition.or(Tables.EH_REGIONS.PINYIN_NAME.like(likeVal.toUpperCase()));
+        condition = condition.or(Tables.EH_REGIONS.PINYIN_PREFIX.like(likeVal.toUpperCase()));
         
         if(parentRegionId != null)
             condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
