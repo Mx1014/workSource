@@ -1236,11 +1236,13 @@ public class FamilyServiceImpl implements FamilyService {
         List<NeighborUserDTO> results = new ArrayList<NeighborUserDTO>();
         for(NeighborUserDetailDTO dto : userDetailList){
             NeighborUserDTO user = ConvertHelper.convert(dto, NeighborUserDTO.class);
-            if(myaddress.getApartmentFloor() != null && dto.getApartmentFloor() != null){
+            if(myaddress.getApartmentFloor() != null && dto.getApartmentFloor() != null
+                    && !myaddress.getApartmentFloor().trim().equals("")
+                    && !dto.getApartmentFloor().trim().equals("")){
                 if(myaddress.getApartmentFloor().equals(dto.getApartmentFloor()))
                     user.setNeighborhoodRelation(NeighborhoodRelation.SAMEFLOOR.getCode());
             }
-            else if(myaddress.getBuildingName().equals(dto.getBuildingName())){
+            else if(myaddress.getBuildingName().trim().equals(dto.getBuildingName().trim())){
                 user.setNeighborhoodRelation(NeighborhoodRelation.SAMEBUILDING.getCode());
             }
             
