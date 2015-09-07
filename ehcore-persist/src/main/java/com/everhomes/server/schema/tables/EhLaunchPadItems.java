@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = -623370328;
+	private static final long serialVersionUID = -1755338674;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -42,9 +42,9 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> APP_ID = createField("app_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_launch_pad_items.scope_type</code>.
+	 * The column <code>ehcore.eh_launch_pad_items.scope_code</code>. 0: all, 1: community, 2: city, 3: user
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> SCOPE_TYPE = createField("scope_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: community, 2: city, 3: user");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_items.scope_id</code>.

@@ -11,14 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = -881566274;
+	private static final long serialVersionUID = -2031162576;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     appid;
 	private java.lang.String   bannerLocation;
 	private java.lang.String   bannerGroup;
-	private java.lang.String   scopeType;
+	private java.lang.Byte     scopeCode;
 	private java.lang.Long     scopeId;
 	private java.lang.String   name;
 	private java.lang.String   vendorTag;
@@ -41,7 +41,7 @@ public class EhBanners implements java.io.Serializable {
 		java.lang.Long     appid,
 		java.lang.String   bannerLocation,
 		java.lang.String   bannerGroup,
-		java.lang.String   scopeType,
+		java.lang.Byte     scopeCode,
 		java.lang.Long     scopeId,
 		java.lang.String   name,
 		java.lang.String   vendorTag,
@@ -61,7 +61,7 @@ public class EhBanners implements java.io.Serializable {
 		this.appid = appid;
 		this.bannerLocation = bannerLocation;
 		this.bannerGroup = bannerGroup;
-		this.scopeType = scopeType;
+		this.scopeCode = scopeCode;
 		this.scopeId = scopeId;
 		this.name = name;
 		this.vendorTag = vendorTag;
@@ -117,12 +117,12 @@ public class EhBanners implements java.io.Serializable {
 		this.bannerGroup = bannerGroup;
 	}
 
-	public java.lang.String getScopeType() {
-		return this.scopeType;
+	public java.lang.Byte getScopeCode() {
+		return this.scopeCode;
 	}
 
-	public void setScopeType(java.lang.String scopeType) {
-		this.scopeType = scopeType;
+	public void setScopeCode(java.lang.Byte scopeCode) {
+		this.scopeCode = scopeCode;
 	}
 
 	public java.lang.Long getScopeId() {

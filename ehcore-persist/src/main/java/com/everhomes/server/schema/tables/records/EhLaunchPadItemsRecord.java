@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 1315447810;
+	private static final long serialVersionUID = 281939498;
 
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.id</code>.
@@ -56,17 +56,17 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_launch_pad_items.scope_type</code>.
+	 * Setter for <code>ehcore.eh_launch_pad_items.scope_code</code>. 0: all, 1: community, 2: city, 3: user
 	 */
-	public void setScopeType(java.lang.String value) {
+	public void setScopeCode(java.lang.Byte value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_launch_pad_items.scope_type</code>.
+	 * Getter for <code>ehcore.eh_launch_pad_items.scope_code</code>. 0: all, 1: community, 2: city, 3: user
 	 */
-	public java.lang.String getScopeType() {
-		return (java.lang.String) getValue(3);
+	public java.lang.Byte getScopeCode() {
+		return (java.lang.Byte) getValue(3);
 	}
 
 	/**
@@ -361,13 +361,13 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	/**
 	 * Create a detached, initialised EhLaunchPadItemsRecord
 	 */
-	public EhLaunchPadItemsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long appId, java.lang.String scopeType, java.lang.Long scopeId, java.lang.String itemLocation, java.lang.String itemGroup, java.lang.String itemName, java.lang.String itemLabel, java.lang.String iconUri, java.lang.Integer itemWidth, java.lang.Integer itemHeight, java.lang.Byte actionType, java.lang.String actionData, java.lang.Integer defaultOrder, java.lang.Byte applyPolicy, java.lang.Long minVersion, java.lang.Byte displayFlag, java.lang.String displayLayout, java.lang.Integer bgcolor, java.lang.String tag, java.lang.String targetType, java.lang.Long targetId) {
+	public EhLaunchPadItemsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long appId, java.lang.Byte scopeCode, java.lang.Long scopeId, java.lang.String itemLocation, java.lang.String itemGroup, java.lang.String itemName, java.lang.String itemLabel, java.lang.String iconUri, java.lang.Integer itemWidth, java.lang.Integer itemHeight, java.lang.Byte actionType, java.lang.String actionData, java.lang.Integer defaultOrder, java.lang.Byte applyPolicy, java.lang.Long minVersion, java.lang.Byte displayFlag, java.lang.String displayLayout, java.lang.Integer bgcolor, java.lang.String tag, java.lang.String targetType, java.lang.Long targetId) {
 		super(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS);
 
 		setValue(0, id);
 		setValue(1, namespaceId);
 		setValue(2, appId);
-		setValue(3, scopeType);
+		setValue(3, scopeCode);
 		setValue(4, scopeId);
 		setValue(5, itemLocation);
 		setValue(6, itemGroup);

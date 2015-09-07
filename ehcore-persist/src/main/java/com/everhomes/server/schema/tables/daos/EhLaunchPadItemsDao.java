@@ -62,10 +62,10 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>scope_type IN (values)</code>
+	 * Fetch records that have <code>scope_code IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByScopeType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.SCOPE_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchByScopeCode(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE, values);
 	}
 
 	/**

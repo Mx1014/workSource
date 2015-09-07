@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = 198066977;
+	private static final long serialVersionUID = -331267573;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
 	private java.lang.Long    appId;
-	private java.lang.String  scopeType;
+	private java.lang.Byte    scopeCode;
 	private java.lang.Long    scopeId;
 	private java.lang.String  itemLocation;
 	private java.lang.String  itemGroup;
@@ -43,7 +43,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Long    id,
 		java.lang.Integer namespaceId,
 		java.lang.Long    appId,
-		java.lang.String  scopeType,
+		java.lang.Byte    scopeCode,
 		java.lang.Long    scopeId,
 		java.lang.String  itemLocation,
 		java.lang.String  itemGroup,
@@ -67,7 +67,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.id = id;
 		this.namespaceId = namespaceId;
 		this.appId = appId;
-		this.scopeType = scopeType;
+		this.scopeCode = scopeCode;
 		this.scopeId = scopeId;
 		this.itemLocation = itemLocation;
 		this.itemGroup = itemGroup;
@@ -113,12 +113,12 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.appId = appId;
 	}
 
-	public java.lang.String getScopeType() {
-		return this.scopeType;
+	public java.lang.Byte getScopeCode() {
+		return this.scopeCode;
 	}
 
-	public void setScopeType(java.lang.String scopeType) {
-		this.scopeType = scopeType;
+	public void setScopeCode(java.lang.Byte scopeCode) {
+		this.scopeCode = scopeCode;
 	}
 
 	public java.lang.Long getScopeId() {

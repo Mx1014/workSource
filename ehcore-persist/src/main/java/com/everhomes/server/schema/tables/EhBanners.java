@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = -1694838833;
+	private static final long serialVersionUID = -2132647503;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -52,9 +52,9 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> BANNER_GROUP = createField("banner_group", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS");
 
 	/**
-	 * The column <code>ehcore.eh_banners.scope_type</code>.
+	 * The column <code>ehcore.eh_banners.scope_code</code>. 0: all, 1: community, 2: city, 3: user
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> SCOPE_TYPE = createField("scope_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: community, 2: city, 3: user");
 
 	/**
 	 * The column <code>ehcore.eh_banners.scope_id</code>.

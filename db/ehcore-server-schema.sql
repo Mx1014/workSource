@@ -263,7 +263,7 @@ CREATE TABLE `eh_launch_pad_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `namespace_id` INTEGER,
     `app_id` BIGINT,
-    `scope_type` VARCHAR(32),
+	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
     `scope_id` BIGINT,
 	`item_location` VARCHAR(2048),
     `item_group` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: Default、GovAgencies、Bizs、GaActions',
@@ -285,7 +285,7 @@ CREATE TABLE `eh_launch_pad_items` (
     `target_id` BIGINT COMMENT 'the entity id linked back to the orginal resource',
 
     PRIMARY KEY (`id`),
-    INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
+    INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_name`),
     INDEX `i_eh_scoped_cfg_order`(`default_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -1042,7 +1042,7 @@ CREATE TABLE `eh_communities`(
     `area_name` VARCHAR(64) COMMENT 'redundant for query optimization',
     `name` VARCHAR(64),
     `alias_name` VARCHAR(64),
-    `address` VARCHAR(128),
+    `address` VARCHAR(512),
     `zipcode` VARCHAR(16),
     `description` TEXT,
     `detail_description` TEXT,
@@ -1075,7 +1075,6 @@ CREATE TABLE `eh_communities`(
     INDEX `i_eh_community_area_name`(`area_name`),
     INDEX `i_eh_community_name`(`name`),
     INDEX `i_eh_community_alias_name`(`alias_name`),
-    INDEX `i_eh_community_address`(`address`),
     INDEX `i_eh_community_zipcode`(`zipcode`),
     INDEX `i_eh_community_create_time`(`create_time`),
     INDEX `i_eh_community_delete_time`(`delete_time`),
@@ -1527,7 +1526,7 @@ CREATE TABLE `eh_banners` (
     `appId` BIGINT,
 	`banner_location` VARCHAR(2048),
     `banner_group` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
-    `scope_type` VARCHAR(32),
+	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
     `scope_id` BIGINT,
     `name` VARCHAR(128),
     `vendor_tag` VARCHAR(64),
