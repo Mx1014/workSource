@@ -27,6 +27,9 @@ public interface CategoryConstants {
     /** 活动 */
     public static final long CATEGORY_ID_ACTIVITY = 4L;
     
+    /** 帖子/紧急通知 */
+    public static final long CATEGORY_ID_URGENT_NOTICE = 1002L;
+    
     /** 帖子/公告（物业、业委、居委、公安等） */
     public static final long CATEGORY_ID_NOTICE = 1003L;
     /** 帖子/报修（物业、业委、居委、公安等）*/

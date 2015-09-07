@@ -305,6 +305,9 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.admin.notification', 19, 'zh_CN', '某管理员被收回管理员权限，通知操作者', '您已解除${userName}在圈“${groupName}”的管理员身份。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.admin.notification', 20, 'zh_CN', '某管理员被收回管理员权限，通知被收回权限的人', '${operatorName}已解除您在圈“${groupName}”的管理员身份。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.admin.notification', 21, 'zh_CN', '某管理员被收回管理员权限，通知其它人', '${operatorName}已解除${userName}在圈“${groupName}”的管理员身份。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.admin.notification', 22, 'zh_CN', '邀请别人成为圈管理员（不需要同意），通知被邀请人', '${operatorName}已经邀请您成为圈“${groupName}”的管理员了。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.admin.notification', 23, 'zh_CN', '邀请别人成为圈管理员（不需要同意），通知邀请人', '您已邀请${userName}成为圈“${groupName}”的管理员了。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.admin.notification', 24, 'zh_CN', '邀请别人成为圈管理员（不需要同意），通知其它人', '${operatorName}已经邀请${userName}成为圈“${groupName}”的管理员了。');
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'family.notification', 1, 'zh_CN', '有人填写地址（地址匹配或不匹配），通知申请人等待审核', '您已提交地址${address}，请耐心等待审核通过。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'family.notification', 2, 'zh_CN', '有人填写地址（地址匹配），通知家人审核', '您的家人${userName}已提交地址审核申请，请及时进行审核。');

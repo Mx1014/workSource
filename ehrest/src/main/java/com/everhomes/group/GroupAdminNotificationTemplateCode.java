@@ -25,4 +25,7 @@ public interface GroupAdminNotificationTemplateCode {
     static final int GROUP_ADMINROLE_INVOKE_FOR_APPLICANT = 20; // 某管理员被收回管理员权限，通知被收回权限的人
     static final int GROUP_ADMINROLE_INVOKE_FOR_OPERATOR = 19; // 某管理员被收回管理员权限，通知操作者
     static final int GROUP_ADMINROLE_INVOKE_FOR_OTHER = 21; // 某管理员被收回管理员权限，通知其它人
+    static final int GROUP_ADMINROLE_FREE_INVITATION_FOR_APPLICANT = 22; // 邀请别人成为圈管理员（不需要同意），通知被邀请人
+    static final int GROUP_ADMINROLE_FREE_INVITATION_FOR_OPERATOR = 23; // 邀请别人成为圈管理员（不需要同意），通知邀请人
+    static final int GROUP_ADMINROLE_FREE_INVITATION_FOR_OTHER = 24; // 邀请别人成为圈管理员（不需要同意），通知其它人
 }
