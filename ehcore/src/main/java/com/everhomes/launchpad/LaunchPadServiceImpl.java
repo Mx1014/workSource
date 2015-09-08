@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Null;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.engine.jdbc.internal.DDLFormatterImpl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -481,10 +483,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     allItems.add(o);
                 }
                 else if(o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode() 
-                        && (d.getId().longValue() == o.getId().longValue() || 
-                        (d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())))){
-                    if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode())
+                        &&d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())
+                                && d.getActionData() != null && o.getActionData() != null && d.getActionData().trim().equals(o.getActionData().trim())){
+                    if((d.getTargetType() == null && o.getTargetType() == null) ||(d.getTargetType() != null && o.getTargetType() != null
+                            && d.getTargetType().trim().equals(o.getTargetType().trim()) && d.getTargetId().longValue() == o.getTargetId().longValue()
+                            && o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode()))
                         allItems.add(o);
+//                    if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode())
+//                        allItems.add(o);
                     flag = true;
                     break;
                 }

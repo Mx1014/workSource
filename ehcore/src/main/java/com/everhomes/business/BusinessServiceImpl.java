@@ -838,7 +838,7 @@ public class BusinessServiceImpl implements BusinessService {
         item.setScopeCode(ScopeType.USER.getCode());
         item.setScopeId(userId);
         item.setDefaultOrder(0);
-        item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+        item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
         item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
         item.setBgcolor(0);
         item.setTargetType(ItemTargetType.BIZ.getCode());
@@ -922,7 +922,7 @@ public class BusinessServiceImpl implements BusinessService {
             item.setScopeCode(itemScope.getScopeCode());
             item.setScopeId(itemScope.getScopeId());
             item.setDefaultOrder(0);
-            item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+            item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
             item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
             item.setBgcolor(0);
             item.setTargetType(ItemTargetType.BIZ.getCode());
