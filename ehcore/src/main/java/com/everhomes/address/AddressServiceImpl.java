@@ -486,7 +486,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     
     @Override
-    public FamilyDTO claimAddress(ClaimAddressCommand cmd) {
+    public ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()
             || cmd.getApartmentName() == null || cmd.getApartmentName().isEmpty()) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -496,7 +496,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(cmd.getReplacedAddressId() == null) {
             return processNewAddressClaim(cmd);
         } else {
-            FamilyDTO info = processNewAddressClaim(cmd);
+            ClaimedAddressInfo info = processNewAddressClaim(cmd);
             
             DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
             disclaimCmd.setAddressId(cmd.getReplacedAddressId());
@@ -542,35 +542,34 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         familyService.leave(leaveCmd);
     }
    
-    private FamilyDTO processNewAddressClaim(ClaimAddressCommand cmd) {
+    private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
         Address address = this.getOrCreateAddress(cmd);
         Family family = this.familyService.getOrCreatefamily(address);
-        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
-        long communityId = family.getIntegralTag2();
-        Community community = this.communityProvider.findCommunityById(communityId);
-        if(community != null){
-            familyDTO.setCommunityId(communityId);
-            familyDTO.setCommunityName(community.getName());
-            familyDTO.setCityId(community.getCityId());
-            familyDTO.setCityName(community.getCityName());
-        }
-        familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-        if(address != null){
-            familyDTO.setBuildingName(address.getBuildingName());
-            familyDTO.setApartmentName(address.getApartmentName());
-            familyDTO.setAddressStatus(address.getStatus());
-            String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
-                            address.getBuildingName(), address.getApartmentName());
-            familyDTO.setDisplayName(addrStr);
-            familyDTO.setAddress(addrStr);
-        }
+//        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
+//        long communityId = family.getIntegralTag2();
+//        Community community = this.communityProvider.findCommunityById(communityId);
+//        if(community != null){
+//            familyDTO.setCommunityId(communityId);
+//            familyDTO.setCommunityName(community.getName());
+//            familyDTO.setCityId(community.getCityId());
+//            familyDTO.setCityName(community.getCityName());
+//        }
+//        familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+//        if(address != null){
+//            familyDTO.setBuildingName(address.getBuildingName());
+//            familyDTO.setApartmentName(address.getApartmentName());
+//            familyDTO.setAddressStatus(address.getStatus());
+//            String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+//                            address.getBuildingName(), address.getApartmentName());
+//            familyDTO.setDisplayName(addrStr);
+//            familyDTO.setAddress(addrStr);
+//        }
         
-//        ClaimedAddressInfo info = new ClaimedAddressInfo();
-//        info.setAddressId(address.getId());
-//        info.setFullAddress(address.getAddress());
-//        info.setUserCount((int)family.getMemberCount().longValue());
-        System.out.println("Return family info:"+familyDTO);
-        return familyDTO;
+        ClaimedAddressInfo info = new ClaimedAddressInfo();
+        info.setAddressId(address.getId());
+        info.setFullAddress(address.getAddress());
+        info.setUserCount((int)family.getMemberCount().longValue());
+        return info;
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {

@@ -259,7 +259,7 @@ public class AddressTest extends CoreServerTestCase {
         //cmd.setReplacedAddressId(15L);
         cmd.setBuildingName("Building 1");
         cmd.setApartmentName("APT 3");
-        FamilyDTO addressInfo = addressService.claimAddress(cmd);
+        ClaimedAddressInfo addressInfo = addressService.claimAddress(cmd);
         assertNotNull(addressInfo);
         System.out.println(addressInfo);
     }

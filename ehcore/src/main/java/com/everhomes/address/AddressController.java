@@ -133,9 +133,9 @@ public class AddressController extends ControllerBase {
      * <p>添加地址或修改地址</p>
      */
     @RequestMapping("claimAddress")
-    @RestReturn(value=FamilyDTO.class)
+    @RestReturn(value=ClaimedAddressInfo.class)
     public RestResponse claimAddress(@Valid ClaimAddressCommand cmd) {
-        FamilyDTO info = this.addressService.claimAddress(cmd);
+        ClaimedAddressInfo info = this.addressService.claimAddress(cmd);
         RestResponse response = new RestResponse(info);
         
         response.setErrorCode(ErrorCodes.SUCCESS);
