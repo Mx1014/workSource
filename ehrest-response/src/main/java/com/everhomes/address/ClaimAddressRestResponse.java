@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-09-01 15:16:07
+// generated at 2015-09-08 14:51:07
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.ClaimedAddressInfo;
+import com.everhomes.family.FamilyDTO;
 
 public class ClaimAddressRestResponse extends RestResponseBase {
 
-    private ClaimedAddressInfo response;
+    private FamilyDTO response;
 
     public ClaimAddressRestResponse () {
     }
 
-    public ClaimedAddressInfo getResponse() {
+    public FamilyDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ClaimedAddressInfo response) {
+    public void setResponse(FamilyDTO response) {
         this.response = response;
     }
 }

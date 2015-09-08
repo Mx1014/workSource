@@ -6,11 +6,11 @@ import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.user.LogonCommandResponse;
 
-public class LogonByTokenRestResponse extends RestResponseBase {
+public class AdminLogonRestResponse extends RestResponseBase {
 
     private LogonCommandResponse response;
 
-    public LogonByTokenRestResponse () {
+    public AdminLogonRestResponse () {
     }
 
     public LogonCommandResponse getResponse() {
