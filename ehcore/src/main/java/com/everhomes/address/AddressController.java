@@ -19,6 +19,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.family.FamilyDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.util.ConvertHelper;
@@ -132,9 +133,9 @@ public class AddressController extends ControllerBase {
      * <p>添加地址或修改地址</p>
      */
     @RequestMapping("claimAddress")
-    @RestReturn(value=ClaimedAddressInfo.class)
+    @RestReturn(value=FamilyDTO.class)
     public RestResponse claimAddress(@Valid ClaimAddressCommand cmd) {
-        ClaimedAddressInfo info = this.addressService.claimAddress(cmd);
+        FamilyDTO info = this.addressService.claimAddress(cmd);
         RestResponse response = new RestResponse(info);
         
         response.setErrorCode(ErrorCodes.SUCCESS);

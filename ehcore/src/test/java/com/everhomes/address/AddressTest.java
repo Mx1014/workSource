@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.region.RegionProvider;
@@ -258,7 +259,7 @@ public class AddressTest extends CoreServerTestCase {
         //cmd.setReplacedAddressId(15L);
         cmd.setBuildingName("Building 1");
         cmd.setApartmentName("APT 3");
-        ClaimedAddressInfo addressInfo = addressService.claimAddress(cmd);
+        FamilyDTO addressInfo = addressService.claimAddress(cmd);
         assertNotNull(addressInfo);
         System.out.println(addressInfo);
     }

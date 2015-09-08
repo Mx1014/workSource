@@ -44,12 +44,17 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
+import com.everhomes.family.FamilyUtils;
 import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -481,7 +486,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     
     @Override
-    public ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd) {
+    public FamilyDTO claimAddress(ClaimAddressCommand cmd) {
         if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()
             || cmd.getApartmentName() == null || cmd.getApartmentName().isEmpty()) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -491,7 +496,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(cmd.getReplacedAddressId() == null) {
             return processNewAddressClaim(cmd);
         } else {
-            ClaimedAddressInfo info = processNewAddressClaim(cmd);
+            FamilyDTO info = processNewAddressClaim(cmd);
             
             DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
             disclaimCmd.setAddressId(cmd.getReplacedAddressId());
@@ -537,16 +542,35 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         familyService.leave(leaveCmd);
     }
    
-    private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
+    private FamilyDTO processNewAddressClaim(ClaimAddressCommand cmd) {
         Address address = this.getOrCreateAddress(cmd);
         Family family = this.familyService.getOrCreatefamily(address);
+        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
+        long communityId = family.getIntegralTag2();
+        Community community = this.communityProvider.findCommunityById(communityId);
+        if(community != null){
+            familyDTO.setCommunityId(communityId);
+            familyDTO.setCommunityName(community.getName());
+            familyDTO.setCityId(community.getCityId());
+            familyDTO.setCityName(community.getCityName());
+        }
+        familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+        if(address != null){
+            familyDTO.setBuildingName(address.getBuildingName());
+            familyDTO.setApartmentName(address.getApartmentName());
+            familyDTO.setAddressStatus(address.getStatus());
+            String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+                            address.getBuildingName(), address.getApartmentName());
+            familyDTO.setDisplayName(addrStr);
+            familyDTO.setAddress(addrStr);
+        }
         
-        ClaimedAddressInfo info = new ClaimedAddressInfo();
-        info.setAddressId(address.getId());
-        info.setFullAddress(address.getAddress());
-        info.setUserCount((int)family.getMemberCount().longValue());
-        
-        return info;
+//        ClaimedAddressInfo info = new ClaimedAddressInfo();
+//        info.setAddressId(address.getId());
+//        info.setFullAddress(address.getAddress());
+//        info.setUserCount((int)family.getMemberCount().longValue());
+        System.out.println("Return family info:"+familyDTO);
+        return familyDTO;
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {

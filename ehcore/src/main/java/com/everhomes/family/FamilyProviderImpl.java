@@ -399,10 +399,14 @@ public class FamilyProviderImpl implements FamilyProvider {
 						if (address == null) {
 						    LOGGER.error("Address is not found,addressId=" + r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1));
 						}
-						Community community = this.communityProvider.findCommunityById(address.getCommunityId());
-						if(community == null) {
-						    LOGGER.error("Community is not found,communityId=" + address.getCommunityId());
+						Community community = null;
+						if(address != null){
+						    community = this.communityProvider.findCommunityById(address.getCommunityId());
+	                        if(community == null) {
+	                            LOGGER.error("Community is not found,communityId=" + address.getCommunityId());
+	                        }
 						}
+						
 						FamilyDTO f = new FamilyDTO();
 						if(address != null){
     						f.setAddress(address.getAddress());
