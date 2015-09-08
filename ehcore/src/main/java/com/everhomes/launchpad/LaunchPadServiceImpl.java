@@ -483,8 +483,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     allItems.add(o);
                 }
                 else if(o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode() 
-                        &&d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())
-                                && d.getActionData() != null && o.getActionData() != null && d.getActionData().trim().equals(o.getActionData().trim())){
+                        &&d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())){
                     if((d.getTargetType() == null && o.getTargetType() == null) ||(d.getTargetType() != null && o.getTargetType() != null
                             && d.getTargetType().trim().equals(o.getTargetType().trim()) && d.getTargetId().longValue() == o.getTargetId().longValue()
                             && o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode()))

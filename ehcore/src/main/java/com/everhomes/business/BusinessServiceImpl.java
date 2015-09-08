@@ -838,7 +838,7 @@ public class BusinessServiceImpl implements BusinessService {
         item.setScopeCode(ScopeType.USER.getCode());
         item.setScopeId(userId);
         item.setDefaultOrder(0);
-        item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+        item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
         item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
         item.setBgcolor(0);
         item.setTargetType(ItemTargetType.BIZ.getCode());
