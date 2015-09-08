@@ -1,16 +1,16 @@
 // @formatter:off
 // generated at 2015-09-08 19:31:04
-package com.everhomes.family;
+package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.family.FamilyDTO;
 
-public class GetRestResponse extends RestResponseBase {
+public class ClaimAddressV2RestResponse extends RestResponseBase {
 
     private FamilyDTO response;
 
-    public GetRestResponse () {
+    public ClaimAddressV2RestResponse () {
     }
 
     public FamilyDTO getResponse() {
