@@ -25,7 +25,7 @@ logging.level.: INFO
 #
 # Uncommit follow to use a different context path other than /
 #
-#server.contextPath: /evh
+server.contextPath: /evh
 
 
 upload.max.size: 10000000
