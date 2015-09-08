@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-09-08 14:51:08
+// generated at 2015-09-08 16:00:43
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -14,6 +14,7 @@ public interface ApiConstants {
     public static final String ACTIVITY_REJECT_URL = "/activity/reject";
     public static final String ACTIVITY_SIGNUP_URL = "/activity/signup";
     public static final String ADDRESS_CLAIMADDRESS_URL = "/address/claimAddress";
+    public static final String ADDRESS_CLAIMADDRESSV2_URL = "/address/claimAddressV2";
     public static final String ADDRESS_CREATESERVICEADDRESS_URL = "/address/createServiceAddress";
     public static final String ADDRESS_DISCLAIMADDRESS_URL = "/address/disclaimAddress";
     public static final String ADDRESS_FINDNEARYCOMMUNITYBYID_URL = "/address/findNearyCommunityById";

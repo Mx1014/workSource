@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-09-08 14:51:08
+// generated at 2015-09-08 16:00:43
 package com.everhomes.poll;
 
 import com.everhomes.rest.RestResponseBase;
