@@ -505,6 +505,26 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
     }
     
+    @Override
+    public FamilyDTO claimAddressV2(ClaimAddressCommand cmd) {
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()
+            || cmd.getApartmentName() == null || cmd.getApartmentName().isEmpty()) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid communityId, buildingName or appartmentName parameter");
+        }
+        
+        if(cmd.getReplacedAddressId() == null) {
+            return processNewAddressClaimV2(cmd);
+        } else {
+            FamilyDTO info = processNewAddressClaimV2(cmd);
+            
+            DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
+            disclaimCmd.setAddressId(cmd.getReplacedAddressId());
+            disclaimAddress(disclaimCmd);
+            return info;
+        }
+    }
+    
     public void disclaimAddress(DisclaimAddressCommand cmd) {
         if(cmd.getAddressId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -545,31 +565,37 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
         Address address = this.getOrCreateAddress(cmd);
         Family family = this.familyService.getOrCreatefamily(address);
-//        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
-//        long communityId = family.getIntegralTag2();
-//        Community community = this.communityProvider.findCommunityById(communityId);
-//        if(community != null){
-//            familyDTO.setCommunityId(communityId);
-//            familyDTO.setCommunityName(community.getName());
-//            familyDTO.setCityId(community.getCityId());
-//            familyDTO.setCityName(community.getCityName());
-//        }
-//        familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-//        if(address != null){
-//            familyDTO.setBuildingName(address.getBuildingName());
-//            familyDTO.setApartmentName(address.getApartmentName());
-//            familyDTO.setAddressStatus(address.getStatus());
-//            String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
-//                            address.getBuildingName(), address.getApartmentName());
-//            familyDTO.setDisplayName(addrStr);
-//            familyDTO.setAddress(addrStr);
-//        }
         
         ClaimedAddressInfo info = new ClaimedAddressInfo();
         info.setAddressId(address.getId());
         info.setFullAddress(address.getAddress());
         info.setUserCount((int)family.getMemberCount().longValue());
         return info;
+    }
+    
+    private FamilyDTO processNewAddressClaimV2(ClaimAddressCommand cmd) {
+        Address address = this.getOrCreateAddress(cmd);
+        Family family = this.familyService.getOrCreatefamily(address);
+        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
+        long communityId = family.getIntegralTag2();
+        Community community = this.communityProvider.findCommunityById(communityId);
+        if(community != null){
+            familyDTO.setCommunityId(communityId);
+            familyDTO.setCommunityName(community.getName());
+            familyDTO.setCityId(community.getCityId());
+            familyDTO.setCityName(community.getCityName());
+        }
+        familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+        if(address != null){
+            familyDTO.setBuildingName(address.getBuildingName());
+            familyDTO.setApartmentName(address.getApartmentName());
+            familyDTO.setAddressStatus(address.getStatus());
+            String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+                            address.getBuildingName(), address.getApartmentName());
+            familyDTO.setDisplayName(addrStr);
+            familyDTO.setAddress(addrStr);
+        }
+        return familyDTO;
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {

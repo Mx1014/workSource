@@ -144,6 +144,21 @@ public class AddressController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /address/claimAddressV2</b>
+     * <p>添加地址或修改地址</p>
+     */
+    @RequestMapping("claimAddressV2")
+    @RestReturn(value=FamilyDTO.class)
+    public RestResponse claimAddressV2(@Valid ClaimAddressCommand cmd) {
+        FamilyDTO info = this.addressService.claimAddressV2(cmd);
+        RestResponse response = new RestResponse(info);
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /address/disclaimAddress</b>
      * <p>删除地址</p>
      */
