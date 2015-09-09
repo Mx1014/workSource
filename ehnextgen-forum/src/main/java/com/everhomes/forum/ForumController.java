@@ -1,0 +1,325 @@
+// @formatter:off
+package com.everhomes.forum;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.search.PostSearcher;
+import com.everhomes.search.SearchSyncManager;
+import com.everhomes.search.SearchSyncType;
+import com.everhomes.util.RequireAuthentication;
+
+@RestDoc(value="Forum controller", site="forum")
+@RestController
+@RequestMapping("/forum")
+public class ForumController extends ControllerBase {
+    
+    @Autowired
+    private ForumService forumService;
+    
+    @Autowired
+    PostSearcher postSearcher;
+    
+    @Autowired
+    private SearchSyncManager searchSyncManager;
+    
+    /**
+     * <b>URL: /forum/newTopic</b>
+     * <p>创建新帖</p>
+     */
+    @RequestMapping("newTopic")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse newTopic(@Valid NewTopicCommand cmd) {
+        PostDTO postDto = this.forumService.createTopic(cmd);
+        
+        RestResponse response = new RestResponse(postDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/getTopic</b>
+     * <p>获取指定论坛里的指定帖子内容</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getTopic")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse getTopic(GetTopicCommand cmd) {
+        PostDTO postDto = this.forumService.getTopic(cmd);
+        
+        RestResponse response = new RestResponse(postDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/listTopics</b>
+     * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
+     */
+    @RequestMapping("listTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listTopics(ListTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = this.forumService.listTopics(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/listUserRelatedTopics</b>
+     * <p>查询与请求者所有相关的帖</p>
+     */
+    @RequestMapping("listUserRelatedTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listUserRelatedTopics(ListUserRelatedTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = this.forumService.listUserRelatedTopics(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/queryTopicsByCategory</b>
+     * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
+     */
+    @RequestMapping("queryTopicsByCategory")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
+        ListPostCommandResponse cmdResponse = this.forumService.queryTopicsByCategory(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/queryTopicsByEntityAndCategory</b>
+     * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
+     */
+    @RequestMapping("queryTopicsByEntityAndCategory")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse queryTopicsByEntityAndCategory(QueryTopicByEntityAndCategoryCommand cmd) {
+        ListPostCommandResponse cmdResponse = this.forumService.queryTopicsByEntityAndCategory(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/likeTopic</b>
+     * <p>对指定论坛里的指定帖子点赞</p>
+     * @return 点赞的结果
+     */
+    @RequestMapping("likeTopic")
+    @RestReturn(value=String.class)
+    public RestResponse likeTopic(LikeTopicCommand cmd) {
+        this.forumService.likeTopic(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/cancelLikeTopic</b>
+     * <p>对指定论坛里的指定帖子取消赞</p>
+     * @return 取消赞的结果
+     */
+    @RequestMapping("cancelLikeTopic")
+    @RestReturn(value=String.class)
+    public RestResponse cancelLikeTopic(CancelLikeTopicCommand cmd) {
+        this.forumService.cancelLikeTopic(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/deleteTopic</b>
+     * <p>删除指定论坛里的指定帖子（需要有删帖权限）</p>
+     * @return 删除结果
+     */
+    @RequestMapping("deleteTopic")
+    @RestReturn(value=String.class)
+    public RestResponse deleteTopic(DeleteTopicCommand cmd) {
+        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId());
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/forwardTopic</b>
+     * <p>转发帖子</p>
+     * @return 转发结果
+     */
+//    @RequestMapping("forwardTopic")
+//    @RestReturn(value=Long.class)
+//    public RestResponse forwardTopic(@Valid ForwardTopicCommand cmd) {
+//        
+//        // ???
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+    
+    /**
+     * <b>URL: /forum/makeTop</b>
+     * <p>置顶帖子</p>
+     * @return 置顶结果
+     */
+    @RequestMapping("makeTop")
+    @RestReturn(value=String.class)
+    public RestResponse makeTop(@Valid MakeTopCommand cmd) {
+        
+        // ???
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/search</b>
+     * <p>按指定条件查询符合条件的帖子列表</p>
+     */
+    @RequestMapping("search")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse search(SearchTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = postSearcher.query(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setResponseObject(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/listTopicComments</b>
+     * <p>获取指定论坛里指定帖子下的评论列表</p>
+     */
+    @RequestMapping("listTopicComments")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listTopicComments(@Valid ListTopicCommentCommand cmd) {
+        ListPostCommandResponse cmdResponse = this.forumService.listTopicComments(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /forum/newComment</b>
+     * <p>创建新评论</p>
+     */
+    @RequestMapping("newComment")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse newComment(@Valid NewCommentCommand cmd) {
+        PostDTO postDTO = this.forumService.createComment(cmd);
+        
+        RestResponse response = new RestResponse(postDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/deleteComment</b>
+     * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
+     * @return 删除结果
+     */
+    @RequestMapping("deleteComment")
+    @RestReturn(value=String.class)
+    public RestResponse deleteComment(DeleteCommentCommand cmd) {
+        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId());
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/updateUsedAndRental</b>
+     * <p>更新二手与租售信息</p>
+     * @return 更新结果
+     */
+    @RequestMapping("updateUsedAndRental")
+    @RestReturn(value=String.class)
+    public RestResponse updateUsedAndRental(UsedAndRentalCommand cmd) {
+        this.forumService.updateUsedAndRental(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/updateFreeStuff</b>
+     * <p>更新免费物品信息</p>
+     * @return 更新结果
+     */
+    @RequestMapping("updateFreeStuff")
+    @RestReturn(value=String.class)
+    public RestResponse updateFreeStuff(FreeStuffCommand cmd) {
+        this.forumService.updateFreeStuff(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/updateLostAndFound</b>
+     * <p>更新失物招领信息</p>
+     * @return 更新结果
+     */
+    @RequestMapping("updateLostAndFound")
+    @RestReturn(value=String.class)
+    public RestResponse updateLostAndFound(LostAndFoundCommand cmd) {
+        this.forumService.updateLostAndFound(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("syncTest")
+    @RestReturn(value=String.class)
+    public RestResponse syncTest() {
+        searchSyncManager.SyncDb(SearchSyncType.POST);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+}

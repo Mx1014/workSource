@@ -1,0 +1,832 @@
+package com.everhomes.forum;
+
+import java.security.InvalidParameterException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.Constants;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupVisibilityScope;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhForumAssignedScopesDao;
+import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhForumPostsDao;
+import com.everhomes.server.schema.tables.daos.EhForumsDao;
+import com.everhomes.server.schema.tables.daos.EhGroupVisibleScopesDao;
+import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.server.schema.tables.pojos.EhForums;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhForumAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserLike;
+import com.everhomes.user.UserLikeType;
+import com.everhomes.user.UserProfileContstant;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
+@Component
+public class ForumProviderImpl implements ForumProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForumProviderImpl.class);
+    
+    @Autowired 
+    private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private CoordinationProvider coordinator;
+    
+    @Autowired
+    private ShardingProvider shardingProvider;
+    
+    @Autowired
+    private DbProvider dbProvider;
+    
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+    
+    @Override
+    public void createForum(Forum forum) {
+        long id = this.shardingProvider.allocShardableContentId(EhForums.class).second();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForums.class, id));
+        
+        EhForumsDao dao = new EhForumsDao(context.configuration());
+        
+        forum.setId(id);
+        forum.setUuid(UUID.randomUUID().toString());
+        forum.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.insert(forum);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhForums.class, null);
+    }
+
+    @Cacheable(value="ForumById", key="#id", unless="#result == null")
+    @Override
+    public Forum findForumById(long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhForums.class, id));
+        
+        EhForumsDao dao = new EhForumsDao(context.configuration());
+        EhForums record = dao.findById(id);
+        return ConvertHelper.convert(record, Forum.class);
+    }
+
+    @Cacheable(value="ForumByName", key="#name", unless="#result == null")
+    @Override
+    public Forum findForumByName(final String name) {
+        final List<EhForums> records = new ArrayList<EhForums>();
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhForums.class), records, (DSLContext context, List<EhForums> reducingContext) -> {
+            EhForumsDao dao = new EhForumsDao(context.configuration());
+            List<EhForums> l = dao.fetchByName(name);
+            if(l.size() > 0) {
+                records.addAll(l);
+                return false;
+            }
+            return true;
+        });
+        
+        if(records.size() > 0)
+            return ConvertHelper.convert(records.get(0), Forum.class);
+        return null;
+    }
+
+    @Cacheable(value="ForumByOwner", key="{#ownerType, #ownerId}", unless="#result.size() == 0")
+    @Override
+    public List<Forum> findForumByOwner(final String ownerType, final long ownerId) {
+        List<Forum> groupList = new ArrayList<Forum>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+			groupList, (DSLContext context, Object reducingContext) -> {
+				List<Forum> list = context.select().from(Tables.EH_FORUMS)
+					.where(Tables.EH_FORUMS.OWNER_TYPE.eq(ownerType))
+					.and(Tables.EH_FORUMS.OWNER_ID.eq(ownerId))
+					.fetch().map((r) -> {
+						return ConvertHelper.convert(r, Forum.class);
+					});
+
+				if (list != null && !list.isEmpty()) {
+					groupList.addAll(list);
+				}
+
+				return true;
+			});
+        
+        return groupList;
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumById", key="#forum.id"), 
+            @CacheEvict(value="ForumByName", key="#forum.name"),
+            @CacheEvict(value="ForumByOwner", key="{#forum.ownerType, #forum.ownerId}")})
+    @Override
+    public void updateForum(Forum forum) {
+        assert(forum.getId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhForums.class, forum.getId()));
+        EhForumsDao dao = new EhForumsDao(context.configuration());
+        dao.update(forum);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForums.class, forum.getId());
+    }
+    
+    @Caching(evict={@CacheEvict(value="ForumById", key="#forum.id"), 
+            @CacheEvict(value="ForumByName", key="#forum.name"),
+            @CacheEvict(value="ForumByOwner", key="{#forum.ownerType, #forum.ownerId}")})
+    @Override
+    public void deleteForum(Forum forum) {
+        assert(forum.getId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhForums.class, forum.getId()));
+        EhForumsDao dao = new EhForumsDao(context.configuration());
+        dao.delete(forum);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForums.class, forum.getId());
+    }
+
+    @Override
+    public void deleteForum(long id) {
+        ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+        Forum forum = self.findForumById(id);
+        if(forum != null)
+            self.deleteForum(forum);
+    }
+
+    @Override
+    public void createPost(Post post) {
+        long startTime = System.currentTimeMillis();
+        assert(post.getForumId() != null);
+        
+        long id = this.shardingProvider.allocShardableContentId(EhForumPosts.class).second();
+        long seq = sequenceProvider.getNextSequence(Constants.FORUM_MODIFY_SEQUENCE_DOMAIN_NAME);
+        
+        post.setId(id);
+        post.setUuid(UUID.randomUUID().toString());
+        post.setModifySeq(seq);
+        
+        Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+        post.setCreateTime(ts);
+        post.setUpdateTime(ts);
+                
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+            this.dbProvider.execute((status) -> {
+                Post parentPost = null;
+                if(post.getParentPostId() != null && post.getParentPostId() != 0) {
+                    parentPost = findPostById(post.getParentPostId());
+                    if(parentPost == null) {
+                        throw new InvalidParameterException("Missing parent post info in post parameter");
+                    }
+                    post.setFloorNumber(parentPost.getChildCount() + 1);
+                } else {
+                    userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
+                    userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, 1);
+                }
+                
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, id));
+                EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+                
+                dao.insert(post);
+                DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumPosts.class, null);
+            
+                if(parentPost != null) {
+                    parentPost.setChildCount(parentPost.getChildCount() + 1);
+                    ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                    self.updatePost(parentPost);
+                }
+                
+                return null;
+            });
+            
+            return null;
+        });
+        
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Create a new post, id=" + id + ", elapse=" + (endTime - startTime));
+        }
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#post.id"),
+        @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
+    @Override
+    public void updatePost(Post post) {
+        assert(post.getId() != 0);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, post.getId()));
+        
+        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        dao.update(post);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId"),
+        @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
+    @Override
+    public void deletePost(long postId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, postId));
+        
+        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        dao.deleteById(postId);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, postId);
+    }
+    
+    @Cacheable(value="ForumPostById", key="#postId", unless="#result == null")
+    @Override
+    public Post findPostById(long postId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhForumPosts.class, postId));
+        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(postId), Post.class);
+    }
+    
+    @Cacheable(value = "ForumPostByUuid", key="#uuid", unless="#result == null")
+    @Override
+    public Post findPostByUuid(String uuid) {
+        Post[] result = new Post[1];
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+            (DSLContext context, Object reducingContext) -> {
+                result[0] = context.select().from(Tables.EH_FORUM_POSTS)
+                    .where(Tables.EH_FORUM_POSTS.UUID.eq(uuid))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, Post.class);
+                    });
+
+                if (result[0] != null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+        
+        return result[0];
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumAttachmentList", key="#attachment.postId")})
+    @Override
+    public void createPostAttachment(Attachment attachment) {
+        assert(attachment.getPostId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, attachment.getPostId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhForumAttachments.class));
+        attachment.setId(id);
+        
+        EhForumAttachmentsDao dao = new EhForumAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumAttachments.class, null);
+    }
+
+    @Cacheable(value="ForumAttachmentById", key="#id", unless="#result == null")
+    @Override
+    public Attachment findAttachmentById(final long id) {
+        final Attachment[] result = new Attachment[1];
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhForumPosts.class), result, (DSLContext context, Attachment[] reducingContext) -> {
+                
+            EhForumAttachmentsDao dao = new EhForumAttachmentsDao(context.configuration());
+            EhForumAttachments pojo = dao.findById(id);
+            if(pojo != null) {
+                result[0] = ConvertHelper.convert(pojo, Attachment.class);
+                return false;
+            }
+            
+            return true;
+        });
+        
+        return result[0];
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumAttachmentById", key="#attachment.id"), 
+            @CacheEvict(value="ForumAttachmentList", key="#attachment.postId")})
+    @Override
+    public void updateAttachment(final Attachment attachment) {
+        this.dbProvider.mapReduce(AccessSpec.readWriteWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+                
+            EhForumAttachmentsDao dao = new EhForumAttachmentsDao(context.configuration());
+            EhForumAttachments pojo = dao.findById(attachment.getId());
+            if(pojo != null) {
+                dao.update(attachment);
+                DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumAttachments.class, attachment.getId());
+                return false;
+            }
+            return true;
+        });
+    }
+    
+    @Caching(evict={@CacheEvict(value="ForumAttachmentById", key="#attachment.id"), 
+            @CacheEvict(value="ForumAttachmentList", key="attachment.postId")})
+    @Override
+    public void deleteAttachment(final Attachment attachment) {
+        this.dbProvider.mapReduce(AccessSpec.readWriteWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+                
+            EhForumAttachmentsDao dao = new EhForumAttachmentsDao(context.configuration());
+            EhForumAttachments pojo = dao.findById(attachment.getId());
+            if(pojo != null) {
+                dao.deleteById(attachment.getId());;
+                DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumAttachments.class, attachment.getId());
+                return false;
+            }
+            return true;
+        });
+    }
+
+    @Override
+    public void deleteAttachment(final long id) {
+        ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+        
+        Attachment attachment = self.findAttachmentById(id);
+        if(attachment != null)
+            self.deleteAttachment(attachment);
+    }
+    
+    @Caching(evict={@CacheEvict(value="ForumAttachmentList", key="#postId")})
+    @Override
+    public List<Attachment> listPostAttachments(long postId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhForumPosts.class, postId));
+        
+        return context.selectFrom(Tables.EH_FORUM_ATTACHMENTS)
+            .where(Tables.EH_FORUM_ATTACHMENTS.POST_ID.eq(postId))
+            .fetch()
+            .map((r)-> { return ConvertHelper.convert(r, Attachment.class); } );
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId")})
+    @Override
+    public void likePost(long uid, long postId) {
+        Post post = this.findPostById(postId);
+        if(post != null) {
+            UserLike userLike = this.userProvider.findUserLike(uid, EntityType.POST.getCode(), postId);
+            if(userLike != null) {
+                if(UserLikeType.fromCode(userLike.getLikeType()) == UserLikeType.NONE) {
+                    userLike.setLikeType(UserLikeType.LIKE.getCode());
+                    this.userProvider.updateUserLike(userLike);
+                    
+                    post.setLikeCount(post.getLikeCount().longValue() + 1);
+                    ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                    self.updatePost(post);
+                }
+            } else {
+                userLike = new UserLike();
+                userLike.setOwnerUid(uid);
+                userLike.setTargetType(EntityType.POST.getCode());
+                userLike.setTargetId(postId);
+                userLike.setLikeType(UserLikeType.LIKE.getCode());
+                this.userProvider.createUserLike(userLike);
+
+                // count does not to be exact accurate, no transaction is used here
+                post.setLikeCount(post.getLikeCount().longValue() + 1);
+                ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                self.updatePost(post);
+            }
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Post is not found, userId=" + uid + ", postId=" + postId);
+            }
+        }
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId")})
+    @Override
+    public void cancelLikePost(long uid, long postId) {
+        Post post = this.findPostById(postId);
+        if(post != null) {
+            UserLike userLike = this.userProvider.findUserLike(uid, EntityType.POST.getCode(), postId);
+            if(userLike != null) {
+                if(UserLikeType.fromCode(userLike.getLikeType()) == UserLikeType.LIKE) {
+                    userLike.setLikeType(UserLikeType.NONE.getCode());
+                    this.userProvider.updateUserLike(userLike);
+                    
+                    long likeCount = post.getLikeCount().longValue() - 1;
+                    likeCount = (likeCount < 0) ? 0 : likeCount;
+                    post.setLikeCount(likeCount);
+                    ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                    self.updatePost(post);
+                }
+            } else {
+                userLike = new UserLike();
+                userLike.setOwnerUid(uid);
+                userLike.setTargetType(EntityType.POST.getCode());
+                userLike.setTargetId(postId);
+                userLike.setLikeType(UserLikeType.NONE.getCode());
+                this.userProvider.createUserLike(userLike);
+            }
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Post is not found, userId=" + uid + ", postId=" + postId);
+            }
+        }
+    }
+    
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId")})
+    @Override
+    public void dislikePost(long postId, long uid) {
+        Post post = this.findPostById(postId);
+        if(post != null) {
+            UserLike userLike = this.userProvider.findUserLike(uid, EntityType.POST.getCode(), postId);
+            if(userLike != null) {
+                if(UserLikeType.fromCode(userLike.getLikeType()) == UserLikeType.LIKE) {
+                    userLike.setLikeType(UserLikeType.DISLIKE.getCode());
+                    this.userProvider.updateUserLike(userLike);
+                    
+                    //post.setDislikeCount(post.getDislikeCount().longValue() + 1);
+                    long likeCount = post.getLikeCount().longValue() - 1;
+                    likeCount = (likeCount < 0) ? 0 : likeCount;
+                    post.setLikeCount(likeCount);
+                    ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                    self.updatePost(post);
+                }
+            } else {
+                userLike = new UserLike();
+                userLike.setOwnerUid(uid);
+                userLike.setTargetType(EntityType.POST.getCode());
+                userLike.setTargetId(postId);
+                userLike.setLikeType(UserLikeType.DISLIKE.getCode());
+                this.userProvider.createUserLike(userLike);
+
+                // count does not to be exact accurate, no transaction is used here
+                //post.setDislikeCount(post.getDislikeCount().longValue() + 1);
+                ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                self.updatePost(post);
+            }
+        }
+    }
+    
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId")})
+    @Override
+    public void cancelLikeDislikePost(long postId, long uid) {
+        Post post = this.findPostById(postId);
+        if(post != null) {
+            UserLike userLike = this.userProvider.findUserLike(uid, EntityType.POST.getCode(), postId);
+            if(userLike != null) {
+                if(UserLikeType.fromCode(userLike.getLikeType()) == UserLikeType.LIKE) {
+                    post.setLikeCount(post.getLikeCount().longValue() - 1);
+                } else {
+                    //post.setDislikeCount(post.getDislikeCount().longValue() - 1);
+                }
+
+                ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+                self.updatePost(post);
+                this.userProvider.deleteUserLike(userLike);
+            }        
+        }
+    }
+
+    @Override
+    public List<Post> queryPosts(CrossShardListingLocator forums[], int maxRecentReplyingPosts, final int count, 
+            final ListingQueryBuilderCallback queryBuilderCallback,
+            Comparator<Post> mergeCamparable) {
+        long startTime = System.currentTimeMillis();
+        assert(queryBuilderCallback != null);
+        assert(mergeCamparable != null);
+        
+        final List<Post> results = new ArrayList<Post>();
+        for(final CrossShardListingLocator locator : forums) {
+            final List<Post> perForumResults = new ArrayList<Post>();
+            
+            final Integer[] limit = new Integer[1];
+            limit[0] = count;
+            if(locator.getShardIterator() == null) {
+                AccessSpec accessSpec = AccessSpec.readOnlyWith(EhForumPosts.class);
+                ShardIterator shardIterator = new ShardIterator(accessSpec);
+                
+                locator.setShardIterator(shardIterator);
+            }
+           
+            this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, reducingContext) -> {
+                SelectQuery<EhForumPostsRecord> query = context.selectQuery(Tables.EH_FORUM_POSTS);
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(locator.getEntityId()));
+                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.isNull());
+                if(queryBuilderCallback != null) {
+                    queryBuilderCallback.buildCondition(locator, query);
+                }
+                query.addLimit(limit[0]);
+                
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Query posts by forum, sql=" + query.getSQL());
+                    LOGGER.debug("Query posts by forum, bindValues=" + query.getBindValues());
+                }
+                
+                List<Post> l = query.fetch().map((EhForumPostsRecord record) -> {
+                    return ConvertHelper.convert(record, Post.class);
+                });
+
+                if(l.size() > 0) {
+                    perForumResults.addAll(l);
+                    results.addAll(l);
+                    limit[0] = count - perForumResults.size();
+                    locator.setAnchor(perForumResults.get(perForumResults.size() -1).getModifySeq());
+                    
+                    if(perForumResults.size() >= count)
+                        return AfterAction.done;
+                }
+                
+                return AfterAction.next;
+            });
+        }
+        
+        Collections.sort(results, mergeCamparable);
+        
+        List<Post> mergedResults = new ArrayList<Post>();
+        if(results.size() > 0) {
+            mergedResults = results.subList(0, Math.min(results.size(), count));
+            populatePostAttachments(mergedResults);
+            // No need to query replies when querying posts
+            //populateRecentReplyPosts(mergedResults, maxRecentReplyingPosts);
+        }
+        
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Query posts by forum, resultSize=" + mergedResults.size() 
+                + ", maxCount=" + count + ", elapse=" + (endTime - startTime));
+        }
+        
+        return mergedResults;
+    }
+    
+    @Override
+    public List<Post> queryPosts(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        long startTime = System.currentTimeMillis();
+        assert(locator.getEntityId() != 0);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhForums.class, locator.getEntityId()));
+        
+        SelectQuery<EhForumPostsRecord> query = context.selectQuery(Tables.EH_FORUM_POSTS);
+        query.addSelect(Tables.EH_FORUM_POSTS.fields());
+        query.setDistinct(true);
+    
+        if(queryBuilderCallback != null) {
+            queryBuilderCallback.buildCondition(locator, query);
+        }
+            
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+        }
+        
+        query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query posts by count, sql=" + query.getSQL());
+            LOGGER.debug("Query posts by count, bindValues=" + query.getBindValues());
+        }
+        
+        List<EhForumPostsRecord> records = query.fetch().map(new EhForumPostsRecordMapper());
+        List<Post> posts = records.stream().map((r) -> {
+            return ConvertHelper.convert(r, Post.class);
+        }).collect(Collectors.toList());
+        
+        if(posts.size() > 0) {
+            locator.setAnchor(posts.get(posts.size() -1).getId());
+        }
+        
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Query posts by count, resultSize=" + posts.size() 
+                + ", maxCount=" + count + ", elapse=" + (endTime - startTime));
+        }
+        
+        return posts;
+    }
+    
+    @Override
+    public List<Post> queryReplyingPosts(final CrossShardListingLocator locator, final int count, 
+            final ListingQueryBuilderCallback queryBuilderCallback) {
+        assert(queryBuilderCallback != null);
+        
+        final List<Post> results = new ArrayList<Post>();
+        final Integer[] limit = new Integer[1];
+        limit[0] = count;
+        
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhForumPosts.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, reducingContext) -> {
+            SelectQuery<EhForumPostsRecord> query = context.selectQuery(Tables.EH_FORUM_POSTS);
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(locator.getEntityId()));
+            queryBuilderCallback.buildCondition(locator, query);
+            query.addLimit(limit[0]);
+            List<Post> l = query.fetch().map((EhForumPostsRecord record) -> {
+                return ConvertHelper.convert(record, Post.class);
+            });
+            
+            if(l.size() > 0) {
+                results.addAll(l);
+                limit[0] = count - results.size();
+                locator.setAnchor(results.get(results.size() -1).getModifySeq());
+                
+                if(results.size() >= count)
+                    return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+        
+        if(results.size() > 0) {
+            populatePostAttachments(results);
+        }
+        
+        return results;
+    }
+    
+    @Override
+    public void iteratePosts(int count, IteratePostCallback callback, ListingQueryBuilderCallback queryBuilderCallback) {
+        assert(count > 0);
+        
+        List<Post> postList = null;
+        int maxIndex = 0; // Max index of group list in loop
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        Long pageAnchor = null;
+        do {
+            locator.setAnchor(pageAnchor);
+            
+            postList = queryPosts(locator, (count + 1), queryBuilderCallback);
+            
+            if(postList == null || postList.size() == 0) {
+                break;
+            } else {
+                // if there are still more records in db
+                if(postList.size() > count) {
+                    maxIndex = postList.size() - 2;
+                    pageAnchor = postList.get(postList.size() - 2).getId();
+                } else {
+                    // no more record in db
+                    maxIndex = postList.size() - 1;
+                    pageAnchor = null;
+                }
+
+                for(int i = 0; i <= maxIndex; i++) {
+                    callback.process(postList.get(i));
+                }
+            }
+        } while (pageAnchor != null);
+    }
+    
+    private void populateRecentReplyPosts(List<Post> posts, int maxRecentReplyingPosts) {
+        assert(posts != null);
+        
+        for(Post post : posts) {
+            CrossShardListingLocator locator = new CrossShardListingLocator(post.getId());
+            List<Post> replyingPosts = this.queryReplyingPosts(locator, maxRecentReplyingPosts, (loc, query)-> {
+                query.addOrderBy(Tables.EH_FORUM_POSTS.MODIFY_SEQ.desc());
+                return query;
+            });
+            post.setCommentPosts(replyingPosts);
+        }
+    }
+    
+    public void populatePostAttachments(final Post post) {
+        if(post == null) {
+            return;
+        } else {
+            List<Post> posts = new ArrayList<Post>();
+            posts.add(post);
+            
+            populatePostAttachments(posts);
+        }
+    }
+    
+    public void populatePostAttachments(final List<Post> posts) {
+        if(posts == null || posts.size() == 0) {
+            return;
+        }
+            
+        final List<Long> postIds = new ArrayList<Long>();
+        final Map<Long, Post> mapPosts = new HashMap<Long, Post>();
+        
+        for(Post post: posts) {
+            postIds.add(post.getId());
+            mapPosts.put(post.getId(), post);
+        }
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhForumPosts.class, postIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhForumPosts.class), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhForumAttachmentsRecord> query = context.selectQuery(Tables.EH_FORUM_ATTACHMENTS);
+            query.addConditions(Tables.EH_FORUM_ATTACHMENTS.POST_ID.in(postIds));
+            query.fetch().map((EhForumAttachmentsRecord record) -> {
+                Post post = mapPosts.get(record.getPostId());
+                assert(post != null);
+                post.getAttachments().add(ConvertHelper.convert(record, Attachment.class));
+            
+                return null;
+            });
+            return true;
+        });
+    }
+
+    @Caching(evict={@CacheEvict(value="AssignedScopeByOwnerId", key="#scope.ownerId")})
+    @Override
+    public void createAssignedScope(AssignedScope scope) {
+        assert(scope.getOwnerId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, scope.getOwnerId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhForumAssignedScopes.class));
+        scope.setId(id);
+        
+        EhForumAssignedScopesDao dao = new EhForumAssignedScopesDao(context.configuration());
+        dao.insert(scope);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumAssignedScopes.class, null);
+    }
+    
+    @Cacheable(value="AssignedScopeById", key="#id", unless="#result == null")
+    @Override
+    public AssignedScope findAssignedScopeById(Long id) {
+        final AssignedScope[] result = new AssignedScope[1];
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhForumPosts.class), null, 
+            (DSLContext context, Object reducingContext) -> {
+                EhForumAssignedScopesDao dao = new EhForumAssignedScopesDao(context.configuration());
+                result[0] = ConvertHelper.convert(dao.findById(id), AssignedScope.class);
+                if(result[0] == null) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+        
+        return result[0];
+    }
+    
+    @Cacheable(value="AssignedScopeByOwnerId", key="#ownerId", unless="#result.size() == 0")
+    @Override
+    public List<AssignedScope> findAssignedScopeByOwnerId(Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhForumPosts.class, ownerId));
+        List<AssignedScope> scopeList = context.select().from(Tables.EH_FORUM_ASSIGNED_SCOPES)
+            .where(Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(ownerId))
+            .fetch().map((r) -> {
+                return ConvertHelper.convert(r, AssignedScope.class);
+            });
+        
+        return scopeList;
+    }
+    
+    @Caching(evict={@CacheEvict(value="AssignedScopeById", key="#scope.id"),
+        @CacheEvict(value="AssignedScopeByOwnerId", key="#scope.ownerId")})
+    @Override
+    public void deleteAssignedScope(AssignedScope scope) {
+        assert(scope.getId() != null);
+        assert(scope.getOwnerId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, scope.getOwnerId()));
+        EhForumAssignedScopesDao dao = new EhForumAssignedScopesDao(context.configuration());
+        dao.delete(scope);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumAssignedScopes.class, scope.getId());
+    }
+    
+    @Override
+    public void deleteAssignedScopeById(Long id) {
+        ForumProvider forumProvider = PlatformContext.getComponent(ForumProvider.class);
+        
+        AssignedScope scope = forumProvider.findAssignedScopeById(id);
+        if(scope != null) {
+            forumProvider.deleteAssignedScope(scope);
+        }
+    }
+ }
