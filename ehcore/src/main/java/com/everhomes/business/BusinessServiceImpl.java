@@ -981,6 +981,9 @@ public class BusinessServiceImpl implements BusinessService {
         
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         cmd.getItemScopes().forEach((itemScope) ->{
+            //先删除用户自定义的
+            this.launchPadProvider.deleteLaunchPadItemByScopeAndTargetId(itemScope.getScopeCode(), itemScope.getScopeId()
+                    ,ItemTargetType.BIZ.getCode(),cmd.getId());
             LaunchPadItem item = new LaunchPadItem();
             item.setAppId(0L);
             item.setItemName(StringUtils.upperCase(business.getName()));
@@ -996,7 +999,7 @@ public class BusinessServiceImpl implements BusinessService {
             item.setScopeCode(itemScope.getScopeCode());
             item.setScopeId(itemScope.getScopeId());
             item.setDefaultOrder(0);
-            item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+            item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
             item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
             item.setBgcolor(0);
             item.setTargetType(ItemTargetType.BIZ.getCode());

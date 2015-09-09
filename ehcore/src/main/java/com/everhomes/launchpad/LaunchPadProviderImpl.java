@@ -267,5 +267,18 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
     }
 
+    @Override
+    public void deleteLaunchPadItemByScopeAndTargetId(Byte scopeCode,Long scopeId,String targetType, long targetId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
+        if(scopeCode != null){
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
+            if(scopeId != null)
+                condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+        }
+        context.delete(Tables.EH_LAUNCH_PAD_ITEMS).where(condition).execute();
+        
+    }
 
 }
