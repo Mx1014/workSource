@@ -978,10 +978,12 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid item scopes paramter.");
         }
-        
+        //先删除用户自定义的
+        this.launchPadProvider.deleteLaunchPadItemByScopeAndTargetId(ScopeType.USER.getCode(), null
+                ,ItemTargetType.BIZ.getCode(),cmd.getId());
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         cmd.getItemScopes().forEach((itemScope) ->{
-            //先删除用户自定义的
+            //重复推荐，先删除
             this.launchPadProvider.deleteLaunchPadItemByScopeAndTargetId(itemScope.getScopeCode(), itemScope.getScopeId()
                     ,ItemTargetType.BIZ.getCode(),cmd.getId());
             LaunchPadItem item = new LaunchPadItem();
