@@ -70,7 +70,7 @@ fi
 
 mysql --user=ehcore --password=ehcore < ehcore-init-data.sql
 if [ $? -ne 0 ]; then
-  printf "Error: Cannot execute ehcore-server-schema.sql\n"
+  printf "Error: Cannot execute ehcore-init-data.sql\n"
   exit 7
 fi
 
