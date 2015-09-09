@@ -268,6 +268,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems.addAll(adminItems);
         }
         try{ 
+            List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
             final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
             final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
@@ -288,9 +289,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                     }
                 }else
                     itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
-                result.add(itemDTO);
+                distinctDto.add(itemDTO);
                
             });
+            if(distinctDto != null && !distinctDto.isEmpty()){
+                distinctDto.forEach(r ->{
+                    if(!result.contains(r)){
+                        result.add(r);
+                    }
+                });
+            }
             if(result != null && !result.isEmpty())
                 sortLaunchPadItems(result);
             
