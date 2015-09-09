@@ -17,7 +17,7 @@ import com.google.gson.JsonObject;
 public class GroupLayout {
     private String groupName;
     private String widget;
-    private JsonObject instanceConfig;
+    private String instanceConfig;
     private String style;
     private Integer defaultOrder;
     private Integer separatorFlag;
@@ -54,10 +54,11 @@ public class GroupLayout {
     public void setSeparatorFlag(Integer separatorFlag) {
         this.separatorFlag = separatorFlag;
     }
-    public JsonObject getInstanceConfig() {
+
+    public String getInstanceConfig() {
         return instanceConfig;
     }
-    public void setInstanceConfig(JsonObject instanceConfig) {
+    public void setInstanceConfig(String instanceConfig) {
         this.instanceConfig = instanceConfig;
     }
     public Double getSeparatorHeight() {

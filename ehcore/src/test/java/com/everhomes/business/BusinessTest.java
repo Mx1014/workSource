@@ -121,10 +121,10 @@ public class BusinessTest extends CoreServerTestCase {
     @Test
     public void testPromoteBusiness(){
         PromoteBusinessAdminCommand cmd = new PromoteBusinessAdminCommand();
-        cmd.setId(2L);
+        cmd.setId(33L);
         ItemScope scope = new ItemScope();
-        scope.setScopeId(8L);
-        scope.setScopeCode((byte)1);
+        scope.setScopeId(0L);
+        scope.setScopeCode((byte)0);
         List<ItemScope> scopes = new ArrayList<>();
         scopes.add(scope);
         cmd.setItemScopes(scopes);
