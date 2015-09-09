@@ -1,0 +1,72 @@
+package server
+
+import (
+	"fmt"
+
+	"github.com/bradfitz/gomemcache/memcache"
+)
+
+//TODO use a long connection or connection poll ?
+//https://groups.google.com/forum/#!topic/golang-nuts/fugquVLZh4Q
+//https://github.com/youtube/vitess/blob/master/go/memcache/memcache.go
+//"github.com/bradfitz/gomemcache/memcache"
+//"gopkgs.com/memcache.v2"
+type ServerCache struct {
+	host string
+	port int
+
+	//Not long connection version
+	client *memcache.Client
+}
+
+func NewCache(h string, p int) *ServerCache {
+	cacheAddr := fmt.Sprintf("%s:%d", h, p)
+	c := memcache.New(cacheAddr)
+	return &ServerCache{client: c, host: h, port: p}
+}
+
+func (scache *ServerCache) ReTry() {
+	cacheAddr := fmt.Sprintf("%s:%d", scache.host, scache.port)
+	c := memcache.New(cacheAddr)
+	scache.client = c
+}
+
+func (scache *ServerCache) FindCache(key string) (string, error) {
+	it, err := scache.client.Get(key)
+	if err != nil {
+		return "", err
+	}
+	return string(it.Value), nil
+}
+
+func (scache *ServerCache) SetCache(k string, v string) error {
+	it := &memcache.Item{Key: k, Value: []byte(v)}
+	return scache.client.Set(it)
+}
+
+func (scache *ServerCache) Exist(key string) bool {
+	_, err := scache.FindCache(key)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (scache *ServerCache) FindCacheBin(key string) ([]byte, error) {
+	it, err := scache.client.Get(key)
+	if err != nil {
+		return nil, err
+	} else {
+		return it.Value, nil
+	}
+
+}
+
+func (scache *ServerCache) SetCacheBin(k string, v []byte) error {
+	it := &memcache.Item{Key: k, Value: v}
+	return scache.client.Set(it)
+}
+
+func (scache *ServerCache) DelCache(key string) error {
+	return scache.client.Delete(key)
+}

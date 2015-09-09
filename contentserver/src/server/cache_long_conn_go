@@ -1,0 +1,127 @@
+package server
+
+import (
+	"fmt"
+	"time"
+)
+
+//TODO use a long connection or connection poll ?
+//https://groups.google.com/forum/#!topic/golang-nuts/fugquVLZh4Q
+//https://github.com/youtube/vitess/blob/master/go/memcache/memcache.go
+//"github.com/bradfitz/gomemcache/memcache"
+//"gopkgs.com/memcache.v2"
+type ServerCache struct {
+	host string
+	port int
+
+	client *CacheClient
+}
+
+const (
+	NotFoundError   = "Not found"
+	SetItemError    = "Set item error"
+	NotConnectError = "Not connect"
+)
+
+func NewCache(h string, p int) *ServerCache {
+	cacheAddr := fmt.Sprintf("%s:%d", h, p)
+	c, _ := CacheConnect(cacheAddr, time.Duration(10*time.Second))
+	return &ServerCache{client: c, host: h, port: p}
+}
+
+func (scache *ServerCache) ReTry() bool {
+	cacheAddr := fmt.Sprintf("%s:%d", scache.host, scache.port)
+	if scache.client != nil {
+		scache.client.Close()
+	}
+	c, _ := CacheConnect(cacheAddr, time.Duration(10*time.Second))
+	scache.client = c
+	return (c != nil)
+}
+
+func (scache *ServerCache) FindCache(key string) (string, error) {
+	if scache.client == nil {
+		if !scache.ReTry() {
+			return "", fmt.Errorf(NotConnectError)
+		}
+	}
+	it, err := scache.client.Get(key)
+	if err != nil {
+		//retry for next time
+		scache.ReTry()
+		return "", err
+	}
+	if len(it) != 1 {
+		return "", fmt.Errorf(NotFoundError)
+	}
+	return string(it[0].Value), nil
+}
+
+func (scache *ServerCache) SetCache(k string, v string) error {
+	if scache.client == nil {
+		if !scache.ReTry() {
+			return fmt.Errorf(NotConnectError)
+		}
+	}
+	ok, err := scache.client.Set(k, 0, 0, []byte(v))
+	if err != nil {
+		scache.ReTry()
+		return err
+	}
+	if !ok {
+		return fmt.Errorf(SetItemError)
+	}
+	return nil
+}
+
+func (scache *ServerCache) Exist(key string) bool {
+	_, err := scache.FindCache(key)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (scache *ServerCache) FindCacheBin(key string) ([]byte, error) {
+	if scache.client == nil {
+		if !scache.ReTry() {
+			return nil, fmt.Errorf(NotConnectError)
+		}
+	}
+	it, err := scache.client.Get(key)
+	if err != nil {
+		println(err.Error())
+		scache.ReTry()
+		return nil, err
+	}
+	if len(it) != 1 {
+		return nil, fmt.Errorf(NotFoundError)
+	}
+	return it[0].Value, nil
+}
+
+func (scache *ServerCache) SetCacheBin(k string, v []byte) error {
+	if scache.client == nil {
+		if !scache.ReTry() {
+			return fmt.Errorf(NotConnectError)
+		}
+	}
+	ok, err := scache.client.Set(k, 0, 0, v)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf(SetItemError)
+	}
+	return nil
+}
+
+func (scache *ServerCache) DelCache(key string) error {
+	if scache.client == nil {
+		if !scache.ReTry() {
+			return fmt.Errorf(NotConnectError)
+		}
+	}
+	_, err := scache.client.Delete(key)
+	return err
+}

@@ -1,0 +1,72 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"runtime"
+
+	"git.lab.everhomes.com/eh-dev/contentserver/src/server"
+	_ "github.com/takama/daemon"
+)
+
+var cfgFile string
+
+func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	configPtr := flag.String("config", "", "config file")
+	flag.Usage = usage
+	flag.Parse()
+
+	if *configPtr == "" {
+		*configPtr = "./conf/config.ini"
+	}
+
+	cfgFile = *configPtr
+
+	isExist, _ := exists(cfgFile)
+	if !isExist {
+		log.Fatal("config file not exist!")
+		os.Exit(-1)
+	}
+
+	//TODO for daemon
+	//service, err := daemon.New("contentserver", "content server for saving file quickly")
+	//if err != nil {
+	//	log.Fatal("Error: ", err)
+	//	os.Exit(-2)
+	//}
+
+	//status, err := service.Install()
+	//if err != nil {
+	//	log.Fatal(status, "\nError: ", err)
+	//	os.Exit(-3)
+	//}
+
+	serverContext, err := server.NewContext(cfgFile)
+	if err != nil {
+		log.Fatal("Error: ", err)
+		os.Exit(-4)
+	}
+	defer serverContext.Release()
+
+	server.StartServer(serverContext)
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage:--config=/etc/config.ini \n")
+	flag.PrintDefaults()
+	os.Exit(-2)
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}

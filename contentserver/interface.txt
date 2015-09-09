@@ -1,0 +1,42 @@
+创建对象：
+/object/create/{md5}
+md5: 对整个文件的md5运算
+post信息：
+ObjectInfo {
+	Md5       string            `json:"md5"`
+	ObjId     string            `json:objId`
+	ObjType   string            `json:"objType"`
+	Url       string            `json:"url"`
+	Format    string            `json:"format"`
+	ChunkSize int               `json:"chunkSize"`
+	TotalSize int               `json:"totalSize"`
+	Token     string            `json:"token"`
+	Meta      map[string]string `json:"meta"`
+}
+
+
+分块上传：
+/object/chunk/{md5}/{index}
+md5: 整个文件的md5运算
+index: 块的编号
+
+图像获取：
+
+原始图像：
+/image/{id} 
+id:文件上传成功返回的id
+
+基于url parameters转换图像：
+/image/{id}?x=-1&y=-1&w=800&h=800&f=webp
+x(y)：-1表示按比例缩略，>=0 表示裁剪的起始位置
+w(h): 宽（高）
+f:输出图片的格式
+r:旋转的角度
+
+基于配置的图片获取：
+/image/{id}/{config}
+
+语音获取：
+/audio/{id}.{ext}
+ext: 语音格式。目前支持m4a mp3
+
