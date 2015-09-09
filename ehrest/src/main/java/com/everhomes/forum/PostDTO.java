@@ -45,7 +45,9 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.forum.AttachmentDTO}</li>
  * <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostAssignedFlag}</li>
  * <li>likeFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostLikeFlag}</li>
+ * <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.forum.PostFavoriteFlag}</li>
  * <li>shareUrl: 分享链接</li>
+ * <li>floorNumber: 楼层（仅用于评论）</li>
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.forum.PostPrivacy}</li>
  * </ul>
  */
@@ -124,9 +126,13 @@ public class PostDTO {
     
     private Byte likeFlag;
     
+    private Byte favoriteFlag;
+    
     private String shareUrl;
     
     private Byte privateFlag;
+    
+    private Long floorNumber;
 
 	public Long getId() {
         return id;
@@ -416,6 +422,14 @@ public class PostDTO {
         this.likeFlag = likeFlag;
     }
 
+    public Byte getFavoriteFlag() {
+        return favoriteFlag;
+    }
+
+    public void setFavoriteFlag(Byte favoriteFlag) {
+        this.favoriteFlag = favoriteFlag;
+    }
+
     public String getShareUrl() {
         return shareUrl;
     }
@@ -430,6 +444,14 @@ public class PostDTO {
 
     public void setPrivateFlag(Byte privateFlag) {
         this.privateFlag = privateFlag;
+    }
+
+    public Long getFloorNumber() {
+        return floorNumber;
+    }
+
+    public void setFloorNumber(Long floorNumber) {
+        this.floorNumber = floorNumber;
     }
 
     @Override
