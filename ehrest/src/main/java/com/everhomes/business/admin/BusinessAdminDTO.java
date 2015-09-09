@@ -68,6 +68,8 @@ public class BusinessAdminDTO{
     private List<BusinessAssignedScopeDTO> assignedScopes;
     private Byte scaleType;
     private Byte promoteFlag;
+    
+    @ItemType(BusinessPromoteScopeDTO.class)
     private List<BusinessPromoteScopeDTO> promoteScopes;
     
     public Long getId() {

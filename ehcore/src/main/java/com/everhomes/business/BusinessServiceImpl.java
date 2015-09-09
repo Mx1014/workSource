@@ -795,11 +795,18 @@ public class BusinessServiceImpl implements BusinessService {
         isValiad(cmd);
         User user = userProvider.findUserById(cmd.getUserId());
         Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-        List<Long> ret = userActivityProvider.findFavorite(user.getId()).stream()
-                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
-        if(ret != null && !ret.isEmpty()&& ret.contains(business.getId())){
+        List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+                business.getId(), ScopeType.USER.getCode(), user.getId());
+        if(userItems != null && !userItems.isEmpty()){
             return BusinessFavoriteStatus.FAVORITE.getCode();
         }
+//        List<Long> ret = userActivityProvider.findFavorite(user.getId()).stream()
+//                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
+//        if(ret != null && !ret.isEmpty()&& ret.contains(business.getId())){
+//            return BusinessFavoriteStatus.FAVORITE.getCode();
+//        }else{
+//            
+//        }
         return BusinessFavoriteStatus.NONE.getCode();
     }
 

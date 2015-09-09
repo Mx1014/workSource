@@ -3,6 +3,7 @@ package com.everhomes.activity;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * 
@@ -41,6 +42,8 @@ public class ActivityMemberDTO {
     private Integer creatorFlag;
     private Integer lotteryWinnerFlag;
     private String lotteryWonTime;
+    
+    @ItemType(String.class)
     private List<String> phone;
     
     public List<String> getPhone() {
