@@ -95,7 +95,7 @@ public class DoorVenderController extends ControllerBase {
             
             Map<String, String> meta = new HashMap<String, String>();
             meta.put("actionType", Byte.toString(ActionType.OPEN_DOOR.getCode()));
-            meta.put("actionData", "{}");
+            meta.put("actionData", "{\"remote\": 1, \"vender\":1}");
             sendMessageToUser(u, "Open door", meta);
             rsp.getPhoneStatus().add(new PhoneStatus(phone, "OK"));
         }
