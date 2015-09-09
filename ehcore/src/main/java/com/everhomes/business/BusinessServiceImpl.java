@@ -822,29 +822,71 @@ public class BusinessServiceImpl implements BusinessService {
             throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
                     "Business is not exists.");
         }
-        List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
-        LaunchPadItem item = new LaunchPadItem();
-        item.setAppId(0L);
-        item.setItemName(StringUtils.upperCase(business.getName()));
-        item.setItemLabel(business.getDisplayName());
-        item.setActionType(ActionType.THIRDPART_URL.getCode());
-        item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
-        item.setItemGroup(LaunchPadConstants.GROUP_BIZS);
-        item.setItemLocation(LaunchPadConstants.ITEM_LOCATION);
-        item.setIconUri(business.getLogoUri());
-        item.setItemWidth(1);
-        item.setItemHeight(1);
-        item.setNamespaceId(0);
-        item.setScopeCode(ScopeType.USER.getCode());
-        item.setScopeId(userId);
-        item.setDefaultOrder(0);
-        item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
-        item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
-        item.setBgcolor(0);
-        item.setTargetType(ItemTargetType.BIZ.getCode());
-        item.setTargetId(businessId);
-        items.add(item);
-        this.launchPadProvider.createLaunchPadItems(items);
+        List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId);
+        LaunchPadItem item = null;
+        if(list != null && list.size() > 0){
+              item = list.get(0);
+        }
+        //List<LaunchPadItem> bizItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, null, 0);
+        boolean flag = isExistsUnUserItem(businessId);
+        if(item != null){
+            if(flag){
+                item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+            }else{
+                item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+            }
+            item.setScopeId(userId);
+            item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+            this.launchPadProvider.updateLaunchPadItem(item);
+            
+        }else{
+            List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+            item = new LaunchPadItem();
+            item.setAppId(0L);
+            item.setItemName(StringUtils.upperCase(business.getName()));
+            item.setItemLabel(business.getDisplayName());
+            item.setActionType(ActionType.THIRDPART_URL.getCode());
+            item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+            item.setItemGroup(LaunchPadConstants.GROUP_BIZS);
+            item.setItemLocation(LaunchPadConstants.ITEM_LOCATION);
+            item.setIconUri(business.getLogoUri());
+            item.setItemWidth(1);
+            item.setItemHeight(1);
+            item.setNamespaceId(0);
+            item.setScopeCode(ScopeType.USER.getCode());
+            item.setScopeId(userId);
+            item.setDefaultOrder(0);
+            item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+            item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
+            item.setBgcolor(0);
+            item.setTargetType(ItemTargetType.BIZ.getCode());
+            item.setTargetId(businessId);
+            if(flag)
+                item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+            items.add(item);
+            this.launchPadProvider.createLaunchPadItems(items);
+        }
+    }
+    
+    private boolean isExistsUnUserItem(long businessId){
+        List<LaunchPadItem> result = getUnUserItems(businessId);
+        if(result != null && !result.isEmpty())
+            return true;
+        return false;
+    }
+    
+    private List<LaunchPadItem> getUnUserItems(long businessId){
+        List<LaunchPadItem> result = new ArrayList<LaunchPadItem>();
+        List<LaunchPadItem> countyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.ALL.getCode(), 0);
+        List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.CITY.getCode(), 0);
+        List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.COMMUNITY.getCode(), 0);
+        if(countyItems != null && !countyItems.isEmpty())
+            result.addAll(countyItems);
+        if(cityItems != null && !cityItems.isEmpty())
+            result.addAll(cityItems);
+        if(cmmtyItems != null && !cmmtyItems.isEmpty())
+            result.addAll(cmmtyItems);
+       return result;
     }
     
 
@@ -871,21 +913,53 @@ public class BusinessServiceImpl implements BusinessService {
         if(list != null && list.size() > 0){
               item = list.get(0);
         }
-        //如果是用户自定义的直接删除,否则增加用户自定义项，并将displayFlag设为不可见
+       
         if(item != null){
-            this.launchPadProvider.deleteLaunchPadItem(item);
-        }
-        else{
-            List<LaunchPadItem> bizItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, null, 0);
-            if(bizItems != null && bizItems.size() > 0){
-                  item = bizItems.get(0);
+            //存在非用户可见的item,则修改为 覆盖且不可见,否则直接删除
+            if(isExistsUnUserItem(businessId)){
+                item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+                item.setScopeId(userId);
+                item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+                item.setScopeCode(ScopeType.USER.getCode());
+                this.launchPadProvider.updateLaunchPadItem(item);
+            }else{
+                this.launchPadProvider.deleteLaunchPadItem(item);
             }
-            item.setId(0L);
-            item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
-            item.setScopeId(userId);
-            item.setScopeCode(ScopeType.USER.getCode());
-            this.launchPadProvider.createLaunchPadItem(item);
+        }else{
+            List<LaunchPadItem> bizItems = getUnUserItems(businessId);
+            if(bizItems != null && !bizItems.isEmpty()){
+                 item = bizItems.get(0);
+                 item.setId(0L);
+                 item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+                 item.setScopeId(userId);
+                 item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+                 item.setScopeCode(ScopeType.USER.getCode());
+                 this.launchPadProvider.createLaunchPadItem(item);
+            }
         }
+        //如果是用户自定义的直接删除,否则增加用户自定义项，并将displayFlag设为不可见
+//        if(item != null && (bizItems == null || bizItems.size() == 0)){
+//            this.launchPadProvider.deleteLaunchPadItem(item);
+//        }
+//        else{
+//            if(item != null){
+//                item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+//                item.setScopeId(userId);
+//                item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+//                item.setScopeCode(ScopeType.USER.getCode());
+//                this.launchPadProvider.updateLaunchPadItem(item);
+//                return;
+//            }
+//            if(bizItems != null && bizItems.size() > 0){
+//                  item = bizItems.get(0);
+//            }
+//            item.setId(0L);
+//            item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+//            item.setScopeId(userId);
+//            item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+//            item.setScopeCode(ScopeType.USER.getCode());
+//            this.launchPadProvider.createLaunchPadItem(item);
+//        }
     }
 
     @Override

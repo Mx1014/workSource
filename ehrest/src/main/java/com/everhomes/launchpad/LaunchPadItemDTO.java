@@ -234,12 +234,12 @@ public class LaunchPadItemDTO {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this,new String[]{"id","scopeType","scopeId","applyPolicy"} );
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj,new String[]{"id","scopeType","scopeId","applyPolicy"});
     }
 
     @Override
