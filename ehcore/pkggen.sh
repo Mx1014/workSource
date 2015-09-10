@@ -9,17 +9,16 @@ cd target/genpkg/ehcore
 war=`ls ../../*.war|sed -n 1p`
 jar -xf $war
 
-find . -name "*.jar" > z.list
+find . -name "*.jar"|grep -v "./WEB-INF/lib/eh"|sort > z.list
 cat z.list|xargs -i md5sum {}|sort >> checksumjars
-echo "expected b6081ee01739846ec864d345179f7519"
+echo "5458104ed4981a9722f58f439a988eaf  expected"
 md5sum checksumjars
 tar -T z.list -czf jar.tar.gz
-sleep 1
 
-rm -f z.list
 mv checksumjars ../../../output
 rm -rf static/apidocs
-find . -name "*.jar"|xargs rm -f
+cat z.list|xargs rm -f
+rm -f z.list
 mv jar.tar.gz ../../../output
 
 cd ..
