@@ -10,8 +10,8 @@ war=`ls ../../*.war|sed -n 1p`
 jar -xf $war
 
 find . -name "*.jar" > z.list
-cat z.list|xargs -i md5sum {} >> checksumjars
-echo "expected 05b42f2cc55f05098deada0dc14b2008"
+cat z.list|xargs -i md5sum {}|sort >> checksumjars
+echo "expected b6081ee01739846ec864d345179f7519"
 md5sum checksumjars
 tar -T z.list -czf jar.tar.gz
 sleep 1
