@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -15,7 +17,10 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Forum controller", site="forum")
 @RestController
@@ -27,6 +32,9 @@ public class ForumController extends ControllerBase {
     
     @Autowired
     PostSearcher postSearcher;
+    
+    @Autowired
+    private AclProvider aclProvider;
     
     @Autowired
     private SearchSyncManager searchSyncManager;
@@ -315,6 +323,12 @@ public class ForumController extends ControllerBase {
     @RequestMapping("syncTest")
     @RestReturn(value=String.class)
     public RestResponse syncTest() {
+        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(), 
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+            }
+        
         searchSyncManager.SyncDb(SearchSyncType.POST);
         
         RestResponse response = new RestResponse();
