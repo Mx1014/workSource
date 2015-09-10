@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.AddressDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
@@ -197,4 +198,20 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /openapi/getUserServiceAddress</b>
+     * <p>获取用户相关的服务地址</p>
+     */
+    @RequestMapping("getUserServiceAddress")
+    @RestReturn(value=UserServiceAddressDTO.class, collection=true)
+    public RestResponse getUserServiceAddress(GetUserServiceAddressCommand cmd) {
+        List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(cmd);
+        
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

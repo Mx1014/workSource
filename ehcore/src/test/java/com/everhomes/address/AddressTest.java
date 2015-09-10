@@ -17,8 +17,11 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.openapi.GetUserServiceAddressCommand;
+import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
@@ -29,7 +32,8 @@ public class AddressTest extends CoreServerTestCase {
     
     @Autowired
     private AddressService addressService;
-    
+    @Autowired
+    private UserActivityService userActivityService;
     @Autowired
     private CommunityProvider communityProvider;
     
@@ -301,18 +305,20 @@ public class AddressTest extends CoreServerTestCase {
         System.out.println(addressDTO);
     }
     
-//    @Test
-//    public void testUserRelateServiceAddress(){
-//        User user = new User();
-//        user.setId(10021L);
-//        UserContext.current().setUser(user);
-//        List<AddressDTO> addresses = addressService.getUserRelateServiceAddress();
-//        if(addresses != null){
-//            addresses.forEach(r ->{
-//                System.out.println(r);
-//            });
-//        }
-//    }
+    @Test
+    public void testUserRelateServiceAddress(){
+        User user = new User();
+        user.setId(152719L);
+        UserContext.current().setUser(user);
+        GetUserServiceAddressCommand cmd = new GetUserServiceAddressCommand();
+        cmd.setUserId(152719L);
+        List<UserServiceAddressDTO> addresses = userActivityService.getUserServiceAddress(cmd);
+        if(addresses != null){
+            addresses.forEach(r ->{
+                System.out.println(r);
+            });
+        }
+    }
     
     @Test
     public void testCountWaitFamily(){

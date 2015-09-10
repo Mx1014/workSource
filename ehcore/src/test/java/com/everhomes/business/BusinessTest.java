@@ -37,7 +37,7 @@ public class BusinessTest extends CoreServerTestCase {
         SyncBusinessCommand cmd = new SyncBusinessCommand();
         cmd.setUserId(152719L);;
         cmd.setAddress("深圳");
-        cmd.setBizOwnerUid(1001l);
+        cmd.setBizOwnerUid(152719L);
         List<Long> categroies = new ArrayList<Long>();
         categroies.add(3001L);
         //categroies.add(3002L);
@@ -113,7 +113,7 @@ public class BusinessTest extends CoreServerTestCase {
     @Test
     public void testDeleteBusiness(){
         SyncDeleteBusinessCommand cmd = new SyncDeleteBusinessCommand();
-        cmd.setId(String.valueOf("1002"));
+        cmd.setId(String.valueOf("14417668830919345118"));
         cmd.setUserId(152719L);
         businessService.syncDeleteBusiness(cmd);
     }
@@ -121,12 +121,17 @@ public class BusinessTest extends CoreServerTestCase {
     @Test
     public void testPromoteBusiness(){
         PromoteBusinessAdminCommand cmd = new PromoteBusinessAdminCommand();
-        cmd.setId(33L);
+        cmd.setId(34L);
         ItemScope scope = new ItemScope();
-        scope.setScopeId(0L);
+        scope.setScopeId(510635L);
         scope.setScopeCode((byte)0);
         List<ItemScope> scopes = new ArrayList<>();
         scopes.add(scope);
+        
+        ItemScope scope1 = new ItemScope();
+        scope1.setScopeId(510636L);
+        scope1.setScopeCode((byte)0);
+        scopes.add(scope1);
         cmd.setItemScopes(scopes);
         businessService.promoteBusiness(cmd);
     }
