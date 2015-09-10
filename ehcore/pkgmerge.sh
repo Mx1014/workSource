@@ -1,12 +1,14 @@
 #!/bin/sh
 
+rm -rf merge
 mkdir merge
 cd merge
 OUT=ehcore-0.0.1-SNAPSHOT.war
 
-tar -zvf ../output/ehcore.tar.gz
+tar -zxf ../output/ehcore.tar.gz
 cd ehcore
-tar -zvf ../../output/jar.tar.gz
+tar -zxf ../../output/jar.tar.gz
 jar -cvfM0 $OUT ./
 mv $OUT ../../output
 cd ../../
+rm -rf merge
