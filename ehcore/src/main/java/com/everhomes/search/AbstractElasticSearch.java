@@ -122,7 +122,9 @@ public abstract class AbstractElasticSearch {
         // http://www.elasticsearch.com/docs/elasticsearch/rest_api/admin/indices/delete_index/
 
         getClient().prepareDeleteByQuery(getIndexName())
-                .setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
+                .setQuery(QueryBuilders.matchAllQuery())
+                .setTypes(getIndexType())
+                .execute().actionGet();
         refresh();
     }
 
