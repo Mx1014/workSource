@@ -317,6 +317,7 @@ public class PollServiceImpl implements PollService {
 
 	@Override
 	public PollDTO showResultBrief(Long postId) {
+		SimpleDateFormat fommat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Poll poll=pollProvider.findByPostId(postId);
         if(poll==null){
             return null;
@@ -329,8 +330,8 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(poll.getStartTime().toString());
-        dto.setStopTime(poll.getEndTime().toString());
+        dto.setStartTime(fommat.format(new Date(poll.getStartTime().getTime())).toString());
+        dto.setStopTime(fommat.format(new Date(poll.getEndTime().getTime())).toString());
         dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
