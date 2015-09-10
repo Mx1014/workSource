@@ -17,7 +17,7 @@ tar -T z.list -czf jar.tar.gz
 sleep 1
 
 rm -f z.list
-rm -f checksumjars
+mv checksumjars ../../../output
 rm -rf static/apidocs
 find . -name "*.jar"|xargs rm -f
 mv jar.tar.gz ../../../output
