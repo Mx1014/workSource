@@ -678,7 +678,8 @@ public class BusinessServiceImpl implements BusinessService {
         if(cmd.getId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter id null,id is null");
-        if(cmd.getScopes() == null){
+        if(cmd.getRecommendStatus().byteValue() == BusinessRecommendStatus.RECOMMEND.getCode()
+                && cmd.getScopes() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid paramter scopes null,scopes is null");
         }
@@ -692,6 +693,7 @@ public class BusinessServiceImpl implements BusinessService {
         
         this.dbProvider.execute((TransactionStatus status) -> {
             this.businessProvider.deleteBusinessAssignedScopeByBusinessId(cmd.getId());
+            
             if(cmd.getRecommendStatus().byteValue() == BusinessRecommendStatus.RECOMMEND.getCode()){
                 cmd.getScopes().forEach(r ->{
                     BusinessAssignedScope scope = ConvertHelper.convert(r,BusinessAssignedScope.class);
