@@ -168,4 +168,34 @@ public class ActivityController extends ControllerBase {
         rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
+    
+    /**
+     * 查询周边活动2.0
+     * @return
+     */
+    @RequestMapping("listNearbyActivitiesV2")
+    @RestReturn(ListNearbyActivitiesResponse.class)
+    public RestResponse listNearbyActivitiesV2(@Valid ListNearByActivitiesCommandV2 cmdV2){
+    	
+        Tuple<Long, List<ActivityDTO>> ret = activityService.listNearByActivitiesV2(cmdV2);
+        ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
+        rsp.setActivities(ret.second());
+        rsp.setNextPageAnchor(ret.first());
+        return new RestResponse(rsp);
+    }
+    
+    /**
+     * 查询同城活动
+     * @return
+     */
+    @RequestMapping("listCityActivities")
+    @RestReturn(ListNearbyActivitiesResponse.class)
+    public RestResponse listCityActivities(@Valid ListNearByActivitiesCommandV2 cmdV2){
+    	
+        Tuple<Long, List<ActivityDTO>> ret = activityService.listCityActivities(cmdV2);
+        ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
+        rsp.setActivities(ret.second());
+        rsp.setNextPageAnchor(ret.first());
+        return new RestResponse(rsp);
+    }
 }

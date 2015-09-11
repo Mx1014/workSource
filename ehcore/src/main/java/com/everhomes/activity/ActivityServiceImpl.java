@@ -27,6 +27,8 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -112,6 +114,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private LocaleStringService localeStringService;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -907,6 +912,111 @@ public class ActivityServiceImpl implements ActivityService {
 		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateActivity(activity);
 		 
+	}
+
+	@Override
+	public  Tuple<Long, List<ActivityDTO>> listNearByActivitiesV2(
+			ListNearByActivitiesCommandV2 cmdV2) {
+		
+		List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmdV2.getCommunity_id());
+		
+		List<String> geoHashCodes = new ArrayList<String>();
+
+		for(CommunityGeoPoint geoPoint : geoPoints){
+			
+			double latitude = geoPoint.getLatitude();
+			double longitude = geoPoint.getLongitude();
+			
+			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+			
+			GeoHash[] adjacents = geo.getAdjacent();
+			geoHashCodes.add(geo.toBase32());
+	        for(GeoHash g : adjacents) {
+	           geoHashCodes.add(g.toBase32());
+	        }
+		}
+
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+		locator.setAnchor(cmdV2.getAnchor());
+		int pageSize=configurationProvider.getIntValue("pagination.page.size", 20);
+		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+			dto.setActivityId(activity.getId());
+			Post post = forumProvider.findPostById(activity.getPostId());
+			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+			dto.setProcessStatus(getStatus(activity).getCode());
+			dto.setFamilyId(activity.getCreatorFamilyId());
+			dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+			dto.setStartTime(activity.getStartTime().toString());
+			dto.setStopTime(activity.getEndTime().toString());
+			dto.setGroupId(activity.getGroupId());
+			dto.setForumId(post.getForumId());
+			return dto;
+       
+		}).collect(Collectors.toList());
+       
+		if(result.size()<pageSize){
+			
+			locator.setAnchor(null);
+		}
+		return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), result);
+	}
+
+	@Override
+	public Tuple<Long, List<ActivityDTO>> listCityActivities(
+			ListNearByActivitiesCommandV2 cmdV2) {
+
+		List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmdV2.getCommunity_id());
+		
+		List<String> geoHashCodes = new ArrayList<String>();
+		
+		for(CommunityGeoPoint geoPoint : geoPoints){
+			
+			double latitude = geoPoint.getLatitude();
+			double longitude = geoPoint.getLongitude();
+			
+			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 4);
+			
+			GeoHash[] adjacents = geo.getAdjacent();
+			geoHashCodes.add(geo.toBase32());
+	        for(GeoHash g : adjacents) {
+	           geoHashCodes.add(g.toBase32());
+	        }
+		}
+	        
+	        
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+		locator.setAnchor(cmdV2.getAnchor());
+		int pageSize=configurationProvider.getIntValue("pagination.page.size", 20);
+		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+			dto.setActivityId(activity.getId());
+			Post post = forumProvider.findPostById(activity.getPostId());
+			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+			dto.setProcessStatus(getStatus(activity).getCode());
+			dto.setFamilyId(activity.getCreatorFamilyId());
+			dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+			dto.setStartTime(activity.getStartTime().toString());
+			dto.setStopTime(activity.getEndTime().toString());
+			dto.setGroupId(activity.getGroupId());
+			dto.setForumId(post.getForumId());
+			return dto;
+       
+		}).collect(Collectors.toList());
+       
+		if(result.size()<pageSize){
+			
+			locator.setAnchor(null);
+		}
+		return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), result);
 	}
 	
 }
