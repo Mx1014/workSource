@@ -64,7 +64,12 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
-            activityService.createPost(cmd, post.getId()); 
+            if(activityService.isPostIdExist(post.getId())){
+            	activityService.updatePost(cmd, post.getId());
+            }
+            else{
+            	activityService.createPost(cmd, post.getId()); 
+            }
         }catch(Exception e){
             LOGGER.error("create activity error",e);
         }

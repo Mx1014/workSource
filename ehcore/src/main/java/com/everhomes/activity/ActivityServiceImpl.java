@@ -888,5 +888,25 @@ public class ActivityServiceImpl implements ActivityService {
        }
         return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), result);
     }
-    
+
+	@Override
+	public boolean isPostIdExist(Long postId) {
+		Activity activity = activityProvider.findSnapshotByPostId(postId);
+		
+		if(activity == null || "".equals(activity))
+			return false;
+		
+		return true;
+	}
+
+	@Override
+	public void updatePost(ActivityPostCommand cmd, Long postId) {
+		Activity activity = activityProvider.findSnapshotByPostId(postId);
+		 
+		activity.setStatus((byte)0);
+		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		activityProvider.updateActivity(activity);
+		 
+	}
+	
 }

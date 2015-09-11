@@ -282,6 +282,9 @@ public class ForumServiceImpl implements ForumService {
         checkForumParameter(userId, forumId, "getTopic");
         
         Post post = checkPostParameter(userId, forumId, postId, "deletePost");
+        Long embededAppId = post.getEmbeddedAppId();
+        ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
+        
         if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
             post.setStatus(PostStatus.INACTIVE.getCode());
             post.setDeleterUid(userId);
@@ -293,6 +296,9 @@ public class ForumServiceImpl implements ForumService {
                 });
                 
                 this.postSearcher.deleteById(post.getId());
+                if(handler != null) {
+                    handler.postProcessEmbeddedObject(post);
+                } 
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
