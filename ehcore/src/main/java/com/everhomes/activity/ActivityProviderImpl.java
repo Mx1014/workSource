@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -303,6 +304,8 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition1,Operator op,Condition... conditions) {
         List<Activity> activities=new ArrayList<Activity>();
+        List<Activity> overdue =new ArrayList<Activity>();
+        Timestamp now = new Timestamp(System.currentTimeMillis());
         if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
@@ -329,10 +332,15 @@ public class ActivityProviderImpl implements ActivityProivider {
             query.addLimit(count - activities.size());
 
             query.fetch().map((r) -> {
-                activities.add(ConvertHelper.convert(r, Activity.class));
+            	if(r.getEndTime().after(now)){
+            		activities.add(ConvertHelper.convert(r, Activity.class));
+            	}
+            	else
+            		overdue.add(ConvertHelper.convert(r, Activity.class));
                 return null;
             });
 
+            activities.addAll(overdue);
             if (activities.size() >= count) {
                 locator.setAnchor(activities.get(activities.size() - 1).getId());
                 return AfterAction.done;
