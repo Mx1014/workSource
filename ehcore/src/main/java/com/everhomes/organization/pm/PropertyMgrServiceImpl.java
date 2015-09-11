@@ -2985,6 +2985,44 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			LOGGER.error("before lock.order="+order.toString());
 		}
 		if(order.getStatus().byteValue() == OrganizationOrderStatus.WAITING_FOR_PAY.getCode()){
+			String uuidStr = UUID.randomUUID().toString();
+			//pre-set-parameter-familyTx
+			FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
+			familyTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
+			familyTx.setChargeAmount(payAmount.negate());
+			familyTx.setCreateTime(payTimeStamp);
+			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+				familyTx.setDescription(cmd.getDescription());
+			familyTx.setOperatorUid(0L);
+			familyTx.setOwnerId(bill.getEntityId());
+			familyTx.setPaidType(PaidType.SELFPAY.getCode());
+			familyTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
+			//familyTx.setResultCodeScope("test");
+			familyTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
+			familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
+			familyTx.setTxSequence(uuidStr);
+			familyTx.setTxType(TxType.ONLINE.getCode());
+			familyTx.setVendor(cmd.getVendorType());
+			familyTx.setPayAccount(cmd.getPayAccount());
+			//pre-set-parameter-orgTx
+			OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
+			orgTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
+			orgTx.setChargeAmount(payAmount);
+			orgTx.setCreateTime(payTimeStamp);
+			if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
+				orgTx.setDescription(cmd.getDescription());
+			orgTx.setOperatorUid(0L);
+			orgTx.setOwnerId(bill.getOrganizationId());
+			orgTx.setPaidType(PaidType.SELFPAY.getCode());
+			orgTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
+			//orgTx.setResultCodeScope("test");
+			orgTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
+			orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
+			orgTx.setTxSequence(uuidStr);
+			orgTx.setTxType(TxType.ONLINE.getCode());
+			orgTx.setVendor(cmd.getVendorType());
+			orgTx.setPayAccount(cmd.getPayAccount());
+			
 			Tuple<OrganizationOrder, Boolean> result = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PM_ORDER.getCode()).enter(() -> {
 				long lqStartTime = System.currentTimeMillis();
 				OrganizationOrder order2 = this.organizationProvider.findOrganizationOrderById(orderId);
@@ -3001,53 +3039,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						order2.setAmount(payAmount);
 						this.updateOrderStatus(order2,0L,payTimeStamp,OrganizationOrderStatus.PAID.getCode());
 
-						FamilyBillingAccount fAccount = this.findOrNewFBillAcount(bill.getEntityId(),currentTimestamp);
-						OrganizationBillingAccount oAccount = this.findOrNewOBillAccount(bill.getOrganizationId(),currentTimestamp);
-
-						String uuidStr = UUID.randomUUID().toString();
-
-						FamilyBillingTransactions familyTx = new FamilyBillingTransactions();
+						FamilyBillingAccount fAccount = this.findOrNewFBillAcountNoLock(bill.getEntityId(),currentTimestamp);
+						OrganizationBillingAccount oAccount = this.findOrNewOBillAccountNoLock(bill.getOrganizationId(),currentTimestamp);
+						
 						familyTx.setOrderId(order2.getId());
-						familyTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
-						familyTx.setChargeAmount(payAmount.negate());
-						familyTx.setCreateTime(payTimeStamp);
-						if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-							familyTx.setDescription(cmd.getDescription());
-						familyTx.setOperatorUid(0L);
 						familyTx.setOwnerAccountId(fAccount.getId());
-						familyTx.setOwnerId(bill.getEntityId());
-						familyTx.setPaidType(PaidType.SELFPAY.getCode());
-						familyTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
-						//familyTx.setResultCodeScope("test");
-						familyTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
 						familyTx.setTargetAccountId(oAccount.getId());
-						familyTx.setTargetAccountType(AccountType.ORGANIZATION.getCode());
-						familyTx.setTxSequence(uuidStr);
-						familyTx.setTxType(TxType.ONLINE.getCode());
-						familyTx.setVendor(cmd.getVendorType());
-						familyTx.setPayAccount(cmd.getPayAccount());
 						this.familyProvider.createFamilyBillingTransaction(familyTx);
 
-						OrganizationBillingTransactions orgTx = new OrganizationBillingTransactions();
 						orgTx.setOrderId(order2.getId());
-						orgTx.setOrderType(OrganizationOrderType.ORGANIZATION_ORDERS.getCode());
-						orgTx.setChargeAmount(payAmount);
-						orgTx.setCreateTime(payTimeStamp);
-						if(cmd.getDescription() != null && !cmd.getDescription().isEmpty())
-							orgTx.setDescription(cmd.getDescription());
-						orgTx.setOperatorUid(0L);
 						orgTx.setOwnerAccountId(oAccount.getId());
-						orgTx.setOwnerId(bill.getOrganizationId());
-						orgTx.setPaidType(PaidType.SELFPAY.getCode());
-						orgTx.setResultCodeId(BillTransactionResult.SUCCESS.getCode());
-						//orgTx.setResultCodeScope("test");
-						orgTx.setResultDesc(BillTransactionResult.SUCCESS.getDescription());
 						orgTx.setTargetAccountId(fAccount.getId());
-						orgTx.setTargetAccountType(AccountType.FAMILY.getCode());
-						orgTx.setTxSequence(uuidStr);
-						orgTx.setTxType(TxType.ONLINE.getCode());
-						orgTx.setVendor(cmd.getVendorType());
-						orgTx.setPayAccount(cmd.getPayAccount());
 						this.organizationProvider.createOrganizationBillingTransaction(orgTx);
 
 						if(LOGGER.isDebugEnabled()){
@@ -3071,6 +3073,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				LOGGER.error("pm order lock finish.status="+result.second());
 			}
 		}
+	}
+
+	private OrganizationBillingAccount findOrNewOBillAccountNoLock(Long orgId,Timestamp currentTimestamp) {
+		OrganizationBillingAccount oAccount = this.organizationProvider.findOrganizationBillingAccount(orgId);
+		if(oAccount == null){
+			oAccount = new OrganizationBillingAccount();
+			oAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.ORGANIZATION.getCode()));
+			oAccount.setBalance(BigDecimal.ZERO);
+			oAccount.setCreateTime(currentTimestamp);
+			oAccount.setOwnerId(orgId);
+			this.organizationProvider.createOrganizationBillingAccount(oAccount);
+		}
+		return oAccount;
+	}
+
+	private FamilyBillingAccount findOrNewFBillAcountNoLock(Long entityId,Timestamp currentTimestamp) {
+		FamilyBillingAccount fAccount = this.familyProvider.findFamilyBillingAccountByOwnerId(entityId);
+		if(fAccount == null){
+			fAccount = new FamilyBillingAccount();
+			fAccount.setAccountNumber(BillingAccountHelper.getAccountNumberByBillingAccountTypeCode(BillingAccountType.FAMILY.getCode()));
+			fAccount.setBalance(BigDecimal.ZERO);
+			fAccount.setCreateTime(currentTimestamp);
+			fAccount.setOwnerId(entityId);
+			this.familyProvider.createFamilyBillingAccount(fAccount);
+		}
+		return fAccount;
 	}
 
 	private OrganizationBillingAccount findOrNewOBillAccount(Long orgId,Timestamp currentTimestamp) {

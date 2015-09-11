@@ -268,6 +268,19 @@ public class ForumProviderImpl implements ForumProvider {
     public void deletePost(long postId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, postId));
         
+        Post post = findPostById(postId);
+        Post parentPost = null;
+        if(post.getParentPostId() != null && post.getParentPostId() != 0) {
+            parentPost = findPostById(post.getParentPostId());
+            if(parentPost == null) {
+                throw new InvalidParameterException("Missing parent post info in post parameter");
+            }
+            post.setFloorNumber(parentPost.getChildCount() - 1);
+        } else {
+//            userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
+            userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+        }
+        
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
         dao.deleteById(postId);
         

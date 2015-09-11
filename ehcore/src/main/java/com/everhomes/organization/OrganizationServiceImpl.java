@@ -1682,7 +1682,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"orgType is wrong.");
 		}
 		return type;
-		
+
 	}
 
 	private void checkOrgNameIsNull(String orgName) {
@@ -1691,6 +1691,37 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"orgName is empty.");
 		}
+	}
+
+	@Override
+	public void addOrgAddress(AddOrgAddressCommand cmd) {
+		User user = UserContext.current().getUser();
+		this.checkOrganizationIdIsNull(cmd.getOrgId());
+		this.checkAddressIsNull(cmd.getAddress());
+		Organization org = this.checkOrganization(cmd.getOrgId());
+		this.dbProvider.execute(s -> {
+			Address address = addressProvider.findAddressByAddress(cmd.getAddress());
+			if(address == null){
+				this.checkArea(cmd.getAreaId());
+				this.checkCity(cmd.getCityId());
+				Region city = this.checkCity(cmd.getCityId());
+				Region area = this.checkArea(cmd.getAreaId());
+				//创建地址
+				address = new Address();
+				address.setAddress(cmd.getAddress());
+				address.setCityId(city.getId());
+				address.setCityName(city.getName());
+				address.setAreaId(area.getId());
+				address.setAreaName(area.getName());
+				address.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				address.setCreatorUid(user.getId());
+				address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+				this.addressProvider.createAddress(address);
+			}
+			org.setAddressId(address.getId());
+			this.organizationProvider.updateOrganization(org);
+			return s;
+		});
 	}
 
 }

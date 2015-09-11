@@ -12,9 +12,11 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.AddOrgAddressCommand;
 import com.everhomes.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.organization.CreateOrganizationCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
+import com.everhomes.organization.CreateOrganizationContactCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
 import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.DeleteOrganizationIdCommand;
@@ -194,7 +196,24 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
    
-   
+    @RequestMapping("addOrgContact")
+    @RestReturn(value=String.class)
+    public RestResponse addOrgContact(@Valid CreateOrganizationContactCommand cmd) {
+    	organizationService.createOrgContact(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
     
+    @RequestMapping("addOrgAddress")
+    @RestReturn(value=String.class)
+    public RestResponse addOrgAddress(@Valid AddOrgAddressCommand cmd) {
+    	organizationService.addOrgAddress(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
     
 }
