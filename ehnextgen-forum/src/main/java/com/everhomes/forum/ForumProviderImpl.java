@@ -256,19 +256,6 @@ public class ForumProviderImpl implements ForumProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, post.getId()));
         
-        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
-        dao.update(post);
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
-    }
-
-    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId"),
-        @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
-    @Override
-    public void deletePost(long postId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, postId));
-        
-        Post post = findPostById(postId);
         Post parentPost = null;
         if(post.getParentPostId() != null && post.getParentPostId() != 0) {
             parentPost = findPostById(post.getParentPostId());
@@ -280,6 +267,18 @@ public class ForumProviderImpl implements ForumProvider {
 //            userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
             userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
         }
+        
+        EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        dao.update(post);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
+    }
+
+    @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId"),
+        @CacheEvict(value="ForumPostByUuid", key="#post.uuid")})
+    @Override
+    public void deletePost(long postId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhForumPosts.class, postId));
         
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
         dao.deleteById(postId);
