@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: banner id</li>
- * <li>scopeType: banner可见范围类型</li>
+ * <li>scopeCode: banner可见范围类型</li>
  * <li>scopeId：banner可见范围的具体id</li>
  * <li>posterPath: 图片路径</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.banner.ActionType}</li>

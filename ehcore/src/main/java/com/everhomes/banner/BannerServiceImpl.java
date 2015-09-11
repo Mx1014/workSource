@@ -265,7 +265,7 @@ public class BannerServiceImpl implements BannerService {
                 banner.setEndTime(new Timestamp(cmd.getEndTime()));
             banner.setStatus(cmd.getStatus());
             banner.setPosterPath(cmd.getPosterPath());
-            banner.setScopeCode(scope.getScopeType());
+            banner.setScopeCode(scope.getScopeCode());
             banner.setScopeId(scope.getScopeId());
             banner.setOrder(scope.getOrder());
             banner.setVendorTag(cmd.getVendorTag());

@@ -13,17 +13,16 @@ import com.everhomes.util.StringHelper;
  */
 public class BannerScope {
 
-    private Byte  scopeType;
+    private Byte  scopeCode;
     private Long    scopeId;
     private Integer order;
-    
 
-    public Byte getScopeType() {
-        return scopeType;
+    public Byte getScopeCode() {
+        return scopeCode;
     }
 
-    public void setScopeType(Byte scopeType) {
-        this.scopeType = scopeType;
+    public void setScopeCode(Byte scopeCode) {
+        this.scopeCode = scopeCode;
     }
 
     public Long getScopeId() {

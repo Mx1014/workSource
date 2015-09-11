@@ -46,7 +46,7 @@ public class BannerTest extends CoreServerTestCase {
         BannerScope scope = new BannerScope();
         scope.setOrder(0);
         scope.setScopeId(0L);
-        scope.setScopeType(ScopeType.ALL.getCode());
+        scope.setScopeCode(ScopeType.ALL.getCode());
         List<BannerScope> scopes = new ArrayList<BannerScope>();
         scopes.add(scope);
         cmd.setScopes(scopes);
