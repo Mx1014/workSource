@@ -21,3 +21,5 @@ ehrest-response/target/
 core-server.*log
 core-server-rest.*log
 ehcore/output
+
+ehcore/statistics
