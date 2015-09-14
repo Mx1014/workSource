@@ -696,7 +696,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ApproveMemberCommand comand = new ApproveMemberCommand();
 		comand.setId(cmd.getFamilyId());
 		comand.setMemberUid(cmd.getUserId());
-		comand.setOperatorRole(Role.ResourceAdmin);
+		comand.setOperatorRole(Role.SystemAdmin);
 		familySerivce.approveMember(comand);
 	}
 
@@ -720,7 +720,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		RejectMemberCommand command = new RejectMemberCommand();
 		command.setId(cmd.getFamilyId());
 		command.setMemberUid(cmd.getUserId());
-		command.setOperatorRole(Role.ResourceAdmin);
+		command.setOperatorRole(Role.SystemAdmin);
 		command.setReason(reason);
 		familySerivce.rejectMember(command );
 	}
