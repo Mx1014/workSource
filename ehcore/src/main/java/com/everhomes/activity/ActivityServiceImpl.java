@@ -927,7 +927,7 @@ public class ActivityServiceImpl implements ActivityService {
 			double latitude = geoPoint.getLatitude();
 			double longitude = geoPoint.getLongitude();
 			
-			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 5);
 			
 			GeoHash[] adjacents = geo.getAdjacent();
 			geoHashCodes.add(geo.toBase32());
