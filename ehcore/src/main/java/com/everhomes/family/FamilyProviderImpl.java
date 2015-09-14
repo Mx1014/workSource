@@ -139,6 +139,12 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		return result[0];
 	}
+	
+	@Caching(evict = { @CacheEvict(value="Family", key="#group.integralTag1")} )
+    @Override
+    public void updateFamily(Group group) {
+        this.groupProvider.updateGroup(group);
+    }
 
 	@Caching(evict = { @CacheEvict(value="Family", key="#address.id")} )
 	@Override
@@ -856,6 +862,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			return BigDecimal.ZERO;
 		return totalChargeAmount[0];
 	}
+
 
 
 
