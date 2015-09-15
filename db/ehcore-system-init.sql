@@ -11,7 +11,7 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.host
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('home.url', 'http://10.1.1.91:8080', 'the home url');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/static/score/score.html', 'the relative path for user score');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/app/static/share_post/share_post.html#', 'the relative path for sharing topic');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/mobile/static/share_post/share_post.html#', 'the relative path for sharing topic');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.vcode.templateid', '9547', 'vcode sms template id');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.account.sid', 'b0b423e8f630d920aaba8aafe8f37701', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.token', '1527ed4b1bb855fab12a5683bb3c7ead', NULL);
