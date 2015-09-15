@@ -26,6 +26,9 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_SERVICE = 3L;
     /** 活动 */
     public static final long CATEGORY_ID_ACTIVITY = 4L;
+
+    /** 帖子/普通 */
+    public static final long CATEGORY_ID_TOPIC_COMMON = 1001L;
     
     /** 帖子/紧急通知 */
     public static final long CATEGORY_ID_URGENT_NOTICE = 1002L;

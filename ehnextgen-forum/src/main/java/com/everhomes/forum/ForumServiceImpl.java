@@ -26,6 +26,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.app.AppConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -1397,22 +1398,25 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private void processPostCategory(long userId, NewTopicCommand cmd, Post post) {
-        if(cmd.getContentCategory() != null && cmd.getContentCategory().longValue() > 0) {
-            Category category = this.categoryProvider.findCategoryById(cmd.getContentCategory());
-            if(category == null) {
-                if(LOGGER.isErrorEnabled()) {
-                    LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
-                }
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid content category");
-            }
-            
-            post.setCategoryId(cmd.getContentCategory());
-            post.setCategoryPath(category.getPath());
+        Long contentCategory = cmd.getContentCategory();
+        if(contentCategory == null || contentCategory.longValue() > 0) {
+            contentCategory = CategoryConstants.CATEGORY_ID_TOPIC_COMMON;
         }
         
+        Category category = this.categoryProvider.findCategoryById(cmd.getContentCategory());
+        if(category == null) {
+            if(LOGGER.isErrorEnabled()) {
+                LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
+            }
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid content category");
+        }
+        
+        post.setCategoryId(contentCategory);
+        post.setCategoryPath(category.getPath());
+        
         if(cmd.getActionCategory() != null && cmd.getActionCategory().longValue() > 0) {
-            Category category = this.categoryProvider.findCategoryById(cmd.getActionCategory());
+            category = this.categoryProvider.findCategoryById(cmd.getActionCategory());
             if(category == null) {
                 if(LOGGER.isErrorEnabled()) {
                     LOGGER.error("Action category not found, userId=" + userId + ", cmd=" + cmd);
@@ -1898,6 +1902,8 @@ public class ForumServiceImpl implements ForumService {
                 
                 populatePostRegionInfo(userId, post);
                 
+                populatePostForumNameInfo(userId, post);
+                
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
@@ -1943,11 +1949,6 @@ public class ForumServiceImpl implements ForumService {
                         String avatarUrl = getResourceUrlByUir(userId, member.getMemberAvatar(), 
                             EntityType.USER.getCode(), member.getMemberId());
                         post.setCreatorAvatarUrl(avatarUrl); 
-                    }
-                    
-                    Group group = this.groupProvider.findGroupById(forum.getOwnerId());
-                    if(group != null) {
-                        post.setForumName(group.getName());
                     }
                 }
             }
@@ -2016,6 +2017,47 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
         }
         
+    }
+    
+    private void populatePostForumNameInfo(long userId, Post post) {
+        Long forumId = post.getForumId();
+        Forum forum = forumProvider.findForumById(forumId);
+        
+        if(forumId == ForumConstants.SYSTEM_FORUM) {
+            VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+            Long regionId = post.getVisibleRegionId();
+            if(regionType != null && regionId != null) {
+                String forumName = forum.getName();
+                if(forumName == null) {
+                    forumName = "";
+                }
+                switch(regionType) {
+                case COMMUNITY:
+                    Community community = communityProvider.findCommunityById(regionId);
+                    forumName = community.getName() + forumName;
+                    break;
+                case REGION:
+                    Organization organization = organizationProvider.findOrganizationById(regionId);
+                    forumName = organization.getName();
+                    break;
+                default:
+                    LOGGER.error("Unsupported visible region type, userId=" + userId 
+                        + ", regionType=" + regionType + ", postId=" + post.getId());
+                }
+                post.setForumName(forumName);
+            } else {
+                LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
+            }
+        } else {
+            if(forumId == ForumConstants.FEEDBACK_FORUM) {
+                post.setForumName(forum.getName());
+            } else {
+                Group group = this.groupProvider.findGroupById(forum.getOwnerId());
+                if(group != null) {
+                    post.setForumName(group.getName());
+                }
+            }
+        }
     }
     
     private void populatePostAttachements(long userId, Post post, List<Attachment> attachmentList) {
