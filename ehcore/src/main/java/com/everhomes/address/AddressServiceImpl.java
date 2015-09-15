@@ -946,11 +946,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                      addr.setCreatorUid(userId);
                      this.addressProvider.createAddress(addr);
                      
-                     //insert user_service_addresses
-                     UserServiceAddress serviceAddress = new UserServiceAddress();
-                     serviceAddress.setAddressId(addr.getId());
-                     serviceAddress.setOwnerUid(userId);
-                     this.userActivityProvider.addUserServiceAddress(serviceAddress);
                 }
                 long lcEndTime = System.currentTimeMillis();
                 LOGGER.info("create address in the lock,elapse=" + (lcEndTime - lcStartTime));
@@ -959,7 +954,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
              
              address = result.first();
          }
-         return ConvertHelper.convert(address, AddressDTO.class);
+        //insert user_service_addresses
+        UserServiceAddress serviceAddress = new UserServiceAddress();
+        serviceAddress.setAddressId(address.getId());
+        serviceAddress.setOwnerUid(userId);
+        this.userActivityProvider.addUserServiceAddress(serviceAddress);
+        return ConvertHelper.convert(address, AddressDTO.class);
     }
     
 

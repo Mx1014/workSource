@@ -46,6 +46,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			if(organization == null){
 				LOGGER.warn("Unable to find the organization.postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
 					+ ", subject=" + post.getSubject());
+				post.setEmbeddedAppId(0L);
 				return post;
 				/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 						"Unable to find the organization.");*/
@@ -57,10 +58,10 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setApplyEntityId(0L); // 还没有帖子ID
 			task.setTargetType(post.getTargetTag());
 			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
-				task.setTargetId(0L);
+				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			else
 				task.setTargetId(organization.getId());
-			task.setCreatorUid(post.getCreatorUid());
+			task.setCreatorUid(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 

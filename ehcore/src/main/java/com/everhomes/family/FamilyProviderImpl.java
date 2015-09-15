@@ -116,7 +116,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 
-	@Cacheable(value="Family", key="#addressId" ,unless="#result==null")
+	//@Cacheable(value="Family", key="#addressId" ,unless="#result==null")
 	@Override
 	public Family findFamilyByAddressId(long addressId) {
 		final Family[] result = new Family[1];
@@ -139,8 +139,14 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		return result[0];
 	}
+	
+	//@Caching(evict = { @CacheEvict(value="Family", key="#group.integralTag1")} )
+    @Override
+    public void updateFamily(Group group) {
+        this.groupProvider.updateGroup(group);
+    }
 
-	@Caching(evict = { @CacheEvict(value="Family", key="#address.id")} )
+	//@Caching(evict = { @CacheEvict(value="Family", key="#address.id")} )
 	@Override
 	public void leaveFamilyAtAddress(Address address, UserGroup userGroup) {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
@@ -856,6 +862,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			return BigDecimal.ZERO;
 		return totalChargeAmount[0];
 	}
+
 
 
 
