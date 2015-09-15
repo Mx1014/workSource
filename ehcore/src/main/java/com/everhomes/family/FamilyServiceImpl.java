@@ -773,9 +773,7 @@ public class FamilyServiceImpl implements FamilyService {
                     this.userProvider.updateUserGroup(userGroup);
                 }
                 group.setMemberCount(group.getMemberCount() + 1);
-                //放到provider更新，为了更新findFamilyByAddressId的缓存
-                this.familyProvider.updateFamily(group);
-                //groupProvider.updateGroup(group);
+                groupProvider.updateGroup(group);
                 
                 return true;
                 
