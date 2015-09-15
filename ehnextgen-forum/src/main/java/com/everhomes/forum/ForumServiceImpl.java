@@ -1299,7 +1299,9 @@ public class ForumServiceImpl implements ForumService {
         
         processPostCategory(userId, cmd, post);
         processPostLocation(userId, cmd, post);
-        processPostVisibility(userId, forumId, cmd, post);
+//        processPostVisibility(userId, forumId, cmd, post);
+        post.setVisibleRegionType(cmd.getVisibleRegionType());
+        post.setVisibleRegionId(cmd.getVisibleRegionId());
         
         post.setForumId(cmd.getForumId());
         post.setParentPostId(0L);
@@ -1979,7 +1981,11 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostRegionInfo(long userId, Post post) {
         VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
         Long regionId = post.getVisibleRegionId();
-        if(regionType != null && regionId != null) {
+        
+        if(regionId == 0L){
+        	post.setCreatorNickName(post.getCreatorNickName());
+        }
+        else if(regionType != null && regionId != null) {
             String creatorNickName = post.getCreatorNickName();
             if(creatorNickName == null) {
                 creatorNickName = "";
