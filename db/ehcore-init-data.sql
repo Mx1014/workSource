@@ -397,6 +397,4 @@ INSERT INTO `eh_launch_pad_layouts` VALUES ('4', '0', 'GapsLayout', '{"versionCo
 INSERT INTO `eh_launch_pad_layouts` VALUES ('5', '0', 'GancLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"GancLayout","displayName":"工作站首页","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-07-13 16:46:37');
 INSERT INTO `eh_launch_pad_layouts` VALUES ('6', '0', 'PaymentLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"PaymentLayout","displayName":"缴费首页","groups":[{"groupName":"pay","widget":"Navigator","instanceConfig":{"itemGroup":"PayActions"},"style":"Light","defaultOrder":1,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2015072202', '2015061701', '2', '2015-07-13 16:46:37');
 
-
-
 SET foreign_key_checks = 1;

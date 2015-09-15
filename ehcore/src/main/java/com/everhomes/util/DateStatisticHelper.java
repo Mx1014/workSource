@@ -147,7 +147,7 @@ public class DateStatisticHelper {
 	}
 
 	/**
-	 * 把日期字符串解释成为日期对象
+	 * 把日期字符串:yyyy-MM-dd,解释成为日期对象
 	 * 
 	 * @param dateStr 日期字符串
 	 * @return 日期对象
@@ -157,5 +157,43 @@ public class DateStatisticHelper {
 	{
 		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATE);
 		return formater.parse(dateStr);
+	}
+	
+	/**
+	 * 把日期字符串:yyyy-MM-dd,解释成为最小日期对象
+	 * 
+	 * @param dateStr 日期字符串
+	 * @return 日期对象
+	 * @throws ParseException
+	 */
+	public static Date parseDateStrToMin(String dateStr) throws ParseException
+	{
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATE);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(formater.parse(dateStr));
+		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMinimum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getActualMinimum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getActualMinimum(Calendar.MILLISECOND));
+		return cal.getTime();
+	}
+	
+	/**
+	 * 把日期字符串:yyyy-MM-dd,解释成为日期对象
+	 * 
+	 * @param dateStr 日期字符串
+	 * @return 日期对象
+	 * @throws ParseException
+	 */
+	public static Date parseDateStrToMax(String dateStr) throws ParseException
+	{
+		SimpleDateFormat formater = new SimpleDateFormat(DateStatisticConstants.FORMATE_DATE);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(formater.parse(dateStr));
+		cal.set(Calendar.HOUR_OF_DAY, cal.getActualMaximum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getActualMaximum(Calendar.MILLISECOND));
+		return cal.getTime();
 	}
 }
