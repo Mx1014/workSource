@@ -49,6 +49,7 @@ import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.app.AppConstants;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -114,6 +115,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationTaskStatus;
+import com.everhomes.organization.OrganizationTaskType;
 import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.PaidType;
 import com.everhomes.organization.TxType;
@@ -1345,7 +1347,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
-		String taskType = null; // OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
+		OrganizationTaskType taskTypeObj = this.convertContentCategoryToTaskType(cmd.getCategoryId());
+		String taskType = taskTypeObj == null ? null:taskTypeObj.getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
@@ -1396,6 +1399,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		response.setWeekList(weekList);
 		response.setYesterdayList(yesterdayList);
 		return response;
+	}
+	
+	
+	private OrganizationTaskType convertContentCategoryToTaskType(Long contentCategoryId) {
+		if(contentCategoryId != null) {
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
+				return OrganizationTaskType.NOTICE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_REPAIRS) {
+				return OrganizationTaskType.REPAIRS;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
+				return OrganizationTaskType.CONSULT_APPEAL;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
+				return OrganizationTaskType.COMPLAINT_ADVICE;
+			}
+		}
+		return null;
 	}
 
 	@Override
