@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"container/list"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -140,6 +141,31 @@ func (cache *LocalCache) newObjEvent(obj *LocalObject) {
 
 	//added ok
 	obj.rv <- 0
+}
+
+func (cache *LocalCache) getAudioDuration(okey string, buf_bytes []byte) (string, error) {
+	//generator a random key for save
+	key := okey + fmt.Sprintf("%v", time.Now().UnixNano())
+	cache.diskv.Write(key, buf_bytes)
+	defer func() {
+		cache.diskv.Erase(key)
+	}()
+
+	fmt.Printf("begin audio info\n")
+	info, err := audio_info(cache.PathFor(key))
+	if err != nil {
+		return "", err
+	} else {
+		map_info := info.(map[string]interface{})
+		if duration, ok := map_info["format"]; ok {
+			duration_map := duration.(map[string]interface{})
+			if nil != duration_map["duration"] {
+				return duration_map["duration"].(string), nil
+			}
+		}
+	}
+
+	return "", errors.New("empty")
 }
 
 func audio_info(filePath string) (interface{}, error) {

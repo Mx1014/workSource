@@ -442,9 +442,15 @@ func serveAudioUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 		return 500, err
 	}
 
-	md5, err := s.audioStorage.SaveAudio(gen_md5_str(data), data, format)
+	data_md5 := gen_md5_str(data)
+	md5, err := s.audioStorage.SaveAudio(data_md5, data, format)
 	if err != nil {
 		return 500, err
+	}
+
+	duration, err := s.context.LocalCache.getAudioDuration(data_md5, data)
+	if err == nil {
+		obj.Meta["duration"] = duration
 	}
 
 	obj.Md5 = md5
