@@ -46,6 +46,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			if(organization == null){
 				LOGGER.warn("Unable to find the organization.postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
 					+ ", subject=" + post.getSubject());
+				post.setEmbeddedAppId(0L);
 				return post;
 				/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 						"Unable to find the organization.");*/
