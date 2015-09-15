@@ -1380,8 +1380,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			Date startTime;
 			Date endTime;
 			try {
-				startTime = DateStatisticHelper.parseDateStr(startStrTime);
-				endTime = DateStatisticHelper.parseDateStr(endStrTime);
+				startTime = DateStatisticHelper.parseDateStrToMin(startStrTime);
+				endTime = DateStatisticHelper.parseDateStrToMax(endStrTime);
 				createList(organizationId,taskType,dateList,startTime.getTime(), endTime.getTime());
 			} catch (ParseException e) {
 				LOGGER.error("failed to parse date.startStrTime=" + startStrTime +",endStrTime=" + endStrTime);
@@ -1901,8 +1901,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	{
 		int todayCount = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,null,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 		todayList.add(todayCount);
-		int num = OrganizationTaskStatus.PROCESSED.getCode();
-		for (int i = 0; i <= num ; i++)
+		int num = OrganizationTaskStatus.OTHER.getCode();
+		for (int i = 1; i <= num ; i++)
 		{
 			int count = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 			todayList.add(count);
