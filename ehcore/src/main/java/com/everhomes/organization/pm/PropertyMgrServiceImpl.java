@@ -1151,7 +1151,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//按楼栋发送：
 		else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
 			for (String buildingName : buildingNames) {
-				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(orgId, buildingName, 1, Integer.MAX_VALUE);
+				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
 				if(addresses != null && addresses.size() > 0){
 					for (ApartmentDTO address : addresses) {
 						Family family = familyProvider.findFamilyByAddressId(address.getAddressId());
