@@ -220,8 +220,8 @@ public class BusinessOpenController extends ControllerBase {
      */
     @RequestMapping("receiveCoupon")
     @RestReturn(String.class)
-    public RestResponse receiveCoupon(Long userId) {
-    	userActivityService.receiveCoupon(userId);
+    public RestResponse receiveCoupon(UserCouponsCommand cmd) {
+    	userActivityService.receiveCoupon(cmd.getUserId());
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -235,8 +235,8 @@ public class BusinessOpenController extends ControllerBase {
      */
     @RequestMapping("invalidCoupon")
     @RestReturn(String.class)
-    public RestResponse invalidCoupon(Long userId) {
-    	userActivityService.invalidCoupon(userId);
+    public RestResponse invalidCoupon(UserCouponsCommand cmd) {
+    	userActivityService.invalidCoupon(cmd.getUserId());
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
