@@ -272,6 +272,12 @@ public class ForumProviderImpl implements ForumProvider {
         dao.update(post);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
+        
+        if(parentPost != null) {
+            parentPost.setChildCount(parentPost.getChildCount() - 1);
+            ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+            self.updatePost(parentPost);
+        }
     }
 
     @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId"),
