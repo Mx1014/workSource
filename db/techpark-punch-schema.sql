@@ -1,7 +1,5 @@
- 
-USE `ehcore`;
 
- 
+USE `ehcore`;
 
 /*Table structure for table `eh_company_phone_list` */
 
@@ -20,6 +18,7 @@ CREATE TABLE `eh_company_phone_list` (
   `update_time` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/*Table structure for table `eh_punch_logs` */
 
 DROP TABLE IF EXISTS `eh_punch_logs`;
 
@@ -31,7 +30,6 @@ CREATE TABLE `eh_punch_logs` (
   `punch_time` datetime DEFAULT NULL COMMENT 'user check time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 /*Table structure for table `eh_punch_rules` */
 
@@ -47,7 +45,8 @@ CREATE TABLE `eh_punch_rules` (
   `noon_end_time` time DEFAULT NULL,
   `afternoon_start_time` time DEFAULT NULL,
   `work_time` time DEFAULT NULL COMMENT 'how long must I work',
-  `late_time` time DEFAULT NULL COMMENT 'how long can I be late',
+  `late_arrive_time` time DEFAULT NULL COMMENT 'how long can I be late',
+  `early_leave_time` time DEFAULT NULL COMMENT 'how long can I be early leave from work',
   `create_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_uid` bigint(20) DEFAULT NULL,
