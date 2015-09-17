@@ -14,6 +14,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostEntityTag;
+import com.everhomes.forum.PostPrivacy;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -46,6 +47,7 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			if(organization == null){
 				LOGGER.warn("Unable to find the organization.postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
 					+ ", subject=" + post.getSubject());
+				post.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
 				post.setEmbeddedAppId(0L);
 				return post;
 				/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
