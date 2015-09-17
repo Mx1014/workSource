@@ -337,6 +337,17 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'user.notification', 1, 'zh_CN', '新用户注册', '小左等您好久啦，已经为您准备好了精彩的社区生活…');
 
+
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '1', 'zh_CN', '给用户发通知：同意用户加入组织', '管理员${memberName}同意了您加入${orgName}的申请。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '2', 'zh_CN', '给其他管理员发通知：同意用户加入组织','管理员${memberName}同意了${userName}加入${orgName}的申请。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '3', 'zh_CN', '给用户发通知：拒绝用户加入组织', '管理员${memberName}拒绝了您加入${orgName}的申请。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '4', 'zh_CN', '给其他管理员发通知：拒绝用户加入组织','管理员${memberName}拒绝了${userName}加入${orgName}的申请。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '5', 'zh_CN', '在请求服务帖发评论:分配请求服务帖任务给处理员', '该请求已安排${memberName}来处理。电话是${memberContactToken}，业主可以电话直接联系。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '6', 'zh_CN', '给被分配人员发短信:分配请求服务帖任务给处理员', '业主${phone}发布了新的${topicType}帖，您已被分配处理该业主的需求，请尽快联系该业主。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '7', 'zh_CN', '给被分配人员发短信:分配请求服务帖任务给处理员,用户求助由管理员代发', '${orgName}管理员给您分配了${topicType}帖的任务，管理员电话${phone},请尽快与管理员联系处理问题。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES ('organization.notification', '8', 'zh_CN', '通知其他管理员：删除组织成员','${orgName}管理员${memberName}删除了${userName}成员。');
+
+
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '1', 'zh_CN', '你有新消息');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '2', 'zh_CN', '你有新的语音消息');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'messaging', '3', 'zh_CN', '你有新的图片消息');
@@ -396,5 +407,17 @@ INSERT INTO `eh_launch_pad_layouts` VALUES ('3', '0', 'GarcLayout', '{"versionCo
 INSERT INTO `eh_launch_pad_layouts` VALUES ('4', '0', 'GapsLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"GapsLayout","displayName":"派出所首页","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-07-13 16:46:40');
 INSERT INTO `eh_launch_pad_layouts` VALUES ('5', '0', 'GancLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"GancLayout","displayName":"工作站首页","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-07-13 16:46:37');
 INSERT INTO `eh_launch_pad_layouts` VALUES ('6', '0', 'PaymentLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"PaymentLayout","displayName":"缴费首页","groups":[{"groupName":"pay","widget":"Navigator","instanceConfig":{"itemGroup":"PayActions"},"style":"Light","defaultOrder":1,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2015072202', '2015061701', '2', '2015-07-13 16:46:37');
+
+
+-- eh_configuration
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('prefix.url', 'http://biz.zuolin.com/zl-ec?hideNavigationBar=0&sourceUrl=http://biz.zuolin.com', null);
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.image.url', 'http://bizimg.zuolin.com/imageService/', 'image url');
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('common.pay.url', 'http://pay.zuolin.com/EDS_PAY/', null);
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('apply.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('manage.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.order.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.coupon.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.detail.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', 'detail url');
+
 
 SET foreign_key_checks = 1;

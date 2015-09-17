@@ -1380,7 +1380,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
 		}
 
-		if(template == null) template = "您有新的任务";
+		if(template == null || template.equals("")) template = "您有新的任务";
 
 		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
 	}

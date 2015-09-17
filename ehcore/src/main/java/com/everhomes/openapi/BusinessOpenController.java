@@ -214,4 +214,32 @@ public class BusinessOpenController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /openapi/receiveCoupon</b>
+     * <p>同步用户领取优惠券</p>
+     */
+    @RequestMapping("receiveCoupon")
+    @RestReturn(String.class)
+    public RestResponse receiveCoupon(UserCouponsCommand cmd) {
+    	userActivityService.receiveCoupon(cmd.getUserId());
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /openapi/invalidCoupon</b>
+     * <p>同步用户不能使用的优惠券</p>
+     */
+    @RequestMapping("invalidCoupon")
+    @RestReturn(String.class)
+    public RestResponse invalidCoupon(UserCouponsCommand cmd) {
+    	userActivityService.invalidCoupon(cmd.getUserId());
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

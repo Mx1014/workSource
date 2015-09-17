@@ -88,6 +88,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
@@ -1151,7 +1152,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//按楼栋发送：
 		else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
 			for (String buildingName : buildingNames) {
-				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(orgId, buildingName, 1, Integer.MAX_VALUE);
+				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
 				if(addresses != null && addresses.size() > 0){
 					for (ApartmentDTO address : addresses) {
 						Family family = familyProvider.findFamilyByAddressId(address.getAddressId());
@@ -1177,25 +1178,30 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	public void sendNoticeToFamilyById(Long familyId,String message){
 		MessageDTO messageDto = new MessageDTO();
-		messageDto.setAppId(AppConstants.APPID_FAMILY);
-		messageDto.setSenderUid(UserContext.current().getUser().getId());
+		//messageDto.setAppId(AppConstants.APPID_FAMILY);
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_UID);
+		//messageDto.setSenderUid(UserContext.current().getUser().getId());
 		messageDto.setChannels(new MessageChannel(MessageChannelType.GROUP.getCode(), String.valueOf(familyId)));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, MessageChannelType.GROUP.getCode(), 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.GROUP.getCode(), 
 				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 
 	public void sendNoticeToUserById(Long userId,String message){
 		MessageDTO messageDto = new MessageDTO();
-		messageDto.setAppId(AppConstants.APPID_FAMILY);
-		messageDto.setSenderUid(UserContext.current().getUser().getId());
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(userId)));
-		messageDto.setMetaAppId(AppConstants.APPID_USER);
+		messageDto.setSenderUid(User.SYSTEM_UID);
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, MessageChannelType.USER.getCode(), 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
 				String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 
