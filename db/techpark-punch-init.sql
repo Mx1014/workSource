@@ -9,7 +9,7 @@ CREATE TABLE `eh_punch_logs` (
   `id` bigint(20) NOT NULL COMMENT 'id',
   `company_id` bigint(20) DEFAULT NULL COMMENT 'compay id',
   `user_id` bigint(20) DEFAULT NULL COMMENT 'user''s id',
-  `check_time` datetime DEFAULT NULL COMMENT 'user check time',
+  `punch_time` datetime DEFAULT NULL COMMENT 'user check time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
