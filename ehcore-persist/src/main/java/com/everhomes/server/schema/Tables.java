@@ -124,6 +124,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
 
 	/**
+	 * The table ehcore.eh_company_phone_list
+	 */
+	public static final com.everhomes.server.schema.tables.EhCompanyPhoneList EH_COMPANY_PHONE_LIST = com.everhomes.server.schema.tables.EhCompanyPhoneList.EH_COMPANY_PHONE_LIST;
+
+	/**
 	 * The table ehcore.eh_content_server
 	 */
 	public static final com.everhomes.server.schema.tables.EhContentServer EH_CONTENT_SERVER = com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER;
@@ -347,6 +352,16 @@ public class Tables {
 	 * The table ehcore.eh_poll_votes
 	 */
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
+
+	/**
+	 * The table ehcore.eh_punch_logs
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchLogs EH_PUNCH_LOGS = com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS;
+
+	/**
+	 * The table ehcore.eh_punch_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchRules EH_PUNCH_RULES = com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES;
 
 	/**
 	 * The table ehcore.eh_qrcodes

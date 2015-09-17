@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1143940887;
+	private static final long serialVersionUID = -1760845261;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -56,6 +56,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES,
 			com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS,
 			com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES,
+			com.everhomes.server.schema.tables.EhCompanyPhoneList.EH_COMPANY_PHONE_LIST,
 			com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER,
 			com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES,
 			com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS,
@@ -101,6 +102,8 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
 			com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES,
+			com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS,
+			com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES,
 			com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES,
 			com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS,
 			com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS,

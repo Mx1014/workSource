@@ -30,7 +30,7 @@ CREATE TABLE `eh_punch_logs` (
   `punch_date` date DEFAULT NULL COMMENT 'user punch date',
   `punch_time` datetime DEFAULT NULL COMMENT 'user check time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 /*Table structure for table `eh_punch_rules` */
