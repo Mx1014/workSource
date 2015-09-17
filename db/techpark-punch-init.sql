@@ -1,7 +1,25 @@
  
 USE `ehcore`;
 
-/*Table structure for table `eh_punch_logs` */
+ 
+
+/*Table structure for table `eh_company_phone_list` */
+
+DROP TABLE IF EXISTS `eh_company_phone_list`;
+
+CREATE TABLE `eh_company_phone_list` (
+  `id` bigint(20) DEFAULT NULL,
+  `company_id` bigint(20) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
+  `telephone` varchar(20) DEFAULT NULL COMMENT 'user telephone',
+  `name` varchar(50) DEFAULT NULL COMMENT 'real name',
+  `department` varchar(200) DEFAULT NULL,
+  `create_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 DROP TABLE IF EXISTS `eh_punch_logs`;
 
