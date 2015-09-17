@@ -7,11 +7,13 @@ DROP TABLE IF EXISTS `eh_punch_logs`;
 
 CREATE TABLE `eh_punch_logs` (
   `id` bigint(20) NOT NULL COMMENT 'id',
-  `company_id` bigint(20) DEFAULT NULL COMMENT 'compay id',
   `user_id` bigint(20) DEFAULT NULL COMMENT 'user''s id',
+  `company_id` bigint(20) DEFAULT NULL COMMENT 'compay id',
+  `punch_date` date DEFAULT NULL COMMENT 'user punch date',
   `punch_time` datetime DEFAULT NULL COMMENT 'user check time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
 
 /*Table structure for table `eh_punch_rules` */
 
