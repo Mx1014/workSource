@@ -321,7 +321,7 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setAppId(AppConstants.APPID_MESSAGING);
             messageDto.setSenderUid(User.SYSTEM_UID);
             messageDto.setChannels(new MessageChannel(channelType, channelToken));
-            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
             if(includeList != null && includeList.size() > 0) {
