@@ -39,9 +39,9 @@ import com.everhomes.util.Tuple;
 public class CategoryController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
     private static final String DEFAULT_SORT = "default_order";
-    private static final String CATEGORY_PATH = "path";
-    private static final long CATEOGRY_RECOMMEND = 9999L;
-    private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
+//    private static final String CATEGORY_PATH = "path";
+//    private static final long CATEOGRY_RECOMMEND = 9999L;
+//    private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
     @Autowired
     private CategoryProvider categoryProvider;    
     
@@ -247,13 +247,14 @@ public class CategoryController extends ControllerBase {
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listBusinessCategories(HttpServletRequest request, HttpServletResponse response) {
         Tuple[] orderBy = defaultSort();
-        Category category = new Category();
-        category.setParentId(CategoryConstants.CATEGORY_ID_SERVICE);
-        category.setId(CATEOGRY_RECOMMEND);
-        category.setName(CATEOGRY_RECOMMEND_NAME);
-        category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
+        //暂时去掉
+//        Category category = new Category();
+//        category.setParentId(CategoryConstants.CATEGORY_ID_SERVICE);
+//        category.setId(CATEOGRY_RECOMMEND);
+//        category.setName(CATEOGRY_RECOMMEND_NAME);
+//        category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
         List<Category> entityResultList = new ArrayList<Category>();
-        entityResultList.add(category);
+        //entityResultList.add(category);
         List<Category> result = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
                 CategoryAdminStatus.ACTIVE, orderBy);
         if(result != null && !result.isEmpty())

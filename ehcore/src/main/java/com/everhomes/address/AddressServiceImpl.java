@@ -56,6 +56,7 @@ import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
@@ -886,7 +887,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     @Override
-    public AddressDTO createServiceAddress(CreateServiceAddressCommand cmd) {
+    public UserServiceAddressDTO createServiceAddress(CreateServiceAddressCommand cmd) {
         if(cmd.getRegionId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid regionId, regionId parameter");
@@ -894,6 +895,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(cmd.getAddress() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid address, address parameter");
+        }
+        if(cmd.getContactName() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid contactName, contactName parameter");
+        }
+        if(cmd.getContactToken() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid contactToken, contactToken parameter");
         }
         Region region = this.regionProvider.findRegionById(cmd.getRegionId());
         if(region == null){
@@ -954,12 +963,27 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
              
              address = result.first();
          }
+        
         //insert user_service_addresses
         UserServiceAddress serviceAddress = new UserServiceAddress();
         serviceAddress.setAddressId(address.getId());
         serviceAddress.setOwnerUid(userId);
+        serviceAddress.setCreatorUid(userId);
+        serviceAddress.setContactName(cmd.getContactName());
+        serviceAddress.setContactToken(cmd.getContactToken());
+        serviceAddress.setContactType(cmd.getContactType());
+        serviceAddress.setStatus((byte)2);
+        
         this.userActivityProvider.addUserServiceAddress(serviceAddress);
-        return ConvertHelper.convert(address, AddressDTO.class);
+        
+        UserServiceAddressDTO dto = new UserServiceAddressDTO();
+        dto.setId(serviceAddress.getId());
+        dto.setAddress(cmd.getAddress());
+        dto.setCity(cityName);
+        dto.setArea(areaName);
+        dto.setUserName(cmd.getContactName());
+        dto.setCallPhone(cmd.getContactToken());
+        return dto;
     }
     
 
