@@ -427,6 +427,7 @@ public class PunchServiceImpl implements PunchService {
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		PunchLogs punchLog = new PunchLogs();
 		punchLog.setCompanyId(companyId);
+		punchLog.setUserId(userId);
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime)); 
 		Calendar punCalendar = Calendar.getInstance();
 		try {
@@ -439,7 +440,7 @@ public class PunchServiceImpl implements PunchService {
 			//如果打卡时间小于5，用昨天
 			punCalendar.add(Calendar.DATE, -1);
 		}
-		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(punCalendar)));
+		punchLog.setPunchDate(  java.sql.Date.valueOf(dateSF.format(punCalendar.getTime())));
 		punchProvider.createPunchLog(punchLog);
 	}
 
