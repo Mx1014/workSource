@@ -124,11 +124,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
 
 	/**
-	 * The table ehcore.eh_company_phone_list
-	 */
-	public static final com.everhomes.server.schema.tables.EhCompanyPhoneList EH_COMPANY_PHONE_LIST = com.everhomes.server.schema.tables.EhCompanyPhoneList.EH_COMPANY_PHONE_LIST;
-
-	/**
 	 * The table ehcore.eh_content_server
 	 */
 	public static final com.everhomes.server.schema.tables.EhContentServer EH_CONTENT_SERVER = com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER;
@@ -222,6 +217,11 @@ public class Tables {
 	 * The table ehcore.eh_groups
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroups EH_GROUPS = com.everhomes.server.schema.tables.EhGroups.EH_GROUPS;
+
+	/**
+	 * The table ehcore.eh_group_contacts
+	 */
+	public static final com.everhomes.server.schema.tables.EhGroupContacts EH_GROUP_CONTACTS = com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS;
 
 	/**
 	 * The table ehcore.eh_group_members

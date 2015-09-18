@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -1760845261;
+	private static final long serialVersionUID = -649209904;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -56,7 +56,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES,
 			com.everhomes.server.schema.tables.EhCommunityGeopoints.EH_COMMUNITY_GEOPOINTS,
 			com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES,
-			com.everhomes.server.schema.tables.EhCompanyPhoneList.EH_COMPANY_PHONE_LIST,
 			com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER,
 			com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES,
 			com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS,
@@ -76,6 +75,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS,
 			com.everhomes.server.schema.tables.EhForumVisibleScopes.EH_FORUM_VISIBLE_SCOPES,
 			com.everhomes.server.schema.tables.EhGroups.EH_GROUPS,
+			com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS,
 			com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS,
 			com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS,
 			com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES,
