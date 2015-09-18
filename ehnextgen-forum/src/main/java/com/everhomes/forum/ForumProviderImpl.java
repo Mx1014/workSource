@@ -31,11 +31,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupVisibilityScope;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -43,7 +42,6 @@ import com.everhomes.server.schema.tables.daos.EhForumAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhForumPostsDao;
 import com.everhomes.server.schema.tables.daos.EhForumsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupVisibleScopesDao;
 import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -54,6 +52,7 @@ import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserLikeType;
 import com.everhomes.user.UserProfileContstant;
@@ -89,6 +88,9 @@ public class ForumProviderImpl implements ForumProvider {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Autowired
+    private LocaleStringService localeStringService;
     
     @Override
     public void createForum(Forum forum) {
@@ -262,10 +264,18 @@ public class ForumProviderImpl implements ForumProvider {
             if(parentPost == null) {
                 throw new InvalidParameterException("Missing parent post info in post parameter");
             }
-            post.setFloorNumber(parentPost.getChildCount() - 1);
+//            post.setFloorNumber(parentPost.getChildCount() - 1);
+            String template = localeStringService.getLocalizedString(
+            		ForumLocalStringCode.SCOPE,
+                    String.valueOf(ForumLocalStringCode.FORUM_COMMENT_DELETED),
+                    UserContext.current().getUser().getLocale(),
+                    "");
+           
+            post.setContent(template);
+            post.setStatus(PostStatus.ACTIVE.getCode());
         } else {
 //            userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
-            userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+            
         }
         
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
@@ -273,11 +283,7 @@ public class ForumProviderImpl implements ForumProvider {
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
         
-        if(parentPost != null) {
-            parentPost.setChildCount(parentPost.getChildCount() - 1);
-            ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
-            self.updatePost(parentPost);
-        }
+        
     }
 
     @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId"),

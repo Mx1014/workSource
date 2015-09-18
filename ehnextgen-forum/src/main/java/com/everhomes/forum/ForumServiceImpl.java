@@ -63,11 +63,13 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserLikeType;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -127,6 +129,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     
     @Override
     public boolean isSystemForum(long forumId) {
@@ -292,6 +297,9 @@ public class ForumServiceImpl implements ForumService {
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
+                    if(userId == post.getCreatorUid()){
+                    	userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+                    }
                    return null;
                 });
                 
