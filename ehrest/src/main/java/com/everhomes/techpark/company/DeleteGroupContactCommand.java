@@ -1,10 +1,10 @@
-package com.everhomes.techpark.punch.company;
+package com.everhomes.techpark.company;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
-public class DeleteContactsCommand {
+public class DeleteGroupContactCommand {
 	@NotNull
 	private Long id;
 

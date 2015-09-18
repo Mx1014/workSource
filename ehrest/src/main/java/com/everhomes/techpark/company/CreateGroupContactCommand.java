@@ -1,20 +1,22 @@
-package com.everhomes.techpark.punch.company;
+package com.everhomes.techpark.company;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
-public class UpdateContactsCommand {
+public class CreateGroupContactCommand {
 	@NotNull
-	private Long id;
+	private Long ownerId;
+	@NotNull
 	private String contactName;
+	@NotNull
 	private String contactToken;
 	
-	public Long getId() {
-		return id;
+	public Long getOwnerId() {
+		return ownerId;
 	}
-	public void setId(Long id) {
-		this.id = id;
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 	public String getContactName() {
 		return contactName;

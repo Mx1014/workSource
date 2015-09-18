@@ -1,4 +1,4 @@
-package com.everhomes.techpark.punch.company;
+package com.everhomes.techpark.company;
 
 public enum ContactType {
 	MOBILE((byte)0),EMAIL((byte)1);

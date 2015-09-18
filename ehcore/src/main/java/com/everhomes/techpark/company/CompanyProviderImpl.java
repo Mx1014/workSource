@@ -1,7 +1,9 @@
-package com.everhomes.techpark.punch.company;
+package com.everhomes.techpark.company;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,19 +15,25 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGroupContactsDao;
 import com.everhomes.server.schema.tables.pojos.EhGroupContacts;
+import com.everhomes.techpark.company.GroupContact;
+import com.everhomes.techpark.company.GroupContactProvider;
+import com.everhomes.techpark.company.OwnerType;
 import com.everhomes.util.ConvertHelper;
 
+import freemarker.template.utility.StringUtil;
+
 @Component
-public class CompanyProviderImpl implements CompanyProvider{
+public class CompanyProviderImpl implements GroupContactProvider{
 	@Autowired
 	private DbProvider dbProvider;
 
 	@Override
-	public GroupContact findComPhoneListByPhone(String telephone) {
-		
+	public GroupContact findGroupContactByToken(String contactToken) {
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.eq(contactToken);
 		List<GroupContact> list = context.select().from(Tables.EH_GROUP_CONTACTS)
-				.where(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.eq(telephone))
+				.where(condition)
 				.fetch().map(r -> {
 					return ConvertHelper.convert(r, GroupContact.class);
 				});
@@ -34,23 +42,23 @@ public class CompanyProviderImpl implements CompanyProvider{
 	}
 
 	@Override
-	public void updateComPhoneList(GroupContact comPhone) {
+	public void updateGroupContact(GroupContact gContact) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGroupContactsDao dao = new EhGroupContactsDao(context.configuration());
-		dao.update(ConvertHelper.convert(comPhone, EhGroupContacts.class));
-		DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhGroupContacts.class, comPhone.getId());
+		dao.update(ConvertHelper.convert(gContact, EhGroupContacts.class));
+		DaoHelper.publishDaoAction(DaoAction.MODIFY,  EhGroupContacts.class, gContact.getId());
 	}
 
 	@Override
-	public void createComPhoneList(GroupContact comPhone) {
+	public void createGroupContact(GroupContact gContact) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGroupContactsDao dao = new EhGroupContactsDao(context.configuration());
-		dao.insert(ConvertHelper.convert(comPhone, EhGroupContacts.class));
+		dao.insert(ConvertHelper.convert(gContact, EhGroupContacts.class));
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhGroupContacts.class, null);
 	}
 
 	@Override
-	public void deleteComPhoneListById(Long id) {
+	public void deleteGroupContactById(Long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGroupContactsDao dao = new EhGroupContactsDao(context.configuration());
 		dao.deleteById(id);
@@ -58,13 +66,30 @@ public class CompanyProviderImpl implements CompanyProvider{
 	}
 
 	@Override
-	public GroupContact findCompanyPhoneListById(Long id) {
+	public GroupContact findGroupContactById(Long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhGroupContactsDao dao = new EhGroupContactsDao(context.configuration());
 		EhGroupContacts ehObj = dao.fetchOneById(id);
 		if(ehObj != null)
 			return ConvertHelper.convert(ehObj, GroupContact.class);
 		return null;
+	}
+
+	@Override
+	public List<GroupContact> listGroupContactsByKeword(Long ownerId,String keyword, Integer pageSize, Long offset) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(ownerId));
+		
+		if(!StringUtils.isEmpty(keyword))	condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%"));
+		List<GroupContact> list = context.select().from(Tables.EH_GROUP_CONTACTS)
+									.where(condition)
+									.limit(pageSize).offset(offset.intValue())
+									.fetch().map(r -> {
+										return ConvertHelper.convert(r, GroupContact.class);
+									});
+		
+		if(list == null || list.isEmpty()) return null;
+		return list;
 	}
 
 }

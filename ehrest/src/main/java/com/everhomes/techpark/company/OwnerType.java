@@ -1,4 +1,4 @@
-package com.everhomes.techpark.punch.company;
+package com.everhomes.techpark.company;
 
 public enum OwnerType {
 	COMPANY("company");
