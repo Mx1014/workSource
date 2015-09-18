@@ -263,7 +263,8 @@ public class BusinessServiceImpl implements BusinessService {
             businesses = this.businessProvider.findBusinessByIds(recommendBizIds);
         }else{
           //获取指定类型的服务
-            businesses = this.businessProvider.findBusinessByCategroy(cmd.getCategoryId(),geoHashList);
+            List<Long> categoryIds = this.categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
+            businesses = this.businessProvider.findBusinessByCategroy(categoryIds,geoHashList);
         }
         
         Category category = categoryProvider.findCategoryById(cmd.getCategoryId());

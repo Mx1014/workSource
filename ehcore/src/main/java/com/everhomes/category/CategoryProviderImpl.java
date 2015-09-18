@@ -33,6 +33,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
+
 @Component
 public class CategoryProviderImpl implements CategoryProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryProviderImpl.class);
@@ -42,7 +43,8 @@ public class CategoryProviderImpl implements CategoryProvider {
 
     @Caching(evict = { @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory") })
+            @CacheEvict(value="listAllCategory"),
+            @CacheEvict(value="listBusinessSubCategories") })
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -64,7 +66,8 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory") })
+            @CacheEvict(value="listAllCategory"),
+            @CacheEvict(value="listBusinessSubCategories")})
     @Override
     public void updateCategory(Category category) {
         assert(category.getId() != null);
@@ -79,7 +82,8 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Caching(evict = { @CacheEvict(value="Category", key="#category.id"),
             @CacheEvict(value="listChildCategory"),
             @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory") })
+            @CacheEvict(value="listAllCategory"),
+            @CacheEvict(value="listBusinessSubCategories") })
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -292,5 +296,54 @@ public class CategoryProviderImpl implements CategoryProvider {
             );
         
         return result;
+    }
+
+    @Cacheable(value = "listBusinessSubCategories", unless="#result.size() == 0")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<Category> listBusinessSubCategories(long categoryId,
+            CategoryAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SortField[] orderByFields = null;
+        if(orderBy != null && orderBy.length != 0)
+                orderByFields = JooqHelper.toJooqFields(Tables.EH_CATEGORIES, orderBy);
+        List<Category> result;
+        
+        List<Long> categoryIds = getBusinessSubCategories(categoryId);
+        if(categoryIds == null || categoryIds.isEmpty())
+            return null;
+        
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
+        Condition condition = Tables.EH_CATEGORIES.PARENT_ID.in(categoryIds);
+
+        if(condition != null) {
+            selectStep.where(condition);
+        }
+        if(orderByFields != null) {
+            result = selectStep.orderBy(orderByFields).fetch().map(
+                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+            );
+        } else {
+            result = selectStep.fetch().map(
+                new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)
+            );
+        }
+        
+        return result;
+    }
+
+    @Override
+    public List<Long> getBusinessSubCategories(long categoryId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
+        
+        Condition condition = Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode());
+        if(categoryId != 0)
+            condition = condition.and(Tables.EH_CATEGORIES.PARENT_ID.eq(categoryId));
+        
+        List<Long> categoryIds = selectStep.where(condition).fetch().map(r -> r.getValue(Tables.EH_CATEGORIES.ID));
+        return categoryIds;
     }
 }

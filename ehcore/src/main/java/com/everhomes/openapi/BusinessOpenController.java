@@ -73,7 +73,9 @@ public class BusinessOpenController extends ControllerBase {
         
         Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
         @SuppressWarnings("unchecked")
-        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+//        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+//                CategoryAdminStatus.ACTIVE, orderBy);
+        List<Category> entityResultList = this.categoryProvider.listBusinessSubCategories(CategoryConstants.CATEGORY_ID_SERVICE,
                 CategoryAdminStatus.ACTIVE, orderBy);
 
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
