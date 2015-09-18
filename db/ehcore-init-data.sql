@@ -183,7 +183,7 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10003', 'zh_CN', '小区不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10004', 'zh_CN', '帖子不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10005', 'zh_CN', '片区不存在');
-INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10006', 'zh_CN', '片区所在小区不存在');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10006', 'zh_CN', '帖子已删除');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10011', 'zh_CN', '无法分配任务');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '10012', 'zh_CN', '任务已分配');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'group', '10001', 'zh_CN', '圈子不存在');
@@ -407,17 +407,6 @@ INSERT INTO `eh_launch_pad_layouts` VALUES ('3', '0', 'GarcLayout', '{"versionCo
 INSERT INTO `eh_launch_pad_layouts` VALUES ('4', '0', 'GapsLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"GapsLayout","displayName":"派出所首页","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-07-13 16:46:40');
 INSERT INTO `eh_launch_pad_layouts` VALUES ('5', '0', 'GancLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"GancLayout","displayName":"工作站首页","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Posts","instanceConfig":{"itemGroup":"GaPosts"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0},{"groupName":"CallPhone","widget":"CallPhones","instanceConfig":{"itemGroup":"CallPhones","position":"bottom"},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-07-13 16:46:37');
 INSERT INTO `eh_launch_pad_layouts` VALUES ('6', '0', 'PaymentLayout', '{"versionCode":"2015072815","versionName":"3.0.0","layoutName":"PaymentLayout","displayName":"缴费首页","groups":[{"groupName":"pay","widget":"Navigator","instanceConfig":{"itemGroup":"PayActions"},"style":"Light","defaultOrder":1,"separatorFlag":0,"separatorHeight":0,"columnCount":3}]}', '2015072202', '2015061701', '2', '2015-07-13 16:46:37');
-
-
--- eh_configuration
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('prefix.url', 'http://biz.zuolin.com/zl-ec?hideNavigationBar=0&sourceUrl=http://biz.zuolin.com', null);
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.image.url', 'http://bizimg.zuolin.com/imageService/', 'image url');
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('common.pay.url', 'http://pay.zuolin.com/EDS_PAY/', null);
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('apply.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('manage.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.order.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.coupon.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
-INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.detail.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', 'detail url');
 
 
 SET foreign_key_checks = 1;
