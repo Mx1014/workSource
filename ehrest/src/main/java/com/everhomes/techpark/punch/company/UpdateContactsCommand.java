@@ -7,9 +7,8 @@ import com.everhomes.util.StringHelper;
 public class UpdateContactsCommand {
 	@NotNull
 	private Long id;
-	private String name;
-	private String telephone;
-	private String department;
+	private String contactName;
+	private String contactToken;
 	
 	public Long getId() {
 		return id;
@@ -17,23 +16,17 @@ public class UpdateContactsCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getName() {
-		return name;
+	public String getContactName() {
+		return contactName;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
-	public String getTelephone() {
-		return telephone;
+	public String getContactToken() {
+		return contactToken;
 	}
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
-	}
-	public String getDepartment() {
-		return department;
-	}
-	public void setDepartment(String department) {
-		this.department = department;
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
 	}
 	@Override
 	public String toString() {

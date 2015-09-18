@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,24 +43,23 @@ public class CompanyServiceImpl implements CompanyService{
 			e.printStackTrace();
 		}
 
-		List<CompanyPhoneList> list = this.getComPhoneList(resultList);
+		List<GroupContact> list = this.getComPhoneList(resultList);
 		if(list != null && !list.isEmpty()){
 			this.dbProvider.execute(s ->{
-				for(CompanyPhoneList r:list){
-					String telephone = r.getTelephone();
+				for(GroupContact r:list){
+					String telephone = r.getContactToken();
 					if(telephone == null) continue;
-					CompanyPhoneList comPhone = companyProvider.findComPhoneListByPhone(telephone);
+					GroupContact comPhone = companyProvider.findComPhoneListByPhone(telephone);
 					if(comPhone != null){
-						comPhone.setName(r.getName());
-						comPhone.setDepartment(r.getDepartment());
+						comPhone.setContactName(r.getContactName());
 						companyProvider.updateComPhoneList(comPhone);
 					}
 					else {
-						comPhone = new CompanyPhoneList();
+						comPhone = new GroupContact();
 						this.setComPhoneAtCreate(comPhone,0L,currentTimeStamp,user.getId());
-						comPhone.setDepartment(r.getDepartment());
-						comPhone.setName(r.getName());
-						comPhone.setTelephone(r.getTelephone());
+						comPhone.setContactName(r.getContactName());
+						comPhone.setContactType(ContactType.MOBILE.getCode());
+						comPhone.setContactToken(r.getContactToken());
 						companyProvider.createComPhoneList(comPhone);
 					}
 				}
@@ -70,26 +68,26 @@ public class CompanyServiceImpl implements CompanyService{
 		}
 	}
 
-	private void setComPhoneAtCreate(CompanyPhoneList comPhone,Long comId, Timestamp currentTimeStamp,Long userId) {
-		comPhone.setCompanyId(comId);
+	private void setComPhoneAtCreate(GroupContact comPhone,Long comId, Timestamp currentTimeStamp,Long userId) {
+		comPhone.setOwnerType(OwnerType.COMPANY.getCode());
+		comPhone.setOwnerId(comId);
 		comPhone.setCreateTime(currentTimeStamp);
-		comPhone.setCreateUid(userId);
-		comPhone.setUserId(0L);
+		comPhone.setCreatorUid(userId);
+		comPhone.setContactUid(0L);
 	}
 
-	private List<CompanyPhoneList> getComPhoneList(ArrayList resultList) {
-		List<CompanyPhoneList> list = new ArrayList<CompanyPhoneList>();
+	private List<GroupContact> getComPhoneList(ArrayList resultList) {
+		List<GroupContact> list = new ArrayList<GroupContact>();
 		if(resultList != null && resultList.size() > 0){
 			for(int i=1;i<resultList.size();i++){
-				CompanyPhoneList comPhone = new CompanyPhoneList();
+				GroupContact comPhone = new GroupContact();
 				RowResult row = (RowResult) resultList.get(i);
 
 				if(row.getA() == null || row.getA().trim().equals(""))	continue;
 				if(row.getB() == null || row.getB().trim().equals("")) continue;
 
-				comPhone.setName(row.getA().trim());
-				comPhone.setTelephone(row.getB().trim());
-				comPhone.setDepartment(row.getC() == null ? null:row.getC().trim());
+				comPhone.setContactName(row.getA().trim());
+				comPhone.setContactToken(row.getB().trim());
 
 				list.add(comPhone);
 			}
@@ -103,19 +101,17 @@ public class CompanyServiceImpl implements CompanyService{
 		Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
 		
 		this.checkIdIsNull(cmd.getId(), user.getId());
-		CompanyPhoneList comPhone = this.checkCompanyPhoneList(cmd.getId());
+		GroupContact comPhone = this.checkCompanyPhoneList(cmd.getId());
 		
-		if(cmd.getDepartment() != null && !cmd.getDepartment().trim().isEmpty())
-			comPhone.setDepartment(cmd.getDepartment().trim());
-		if(cmd.getName() != null && !cmd.getName().trim().isEmpty())
-			comPhone.setName(cmd.getName().trim());
-		if(cmd.getTelephone() != null && !cmd.getTelephone().trim().isEmpty())
-			comPhone.setTelephone(cmd.getTelephone().trim());
+		if(cmd.getContactName() != null && !cmd.getContactName().trim().isEmpty())
+			comPhone.setContactName(cmd.getContactName().trim());
+		if(cmd.getContactToken() != null && !cmd.getContactToken().trim().isEmpty())
+			comPhone.setContactToken(cmd.getContactToken().trim());
 		this.companyProvider.updateComPhoneList(comPhone);
 	}
 
-	private CompanyPhoneList checkCompanyPhoneList(Long id) {
-		CompanyPhoneList comPhone = this.companyProvider.findCompanyPhoneListById(id);
+	private GroupContact checkCompanyPhoneList(Long id) {
+		GroupContact comPhone = this.companyProvider.findCompanyPhoneListById(id);
 		if(comPhone == null){
 			LOGGER.error("companyPhoneList not be found.id="+id);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -163,13 +159,12 @@ public class CompanyServiceImpl implements CompanyService{
 		this.checkNameIsNull(cmd.getName(), user.getId());
 		this.checkTelephoneIsNull(cmd.getTelephone(), user.getId());
 		
-		CompanyPhoneList comPhone = new CompanyPhoneList();
+		GroupContact comPhone = new GroupContact();
 		Long comId = cmd.getCompanyId() == null ? 0L:cmd.getCompanyId();
 		
 		this.setComPhoneAtCreate(comPhone, comId, currentTimeStamp, user.getId());
-		comPhone.setDepartment(cmd.getDepartment() == null ? "":cmd.getDepartment().trim());
-		comPhone.setName(cmd.getName().trim());
-		comPhone.setTelephone(cmd.getTelephone().trim());
+		comPhone.setContactName(cmd.getName().trim());
+		comPhone.setContactToken(cmd.getTelephone().trim());
 		this.companyProvider.createComPhoneList(comPhone);
 	}
 
