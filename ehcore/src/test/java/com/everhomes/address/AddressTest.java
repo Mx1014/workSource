@@ -328,4 +328,14 @@ public class AddressTest extends CoreServerTestCase {
         int count = familyProvider.countWaitApproveFamily(8L);
         System.out.println(count);
     }
+    
+    @Test
+    public void deleteServiceAddress(){
+        User user = new User();
+        user.setId(10021L);
+        UserContext.current().setUser(user);
+        DeleteServiceAddressCommand cmd = new DeleteServiceAddressCommand();
+        cmd.setId(152714L);
+        this.addressService.deleteServiceAddress(cmd);
+    }
 }
