@@ -61,10 +61,10 @@ ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 #
 # populate default system user root/password
 #
-INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (1, UUID(), 'root', 'system user', 1, 
-    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');
-INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (2, UUID(), 'system assistant', '系统小助手', 1, 
-    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');	
+INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (1, UUID(), 'root', 'system user', 1, 
+    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');
+INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (2, UUID(), 'system assistant', '系统小助手', 1, 
+    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');	
 
 #
 # Reserve IDs
