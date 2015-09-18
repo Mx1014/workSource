@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-09-08 21:01:07
+// generated at 2015-09-18 18:44:17
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.AddressDTO;
+import com.everhomes.openapi.UserServiceAddressDTO;
 
 public class CreateServiceAddressRestResponse extends RestResponseBase {
 
-    private AddressDTO response;
+    private UserServiceAddressDTO response;
 
     public CreateServiceAddressRestResponse () {
     }
 
-    public AddressDTO getResponse() {
+    public UserServiceAddressDTO getResponse() {
         return response;
     }
 
-    public void setResponse(AddressDTO response) {
+    public void setResponse(UserServiceAddressDTO response) {
         this.response = response;
     }
 }
