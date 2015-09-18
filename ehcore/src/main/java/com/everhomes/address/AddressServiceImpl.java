@@ -44,7 +44,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
@@ -52,8 +51,6 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
 import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.openapi.UserServiceAddressDTO;
@@ -987,6 +984,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
 
+    @Override
+    public void deleteServiceAddress(DeleteServiceAddressCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid address id, id parameter");
+        }
+        Address address = this.addressProvider.findAddressById(cmd.getId());
+        if(address == null){
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
+                    "Address is not exists");
+        }
+        User user = UserContext.current().getUser();
+        
+        this.userActivityProvider.deleteUserServieAddress(address.getId(),user.getId());
+        this.addressProvider.deleteAddress(address);
+    }
 	@Override
 	public void importCommunityInfos(MultipartFile[] files) {
 		long startTime = System.currentTimeMillis();
@@ -1293,6 +1306,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		}
 		return count;
 	}
+
 
 
 }

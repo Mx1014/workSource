@@ -249,5 +249,22 @@ public class AddressController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /address/deleteServiceAddress</b>
+     * <p>删除服务地址</p>
+     */
+    @RequestMapping("deleteServiceAddress")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceAddress(@Valid DeleteServiceAddressCommand cmd) {
+        this.addressService.deleteServiceAddress(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 
 }
