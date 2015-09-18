@@ -20,13 +20,23 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.ve
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.server', 'api.ucpaas.com', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('mw.vcode.template.content', '您的验证码为${vcode}，10分钟内有效，感谢您的使用。', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('marketdata.item.version', '2015080311', 'the version of all luanchpad items');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.order.url', '/app/static/indent/indent.html', 'the relative path for user order');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('app.agreements.url', '/app/static/app_agreements/app_agreements.html', 'the relative path for app agreements');
+
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('apply.shop.url', '/app/static/apply_store/apply_store.html', 'the relative path for user shop apply');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('manage.shop.url', '/app/static/my_store/my_store.html', 'the relative path for user shop manage');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.order.url', '/app/static/indent/indent.html', 'the relative path for user order');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.coupon.url', '/app/static/coupon/coupon.html', 'the relative path for user coupon');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('app.agreements.url', '/app/static/app_agreements/app_agreements.html', 'the relative path for app agreements');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.detail.url', '/web/app/user/index.html#/store/details/', 'business details');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.image.url', 'http://121.199.69.107:8081/imageService/', 'business image url');
+
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('prefix.url', 'http://biz.zuolin.com/zl-ec?hideNavigationBar=0&sourceUrl=http://biz.zuolin.com', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('common.pay.url', 'http://pay.zuolin.com/EDS_PAY/', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('apply.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('manage.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.order.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.coupon.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.image.url', 'http://bizimg.zuolin.com/imageService/', 'image url');
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.detail.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', 'detail url');
 
 
 
