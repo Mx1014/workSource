@@ -270,4 +270,23 @@ public class CategoryController extends ControllerBase {
         }
         return new RestResponse();
     }
+    
+    /**
+     * <b>URL: /category/listBusinessSubCategories</b> 列出所有商家子分类
+     */
+    @RequestMapping("listBusinessSubCategories")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listBusinessSubCategories() {
+        
+        Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
+        @SuppressWarnings("unchecked")
+        List<Category> entityResultList = this.categoryProvider.listBusinessSubCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+                CategoryAdminStatus.ACTIVE, orderBy);
+
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+        
+        return new RestResponse(dtoResultList);
+    }
 }
