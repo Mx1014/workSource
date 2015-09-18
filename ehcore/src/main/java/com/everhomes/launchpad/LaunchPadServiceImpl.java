@@ -258,15 +258,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
         //获取用户相关组织，如果用户加入组织，则获取相应的item（如某个item物业人员可见）
-        ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
-        List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
-        if(dtos != null && !dtos.isEmpty()){
-            List<String> tags = new  ArrayList<String>();
-            dtos.forEach(r -> tags.add(r.getOrganizationType()));
-            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,tags);
-            if(adminItems != null && !adminItems.isEmpty())
-                allItems.addAll(adminItems);
-        }
+        //目前这个版本不考虑管理员相关的item
+//        ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
+//        List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
+//        if(dtos != null && !dtos.isEmpty()){
+//            List<String> tags = new  ArrayList<String>();
+//            dtos.forEach(r -> tags.add(r.getOrganizationType()));
+//            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,tags);
+//            if(adminItems != null && !adminItems.isEmpty())
+//                allItems.addAll(adminItems);
+//        }
         try{ 
             List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
