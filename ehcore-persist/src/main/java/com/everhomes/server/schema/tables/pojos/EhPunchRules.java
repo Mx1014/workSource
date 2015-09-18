@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2019298664;
+	private static final long serialVersionUID = -2074416840;
 
 	private java.lang.Long     id;
 	private java.lang.Long     companyId;
@@ -22,7 +22,8 @@ public class EhPunchRules implements java.io.Serializable {
 	private java.sql.Time      noonEndTime;
 	private java.sql.Time      afternoonStartTime;
 	private java.sql.Time      workTime;
-	private java.sql.Time      lateTime;
+	private java.sql.Time      lateArriveTime;
+	private java.sql.Time      earlyLeaveTime;
 	private java.lang.Long     createUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     updateUid;
@@ -40,7 +41,8 @@ public class EhPunchRules implements java.io.Serializable {
 		java.sql.Time      noonEndTime,
 		java.sql.Time      afternoonStartTime,
 		java.sql.Time      workTime,
-		java.sql.Time      lateTime,
+		java.sql.Time      lateArriveTime,
+		java.sql.Time      earlyLeaveTime,
 		java.lang.Long     createUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     updateUid,
@@ -55,7 +57,8 @@ public class EhPunchRules implements java.io.Serializable {
 		this.noonEndTime = noonEndTime;
 		this.afternoonStartTime = afternoonStartTime;
 		this.workTime = workTime;
-		this.lateTime = lateTime;
+		this.lateArriveTime = lateArriveTime;
+		this.earlyLeaveTime = earlyLeaveTime;
 		this.createUid = createUid;
 		this.createTime = createTime;
 		this.updateUid = updateUid;
@@ -134,12 +137,20 @@ public class EhPunchRules implements java.io.Serializable {
 		this.workTime = workTime;
 	}
 
-	public java.sql.Time getLateTime() {
-		return this.lateTime;
+	public java.sql.Time getLateArriveTime() {
+		return this.lateArriveTime;
 	}
 
-	public void setLateTime(java.sql.Time lateTime) {
-		this.lateTime = lateTime;
+	public void setLateArriveTime(java.sql.Time lateArriveTime) {
+		this.lateArriveTime = lateArriveTime;
+	}
+
+	public java.sql.Time getEarlyLeaveTime() {
+		return this.earlyLeaveTime;
+	}
+
+	public void setEarlyLeaveTime(java.sql.Time earlyLeaveTime) {
+		this.earlyLeaveTime = earlyLeaveTime;
 	}
 
 	public java.lang.Long getCreateUid() {

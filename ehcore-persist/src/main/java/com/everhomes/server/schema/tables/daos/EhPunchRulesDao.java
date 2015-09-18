@@ -104,10 +104,17 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>late_time IN (values)</code>
+	 * Fetch records that have <code>late_arrive_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByLateTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.LATE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByLateArriveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.LATE_ARRIVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>early_leave_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByEarlyLeaveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.EARLY_LEAVE_TIME, values);
 	}
 
 	/**

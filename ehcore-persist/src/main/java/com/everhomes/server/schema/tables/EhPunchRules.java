@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchRulesRecord> {
 
-	private static final long serialVersionUID = -1581468190;
+	private static final long serialVersionUID = -703096076;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_rules</code>
@@ -72,9 +72,14 @@ public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> WORK_TIME = createField("work_time", org.jooq.impl.SQLDataType.TIME, this, "how long must I work");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.late_time</code>. how long can I be late
+	 * The column <code>ehcore.eh_punch_rules.late_arrive_time</code>. how long can I be late
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> LATE_TIME = createField("late_time", org.jooq.impl.SQLDataType.TIME, this, "how long can I be late");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> LATE_ARRIVE_TIME = createField("late_arrive_time", org.jooq.impl.SQLDataType.TIME, this, "how long can I be late");
+
+	/**
+	 * The column <code>ehcore.eh_punch_rules.early_leave_time</code>. how long can I be early leave from work
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> EARLY_LEAVE_TIME = createField("early_leave_time", org.jooq.impl.SQLDataType.TIME, this, "how long can I be early leave from work");
 
 	/**
 	 * The column <code>ehcore.eh_punch_rules.create_uid</code>.
