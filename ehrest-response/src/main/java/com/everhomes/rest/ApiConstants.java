@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-09-08 21:01:07
+// generated at 2015-09-18 18:44:17
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -10,7 +10,9 @@ public interface ApiConstants {
     public static final String ACTIVITY_FINDACTIVITYDETAILS_URL = "/activity/findActivityDetails";
     public static final String ACTIVITY_LIST_URL = "/activity/list";
     public static final String ACTIVITY_LISTACTIVITYCATEGORIES_URL = "/activity/listActivityCategories";
+    public static final String ACTIVITY_LISTCITYACTIVITIES_URL = "/activity/listCityActivities";
     public static final String ACTIVITY_LISTNEARBYACTIVITIES_URL = "/activity/listNearbyActivities";
+    public static final String ACTIVITY_LISTNEARBYACTIVITIESV2_URL = "/activity/listNearbyActivitiesV2";
     public static final String ACTIVITY_REJECT_URL = "/activity/reject";
     public static final String ACTIVITY_SIGNUP_URL = "/activity/signup";
     public static final String ADDRESS_CLAIMADDRESS_URL = "/address/claimAddress";
@@ -27,6 +29,9 @@ public interface ApiConstants {
     public static final String ADDRESS_LISTSUGGESTEDCOMMUNITIES_URL = "/address/listSuggestedCommunities";
     public static final String ADDRESS_SEARCHCOMMUNITIES_URL = "/address/searchCommunities";
     public static final String ADDRESS_SUGGESTCOMMUNITY_URL = "/address/suggestCommunity";
+    public static final String ADMIN_ACL_ASSIGNUSERROLE_URL = "/admin/acl/assignUserRole";
+    public static final String ADMIN_ACL_DELETEUSERROLE_URL = "/admin/acl/deleteUserRole";
+    public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
     public static final String ADMIN_ADDBORDER_URL = "/admin/addBorder";
     public static final String ADMIN_ADDNAMESPACE_URL = "/admin/addNamespace";
@@ -85,6 +90,8 @@ public interface ApiConstants {
     public static final String ADMIN_LISTLOGIN_URL = "/admin/listLogin";
     public static final String ADMIN_LISTNAMESPACE_URL = "/admin/listNamespace";
     public static final String ADMIN_LISTPERSISTSERVER_URL = "/admin/listPersistServer";
+    public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
+    public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
     public static final String ADMIN_ORG_CREATEORGANIZATION_URL = "/admin/org/createOrganization";
     public static final String ADMIN_ORG_CREATEORGANIZATIONCOMMUNITY_URL = "/admin/org/createOrganizationCommunity";
     public static final String ADMIN_ORG_CREATEORGANIZATIONMEMBER_URL = "/admin/org/createOrganizationMember";
@@ -126,6 +133,7 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTACTIONCATEGORIES_URL = "/category/listActionCategories";
     public static final String CATEGORY_LISTALLCATEGORIES_URL = "/category/listAllCategories";
     public static final String CATEGORY_LISTBUSINESSCATEGORIES_URL = "/category/listBusinessCategories";
+    public static final String CATEGORY_LISTBUSINESSSUBCATEGORIES_URL = "/category/listBusinessSubCategories";
     public static final String CATEGORY_LISTCHILDREN_URL = "/category/listChildren";
     public static final String CATEGORY_LISTCONTENTCATEGORIES_URL = "/category/listContentCategories";
     public static final String CATEGORY_LISTDESCENDANTS_URL = "/category/listDescendants";
@@ -229,9 +237,12 @@ public interface ApiConstants {
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
     public static final String OAUTH2API_GETUSERINFO_URL = "/oauth2api/getUserInfo";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
+    public static final String OPENAPI_GETUSERSERVICEADDRESS_URL = "/openapi/getUserServiceAddress";
+    public static final String OPENAPI_INVALIDCOUPON_URL = "/openapi/invalidCoupon";
     public static final String OPENAPI_LISTBIZCATEGORIES_URL = "/openapi/listBizCategories";
     public static final String OPENAPI_NOTIFYDOORLOCK_URL = "/openapi/notifyDoorLock";
     public static final String OPENAPI_NOTIFYMESSAGE_URL = "/openapi/notifyMessage";
+    public static final String OPENAPI_RECEIVECOUPON_URL = "/openapi/receiveCoupon";
     public static final String OPENAPI_SENDMESSAGETOUSER_URL = "/openapi/sendMessageToUser";
     public static final String OPENAPI_SYNCBUSINESS_URL = "/openapi/syncBusiness";
     public static final String OPENAPI_SYNCDELETEBUSINESS_URL = "/openapi/syncDeleteBusiness";
