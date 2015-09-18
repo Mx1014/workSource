@@ -297,7 +297,7 @@ public class ForumServiceImpl implements ForumService {
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
-                    if(userId == post.getCreatorUid()){
+                    if(userId.equals(post.getCreatorUid())){
                     	userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
                     }
                    return null;
