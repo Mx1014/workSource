@@ -452,6 +452,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
+        
+        Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+            @Override
+            public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+               return o1.getId().intValue() - o2.getId().intValue();
+            }
+        });
+        //优先根据defaultOrder排序显示
         Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
             @Override
             public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
