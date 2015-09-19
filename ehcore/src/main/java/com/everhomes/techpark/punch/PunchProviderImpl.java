@@ -36,13 +36,17 @@ public class PunchProviderImpl implements PunchProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
      
-    @Cacheable(value="PunchLogs-List", key="#queryDate", unless="#result.size() == 0")
+//    @Cacheable(value="PunchLogs-List", key="{#queryDate,#userId,#companyId}", unless="#result.size() == 0")
 	@Override
-	public List<PunchLogs> listPunchLogsByDate(String queryDate) { 
+	public List<PunchLogs> listPunchLogsByDate(Long userId, Long companyId,String queryDate) { 
 		Date date =java.sql.Date.valueOf(queryDate);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS);
         Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.equal(date);
+        Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
+        Condition condition3 = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+        condition = condition.and(condition2);
+        condition = condition.and(condition3);
         step.where(condition);
         List<PunchLogs> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc()).
                 fetch().map((r) ->{ return ConvertHelper.convert(r, PunchLogs.class);});
@@ -50,12 +54,16 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public List<Date> listPunchLogsBwteenTwoDay(String beginDate,String endDate) { 
+	public List<Date> listPunchLogsBwteenTwoDay(Long userId, Long companyId,String beginDate,String endDate) { 
 		Date beginSqlDate =java.sql.Date.valueOf(beginDate);
 		Date endSqlDate =java.sql.Date.valueOf(endDate);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record1<Date>> step = context.selectDistinct(Tables.EH_PUNCH_LOGS.PUNCH_DATE).from(Tables.EH_PUNCH_LOGS);
-        Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginSqlDate, endSqlDate);
+        Condition condition3 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginSqlDate, endSqlDate);
+        Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
+        Condition condition = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+        condition = condition.and(condition2);
+        condition = condition.and(condition3);
         step.where(condition);
         List<Date> result = step.orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc()).
                 fetch().map(r -> r.getValue(Tables.EH_PUNCH_LOGS.PUNCH_DATE));
@@ -75,9 +83,9 @@ public class PunchProviderImpl implements PunchProvider {
         return null;
 	}
 	
-	@Caching(evict = {
-	        @CacheEvict(value="PunchLogs-List", key="#punchLog.punchDate")
-	    })
+//	@Caching(evict = {
+//	        @CacheEvict(value="PunchLogs-List", key="{#punchLog.punchDate,#punchLog.userId,#punchLog.companyId}")
+//	    })
 	@Override
 	public void createPunchLog(PunchLogs punchLog) {
 		// TODO Auto-generated method stub

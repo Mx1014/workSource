@@ -72,7 +72,7 @@ public class PunchServiceImpl implements PunchService {
 							PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
 							"there is something wrong with queryYear,please check again ");
 		}
-		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(dateSF.format(start.getTime()), dateSF.format(end.getTime()));
+		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(userId,cmd.getCompanyId(),dateSF.format(start.getTime()), dateSF.format(end.getTime()));
 		
 		for(java.sql.Date date : dateList) {
 			start.setTime(date);
@@ -83,15 +83,15 @@ public class PunchServiceImpl implements PunchService {
 				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayListInfo>());
 				pyl.getPunchLogsMonthListResponses().add(pml);
 			} else if (!pml.getPunch_month().equals(
-					String.valueOf(start.get(Calendar.MONTH)))) {
+					String.valueOf(start.get(Calendar.MONTH)+1))) {
 				// 如果pml的月份和start不一样，建立新的pml
 				pml = new PunchLogsMonthListResponse();
-				pml.setPunch_month(String.valueOf(start.get(Calendar.MONTH)));
+				pml.setPunch_month(String.valueOf(start.get(Calendar.MONTH)+ 1));
 				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayListInfo>());
 				pyl.getPunchLogsMonthListResponses().add(pml);
 			}
 			List<PunchLogs> punchLogs = punchProvider
-					.listPunchLogsByDate(dateSF.format(start.getTime()));
+					.listPunchLogsByDate(userId,cmd.getCompanyId(),dateSF.format(start.getTime()));
 			if (null == punchLogs|| punchLogs.size()==0) {
 				continue;
 			}
@@ -180,9 +180,9 @@ public class PunchServiceImpl implements PunchService {
 					pdl.setPunchStatus(PunchStatus.UNPUNCH);
 				} else {
 					// 下班时间-早退时间前有记录-早退
-					punchLogDTO.setPunchStatus(PunchStatus.BELATE);
+					punchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY);
 					if (pdl.getPunchStatus() == PunchStatus.NORMAL)
-						pdl.setPunchStatus(PunchStatus.BELATE);
+						pdl.setPunchStatus(PunchStatus.LEAVEEARLY);
 				}
 			} else {
 				// 下班时间前有记录-正常
@@ -266,9 +266,9 @@ public class PunchServiceImpl implements PunchService {
 					pdl.setPunchStatus(PunchStatus.UNPUNCH);
 				} else {
 					// 下班时间-早退时间前有记录-早退
-					punchLogDTO.setPunchStatus(PunchStatus.BELATE);
+					punchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY);
 					if (pdl.getPunchStatus() == PunchStatus.NORMAL)
-						pdl.setPunchStatus(PunchStatus.BELATE);
+						pdl.setPunchStatus(PunchStatus.LEAVEEARLY);
 				}
 			} else {
 				// 下班时间前有记录-正常
@@ -328,8 +328,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private List<PunchLogDTO> marcheLogsBetweenTime(List<PunchLogs> punchLogs,
-			Calendar beginCalendar, Calendar endCalendar) {
-		// TODO Auto-generated method stub
+			Calendar beginCalendar, Calendar endCalendar) { 
 		List<PunchLogDTO> result = new ArrayList<PunchLogDTO>();
 		Calendar logCalendar = Calendar.getInstance();
 		Calendar maxCalendar = Calendar.getInstance();
@@ -422,7 +421,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void createPunchLog(Long userId, Long companyId, String punchTime) {
-		// TODO Auto-generated method stub
+ 
 		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		PunchLogs punchLog = new PunchLogs();
@@ -433,7 +432,7 @@ public class PunchServiceImpl implements PunchService {
 		try {
 			punCalendar.setTime(datetimeSF.parse(punchTime));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+		 
 			e.printStackTrace();
 		}
 		if(punCalendar.get(Calendar.HOUR_OF_DAY)<5){
