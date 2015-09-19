@@ -299,9 +299,11 @@ public class AddressTest extends CoreServerTestCase {
         user.setId(10021L);
         UserContext.current().setUser(user);
         CreateServiceAddressCommand cmd = new CreateServiceAddressCommand();
-        cmd.setAddress("京基百纳");
+        cmd.setAddress("京基百纳xxxxdddddsdfsadfx");
         cmd.setRegionId(4150l);
-        AddressDTO addressDTO = addressService.createServiceAddress(cmd);
+        cmd.setContactName("namexxxxxxxxx");
+        cmd.setContactToken("15875301110");
+        UserServiceAddressDTO addressDTO = addressService.createServiceAddress(cmd);
         System.out.println(addressDTO);
     }
     
@@ -312,6 +314,7 @@ public class AddressTest extends CoreServerTestCase {
         UserContext.current().setUser(user);
         GetUserServiceAddressCommand cmd = new GetUserServiceAddressCommand();
         cmd.setUserId(152719L);
+        
         List<UserServiceAddressDTO> addresses = userActivityService.getUserServiceAddress(cmd);
         if(addresses != null){
             addresses.forEach(r ->{
@@ -324,5 +327,15 @@ public class AddressTest extends CoreServerTestCase {
     public void testCountWaitFamily(){
         int count = familyProvider.countWaitApproveFamily(8L);
         System.out.println(count);
+    }
+    
+    @Test
+    public void deleteServiceAddress(){
+        User user = new User();
+        user.setId(10021L);
+        UserContext.current().setUser(user);
+        DeleteServiceAddressCommand cmd = new DeleteServiceAddressCommand();
+        cmd.setId(152714L);
+        this.addressService.deleteServiceAddress(cmd);
     }
 }

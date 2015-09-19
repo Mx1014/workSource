@@ -1,7 +1,6 @@
 package com.everhomes.address;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,9 +19,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyDTO;
+import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.CommunitySearcher;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
 
@@ -241,14 +240,31 @@ public class AddressController extends ControllerBase {
      * <p>创建服务地址</p>
      */
     @RequestMapping("createServiceAddress")
-    @RestReturn(value=AddressDTO.class)
+    @RestReturn(value=UserServiceAddressDTO.class)
     public RestResponse createServiceAddress(@Valid CreateServiceAddressCommand cmd) {
-        AddressDTO addressDTO = this.addressService.createServiceAddress(cmd);
+        UserServiceAddressDTO addressDTO = this.addressService.createServiceAddress(cmd);
         
         RestResponse response = new RestResponse(addressDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /address/deleteServiceAddress</b>
+     * <p>删除服务地址</p>
+     */
+    @RequestMapping("deleteServiceAddress")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceAddress(@Valid DeleteServiceAddressCommand cmd) {
+        this.addressService.deleteServiceAddress(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 
 }
