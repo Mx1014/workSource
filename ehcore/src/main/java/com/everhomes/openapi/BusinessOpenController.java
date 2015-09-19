@@ -32,9 +32,12 @@ import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.GetUserByUuidResponse;
+import com.everhomes.user.GetUserInfoByUuid;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
+import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -242,6 +245,32 @@ public class BusinessOpenController extends ControllerBase {
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("getUserInfoByUuid")
+    @RestReturn(GetUserByUuidResponse.class)
+    public RestResponse getUserInfoByUuid(@Valid GetUserInfoByUuid cmd) {
+        UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        if(null == user) {
+            response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
+            response.setErrorDescription("User not found");
+            return response;
+        }
+        
+        GetUserByUuidResponse resp = new GetUserByUuidResponse();
+        resp.setAccountName(user.getAccountName());
+        resp.setMobile(user.getPhones().get(0));
+        resp.setNickName(user.getNickName());
+        resp.setAvatarUrl(user.getAvatarUrl());
+        resp.setUuid(user.getUuid());
+        resp.setGender(user.getGender());
+        
+        response.setResponseObject(resp);
         return response;
     }
 }
