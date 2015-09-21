@@ -12,9 +12,12 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGroupContactsDao;
 import com.everhomes.server.schema.tables.pojos.EhGroupContacts;
+import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.techpark.company.GroupContact;
 import com.everhomes.techpark.company.GroupContactProvider;
 import com.everhomes.techpark.company.OwnerType;
@@ -27,6 +30,9 @@ public class CompanyProviderImpl implements GroupContactProvider{
 	@Autowired
 	private DbProvider dbProvider;
 
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
 	@Override
 	public GroupContact findGroupContactByToken(String contactToken) {
 
@@ -51,7 +57,9 @@ public class CompanyProviderImpl implements GroupContactProvider{
 
 	@Override
 	public void createGroupContact(GroupContact gContact) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite()); 
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupContacts.class));
+		gContact.setId(id);
 		EhGroupContactsDao dao = new EhGroupContactsDao(context.configuration());
 		dao.insert(ConvertHelper.convert(gContact, EhGroupContacts.class));
 		DaoHelper.publishDaoAction(DaoAction.CREATE,  EhGroupContacts.class, null);
