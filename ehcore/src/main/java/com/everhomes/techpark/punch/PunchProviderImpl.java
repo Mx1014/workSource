@@ -38,7 +38,7 @@ public class PunchProviderImpl implements PunchProvider {
      
 //    @Cacheable(value="PunchLogs-List", key="{#queryDate,#userId,#companyId}", unless="#result.size() == 0")
 	@Override
-	public List<PunchLogs> listPunchLogsByDate(Long userId, Long companyId,String queryDate) { 
+	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId,String queryDate) { 
 		Date date =java.sql.Date.valueOf(queryDate);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS);
@@ -48,8 +48,8 @@ public class PunchProviderImpl implements PunchProvider {
         condition = condition.and(condition2);
         condition = condition.and(condition3);
         step.where(condition);
-        List<PunchLogs> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc()).
-                fetch().map((r) ->{ return ConvertHelper.convert(r, PunchLogs.class);});
+        List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc()).
+                fetch().map((r) ->{ return ConvertHelper.convert(r, PunchLog.class);});
         return result;
 	}
 	
@@ -71,13 +71,13 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public PunchRules getPunchRuleByCompanyId(Long companyId) {
+	public PunchRule getPunchRuleByCompanyId(Long companyId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_RULES);
         Condition condition = Tables.EH_PUNCH_RULES.COMPANY_ID.equal(companyId);
         step.where(condition);
-        List<PunchRules> result = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc()).
-                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchRules.class);});
+        List<PunchRule> result = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc()).
+                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchRule.class);});
         if(null!=result && result.size()>0 )
         	return result.get(0);
         return null;
@@ -87,7 +87,7 @@ public class PunchProviderImpl implements PunchProvider {
 //	        @CacheEvict(value="PunchLogs-List", key="{#punchLog.punchDate,#punchLog.userId,#punchLog.companyId}")
 //	    })
 	@Override
-	public void createPunchLog(PunchLogs punchLog) {
+	public void createPunchLog(PunchLog punchLog) {
 		// TODO Auto-generated method stub
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchLogs.class));
@@ -96,8 +96,7 @@ public class PunchProviderImpl implements PunchProvider {
 		dao.insert(punchLog);
 		
 		
-	}
-	  
+	} 
  
 	    
 	  

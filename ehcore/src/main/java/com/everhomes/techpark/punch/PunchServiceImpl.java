@@ -17,7 +17,9 @@ import org.apache.tools.ant.taskdefs.Java;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.everhomes.constants.ErrorCodes; 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 @Service
@@ -27,8 +29,9 @@ public class PunchServiceImpl implements PunchService {
 	PunchProvider punchProvider;
 
 	@Override
-	public PunchLogsYearListResponse getlistPunchLogs(Long userId,
-			ListPunchLogsCommand cmd) {
+	public PunchLogsYearListResponse getlistPunchLogs(ListPunchLogsCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+       
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		if (cmd.getCompanyId() == null)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -39,7 +42,7 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryYear parameter in the command");
 
-		PunchRules punchRule = punchProvider.getPunchRuleByCompanyId(cmd
+		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(cmd
 				.getCompanyId());
 		if (null == punchRule)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -72,9 +75,11 @@ public class PunchServiceImpl implements PunchService {
 							PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
 							"there is something wrong with queryYear,please check again ");
 		}
-		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(userId,cmd.getCompanyId(),dateSF.format(start.getTime()), dateSF.format(end.getTime()));
-		
-		for(java.sql.Date date : dateList) {
+		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(
+				userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
+				dateSF.format(end.getTime()));
+
+		for (java.sql.Date date : dateList) {
 			start.setTime(date);
 			if (null == pml) {
 				// 如果pml为空，即是循环第一次，建立新的pml
@@ -83,37 +88,38 @@ public class PunchServiceImpl implements PunchService {
 				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayList>());
 				pyl.getPunchLogsMonthList().add(pml);
 			} else if (!pml.getPunchMonth().equals(
-					String.valueOf(start.get(Calendar.MONTH)+1))) {
+					String.valueOf(start.get(Calendar.MONTH) + 1))) {
 				// 如果pml的月份和start不一样，建立新的pml
 				pml = new PunchLogsMonthList();
-				pml.setPunchMonth(String.valueOf(start.get(Calendar.MONTH)+ 1));
+				pml.setPunchMonth(String.valueOf(start.get(Calendar.MONTH) + 1));
 				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayList>());
 				pyl.getPunchLogsMonthList().add(pml);
 			}
-			List<PunchLogs> punchLogs = punchProvider
-					.listPunchLogsByDate(userId,cmd.getCompanyId(),dateSF.format(start.getTime()));
-			if (null == punchLogs|| punchLogs.size()==0) {
+			List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
+					userId, cmd.getCompanyId(), dateSF.format(start.getTime()));
+			if (null == punchLogs || punchLogs.size() == 0) {
 				continue;
 			}
 			PunchLogsDayList pdl = new PunchLogsDayList();
 			pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
 			pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
-			try{
-			pml.getPunchLogsDayList().add(
-					makePunchLogsDayListInfo(punchLogs, punchRule, pdl));}
-			catch(ParseException e){
-				 
-					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-							ErrorCodes.ERROR_INVALID_PARAMETER,
-							"punch Rule has somthing wrong");
-			} 
-//			start.add(Calendar.DAY_OF_MONTH, 1);
+			try {
+				pml.getPunchLogsDayList().add(
+						makePunchLogsDayListInfo(punchLogs, punchRule, pdl));
+			} catch (ParseException e) {
+
+				throw RuntimeErrorException.errorWith(
+						PunchServiceErrorCode.SCOPE,
+						ErrorCodes.ERROR_INVALID_PARAMETER,
+						"punch Rule has somthing wrong");
+			}
+			// start.add(Calendar.DAY_OF_MONTH, 1);
 		}
 		return pyl;
 	}
 
 	private PunchLogsDayList makePunchLogsDayListInfo(
-			List<PunchLogs> punchLogs, PunchRules punchRule,
+			List<PunchLog> punchLogs, PunchRule punchRule,
 			PunchLogsDayList pdl) throws ParseException {
 
 		SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
@@ -180,7 +186,8 @@ public class PunchServiceImpl implements PunchService {
 					pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 				} else {
 					// 下班时间-早退时间前有记录-早退
-					punchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+					punchLogDTO
+							.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
 					if (pdl.getPunchStatus() == PunchStatus.NORMAL.getCode())
 						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
 				}
@@ -266,7 +273,8 @@ public class PunchServiceImpl implements PunchService {
 					pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 				} else {
 					// 下班时间-早退时间前有记录-早退
-					punchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+					punchLogDTO
+							.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
 					if (pdl.getPunchStatus() == PunchStatus.NORMAL.getCode())
 						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
 				}
@@ -327,13 +335,13 @@ public class PunchServiceImpl implements PunchService {
 		return pdl;
 	}
 
-	private List<PunchLogDTO> marcheLogsBetweenTime(List<PunchLogs> punchLogs,
-			Calendar beginCalendar, Calendar endCalendar) { 
+	private List<PunchLogDTO> marcheLogsBetweenTime(List<PunchLog> punchLogs,
+			Calendar beginCalendar, Calendar endCalendar) {
 		List<PunchLogDTO> result = new ArrayList<PunchLogDTO>();
 		Calendar logCalendar = Calendar.getInstance();
 		Calendar maxCalendar = Calendar.getInstance();
 		Calendar minCalendar = Calendar.getInstance();
-		for (PunchLogs punchlog : punchLogs) {
+		for (PunchLog punchlog : punchLogs) {
 			logCalendar.setTime(punchlog.getPunchTime());
 			// 打卡记录在时间之前
 			if (logCalendar.after(beginCalendar)
@@ -375,12 +383,12 @@ public class PunchServiceImpl implements PunchService {
 		return result;
 	}
 
-	private PunchLogDTO marcheLogsAfterTime(List<PunchLogs> punchLogs,
+	private PunchLogDTO marcheLogsAfterTime(List<PunchLog> punchLogs,
 			Calendar compareCalendar) {
 		PunchLogDTO result = null;
 		Calendar logCalendar = Calendar.getInstance();
 		Calendar maxCalendar = Calendar.getInstance();
-		for (PunchLogs punchlog : punchLogs) {
+		for (PunchLog punchlog : punchLogs) {
 			logCalendar.setTime(punchlog.getPunchTime());
 			// 打卡记录在时间之前
 			if (logCalendar.after(compareCalendar)) {
@@ -397,12 +405,12 @@ public class PunchServiceImpl implements PunchService {
 		return result;
 	}
 
-	private PunchLogDTO marcheLogsBeforeTime(List<PunchLogs> punchLogs,
+	private PunchLogDTO marcheLogsBeforeTime(List<PunchLog> punchLogs,
 			Calendar compareCalendar) {
 		PunchLogDTO result = null;
 		Calendar logCalendar = Calendar.getInstance();
 		Calendar minCalendar = Calendar.getInstance();
-		for (PunchLogs punchlog : punchLogs) {
+		for (PunchLog punchlog : punchLogs) {
 			logCalendar.setTime(punchlog.getPunchTime());
 			// 打卡记录在时间之前
 			if (logCalendar.before(compareCalendar)) {
@@ -420,27 +428,34 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public void createPunchLog(Long userId, Long companyId, String punchTime) {
- 
-		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public String createPunchLog(PunchClockCommand cmd) {
+
+		Long userId = UserContext.current().getUser().getId();
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 设置日期格式
+		String punchTime = df.format(new Date());// new Date()为获取当前系统时间为打卡时间
+		SimpleDateFormat datetimeSF = new SimpleDateFormat(
+				"yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		PunchLogs punchLog = new PunchLogs();
-		punchLog.setCompanyId(companyId);
+		PunchLog punchLog = new PunchLog();
+		punchLog.setCompanyId(cmd.getCompanyId());
 		punchLog.setUserId(userId);
-		punchLog.setPunchTime(Timestamp.valueOf(punchTime)); 
+		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
 		Calendar punCalendar = Calendar.getInstance();
 		try {
 			punCalendar.setTime(datetimeSF.parse(punchTime));
 		} catch (ParseException e) {
-		 
+
 			e.printStackTrace();
 		}
-		if(punCalendar.get(Calendar.HOUR_OF_DAY)<5){
-			//如果打卡时间小于5，用昨天
+		if (punCalendar.get(Calendar.HOUR_OF_DAY) < 5) {
+			// 如果打卡时间小于5，用昨天
 			punCalendar.add(Calendar.DATE, -1);
 		}
-		punchLog.setPunchDate(  java.sql.Date.valueOf(dateSF.format(punCalendar.getTime())));
+		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(punCalendar
+				.getTime())));
 		punchProvider.createPunchLog(punchLog);
+		return punchTime;
 	}
 
 }

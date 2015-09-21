@@ -31,33 +31,34 @@ import com.everhomes.user.UserContext;
 @RestController
 @RequestMapping("/techpark/punch")
 public class PunchController extends ControllerBase {
-	
+
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchController.class);
 
-    @Autowired
-    private PunchService punchService;
+	@Autowired
+	private PunchService punchService;
 
-	/**
-	 * <b>URL: /techpark/punch/getPunchLocation</b>
-	 * <p>
-	 * 根据请求 user和company的ID 确定用户办公楼栋坐标
-	 * </p>
-	 */
-	@RequestMapping("getPunchLocation")
-	@RestReturn(value = GroupDTO.class)
-	public RestResponse getPunchLocation(@Valid GetPunchLocationCommand cmd) {
-		// LocationDTO locationDto = this.(cmd);
-		LocationDTO locationDTO = new LocationDTO();
-		locationDTO.setLatitude(39.9291);
-		locationDTO.setLongitude(116.597);
-		RestResponse response = new RestResponse(locationDTO);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+	//
+	// /**
+	// * <b>URL: /techpark/punch/getPunchLocation</b>
+	// * <p>
+	// * 根据请求 user和company的ID 确定用户办公楼栋坐标
+	// * </p>
+	// */
+	// z @RequestMapping("getPunchLocation")
+	// @RestReturn(value = GroupDTO.class)
+	// public RestResponse getPunchLocation(@Valid GetPunchLocationCommand cmd)
+	// {
+	// // LocationDTO locationDto = this.(cmd);
+	// LocationDTO locationDTO = new LocationDTO();
+	// locationDTO.setLatitude(39.9291);
+	// locationDTO.setLongitude(116.597);
+	// RestResponse response = new RestResponse(locationDTO);
+	// response.setErrorCode(ErrorCodes.SUCCESS);
+	// response.setErrorDescription("OK");
+	// return response;
+	// }
 
-	
 	/**
 	 * <b>URL: /techpark/punch/verifyPunchLocation</b>
 	 * <p>
@@ -65,51 +66,49 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("verifyPunchLocation")
-//	@RestReturn(value = GroupDTO.class)
-	public RestResponse verifyPunchLocation(@Valid VerifyPunchLocationCommand cmd) {
+	@RestReturn(value = String.class)
+	public RestResponse verifyPunchLocation(
+			@Valid VerifyPunchLocationCommand cmd) {
 		// LocationDTO locationDto = this.(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
+
 	/**
 	 * <b>URL: /techpark/punch/punchClock</b>
 	 * <p>
 	 * 根据请求 user和company的ID完成打卡功能
 	 * </p>
 	 */
-	@RequestMapping("punchClock") 
+	@RequestMapping("punchClock")
+	@RestReturn(value = String.class)
 	public RestResponse punchClock(@Valid PunchClockCommand cmd) {
-		//      TODO：需要搞定
-		Long userId = UserContext.current().getUser().getId();
-
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-		String punchTime = df.format(new Date());// new Date()为获取当前系统时间为打卡时间
-		punchService.createPunchLog(userId,cmd.getCompanyId(),punchTime); //打卡
-		RestResponse response = new RestResponse(punchTime);
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(
+				punchService.createPunchLog(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
+
 	/**
 	 * <b>URL: /techpark/punch/listYearPunchLogs</b>
 	 * <p>
 	 * 根据请求 companyid和日期 取一年的打卡记录
 	 * </p>
 	 */
-	@RequestMapping("listYearPunchLogs") 
+	@RequestMapping("listYearPunchLogs")
+	@RestReturn(value = PunchLogsYearListResponse.class, collection = true)
 	public RestResponse listPunchLogs(@Valid ListPunchLogsCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-        RestResponse res = new RestResponse();
-        res.setErrorCode(ErrorCodes.SUCCESS);
-        res.setErrorDescription("OK");
-        PunchLogsYearListResponse punchLogsYearListResponse = punchService.getlistPunchLogs(userId,cmd);
-        res.setResponseObject(punchLogsYearListResponse);
+
+		RestResponse res = new RestResponse();
+		PunchLogsYearListResponse punchLogsYearListResponse = punchService
+				.getlistPunchLogs(cmd);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		res.setResponseObject(punchLogsYearListResponse);
 		return res;
 	}
 }
