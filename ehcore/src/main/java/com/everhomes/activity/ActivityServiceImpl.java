@@ -61,6 +61,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -126,7 +127,10 @@ public class ActivityServiceImpl implements ActivityService {
     private CommunityProvider communityProvider;
     
     @Autowired
-    MessagingService messagingService;
+    private MessagingService messagingService;
+    
+    @Autowired
+    private UserService userService;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -737,7 +741,7 @@ public class ActivityServiceImpl implements ActivityService {
         messageDto.setBody(comment.getContent());
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         
-        UserLogin u = ConvertHelper.convert(user, UserLogin.class);
+        UserLogin u = userService.listUserLogins(user.getId()).get(0);
         messagingService.routeMessage(u, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
         		queryUser.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
         
