@@ -1944,7 +1944,14 @@ public class ForumServiceImpl implements ForumService {
                     GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
                         EntityType.USER.getCode(), post.getCreatorUid());
                     if(member != null) {
-                        post.setCreatorNickName(member.getMemberNickName());
+                        String nickName = member.getMemberNickName();
+                        if(nickName == null || nickName.trim().length() == 0) {
+                            User creator = userProvider.findUserById(post.getCreatorUid());
+                            if(creator != null) {
+                                nickName = creator.getNickName();
+                            }
+                        }
+                        post.setCreatorNickName(nickName);
                         post.setCreatorAvatar(member.getMemberAvatar());
                         String avatarUrl = getResourceUrlByUir(userId, member.getMemberAvatar(), 
                             EntityType.USER.getCode(), member.getMemberId());
