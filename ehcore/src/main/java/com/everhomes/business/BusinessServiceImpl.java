@@ -21,6 +21,8 @@ import org.springframework.transaction.TransactionStatus;
 
 import ch.hsr.geohash.GeoHash;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.business.admin.BusinessAdminDTO;
 import com.everhomes.business.admin.BusinessPromoteScopeDTO;
 import com.everhomes.business.admin.CreateBusinessAdminCommand;
@@ -43,6 +45,9 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.ActionType;
 import com.everhomes.launchpad.ApplyPolicy;
 import com.everhomes.launchpad.ItemDisplayFlag;
@@ -51,17 +56,23 @@ import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.launchpad.ScaleType;
+import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.user.GetUserDefaultAddressCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 
 
@@ -99,6 +110,10 @@ public class BusinessServiceImpl implements BusinessService {
     private RegionProvider regionProvider;
     @Autowired
     private LaunchPadProvider launchPadProvider;
+    @Autowired
+    private AddressProvider addressProvider;
+    @Autowired
+    private GroupProvider groupProvider;
     
     @Override
     public void syncBusiness(SyncBusinessCommand cmd) {
@@ -1034,5 +1049,77 @@ public class BusinessServiceImpl implements BusinessService {
         });
         
     }
+
+	@Override
+	public UserServiceAddressDTO getUserDefaultAddress(GetUserDefaultAddressCommand cmd) {
+		//List<UserServiceAddressDTO> dtos = new ArrayList<UserServiceAddressDTO>();
+		UserServiceAddressDTO dto = new UserServiceAddressDTO();
+		Long userId = cmd.getUserId();
+		LOGGER.error("getUserDefaultAddress-userId="+userId);
+		List<UserServiceAddress> serviceAddresses = this.userActivityProvider.findUserRelateServiceAddresses(userId);
+		LOGGER.error("getUserDefaultAddress-serviceAddresses="+StringHelper.toJsonString(serviceAddresses));
+		if(serviceAddresses == null || serviceAddresses.isEmpty()){
+			List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
+			if(list != null && !list.isEmpty()){
+				for(int i=0;i<list.size();i++){
+					UserGroup uGroup = list.get(i);
+					Group group = groupProvider.findGroupById(uGroup.getGroupId());
+					if(group == null){	
+						LOGGER.error("getUserDefaultAddress-group=group is empty,groupId=" +uGroup.getGroupId());
+						continue;
+					}
+					Address addr = addressProvider.findAddressById(group.getIntegralTag1());
+					if(addr == null){
+						LOGGER.error("getUserDefaultAddress-address=address is empty,addressId=" +group.getIntegralTag1());
+						continue;
+					}
+					Region city = this.regionProvider.findRegionById(addr.getCityId());
+		            if(city != null){
+		                Region province = this.regionProvider.findRegionById(city.getParentId());
+		                if(province != null)
+		                    dto.setProvince(province.getName());
+		            }
+		            dto.setId(addr.getId());
+		            dto.setCity(addr.getCityName());
+		            dto.setArea(addr.getAreaName());
+		            dto.setAddress(addr.getAddress());
+		            User user = this.userProvider.findUserById(userId);
+		            LOGGER.error("getUserDefaultAddress-user=" +user.toString());
+		            if(user != null)
+		            	dto.setUserName(user.getNickName());
+		            List<UserIdentifier> uIdentif = this.userProvider.listUserIdentifiersOfUser(userId);
+		            LOGGER.error("getUserDefaultAddress-uIdentif=" +StringHelper.toJsonString(uIdentif));
+		            if(uIdentif != null && !uIdentif.isEmpty()){
+		            	dto.setCallPhone(uIdentif.get(0).getIdentifierToken());
+		            }
+		            break;
+				}
+			}
+		}
+		else{
+			for(int i=0;i<serviceAddresses.size();i++){
+				UserServiceAddress r = serviceAddresses.get(i);
+				Address addr = this.addressProvider.findAddressById(r.getAddressId());
+	            if(addr == null){
+	                LOGGER.error("getUserDefaultAddress-error=Address is not found,addressId=" + r.getAddressId());
+	                continue;
+	            }
+	            Region city = this.regionProvider.findRegionById(addr.getCityId());
+	            if(city != null){
+	                Region province = this.regionProvider.findRegionById(city.getParentId());
+	                if(province != null)
+	                    dto.setProvince(province.getName());
+	            }
+	            dto.setId(addr.getId());
+	            dto.setCity(addr.getCityName());
+	            dto.setArea(addr.getAreaName());
+	            dto.setAddress(addr.getAddress());
+	            dto.setUserName(r.getContactName());
+	            dto.setCallPhone(r.getContactToken());
+	            break;
+			}
+		}
+		return dto;
+	}
  
 }
