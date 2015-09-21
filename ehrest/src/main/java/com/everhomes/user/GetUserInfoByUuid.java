@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
 public class GetUserInfoByUuid {
     @NotNull
     private String uuid;
+    
+    private Long timestamp;
 
     public String getUuid() {
         return uuid;
@@ -14,6 +16,14 @@ public class GetUserInfoByUuid {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

@@ -9,7 +9,6 @@ package com.everhomes.user;
  */
 public class GetUserByUuidResponse {
     private String nickName;
-    private String accountName;
     private String mobile;
     private String avatarUrl;
     private Byte gender;
@@ -20,12 +19,6 @@ public class GetUserByUuidResponse {
     }
     public void setNickName(String nickName) {
         this.nickName = nickName;
-    }
-    public String getAccountName() {
-        return accountName;
-    }
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
     }
     public String getMobile() {
         return mobile;

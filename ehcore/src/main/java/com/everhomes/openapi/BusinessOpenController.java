@@ -264,7 +264,6 @@ public class BusinessOpenController extends ControllerBase {
         }
         
         GetUserByUuidResponse resp = new GetUserByUuidResponse();
-        resp.setAccountName(user.getAccountName());
         resp.setMobile(user.getPhones().get(0));
         resp.setNickName(user.getNickName());
         resp.setAvatarUrl(user.getAvatarUrl());
@@ -276,7 +275,7 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     @RequestMapping("getUserDetailByUuid")
-    @RestReturn(GetUserByUuidResponse.class)
+    @RestReturn(GetUserDetailByUuidResponse.class)
     public RestResponse getUserDetailByUuid(@Valid GetUserInfoByUuid cmd) {
         UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
         RestResponse response =  new RestResponse();
@@ -290,7 +289,6 @@ public class BusinessOpenController extends ControllerBase {
         }
         
         GetUserDetailByUuidResponse resp = new GetUserDetailByUuidResponse();
-        resp.setAccountName(user.getAccountName());
         resp.setMobile(user.getPhones().get(0));
         resp.setNickName(user.getNickName());
         resp.setAvatarUrl(user.getAvatarUrl());
