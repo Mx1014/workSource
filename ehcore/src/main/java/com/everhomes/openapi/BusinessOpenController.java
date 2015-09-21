@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.address.AddressDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
@@ -33,6 +32,8 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.GetUserByUuidResponse;
+import com.everhomes.user.GetUserDefaultAddressCommand;
+import com.everhomes.user.GetUserDetailByUuidResponse;
 import com.everhomes.user.GetUserInfoByUuid;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
@@ -273,4 +274,48 @@ public class BusinessOpenController extends ControllerBase {
         response.setResponseObject(resp);
         return response;
     }
+    
+    @RequestMapping("getUserDetailByUuid")
+    @RestReturn(GetUserByUuidResponse.class)
+    public RestResponse getUserDetailByUuid(@Valid GetUserInfoByUuid cmd) {
+        UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        if(null == user) {
+            response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
+            response.setErrorDescription("User not found");
+            return response;
+        }
+        
+        GetUserDetailByUuidResponse resp = new GetUserDetailByUuidResponse();
+        resp.setAccountName(user.getAccountName());
+        resp.setMobile(user.getPhones().get(0));
+        resp.setNickName(user.getNickName());
+        resp.setAvatarUrl(user.getAvatarUrl());
+        resp.setUuid(user.getUuid());
+        resp.setGender(user.getGender());
+        
+        GetUserServiceAddressCommand getUserCmd = new GetUserServiceAddressCommand();
+        getUserCmd.setUserId(user.getId());
+        List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(getUserCmd);
+        if(result != null && result.size() > 0) {
+            resp.setAddress(result.get(0));
+        }
+        
+        response.setResponseObject(resp);
+        return response;
+    }
+    
+    @RequestMapping("getUserDefaultAddress")
+    @RestReturn(UserServiceAddressDTO.class)
+    public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
+    	UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
+    	RestResponse response =  new RestResponse(address);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
 }
