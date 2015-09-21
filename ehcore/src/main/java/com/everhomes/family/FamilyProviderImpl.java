@@ -265,7 +265,8 @@ public class FamilyProviderImpl implements FamilyProvider {
 				family.setCommunityId(communityId);
 				family.setCommunityName(community.getName());
 				family.setCityId(community.getCityId());
-				family.setCityName(community.getCityName());
+				family.setCityName(community.getCityName()+community.getAreaName());
+				
 			}
 			if(group.getCreatorUid().longValue() == userId.longValue())
 				family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
