@@ -582,6 +582,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             familyDTO.setCommunityName(community.getName());
             familyDTO.setCityId(community.getCityId());
             familyDTO.setCityName(community.getCityName());
+            
+            familyDTO.setAreaId(community.getAreaId());
+            familyDTO.setAreaName(community.getAreaName());
         }
         familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
         if(address != null){
