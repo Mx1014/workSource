@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.address.AddressDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
@@ -33,6 +32,7 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.GetUserByUuidResponse;
+import com.everhomes.user.GetUserDefaultAddressCommand;
 import com.everhomes.user.GetUserDetailByUuidResponse;
 import com.everhomes.user.GetUserInfoByUuid;
 import com.everhomes.user.MessageChannelType;
@@ -307,4 +307,15 @@ public class BusinessOpenController extends ControllerBase {
         response.setResponseObject(resp);
         return response;
     }
+    
+    @RequestMapping("getUserDefaultAddress")
+    @RestReturn(UserServiceAddressDTO.class)
+    public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
+    	UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
+    	RestResponse response =  new RestResponse(address);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
 }
