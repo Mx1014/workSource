@@ -47,6 +47,8 @@ import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.DoorVenderController;
+import com.everhomes.openapi.NotifyDoorMessageCommand;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.IdentifierType;
@@ -117,6 +119,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private DoorVenderController doorVender;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -440,21 +445,23 @@ public class ActivityServiceImpl implements ActivityService {
                     d.setFamilyName(family.getName());
                     d.setFamilyId(r.getFamilyId());
                 }
-                User currentUser = userProvider.findUserById(r.getUid());
-                d.setId(r.getId());
-                if (currentUser != null) {
-                    d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
-                    d.setUserName(currentUser.getNickName());
-                    
-                    List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
-                    
-                    List<String> phones = identifiers.stream().filter((a)-> { return IdentifierType.fromCode(a.getIdentifierType()) == IdentifierType.MOBILE; })
-                            .map((a) -> { return a.getIdentifierToken(); })
-                            .collect(Collectors.toList());
-                    d.setPhone(phones);
-                }
-
             }
+            
+            User currentUser = userProvider.findUserById(r.getUid());
+            d.setId(r.getId());
+            if (currentUser != null) {
+                d.setUserAvatar(contentServerService.parserUri(currentUser.getAvatar(), EntityType.ACTIVITY.getCode(), activity.getId()));
+                d.setUserName(currentUser.getNickName());
+                
+                List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(currentUser.getId());
+                
+                List<String> phones = identifiers.stream().filter((a)-> { return IdentifierType.fromCode(a.getIdentifierType()) == IdentifierType.MOBILE; })
+                        .map((a) -> { return a.getIdentifierToken(); })
+                        .collect(Collectors.toList());
+                d.setPhone(phones);
+            }
+
+            
             return d;
         }).collect(Collectors.toList());
         if(rosterList.size()<cmd.getPageSize()){
@@ -713,6 +720,15 @@ public class ActivityServiceImpl implements ActivityService {
             put("reason",cmd.getReason());
         }}, ""));
         forumProvider.createPost(comment);
+        
+        NotifyDoorMessageCommand msgcmd = new NotifyDoorMessageCommand();
+        List<String> phones = new ArrayList<String>();
+        String phone = userProvider.findClaimedIdentifierByOwnerAndType(roster.getUid(), (byte) 0).getIdentifierToken();
+        phones.add(phone);
+        msgcmd.setContent(comment.getContent());
+        msgcmd.setPhones(phones);
+        doorVender.notifyMessage(msgcmd);
+        
     }
 
     @Override

@@ -7,7 +7,6 @@ import com.everhomes.openapi.UserServiceAddressDTO;
 
 public class GetUserDetailByUuidResponse {
     private String nickName;
-    private String accountName;
     private String mobile;
     private String avatarUrl;
     private Byte gender;
@@ -30,14 +29,6 @@ public class GetUserDetailByUuidResponse {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
     }
 
     public String getMobile() {
