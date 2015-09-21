@@ -118,7 +118,7 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(3015, 3003, 0, '上门服务-宠物美容', '商家和服务/上门服务/宠物美容', 3, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3016, 3004, 0, '其他-快递查询', '商家和服务/其他/快递查询', 4, 2, UTC_TIMESTAMP());
+    VALUES(3016, 3004, 0, '快递查询', '商家和服务/其他/快递查询', 4, 2, UTC_TIMESTAMP());
 	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(4001, 4, 0, '亲子与教育', '活动/亲子与教育', 0, 2, UTC_TIMESTAMP());
