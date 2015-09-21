@@ -88,31 +88,37 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES(2019, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP());
 	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3001, 3, 0, '教育', '商家和服务/教育', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3001, 3, 0, '周边商铺', '商家和服务/周边商铺', 1, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3002, 3, 0, '家政与维修', '商家和服务/家政与维修', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3002, 3, 0, '邻家小店', '商家和服务/邻家小店', 2, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3003, 3, 0, '休闲与运动', '商家和服务/休闲与运动', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3003, 3, 0, '上门服务', '商家和服务/上门服务', 3, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3004, 3, 0, '便利店与超市', '商家和服务/便利店与超市', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3004, 3, 0, '其他', '商家和服务/其他', 4, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3005, 3, 0, '水果店', '商家和服务/水果店', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3005, 3001, 0, '周边商铺-便利店', '商家和服务/周边商铺/便利店', 1, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3006, 3, 0, '餐饮', '商家和服务/餐饮', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3006, 3001, 0, '周边商铺-水果店', '商家和服务/周边商铺/水果店', 1, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3007, 3, 0, '宠物', '商家和服务/宠物', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3007, 3001, 0, '周边商铺-餐饮店', '商家和服务/周边商铺/餐饮店', 1, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3008, 3, 0, '公共服务', '商家和服务/公共服务', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3008, 3001, 0, '周边商铺-烟酒店', '商家和服务/周边商铺/烟酒店', 1, 2, UTC_TIMESTAMP());	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3009, 3, 0, '其他', '商家和服务/其他', 1, 2, UTC_TIMESTAMP());
+    VALUES(3009, 3001, 0, '周边商铺-生鲜店', '商家和服务/周边商铺/生鲜店', 1, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3010, 3002, 0, '家政', '商家和服务/家政与维修/家政', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3010, 3002, 0, '邻家小店', '商家和服务/邻家小店/邻家小店', 2, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3011, 3002, 0, '维修', '商家和服务/家政与维修/维修', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3011, 3003, 0, '上门服务-开锁疏通', '商家和服务/上门服务/管道疏通', 3, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3012, 3003, 0, '休闲', '商家和服务/休闲与运动/休闲', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3012, 3003, 0, '上门服务-家电维修', '商家和服务/上门服务/家电维修', 3, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(3013, 3003, 0, '运动', '商家和服务/休闲与运动/运动', 0, 2, UTC_TIMESTAMP());	
+    VALUES(3013, 3003, 0, '上门服务-家政服务', '商家和服务/上门服务/家政服务', 3, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3014, 3003, 0, '上门服务-家电清洁', '商家和服务/上门服务/家电清洁', 3, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3015, 3003, 0, '上门服务-宠物美容', '商家和服务/上门服务/宠物美容', 3, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(3016, 3004, 0, '其他-快递查询', '商家和服务/其他/快递查询', 4, 2, UTC_TIMESTAMP());
 	
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(4001, 4, 0, '亲子与教育', '活动/亲子与教育', 0, 2, UTC_TIMESTAMP());
