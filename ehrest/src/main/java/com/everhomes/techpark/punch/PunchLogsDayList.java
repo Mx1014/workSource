@@ -8,29 +8,19 @@ import com.everhomes.util.StringHelper;
 
  /**
  * <ul>  
- * <li>Punch_day：每一日的punchlist</li>
+ * <li>PunchDay：每一日的punchlist</li>
  * <li>punchStatus：打卡状态  如 迟到 早退 参考{@link com.everhomes.techpark.punch.PunchStatus}</li>
  * </ul>
  */
-public class PunchLogsDayListInfo{
+public class PunchLogsDayList{
  
 
-    private String punch_day;
-    private PunchStatus punchStatus ;
+    private String punchDay;
+    private byte punchStatus ;
     @ItemType(PunchLogDTO.class)
     private List<PunchLogDTO> PunchLogs;
  
-
-	public PunchStatus getPunchStatus() {
-		return punchStatus;
-	}
-
-
-
-	public void setPunchStatus(PunchStatus punchStatus) {
-		this.punchStatus = punchStatus;
-	}
-
+ 
  
 
 
@@ -53,14 +43,26 @@ public class PunchLogsDayListInfo{
 
 
 
-	public String getPunch_day() {
-		return punch_day;
+	public String getPunchDay() {
+		return punchDay;
 	}
 
 
 
-	public void setPunch_day(String punch_day) {
-		this.punch_day = punch_day;
+	public void setPunchDay(String punchDay) {
+		this.punchDay = punchDay;
+	}
+
+
+
+	public byte getPunchStatus() {
+		return punchStatus;
+	}
+
+
+
+	public void setPunchStatus(byte punchStatus) {
+		this.punchStatus = punchStatus;
 	}
 
  }

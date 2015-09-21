@@ -9,18 +9,18 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum ClockStatus {
-    AFTERNOONARRIVE(3),NOONLEAVE(2), LEAVE(1), ARRIVE(0);
+    AFTERNOONARRIVE((byte)3),NOONLEAVE((byte)2), LEAVE((byte)1), ARRIVE((byte)0);
     
-    private int code;
-    private ClockStatus(int code) {
+    private byte code;
+    private ClockStatus(byte code) {
         this.code = code;
     }
     
-    public Integer getCode() {
+    public byte getCode() {
         return this.code;
     }
     
-    public static ClockStatus fromCode(int code) {
+    public static ClockStatus fromCode(byte code) {
         for(ClockStatus t : ClockStatus.values()) {
             if (t.code == code) {
                 return t;

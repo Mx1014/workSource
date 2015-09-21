@@ -8,8 +8,8 @@ package com.everhomes.techpark.punch;
 public enum punchTimes {
     TWICE(2),FORTH(4);
     
-    private int code;
-    private punchTimes(int code) {
+    private Integer code;
+    private punchTimes(Integer code) {
         this.code = code;
     }
     
@@ -17,7 +17,7 @@ public enum punchTimes {
         return this.code;
     }
     
-    public static punchTimes fromCode(int code) {
+    public static punchTimes fromCode(Integer code) {
         for(punchTimes t : punchTimes.values()) {
             if (t.code == code) {
                 return t;

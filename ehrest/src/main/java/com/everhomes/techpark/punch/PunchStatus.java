@@ -9,18 +9,18 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum PunchStatus {
-    UNPUNCH(3),LEAVEEARLY(2), BELATE(1), NORMAL(0);
+    UNPUNCH((byte)3),LEAVEEARLY((byte)2), BELATE((byte)1), NORMAL((byte)0);
     
-    private int code;
-    private PunchStatus(int code) {
+    private byte code;
+    private PunchStatus(byte code) {
         this.code = code;
     }
     
-    public Integer getCode() {
+    public byte getCode() {
         return this.code;
     }
     
-    public static PunchStatus fromCode(int code) {
+    public static PunchStatus fromCode(byte code) {
         for(PunchStatus t : PunchStatus.values()) {
             if (t.code == code) {
                 return t;
