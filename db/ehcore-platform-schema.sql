@@ -169,6 +169,8 @@ CREATE TABLE `eh_apps` (
     `description` VARCHAR(2048),
     `status` tinyint NOT NULL DEFAULT 1 COMMENT '0 - inactive, 1 - active',
     `create_time` DATETIME,
+	`update_uid` bigint(20) DEFAULT NULL,
+	`update_time` datetime DEFAULT NULL,
 
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_app_reg_app_key`(`app_key`),

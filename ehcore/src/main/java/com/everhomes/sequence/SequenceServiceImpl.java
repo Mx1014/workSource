@@ -51,6 +51,7 @@ import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserServiceAddress;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -124,6 +125,10 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(EhUsers.class, EhUserProfiles.class, Tables.EH_USER_PROFILES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_PROFILES.ID.max()).from(Tables.EH_USER_PROFILES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhUsers.class, UserServiceAddress.class, Tables.EH_USER_SERVICE_ADDRESSES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_USER_SERVICE_ADDRESSES.ID.max()).from(Tables.EH_USER_SERVICE_ADDRESSES).fetchOne().value1(); 
         });
         
         syncTableSequence(EhForums.class, EhForums.class, Tables.EH_FORUMS.getName(), (dbContext) -> { 

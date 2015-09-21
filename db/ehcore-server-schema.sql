@@ -643,8 +643,16 @@ DROP TABLE IF EXISTS `eh_user_service_addresses`;
 CREATE TABLE `eh_user_service_addresses` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
-    `address_id` BIGINT NOT NULL DEFAULT 0,
+    `address_id` BIGINT NOT NULL DEFAULT 0,	
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'phone number or email address',
+	`contact_name` VARCHAR(64),
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+    `creator_uid` BIGINT NOT NULL,
     `create_time` DATETIME,
+	`update_time` datetime DEFAULT NULL,
+	`deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
+    `delete_time` DATETIME COMMENT '',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_usr_service_address_id`(`owner_uid`, `address_id`)
