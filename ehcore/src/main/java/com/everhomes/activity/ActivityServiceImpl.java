@@ -47,14 +47,19 @@ import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.openapi.DoorVenderController;
-import com.everhomes.openapi.NotifyDoorMessageCommand;
+import com.everhomes.messaging.MessageBodyType;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingConstants;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.IdentifierType;
+import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -121,7 +126,7 @@ public class ActivityServiceImpl implements ActivityService {
     private CommunityProvider communityProvider;
     
     @Autowired
-    private DoorVenderController doorVender;
+    MessagingService messagingService;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -721,13 +726,20 @@ public class ActivityServiceImpl implements ActivityService {
         }}, ""));
         forumProvider.createPost(comment);
         
-        NotifyDoorMessageCommand msgcmd = new NotifyDoorMessageCommand();
-        List<String> phones = new ArrayList<String>();
-        String phone = userProvider.findClaimedIdentifierByOwnerAndType(roster.getUid(), (byte) 0).getIdentifierToken();
-        phones.add(phone);
-        msgcmd.setContent(comment.getContent());
-        msgcmd.setPhones(phones);
-        doorVender.notifyMessage(msgcmd);
+        
+        
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(user.getId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), queryUser.getId().toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(comment.getContent());
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        
+        UserLogin u = ConvertHelper.convert(user, UserLogin.class);
+        messagingService.routeMessage(u, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+        		queryUser.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
         
     }
 
