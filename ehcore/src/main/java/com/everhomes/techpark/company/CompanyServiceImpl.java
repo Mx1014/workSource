@@ -71,6 +71,7 @@ public class CompanyServiceImpl implements GroupContactService{
 					GroupContact gContact = groupContactProvider.findGroupContactByToken(telephone);
 					if(gContact != null){
 						gContact.setContactName(r.getContactName());
+						gContact.setStringTag1(r.getStringTag1());
 						groupContactProvider.updateGroupContact(gContact);
 					}
 					else {
@@ -79,6 +80,7 @@ public class CompanyServiceImpl implements GroupContactService{
 						gContact.setContactName(r.getContactName());
 						gContact.setContactType(ContactType.MOBILE.getCode());
 						gContact.setContactToken(r.getContactToken());
+						gContact.setStringTag1(r.getStringTag1());
 						groupContactProvider.createGroupContact(gContact);
 					}
 				}
@@ -104,9 +106,11 @@ public class CompanyServiceImpl implements GroupContactService{
 
 				if(row.getA() == null || row.getA().trim().equals(""))	continue;
 				if(row.getB() == null || row.getB().trim().equals("")) continue;
-
+				
 				gContact.setContactName(row.getA().trim());
 				gContact.setContactToken(row.getB().trim());
+				if(row.getC()!= null)
+					gContact.setStringTag1(row.getC().trim());
 
 				list.add(gContact);
 			}
@@ -126,6 +130,10 @@ public class CompanyServiceImpl implements GroupContactService{
 			gContact.setContactName(cmd.getContactName().trim());
 		if(cmd.getContactToken() != null && !cmd.getContactToken().trim().isEmpty())
 			gContact.setContactToken(cmd.getContactToken().trim());
+		if(cmd.getDepartment() != null && !cmd.getDepartment().trim().isEmpty())
+			gContact.setStringTag1(cmd.getDepartment().trim());
+		gContact.setUpdateTime(currentTimeStamp);
+		gContact.setUpdateUid(user.getId());
 		this.groupContactProvider.updateGroupContact(gContact);
 	}
 
@@ -183,6 +191,8 @@ public class CompanyServiceImpl implements GroupContactService{
 		this.setGroupContactAtCreate(gContact, cmd.getOwnerId(), currentTimeStamp, user.getId());
 		gContact.setContactName(cmd.getContactName().trim());
 		gContact.setContactToken(cmd.getContactToken().trim());
+		if(cmd.getDepartment() != null && !cmd.getDepartment().trim().isEmpty())
+			gContact.setStringTag1(cmd.getDepartment().trim());
 		this.groupContactProvider.createGroupContact(gContact);
 	}
 
@@ -209,6 +219,7 @@ public class CompanyServiceImpl implements GroupContactService{
 					GroupContactDTO dto = ConvertHelper.convert(r, GroupContactDTO.class);
 					dto.setCreateTime(r.getCreateTime() == null ? null:r.getCreateTime().getTime());
 					dto.setUpdateTime(r.getUpdateTime() == null ? null:r.getUpdateTime().getTime());
+					dto.setDepartment(r.getStringTag1());
 					listDto.add(dto);
 					return null;
 				}).toArray();

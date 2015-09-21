@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime：创建时间</li>
  * <li>updateUid：更新者id</li>
  * <li>updateTime:更新时间</li>
+ * <li>deparment:部门</li>
  * <li>
  * </ul>
  */
@@ -30,6 +31,7 @@ public class GroupContactDTO {
 	private java.lang.Long createTime;
 	private java.lang.Long     updateUid;
 	private java.lang.Long updateTime;
+	private String department;
 	public java.lang.Long getId() {
 		return id;
 	}
@@ -95,6 +97,12 @@ public class GroupContactDTO {
 	}
 	public void setUpdateTime(java.lang.Long updateTime) {
 		this.updateTime = updateTime;
+	}
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 	@Override
 	public String toString() {

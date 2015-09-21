@@ -11,6 +11,7 @@ public class CreateGroupContactCommand {
 	private String contactName;
 	@NotNull
 	private String contactToken;
+	private String department;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -29,6 +30,13 @@ public class CreateGroupContactCommand {
 	}
 	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
+	}
+	
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 	@Override
 	public String toString() {

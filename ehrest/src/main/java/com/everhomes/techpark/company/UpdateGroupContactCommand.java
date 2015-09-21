@@ -9,6 +9,7 @@ public class UpdateGroupContactCommand {
 	private Long id;
 	private String contactName;
 	private String contactToken;
+	private String department;
 	
 	public Long getId() {
 		return id;
@@ -27,6 +28,12 @@ public class UpdateGroupContactCommand {
 	}
 	public void setContactToken(String contactToken) {
 		this.contactToken = contactToken;
+	}
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 	@Override
 	public String toString() {
