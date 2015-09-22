@@ -14,6 +14,7 @@ CREATE TABLE `eh_punch_logs` (
   `latitude` double,
   `punch_date` date COMMENT 'user punch date',
   `punch_time` datetime COMMENT 'user check time',
+  `punch_status` tinyint(4) COMMENT '2:Normal ;  1:Not in punch area',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -23,19 +24,47 @@ DROP TABLE IF EXISTS `eh_punch_rules`;
 
 CREATE TABLE `eh_punch_rules` (
   `id` bigint(20) NOT NULL COMMENT 'id',
-  `company_id` bigint(20) NOT NULL COMMENT 'rule company id',
-  `check_type` tinyint(4) COMMENT '0:standard ;  1:flextime',
-  `punch_times` int(1) COMMENT 'how many times everyday emloyee need punched. 2 times or 4 times',
-  `work_begin_time` time COMMENT 'type=0:work start time ;1:work start earlist time',
-  `work_end_time` time COMMENT 'type=0:work end time ;1:work start latest time',
+  `company_id` bigint(20) NOT NULL COMMENT 'rule company id', 
+  `start_early_time` time COMMENT 'how early can i arrive',
+  `start_late_time` time COMMENT 'how late can i arrive ',
+  `work_time` time COMMENT 'how long do i must be work',
   `time_tag1` time,
   `time_tag2` time,
-  `time_tag3` time ,
-  `time_tag4` time COMMENT ,
-  `time_tag5` time COMMENT ,
+  `time_tag3` time,
   `create_uid` bigint(20),
   `create_time` datetime,
   `update_uid` bigint(20),
   `update_time` datetime,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_punch_geopoints`;
+
+CREATE TABLE `eh_punch_geopoints` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `company_id` bigint(20) DEFAULT NULL,
+  `description` varchar(64) DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `geohash` varchar(32) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+
+
+DROP TABLE IF EXISTS `eh_punch_alter_requests`;
+
+CREATE TABLE `eh_punch_alter_requests` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `user_id` bigint(20) COMMENT 'user''s id',
+  `company_id` bigint(20) COMMENT 'compay id',
+  `punch_date` date COMMENT 'user punch date',
+  `request_status` tinyint(4) COMMENT '0:alter request ;  1:illustrate',
+  `request_answer` tinyint(4) COMMENT '0:undo ;  1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence',
+  `description` varchar(128) ,
+  `string_tag1` varchar(128) ,
+  `string_tag2` varchar(128) ,
+  `punch_time` datetime COMMENT 'user check time',
+  `punch_status` tinyint(4) COMMENT '2:Normal ;  1:Not in punch area',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
