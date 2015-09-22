@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressAdminStatus;
@@ -26,6 +28,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.AttachmentDescriptor;
 import com.everhomes.forum.CancelLikeTopicCommand;
@@ -60,6 +63,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.region.RegionScope;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.IdentifierType;
@@ -78,6 +82,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
 public class OrganizationServiceImpl implements OrganizationService {
@@ -1740,6 +1747,274 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.organizationProvider.updateOrganization(org);
 			return s;
 		});
+	}
+
+	@Override
+	public void importOrganization(MultipartFile[] files) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		this.checkFilesIsNull(files,user.getId());
+		
+		ArrayList resultList = new ArrayList();
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		List<OrganizationDTO2> list = this.convertToOrganizations(resultList,userId);
+		if(list == null || list.isEmpty()){
+			LOGGER.error("organizations list is empty.userId="+userId);
+			return;
+		}
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("importOrganization-list-before="+StringHelper.toJsonString(list));
+		
+		for(OrganizationDTO2 r:list){
+			this.checkCityNameIsNull(r.getCityName());
+			this.checkAreaNameIsNull(r.getAreaName());
+			this.setCityId(r,r.getCityName());
+			this.setAreaId(r,r.getAreaName());
+			this.setTokenList(r,r.getTokens());
+			//this.setAddressId(r,r.getAddressName());
+			this.setCommunityIdsByCommunityName(r,r.getCommunityNames(),r.getCityId());
+		}
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("importOrganization-list-after="+StringHelper.toJsonString(list));
+		
+		this.dbProvider.execute(s -> {
+			for(OrganizationDTO2 r:list){
+				//地址
+				Address address = addressProvider.findAddressByRegionAndAddress(r.getCityId(),0L,r.getAddressName());
+				if(address == null){
+					//创建地址
+					Region city = this.regionProvider.findRegionById(r.getCityId());
+					Region area = this.regionProvider.findRegionById(r.getAreaId());
+					address = new Address();
+					address.setAddress(r.getAddressName());
+					address.setCityId(city.getId());
+					address.setCityName(city.getName());
+					address.setAreaId(area.getId());
+					address.setAreaName(area.getName());
+					address.setLongitude(r.getLongitude());
+					address.setLatitude(r.getLatitude());
+					address.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					address.setCreatorUid(userId);
+					address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+					this.addressProvider.createAddress(address);
+				}
+				r.setAddressId(address.getId());
+				//机构
+				Organization org = this.convertOrgDTO2ToOrg(r); 
+				this.organizationProvider.createOrganization(org);
+				//机构小区
+				for(Long comId : r.getCommunityIds()){
+					OrganizationCommunity orgComm = new OrganizationCommunity();
+					orgComm.setCommunityId(comId);
+					orgComm.setOrganizationId(org.getId());
+					this.organizationProvider.createOrganizationCommunity(orgComm);
+				}
+				//机构电话
+				for(String token : r.getTokenList()){
+					CommunityPmContact orgContact = new CommunityPmContact();
+					orgContact.setContactName(null);
+					orgContact.setContactToken(token);
+					orgContact.setContactType(IdentifierType.MOBILE.getCode());
+					orgContact.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					orgContact.setCreatorUid(userId);
+					orgContact.setOrganizationId(org.getId());
+					this.propertyMgrProvider.createPropContact(orgContact);
+				}
+			}
+			return s;
+		});
+	}
+
+	private void checkAreaNameIsNull(String areaName) {
+		if(areaName == null || areaName.trim().equals("")){
+			LOGGER.error("areaName is empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"areaName is empty.");
+		}
+	}
+
+	private void setAreaId(OrganizationDTO2 r, String areaName) {
+		Region area = this.checkAreaName(areaName);
+		r.setAreaId(area.getId());
+	}
+
+	private Region checkAreaName(String areaName) {
+		List<Region> areas = this.regionProvider.listRegionByKeyword(null, RegionScope.AREA, null, null, areaName);
+		if(areas == null || areas.isEmpty()){
+			LOGGER.error("area is not found by areaName.areaName="+areaName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"area is not found by areaName.");
+		}
+		else if(areas.size() != 1){
+			LOGGER.error("area is not unique found by areaName.areaName="+areaName);
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city is not unique found by cityName.");*/
+		}
+		return areas.get(0);
+	}
+
+	private Organization convertOrgDTO2ToOrg(OrganizationDTO2 r) {
+		Organization org = new Organization();
+		org.setAddressId(r.getAddressId());
+		org.setLevel(1);
+		org.setName(r.getOrgName());
+		org.setOrganizationType(r.getOrgType());
+		org.setParentId(0L);
+		org.setPath("/"+r.getOrgName());
+		org.setStatus(OrganizationStatus.ACTIVE.getCode());
+		return org;
+	}
+
+	private void setCommunityIdsByCommunityName(OrganizationDTO2 r,String communityNames,Long cityId) {
+		String [] commNames = communityNames.split(",");
+		for(String communityName : commNames){
+			Community comm = this.findCommunityByCommName(communityName, cityId);
+			if(r.getCommunityIds() == null)
+				r.setCommunityIds(new ArrayList<Long>());
+			r.getCommunityIds().add(comm.getId());
+		}
+	}
+
+	private Community findCommunityByCommName(String communityName, Long cityId) {
+		List<Community> comms = this.communityProvider.findCommunitiesByNameAndCityId(communityName, cityId);
+		if(comms == null || comms.isEmpty()){
+			LOGGER.error("community is not found by communityName.communityName="+communityName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"community is not found by communityName.");
+		}
+		else if(comms.size() != 1){
+			LOGGER.error("community is not unique found by communityName.communityName="+communityName);
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"community is not unique found by communityName.");*/
+		}
+		return comms.get(0);
+	}
+
+	private void setAddressId(OrganizationDTO2 r, String addressName) {
+		Address address = this.checkAddressByAddressName(addressName);
+		r.setAddressId(address.getId());
+	}
+
+	private Address checkAddressByAddressName(String addressName) {
+		Address address = addressProvider.findAddressByAddress(addressName);
+		if(address == null){
+			LOGGER.error("address is not found by addressName.addressName="+addressName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"address is not found by addressName.");
+		}
+		return address;
+	}
+
+	private void setTokenList(OrganizationDTO2 r, String tokens) {
+		String [] strList = tokens.split(",");
+		for(String token : strList){
+			if(r.getTokenList() == null)
+				r.setTokenList(new ArrayList<String>());
+			r.getTokenList().add(token);
+		}
+	}
+
+	private void setCityId(OrganizationDTO2 r,String cityName) {
+		Region city = this.checkCityName(cityName);
+		r.setCityId(city.getId());
+	}
+
+	private Region checkCityName(String cityName) {
+		List<Region> citys = this.regionProvider.listRegionByKeyword(null, RegionScope.CITY, null, null, cityName);
+		if(citys == null || citys.isEmpty()){
+			LOGGER.error("city is not found by cityName.cityName="+cityName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city is not found by cityName.");
+		}
+		else if(citys.size() != 1){
+			LOGGER.error("city is not unique found by cityName.cityName="+cityName);
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city is not unique found by cityName.");*/
+		}
+		return citys.get(0);
+	}
+
+	private void checkCityNameIsNull(String cityName) {
+		if(cityName == null || cityName.trim().equals("")){
+			LOGGER.error("cityName is empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cityName is empty.");
+		}
+	}
+
+	private List<OrganizationDTO2> convertToOrganizations(ArrayList list,Long userId) {
+		if(list == null || list.isEmpty()){
+			LOGGER.error("resultList is empty.userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"resultList is empty.");
+		}
+		List<OrganizationDTO2> result = new ArrayList<OrganizationDTO2>();
+		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+			RowResult r = (RowResult)list.get(rowIndex);
+			OrganizationDTO2 dto = new OrganizationDTO2();
+			dto.setCityName(this.getCityName(r.getA()));
+			dto.setAreaName(this.setAreaName(r.getB()));
+			dto.setOrgName(this.getOrgName(r.getC()));
+			dto.setOrgType(this.getOrgType(r.getD()));
+			dto.setTokens(this.getTokens(r.getE()));
+			dto.setAddressName(this.getAddressName(r.getF()));
+			dto.setLongitude(this.getLongitude(r.getG()));
+			dto.setLatitude(this.getLatitude(r.getH()));
+			dto.setCommunityNames(this.getCommunityNames(r.getI()));
+			result.add(dto);
+		}
+		return result;
+	}
+
+	private String setAreaName(String areaName) {
+		return areaName;
+	}
+
+	private String getCommunityNames(String comName) {
+		return comName;
+	}
+
+	private Double getLatitude(String latitude) {
+		return Double.valueOf(latitude);
+	}
+
+	private Double getLongitude(String longitude) {
+		return Double.valueOf(longitude);
+		
+	}
+
+	private String getAddressName(String addressName) {
+		return addressName;
+	}
+	
+	private String getTokens(String tokens) {
+		return tokens;
+	}
+
+	private String getOrgType(String orgType) {
+		return orgType;
+	}
+
+	private String getOrgName(String orgName) {
+		return orgName;
+	}
+	
+	private String getCityName(String cityName) {
+		return cityName;
+	}
+
+	private void checkFilesIsNull(MultipartFile[] files,Long userId) {
+		if(files == null){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"files is null");
+		}
 	}
 
 }

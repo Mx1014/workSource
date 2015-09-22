@@ -24,6 +24,7 @@ import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
@@ -41,6 +42,10 @@ public class PropertyMgrController extends ControllerBase {
 
 	@Autowired
 	PropertyMgrProvider propertyMgrProvider;
+	
+	@Autowired
+	OrganizationService organizationService;
+	
 
 	/**
 	 * <b>URL: /pm/findPropertyOrganization</b>
@@ -1297,7 +1302,21 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-        
     }
+	
+	/**
+     * <b>URL: /org/importOrganization</b>
+     * <p>导入机构信息</p>
+     */
+    //importPmBills
+    /*@RequestMapping(value="importPmBills", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
+        this.organizationService.importOrganization(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
 
 }
