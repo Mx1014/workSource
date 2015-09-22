@@ -26,6 +26,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.app.AppConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -1397,14 +1398,15 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private void processPostCategory(long userId, NewTopicCommand cmd, Post post) {
-        if(cmd.getContentCategory() != null && cmd.getContentCategory().longValue() > 0) {
-            Category category = this.categoryProvider.findCategoryById(cmd.getContentCategory());
-            if(category == null) {
-                if(LOGGER.isErrorEnabled()) {
-                    LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
-                }
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid content category");
+        Long contentCategory = cmd.getContentCategory();
+        if(contentCategory == null || contentCategory.longValue() == 0) {
+            contentCategory = CategoryConstants.CATEGORY_ID_TOPIC_COMMON;
+        }
+        
+        Category category = this.categoryProvider.findCategoryById(cmd.getContentCategory());
+        if(category == null) {
+            if(LOGGER.isErrorEnabled()) {
+                LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
             }
             
             post.setCategoryId(cmd.getContentCategory());
@@ -1412,7 +1414,7 @@ public class ForumServiceImpl implements ForumService {
         }
         
         if(cmd.getActionCategory() != null && cmd.getActionCategory().longValue() > 0) {
-            Category category = this.categoryProvider.findCategoryById(cmd.getActionCategory());
+            category = this.categoryProvider.findCategoryById(cmd.getActionCategory());
             if(category == null) {
                 if(LOGGER.isErrorEnabled()) {
                     LOGGER.error("Action category not found, userId=" + userId + ", cmd=" + cmd);
