@@ -952,6 +952,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 						+ ", organizationId=" + organization.getId() + ", organizationType=" + organization.getOrganizationType());
 			}
 		}
+		
+		// 为了兼容没有机构的情况，需要为其提供默认值
+		OrganizationType[] values = OrganizationType.values();
+		for(OrganizationType value : values) {
+		    Long organizatioinId = map.get(value.getCode());
+		    if(organizatioinId == null) {
+    		    if(value == OrganizationType.PM || value == OrganizationType.GARC) {
+    		        map.put(value.getCode(), communityId);
+    		    } else {
+    		        map.put(value.getCode(), 0L);
+    		    }
+		    }
+		}
 
 		return map;
 	}
