@@ -30,8 +30,8 @@ CREATE TABLE `eh_group_contacts` (
     `string_tag5` VARCHAR(128),
 	`creater_uid` bigint,
 	`create_time` datetime,
-	`update_uid` bigint,
-	`update_time` datetime,
+	`operator_uid` bigint,
+	`operate_time` datetime,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -69,8 +69,8 @@ CREATE TABLE `eh_punch_rules` (
   `time_tag3` time,
 	`creater_uid` bigint,
 	`create_time` datetime,
-  `update_uid` bigint,
-  `update_time` datetime,
+  `operator_uid` bigint,
+  `operate_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -86,8 +86,8 @@ CREATE TABLE `eh_punch_geopoints` (
   `distance` int ,
 	`creater_uid` bigint,
 	`create_time` datetime,
-  `update_uid` bigint,
-  `update_time` datetime,
+  `operator_uid` bigint,
+  `operate_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
@@ -100,28 +100,28 @@ CREATE TABLE `eh_punch_exception_requests` (
   `user_id` bigint(20) COMMENT 'user''s id',
   `company_id` bigint(20) COMMENT 'compay id',
   `punch_date` date COMMENT 'user punch date',
-  `type` tinyint(4) COMMENT '0:alter request ;  1:illustrate',
+  `request_type` tinyint(4) COMMENT '0:alter request ;  1:illustrate',
   `description` varchar(128) ,
-  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
   `process_code` TINYINT COMMENT ' 1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence',
   `process_details` TEXT,
-	`creater_uid` bigint,
+	`creator_uid` bigint,
 	`create_time` datetime,
-  `update_uid` bigint,
-  `update_time` datetime,
+  `operator_uid` bigint,
+  `operate_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `eh_china_workdate`;
+DROP TABLE IF EXISTS `eh_punch_workday`;
 
-CREATE TABLE `eh_china_workdate` (
+CREATE TABLE `eh_punch_workday` (
   `id` bigint(20) NOT NULL COMMENT 'id',
   `date_status` tinyint(4) COMMENT '0:weekend work date ;  1:holiday',
   `date_tag` date COMMENT 'date',
 	`creater_uid` bigint,
 	`create_time` datetime,
-  `update_uid` bigint,
-  `update_time` datetime,
+  `operator_uid` bigint,
+  `operate_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
