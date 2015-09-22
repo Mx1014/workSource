@@ -89,7 +89,7 @@ CREATE TABLE `eh_punch_geopoints` (
   `operator_uid` bigint,
   `operate_time` datetime,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
