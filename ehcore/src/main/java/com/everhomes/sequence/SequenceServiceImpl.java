@@ -18,6 +18,10 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhBusinessAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
+import com.everhomes.server.schema.tables.pojos.EhBusinessVisibleScopes;
+import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
@@ -226,6 +230,22 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhCooperationRequests.class, Tables.EH_COOPERATION_REQUESTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_COOPERATION_REQUESTS.ID.max()).from(Tables.EH_COOPERATION_REQUESTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinesses.class, Tables.EH_BUSINESSES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESSES.ID.max()).from(Tables.EH_BUSINESSES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinessVisibleScopes.class, Tables.EH_BUSINESS_VISIBLE_SCOPES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESS_VISIBLE_SCOPES.ID.max()).from(Tables.EH_BUSINESS_VISIBLE_SCOPES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinessAssignedScopes.class, Tables.EH_BUSINESS_ASSIGNED_SCOPES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESS_ASSIGNED_SCOPES.ID.max()).from(Tables.EH_BUSINESS_ASSIGNED_SCOPES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinessCategories.class, Tables.EH_BUSINESS_CATEGORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESS_CATEGORIES.ID.max()).from(Tables.EH_BUSINESS_CATEGORIES).fetchOne().value1(); 
         });
     }
     
