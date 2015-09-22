@@ -47,6 +47,10 @@ CREATE TABLE `eh_punch_geopoints` (
   `longitude` double DEFAULT NULL,
   `latitude` double DEFAULT NULL,
   `geohash` varchar(32) DEFAULT NULL,
+  `create_uid` bigint(20),
+  `create_time` datetime,
+  `update_uid` bigint(20),
+  `update_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
@@ -64,7 +68,40 @@ CREATE TABLE `eh_punch_alter_requests` (
   `description` varchar(128) ,
   `string_tag1` varchar(128) ,
   `string_tag2` varchar(128) ,
+  `create_uid` bigint(20),
+  `create_time` datetime,
+  `update_uid` bigint(20),
+  `update_time` datetime,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `eh_punch_alter_requests`;
+
+CREATE TABLE `eh_punch_alter_requests` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `user_id` bigint(20) COMMENT 'user''s id',
+  `company_id` bigint(20) COMMENT 'compay id',
+  `punch_date` date COMMENT 'user punch date',
+  `request_status` tinyint(4) COMMENT '0:alter request ;  1:illustrate',
+  `request_answer` tinyint(4) COMMENT '0:undo ;  1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence',
+  `description` varchar(128) ,
+  `string_tag1` varchar(128) ,
+  `string_tag2` varchar(128) ,
   `punch_time` datetime COMMENT 'user check time',
   `punch_status` tinyint(4) COMMENT '2:Normal ;  1:Not in punch area',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `eh_china_workdate`;
+
+CREATE TABLE `eh_china_workdate` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `request_status` tinyint(4) COMMENT '0:weekend work date ;  1:holiday',
+  `date_tag` date COMMENT 'date',
+  `create_uid` bigint(20),
+  `create_time` datetime,
+  `update_uid` bigint(20),
+  `update_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -60,7 +60,7 @@ CREATE TABLE `eh_punch_alter_requests` (
   `company_id` bigint(20) COMMENT 'compay id',
   `punch_date` date COMMENT 'user punch date',
   `request_status` tinyint(4) COMMENT '0:alter request ;  1:illustrate',
-  `request_answer` tinyint(4) COMMENT '0:consent ;  1:refuse ;2:sick absence 3: leave of absence 4:annual leave ;5: other absence',
+  `request_answer` tinyint(4) COMMENT '0:undo ;  1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence',
   `description` varchar(128) ,
   `string_tag1` varchar(128) ,
   `string_tag2` varchar(128) ,
