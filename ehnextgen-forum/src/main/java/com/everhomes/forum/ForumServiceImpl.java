@@ -1399,7 +1399,7 @@ public class ForumServiceImpl implements ForumService {
     
     private void processPostCategory(long userId, NewTopicCommand cmd, Post post) {
         Long contentCategory = cmd.getContentCategory();
-        if(contentCategory == null || contentCategory.longValue() > 0) {
+        if(contentCategory == null || contentCategory.longValue() == 0) {
             contentCategory = CategoryConstants.CATEGORY_ID_TOPIC_COMMON;
         }
         
