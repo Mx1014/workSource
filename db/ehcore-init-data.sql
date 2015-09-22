@@ -259,7 +259,11 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'user'
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'version', '1', 'zh_CN', '呃，好像哪里出错了');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'version', '2', 'zh_CN', '版本内容不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'version', '3', 'zh_CN', '版本内容不存在');
-
+INSERT INTO eh_locale_strings(scope,code,locale,text) VALUES('activity','1','zh_CN','我已报名!');
+INSERT INTO eh_locale_strings(scope,code,locale,text) VALUES('activity','2','zh_CN','我已签到!');
+INSERT INTO eh_locale_strings(scope,code,locale,text) VALUES('activity','3','zh_CN','回复 ${username}：您的报名已被确认');
+INSERT INTO eh_locale_strings(scope,code,locale,text) VALUES('activity','4','zh_CN','我已取消报名!');
+INSERT INTO eh_locale_strings(scope,code,locale,text) VALUES('activity','5','zh_CN','回复 ${username}：您的报名已被拒绝，原因：${reason}');
 
 	
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 1, 'zh_CN', '有人申请加入圈（圈不需要审批），通知申请者成功加入圈', '您已加入圈“${groupName}”。');
