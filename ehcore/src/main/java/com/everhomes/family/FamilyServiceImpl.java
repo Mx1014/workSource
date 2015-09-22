@@ -1287,31 +1287,53 @@ public class FamilyServiceImpl implements FamilyService {
         Group group = this.groupProvider.findGroupById(familyId);
         
         GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), user.getId());
-        if(m == null)
+        if(m == null || m.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode())
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "User not in family");
-            
+                    "User not in family or user status is not active.");
+        
+        List<Family> familyList = new ArrayList<Family>();
         long communityId = group.getIntegralTag2();
         List<Long> userIds = new ArrayList<Long>();
         List<NeighborUserDTO> results = new ArrayList<NeighborUserDTO>();
         
         long startTime = System.currentTimeMillis();
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                    context.select(Tables.EH_USER_GROUPS.OWNER_UID).from(Tables.EH_USER_GROUPS)
-                        .where(Tables.EH_USER_GROUPS.REGION_SCOPE.eq(RegionScope.COMMUNITY.getCode()))
-                        .and(Tables.EH_USER_GROUPS.REGION_SCOPE_ID.eq(communityId))
-                        .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
+                    context.select().from(Tables.EH_GROUPS)
+                        .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
-                            Long id = r.getValue(Tables.EH_USER_GROUPS.OWNER_UID);
-                            if(!userIds.contains(id) && id.longValue() != user.getId().longValue()){
-                                userIds.add(r.getValue(Tables.EH_USER_GROUPS.OWNER_UID));
-                                
-                            }
+                            //排除自己家庭
+                            if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != group.getIntegralTag1())
+                                familyList.add(ConvertHelper.convert(r,Family.class));
+
                             return null;
                         });
                     return true;
                 });
+        
+        familyList.stream().forEach((f) ->{
+            if(f == null) return;
+            
+            Address address = this.addressProvider.findAddressById(f.getAddressId());
+            if(address != null){
+                
+                List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
+                if(members != null && !members.isEmpty()){
+                    for(GroupMember gm : members){
+                        
+                        if(gm.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
+                                && gm.getMemberType().equals(EntityType.USER.getCode())
+                                        && gm.getMemberId().longValue() != user.getId().longValue()){
+                            //去重
+                            if(userIds.contains(gm.getMemberId())) 
+                                return;
+                            userIds.add(gm.getMemberId());
+                        }
+                    }
+                }
+            }
+            
+        });
         
         if(userIds.size() > 0){
             LOGGER.info("Community neary by user,userIds=" + userIds);
@@ -1322,6 +1344,7 @@ public class FamilyServiceImpl implements FamilyService {
                 
                 listUserLocations.forEach((userLocation) ->{
                     UserInfo u = this.userService.getUserSnapshotInfo(userLocation.getUid());
+                    
                     NeighborUserDTO n = new NeighborUserDTO();
                     n.setUserId(u.getId());
                     n.setUserStatusLine(u.getStatusLine());
@@ -1336,6 +1359,7 @@ public class FamilyServiceImpl implements FamilyService {
                     double distince = DistanceUtils.getDistanceMi(latitude,longitude,lat , lon) * MILES_KILOMETRES_RATIO * 1000;
                     n.setDistance(distince);
                     results.add(n);
+                    
                 });
                 
             }
