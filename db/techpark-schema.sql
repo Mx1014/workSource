@@ -50,7 +50,7 @@ CREATE TABLE `eh_punch_logs` (
   `latitude` double,
   `punch_date` date COMMENT 'user punch date',
   `punch_time` datetime COMMENT 'user check time',
-  `punch_status` tinyint(4) COMMENT '0:Normal ;  1:Not in punch area',
+  `punch_status` tinyint(4) COMMENT '1:Normal ;  0:Not in punch area',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
