@@ -38,22 +38,24 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     @Override
     public void upload(MessageHandleRequest request) throws Exception {
         Long[] ids=new Long[1];
-        LoginToken login;
+        LoginToken login = null;
         try {
              login = WebTokenGenerator.getInstance().fromWebToken(request.getToken(), LoginToken.class);
             if (null != login) {
-                LOGGER.error("cannot find login information");
                 ids[0]=login.getUserId();
+            } else {
+                LOGGER.error("Login token is null, reqToken=", request.getToken() 
+                    + ", md5=" + request.getMd5() + ", objectId=" + request.getObjectId());
             }
         } catch (Exception e) {
-            // skip validate
+            LOGGER.error("Failed to parse login token, reqToken=" + request.getToken(), e);
         }
 
         ContentServer server = contentServerService.selectContentServer();
         if (server == null) {
-            LOGGER.error("cannot find server.userId={}", ids[0]);
+            LOGGER.error("Content server not found, userId=" + ids[0] + ", reqToken=" + request.getToken() + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "cannot find server");
+                    "Content server not found");
         }
         ContentServerResource result = contentServerProvider.findByUidAndMD5(ids[0], request.getMd5());
         if (result != null) {
@@ -75,6 +77,10 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         result = resource.first();
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
         request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Upload resource file successfully, userId=" + ids[0] + ", reqToken=" + request.getToken() 
+                + ", loginToken=" + login + ", objectId=" + request.getObjectId() + ", url=" + request.getUrl());
+        }
     }
 
     private String createUrl(ContentServer content, String resourceId, String type, String token) {
@@ -99,11 +105,13 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     public void delete(MessageHandleRequest request) {
         LoginToken token = WebTokenGenerator.getInstance().fromWebToken(request.getToken(), LoginToken.class);
         if (null == token) {
-            LOGGER.error("may be some internal error.token can convert or is empty.tokenString={}", request.getToken());
+            LOGGER.error("Login token is null, reqToken=", request.getToken() 
+                + ", md5=" + request.getMd5() + ", objectId=" + request.getObjectId());
             return;
         }
         contentServerProvider.deleteByUidAndResourceId(token.getUserId(), request.getObjectId());
-        LOGGER.warn("delete file record from database.file md5={},objectId={}", request.getMd5(), request.getObjectId());
+        LOGGER.warn("Delete resource file, reqToken=", request.getToken() 
+                + ", md5=" + request.getMd5() + ", objectId=" + request.getObjectId());
     }
 
     @Override
@@ -112,7 +120,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         try {
             login = WebTokenGenerator.getInstance().fromWebToken(request.getToken(), LoginToken.class);
         } catch (Exception e) {
-            // skip validate
+            LOGGER.error("Failed to parse login token, reqToken=" + request.getToken(), e);
         }
 
         // if (!userService.isValidLoginToken(login)) {
@@ -133,47 +141,57 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             md5 = uploadInvoke(login, request.getObjectId());
             break;
         default:
+            LOGGER.error("Unsupported access type, accessType=" + request.getAccessType() + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
-                    ContentServerErrorCode.ERROR_INVALID_ACTION, "invalid action.cannot known");
+                    ContentServerErrorCode.ERROR_INVALID_ACTION, "Unsupported access type");
         }
         request.setMd5(md5);
     }
 
     private String lookupInvoke(LoginToken login, String resourceId) {
+        String orginResourceId = resourceId;
         resourceId = Generator.decodeUrl(resourceId);
         ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
-            LOGGER.error("cannot find resource information");
+            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId 
+                + ", decodeResourceId=" + resourceId + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "cannot find file");
+                    "Resource file not found");
         }
         return resource.getResourceMd5();
 
     }
 
-    private String deleteInvoke(LoginToken login, String uniqueId) {
-        uniqueId = Generator.decodeUrl(uniqueId);
-        ContentServerResource resource = contentServerProvider.findByResourceId(uniqueId);
+    private String deleteInvoke(LoginToken login, String resourceId) {
+        String originResourceId = resourceId;
+        resourceId = Generator.decodeUrl(resourceId);
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
-            LOGGER.error("can not find file information");
+            LOGGER.error("Resource file not found, originResourceId=" + originResourceId 
+                + ", decodeResourceId=" + resourceId + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "can not find the file");
+                    "Resource file not found");
         }
         if (login != null && login.getUserId() != resource.getOwnerId()) {
-            LOGGER.error("cannot delete file.current user is not own.uid={},own={}", login.getUserId(),
-                    resource.getOwnerId());
+            LOGGER.error("Can not delete the resource file who is not the owner, operatorUid=" 
+                + login.getUserId() + ", ownerId=" + resource.getOwnerId() + ", resourceId=" + resourceId);
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
                     ContentServerErrorCode.ERROR_INVALID_USER, "invalid owner or user");
         }
-        LOGGER.error("the usr cannot delete this file.objectId={}", uniqueId);
+        
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("The user can delete the resource, resourceId=" + resourceId + ", md5=" + resource.getResourceMd5()  
+                + ", ownerId=" + resource.getOwnerId() + ", loginToken=" + login);
+        }
+        
         return resource.getResourceMd5();
     }
 
-    private String uploadInvoke(LoginToken login, String uniqueId) {
+    private String uploadInvoke(LoginToken login, String resourceId) {
         if (login == null || login.getUserId() == 0) {
-            LOGGER.info("can not access.userId is empty");
+            LOGGER.info("Invalid login token, loginToken=" + login + ", resourceId=" + resourceId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "user is invalid.userId=" + login.getUserId());
+                    "Invalid login token");
         }
         return null;
     }
