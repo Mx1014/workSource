@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,10 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
 import com.everhomes.forum.admin.PostAdminDTO;
 import com.everhomes.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.forum.admin.SearchTopicAdminCommandResponse;
@@ -61,6 +64,8 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
@@ -291,6 +296,21 @@ public class ForumServiceImpl implements ForumService {
         Long embededAppId = post.getEmbeddedAppId();
         ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
         
+        List<Long> userIds = new ArrayList<Long>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    context.select().from(Tables.EH_USER_FAVORITES)
+                        .where(Tables.EH_USER_FAVORITES.TARGET_ID.eq(postId))
+                        .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq("topic"))
+                        .fetch().map( (r) ->{
+                        	
+                        	userIds.add(r.getValue(Tables.EH_USER_FAVORITES.OWNER_UID));
+
+                            return null;
+                        });
+                    return true;
+                });
+        
         if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
             post.setStatus(PostStatus.INACTIVE.getCode());
             post.setDeleterUid(userId);
@@ -300,6 +320,11 @@ public class ForumServiceImpl implements ForumService {
                     this.forumProvider.updatePost(post);
                     if(userId.equals(post.getCreatorUid())){
                     	userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+                    }
+                    if(userIds.size() != 0){
+                    	for(Long id:userIds){
+                    		userActivityProvider.deleteFavorite(id, postId, "topic");
+                    	}
                     }
                    return null;
                 });
