@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupContacts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupContactsRecord> {
 
-	private static final long serialVersionUID = 2068226640;
+	private static final long serialVersionUID = -582166000;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_contacts</code>
@@ -112,9 +112,9 @@ public class EhGroupContacts extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_contacts.creator_uid</code>. the user id who create the contact
+	 * The column <code>ehcore.eh_group_contacts.creater_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "the user id who create the contact");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.Long> CREATER_UID = createField("creater_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_contacts.create_time</code>.
@@ -122,14 +122,14 @@ public class EhGroupContacts extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_contacts.update_uid</code>.
+	 * The column <code>ehcore.eh_group_contacts.operator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.Long> UPDATE_UID = createField("update_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_contacts.update_time</code>.
+	 * The column <code>ehcore.eh_group_contacts.operate_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_group_contacts</code> table reference

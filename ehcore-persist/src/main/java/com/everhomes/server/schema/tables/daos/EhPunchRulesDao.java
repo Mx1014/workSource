@@ -55,45 +55,17 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>check_type IN (values)</code>
+	 * Fetch records that have <code>start_early_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByCheckType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.CHECK_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByStartEarlyTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.START_EARLY_TIME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>punch_times IN (values)</code>
+	 * Fetch records that have <code>start_late_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByPunchTimes(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.PUNCH_TIMES, values);
-	}
-
-	/**
-	 * Fetch records that have <code>start_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByStartTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.START_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>end_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByEndTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.END_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>noon_end_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByNoonEndTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.NOON_END_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>afternoon_start_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByAfternoonStartTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.AFTERNOON_START_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByStartLateTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.START_LATE_TIME, values);
 	}
 
 	/**
@@ -104,24 +76,31 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>late_arrive_time IN (values)</code>
+	 * Fetch records that have <code>time_tag1 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByLateArriveTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.LATE_ARRIVE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag1(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG1, values);
 	}
 
 	/**
-	 * Fetch records that have <code>early_leave_time IN (values)</code>
+	 * Fetch records that have <code>time_tag2 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByEarlyLeaveTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.EARLY_LEAVE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag2(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG2, values);
 	}
 
 	/**
-	 * Fetch records that have <code>create_uid IN (values)</code>
+	 * Fetch records that have <code>time_tag3 IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByCreateUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.CREATE_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag3(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_uid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.CREATOR_UID, values);
 	}
 
 	/**
@@ -132,16 +111,16 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>update_uid IN (values)</code>
+	 * Fetch records that have <code>operator_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByUpdateUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.UPDATE_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.OPERATOR_UID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>update_time IN (values)</code>
+	 * Fetch records that have <code>operate_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByUpdateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.UPDATE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByOperateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.OPERATE_TIME, values);
 	}
 }

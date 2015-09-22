@@ -354,6 +354,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
+	 * The table ehcore.eh_punch_exception_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchExceptionRequests EH_PUNCH_EXCEPTION_REQUESTS = com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS;
+
+	/**
+	 * The table ehcore.eh_punch_geopoints
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchGeopoints EH_PUNCH_GEOPOINTS = com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS;
+
+	/**
 	 * The table ehcore.eh_punch_logs
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchLogs EH_PUNCH_LOGS = com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS;
@@ -362,6 +372,11 @@ public class Tables {
 	 * The table ehcore.eh_punch_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchRules EH_PUNCH_RULES = com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES;
+
+	/**
+	 * The table ehcore.eh_punch_workday
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchWorkday EH_PUNCH_WORKDAY = com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY;
 
 	/**
 	 * The table ehcore.eh_qrcodes

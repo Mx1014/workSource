@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupContactsRecord> implements org.jooq.Record21<java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1603788115;
+	private static final long serialVersionUID = 1945562807;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_contacts.id</code>.
@@ -252,16 +252,16 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_contacts.creator_uid</code>. the user id who create the contact
+	 * Setter for <code>ehcore.eh_group_contacts.creater_uid</code>.
 	 */
-	public void setCreatorUid(java.lang.Long value) {
+	public void setCreaterUid(java.lang.Long value) {
 		setValue(17, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_contacts.creator_uid</code>. the user id who create the contact
+	 * Getter for <code>ehcore.eh_group_contacts.creater_uid</code>.
 	 */
-	public java.lang.Long getCreatorUid() {
+	public java.lang.Long getCreaterUid() {
 		return (java.lang.Long) getValue(17);
 	}
 
@@ -280,30 +280,30 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_contacts.update_uid</code>.
+	 * Setter for <code>ehcore.eh_group_contacts.operator_uid</code>.
 	 */
-	public void setUpdateUid(java.lang.Long value) {
+	public void setOperatorUid(java.lang.Long value) {
 		setValue(19, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_contacts.update_uid</code>.
+	 * Getter for <code>ehcore.eh_group_contacts.operator_uid</code>.
 	 */
-	public java.lang.Long getUpdateUid() {
+	public java.lang.Long getOperatorUid() {
 		return (java.lang.Long) getValue(19);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_contacts.update_time</code>.
+	 * Setter for <code>ehcore.eh_group_contacts.operate_time</code>.
 	 */
-	public void setUpdateTime(java.sql.Timestamp value) {
+	public void setOperateTime(java.sql.Timestamp value) {
 		setValue(20, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_contacts.update_time</code>.
+	 * Getter for <code>ehcore.eh_group_contacts.operate_time</code>.
 	 */
-	public java.sql.Timestamp getUpdateTime() {
+	public java.sql.Timestamp getOperateTime() {
 		return (java.sql.Timestamp) getValue(20);
 	}
 
@@ -480,7 +480,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field18() {
-		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.CREATOR_UID;
+		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.CREATER_UID;
 	}
 
 	/**
@@ -496,7 +496,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field20() {
-		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.UPDATE_UID;
+		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.OPERATOR_UID;
 	}
 
 	/**
@@ -504,7 +504,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public org.jooq.Field<java.sql.Timestamp> field21() {
-		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.UPDATE_TIME;
+		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.OPERATE_TIME;
 	}
 
 	/**
@@ -648,7 +648,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public java.lang.Long value18() {
-		return getCreatorUid();
+		return getCreaterUid();
 	}
 
 	/**
@@ -664,7 +664,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public java.lang.Long value20() {
-		return getUpdateUid();
+		return getOperatorUid();
 	}
 
 	/**
@@ -672,7 +672,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public java.sql.Timestamp value21() {
-		return getUpdateTime();
+		return getOperateTime();
 	}
 
 	/**
@@ -833,7 +833,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public EhGroupContactsRecord value18(java.lang.Long value) {
-		setCreatorUid(value);
+		setCreaterUid(value);
 		return this;
 	}
 
@@ -851,7 +851,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public EhGroupContactsRecord value20(java.lang.Long value) {
-		setUpdateUid(value);
+		setOperatorUid(value);
 		return this;
 	}
 
@@ -860,7 +860,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public EhGroupContactsRecord value21(java.sql.Timestamp value) {
-		setUpdateTime(value);
+		setOperateTime(value);
 		return this;
 	}
 
@@ -886,7 +886,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	/**
 	 * Create a detached, initialised EhGroupContactsRecord
 	 */
-	public EhGroupContactsRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long contactUid, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactName, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long updateUid, java.sql.Timestamp updateTime) {
+	public EhGroupContactsRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long contactUid, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactName, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long createrUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS);
 
 		setValue(0, id);
@@ -906,9 +906,9 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 		setValue(14, stringTag3);
 		setValue(15, stringTag4);
 		setValue(16, stringTag5);
-		setValue(17, creatorUid);
+		setValue(17, createrUid);
 		setValue(18, createTime);
-		setValue(19, updateUid);
-		setValue(20, updateTime);
+		setValue(19, operatorUid);
+		setValue(20, operateTime);
 	}
 }

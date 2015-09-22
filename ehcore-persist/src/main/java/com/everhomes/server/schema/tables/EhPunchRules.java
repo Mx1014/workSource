@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchRulesRecord> {
 
-	private static final long serialVersionUID = -703096076;
+	private static final long serialVersionUID = -1784433536;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_rules</code>
@@ -37,54 +37,39 @@ public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Long> COMPANY_ID = createField("company_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "rule company id");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.check_type</code>. 0:standard ;  1:flextime
+	 * The column <code>ehcore.eh_punch_rules.start_early_time</code>. how early can i arrive
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Byte> CHECK_TYPE = createField("check_type", org.jooq.impl.SQLDataType.TINYINT, this, "0:standard ;  1:flextime");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> START_EARLY_TIME = createField("start_early_time", org.jooq.impl.SQLDataType.TIME, this, "how early can i arrive");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.punch_times</code>. how many times everyday emloyee need punched. 2 times or 4 times
+	 * The column <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive 
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Integer> PUNCH_TIMES = createField("punch_times", org.jooq.impl.SQLDataType.INTEGER, this, "how many times everyday emloyee need punched. 2 times or 4 times");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> START_LATE_TIME = createField("start_late_time", org.jooq.impl.SQLDataType.TIME, this, "how late can i arrive ");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.start_time</code>. type=0:work start time ;1:work start earlist time
+	 * The column <code>ehcore.eh_punch_rules.work_time</code>. how long do i must be work
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIME, this, "type=0:work start time ;1:work start earlist time");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> WORK_TIME = createField("work_time", org.jooq.impl.SQLDataType.TIME, this, "how long do i must be work");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.end_time</code>. type=0:work end time ;1:work start latest time
+	 * The column <code>ehcore.eh_punch_rules.time_tag1</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIME, this, "type=0:work end time ;1:work start latest time");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> TIME_TAG1 = createField("time_tag1", org.jooq.impl.SQLDataType.TIME, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.noon_end_time</code>.
+	 * The column <code>ehcore.eh_punch_rules.time_tag2</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> NOON_END_TIME = createField("noon_end_time", org.jooq.impl.SQLDataType.TIME, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> TIME_TAG2 = createField("time_tag2", org.jooq.impl.SQLDataType.TIME, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.afternoon_start_time</code>.
+	 * The column <code>ehcore.eh_punch_rules.time_tag3</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> AFTERNOON_START_TIME = createField("afternoon_start_time", org.jooq.impl.SQLDataType.TIME, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> TIME_TAG3 = createField("time_tag3", org.jooq.impl.SQLDataType.TIME, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.work_time</code>. how long must I work
+	 * The column <code>ehcore.eh_punch_rules.creator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> WORK_TIME = createField("work_time", org.jooq.impl.SQLDataType.TIME, this, "how long must I work");
-
-	/**
-	 * The column <code>ehcore.eh_punch_rules.late_arrive_time</code>. how long can I be late
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> LATE_ARRIVE_TIME = createField("late_arrive_time", org.jooq.impl.SQLDataType.TIME, this, "how long can I be late");
-
-	/**
-	 * The column <code>ehcore.eh_punch_rules.early_leave_time</code>. how long can I be early leave from work
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> EARLY_LEAVE_TIME = createField("early_leave_time", org.jooq.impl.SQLDataType.TIME, this, "how long can I be early leave from work");
-
-	/**
-	 * The column <code>ehcore.eh_punch_rules.create_uid</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Long> CREATE_UID = createField("create_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_punch_rules.create_time</code>.
@@ -92,14 +77,14 @@ public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.update_uid</code>.
+	 * The column <code>ehcore.eh_punch_rules.operator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Long> UPDATE_UID = createField("update_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.update_time</code>.
+	 * The column <code>ehcore.eh_punch_rules.operate_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_rules</code> table reference

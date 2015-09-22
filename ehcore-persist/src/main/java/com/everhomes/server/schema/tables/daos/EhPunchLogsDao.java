@@ -62,6 +62,20 @@ public class EhPunchLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.LATITUDE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>punch_date IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByPunchDate(java.sql.Date... values) {
@@ -73,5 +87,12 @@ public class EhPunchLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByPunchTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.PUNCH_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>punch_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByPunchStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.PUNCH_STATUS, values);
 	}
 }

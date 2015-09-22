@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupContacts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1371090711;
+	private static final long serialVersionUID = 1616810367;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -30,10 +30,10 @@ public class EhGroupContacts implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.Long     creatorUid;
+	private java.lang.Long     createrUid;
 	private java.sql.Timestamp createTime;
-	private java.lang.Long     updateUid;
-	private java.sql.Timestamp updateTime;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
 
 	public EhGroupContacts() {}
 
@@ -55,10 +55,10 @@ public class EhGroupContacts implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Long     creatorUid,
+		java.lang.Long     createrUid,
 		java.sql.Timestamp createTime,
-		java.lang.Long     updateUid,
-		java.sql.Timestamp updateTime
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -77,10 +77,10 @@ public class EhGroupContacts implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.creatorUid = creatorUid;
+		this.createrUid = createrUid;
 		this.createTime = createTime;
-		this.updateUid = updateUid;
-		this.updateTime = updateTime;
+		this.operatorUid = operatorUid;
+		this.operateTime = operateTime;
 	}
 
 	public java.lang.Long getId() {
@@ -219,12 +219,12 @@ public class EhGroupContacts implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
-	public java.lang.Long getCreatorUid() {
-		return this.creatorUid;
+	public java.lang.Long getCreaterUid() {
+		return this.createrUid;
 	}
 
-	public void setCreatorUid(java.lang.Long creatorUid) {
-		this.creatorUid = creatorUid;
+	public void setCreaterUid(java.lang.Long createrUid) {
+		this.createrUid = createrUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {
@@ -235,19 +235,19 @@ public class EhGroupContacts implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.lang.Long getUpdateUid() {
-		return this.updateUid;
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
 	}
 
-	public void setUpdateUid(java.lang.Long updateUid) {
-		this.updateUid = updateUid;
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
 	}
 
-	public java.sql.Timestamp getUpdateTime() {
-		return this.updateTime;
+	public java.sql.Timestamp getOperateTime() {
+		return this.operateTime;
 	}
 
-	public void setUpdateTime(java.sql.Timestamp updateTime) {
-		this.updateTime = updateTime;
+	public void setOperateTime(java.sql.Timestamp operateTime) {
+		this.operateTime = operateTime;
 	}
 }

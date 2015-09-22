@@ -11,13 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1513450524;
+	private static final long serialVersionUID = 333555480;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
 	private java.lang.Long     companyId;
+	private java.lang.Double   longitude;
+	private java.lang.Double   latitude;
 	private java.sql.Date      punchDate;
 	private java.sql.Timestamp punchTime;
+	private java.lang.Byte     punchStatus;
 
 	public EhPunchLogs() {}
 
@@ -25,14 +28,20 @@ public class EhPunchLogs implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     userId,
 		java.lang.Long     companyId,
+		java.lang.Double   longitude,
+		java.lang.Double   latitude,
 		java.sql.Date      punchDate,
-		java.sql.Timestamp punchTime
+		java.sql.Timestamp punchTime,
+		java.lang.Byte     punchStatus
 	) {
 		this.id = id;
 		this.userId = userId;
 		this.companyId = companyId;
+		this.longitude = longitude;
+		this.latitude = latitude;
 		this.punchDate = punchDate;
 		this.punchTime = punchTime;
+		this.punchStatus = punchStatus;
 	}
 
 	public java.lang.Long getId() {
@@ -59,6 +68,22 @@ public class EhPunchLogs implements java.io.Serializable {
 		this.companyId = companyId;
 	}
 
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
 	public java.sql.Date getPunchDate() {
 		return this.punchDate;
 	}
@@ -73,5 +98,13 @@ public class EhPunchLogs implements java.io.Serializable {
 
 	public void setPunchTime(java.sql.Timestamp punchTime) {
 		this.punchTime = punchTime;
+	}
+
+	public java.lang.Byte getPunchStatus() {
+		return this.punchStatus;
+	}
+
+	public void setPunchStatus(java.lang.Byte punchStatus) {
+		this.punchStatus = punchStatus;
 	}
 }
