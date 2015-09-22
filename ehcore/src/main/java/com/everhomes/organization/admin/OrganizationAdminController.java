@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
@@ -214,6 +217,20 @@ public class OrganizationAdminController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+    }
+    
+    /**
+     * <b>URL: /org/importOrganization</b>
+     * <p>导入机构信息</p>
+     */
+    @RequestMapping(value="importOrganization", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
+        this.organizationService.importOrganization(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
 }
