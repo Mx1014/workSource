@@ -17,7 +17,7 @@ public class PunchLogsYearListResponse{
     private String punchYear; 
     
     @ItemType(PunchLogsMonthList.class)
-    private List<PunchLogsMonthList> PunchLogsMonthList;
+    private List<PunchLogsMonthList> punchLogsMonthList;
  
     @Override
     public String toString() {
@@ -25,12 +25,12 @@ public class PunchLogsYearListResponse{
     }
 
 	public List<PunchLogsMonthList> getPunchLogsMonthList() {
-		return PunchLogsMonthList;
+		return punchLogsMonthList;
 	}
 
 	public void setPunchLogsMonthList(
 			List<PunchLogsMonthList> punchLogsMonthList) {
-		PunchLogsMonthList = punchLogsMonthList;
+		punchLogsMonthList = punchLogsMonthList;
 	}
 
 	public String getPunchYear() {

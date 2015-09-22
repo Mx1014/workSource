@@ -88,7 +88,6 @@ public class PunchProviderImpl implements PunchProvider {
 //	    })
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
-		// TODO Auto-generated method stub
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchLogs.class));
 		punchLog.setId(id);
@@ -96,6 +95,18 @@ public class PunchProviderImpl implements PunchProvider {
 		dao.insert(punchLog);
 		
 		
+	}
+
+	@Override
+	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId) {
+		// TODO Auto-generated method stub
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_GEOPOINTS);
+        Condition condition = Tables.EH_PUNCH_GEOPOINTS.COMPANY_ID.equal(companyId);
+        step.where(condition);
+        List<PunchGeopoint> result = step.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).
+                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchGeopoint.class);});
+        return result;
 	} 
  
 	    

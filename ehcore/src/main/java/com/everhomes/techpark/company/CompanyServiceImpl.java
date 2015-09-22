@@ -132,8 +132,8 @@ public class CompanyServiceImpl implements GroupContactService{
 			gContact.setContactToken(cmd.getContactToken().trim());
 		if(cmd.getDepartment() != null && !cmd.getDepartment().trim().isEmpty())
 			gContact.setStringTag1(cmd.getDepartment().trim());
-		gContact.setUpdateTime(currentTimeStamp);
-		gContact.setUpdateUid(user.getId());
+		gContact.setOperateTime(currentTimeStamp);
+		gContact.setOperatorUid(user.getId());
 		this.groupContactProvider.updateGroupContact(gContact);
 	}
 
@@ -218,7 +218,7 @@ public class CompanyServiceImpl implements GroupContactService{
 				list.stream().map(r -> {
 					GroupContactDTO dto = ConvertHelper.convert(r, GroupContactDTO.class);
 					dto.setCreateTime(r.getCreateTime() == null ? null:r.getCreateTime().getTime());
-					dto.setUpdateTime(r.getUpdateTime() == null ? null:r.getUpdateTime().getTime());
+					dto.setUpdateTime(r.getOperateTime() == null ? null:r.getOperateTime().getTime());
 					dto.setDepartment(r.getStringTag1());
 					listDto.add(dto);
 					return null;
