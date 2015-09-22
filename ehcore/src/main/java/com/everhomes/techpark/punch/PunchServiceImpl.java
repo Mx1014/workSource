@@ -467,5 +467,28 @@ public class PunchServiceImpl implements PunchService {
 		punchProvider.createPunchLog(punchLog);
 		return punchTime;
 	}
+	/***return 两个坐标之间的距离 单位 米*/
+	private double caculateDistance(double longitude1, double latitude1,
+			double longitude2, double latitude2) {
+		double radianLat1 = angle2Radian(latitude1);
+		double radianLat2 = angle2Radian(latitude2);
+		double differenceLat = radianLat1 - radianLat2;
+		double differenceLng = angle2Radian(longitude1)
+				- angle2Radian(longitude2);
+
+		double s = 2 * Math.asin(Math.sqrt(Math.pow(
+				Math.sin(differenceLat / 2), 2)
+				+ Math.cos(radianLat1)
+				* Math.cos(radianLat2)
+				* Math.pow(Math.sin(differenceLng / 2), 2)));
+		s = s * 6378137.0D;
+		s = Math.round(s * 10000) / 10000;
+
+		return s;
+	}
+
+	private double angle2Radian(double angle) {
+		return angle * Math.PI / 180.0;
+	}
 
 }
