@@ -430,8 +430,18 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public String createPunchLog(PunchClockCommand cmd) {
 
+		 if(cmd.getCompanyId() == null || cmd.getCompanyId().equals(0L) )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, 
+	                    "Invalid companyId parameter in the command");
+		 if(cmd.getLatitude() == null || cmd.getLatitude().equals(0))
+	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+	                    "Invalid Latitude parameter in the command");
+		 if(cmd.getLongitude() == null || cmd.getLongitude().equals(0) )
+	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+	                    "Invalid Longitude parameter in the command");
+		
 		Long userId = UserContext.current().getUser().getId();
-
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 设置日期格式
 		String punchTime = df.format(new Date());// new Date()为获取当前系统时间为打卡时间
 		SimpleDateFormat datetimeSF = new SimpleDateFormat(
