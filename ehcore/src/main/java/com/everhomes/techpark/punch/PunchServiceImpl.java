@@ -28,18 +28,20 @@ import com.everhomes.util.RuntimeErrorException;
 @Service
 public class PunchServiceImpl implements PunchService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PunchServiceImpl.class);
-	
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(PunchServiceImpl.class);
+
 	@Autowired
 	PunchProvider punchProvider;
-	
+
 	@Autowired
 	SequenceProvider sequenceProvider;
-	
+
 	private void checkCompanyIdIsNull(Long companyId) {
-		if(companyId == null || companyId.equals(0L)){
+		if (companyId == null || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid company Id parameter in the command");
 		}
 
@@ -191,16 +193,20 @@ public class PunchServiceImpl implements PunchService {
 			} else {
 				if (arriveCalendar.after(startMinTime)) {
 					if (leaveCalendar.after(arriveCalendar)) {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL.getCode());
+						leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL
+								.getCode());
 					} else {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+						leavePunchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY
+								.getCode());
 						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
 					}
 				} else {
 					if (leaveCalendar.after(startMinTime)) {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL.getCode());
+						leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL
+								.getCode());
 					} else {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+						leavePunchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY
+								.getCode());
 						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
 					}
 				}
@@ -294,7 +300,7 @@ public class PunchServiceImpl implements PunchService {
 							"Invalid companyId parameter in the command:companyId has no geo point");
 		for (PunchGeopoint punchGeopoint : punchGeopoints) {
 			if (caculateDistance(cmd.getLongitude(), cmd.getLatitude(),
-					punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= (double) punchGeopoint
+					punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= punchGeopoint
 					.getDistance()) {
 				// 如果找到了一个就跳出
 				code = ClockCode.SUCESS;
@@ -328,39 +334,45 @@ public class PunchServiceImpl implements PunchService {
 	private double angle2Radian(double angle) {
 		return angle * Math.PI / 180.0;
 	}
-	
+
 	@Override
 	public void createPunchRule(CreatePunchRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+				.getCompanyId());
 		String startEarlyTime = cmd.getStartEarlyTime();
 		String startLastTime = cmd.getStartLateTime();
 		String endEarlyTime = cmd.getEndEarlyTime();
-		
-		if(punchRule == null){
+
+		if (punchRule == null) {
 			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
-			long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchRules.class));
+			long id = sequenceProvider.getNextSequence(NameMapper
+					.getSequenceDomainFromTablePojo(EhPunchRules.class));
 			punchRule.setId(id);
-			convertTime(punchRule,startEarlyTime,startLastTime,endEarlyTime);
+			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
 			punchRule.setCreatorUid(userId);
-			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
 			punchProvider.createPunchRule(punchRule);
 		}
-		
+
 	}
-	
-	private void convertTime(PunchRule punchRule, String startEarlyTime, String startLastTime, String endEarlyTime) {
+
+	private void convertTime(PunchRule punchRule, String startEarlyTime,
+			String startLastTime, String endEarlyTime) {
 		Time startEarly = convertTime(startEarlyTime);
 		punchRule.setStartEarlyTime(startEarly);
 		punchRule.setStartLateTime(convertTime(startLastTime));
 		Time endEarly = convertTime(endEarlyTime);
 		Long workTime = endEarly.getTime() - startEarly.getTime();
-		punchRule.setWorkTime(convertTime(String.format("%tT", DateHelper.getDateDisplayString(TimeZone.getDefault(), workTime, "HH:mm:ss"))));
+		punchRule.setWorkTime(convertTime(String.format("%tT", DateHelper
+				.getDateDisplayString(TimeZone.getDefault(), workTime,
+						"HH:mm:ss"))));
 	}
 
 	private Time convertTime(String TimeStr) {
-		if(!StringUtils.isEmpty(TimeStr)){
+		if (!StringUtils.isEmpty(TimeStr)) {
 			return Time.valueOf(TimeStr);
 		}
 		return null;
@@ -370,38 +382,42 @@ public class PunchServiceImpl implements PunchService {
 	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+				.getCompanyId());
 		String startEarlyTime = cmd.getStartEarlyTime();
 		String startLastTime = cmd.getStartLateTime();
 		String endEarlyTime = cmd.getEndEarlyTime();
-		if(punchRule != null){
-			PunchRule  newPunchRule = ConvertHelper.convert(cmd, PunchRule.class);
+		if (punchRule != null) {
+			PunchRule newPunchRule = ConvertHelper
+					.convert(cmd, PunchRule.class);
 			newPunchRule.setCreatorUid(punchRule.getCreatorUid());
 			newPunchRule.setCreateTime(punchRule.getCreateTime());
-			convertTime(punchRule,startEarlyTime,startLastTime,endEarlyTime);
-//			punchRule.setUpdateUid(userId);
-//			punchRule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
+			// punchRule.setUpdateUid(userId);
+			// punchRule.setUpdateTime(new
+			// Timestamp(DateHelper.currentGMTTime().getTime()));
 			punchProvider.updatePunchRule(punchRule);
 		}
 	}
-	
+
 	@Override
 	public PunchRuleResponse getPunchRuleByCompanyId(PunchClockCommand cmd) {
 		PunchRuleResponse response = new PunchRuleResponse();
 		PunchRuleDTO dto = null;
 		checkCompanyIdIsNull(cmd.getCompanyId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
-		if(punchRule != null){
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+				.getCompanyId());
+		if (punchRule != null) {
 			dto = ConvertHelper.convert(punchRule, PunchRuleDTO.class);
 		}
 		response.setPunchRuleDTO(dto);
 		return response;
 	}
-	
+
 	@Override
 	public void deletePunchRule(DeletePunchCommand cmd) {
 		PunchRule punchRule = punchProvider.findPunchRuleById(cmd.getId());
-		if(punchRule != null){
+		if (punchRule != null) {
 			punchProvider.deletePunchRule(punchRule);
 		}
 	}
