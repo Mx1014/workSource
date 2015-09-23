@@ -211,4 +211,15 @@ public class PunchProviderImpl implements PunchProvider {
 
 	}
 
+	@Override
+	public List<PunchWorkday> listWorkdays(DateStatus dateStatus) {
+		// TODO Auto-generated method stub
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_WORKDAY);
+        Condition condition = Tables.EH_PUNCH_WORKDAY.DATE_STATUS.equal(dateStatus.getCode());
+        step.where(condition);
+        List<PunchWorkday> result = step.orderBy(Tables.EH_PUNCH_WORKDAY.ID.desc()).
+                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchWorkday.class);});
+        return result;
+	} 
 }
