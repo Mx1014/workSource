@@ -347,9 +347,7 @@ public class PunchServiceImpl implements PunchService {
 
 		if (punchRule == null) {
 			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
-			long id = sequenceProvider.getNextSequence(NameMapper
-					.getSequenceDomainFromTablePojo(EhPunchRules.class));
-			punchRule.setId(id);
+			 
 			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
 			punchRule.setCreatorUid(userId);
 			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()

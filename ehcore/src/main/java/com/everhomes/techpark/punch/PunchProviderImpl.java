@@ -25,12 +25,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.version.VersionUpgradeRule;
@@ -119,6 +121,9 @@ public class PunchProviderImpl implements PunchProvider {
  
 	@Override
 	public void createPunchRule(PunchRule punchRule) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPunchRules.class));
+		punchRule.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchRulesRecord record = ConvertHelper.convert(punchRule, EhPunchRulesRecord.class);
 		InsertQuery<EhPunchRulesRecord> query = context.insertQuery(Tables.EH_PUNCH_RULES);
@@ -190,4 +195,20 @@ public class PunchProviderImpl implements PunchProvider {
 	        return null;
 	}    
 	  
+	@Override
+	public void createPunchWorkday(PunchWorkday punchWorkday) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPunchWorkday.class));
+		punchWorkday.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchWorkdayRecord record = ConvertHelper.convert(punchWorkday, EhPunchWorkdayRecord.class);
+		InsertQuery<EhPunchWorkdayRecord> query = context.insertQuery(Tables.EH_PUNCH_WORKDAY);
+		query.setRecord(record);
+//		query.setReturning(Tables.EH_PUNCH_RULES.ID);
+		query.execute();
+//		punchRule.setId(query.getReturnedRecord().getId());
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchWorkday.class, null); 
+
+	}
+
 }
