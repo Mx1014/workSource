@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopoints implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1425429857;
+	private static final long serialVersionUID = 1927020337;
 
 	private java.lang.Long     id;
 	private java.lang.Long     companyId;
@@ -19,7 +19,7 @@ public class EhPunchGeopoints implements java.io.Serializable {
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
-	private java.lang.Integer  distance;
+	private java.lang.Double   distance;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -34,7 +34,7 @@ public class EhPunchGeopoints implements java.io.Serializable {
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
-		java.lang.Integer  distance,
+		java.lang.Double   distance,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
@@ -101,11 +101,11 @@ public class EhPunchGeopoints implements java.io.Serializable {
 		this.geohash = geohash;
 	}
 
-	public java.lang.Integer getDistance() {
+	public java.lang.Double getDistance() {
 		return this.distance;
 	}
 
-	public void setDistance(java.lang.Integer distance) {
+	public void setDistance(java.lang.Double distance) {
 		this.distance = distance;
 	}
 

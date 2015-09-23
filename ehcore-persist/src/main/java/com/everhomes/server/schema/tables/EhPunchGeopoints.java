@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopoints extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord> {
 
-	private static final long serialVersionUID = 600858150;
+	private static final long serialVersionUID = -1155502546;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_geopoints</code>
@@ -59,7 +59,7 @@ public class EhPunchGeopoints extends org.jooq.impl.TableImpl<com.everhomes.serv
 	/**
 	 * The column <code>ehcore.eh_punch_geopoints.distance</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Integer> DISTANCE = createField("distance", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Double> DISTANCE = createField("distance", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_punch_geopoints.creator_uid</code>.

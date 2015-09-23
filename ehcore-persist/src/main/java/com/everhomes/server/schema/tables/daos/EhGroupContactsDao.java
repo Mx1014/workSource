@@ -160,10 +160,10 @@ public class EhGroupContactsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
-	 * Fetch records that have <code>creater_uid IN (values)</code>
+	 * Fetch records that have <code>creator_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupContacts> fetchByCreaterUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.CREATER_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroupContacts> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.CREATOR_UID, values);
 	}
 
 	/**

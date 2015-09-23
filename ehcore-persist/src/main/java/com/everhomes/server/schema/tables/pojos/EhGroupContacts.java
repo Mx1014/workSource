@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupContacts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1616810367;
+	private static final long serialVersionUID = -1315100737;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -30,7 +30,7 @@ public class EhGroupContacts implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.Long     createrUid;
+	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
@@ -55,7 +55,7 @@ public class EhGroupContacts implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Long     createrUid,
+		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime
@@ -77,7 +77,7 @@ public class EhGroupContacts implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.createrUid = createrUid;
+		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
@@ -219,12 +219,12 @@ public class EhGroupContacts implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
-	public java.lang.Long getCreaterUid() {
-		return this.createrUid;
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
 	}
 
-	public void setCreaterUid(java.lang.Long createrUid) {
-		this.createrUid = createrUid;
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupContacts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupContactsRecord> {
 
-	private static final long serialVersionUID = -582166000;
+	private static final long serialVersionUID = -1895305338;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_contacts</code>
@@ -112,9 +112,9 @@ public class EhGroupContacts extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_group_contacts.creater_uid</code>.
+	 * The column <code>ehcore.eh_group_contacts.creator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.Long> CREATER_UID = createField("creater_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupContactsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_contacts.create_time</code>.

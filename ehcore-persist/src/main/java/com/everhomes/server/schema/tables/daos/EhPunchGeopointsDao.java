@@ -85,7 +85,7 @@ public class EhPunchGeopointsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	/**
 	 * Fetch records that have <code>distance IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByDistance(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByDistance(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.DISTANCE, values);
 	}
 

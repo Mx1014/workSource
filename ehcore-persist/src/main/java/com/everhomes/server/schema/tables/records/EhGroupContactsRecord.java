@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupContactsRecord> implements org.jooq.Record21<java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1945562807;
+	private static final long serialVersionUID = -260440939;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_contacts.id</code>.
@@ -252,16 +252,16 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_contacts.creater_uid</code>.
+	 * Setter for <code>ehcore.eh_group_contacts.creator_uid</code>.
 	 */
-	public void setCreaterUid(java.lang.Long value) {
+	public void setCreatorUid(java.lang.Long value) {
 		setValue(17, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_contacts.creater_uid</code>.
+	 * Getter for <code>ehcore.eh_group_contacts.creator_uid</code>.
 	 */
-	public java.lang.Long getCreaterUid() {
+	public java.lang.Long getCreatorUid() {
 		return (java.lang.Long) getValue(17);
 	}
 
@@ -480,7 +480,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field18() {
-		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.CREATER_UID;
+		return com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS.CREATOR_UID;
 	}
 
 	/**
@@ -648,7 +648,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public java.lang.Long value18() {
-		return getCreaterUid();
+		return getCreatorUid();
 	}
 
 	/**
@@ -833,7 +833,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	 */
 	@Override
 	public EhGroupContactsRecord value18(java.lang.Long value) {
-		setCreaterUid(value);
+		setCreatorUid(value);
 		return this;
 	}
 
@@ -886,7 +886,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	/**
 	 * Create a detached, initialised EhGroupContactsRecord
 	 */
-	public EhGroupContactsRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long contactUid, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactName, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long createrUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhGroupContactsRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long contactUid, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactName, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS);
 
 		setValue(0, id);
@@ -906,7 +906,7 @@ public class EhGroupContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 		setValue(14, stringTag3);
 		setValue(15, stringTag4);
 		setValue(16, stringTag5);
-		setValue(17, createrUid);
+		setValue(17, creatorUid);
 		setValue(18, createTime);
 		setValue(19, operatorUid);
 		setValue(20, operateTime);
