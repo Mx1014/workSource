@@ -17,7 +17,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.AddOrgAddressCommand;
 import com.everhomes.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.organization.CreateOrganizationCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.organization.CreateOrganizationContactCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
@@ -227,6 +226,20 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
         this.organizationService.importOrganization(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/importOrgPost</b>
+     * <p>导入机构公告，报修等帖</p>
+     */
+    @RequestMapping(value="importOrgPost", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importOrgPost(@RequestParam(value = "attachment") MultipartFile[] files){
+        this.organizationService.importOrgPost(files);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
