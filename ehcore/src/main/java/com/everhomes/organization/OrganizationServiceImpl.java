@@ -2138,8 +2138,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			post.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
 			post.setCreateTime(currentTime);
 			post.setUpdateTime(currentTime);
-
-			/*post.setCreatorUid(user.getId());*/
+			if(user.getId() != null)
+				post.setCreatorUid(user.getId());
 
 			if(org.getOrganizationType().equals(OrganizationType.PM.getCode()) || org.getOrganizationType().equals(OrganizationType.GARC.getCode())){
 				OrganizationCommunity orgComm = this.checkOrgCommByOrgId(org.getId());
@@ -2171,7 +2171,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				task.setApplyEntityId(0L); // 还没有帖子ID
 				task.setTargetType(org.getOrganizationType());
 				task.setTargetId(org.getId());
-				/*task.setCreatorUid(user.getId());*/
+				if(user.getId() != null)
+					task.setCreatorUid(user.getId());
 				task.setCreateTime(currentTime);
 				task.setUnprocessedTime(currentTime);
 
@@ -2215,9 +2216,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 					this.userProvider.createIdentifier(r.getUserIden());
 				}
 				if(r.getTask() != null && r.getPost() != null){
-					r.getTask().setCreatorUid(r.getUser().getId());
+					if(r.getUser() !=null){
+						r.getTask().setCreatorUid(r.getUser().getId());
+						r.getPost().setCreatorUid(r.getUser().getId());
+					}
 					this.organizationProvider.createOrganizationTask(r.getTask());
-					r.getPost().setCreatorUid(r.getUser().getId());
 					r.getPost().setEmbeddedAppId(27L);
 					r.getPost().setEmbeddedId(r.getTask().getId());
 					this.forumProvider.createPost(r.getPost());
@@ -2225,6 +2228,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					this.organizationProvider.updateOrganizationTask(r.getTask());
 				}
 				else{
+					if(r.getUser() !=null)
+						r.getPost().setCreatorUid(r.getUser().getId());
 					this.forumProvider.createPost(r.getPost());
 				}
 			}
