@@ -269,9 +269,11 @@ public class ForumServiceImpl implements ForumService {
         Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
         if(post != null) {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
-                LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-                throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+            	if(!(post.getCreatorUid() != post.getDeleterUid() && post.getCreatorUid() == userId)){
+            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
+            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+            	}
             }
             
             this.forumProvider.populatePostAttachments(post);
