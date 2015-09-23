@@ -940,8 +940,8 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 
-	} 
-
+	}
+	
 	/**
 	 * <b>URL: /pm/listPmBillsByConditions
 	 * <p>根据条件查询物业缴费单
@@ -1304,19 +1304,4 @@ public class PropertyMgrController extends ControllerBase {
         return response;
     }
 	
-	/**
-     * <b>URL: /org/importOrganization</b>
-     * <p>导入机构信息</p>
-     */
-    //importPmBills
-    /*@RequestMapping(value="importPmBills", method = RequestMethod.POST)
-    @RestReturn(value=String.class)
-    public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
-        this.organizationService.importOrganization(files);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }*/
-
 }
