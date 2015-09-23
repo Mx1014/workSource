@@ -46,24 +46,16 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public PunchLogsYearListResponse getlistPunchLogs(ListPunchLogsCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-
-		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getQueryYear() == null || cmd.getQueryYear().isEmpty())
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryYear parameter in the command");
 
-		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(cmd
-				.getCompanyId());
-		if (null == punchRule)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid company Id parameter in the command ");
+		
 		PunchLogsYearListResponse pyl = new PunchLogsYearListResponse();
 		pyl.setPunchYear(cmd.getQueryYear());
-		PunchLogsMonthList pml = null;
 		pyl.setPunchLogsMonthList(new ArrayList<PunchLogsMonthList>());
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Calendar start = Calendar.getInstance();
@@ -91,7 +83,20 @@ public class PunchServiceImpl implements PunchService {
 //		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(
 //				userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
 //				dateSF.format(end.getTime()));
-		//TODO ： 改成循环每一天，然后看是否有为工作日，然后看是否有记录
+		
+		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getCompanyId(),start, end);
+		return pyl;
+	}
+	@Override
+	public PunchLogsYearListResponse getlistPunchLogsBetweenTwoCalendar(PunchLogsYearListResponse pyl,long CompanyId ,Calendar start,Calendar end){
+		Long userId = UserContext.current().getUser().getId();
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(CompanyId);
+		if (null == punchRule)
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid company Id parameter in the command ");
+		PunchLogsMonthList pml = null;
 		while (start.before(end)){
 			
 			Date date = start.getTime();
@@ -123,7 +128,7 @@ public class PunchServiceImpl implements PunchService {
 				continue;  
 			}
 			List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
-					userId, cmd.getCompanyId(), dateSF.format(start.getTime()) ,ClockCode.SUCESS.getCode());
+					userId, CompanyId, dateSF.format(start.getTime()) ,ClockCode.SUCESS.getCode());
 
 			
 			if (null == punchLogs || punchLogs.size() == 0) {
@@ -153,7 +158,6 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return pyl;
 	}
-
 	private PunchLogsDayList makePunchLogsDayListInfo(List<PunchLog> punchLogs,
 			PunchRule punchRule, PunchLogsDayList pdl) throws ParseException {
 
