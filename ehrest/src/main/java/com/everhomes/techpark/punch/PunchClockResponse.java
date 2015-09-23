@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 * </ul>
 */
 public class PunchClockResponse {
-	private ClockCode code ;
+	private byte punchCode ;
 	private String punchTime;
 	
 	
@@ -19,17 +19,7 @@ public class PunchClockResponse {
     }
 
 
-
-	public ClockCode getCode() {
-		return code;
-	}
-
-
-
-	public void setCode(ClockCode code) {
-		this.code = code;
-	}
-
+ 
 
 
 	public String getPunchTime() {
@@ -40,5 +30,21 @@ public class PunchClockResponse {
 
 	public void setPunchTime(String punchTime) {
 		this.punchTime = punchTime;
+	}
+
+
+
+
+
+	public byte getPunchCode() {
+		return punchCode;
+	}
+
+
+
+
+
+	public void setPunchCode(byte punchCode) {
+		this.punchCode = punchCode;
 	}
 }

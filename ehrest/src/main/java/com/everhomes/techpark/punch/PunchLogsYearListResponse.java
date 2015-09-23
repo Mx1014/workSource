@@ -30,7 +30,7 @@ public class PunchLogsYearListResponse{
 
 	public void setPunchLogsMonthList(
 			List<PunchLogsMonthList> punchLogsMonthList) {
-		punchLogsMonthList = punchLogsMonthList;
+		this.punchLogsMonthList = punchLogsMonthList;
 	}
 
 	public String getPunchYear() {

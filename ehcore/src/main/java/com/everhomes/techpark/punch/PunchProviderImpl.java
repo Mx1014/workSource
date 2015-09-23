@@ -48,7 +48,7 @@ public class PunchProviderImpl implements PunchProvider {
      
 //    @Cacheable(value="PunchLogs-List", key="{#queryDate,#userId,#companyId}", unless="#result.size() == 0")
 	@Override
-	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId,String queryDate) { 
+	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId,String queryDate,byte clockCode) { 
 		Date date =java.sql.Date.valueOf(queryDate);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS);

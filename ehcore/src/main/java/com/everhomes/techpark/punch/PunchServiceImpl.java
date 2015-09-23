@@ -33,10 +33,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	PunchProvider punchProvider;
-
-	@Autowired
-	SequenceProvider sequenceProvider;
-
+ 
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (companyId == null || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -91,12 +88,17 @@ public class PunchServiceImpl implements PunchService {
 							PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
 							"there is something wrong with queryYear,please check again ");
 		}
-		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(
-				userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
-				dateSF.format(end.getTime()));
-
-		for (java.sql.Date date : dateList) {
-			start.setTime(date);
+//		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(
+//				userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
+//				dateSF.format(end.getTime()));
+		//TODO ： 改成循环每一天，然后看是否有为工作日，然后看是否有记录
+		while (start.before(end)){
+			
+			Date date = start.getTime();
+//			start.setTime(date);
+			//if not workday continue
+			
+			
 			if (null == pml) {
 				// 如果pml为空，即是循环第一次，建立新的pml
 				pml = new PunchLogsMonthList();
@@ -111,14 +113,32 @@ public class PunchServiceImpl implements PunchService {
 				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayList>());
 				pyl.getPunchLogsMonthList().add(pml);
 			}
-			List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
-					userId, cmd.getCompanyId(), dateSF.format(start.getTime()));
-			if (null == punchLogs || punchLogs.size() == 0) {
-				continue;
-			}
 			PunchLogsDayList pdl = new PunchLogsDayList();
 			pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
 			pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+			
+			if(!isWorkDay(date)){ 
+				//如果非工作日，不增pdl直接下一天
+				start.add(Calendar.DAY_OF_MONTH, 1);
+				continue;  
+			}
+			List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
+					userId, cmd.getCompanyId(), dateSF.format(start.getTime()) ,ClockCode.SUCESS.getCode());
+
+			
+			if (null == punchLogs || punchLogs.size() == 0) {
+				PunchLogDTO noPunchLogDTO1 = new PunchLogDTO();
+				noPunchLogDTO1.setClockStatus(ClockStatus.ARRIVE.getCode());
+				noPunchLogDTO1.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				pdl.getPunchLogs().add(noPunchLogDTO1);
+				PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
+				noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
+				noPunchLogDTO2.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				pdl.getPunchLogs().add(noPunchLogDTO2);
+				pml.getPunchLogsDayList().add(pdl);
+				start.add(Calendar.DAY_OF_MONTH, 1);
+				continue;
+			}
 			try {
 				pml.getPunchLogsDayList().add(
 						makePunchLogsDayListInfo(punchLogs, punchRule, pdl));
@@ -129,7 +149,7 @@ public class PunchServiceImpl implements PunchService {
 						ErrorCodes.ERROR_INVALID_PARAMETER,
 						"punch Rule has somthing wrong");
 			}
-			// start.add(Calendar.DAY_OF_MONTH, 1);
+			start.add(Calendar.DAY_OF_MONTH, 1);
 		}
 		return pyl;
 	}
@@ -267,8 +287,8 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
 		punchLog.setLatitude(cmd.getLatitude());
 		punchLog.setLongitude(cmd.getLongitude());
-		request.setCode(verifyCompanyGoePoints(cmd));
-		punchLog.setPunchStatus(request.getCode().getCode());
+		request.setPunchCode(verifyCompanyGoePoints(cmd).getCode());
+		punchLog.setPunchStatus(request.getPunchCode());
 		Calendar punCalendar = Calendar.getInstance();
 		try {
 			punCalendar.setTime(datetimeSF.parse(punchTime));
@@ -288,8 +308,7 @@ public class PunchServiceImpl implements PunchService {
 		return request;
 	}
 
-	private ClockCode verifyCompanyGoePoints(PunchClockCommand cmd) {
-		// TODO Auto-generated method stub
+	private ClockCode verifyCompanyGoePoints(PunchClockCommand cmd) { 
 		ClockCode code = ClockCode.NOTINAREA;
 		List<PunchGeopoint> punchGeopoints = punchProvider
 				.listPunchGeopointsByCompanyId(cmd.getCompanyId());
@@ -419,5 +438,55 @@ public class PunchServiceImpl implements PunchService {
 			punchProvider.deletePunchRule(punchRule);
 		}
 	}
-
+	
+	
+	public boolean isWorkDay(Date date1){
+		if (date1 == null)
+			return false;
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		//如果属于周末调班 返回工作日
+		for(Date workDate : getSpecialDay(DateStatus.WEEKENDWORK)){
+			if (dateSF.format(date1).equals(dateSF.format(workDate)))
+				return true;
+		}
+		//如果属于工作日休假 返回非工作日
+		for(Date workDate : getSpecialDay(DateStatus.HOLIDAY)){
+			if (dateSF.format(date1).equals(dateSF.format(workDate)))
+				return false;
+		}
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date1);
+		//一周第一天是否为星期天
+		boolean isFirstSunday = (calendar.getFirstDayOfWeek() == Calendar.SUNDAY);
+		//获取周几
+		int weekDay = calendar.get(Calendar.DAY_OF_WEEK);
+		//若一周第一天为星期天，则-1
+		if(isFirstSunday){
+		  weekDay = weekDay - 1;
+		  if(weekDay == 0){
+		    weekDay = 7;
+		  }
+		}
+		if( weekDay >=6){
+			return false;
+		}else {
+			return true;
+		}
+		
+	}
+	
+	public List<Date> getSpecialDay (DateStatus dateStatu){
+		List<Date> result = new ArrayList() ;
+		List<PunchWorkday> punchWorkdays = punchProvider.listWorkdays(dateStatu);
+		if (punchWorkdays.size() ==0){
+			return null ;
+		}
+		for (PunchWorkday punchWorkday : punchWorkdays){
+			result.add(punchWorkday.getDateTag());
+		}
+		return result;
+	} 
+	
+	
 }
