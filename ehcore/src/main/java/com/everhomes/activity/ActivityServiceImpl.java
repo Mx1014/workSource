@@ -37,6 +37,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -866,6 +867,17 @@ public class ActivityServiceImpl implements ActivityService {
             if(post==null){
                 return null;
             }
+            if(activity.getPosterUri()==null){
+            	this.forumProvider.populatePostAttachments(post);
+            	List<Attachment> attachmentList = post.getAttachments();
+            	if(attachmentList != null && attachmentList.size() != 0){
+            		for(Attachment attachment : attachmentList){
+            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+            				activity.setPosterUri(attachment.getContentUri());
+            			break;
+            		}
+            	}
+            }
             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
@@ -906,6 +918,20 @@ public class ActivityServiceImpl implements ActivityService {
           ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
           dto.setActivityId(activity.getId());
           Post post = forumProvider.findPostById(activity.getPostId());
+          if(post==null){
+              return null;
+          }
+          if(activity.getPosterUri()==null){
+          	this.forumProvider.populatePostAttachments(post);
+          	List<Attachment> attachmentList = post.getAttachments();
+          	if(attachmentList != null && attachmentList.size() != 0){
+          		for(Attachment attachment : attachmentList){
+          			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+          				activity.setPosterUri(attachment.getContentUri());
+          			break;
+          		}
+          	}
+          }
           dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
           dto.setEnrollUserCount(activity.getSignupAttendeeCount());
           dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
@@ -976,6 +1002,20 @@ public class ActivityServiceImpl implements ActivityService {
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
+			if(post==null){
+                return null;
+            }
+            if(activity.getPosterUri()==null){
+            	this.forumProvider.populatePostAttachments(post);
+            	List<Attachment> attachmentList = post.getAttachments();
+            	if(attachmentList != null && attachmentList.size() != 0){
+            		for(Attachment attachment : attachmentList){
+            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+            				activity.setPosterUri(attachment.getContentUri());
+            			break;
+            		}
+            	}
+            }
 			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
 			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
@@ -1029,6 +1069,20 @@ public class ActivityServiceImpl implements ActivityService {
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
+			if(post==null){
+                return null;
+            }
+            if(activity.getPosterUri()==null){
+            	this.forumProvider.populatePostAttachments(post);
+            	List<Attachment> attachmentList = post.getAttachments();
+            	if(attachmentList != null && attachmentList.size() != 0){
+            		for(Attachment attachment : attachmentList){
+            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+            				activity.setPosterUri(attachment.getContentUri());
+            			break;
+            		}
+            	}
+            }
 			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
 			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
