@@ -2,13 +2,16 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,13 +19,18 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPunchRules;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.version.VersionUpgradeRule;
@@ -109,6 +117,77 @@ public class PunchProviderImpl implements PunchProvider {
         return result;
 	} 
  
-	    
+	@Override
+	public void createPunchRule(PunchRule punchRule) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchRulesRecord record = ConvertHelper.convert(punchRule, EhPunchRulesRecord.class);
+		InsertQuery<EhPunchRulesRecord> query = context.insertQuery(Tables.EH_PUNCH_RULES);
+		query.setRecord(record);
+//		query.setReturning(Tables.EH_PUNCH_RULES.ID);
+		query.execute();
+
+//		punchRule.setId(query.getReturnedRecord().getId());
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchRules.class, null); 
+
+	}
+
+
+	@Override
+	public void updatePunchRule(PunchRule punchRule){
+		assert(punchRule.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
+		dao.update(punchRule);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class, punchRule.getId());
+	}
+
+
+	@Override
+	public void deletePunchRule(PunchRule punchRule){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
+		dao.deleteById(punchRule.getId());
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class, punchRule.getId());
+	}
+
+
+	@Override
+	public void deletePunchRuleById(Long id){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
+		dao.deleteById(id);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class, id);
+	}
+
+
+	@Override
+	public PunchRule findPunchRuleById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), PunchRule.class);
+	}
+
+	@Override
+	public PunchRule findPunchRuleByCompanyId(Long companyId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchRulesRecord> query = context.selectQuery(Tables.EH_PUNCH_RULES);
+		query.addConditions(Tables.EH_PUNCH_RULES.COMPANY_ID.eq(companyId));
+
+		List<PunchRule> result = new ArrayList<>();
+		query.fetch().map((r) ->{
+				result.add(ConvertHelper.convert(r,  PunchRule.class));
+				return null;
+			});
+	        if(null!=result && result.size()>0 )
+	        	return result.get(0);
+	        return null;
+	}    
 	  
 }

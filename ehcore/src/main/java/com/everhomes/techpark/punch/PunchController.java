@@ -111,4 +111,69 @@ public class PunchController extends ControllerBase {
 		res.setResponseObject(punchLogsYearListResponse);
 		return res;
 	}
+	
+	/**
+	 * <b>URL: /techpark/punch/addPunchRule</b>
+	 * <p>
+	 * 添加公司打卡规则
+	 * </p>
+	 */
+	@RequestMapping("addPunchRule")
+	@RestReturn(value = String.class)
+	public RestResponse addPunchRule(@Valid CreatePunchRuleCommand cmd) {
+		punchService.createPunchRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/punch/updatePunchRule</b>
+	 * <p>
+	 * 修改公司打卡规则
+	 * </p>
+	 */
+	@RequestMapping("updatePunchRule")
+	@RestReturn(value = String.class)
+	public RestResponse updatePunchRule(@Valid UpdatePunchRuleCommand cmd) {
+		punchService.updatePunchRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/punch/deletePunchRule</b>
+	 * <p>
+	 * 删除公司打卡规则
+	 * </p>
+	 */
+	@RequestMapping("deletePunchRule")
+	@RestReturn(value = String.class)
+	public RestResponse deletePunchRule(@Valid DeletePunchCommand cmd) {
+		punchService.deletePunchRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/punch/getPunchRule</b>
+	 * <p>
+	 * 查询
+	 * </p>
+	 */
+	@RequestMapping("getPunchRule")
+	@RestReturn(value = PunchRuleResponse.class)
+	public RestResponse getPunchRule(@Valid PunchClockCommand cmd) {
+		PunchRuleResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

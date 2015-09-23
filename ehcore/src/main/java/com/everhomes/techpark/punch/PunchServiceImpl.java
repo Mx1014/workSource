@@ -6,37 +6,51 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.TimeZone;
 
-import org.apache.naming.java.javaURLContextFactory;
-import org.apache.tools.ant.taskdefs.Java;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.RestResponse;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.EhPunchRules;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Service
 public class PunchServiceImpl implements PunchService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PunchServiceImpl.class);
+	
 	@Autowired
 	PunchProvider punchProvider;
+	
+	@Autowired
+	SequenceProvider sequenceProvider;
+	
+	private void checkCompanyIdIsNull(Long companyId) {
+		if(companyId == null || companyId.equals(0L)){
+			LOGGER.error("Invalid company Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid company Id parameter in the command");
+		}
+
+	}
 
 	@Override
 	public PunchLogsYearListResponse getlistPunchLogs(ListPunchLogsCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		if (cmd.getCompanyId() == null)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid company Id parameter in the command");
+		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getQueryYear() == null || cmd.getQueryYear().isEmpty())
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -225,10 +239,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
 
-		if (cmd.getCompanyId() == null || cmd.getCompanyId().equals(0L))
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid companyId parameter in the command");
+		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getLatitude() == null || cmd.getLatitude().equals(0))
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -316,6 +327,83 @@ public class PunchServiceImpl implements PunchService {
 
 	private double angle2Radian(double angle) {
 		return angle * Math.PI / 180.0;
+	}
+	
+	@Override
+	public void createPunchRule(CreatePunchRuleCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
+		String startEarlyTime = cmd.getStartEarlyTime();
+		String startLastTime = cmd.getStartLateTime();
+		String endEarlyTime = cmd.getEndEarlyTime();
+		
+		if(punchRule == null){
+			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
+			long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchRules.class));
+			punchRule.setId(id);
+			convertTime(punchRule,startEarlyTime,startLastTime,endEarlyTime);
+			punchRule.setCreatorUid(userId);
+			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchProvider.createPunchRule(punchRule);
+		}
+		
+	}
+	
+	private void convertTime(PunchRule punchRule, String startEarlyTime, String startLastTime, String endEarlyTime) {
+		Time startEarly = convertTime(startEarlyTime);
+		punchRule.setStartEarlyTime(startEarly);
+		punchRule.setStartLateTime(convertTime(startLastTime));
+		Time endEarly = convertTime(endEarlyTime);
+		Long workTime = endEarly.getTime() - startEarly.getTime();
+		punchRule.setWorkTime(convertTime(String.format("%tT", DateHelper.getDateDisplayString(TimeZone.getDefault(), workTime, "HH:mm:ss"))));
+	}
+
+	private Time convertTime(String TimeStr) {
+		if(!StringUtils.isEmpty(TimeStr)){
+			return Time.valueOf(TimeStr);
+		}
+		return null;
+	}
+
+	@Override
+	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
+		String startEarlyTime = cmd.getStartEarlyTime();
+		String startLastTime = cmd.getStartLateTime();
+		String endEarlyTime = cmd.getEndEarlyTime();
+		if(punchRule != null){
+			PunchRule  newPunchRule = ConvertHelper.convert(cmd, PunchRule.class);
+			newPunchRule.setCreatorUid(punchRule.getCreatorUid());
+			newPunchRule.setCreateTime(punchRule.getCreateTime());
+			convertTime(punchRule,startEarlyTime,startLastTime,endEarlyTime);
+//			punchRule.setUpdateUid(userId);
+//			punchRule.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchProvider.updatePunchRule(punchRule);
+		}
+	}
+	
+	@Override
+	public PunchRuleResponse getPunchRuleByCompanyId(PunchClockCommand cmd) {
+		PunchRuleResponse response = new PunchRuleResponse();
+		PunchRuleDTO dto = null;
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
+		if(punchRule != null){
+			dto = ConvertHelper.convert(punchRule, PunchRuleDTO.class);
+		}
+		response.setPunchRuleDTO(dto);
+		return response;
+	}
+	
+	@Override
+	public void deletePunchRule(DeletePunchCommand cmd) {
+		PunchRule punchRule = punchProvider.findPunchRuleById(cmd.getId());
+		if(punchRule != null){
+			punchProvider.deletePunchRule(punchRule);
+		}
 	}
 
 }
