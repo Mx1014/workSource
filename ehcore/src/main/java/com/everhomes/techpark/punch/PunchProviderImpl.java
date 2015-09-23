@@ -109,7 +109,6 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId) {
-		// TODO Auto-generated method stub
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_GEOPOINTS);
         Condition condition = Tables.EH_PUNCH_GEOPOINTS.COMPANY_ID.equal(companyId);
@@ -212,8 +211,7 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 
 	@Override
-	public List<PunchWorkday> listWorkdays(DateStatus dateStatus) {
-		// TODO Auto-generated method stub
+	public List<PunchWorkday> listWorkdays(DateStatus dateStatus) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_WORKDAY);
         Condition condition = Tables.EH_PUNCH_WORKDAY.DATE_STATUS.equal(dateStatus.getCode());
