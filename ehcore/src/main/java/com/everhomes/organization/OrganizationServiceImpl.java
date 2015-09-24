@@ -2097,34 +2097,37 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization org = this.checkOrganizationByName(r.getOrgName(),r.getOrgType());
 			this.checkOrgAddressCity(org.getAddressId(),r.getCityId());
 			//token
-			User user = this.userService.findUserByIndentifier(r.getToken());
-			if(user == null){
-				user = new User();
-				user.setAccountName(r.getToken());
-				user.setNickName(r.getUserName());
-				user.setStatus(UserStatus.ACTIVE.getCode());
-				user.setPoints(0);
-				user.setLevel((byte)1);
-				user.setGender((byte)1);
-				//password
-				String salt = EncryptionUtils.createRandomSalt();
-				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
-				user.setSalt(salt);
-				userCount++;
-				orgPostVo.setUser(user);
-				//this.userProvider.createUser(user);
-				UserIdentifier userIden = new UserIdentifier();
-				userIden.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-				userIden.setIdentifierToken(r.getToken());
-				userIden.setIdentifierType(IdentifierType.MOBILE.getCode());
-				/*userIden.setOwnerUid(user.getId());*/
-				userIdenCount++;
-				orgPostVo.setUserIden(userIden);
-				//this.userProvider.createIdentifier(userIden);
-			}
-			else{
-				orgPostVo.setUser(null);
-				orgPostVo.setUserIden(null);
+			User tokenUser = null;
+			if(r.getToken() != null && !r.getToken().trim().equals("")){
+				tokenUser = this.userService.findUserByIndentifier(r.getToken());
+				if(tokenUser == null){
+					User user = new User();
+					user.setAccountName(r.getToken());
+					user.setNickName(r.getUserName());
+					user.setStatus(UserStatus.ACTIVE.getCode());
+					user.setPoints(0);
+					user.setLevel((byte)1);
+					user.setGender((byte)1);
+					//password
+					String salt = EncryptionUtils.createRandomSalt();
+					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
+					user.setSalt(salt);
+					userCount++;
+					orgPostVo.setUser(user);
+					//this.userProvider.createUser(user);
+					UserIdentifier userIden = new UserIdentifier();
+					userIden.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+					userIden.setIdentifierToken(r.getToken());
+					userIden.setIdentifierType(IdentifierType.MOBILE.getCode());
+					/*userIden.setOwnerUid(user.getId());*/
+					userIdenCount++;
+					orgPostVo.setUserIden(userIden);
+					//this.userProvider.createIdentifier(userIden);
+				}
+				else{
+					orgPostVo.setUser(null);
+					orgPostVo.setUserIden(null);
+				}
 			}
 
 			//post
@@ -2138,8 +2141,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			post.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
 			post.setCreateTime(currentTime);
 			post.setUpdateTime(currentTime);
-			if(user.getId() != null)
-				post.setCreatorUid(user.getId());
+			if(r.getToken() == null || r.getToken().trim().equals(""))//token is null then use the loginUser id
+				post.setCreatorUid(userId);
+			else if(tokenUser != null && tokenUser.getId() != null)//token not null and use is found by token
+				post.setCreatorUid(tokenUser.getId());
 
 			if(org.getOrganizationType().equals(OrganizationType.PM.getCode()) || org.getOrganizationType().equals(OrganizationType.GARC.getCode())){
 				OrganizationCommunity orgComm = this.checkOrgCommByOrgId(org.getId());
@@ -2171,8 +2176,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				task.setApplyEntityId(0L); // 还没有帖子ID
 				task.setTargetType(org.getOrganizationType());
 				task.setTargetId(org.getId());
-				if(user.getId() != null)
-					task.setCreatorUid(user.getId());
+				if(r.getToken() == null || r.getToken().trim().equals(""))//token is null then use the loginUser id
+					task.setCreatorUid(userId);
+				if(tokenUser != null && tokenUser.getId() != null)//token not null and use is found by token
+					task.setCreatorUid(tokenUser.getId());
+				
 				task.setCreateTime(currentTime);
 				task.setUnprocessedTime(currentTime);
 
@@ -2212,11 +2220,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			for(OrganizationPostVo r:orgPostVos){
 				if(r.getUser() != null&&r.getUserIden() != null){
 					this.userProvider.createUser(r.getUser());
-					r.getUserIden().setOwnerUid(r.getUser().getId());
+					r.getUserIden().setOwnerUid(r.getUser().getId());//use the create user id
 					this.userProvider.createIdentifier(r.getUserIden());
 				}
 				if(r.getTask() != null && r.getPost() != null){
-					if(r.getUser() !=null){
+					if(r.getUser() !=null){//use the create user id
 						r.getTask().setCreatorUid(r.getUser().getId());
 						r.getPost().setCreatorUid(r.getUser().getId());
 					}
@@ -2228,7 +2236,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					this.organizationProvider.updateOrganizationTask(r.getTask());
 				}
 				else{
-					if(r.getUser() !=null)
+					if(r.getUser() !=null)//use the create user id
 						r.getPost().setCreatorUid(r.getUser().getId());
 					this.forumProvider.createPost(r.getPost());
 				}
