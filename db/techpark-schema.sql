@@ -113,6 +113,24 @@ CREATE TABLE `eh_punch_exception_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+
+DROP TABLE IF EXISTS `eh_punch_exception_approval`;
+
+CREATE TABLE `eh_punch_exception_approval` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `user_id` bigint(20) COMMENT 'user''s id',
+  `company_id` bigint(20) COMMENT 'compay id',
+  `punch_date` date COMMENT 'user punch date',
+  `approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
+	`creator_uid` bigint,
+	`create_time` datetime,
+  `operator_uid` bigint,
+  `operate_time` datetime,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
 DROP TABLE IF EXISTS `eh_punch_workday`;
 
 CREATE TABLE `eh_punch_workday` (
