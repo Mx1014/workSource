@@ -2,6 +2,9 @@ package com.everhomes.techpark.punch;
 
 /**
  * <ul>打卡的状态
+ * <li>EXCHANGE(7): 调休</li>
+ * <li>SICK(6): 病假</li>
+ * <li>ABSENCE(5): 事假</li>
  * <li>BLANDLE(4): 迟到且早退</li>
  * <li>UNPUNCH(3): 未打卡</li>
  * <li>LEAVEEARLY(2): 早退</li>
@@ -9,7 +12,13 @@ package com.everhomes.techpark.punch;
  * <li>NORMAL(0): 正常</li>
  * </ul>
  */
-public enum PunchStatus {
+public enum ApprovalStatus { 
+	/** <li>EXCHANGE(7): 调休</li>*/
+	EXCHANGE((byte)7),
+	/**<li>SICK(6): 病假</li>*/
+	SICK((byte)6),
+	/**<li>ABSENCE(5): 事假</li>*/
+	ABSENCE((byte)5),
 	/**BLANDLE(4): 迟到且早退*/
 	BLANDLE((byte)4),
 	/**UNPUNCH(3): 未打卡*/
@@ -22,7 +31,7 @@ public enum PunchStatus {
 	NORMAL((byte)0);
     
     private byte code;
-    private PunchStatus(byte code) {
+    private ApprovalStatus(byte code) {
         this.code = code;
     }
     
@@ -30,8 +39,8 @@ public enum PunchStatus {
         return this.code;
     }
     
-    public static PunchStatus fromCode(byte code) {
-        for(PunchStatus t : PunchStatus.values()) {
+    public static ApprovalStatus fromCode(byte code) {
+        for(ApprovalStatus t : ApprovalStatus.values()) {
             if (t.code == code) {
                 return t;
             }

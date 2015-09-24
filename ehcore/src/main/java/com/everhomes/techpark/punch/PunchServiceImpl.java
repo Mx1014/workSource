@@ -41,7 +41,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	PunchProvider punchProvider;
- 
+
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (companyId == null || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -54,14 +54,13 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public PunchLogsYearListResponse getlistPunchLogs(ListPunchLogsCommand cmd) {
-		
+
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getQueryYear() == null || cmd.getQueryYear().isEmpty())
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryYear parameter in the command");
 
-		
 		PunchLogsYearListResponse pyl = new PunchLogsYearListResponse();
 		pyl.setPunchYear(cmd.getQueryYear());
 		pyl.setPunchLogsMonthList(new ArrayList<PunchLogsMonthList>());
@@ -88,30 +87,30 @@ public class PunchServiceImpl implements PunchService {
 							PunchServiceErrorCode.ERROR_QUERY_YEAR_ERROR,
 							"there is something wrong with queryYear,please check again ");
 		}
-//		List<java.sql.Date> dateList = punchProvider.listPunchLogsBwteenTwoDay(
-//				userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
-//				dateSF.format(end.getTime()));
-		
-		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getCompanyId(),start, end);
+		// List<java.sql.Date> dateList =
+		// punchProvider.listPunchLogsBwteenTwoDay(
+		// userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
+		// dateSF.format(end.getTime()));
+
+		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getCompanyId(),
+				start, end);
 		return pyl;
 	}
+
 	@Override
-	public PunchLogsYearListResponse getlistPunchLogsBetweenTwoCalendar(PunchLogsYearListResponse pyl,long CompanyId ,Calendar start,Calendar end){
+	public PunchLogsYearListResponse getlistPunchLogsBetweenTwoCalendar(
+			PunchLogsYearListResponse pyl, long CompanyId, Calendar start,
+			Calendar end) {
 		Long userId = UserContext.current().getUser().getId();
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(CompanyId);
-		if (null == punchRule)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid company Id parameter in the command ");
+		
 		PunchLogsMonthList pml = null;
-		while (start.before(end)){
-			
+		while (start.before(end)) {
+
 			Date date = start.getTime();
-//			start.setTime(date);
-			//if not workday continue
-			
-			
+			// start.setTime(date);
+			// if not workday continue
+
 			if (null == pml) {
 				// 如果pml为空，即是循环第一次，建立新的pml
 				pml = new PunchLogsMonthList();
@@ -126,35 +125,17 @@ public class PunchServiceImpl implements PunchService {
 				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayList>());
 				pyl.getPunchLogsMonthList().add(pml);
 			}
-			PunchLogsDayList pdl = new PunchLogsDayList();
-			pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
-			pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
-			
-			if(!isWorkDay(date)){ 
-				//如果非工作日，不增pdl直接下一天
-				start.add(Calendar.DAY_OF_MONTH, 1);
-				continue;  
-			}
-			List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
-					userId, CompanyId, dateSF.format(start.getTime()) ,ClockCode.SUCESS.getCode());
 
-			
-			if (null == punchLogs || punchLogs.size() == 0) {
-				PunchLogDTO noPunchLogDTO1 = new PunchLogDTO();
-				noPunchLogDTO1.setClockStatus(ClockStatus.ARRIVE.getCode());
-				noPunchLogDTO1.setPunchStatus(PunchStatus.UNPUNCH.getCode());
-				pdl.getPunchLogs().add(noPunchLogDTO1);
-				PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
-				noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
-				noPunchLogDTO2.setPunchStatus(PunchStatus.UNPUNCH.getCode());
-				pdl.getPunchLogs().add(noPunchLogDTO2);
-				pml.getPunchLogsDayList().add(pdl);
+			if (!isWorkDay(date)) {
+				// 如果非工作日，不增pdl直接下一天
 				start.add(Calendar.DAY_OF_MONTH, 1);
 				continue;
 			}
+			
+
 			try {
 				pml.getPunchLogsDayList().add(
-						makePunchLogsDayListInfo(punchLogs, punchRule, pdl));
+						makePunchLogsDayListInfo(userId, CompanyId, start));
 			} catch (ParseException e) {
 
 				throw RuntimeErrorException.errorWith(
@@ -166,13 +147,55 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return pyl;
 	}
-	private PunchLogsDayList makePunchLogsDayListInfo(List<PunchLog> punchLogs,
-			PunchRule punchRule, PunchLogsDayList pdl) throws ParseException {
 
+	/***
+	 * @param punchLogs
+	 *            ： 当天的全部打卡记录通过punchProvider.listPunchLogsByDate()方法得到;
+	 * @param punchRule
+	 *            :打卡规则
+	 * @param logDay
+	 *            : 计算的打卡日期
+	 * @return PunchLogsDayList：计算好的当日打卡状态
+	 * */
+	private PunchLogsDayList makePunchLogsDayListInfo(Long userId, Long companyId, Calendar logDay) throws ParseException {
 		SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat datetimeSF = new SimpleDateFormat(
 				"yyyy-MM-dd HH:mm:ss");
+		PunchLogsDayList pdl = new PunchLogsDayList();
+		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
+		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
+				userId, companyId, dateSF.format(logDay.getTime()),
+				ClockCode.SUCESS.getCode());
+		// 如果零次打卡记录
+		if (null == punchLogs || punchLogs.size() == 0) {
+			PunchLogDTO noPunchLogDTO1 = new PunchLogDTO();
+			noPunchLogDTO1.setClockStatus(ClockStatus.ARRIVE.getCode());
+			pdl.getPunchLogs().add(noPunchLogDTO1);
+			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
+			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
+			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+			pdl.getPunchLogs().add(noPunchLogDTO2);
+			return pdl;
+		}
+		if(punchLogs.size()==1){
+			//如果只有一次打卡，就把离开设置为未打卡,当天设置为旷工
+			PunchLogDTO arriveLogDTO = new PunchLogDTO();
+			arriveLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
+			arriveLogDTO.setPunchTime(punchLogs.get(0).getPunchDate().getTime());
+			pdl.getPunchLogs().add(arriveLogDTO);
+			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
+			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
+			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+			pdl.getPunchLogs().add(noPunchLogDTO2);
+			return pdl;	
+			}
+		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(companyId);
+		if (null == punchRule)
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid company Id parameter in the command ");
 		Calendar startMinTime = Calendar.getInstance();
 		Calendar startMaxTime = Calendar.getInstance();
 		Calendar workTime = Calendar.getInstance();
@@ -188,65 +211,64 @@ public class PunchServiceImpl implements PunchService {
 
 		workTime.setTime(datetimeSF.parse(dateSF.format(punchLogs.get(0)
 				.getPunchDate()) + " " + timeSF.format(punchRule.getWorkTime())));
-		if (punchLogs.size() == 0) {
-			// 未打卡
-			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
-		} else {
-			PunchLogDTO arrivePunchLogDTO = new PunchLogDTO();
-			PunchLogDTO leavePunchLogDTO = new PunchLogDTO();
-			arrivePunchLogDTO.setPunchStatus(ClockStatus.ARRIVE.getCode());
-			leavePunchLogDTO.setPunchStatus(ClockStatus.LEAVE.getCode());
-			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
-			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
-			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
-			arrivePunchLogDTO.setPunchTime(arriveCalendar.getTime().getTime());
-			leavePunchLogDTO.setPunchTime(leaveCalendar.getTime().getTime());
 
-			// 先设开始状态 只要早于最晚上班时间就可以
-			if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
-				arrivePunchLogDTO.setPunchStatus(PunchStatus.NORMAL.getCode());
-			} else {
-				arrivePunchLogDTO.setPunchStatus(PunchStatus.BELATE.getCode());
-				pdl.setPunchStatus(PunchStatus.BELATE.getCode());
-			}
-			// 再设离开状态 ：
-			// 1.晚于最晚下班时间为正常，2.判断上班时间是否早于最早上班时间，如果是，则晚于最早下班时间为正常，如果不是，则晚于上班时间+工作时长
-			startMinTime.add(Calendar.HOUR, workTime.get(Calendar.HOUR));
-			startMinTime.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
-			startMinTime.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
-			startMaxTime.add(Calendar.HOUR, workTime.get(Calendar.HOUR));
-			startMaxTime.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
-			startMaxTime.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
-			arriveCalendar.add(Calendar.HOUR, workTime.get(Calendar.HOUR));
-			arriveCalendar.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
-			arriveCalendar.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
-			if (leaveCalendar.after(startMaxTime)) {
-				leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL.getCode());
-			} else {
-				if (arriveCalendar.after(startMinTime)) {
-					if (leaveCalendar.after(arriveCalendar)) {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL
-								.getCode());
-					} else {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY
-								.getCode());
-						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
-					}
+		PunchLogDTO arrivePunchLogDTO = new PunchLogDTO();
+		PunchLogDTO leavePunchLogDTO = new PunchLogDTO();
+		arrivePunchLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
+		leavePunchLogDTO.setClockStatus(ClockStatus.LEAVE.getCode());
+		List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
+		Calendar arriveCalendar = punchMinAndMaxTime.get(0);
+		Calendar leaveCalendar = punchMinAndMaxTime.get(1);
+		arrivePunchLogDTO.setPunchTime(arriveCalendar.getTime().getTime());
+		leavePunchLogDTO.setPunchTime(leaveCalendar.getTime().getTime());
+
+		//打卡状态设置为正常或者迟到
+		if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
+			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+		} else {
+			pdl.setPunchStatus(PunchStatus.BELATE.getCode());
+		}
+		// 再设离开状态 ：
+		// 1.晚于最晚下班时间为正常，2.判断上班时间是否早于最早上班时间，如果是，则晚于最早下班时间为正常，如果不是，则晚于上班时间+工作时长
+		startMinTime.add(Calendar.HOUR, workTime.get(Calendar.HOUR));
+		startMinTime.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
+		startMinTime.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
+		startMaxTime.add(Calendar.HOUR, workTime.get(Calendar.HOUR));
+		startMaxTime.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
+		startMaxTime.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
+		arriveCalendar.add(Calendar.HOUR, workTime.get(Calendar.HOUR));
+		arriveCalendar.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
+		arriveCalendar.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
+		if (leaveCalendar.after(startMaxTime)) {
+			//如果离开时间超过最晚工作时间，为正常
+		} else {
+			if (arriveCalendar.after(startMinTime)) {
+				//如果到达时间晚于最早工作时间，按照到达时间计算
+				if (leaveCalendar.after(arriveCalendar)) {
+					
 				} else {
-					if (leaveCalendar.after(startMinTime)) {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.NORMAL
-								.getCode());
-					} else {
-						leavePunchLogDTO.setPunchStatus(PunchStatus.LEAVEEARLY
-								.getCode());
-						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+					if(pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
+						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());}
+					else {
+						pdl.setPunchStatus(PunchStatus.BLANDLE.getCode());
+					}
+				}
+			} else {
+				if (leaveCalendar.after(startMinTime)) {
+					 
+				} else {
+					if(pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
+						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());}
+					else {
+						pdl.setPunchStatus(PunchStatus.BLANDLE.getCode());
 					}
 				}
 			}
-			pdl.getPunchLogs().add(leavePunchLogDTO);
-			pdl.getPunchLogs().add(arrivePunchLogDTO);
 		}
-
+		pdl.getPunchLogs().add(leavePunchLogDTO);
+		pdl.getPunchLogs().add(arrivePunchLogDTO);
+//TODO： 异常申报结果的返回
+		List<PunchExceptionRequest> exceptionRequests = punchProvider.listExceptionRequestsByDate(userId,companyId,dateSF.format(logDay.getTime()));
 		return pdl;
 	}
 
@@ -320,7 +342,7 @@ public class PunchServiceImpl implements PunchService {
 		return request;
 	}
 
-	private ClockCode verifyCompanyGoePoints(PunchClockCommand cmd) { 
+	private ClockCode verifyCompanyGoePoints(PunchClockCommand cmd) {
 		ClockCode code = ClockCode.NOTINAREA;
 		List<PunchGeopoint> punchGeopoints = punchProvider
 				.listPunchGeopointsByCompanyId(cmd.getCompanyId());
@@ -378,29 +400,33 @@ public class PunchServiceImpl implements PunchService {
 
 		if (punchRule == null) {
 			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
-			 
+
 			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
 			punchRule.setCreatorUid(userId);
 			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			punchProvider.createPunchRule(punchRule);
-			createPunchGeopoints(userId,cmd.getLocations(),cmd.getCompanyId());
-			
+			createPunchGeopoints(userId, cmd.getLocations(), cmd.getCompanyId());
+
 		}
 
 	}
 
-	private void createPunchGeopoints(Long userId, String locations,Long compantId) {
+	private void createPunchGeopoints(Long userId, String locations,
+			Long compantId) {
 		JSONObject jsonObject = (JSONObject) JSONValue.parse(locations);
 		JSONArray locationValue = (JSONArray) jsonObject.get("locations");
-		Gson  gson = new Gson();
-		List<PunchGeopoint> geopoints = gson.fromJson(locationValue.toString(), new TypeToken<List<PunchGeopoint>>(){}.getType());
+		Gson gson = new Gson();
+		List<PunchGeopoint> geopoints = gson.fromJson(locationValue.toString(),
+				new TypeToken<List<PunchGeopoint>>() {
+				}.getType());
 		for (PunchGeopoint punchGeopoint : geopoints) {
 			punchGeopoint.setCompanyId(compantId);
 			punchGeopoint.setCreatorUid(userId);
-			punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			punchGeopoint.setGeohash(GeoHashUtils.encode(punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+			punchGeopoint.setCreateTime(new Timestamp(DateHelper
+					.currentGMTTime().getTime()));
+			punchGeopoint.setGeohash(GeoHashUtils.encode(
+					punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
 			punchProvider.createPunchGeopoint(punchGeopoint);
 		}
 	}
@@ -412,19 +438,20 @@ public class PunchServiceImpl implements PunchService {
 		punchRule.setStartLateTime(convertTime(startLastTime));
 		Time endEarly = convertTime(endEarlyTime);
 		Long workTime = endEarly.getTime() - startEarly.getTime();
-//		long hours = (workTime/(1000* 60 * 60));
-//		long minutes = (workTime-hours*(1000* 60 * 60))/(1000* 60);
+		// long hours = (workTime/(1000* 60 * 60));
+		// long minutes = (workTime-hours*(1000* 60 * 60))/(1000* 60);
 		String workTimeStr = getGMTtimeString("HH:mm:ss", workTime);
 		punchRule.setWorkTime(convertTime(workTimeStr));
 	}
-	
-	public String getGMTtimeString(String dateFormat,long time){
+
+	public String getGMTtimeString(String dateFormat, long time) {
 		DateFormat format = new SimpleDateFormat(dateFormat);
-		format.setTimeZone(TimeZone.getTimeZone("GMT"));//设置 DateFormat的时间区域为GMT
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));// 设置
+														// DateFormat的时间区域为GMT
 		Date date = new Date(time);
 		return format.format(date);
 	}
-	
+
 	private Time convertTime(String TimeStr) {
 		if (!StringUtils.isEmpty(TimeStr)) {
 			return Time.valueOf(TimeStr);
@@ -444,17 +471,19 @@ public class PunchServiceImpl implements PunchService {
 		if (punchRule != null) {
 			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
 			punchRule.setOperatorUid(userId);
-			punchRule.setOperateTime(new
-			 Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
 			punchProvider.updatePunchRule(punchRule);
-			if(!StringUtils.isEmpty(cmd.getLocations())){
-				List<PunchGeopoint> geopoints = punchProvider.listPunchGeopointsByCompanyId(cmd.getCompanyId());
-				if(geopoints != null && geopoints.size() >0){
+			if (!StringUtils.isEmpty(cmd.getLocations())) {
+				List<PunchGeopoint> geopoints = punchProvider
+						.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+				if (geopoints != null && geopoints.size() > 0) {
 					for (PunchGeopoint punchGeopoint : geopoints) {
 						punchProvider.deletePunchGeopoint(punchGeopoint);
 					}
 				}
-				createPunchGeopoints(userId,cmd.getLocations(),cmd.getCompanyId());
+				createPunchGeopoints(userId, cmd.getLocations(),
+						cmd.getCompanyId());
 			}
 		}
 	}
@@ -468,24 +497,34 @@ public class PunchServiceImpl implements PunchService {
 				.getCompanyId());
 		if (punchRule != null) {
 			dto = ConvertHelper.convert(punchRule, PunchRuleDTO.class);
-			dto.setStartEarlyTime(String.format("%tT", punchRule.getStartEarlyTime()));
-			dto.setStartLateTime(String.format("%tT", punchRule.getStartLateTime()));
-			dto.setEndEarlyTime(calculateEndTime("HH:mm:ss",String.format("%tT", punchRule.getStartEarlyTime()),String.format("%tT", punchRule.getWorkTime())));
-			dto.setEndLateTime(calculateEndTime("HH:mm:ss",String.format("%tT", punchRule.getStartLateTime()),String.format("%tT", punchRule.getWorkTime())));
-			List<PunchGeopoint> geopoints = punchProvider.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+			dto.setStartEarlyTime(String.format("%tT",
+					punchRule.getStartEarlyTime()));
+			dto.setStartLateTime(String.format("%tT",
+					punchRule.getStartLateTime()));
+			dto.setEndEarlyTime(calculateEndTime("HH:mm:ss",
+					String.format("%tT", punchRule.getStartEarlyTime()),
+					String.format("%tT", punchRule.getWorkTime())));
+			dto.setEndLateTime(calculateEndTime("HH:mm:ss",
+					String.format("%tT", punchRule.getStartLateTime()),
+					String.format("%tT", punchRule.getWorkTime())));
+			List<PunchGeopoint> geopoints = punchProvider
+					.listPunchGeopointsByCompanyId(cmd.getCompanyId());
 			dto.setLocations(GsonUtil.toJson(geopoints));
 		}
 		response.setPunchRuleDTO(dto);
 		return response;
 	}
 
-	private String calculateEndTime(String dateFormat,String startEarlyTime, String workTime) {
+	private String calculateEndTime(String dateFormat, String startEarlyTime,
+			String workTime) {
 		DateFormat format = new SimpleDateFormat(dateFormat);
-		format.setTimeZone(TimeZone.getTimeZone("GMT"));//设置 DateFormat的时间区域为GMT
-		
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));// 设置
+														// DateFormat的时间区域为GMT
+
 		long endTime = 0;
 		try {
-			endTime = format.parse(startEarlyTime).getTime()+format.parse(workTime).getTime();
+			endTime = format.parse(startEarlyTime).getTime()
+					+ format.parse(workTime).getTime();
 		} catch (ParseException e) {
 			LOGGER.error("the time format is error.", e);
 		}
@@ -494,62 +533,64 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void deletePunchRule(PunchCompanyIdCommand cmd) {
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+				.getCompanyId());
 		if (punchRule != null) {
 			punchProvider.deletePunchRule(punchRule);
-			List<PunchGeopoint> geopoints = punchProvider.listPunchGeopointsByCompanyId(cmd.getCompanyId());
-			if(geopoints != null && geopoints.size() >0){
+			List<PunchGeopoint> geopoints = punchProvider
+					.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+			if (geopoints != null && geopoints.size() > 0) {
 				for (PunchGeopoint punchGeopoint : geopoints) {
 					punchProvider.deletePunchGeopoint(punchGeopoint);
 				}
 			}
 		}
 	}
-	
-	
-	public boolean isWorkDay(Date date1){
+
+	public boolean isWorkDay(Date date1) {
 		if (date1 == null)
 			return false;
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		//如果属于周末调班 返回工作日
-		for(Date workDate : getSpecialDay(DateStatus.WEEKENDWORK)){
+		// 如果属于周末调班 返回工作日
+		for (Date workDate : getSpecialDay(DateStatus.WEEKENDWORK)) {
 			if (dateSF.format(date1).equals(dateSF.format(workDate)))
 				return true;
 		}
-		//如果属于工作日休假 返回非工作日
-		for(Date workDate : getSpecialDay(DateStatus.HOLIDAY)){
+		// 如果属于工作日休假 返回非工作日
+		for (Date workDate : getSpecialDay(DateStatus.HOLIDAY)) {
 			if (dateSF.format(date1).equals(dateSF.format(workDate)))
 				return false;
 		}
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date1);
-		//一周第一天是否为星期天
+		// 一周第一天是否为星期天
 		boolean isFirstSunday = (calendar.getFirstDayOfWeek() == Calendar.SUNDAY);
-		//获取周几
+		// 获取周几
 		int weekDay = calendar.get(Calendar.DAY_OF_WEEK);
-		//若一周第一天为星期天，则-1
-		if(isFirstSunday){
-		  weekDay = weekDay - 1;
-		  if(weekDay == 0){
-		    weekDay = 7;
-		  }
+		// 若一周第一天为星期天，则-1
+		if (isFirstSunday) {
+			weekDay = weekDay - 1;
+			if (weekDay == 0) {
+				weekDay = 7;
+			}
 		}
-		if( weekDay >=6){
+		if (weekDay >= 6) {
 			return false;
-		}else {
+		} else {
 			return true;
 		}
-		
+
 	}
-	
-	public List<Date> getSpecialDay (DateStatus dateStatu){
-		List<Date> result = new ArrayList() ;
-		List<PunchWorkday> punchWorkdays = punchProvider.listWorkdays(dateStatu);
-		if (punchWorkdays.size() ==0){
-			return null ;
+
+	public List<Date> getSpecialDay(DateStatus dateStatu) {
+		List<Date> result = new ArrayList();
+		List<PunchWorkday> punchWorkdays = punchProvider
+				.listWorkdays(dateStatu);
+		if (punchWorkdays.size() == 0) {
+			return null;
 		}
-		for (PunchWorkday punchWorkday : punchWorkdays){
+		for (PunchWorkday punchWorkday : punchWorkdays) {
 			result.add(punchWorkday.getDateTag());
 		}
 		return result;
@@ -557,29 +598,26 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public void createPunchExceptionRequest(PunchExceptionRequestCommand cmd) {
-		// TODO Auto-generated method stub
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getDescription() == null || cmd.getDescription().equals(0))
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid description parameter in the command");
-		if (cmd.getRequestType() == null )
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid description parameter in the command");
+
 		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
 		punchExceptionRequest.setCompanyId(cmd.getCompanyId());
 		punchExceptionRequest.setUserId(userId);
 		punchExceptionRequest.setCreatorUid(userId);
-		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-				.getTime()));
+		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper
+				.currentGMTTime().getTime()));
 		punchExceptionRequest.setDescription(cmd.getDescription());
-		punchExceptionRequest.setRequestType(cmd.getRequestType());
-		punchExceptionRequest.setPunchDate(new java.sql.Date(0).valueOf(cmd.getPunchDate()));
+		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
+				.getPunchDate()));
+		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR.getCode());
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
-		
-	} 
-	
-	
+
+	}
+	 
+
 }

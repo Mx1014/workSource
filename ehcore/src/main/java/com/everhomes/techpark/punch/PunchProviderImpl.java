@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.jooq.Condition;
@@ -48,122 +49,142 @@ public class PunchProviderImpl implements PunchProvider {
 	@Autowired
 	private DbProvider dbProvider;
 
-    @Autowired
-    private SequenceProvider sequenceProvider;
-     
-//    @Cacheable(value="PunchLogs-List", key="{#queryDate,#userId,#companyId}", unless="#result.size() == 0")
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
+	// @Cacheable(value="PunchLogs-List", key="{#queryDate,#userId,#companyId}",
+	// unless="#result.size() == 0")
 	@Override
-	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId,String queryDate,byte clockCode) { 
-		Date date =java.sql.Date.valueOf(queryDate);
+	public List<PunchLog> listPunchLogsByDate(Long userId, Long companyId,
+			String queryDate, byte clockCode) {
+		Date date = java.sql.Date.valueOf(queryDate);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_LOGS);
-        Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.equal(date);
-        Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
-        Condition condition3 = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
-        condition = condition.and(condition2);
-        condition = condition.and(condition3);
-        step.where(condition);
-        List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc()).
-                fetch().map((r) ->{ return ConvertHelper.convert(r, PunchLog.class);});
-        return result;
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_LOGS);
+		Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.equal(date);
+		Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
+		Condition condition3 = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+		condition = condition.and(condition2);
+		condition = condition.and(condition3);
+		step.where(condition);
+		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, PunchLog.class);
+				});
+		return result;
 	}
-	
+
 	@Override
-	public List<Date> listPunchLogsBwteenTwoDay(Long userId, Long companyId,String beginDate,String endDate) { 
-		Date beginSqlDate =java.sql.Date.valueOf(beginDate);
-		Date endSqlDate =java.sql.Date.valueOf(endDate);
+	public List<Date> listPunchLogsBwteenTwoDay(Long userId, Long companyId,
+			String beginDate, String endDate) {
+		Date beginSqlDate = java.sql.Date.valueOf(beginDate);
+		Date endSqlDate = java.sql.Date.valueOf(endDate);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record1<Date>> step = context.selectDistinct(Tables.EH_PUNCH_LOGS.PUNCH_DATE).from(Tables.EH_PUNCH_LOGS);
-        Condition condition3 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginSqlDate, endSqlDate);
-        Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
-        Condition condition = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
-        condition = condition.and(condition2);
-        condition = condition.and(condition3);
-        step.where(condition);
-        List<Date> result = step.orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc()).
-                fetch().map(r -> r.getValue(Tables.EH_PUNCH_LOGS.PUNCH_DATE));
-        return result;
+		SelectJoinStep<Record1<Date>> step = context.selectDistinct(
+				Tables.EH_PUNCH_LOGS.PUNCH_DATE).from(Tables.EH_PUNCH_LOGS);
+		Condition condition3 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(
+				beginSqlDate, endSqlDate);
+		Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
+		Condition condition = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+		condition = condition.and(condition2);
+		condition = condition.and(condition3);
+		step.where(condition);
+		List<Date> result = step
+				.orderBy(Tables.EH_PUNCH_LOGS.PUNCH_DATE.desc()).fetch()
+				.map(r -> r.getValue(Tables.EH_PUNCH_LOGS.PUNCH_DATE));
+		return result;
 	}
-	
+
 	@Override
 	public PunchRule getPunchRuleByCompanyId(Long companyId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_RULES);
-        Condition condition = Tables.EH_PUNCH_RULES.COMPANY_ID.equal(companyId);
-        step.where(condition);
-        List<PunchRule> result = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc()).
-                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchRule.class);});
-        if(null!=result && result.size()>0 )
-        	return result.get(0);
-        return null;
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_RULES);
+		Condition condition = Tables.EH_PUNCH_RULES.COMPANY_ID.equal(companyId);
+		step.where(condition);
+		List<PunchRule> result = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, PunchRule.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
 	}
-	
-//	@Caching(evict = {
-//	        @CacheEvict(value="PunchLogs-List", key="{#punchLog.punchDate,#punchLog.userId,#punchLog.companyId}")
-//	    })
+
+	// @Caching(evict = {
+	// @CacheEvict(value="PunchLogs-List",
+	// key="{#punchLog.punchDate,#punchLog.userId,#punchLog.companyId}")
+	// })
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchLogs.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
 		punchLog.setId(id);
 		EhPunchLogsDao dao = new EhPunchLogsDao(context.configuration());
 		dao.insert(punchLog);
-		
-		
+
 	}
 
 	@Override
 	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_GEOPOINTS);
-        Condition condition = Tables.EH_PUNCH_GEOPOINTS.COMPANY_ID.equal(companyId);
-        step.where(condition);
-        List<PunchGeopoint> result = step.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).
-                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchGeopoint.class);});
-        return result;
-	} 
- 
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_GEOPOINTS);
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.COMPANY_ID
+				.equal(companyId);
+		step.where(condition);
+		List<PunchGeopoint> result = step
+				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchGeopoint.class);
+				});
+		return result;
+	}
+
 	@Override
 	public void createPunchRule(PunchRule punchRule) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchRules.class));
 		punchRule.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchRulesRecord record = ConvertHelper.convert(punchRule, EhPunchRulesRecord.class);
-		InsertQuery<EhPunchRulesRecord> query = context.insertQuery(Tables.EH_PUNCH_RULES);
+		EhPunchRulesRecord record = ConvertHelper.convert(punchRule,
+				EhPunchRulesRecord.class);
+		InsertQuery<EhPunchRulesRecord> query = context
+				.insertQuery(Tables.EH_PUNCH_RULES);
 		query.setRecord(record);
 		query.execute();
 
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchRules.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchRules.class, null);
 
 	}
 
-
 	@Override
-	public void updatePunchRule(PunchRule punchRule){
-		assert(punchRule.getId() == null);
+	public void updatePunchRule(PunchRule punchRule) {
+		assert (punchRule.getId() == null);
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
 		dao.update(punchRule);
 
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class, punchRule.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class,
+				punchRule.getId());
 	}
 
-
 	@Override
-	public void deletePunchRule(PunchRule punchRule){
+	public void deletePunchRule(PunchRule punchRule) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
 		dao.deleteById(punchRule.getId());
 
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class, punchRule.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class,
+				punchRule.getId());
 	}
 
-
 	@Override
-	public void deletePunchRuleById(Long id){
+	public void deletePunchRuleById(Long id) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchRulesDao dao = new EhPunchRulesDao(context.configuration());
@@ -171,7 +192,6 @@ public class PunchProviderImpl implements PunchProvider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchRules.class, id);
 	}
-
 
 	@Override
 	public PunchRule findPunchRuleById(Long id) {
@@ -184,115 +204,156 @@ public class PunchProviderImpl implements PunchProvider {
 	public PunchRule findPunchRuleByCompanyId(Long companyId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-		SelectQuery<EhPunchRulesRecord> query = context.selectQuery(Tables.EH_PUNCH_RULES);
+		SelectQuery<EhPunchRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_RULES);
 		query.addConditions(Tables.EH_PUNCH_RULES.COMPANY_ID.eq(companyId));
 
 		List<PunchRule> result = new ArrayList<>();
-		query.fetch().map((r) ->{
-				result.add(ConvertHelper.convert(r,  PunchRule.class));
-				return null;
-			});
-	        if(null!=result && result.size()>0 )
-	        	return result.get(0);
-	        return null;
-	}    
-	
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+	}
+
 	@Override
 	public void createPunchGeopoint(PunchGeopoint punchGeopoint) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchGeopoints.class));
 		punchGeopoint.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchGeopointsRecord record = ConvertHelper.convert(punchGeopoint, EhPunchGeopointsRecord.class);
-		InsertQuery<EhPunchGeopointsRecord> query = context.insertQuery(Tables.EH_PUNCH_GEOPOINTS);
+		EhPunchGeopointsRecord record = ConvertHelper.convert(punchGeopoint,
+				EhPunchGeopointsRecord.class);
+		InsertQuery<EhPunchGeopointsRecord> query = context
+				.insertQuery(Tables.EH_PUNCH_GEOPOINTS);
 		query.setRecord(record);
 		query.execute();
 
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchGeopoints.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchGeopoints.class,
+				null);
 
 	}
 
-
 	@Override
-	public void updatePunchGeopoint(PunchGeopoint punchGeopoint){
-		assert(punchGeopoint.getId() == null);
+	public void updatePunchGeopoint(PunchGeopoint punchGeopoint) {
+		assert (punchGeopoint.getId() == null);
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(
+				context.configuration());
 		dao.update(punchGeopoint);
 
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, punchGeopoint.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class,
+				punchGeopoint.getId());
 	}
 
-
 	@Override
-	public void deletePunchGeopoint(PunchGeopoint punchGeopoint){
+	public void deletePunchGeopoint(PunchGeopoint punchGeopoint) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(
+				context.configuration());
 		dao.deleteById(punchGeopoint.getId());
 
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, punchGeopoint.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class,
+				punchGeopoint.getId());
 	}
-
 
 	@Override
-	public void deletePunchGeopointById(Long id){
+	public void deletePunchGeopointById(Long id) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(
+				context.configuration());
 		dao.deleteById(id);
 
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, id);
+		DaoHelper
+				.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, id);
 	}
-
 
 	@Override
 	public PunchGeopoint findPunchGeopointById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(
+				context.configuration());
 		return ConvertHelper.convert(dao.findById(id), PunchGeopoint.class);
 	}
-	  
+
 	@Override
 	public void createPunchWorkday(PunchWorkday punchWorkday) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchWorkday.class));
 		punchWorkday.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhPunchWorkdayRecord record = ConvertHelper.convert(punchWorkday, EhPunchWorkdayRecord.class);
-		InsertQuery<EhPunchWorkdayRecord> query = context.insertQuery(Tables.EH_PUNCH_WORKDAY);
+		EhPunchWorkdayRecord record = ConvertHelper.convert(punchWorkday,
+				EhPunchWorkdayRecord.class);
+		InsertQuery<EhPunchWorkdayRecord> query = context
+				.insertQuery(Tables.EH_PUNCH_WORKDAY);
 		query.setRecord(record);
-//		query.setReturning(Tables.EH_PUNCH_RULES.ID);
+		// query.setReturning(Tables.EH_PUNCH_RULES.ID);
 		query.execute();
-//		punchRule.setId(query.getReturnedRecord().getId());
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchWorkday.class, null); 
+		// punchRule.setId(query.getReturnedRecord().getId());
+		DaoHelper
+				.publishDaoAction(DaoAction.CREATE, EhPunchWorkday.class, null);
 
 	}
 
 	@Override
-	public List<PunchWorkday> listWorkdays(DateStatus dateStatus) { 
+	public List<PunchWorkday> listWorkdays(DateStatus dateStatus) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_PUNCH_WORKDAY);
-        Condition condition = Tables.EH_PUNCH_WORKDAY.DATE_STATUS.equal(dateStatus.getCode());
-        step.where(condition);
-        List<PunchWorkday> result = step.orderBy(Tables.EH_PUNCH_WORKDAY.ID.desc()).
-                fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchWorkday.class);});
-        return result;
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_WORKDAY);
+		Condition condition = Tables.EH_PUNCH_WORKDAY.DATE_STATUS
+				.equal(dateStatus.getCode());
+		step.where(condition);
+		List<PunchWorkday> result = step
+				.orderBy(Tables.EH_PUNCH_WORKDAY.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchWorkday.class);
+				});
+		return result;
 	}
 
 	@Override
 	public void createPunchExceptionRequest(
 			PunchExceptionRequest punchExceptionRequest) {
-		// TODO Auto-generated method stub
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhPunchExceptionRequests.class));
+		long id = sequenceProvider
+				.getNextSequence(NameMapper
+						.getSequenceDomainFromTablePojo(EhPunchExceptionRequests.class));
 		punchExceptionRequest.setId(id);
-		EhPunchExceptionRequestsRecord record = ConvertHelper.convert(punchExceptionRequest, EhPunchExceptionRequestsRecord.class);
-		InsertQuery<EhPunchExceptionRequestsRecord> query = context.insertQuery(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		EhPunchExceptionRequestsRecord record = ConvertHelper.convert(
+				punchExceptionRequest, EhPunchExceptionRequestsRecord.class);
+		InsertQuery<EhPunchExceptionRequestsRecord> query = context
+				.insertQuery(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 		query.setRecord(record);
 		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchExceptionRequests.class, null); 
-	} 
+		DaoHelper.publishDaoAction(DaoAction.CREATE,
+				EhPunchExceptionRequests.class, null);
+	}
+
+	@Override
+	public List<PunchExceptionRequest> listExceptionRequestsByDate(Long userId,
+			Long companyId, String logDay) {
+		// TODO Auto-generated method stub
+		Date date = java.sql.Date.valueOf(logDay);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		Condition condition = Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE
+				.equal(date);
+		Condition condition2 = Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.equal(userId);
+		Condition condition3 = Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId);
+		condition = condition.and(condition2);
+		condition = condition.and(condition3);
+		step.where(condition);
+		List<PunchExceptionRequest> result = step
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchExceptionRequest.class);
+				});
+		return result;
+	}
 }

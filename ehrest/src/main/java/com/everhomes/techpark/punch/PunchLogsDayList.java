@@ -10,16 +10,24 @@ import com.everhomes.util.StringHelper;
  * <ul>  
  * <li>PunchDay：每一日的punchlist</li>
  * <li>punchStatus：打卡状态  如 迟到 早退 参考{@link com.everhomes.techpark.punch.PunchStatus}</li>
+ * <li>approvalStatus：审批状态  如 迟到 早退 参考{@link com.everhomes.techpark.punch.ApprovalStatus}</li>
+ * <li>exceptionStatus：异常状态:异常正常 参考{@link com.everhomes.techpark.punch.ExceptionStatus}</li>
+ * <li>PunchLogs: 打卡记录list</li>
  * </ul>
  */
 public class PunchLogsDayList{
  
 
     private String punchDay;
-    private byte punchStatus ;
+    private Byte punchStatus ;
+    private Byte approvalStatus ;
+    private Byte exceptionStatus ;
     @ItemType(PunchLogDTO.class)
     private List<PunchLogDTO> PunchLogs;
- 
+    @ItemType(PunchExceptionDTO.class)
+    private List<PunchExceptionDTO> PunchExceptionDTOs;
+    
+    
  
  
 
@@ -55,14 +63,53 @@ public class PunchLogsDayList{
 
 
 
-	public byte getPunchStatus() {
+	public Byte getPunchStatus() {
 		return punchStatus;
 	}
 
 
 
-	public void setPunchStatus(byte punchStatus) {
+	public void setPunchStatus(Byte punchStatus) {
 		this.punchStatus = punchStatus;
 	}
+
+
+
+	public Byte getExceptionStatus() {
+		return exceptionStatus;
+	}
+
+
+
+	public void setExceptionStatus(Byte exceptionStatus) {
+		this.exceptionStatus = exceptionStatus;
+	}
+
+
+
+	public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+
+
+	public List<PunchExceptionDTO> getPunchExceptionDTOs() {
+		return PunchExceptionDTOs;
+	}
+
+
+
+	public void setPunchExceptionDTOs(List<PunchExceptionDTO> punchExceptionDTOs) {
+		PunchExceptionDTOs = punchExceptionDTOs;
+	}
+
+
+ 
 
  }
