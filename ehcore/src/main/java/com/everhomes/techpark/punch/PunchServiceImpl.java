@@ -176,6 +176,7 @@ public class PunchServiceImpl implements PunchService {
 			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			pdl.getPunchLogs().add(noPunchLogDTO2);
 			return pdl;
 		}
@@ -188,6 +189,7 @@ public class PunchServiceImpl implements PunchService {
 			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			pdl.getPunchLogs().add(noPunchLogDTO2);
 			return pdl;	
 			}
@@ -225,8 +227,10 @@ public class PunchServiceImpl implements PunchService {
 		//打卡状态设置为正常或者迟到
 		if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		} else {
 			pdl.setPunchStatus(PunchStatus.BELATE.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 		}
 		// 再设离开状态 ：
 		// 1.晚于最晚下班时间为正常，2.判断上班时间是否早于最早上班时间，如果是，则晚于最早下班时间为正常，如果不是，则晚于上班时间+工作时长
@@ -248,9 +252,11 @@ public class PunchServiceImpl implements PunchService {
 					
 				} else {
 					if(pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
-						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());}
+						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());}
 					else {
 						pdl.setPunchStatus(PunchStatus.BLANDLE.getCode());
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 					}
 				}
 			} else {
@@ -258,17 +264,43 @@ public class PunchServiceImpl implements PunchService {
 					 
 				} else {
 					if(pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
-						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());}
+						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());}
 					else {
 						pdl.setPunchStatus(PunchStatus.BLANDLE.getCode());
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 					}
 				}
 			}
 		}
 		pdl.getPunchLogs().add(leavePunchLogDTO);
 		pdl.getPunchLogs().add(arrivePunchLogDTO);
-//TODO： 异常申报结果的返回
+		//异常申报结果的返回
+		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId,companyId,dateSF.format(logDay.getTime()));
+		if(null != exceptionApproval ){
+			pdl.setApprovalStatus(exceptionApproval.getApprovalStatus());
+			if(pdl.getApprovalStatus().equals(ApprovalStatus.NORMAL.getCode()) ||pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
+				//如果有申报审批结果，并且审批结果和实际打卡结果有一个是正常的话，异常结果为正常 别的为异常
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			}else {
+				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+		}
 		List<PunchExceptionRequest> exceptionRequests = punchProvider.listExceptionRequestsByDate(userId,companyId,dateSF.format(logDay.getTime()));
+		if (exceptionRequests.size()>0){
+			for(PunchExceptionRequest exceptionRequest : exceptionRequests){
+				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
+				punchExceptionDTO.setDescription(exceptionRequest.getDescription());
+				punchExceptionDTO.setExceptionProcessStatus(exceptionRequest.getStatus());
+				punchExceptionDTO.setProcessCode(exceptionRequest.getProcessCode());
+				punchExceptionDTO.setProcessDetails(exceptionRequest.getProcessDetails());
+				punchExceptionDTO.setRequestTime(exceptionRequest.getCreateTime().getTime());
+				if(null == pdl.getPunchExceptionDTOs() ){
+					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
+				}
+				pdl.getPunchExceptionDTOs().add(punchExceptionDTO);
+			}
+		}
 		return pdl;
 	}
 

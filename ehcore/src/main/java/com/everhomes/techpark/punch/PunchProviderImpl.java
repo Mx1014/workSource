@@ -336,8 +336,7 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public List<PunchExceptionRequest> listExceptionRequestsByDate(Long userId,
-			Long companyId, String logDay) {
-		// TODO Auto-generated method stub
+			Long companyId, String logDay) { 
 		Date date = java.sql.Date.valueOf(logDay);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
@@ -355,5 +354,31 @@ public class PunchProviderImpl implements PunchProvider {
 					return ConvertHelper.convert(r, PunchExceptionRequest.class);
 				});
 		return result;
+	}
+
+	@Override
+	public PunchExceptionApproval getPunchExceptionApprovalByDate(Long userId,
+			Long companyId, String logDay) {
+		// TODO Auto-generated method stub
+		Date date = java.sql.Date.valueOf(logDay);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_EXCEPTION_APPROVALS);
+		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE
+				.equal(date);
+		Condition condition2 = Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.equal(userId);
+		Condition condition3 = Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.equal(companyId);
+		condition = condition.and(condition2);
+		condition = condition.and(condition3);
+		step.where(condition);
+		List<PunchExceptionApproval> result = step
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, PunchExceptionApproval.class);
+				});
+
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
 	}
 }
