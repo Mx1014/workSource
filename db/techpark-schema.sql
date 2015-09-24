@@ -103,7 +103,7 @@ CREATE TABLE `eh_punch_exception_requests` (
   `request_type` tinyint(4) COMMENT '0:alter request ;  1:illustrate',
   `description` varchar(128) ,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
-  `process_code` TINYINT COMMENT ' 1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence',
+  `process_code` TINYINT COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
   `process_details` TEXT,
 	`creator_uid` bigint,
 	`create_time` datetime,
@@ -114,14 +114,14 @@ CREATE TABLE `eh_punch_exception_requests` (
 
 
 
-DROP TABLE IF EXISTS `eh_punch_exception_approval`;
+DROP TABLE IF EXISTS `eh_punch_exception_approvals`;
 
-CREATE TABLE `eh_punch_exception_approval` (
+CREATE TABLE `eh_punch_exception_approvals` (
   `id` bigint(20) NOT NULL COMMENT 'id',
   `user_id` bigint(20) COMMENT 'user''s id',
   `company_id` bigint(20) COMMENT 'compay id',
   `punch_date` date COMMENT 'user punch date',
-  `approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
+  `approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
 	`creator_uid` bigint,
 	`create_time` datetime,
   `operator_uid` bigint,
