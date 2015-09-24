@@ -2,8 +2,8 @@ package com.everhomes.techpark.punch;
 
 /**
  * <ul>
- * <li>AFTERNOONARRIVE(0): 不在打卡范围内</li>
- * <li>NOONLEAVE(1): 正常打卡成功</li>
+ * <li>NOTINAREA(0): 不在打卡范围内</li>
+ * <li>SUCESS(1): 正常打卡成功</li>
  * </ul>
  */
 public enum ClockCode {

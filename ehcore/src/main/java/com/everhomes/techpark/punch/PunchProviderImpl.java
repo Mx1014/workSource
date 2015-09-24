@@ -25,12 +25,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.util.ConvertHelper;
@@ -219,5 +221,20 @@ public class PunchProviderImpl implements PunchProvider {
         List<PunchWorkday> result = step.orderBy(Tables.EH_PUNCH_WORKDAY.ID.desc()).
                 fetch().map((r) ->{ return ConvertHelper.convert(r,  PunchWorkday.class);});
         return result;
+	}
+
+	@Override
+	public void createPunchExceptionRequest(
+			PunchExceptionRequest punchExceptionRequest) {
+		// TODO Auto-generated method stub
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPunchExceptionRequests.class));
+		punchExceptionRequest.setId(id);
+		EhPunchExceptionRequestsRecord record = ConvertHelper.convert(punchExceptionRequest, EhPunchExceptionRequestsRecord.class);
+		InsertQuery<EhPunchExceptionRequestsRecord> query = context.insertQuery(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchExceptionRequests.class, null); 
 	} 
 }

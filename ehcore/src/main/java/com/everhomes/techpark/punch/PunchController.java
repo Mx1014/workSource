@@ -37,39 +37,20 @@ public class PunchController extends ControllerBase {
 
 	@Autowired
 	private PunchService punchService;
-
-	//
-	// /**
-	// * <b>URL: /techpark/punch/getPunchLocation</b>
-	// * <p>
-	// * 根据请求 user和company的ID 确定用户办公楼栋坐标
-	// * </p>
-	// */
-	// z @RequestMapping("getPunchLocation")
-	// @RestReturn(value = GroupDTO.class)
-	// public RestResponse getPunchLocation(@Valid GetPunchLocationCommand cmd)
-	// {
-	// // LocationDTO locationDto = this.(cmd);
-	// LocationDTO locationDTO = new LocationDTO();
-	// locationDTO.setLatitude(39.9291);
-	// locationDTO.setLongitude(116.597);
-	// RestResponse response = new RestResponse(locationDTO);
-	// response.setErrorCode(ErrorCodes.SUCCESS);
-	// response.setErrorDescription("OK");
-	// return response;
-	// }
-
+	
+	
+	
 	/**
-	 * <b>URL: /techpark/punch/verifyPunchLocation</b>
+	 * <b>URL: /techpark/punch/punchExceptionRequest</b>
 	 * <p>
 	 * 根据请求的坐标,和公司ID计算距离是否在设置距离内确定他是否能打卡
 	 * </p>
 	 */
-	@RequestMapping("verifyPunchLocation")
+	@RequestMapping("punchExceptionRequest")
 	@RestReturn(value = String.class)
-	public RestResponse verifyPunchLocation(
-			@Valid VerifyPunchLocationCommand cmd) {
-		// LocationDTO locationDto = this.(cmd);
+	public RestResponse punchExceptionRequest(
+			@Valid PunchExceptionRequestCommand cmd) {
+		punchService.createPunchExceptionRequest(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

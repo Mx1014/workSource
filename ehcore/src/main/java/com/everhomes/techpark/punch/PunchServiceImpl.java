@@ -490,6 +490,32 @@ public class PunchServiceImpl implements PunchService {
 			result.add(punchWorkday.getDateTag());
 		}
 		return result;
+	}
+
+	@Override
+	public void createPunchExceptionRequest(PunchExceptionRequestCommand cmd) {
+		// TODO Auto-generated method stub
+		Long userId = UserContext.current().getUser().getId();
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		if (cmd.getDescription() == null || cmd.getDescription().equals(0))
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid description parameter in the command");
+		if (cmd.getRequestType() == null )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid description parameter in the command");
+		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
+		punchExceptionRequest.setCompanyId(cmd.getCompanyId());
+		punchExceptionRequest.setUserId(userId);
+		punchExceptionRequest.setCreatorUid(userId);
+		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		punchExceptionRequest.setDescription(cmd.getDescription());
+		punchExceptionRequest.setRequestType(cmd.getRequestType());
+		punchExceptionRequest.setPunchDate(new java.sql.Date(0).valueOf(cmd.getPunchDate()));
+		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
+		
 	} 
 	
 	
