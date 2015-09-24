@@ -43,7 +43,7 @@ public class PunchController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/punch/punchExceptionRequest</b>
 	 * <p>
-	 * 根据请求的坐标,和公司ID计算距离是否在设置距离内确定他是否能打卡
+	 * 增加打卡异常申报
 	 * </p>
 	 */
 	@RequestMapping("punchExceptionRequest")
