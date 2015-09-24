@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> implements org.jooq.Record13<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.lang.Byte, java.lang.String, java.lang.Byte, java.lang.Byte, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -544573865;
+	private static final long serialVersionUID = -248134313;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_exception_requests.id</code>. id
@@ -112,14 +112,14 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_exception_requests.process_code</code>.  1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence
+	 * Setter for <code>ehcore.eh_punch_exception_requests.process_code</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
 	 */
 	public void setProcessCode(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_exception_requests.process_code</code>.  1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence
+	 * Getter for <code>ehcore.eh_punch_exception_requests.process_code</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
 	 */
 	public java.lang.Byte getProcessCode() {
 		return (java.lang.Byte) getValue(7);

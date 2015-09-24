@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> {
 
-	private static final long serialVersionUID = 604123428;
+	private static final long serialVersionUID = -2084188316;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_requests</code>
@@ -62,9 +62,9 @@ public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2:active");
 
 	/**
-	 * The column <code>ehcore.eh_punch_exception_requests.process_code</code>.  1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence
+	 * The column <code>ehcore.eh_punch_exception_requests.process_code</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> PROCESS_CODE = createField("process_code", org.jooq.impl.SQLDataType.TINYINT, this, " 1:refuse ;2:consent ;3:sick absence 4: leave of absence 5:annual leave ;6: other absence");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> PROCESS_CODE = createField("process_code", org.jooq.impl.SQLDataType.TINYINT, this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
 
 	/**
 	 * The column <code>ehcore.eh_punch_exception_requests.process_details</code>.

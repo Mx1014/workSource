@@ -354,6 +354,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
+	 * The table ehcore.eh_punch_exception_approvals
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchExceptionApprovals EH_PUNCH_EXCEPTION_APPROVALS = com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS;
+
+	/**
 	 * The table ehcore.eh_punch_exception_requests
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchExceptionRequests EH_PUNCH_EXCEPTION_REQUESTS = com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS;
