@@ -1426,11 +1426,11 @@ public class ForumServiceImpl implements ForumService {
     
     private void processPostCategory(long userId, NewTopicCommand cmd, Post post) {
         Long contentCategory = cmd.getContentCategory();
-        if(contentCategory == null || contentCategory.longValue() == 0) {
+        if(contentCategory == null || contentCategory.longValue() == 0 || contentCategory.longValue() == -1) {
             contentCategory = CategoryConstants.CATEGORY_ID_TOPIC_COMMON;
         }
         
-        Category category = this.categoryProvider.findCategoryById(cmd.getContentCategory());
+        Category category = this.categoryProvider.findCategoryById(contentCategory);
         if(category == null) {
             if(LOGGER.isErrorEnabled()) {
                 LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
@@ -1968,16 +1968,26 @@ public class ForumServiceImpl implements ForumService {
                         EntityType.USER.getCode(), post.getCreatorUid());
                     if(member != null) {
                         String nickName = member.getMemberNickName();
+                        String avatar = member.getMemberAvatar();
                         if(nickName == null || nickName.trim().length() == 0) {
                             User creator = userProvider.findUserById(post.getCreatorUid());
                             if(creator != null) {
                                 nickName = creator.getNickName();
                             }
                         }
+                        
+                        if(avatar == null || avatar.trim().length() == 0){
+                        	User creator = userProvider.findUserById(post.getCreatorUid());
+                        	if(creator != null) {
+                        		avatar = creator.getAvatar();
+                            }
+                        }
                         post.setCreatorNickName(nickName);
-                        post.setCreatorAvatar(member.getMemberAvatar());
-                        String avatarUrl = getResourceUrlByUir(userId, member.getMemberAvatar(), 
-                            EntityType.USER.getCode(), member.getMemberId());
+                        post.setCreatorAvatar(avatar);
+                        String avatarUrl = getResourceUrlByUir(userId, avatar, EntityType.USER.getCode(), member.getMemberId());
+//                        post.setCreatorAvatar(member.getMemberAvatar());
+//                        String avatarUrl = getResourceUrlByUir(userId, member.getMemberAvatar(), 
+//                            EntityType.USER.getCode(), member.getMemberId());
                         post.setCreatorAvatarUrl(avatarUrl); 
                     }
                     
