@@ -43,6 +43,9 @@ public class PunchRuleDTO {
 	private Long     updateUid;
 	private Timestamp updateTime;
 	
+	@NotNull
+	private String      locations;
+	
 	public PunchRuleDTO() {
     }
 	public Long getId() {
@@ -110,6 +113,12 @@ public class PunchRuleDTO {
 	}
 	public void setUpdateTime(Timestamp updateTime) {
 		this.updateTime = updateTime;
+	}
+	public String getLocations() {
+		return locations;
+	}
+	public void setLocations(String locations) {
+		this.locations = locations;
 	}
 	@Override
     public String toString() {

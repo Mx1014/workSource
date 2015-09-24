@@ -133,7 +133,7 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("deletePunchRule")
 	@RestReturn(value = String.class)
-	public RestResponse deletePunchRule(@Valid DeletePunchCommand cmd) {
+	public RestResponse deletePunchRule(@Valid PunchCompanyIdCommand cmd) {
 		punchService.deletePunchRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -149,7 +149,7 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("getPunchRule")
 	@RestReturn(value = PunchRuleResponse.class)
-	public RestResponse getPunchRule(@Valid PunchClockCommand cmd) {
+	public RestResponse getPunchRule(@Valid PunchCompanyIdCommand cmd) {
 		PunchRuleResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

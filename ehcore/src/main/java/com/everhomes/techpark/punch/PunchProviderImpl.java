@@ -26,13 +26,16 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
+import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
+import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
 import com.everhomes.util.ConvertHelper;
@@ -129,10 +132,8 @@ public class PunchProviderImpl implements PunchProvider {
 		EhPunchRulesRecord record = ConvertHelper.convert(punchRule, EhPunchRulesRecord.class);
 		InsertQuery<EhPunchRulesRecord> query = context.insertQuery(Tables.EH_PUNCH_RULES);
 		query.setRecord(record);
-//		query.setReturning(Tables.EH_PUNCH_RULES.ID);
 		query.execute();
 
-//		punchRule.setId(query.getReturnedRecord().getId());
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchRules.class, null); 
 
 	}
@@ -195,6 +196,63 @@ public class PunchProviderImpl implements PunchProvider {
 	        	return result.get(0);
 	        return null;
 	}    
+	
+	@Override
+	public void createPunchGeopoint(PunchGeopoint punchGeopoint) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPunchGeopoints.class));
+		punchGeopoint.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchGeopointsRecord record = ConvertHelper.convert(punchGeopoint, EhPunchGeopointsRecord.class);
+		InsertQuery<EhPunchGeopointsRecord> query = context.insertQuery(Tables.EH_PUNCH_GEOPOINTS);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchGeopoints.class, null); 
+
+	}
+
+
+	@Override
+	public void updatePunchGeopoint(PunchGeopoint punchGeopoint){
+		assert(punchGeopoint.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		dao.update(punchGeopoint);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, punchGeopoint.getId());
+	}
+
+
+	@Override
+	public void deletePunchGeopoint(PunchGeopoint punchGeopoint){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		dao.deleteById(punchGeopoint.getId());
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, punchGeopoint.getId());
+	}
+
+
+	@Override
+	public void deletePunchGeopointById(Long id){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		dao.deleteById(id);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchGeopoints.class, id);
+	}
+
+
+	@Override
+	public PunchGeopoint findPunchGeopointById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPunchGeopointsDao dao = new EhPunchGeopointsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), PunchGeopoint.class);
+	}
 	  
 	@Override
 	public void createPunchWorkday(PunchWorkday punchWorkday) {

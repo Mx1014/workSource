@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>endEarlyTime：最早下班班时间</li>
  * <li>endLateTime：最晚下班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
  * <li>workTime：每天工作时间 ,有由后台处理 (startLateTime - startEarlyTime)</li>
+ * <li>locations：打卡地点的json数组</li>
  * </ul>
  */
 public class CreatePunchRuleCommand {
@@ -28,6 +29,8 @@ public class CreatePunchRuleCommand {
 	private String      startLateTime;
 	@NotNull
 	private String      endEarlyTime;
+	@NotNull
+	private String      locations;
 
 	public CreatePunchRuleCommand() {
 	}
@@ -55,6 +58,12 @@ public class CreatePunchRuleCommand {
 	}
 	public void setEndEarlyTime(String endEarlyTime) {
 		this.endEarlyTime = endEarlyTime;
+	}
+	public String getLocations() {
+		return locations;
+	}
+	public void setLocations(String locations) {
+		this.locations = locations;
 	}
 	@Override
     public String toString() {

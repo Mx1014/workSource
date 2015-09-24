@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,6 +12,10 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +23,15 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhPunchRules;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -376,8 +384,25 @@ public class PunchServiceImpl implements PunchService {
 			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			punchProvider.createPunchRule(punchRule);
+			createPunchGeopoints(userId,cmd.getLocations(),cmd.getCompanyId());
+			
 		}
 
+	}
+
+	private void createPunchGeopoints(Long userId, String locations,Long compantId) {
+		JSONObject jsonObject = (JSONObject) JSONValue.parse(locations);
+		JSONArray locationValue = (JSONArray) jsonObject.get("locations");
+		Gson  gson = new Gson();
+		List<PunchGeopoint> geopoints = gson.fromJson(locationValue.toString(), new TypeToken<List<PunchGeopoint>>(){}.getType());
+		for (PunchGeopoint punchGeopoint : geopoints) {
+			punchGeopoint.setCompanyId(compantId);
+			punchGeopoint.setCreatorUid(userId);
+			punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			punchGeopoint.setGeohash(GeoHashUtils.encode(punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+			punchProvider.createPunchGeopoint(punchGeopoint);
+		}
 	}
 
 	private void convertTime(PunchRule punchRule, String startEarlyTime,
@@ -387,11 +412,19 @@ public class PunchServiceImpl implements PunchService {
 		punchRule.setStartLateTime(convertTime(startLastTime));
 		Time endEarly = convertTime(endEarlyTime);
 		Long workTime = endEarly.getTime() - startEarly.getTime();
-		punchRule.setWorkTime(convertTime(String.format("%tT", DateHelper
-				.getDateDisplayString(TimeZone.getDefault(), workTime,
-						"HH:mm:ss"))));
+//		long hours = (workTime/(1000* 60 * 60));
+//		long minutes = (workTime-hours*(1000* 60 * 60))/(1000* 60);
+		String workTimeStr = getGMTtimeString("HH:mm:ss", workTime);
+		punchRule.setWorkTime(convertTime(workTimeStr));
 	}
-
+	
+	public String getGMTtimeString(String dateFormat,long time){
+		DateFormat format = new SimpleDateFormat(dateFormat);
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));//设置 DateFormat的时间区域为GMT
+		Date date = new Date(time);
+		return format.format(date);
+	}
+	
 	private Time convertTime(String TimeStr) {
 		if (!StringUtils.isEmpty(TimeStr)) {
 			return Time.valueOf(TimeStr);
@@ -409,20 +442,25 @@ public class PunchServiceImpl implements PunchService {
 		String startLastTime = cmd.getStartLateTime();
 		String endEarlyTime = cmd.getEndEarlyTime();
 		if (punchRule != null) {
-			PunchRule newPunchRule = ConvertHelper
-					.convert(cmd, PunchRule.class);
-			newPunchRule.setCreatorUid(punchRule.getCreatorUid());
-			newPunchRule.setCreateTime(punchRule.getCreateTime());
 			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
-			// punchRule.setUpdateUid(userId);
-			// punchRule.setUpdateTime(new
-			// Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchRule.setOperatorUid(userId);
+			punchRule.setOperateTime(new
+			 Timestamp(DateHelper.currentGMTTime().getTime()));
 			punchProvider.updatePunchRule(punchRule);
+			if(!StringUtils.isEmpty(cmd.getLocations())){
+				List<PunchGeopoint> geopoints = punchProvider.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+				if(geopoints != null && geopoints.size() >0){
+					for (PunchGeopoint punchGeopoint : geopoints) {
+						punchProvider.deletePunchGeopoint(punchGeopoint);
+					}
+				}
+				createPunchGeopoints(userId,cmd.getLocations(),cmd.getCompanyId());
+			}
 		}
 	}
 
 	@Override
-	public PunchRuleResponse getPunchRuleByCompanyId(PunchClockCommand cmd) {
+	public PunchRuleResponse getPunchRuleByCompanyId(PunchCompanyIdCommand cmd) {
 		PunchRuleResponse response = new PunchRuleResponse();
 		PunchRuleDTO dto = null;
 		checkCompanyIdIsNull(cmd.getCompanyId());
@@ -430,16 +468,41 @@ public class PunchServiceImpl implements PunchService {
 				.getCompanyId());
 		if (punchRule != null) {
 			dto = ConvertHelper.convert(punchRule, PunchRuleDTO.class);
+			dto.setStartEarlyTime(String.format("%tT", punchRule.getStartEarlyTime()));
+			dto.setStartLateTime(String.format("%tT", punchRule.getStartLateTime()));
+			dto.setEndEarlyTime(calculateEndTime("HH:mm:ss",String.format("%tT", punchRule.getStartEarlyTime()),String.format("%tT", punchRule.getWorkTime())));
+			dto.setEndLateTime(calculateEndTime("HH:mm:ss",String.format("%tT", punchRule.getStartLateTime()),String.format("%tT", punchRule.getWorkTime())));
+			List<PunchGeopoint> geopoints = punchProvider.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+			dto.setLocations(GsonUtil.toJson(geopoints));
 		}
 		response.setPunchRuleDTO(dto);
 		return response;
 	}
 
+	private String calculateEndTime(String dateFormat,String startEarlyTime, String workTime) {
+		DateFormat format = new SimpleDateFormat(dateFormat);
+		format.setTimeZone(TimeZone.getTimeZone("GMT"));//设置 DateFormat的时间区域为GMT
+		
+		long endTime = 0;
+		try {
+			endTime = format.parse(startEarlyTime).getTime()+format.parse(workTime).getTime();
+		} catch (ParseException e) {
+			LOGGER.error("the time format is error.", e);
+		}
+		return getGMTtimeString("HH:mm;ss", endTime);
+	}
+
 	@Override
-	public void deletePunchRule(DeletePunchCommand cmd) {
-		PunchRule punchRule = punchProvider.findPunchRuleById(cmd.getId());
+	public void deletePunchRule(PunchCompanyIdCommand cmd) {
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd.getCompanyId());
 		if (punchRule != null) {
 			punchProvider.deletePunchRule(punchRule);
+			List<PunchGeopoint> geopoints = punchProvider.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+			if(geopoints != null && geopoints.size() >0){
+				for (PunchGeopoint punchGeopoint : geopoints) {
+					punchProvider.deletePunchGeopoint(punchGeopoint);
+				}
+			}
 		}
 	}
 	
