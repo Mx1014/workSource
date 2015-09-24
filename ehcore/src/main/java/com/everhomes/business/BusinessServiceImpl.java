@@ -363,9 +363,18 @@ public class BusinessServiceImpl implements BusinessService {
         return business.getUrl();
     }
     
+    /*
+     *category : 
+     *3001 -> 3005,3006,等
+     *9999 -> none
+     *	 
+     */
     private void processRecommendBusinesses( List<Long> recommendBizIds, List<BusinessDTO> dtos, 
             Category category, long userId,List<Long> favoriteBizIds){
-        List<BusinessCategory> businessCategories = this.businessProvider.findBusinessCategoriesByIdAndOwnerIds(category.getId(),recommendBizIds);
+    	if(category.getId().longValue() == CATEOGRY_RECOMMEND)
+    		return;
+    	
+        List<BusinessCategory> businessCategories = this.businessProvider.listBusinessCategoriesByCatPIdAndOwnerIds(category.getId(),recommendBizIds);
         if(businessCategories == null || businessCategories.isEmpty())
             return;
         List<Long> bizIds = businessCategories.stream().map(r -> r.getOwnerId()).collect(Collectors.toList());
