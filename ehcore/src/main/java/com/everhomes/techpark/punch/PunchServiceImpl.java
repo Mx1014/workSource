@@ -22,10 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.EhPunchRules;
+import com.everhomes.techpark.company.GroupContact;
+import com.everhomes.techpark.company.GroupContactProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -41,6 +40,8 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	PunchProvider punchProvider;
+	@Autowired
+	GroupContactProvider groupContactProvider;
 
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (companyId == null || companyId.equals(0L)) {
@@ -102,8 +103,6 @@ public class PunchServiceImpl implements PunchService {
 			PunchLogsYearListResponse pyl, long CompanyId, Calendar start,
 			Calendar end) {
 		Long userId = UserContext.current().getUser().getId();
-		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		
 		PunchLogsMonthList pml = null;
 		while (start.before(end)) {
 
@@ -131,7 +130,6 @@ public class PunchServiceImpl implements PunchService {
 				start.add(Calendar.DAY_OF_MONTH, 1);
 				continue;
 			}
-			
 
 			try {
 				pml.getPunchLogsDayList().add(
@@ -148,6 +146,62 @@ public class PunchServiceImpl implements PunchService {
 		return pyl;
 	}
 
+	private void makeExceptionForDayList(Long userId, Long companyId,
+			Calendar logDay, PunchLogsDayList pdl) {
+		// 异常申报结果的返回
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		PunchExceptionApproval exceptionApproval = punchProvider
+				.getPunchExceptionApprovalByDate(userId, companyId,
+						dateSF.format(logDay.getTime()));
+		if (null != exceptionApproval) {
+			pdl.setApprovalStatus(exceptionApproval.getApprovalStatus());
+			if (pdl.getApprovalStatus().equals(ApprovalStatus.NORMAL.getCode())
+					|| pdl.getPunchStatus()
+							.equals(PunchStatus.NORMAL.getCode())) {
+				// 如果有申报审批结果，并且审批结果和实际打卡结果有一个是正常的话，异常结果为正常 别的为异常
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			} else {
+				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+		}
+		List<PunchExceptionRequest> exceptionRequests = punchProvider
+				.listExceptionRequestsByDate(userId, companyId,
+						dateSF.format(logDay.getTime()));
+		if (exceptionRequests.size() > 0) {
+			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
+				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
+				punchExceptionDTO.setRequestDescription(exceptionRequest
+						.getDescription());
+				punchExceptionDTO.setExceptionProcessStatus(exceptionRequest
+						.getStatus());
+				punchExceptionDTO.setProcessCode(exceptionRequest
+						.getProcessCode());
+				punchExceptionDTO.setProcessDetails(exceptionRequest
+						.getProcessDetails());
+				punchExceptionDTO.setRequestTime(exceptionRequest
+						.getCreateTime().getTime());
+				Timestamp operatTimestamp = exceptionRequest.getOperateTime();
+				if (null != operatTimestamp)
+					punchExceptionDTO.setOperateTime(operatTimestamp.getTime());
+				Long opreatorId = exceptionRequest.getOperatorUid();
+				if (null != opreatorId) {
+					GroupContact groupContact = groupContactProvider
+							.findGroupContactByUserId(opreatorId);
+					if (null == groupContact) {
+						punchExceptionDTO.setOperatorName("无此人");
+					} else {
+						punchExceptionDTO.setOperatorName(groupContact
+								.getContactName());
+					}
+				}
+				if (null == pdl.getPunchExceptionDTOs()) {
+					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
+				}
+				pdl.getPunchExceptionDTOs().add(punchExceptionDTO);
+			}
+		}
+	}
+
 	/***
 	 * @param punchLogs
 	 *            ： 当天的全部打卡记录通过punchProvider.listPunchLogsByDate()方法得到;
@@ -157,7 +211,8 @@ public class PunchServiceImpl implements PunchService {
 	 *            : 计算的打卡日期
 	 * @return PunchLogsDayList：计算好的当日打卡状态
 	 * */
-	private PunchLogsDayList makePunchLogsDayListInfo(Long userId, Long companyId, Calendar logDay) throws ParseException {
+	private PunchLogsDayList makePunchLogsDayListInfo(Long userId,
+			Long companyId, Calendar logDay) throws ParseException {
 		SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat datetimeSF = new SimpleDateFormat(
@@ -165,9 +220,10 @@ public class PunchServiceImpl implements PunchService {
 		PunchLogsDayList pdl = new PunchLogsDayList();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
-		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(
-				userId, companyId, dateSF.format(logDay.getTime()),
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
+				companyId, dateSF.format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
+
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
 			PunchLogDTO noPunchLogDTO1 = new PunchLogDTO();
@@ -178,21 +234,24 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			pdl.getPunchLogs().add(noPunchLogDTO2);
+			makeExceptionForDayList(userId, companyId, logDay, pdl);
 			return pdl;
 		}
-		if(punchLogs.size()==1){
-			//如果只有一次打卡，就把离开设置为未打卡,当天设置为旷工
+		if (punchLogs.size() == 1) {
+			// 如果只有一次打卡，就把离开设置为未打卡,当天设置为旷工
 			PunchLogDTO arriveLogDTO = new PunchLogDTO();
 			arriveLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
-			arriveLogDTO.setPunchTime(punchLogs.get(0).getPunchDate().getTime());
+			arriveLogDTO
+					.setPunchTime(punchLogs.get(0).getPunchDate().getTime());
 			pdl.getPunchLogs().add(arriveLogDTO);
 			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			pdl.getPunchLogs().add(noPunchLogDTO2);
-			return pdl;	
-			}
+			makeExceptionForDayList(userId, companyId, logDay, pdl);
+			return pdl;
+		}
 		PunchRule punchRule = punchProvider.getPunchRuleByCompanyId(companyId);
 		if (null == punchRule)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -224,7 +283,7 @@ public class PunchServiceImpl implements PunchService {
 		arrivePunchLogDTO.setPunchTime(arriveCalendar.getTime().getTime());
 		leavePunchLogDTO.setPunchTime(leaveCalendar.getTime().getTime());
 
-		//打卡状态设置为正常或者迟到
+		// 打卡状态设置为正常或者迟到
 		if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
@@ -244,63 +303,45 @@ public class PunchServiceImpl implements PunchService {
 		arriveCalendar.add(Calendar.MINUTE, workTime.get(Calendar.MINUTE));
 		arriveCalendar.add(Calendar.SECOND, workTime.get(Calendar.SECOND));
 		if (leaveCalendar.after(startMaxTime)) {
-			//如果离开时间超过最晚工作时间，为正常
+			// 如果离开时间超过最晚工作时间，为正常
 		} else {
 			if (arriveCalendar.after(startMinTime)) {
-				//如果到达时间晚于最早工作时间，按照到达时间计算
+				// 如果到达时间晚于最早工作时间，按照到达时间计算
 				if (leaveCalendar.after(arriveCalendar)) {
-					
+
 				} else {
-					if(pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
+					if (pdl.getPunchStatus().equals(
+							PunchStatus.NORMAL.getCode())) {
 						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
-						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());}
-					else {
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION
+								.getCode());
+					} else {
 						pdl.setPunchStatus(PunchStatus.BLANDLE.getCode());
-						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION
+								.getCode());
 					}
 				}
 			} else {
 				if (leaveCalendar.after(startMinTime)) {
-					 
+
 				} else {
-					if(pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
+					if (pdl.getPunchStatus().equals(
+							PunchStatus.NORMAL.getCode())) {
 						pdl.setPunchStatus(PunchStatus.LEAVEEARLY.getCode());
-						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());}
-					else {
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION
+								.getCode());
+					} else {
 						pdl.setPunchStatus(PunchStatus.BLANDLE.getCode());
-						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+						pdl.setExceptionStatus(ExceptionStatus.EXCEPTION
+								.getCode());
 					}
 				}
 			}
 		}
 		pdl.getPunchLogs().add(leavePunchLogDTO);
 		pdl.getPunchLogs().add(arrivePunchLogDTO);
-		//异常申报结果的返回
-		PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId,companyId,dateSF.format(logDay.getTime()));
-		if(null != exceptionApproval ){
-			pdl.setApprovalStatus(exceptionApproval.getApprovalStatus());
-			if(pdl.getApprovalStatus().equals(ApprovalStatus.NORMAL.getCode()) ||pdl.getPunchStatus().equals(PunchStatus.NORMAL.getCode())){
-				//如果有申报审批结果，并且审批结果和实际打卡结果有一个是正常的话，异常结果为正常 别的为异常
-				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-			}else {
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			}
-		}
-		List<PunchExceptionRequest> exceptionRequests = punchProvider.listExceptionRequestsByDate(userId,companyId,dateSF.format(logDay.getTime()));
-		if (exceptionRequests.size()>0){
-			for(PunchExceptionRequest exceptionRequest : exceptionRequests){
-				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
-				punchExceptionDTO.setDescription(exceptionRequest.getDescription());
-				punchExceptionDTO.setExceptionProcessStatus(exceptionRequest.getStatus());
-				punchExceptionDTO.setProcessCode(exceptionRequest.getProcessCode());
-				punchExceptionDTO.setProcessDetails(exceptionRequest.getProcessDetails());
-				punchExceptionDTO.setRequestTime(exceptionRequest.getCreateTime().getTime());
-				if(null == pdl.getPunchExceptionDTOs() ){
-					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
-				}
-				pdl.getPunchExceptionDTOs().add(punchExceptionDTO);
-			}
-		}
+		makeExceptionForDayList(userId, companyId, logDay, pdl);
+
 		return pdl;
 	}
 
@@ -646,10 +687,10 @@ public class PunchServiceImpl implements PunchService {
 		punchExceptionRequest.setDescription(cmd.getDescription());
 		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
 				.getPunchDate()));
-		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR.getCode());
+		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR
+				.getCode());
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
 
 	}
-	 
 
 }

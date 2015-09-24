@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.techpark.company.GroupContact;
 import com.everhomes.techpark.company.GroupContactProvider;
 import com.everhomes.techpark.company.OwnerType;
+import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.util.ConvertHelper;
 
 import freemarker.template.utility.StringUtil;
@@ -84,6 +87,23 @@ public class CompanyProviderImpl implements GroupContactProvider{
 	}
 
 	@Override
+	public GroupContact findGroupContactByUserId(Long userId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_GROUP_CONTACTS); 
+		Condition condition = Tables.EH_GROUP_CONTACTS.CONTACT_UID.equal(userId);  
+		step.where(condition);
+		List<GroupContact> result = step
+				.orderBy(Tables.EH_GROUP_CONTACTS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, GroupContact.class);
+				});
+
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null ;
+	}
+	@Override
 	public List<GroupContact> listGroupContactsByKeword(Long ownerId,String keyword, Integer pageSize, Long offset) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Condition condition = Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(ownerId));
@@ -100,4 +120,5 @@ public class CompanyProviderImpl implements GroupContactProvider{
 		return list;
 	}
 
+ 
 }
