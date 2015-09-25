@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -21,8 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.company.GroupContact;
 import com.everhomes.techpark.company.GroupContactProvider;
 import com.everhomes.user.UserContext;
@@ -42,6 +45,9 @@ public class PunchServiceImpl implements PunchService {
 	PunchProvider punchProvider;
 	@Autowired
 	GroupContactProvider groupContactProvider;
+	
+	@Autowired
+	ConfigurationProvider configurationProvider;
 
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (companyId == null || companyId.equals(0L)) {
@@ -714,4 +720,36 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
+	@Override
+	public  ListPunchExceptionRequestCommandResponse listExceptionRequests(ListPunchExceptionRequestCommand cmd) {
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
+		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+		int totalCount = punchProvider.countExceptionRequests(cmd.getKeyword(), cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(), cmd.getExceptionStatus(), cmd.getProcessCode());
+		if(totalCount == 0) return response;
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageCount = getPageCount(totalCount, pageSize);
+
+		List<PunchExceptionRequest> result = punchProvider.listExceptionRequests(cmd.getKeyword(), cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(), cmd.getExceptionStatus(), cmd.getProcessCode(), cmd.getPageOffset(), pageSize);
+		response.setExceptionRequestList( result.stream()
+				.map(r->{ 
+					PunchExceptionRequestDTO dto = ConvertHelper.convert(r,PunchExceptionRequestDTO.class);
+					GroupContact groupContact = groupContactProvider.findGroupContactByUserId(dto.getUserId());
+					dto.setUserName(groupContact.getContactName());
+					dto.setToken(groupContact.getContactToken());
+					return dto; }).collect(Collectors.toList()));
+
+		response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+		return response;
+	}
+
+	private int getPageCount(int totalCount, int pageSize){
+		int pageCount = totalCount/pageSize;
+
+		if(totalCount % pageSize != 0){
+			pageCount ++;
+		}
+		return pageCount;
+	}
 }

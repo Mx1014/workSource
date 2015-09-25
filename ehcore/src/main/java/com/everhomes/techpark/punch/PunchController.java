@@ -144,7 +144,7 @@ public class PunchController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/punch/getPunchRule</b>
 	 * <p>
-	 * 查询
+	 * 查询公司打卡规则
 	 * </p>
 	 */
 	@RequestMapping("getPunchRule")
@@ -156,5 +156,23 @@ public class PunchController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/punch/listPunchExceptionRequest</b>
+	 * <p>
+	 * 查询公司打卡异常申请
+	 * </p>
+	 */
+	@RequestMapping("listPunchExceptionRequest")
+	@RestReturn(value = PunchRuleResponse.class)
+	public RestResponse listPunchExceptionRequest(@Valid ListPunchExceptionRequestCommand cmd) {
+		ListPunchExceptionRequestCommandResponse commandResponse = punchService.listExceptionRequests(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
 
 }

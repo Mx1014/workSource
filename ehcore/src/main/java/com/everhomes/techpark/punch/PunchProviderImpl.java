@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
@@ -24,6 +26,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.pm.CommunityPmMember;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
@@ -35,6 +38,7 @@ import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
@@ -381,4 +385,68 @@ public class PunchProviderImpl implements PunchProvider {
 			return result.get(0);
 		return null;
 	}
+	
+	@Override
+	public Integer countExceptionRequests(String keyword, Long companyId, String startDay, String endDay, byte status,
+			byte processCode) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		
+	
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		if(keyword != null)
+			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
+
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(status != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		}
+		if(processCode != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+		}
+		return step.where(condition).fetchOneInto(Integer.class);
+	
+	}
+	
+	@Override
+	public List<PunchExceptionRequest> listExceptionRequests(String keyword, Long companyId, String startDay,String endDay,
+			byte status, byte processCode,Integer pageOffset,Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<PunchExceptionRequest> result  = new ArrayList<PunchExceptionRequest>();
+		SelectQuery<EhPunchExceptionRequestsRecord> query = context.selectQuery(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+		query.addJoin(Tables.EH_GROUP_CONTACTS, Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		if(keyword != null)
+			query.addConditions(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
+
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(status != 0){
+			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		}
+		if(processCode != 0){
+			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+		}
+		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		query.addOrderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.asc());
+		query.addLimit(offset, pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchExceptionRequest.class));
+			return null;
+		});
+		return result;
+	}
 }
+
