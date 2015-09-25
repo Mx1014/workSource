@@ -1953,15 +1953,20 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostCreatorInfo(long userId, Post post) {
         Long forumId = post.getForumId();
         if(forumId != null) {
+            String creatorNickName = post.getCreatorNickName();
+            String creatorAvatar = post.getCreatorAvatar();
+            
             // 社区论坛的意见反馈论坛直接使用USER表中的信息作为发帖人的信息
             if(forumId == ForumConstants.SYSTEM_FORUM || forumId == ForumConstants.FEEDBACK_FORUM) {
                 User creator = userProvider.findUserById(post.getCreatorUid());
                 if(creator != null) {
-                    post.setCreatorNickName(creator.getNickName());
-                    post.setCreatorAvatar(creator.getAvatar());
-                    String avatarUrl = getResourceUrlByUir(userId, creator.getAvatar(), 
-                        EntityType.USER.getCode(), creator.getId());
-                    post.setCreatorAvatarUrl(avatarUrl);
+                    // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+                    if(creatorNickName == null || creatorNickName.length() == 0) {
+                        post.setCreatorNickName(creator.getNickName());
+                    }
+                    if(creatorAvatar == null || creatorAvatar.length() == 0) {
+                        post.setCreatorAvatar(creator.getAvatar());
+                    }
                 }
                 // TODO: set the admin flag of system forum
             } else {
@@ -1979,22 +1984,28 @@ public class ForumServiceImpl implements ForumService {
                                 nickName = creator.getNickName();
                             }
                         }
-                        
                         if(avatar == null || avatar.trim().length() == 0){
                         	User creator = userProvider.findUserById(post.getCreatorUid());
                         	if(creator != null) {
                         		avatar = creator.getAvatar();
                             }
                         }
-                        post.setCreatorNickName(nickName);
-                        post.setCreatorAvatar(avatar);
-                        String avatarUrl = getResourceUrlByUir(userId, avatar, EntityType.USER.getCode(), member.getMemberId());
-//                        post.setCreatorAvatar(member.getMemberAvatar());
-//                        String avatarUrl = getResourceUrlByUir(userId, member.getMemberAvatar(), 
-//                            EntityType.USER.getCode(), member.getMemberId());
-                        post.setCreatorAvatarUrl(avatarUrl); 
+                        // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+                        if(creatorNickName == null || creatorNickName.length() == 0) {
+                            post.setCreatorNickName(nickName);
+                        }
+                        if(creatorAvatar == null || creatorAvatar.length() == 0) {
+                            post.setCreatorAvatar(member.getMemberAvatar());
+                        }
                     }
                 }
+            }
+            
+            creatorAvatar = post.getCreatorAvatar();
+            if(creatorAvatar != null && creatorAvatar.length() > 0) {
+                String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, 
+                    EntityType.USER.getCode(), post.getCreatorUid());
+                post.setCreatorAvatarUrl(avatarUrl);
             }
         }
         
