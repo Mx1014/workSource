@@ -752,4 +752,16 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return pageCount;
 	}
+	
+	@Override
+	public void approvePunchExceptionRequest(ApprovePunchExceptionRequestCommand cmd) {
+		
+		
+	}
+	
+	@Override
+	public void rejectPunchExceptionRequest(RejectPunchExceptionRequestCommand cmd) {
+		
+		
+	}
 }

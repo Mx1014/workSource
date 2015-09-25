@@ -387,8 +387,8 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public Integer countExceptionRequests(String keyword, Long companyId, String startDay, String endDay, byte status,
-			byte processCode) {
+	public Integer countExceptionRequests(String keyword, Long companyId, String startDay, String endDay, Byte status,
+			Byte processCode) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
@@ -396,7 +396,7 @@ public class PunchProviderImpl implements PunchProvider {
 		
 	
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
-		if(keyword != null)
+		if(!StringUtils.isEmpty(keyword))
 			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
 					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
 
@@ -405,10 +405,10 @@ public class PunchProviderImpl implements PunchProvider {
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		if(status != 0){
+		if(status!= null && status != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
-		if(processCode != 0){
+		if(processCode!= null && processCode != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
 		return step.where(condition).fetchOneInto(Integer.class);
@@ -417,14 +417,14 @@ public class PunchProviderImpl implements PunchProvider {
 	
 	@Override
 	public List<PunchExceptionRequest> listExceptionRequests(String keyword, Long companyId, String startDay,String endDay,
-			byte status, byte processCode,Integer pageOffset,Integer pageSize) {
+			Byte status, Byte processCode,Integer pageOffset,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<PunchExceptionRequest> result  = new ArrayList<PunchExceptionRequest>();
 		SelectQuery<EhPunchExceptionRequestsRecord> query = context.selectQuery(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 		query.addJoin(Tables.EH_GROUP_CONTACTS, Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 		query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
-		if(keyword != null)
+		if(!StringUtils.isEmpty(keyword))
 			query.addConditions(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
 					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
 
@@ -433,10 +433,10 @@ public class PunchProviderImpl implements PunchProvider {
 			Date endDate = Date.valueOf(endDay);
 			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		if(status != 0){
+		if(status!= null && status != 0){
 			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
-		if(processCode != 0){
+		if(processCode!= null && processCode != 0){
 			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
