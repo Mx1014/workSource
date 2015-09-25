@@ -227,7 +227,7 @@ public class PunchServiceImpl implements PunchService {
 		Date now = new Date(); 
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
-			if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay))) {
+			if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
 				// 如果非工作日或者当天，不增pdl直接下一天
 				return null;
 			} 
@@ -252,18 +252,17 @@ public class PunchServiceImpl implements PunchService {
 			arriveLogDTO
 					.setPunchTime(punchLogs.get(0).getPunchDate().getTime());
 			pdl.getPunchLogs().add(arriveLogDTO);
-
-			if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay))){
+			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
+			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
+			pdl.getPunchLogs().add(noPunchLogDTO2);
+			if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay.getTime()))){
 				pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 				// 如果非工作日 normal
 				return pdl;
 			}
-			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
-			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			pdl.getPunchLogs().add(noPunchLogDTO2);
 			makeExceptionForDayList(userId, companyId, logDay, pdl);
 			return pdl;
 		}
@@ -300,7 +299,7 @@ public class PunchServiceImpl implements PunchService {
 		arrivePunchLogDTO.setPunchTime(arriveCalendar.getTime().getTime());
 		leavePunchLogDTO.setPunchTime(leaveCalendar.getTime().getTime());
 
-		if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay))) {
+		if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
 			// 如果非工作日 normal
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
