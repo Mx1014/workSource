@@ -739,8 +739,8 @@ public class BusinessServiceImpl implements BusinessService {
         Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
         if(business == null){
             LOGGER.error("Business is not exists.id=" + cmd.getId());
-            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
-                    "Business is not exists.");
+            /*throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+                    "Business is not exists.");*/
         }
         User user = userProvider.findUserById(cmd.getUserId());
         if(user == null){
@@ -748,10 +748,12 @@ public class BusinessServiceImpl implements BusinessService {
                     "Invalid paramter userId,userId is not found");
         }
         this.dbProvider.execute((TransactionStatus status) -> {
-            this.businessProvider.deleteBusiness(business.getId());
-            this.userActivityService.cancelShop(user.getId());
-            //删除服务市场item
-            this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(),business.getId());
+        	this.userActivityService.cancelShop(user.getId());
+        	if(business != null){
+        		this.businessProvider.deleteBusiness(business.getId());
+        		//删除服务市场item
+        		this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(),business.getId());
+        	}
             return true;
         });
         
