@@ -125,15 +125,14 @@ public class PunchServiceImpl implements PunchService {
 				pyl.getPunchLogsMonthList().add(pml);
 			}
 
-			if (!isWorkDay(date)) {
-				// 如果非工作日，不增pdl直接下一天
-				start.add(Calendar.DAY_OF_MONTH, 1);
-				continue;
-			}
+			
 
 			try {
-				pml.getPunchLogsDayList().add(
-						makePunchLogsDayListInfo(userId, CompanyId, start));
+				PunchLogsDayList pdl = makePunchLogsDayListInfo(userId,
+						CompanyId, start);
+				if (null != pdl) {
+					pml.getPunchLogsDayList().add(pdl);
+				}
 			} catch (ParseException e) {
 
 				throw RuntimeErrorException.errorWith(
@@ -213,6 +212,7 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	private PunchLogsDayList makePunchLogsDayListInfo(Long userId,
 			Long companyId, Calendar logDay) throws ParseException {
+		
 		SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat datetimeSF = new SimpleDateFormat(
@@ -224,8 +224,13 @@ public class PunchServiceImpl implements PunchService {
 				companyId, dateSF.format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
 
+		Date now = new Date(); 
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
+			if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay))) {
+				// 如果非工作日或者当天，不增pdl直接下一天
+				return null;
+			} 
 			PunchLogDTO noPunchLogDTO1 = new PunchLogDTO();
 			noPunchLogDTO1.setClockStatus(ClockStatus.ARRIVE.getCode());
 			pdl.getPunchLogs().add(noPunchLogDTO1);
@@ -237,6 +242,9 @@ public class PunchServiceImpl implements PunchService {
 			makeExceptionForDayList(userId, companyId, logDay, pdl);
 			return pdl;
 		}
+		
+		
+		
 		if (punchLogs.size() == 1) {
 			// 如果只有一次打卡，就把离开设置为未打卡,当天设置为旷工
 			PunchLogDTO arriveLogDTO = new PunchLogDTO();
@@ -244,6 +252,13 @@ public class PunchServiceImpl implements PunchService {
 			arriveLogDTO
 					.setPunchTime(punchLogs.get(0).getPunchDate().getTime());
 			pdl.getPunchLogs().add(arriveLogDTO);
+
+			if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay))){
+				pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				// 如果非工作日 normal
+				return pdl;
+			}
 			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
@@ -275,6 +290,8 @@ public class PunchServiceImpl implements PunchService {
 
 		PunchLogDTO arrivePunchLogDTO = new PunchLogDTO();
 		PunchLogDTO leavePunchLogDTO = new PunchLogDTO();
+		pdl.getPunchLogs().add(leavePunchLogDTO);
+		pdl.getPunchLogs().add(arrivePunchLogDTO);
 		arrivePunchLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
 		leavePunchLogDTO.setClockStatus(ClockStatus.LEAVE.getCode());
 		List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
@@ -283,6 +300,13 @@ public class PunchServiceImpl implements PunchService {
 		arrivePunchLogDTO.setPunchTime(arriveCalendar.getTime().getTime());
 		leavePunchLogDTO.setPunchTime(leaveCalendar.getTime().getTime());
 
+		if (!isWorkDay(logDay.getTime())||dateSF.format(now).equals(dateSF.format(logDay))) {
+			// 如果非工作日 normal
+			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			
+			return pdl;
+		}
 		// 打卡状态设置为正常或者迟到
 		if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
@@ -338,8 +362,6 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
-		pdl.getPunchLogs().add(leavePunchLogDTO);
-		pdl.getPunchLogs().add(arrivePunchLogDTO);
 		makeExceptionForDayList(userId, companyId, logDay, pdl);
 
 		return pdl;
