@@ -1898,7 +1898,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private Community findCommunityByCommName(String communityName, Long cityId) {
 		List<Community> comms = this.communityProvider.findCommunitiesByNameAndCityId(communityName, cityId);
 		if(comms == null || comms.isEmpty()){
-			LOGGER.error("community is not found by communityName.communityName="+communityName);
+			LOGGER.error("community is not found by communityName.communityName="+communityName+",cityId="+cityId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"community is not found by communityName.");
 		}
@@ -1991,40 +1991,40 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private String setAreaName(String areaName) {
-		return areaName;
+		return areaName==null?null:areaName.trim();
 	}
 
 	private String getCommunityNames(String comName) {
-		return comName;
+		return comName==null?null:comName.trim();
 	}
 
 	private Double getLatitude(String latitude) {
-		return Double.valueOf(latitude);
+		return Double.valueOf(latitude ==null?null:latitude.trim());
 	}
 
 	private Double getLongitude(String longitude) {
-		return Double.valueOf(longitude);
-
+		return Double.valueOf(longitude == null?null:longitude.trim());
 	}
 
 	private String getAddressName(String addressName) {
-		return addressName;
+		return addressName == null?null:addressName.trim();
 	}
 
 	private String getTokens(String tokens) {
-		return tokens;
+		return tokens == null?null:tokens.trim();
 	}
 
 	private String getOrgType(String orgType) {
-		return orgType;
+		return orgType == null?null:orgType.trim();
 	}
 
 	private String getOrgName(String orgName) {
-		return orgName;
+		return orgName == null?null:orgName.trim();
 	}
 
 	private String getCityName(String cityName) {
-		return cityName;
+		
+		return cityName == null?null:cityName.trim();
 	}
 
 	private void checkFilesIsNull(MultipartFile[] files,Long userId) {
