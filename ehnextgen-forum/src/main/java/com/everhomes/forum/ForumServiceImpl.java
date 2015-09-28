@@ -1961,10 +1961,10 @@ public class ForumServiceImpl implements ForumService {
                 User creator = userProvider.findUserById(post.getCreatorUid());
                 if(creator != null) {
                     // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-                    if(creatorNickName == null || creatorNickName.length() == 0) {
+                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
                         post.setCreatorNickName(creator.getNickName());
                     }
-                    if(creatorAvatar == null || creatorAvatar.length() == 0) {
+                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
                         post.setCreatorAvatar(creator.getAvatar());
                     }
                 }
@@ -1991,11 +1991,11 @@ public class ForumServiceImpl implements ForumService {
                             }
                         }
                         // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-                        if(creatorNickName == null || creatorNickName.length() == 0) {
+                        if(creatorNickName == null || creatorNickName.trim().length() == 0) {
                             post.setCreatorNickName(nickName);
                         }
-                        if(creatorAvatar == null || creatorAvatar.length() == 0) {
-                            post.setCreatorAvatar(member.getMemberAvatar());
+                        if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                            post.setCreatorAvatar(avatar);
                         }
                     }
                 }
