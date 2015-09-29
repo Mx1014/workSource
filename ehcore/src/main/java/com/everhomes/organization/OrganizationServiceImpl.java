@@ -1945,14 +1945,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private Community findCommunityByCommName(String communityName, Long cityId, Long areaId) {
-		List<Community> comms = this.communityProvider.findCommunitiesByNameCityIdAreaId(communityName, cityId,areaId);
+		List<Community> comms = this.communityProvider.findCommunitiesByNameCityIdAreaId(communityName, cityId,null);
 		if(comms == null || comms.isEmpty()){
-			LOGGER.error("community is not found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+areaId);
+			LOGGER.error("community is not found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+null);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"community is not found by communityName.");
 		}
 		else if(comms.size() != 1){
-			LOGGER.error("community is not unique found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+areaId);
+			LOGGER.error("community is not unique found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+null);
 			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"community is not unique found by communityName.");*/
 		}
