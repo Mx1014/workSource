@@ -456,7 +456,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                 	
                 	Condition condition = Tables.EH_COMMUNITIES.NAME.like("%" + name + "%");
                     if(cityId != null)
-                    	condition = condition.and(Tables.EH_COMMUNITIES.CITY_ID.eq(areaId));
+                    	condition = condition.and(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId));
                     /*if(areaId != null)
                     	condition = condition.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));*/
                     
