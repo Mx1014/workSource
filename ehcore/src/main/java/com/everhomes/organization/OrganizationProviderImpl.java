@@ -978,7 +978,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<Organization> listOrganizationByName(String orgName,String orgType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Organization> list = context.select().from(Tables.EH_ORGANIZATIONS)
-				.where(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(orgType).and(Tables.EH_ORGANIZATIONS.NAME.like("%"+orgName+"%")))
+				.where(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(orgType).and(Tables.EH_ORGANIZATIONS.NAME.eq(orgName)))
 				.fetch().map(r -> {
 					return ConvertHelper.convert(r, Organization.class);
 				});

@@ -2358,7 +2358,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private List<Organization> checkOrganizationByName(String orgName, String orgType) {
 		List<Organization> orgs = this.organizationProvider.listOrganizationByName(orgName,orgType);
 
-
 		if(orgs == null || orgs.isEmpty()){
 			LOGGER.error("organization not found by orgName.orgName="+orgName);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
