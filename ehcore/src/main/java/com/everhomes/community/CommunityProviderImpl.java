@@ -445,6 +445,24 @@ public class CommunityProviderImpl implements CommunityProvider {
                 });
         return result;
     }
+    
+    @Override
+    public List<Community> findCommunitiesByNameCityIdAreaId(String name, long cityId,long areaId) {
+        List<Community> result = new ArrayList<Community>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
+                (DSLContext context, Object reducingContext) -> {
+                    context.select().from(Tables.EH_COMMUNITIES)
+                    .where(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId)
+                    		.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId))
+                    		.and(Tables.EH_COMMUNITIES.NAME.like("%" + name + "%"))
+                    	).fetch().map(r ->{
+                    		result.add(ConvertHelper.convert(r,Community.class));
+                    		return null;
+                   });
+                    return true;
+                });
+        return result;
+    }
 
     @Override
     public List<Community> findCommunitiesByIds(List<Long> ids) {

@@ -1787,58 +1787,106 @@ public class OrganizationServiceImpl implements OrganizationService {
 		for(OrganizationDTO2 r:list){
 			this.checkCityNameIsNull(r.getCityName());
 			this.checkAreaNameIsNull(r.getAreaName());
-			this.setCityId(r,r.getCityName());
-			this.setAreaId(r,r.getAreaName());
+			Region city = this.checkCityName(r.getCityName());
+			r.setCityId(city.getId());
+			Region area = this.checkAreaName(r.getAreaName(),city.getId());
+			r.setAreaId(area.getId());
 			this.setTokenList(r,r.getTokens());
-			//this.setAddressId(r,r.getAddressName());
-			this.setCommunityIdsByCommunityName(r,r.getCommunityNames(),r.getCityId());
+			this.setCommunityIdsByCommunityName(r,r.getCommunityNames(),r.getCityId(),r.getAreaId());
 		}
 
 		if(LOGGER.isDebugEnabled())
 			LOGGER.info("importOrganization-list-after="+StringHelper.toJsonString(list));
+		
+		List<OrganizationVo> orgVos = new ArrayList<OrganizationVo>();
+		int orgCount = 0;
+		int orgCommCount = 0;
+		int orgContactCount = 0;
+		int addressCount = 0;
+		for(OrganizationDTO2 r:list){
+			OrganizationVo orgVo = new OrganizationVo();
+			//地址
+			Address address = addressProvider.findAddressByRegionAndAddress(r.getCityId(),r.getAreaId(),r.getAddressName());
+			if(LOGGER.isDebugEnabled())
+				LOGGER.info("address not found.cityId="+r.getCityId()+",areaId="+r.getAreaId());
+			
+			if(address == null){
+				//创建地址
+				Region city = this.regionProvider.findRegionById(r.getCityId());
+				Region area = this.regionProvider.findRegionById(r.getAreaId());
+				address = new Address();
+				address.setAddress(r.getAddressName());
+				address.setCityId(city.getId());
+				address.setCityName(city.getName());
+				address.setAreaId(area.getId());
+				address.setAreaName(area.getName());
+				address.setLongitude(r.getLongitude());
+				address.setLatitude(r.getLatitude());
+				address.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				address.setCreatorUid(userId);
+				address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+				orgVo.setAddress(address);
+				addressCount++;
+				//this.addressProvider.createAddress(address);
+			}
+			else{
+				r.setAddressId(address.getId());
+			}
+			//机构
+			Organization org = this.convertOrgDTO2ToOrg(r);
+			orgVo.setOrg(org);
+			orgCount++;
+			//this.organizationProvider.createOrganization(org);
+			//机构小区
+			for(Long comId : r.getCommunityIds()){
+				OrganizationCommunity orgComm = new OrganizationCommunity();
+				orgComm.setCommunityId(comId);
+				if(orgVo.getOrgComms()==null || orgVo.getOrgComms().isEmpty())
+					orgVo.setOrgComms(new ArrayList<OrganizationCommunity>());
+				orgVo.getOrgComms().add(orgComm);
+				orgCommCount++;
+				//orgComm.setOrganizationId(org.getId());
+				//this.organizationProvider.createOrganizationCommunity(orgComm);
+			}
+			//机构电话
+			for(String token : r.getTokenList()){
+				CommunityPmContact orgContact = new CommunityPmContact();
+				orgContact.setContactName(null);
+				orgContact.setContactToken(token);
+				orgContact.setContactType(IdentifierType.MOBILE.getCode());
+				orgContact.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				orgContact.setCreatorUid(userId);
+				if(orgVo.getOrgContacts()==null)
+					orgVo.setOrgContacts(new ArrayList<CommunityPmContact>());
+				orgVo.getOrgContacts().add(orgContact);
+				orgContactCount++;
+//				orgContact.setOrganizationId(org.getId());
+//				this.propertyMgrProvider.createPropContact(orgContact);
+			}
+		}
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("importOrganization:orgVos="+StringHelper.toJsonString(orgVos));
+		LOGGER.info("importOrganization:orgCount="+orgCount+",addressCount="+addressCount+",orgCommCount="+orgCommCount+",orgContactCount="+orgContactCount);
 
 		this.dbProvider.execute(s -> {
-			for(OrganizationDTO2 r:list){
-				//地址
-				Address address = addressProvider.findAddressByRegionAndAddress(r.getCityId(),0L,r.getAddressName());
-				if(address == null){
-					//创建地址
-					Region city = this.regionProvider.findRegionById(r.getCityId());
-					Region area = this.regionProvider.findRegionById(r.getAreaId());
-					address = new Address();
-					address.setAddress(r.getAddressName());
-					address.setCityId(city.getId());
-					address.setCityName(city.getName());
-					address.setAreaId(area.getId());
-					address.setAreaName(area.getName());
-					address.setLongitude(r.getLongitude());
-					address.setLatitude(r.getLatitude());
-					address.setCreateTime(new Timestamp(System.currentTimeMillis()));
-					address.setCreatorUid(userId);
-					address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-					this.addressProvider.createAddress(address);
+			for(OrganizationVo r:orgVos){
+				if(r.getAddress()!=null){
+					this.addressProvider.createAddress(r.getAddress());
+					r.getOrg().setAddressId(r.getAddress().getId());
 				}
-				r.setAddressId(address.getId());
-				//机构
-				Organization org = this.convertOrgDTO2ToOrg(r); 
-				this.organizationProvider.createOrganization(org);
-				//机构小区
-				for(Long comId : r.getCommunityIds()){
-					OrganizationCommunity orgComm = new OrganizationCommunity();
-					orgComm.setCommunityId(comId);
-					orgComm.setOrganizationId(org.getId());
-					this.organizationProvider.createOrganizationCommunity(orgComm);
+				this.organizationProvider.createOrganization(r.getOrg());
+				if(r.getOrgComms() != null){
+					for(OrganizationCommunity om : r.getOrgComms()){
+						om.setOrganizationId(r.getOrg().getId());
+						this.organizationProvider.createOrganizationCommunity(om);
+					}
 				}
-				//机构电话
-				for(String token : r.getTokenList()){
-					CommunityPmContact orgContact = new CommunityPmContact();
-					orgContact.setContactName(null);
-					orgContact.setContactToken(token);
-					orgContact.setContactType(IdentifierType.MOBILE.getCode());
-					orgContact.setCreateTime(new Timestamp(System.currentTimeMillis()));
-					orgContact.setCreatorUid(userId);
-					orgContact.setOrganizationId(org.getId());
-					this.propertyMgrProvider.createPropContact(orgContact);
+				if(r.getOrgContacts()!=null){
+					for(CommunityPmContact oc:r.getOrgContacts()){
+						oc.setOrganizationId(r.getOrg().getId());
+						this.propertyMgrProvider.createPropContact(oc);
+					}
 				}
 			}
 			return s;
@@ -1853,20 +1901,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 	}
 
-	private void setAreaId(OrganizationDTO2 r, String areaName) {
-		Region area = this.checkAreaName(areaName);
+	private void setAreaId(OrganizationDTO2 r, String areaName, Long cityId) {
+		Region area = this.checkAreaName(areaName,cityId);
 		r.setAreaId(area.getId());
 	}
 
-	private Region checkAreaName(String areaName) {
-		List<Region> areas = this.regionProvider.listRegionByKeyword(null, RegionScope.AREA, null, null, areaName);
+	private Region checkAreaName(String areaName, Long cityId) {
+		List<Region> areas = this.regionProvider.listRegionByName(cityId, RegionScope.AREA, null, null, areaName);
 		if(areas == null || areas.isEmpty()){
-			LOGGER.error("area is not found by areaName.areaName="+areaName);
+			LOGGER.error("area is not found by areaName.areaName="+areaName+",cityId="+cityId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"area is not found by areaName.");
 		}
 		else if(areas.size() != 1){
-			LOGGER.error("area is not unique found by areaName.areaName="+areaName);
+			LOGGER.error("area is not unique found by areaName.areaName="+areaName+",cityId="+cityId);
 			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"city is not unique found by cityName.");*/
 		}
@@ -1885,25 +1933,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return org;
 	}
 
-	private void setCommunityIdsByCommunityName(OrganizationDTO2 r,String communityNames,Long cityId) {
+	private void setCommunityIdsByCommunityName(OrganizationDTO2 r,String communityNames,Long cityId, Long areaId) {
 		String [] commNames = communityNames.split(",");
 		for(String communityName : commNames){
-			Community comm = this.findCommunityByCommName(communityName, cityId);
+			Community comm = this.findCommunityByCommName(communityName, cityId,areaId);
 			if(r.getCommunityIds() == null)
 				r.setCommunityIds(new ArrayList<Long>());
 			r.getCommunityIds().add(comm.getId());
 		}
 	}
 
-	private Community findCommunityByCommName(String communityName, Long cityId) {
-		List<Community> comms = this.communityProvider.findCommunitiesByNameAndCityId(communityName, cityId);
+	private Community findCommunityByCommName(String communityName, Long cityId, Long areaId) {
+		List<Community> comms = this.communityProvider.findCommunitiesByNameCityIdAreaId(communityName, cityId,areaId);
 		if(comms == null || comms.isEmpty()){
-			LOGGER.error("community is not found by communityName.communityName="+communityName+",cityId="+cityId);
+			LOGGER.error("community is not found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+areaId);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"community is not found by communityName.");
 		}
 		else if(comms.size() != 1){
-			LOGGER.error("community is not unique found by communityName.communityName="+communityName);
+			LOGGER.error("community is not unique found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+areaId);
 			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"community is not unique found by communityName.");*/
 		}
@@ -1940,7 +1988,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private Region checkCityName(String cityName) {
-		List<Region> citys = this.regionProvider.listRegionByKeyword(null, RegionScope.CITY, null, null, cityName);
+		List<Region> citys = this.regionProvider.listRegionByName(null, RegionScope.CITY, null, null, cityName);
 		if(citys == null || citys.isEmpty()){
 			LOGGER.error("city is not found by cityName.cityName="+cityName);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
