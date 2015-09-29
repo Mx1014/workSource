@@ -2,12 +2,18 @@ package com.everhomes.organization;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class OrganizationDTO2 {
 	Long orgId;
+	
+	@ItemType(Long.class)
 	List<Long> communityIds;
+	
+	@ItemType(String.class)
 	List<String> tokenList;
+	
 	Long addressId;
 	String orgName;
 	String communityNames;
