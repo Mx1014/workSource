@@ -2120,7 +2120,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			//createTime
 			Date createDate = null;
 			if(r.getCreateTime() != null){
-				LOGGER.error("importOrgPost-createDateStr="+r.getCreateTime());
+				if(LOGGER.isDebugEnabled())
+					LOGGER.error("importOrgPost-createDateStr="+r.getCreateTime());
+				
 				try {
 					createDate = format.parse(r.getCreateTime());
 					Calendar cal = Calendar.getInstance();
@@ -2397,5 +2399,4 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		return result;
 	}
-
 }
