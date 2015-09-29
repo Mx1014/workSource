@@ -1,6 +1,7 @@
 package com.everhomes.techpark.punch;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -13,15 +14,19 @@ import com.everhomes.util.StringHelper;
  * <li>token：申请人联系电话</li>
  * <li>companyId：公司id</li>
  * <li>punchDate: 申请时间</li>
- * <li>requestType：申请类型 有效{@link com.everhomes.techpark.punch.PunchRquestType}</li>
+ * <li>requestType：申请类型申请或审批{@link com.everhomes.techpark.punch.PunchRquestType}</li>
  * <li>description：申请内容</li>
  * <li>status：异常处理状态：驳回，待审核，有效{@link com.everhomes.techpark.punch.ExceptionProcessStatus}</li>
- * <li>processCode：处理结果:正常，迟到等 参考{@link com.everhomes.techpark.punch.ApprovalStatus}</li>
+ * <li>processCode：处理结果-审批考勤:正常，迟到等 参考{@link com.everhomes.techpark.punch.ApprovalStatus}</li>
  * <li>processDetails: 无效的时候有detail</li>
  * <li>creatorUid：创建人id</li>
  * <li>createTime：创建时间</li>
  * <li>operatorUid：审核人id</li>
  * <li>operateTime：审核时间</li>
+ * <li>punchStatus：打卡考勤:正常，迟到等 参考{@link com.everhomes.techpark.punch.PunchStatus}</li>
+ * <li>arriveTime：上班时间</li>
+ * <li>leaveTime：下班时间</li>
+ * <li>workTime：工作时长</li>
  * </ul>
  */
 public class PunchExceptionRequestDTO{
@@ -40,7 +45,10 @@ public class PunchExceptionRequestDTO{
 	private Timestamp createTime;
 	private Long     operatorUid;
 	private Timestamp operateTime;
- 
+	private Byte punchStatus;
+	private String arriveTime;
+	private String leaveTime;
+	private String workTime;
  
     public Long getId() {
 		return id;
@@ -196,5 +204,47 @@ public class PunchExceptionRequestDTO{
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+	public Byte getPunchStatus() {
+		return punchStatus;
+	}
+
+
+	public void setPunchStatus(Byte punchStatus) {
+		this.punchStatus = punchStatus;
+	}
+
+
+	public String getArriveTime() {
+		return arriveTime;
+	}
+
+
+	public void setArriveTime(String arriveTime) {
+		this.arriveTime = arriveTime;
+	}
+
+
+	public String getLeaveTime() {
+		return leaveTime;
+	}
+
+
+	public void setLeaveTime(String leaveTime) {
+		this.leaveTime = leaveTime;
+	}
+
+
+	public String getWorkTime() {
+		return workTime;
+	}
+
+
+	public void setWorkTime(String workTime) {
+		this.workTime = workTime;
+	}
+
+ 
 
  }

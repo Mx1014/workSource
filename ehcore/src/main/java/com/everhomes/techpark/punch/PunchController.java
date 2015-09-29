@@ -173,6 +173,39 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /techpark/punch/listPunchExceptionApproval</b>
+	 * <p>
+	 * 查询公司打卡异常审批-某人某日的申请的审批
+	 * </p>
+	 */
+	@RequestMapping("listPunchExceptionApproval")
+	@RestReturn(value = PunchRuleResponse.class)
+	public RestResponse listPunchExceptionApproval(@Valid ListPunchExceptionApprovalCommand cmd) {
+		ListPunchExceptionRequestCommandResponse commandResponse = punchService.listExceptionApprovals(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
-
+	
+	/**
+	 * <b>URL: /techpark/punch/PunchExceptionApproval</b>
+	 * <p>
+	 *审批异常申报
+	 * </p>
+	 */
+	@RequestMapping("PunchExceptionApproval")
+	@RestReturn(value = String.class)
+	public RestResponse PunchExceptionApproval(@Valid PunchExceptionApprovalCommand cmd) {
+		punchService.PunchExceptionApproval(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	
 }

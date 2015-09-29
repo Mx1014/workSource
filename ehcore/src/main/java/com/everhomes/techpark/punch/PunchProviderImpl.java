@@ -1,24 +1,19 @@
 package com.everhomes.techpark.punch;
 
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
-import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
@@ -26,26 +21,26 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.pm.CommunityPmMember;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
-import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
-import com.everhomes.server.schema.tables.pojos.EhPunchRules;
-import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
+import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
-import com.everhomes.server.schema.tables.daos.EhVersionUpgradeRulesDao;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
+import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
+import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
+import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
+import com.everhomes.techpark.company.OwnerType;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.version.VersionUpgradeRule;
 
 @Component
 public class PunchProviderImpl implements PunchProvider {
@@ -362,8 +357,7 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public PunchExceptionApproval getPunchExceptionApprovalByDate(Long userId,
-			Long companyId, String logDay) {
-		// TODO Auto-generated method stub
+			Long companyId, String logDay) { 
 		Date date = java.sql.Date.valueOf(logDay);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
@@ -387,15 +381,17 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public Integer countExceptionRequests(String keyword, Long companyId, String startDay, String endDay, byte status,
-			byte processCode) {
+	public Integer countExceptionRequests(Long userId,String keyword, Long companyId, String startDay, String endDay, Byte status,
+			Byte processCode,Byte requestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
-		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		
-	
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+	 
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
 		if(keyword != null)
 			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
 					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
@@ -405,10 +401,10 @@ public class PunchProviderImpl implements PunchProvider {
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		if(status != 0){
+		if(null!= status && status != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
-		if(processCode != 0){
+		if(null!= processCode &&  processCode != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
 		return step.where(condition).fetchOneInto(Integer.class);
@@ -416,37 +412,174 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public List<PunchExceptionRequest> listExceptionRequests(String keyword, Long companyId, String startDay,String endDay,
-			byte status, byte processCode,Integer pageOffset,Integer pageSize) {
+	public List<PunchExceptionRequest> listExceptionRequests(Long userId,String keyword, Long companyId, String startDay,String endDay,
+			Byte status, Byte processCode,Integer pageOffset,Integer pageSize,Byte requestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
-		List<PunchExceptionRequest> result  = new ArrayList<PunchExceptionRequest>();
-		SelectQuery<EhPunchExceptionRequestsRecord> query = context.selectQuery(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
-		query.addJoin(Tables.EH_GROUP_CONTACTS, Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
 		if(keyword != null)
-			query.addConditions(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
 					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
 
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
-			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		if(status != 0){
-			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		if(null!= status && status != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
-		if(processCode != 0){
-			query.addConditions(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+		if(null!= processCode &&  processCode != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
-		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
-		query.addOrderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.asc());
-		query.addLimit(offset, pageSize);
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, PunchExceptionRequest.class));
-			return null;
-		});
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+		
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchExceptionRequest.class);
+        }).collect(Collectors.toList());
+		return result;
+ 
+	}
+
+	@Override
+	public int countExceptionRequests(String keyword, Long companyId,
+			String startDay, String endDay, Byte status,
+			Byte processCode, Byte requestType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
+		if(keyword != null)
+			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
+
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(null!= status && status != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		}
+		if(null!= processCode &&  processCode != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+		}
+		return step.where(condition).fetchOneInto(Integer.class);
+	
+	}
+	@Override
+	public void updatePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest) {
+		assert (punchExceptionRequest.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchExceptionRequestsDao dao = new EhPunchExceptionRequestsDao(
+				context.configuration());
+		dao.update(punchExceptionRequest);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchExceptionRequests.class,
+				punchExceptionRequest.getId());
+	}
+	@Override
+	public List<PunchExceptionRequest> listExceptionRequests(String keyword,
+			Long companyId, String startDay, String endDay, Byte status,
+			Byte processCode, Integer pageOffset, int pageSize, Byte requestType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
+		if(keyword != null)
+			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
+
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(null!= status && status != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
+		}
+		if(null!= processCode &&  processCode != 0){
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+		}
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+		
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchExceptionRequest.class);
+        }).collect(Collectors.toList());
 		return result;
 	}
+
+	@Override
+	public PunchExceptionApproval  getExceptionApproval(Long userId, Long companyId,
+			Date punchDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		 
+		SelectJoinStep<Record1<Integer>>  step = context.selectOne().from(Tables.EH_PUNCH_EXCEPTION_APPROVALS);
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(punchDate));
+		return step.where(condition).fetchOneInto(PunchExceptionApproval.class);
+	}
+
+	@Override
+	public void createPunchExceptionApproval(
+			PunchExceptionApproval punchExceptionApproval) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider
+				.getNextSequence(NameMapper
+						.getSequenceDomainFromTablePojo(EhPunchExceptionApprovals.class));
+		punchExceptionApproval.setId(id);
+		EhPunchExceptionApprovalsRecord record = ConvertHelper.convert(
+				punchExceptionApproval, EhPunchExceptionApprovalsRecord.class);
+		InsertQuery<EhPunchExceptionApprovalsRecord> query = context
+				.insertQuery(Tables.EH_PUNCH_EXCEPTION_APPROVALS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE,
+				EhPunchExceptionApprovals.class, null);
+		
+	}
+
+	@Override
+	public void updatePunchExceptionApproval(PunchExceptionApproval punchExceptionApproval) {
+		assert (punchExceptionApproval.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchExceptionApprovalsDao dao = new EhPunchExceptionApprovalsDao(
+				context.configuration());
+		dao.update(punchExceptionApproval);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchExceptionApprovals.class,
+				punchExceptionApproval.getId());
+	}
+	
+	@Override
+	public void deletePunchExceptionApproval(Long id) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchExceptionApprovalsDao dao = new EhPunchExceptionApprovalsDao(context.configuration());
+		dao.deleteById(id);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchExceptionApprovals.class, id);
+	}
+	
+	
 }
 

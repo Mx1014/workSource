@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch;
 
 /**
  * <ul>打卡的状态
+ *<li>OUTWORK(7):  公出</li>
  * <li>EXCHANGE(7): 调休</li>
  * <li>SICK(6): 病假</li>
  * <li>ABSENCE(5): 事假</li>
@@ -13,7 +14,7 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum ApprovalStatus { 
-	/** <li>EXCHANGE(7): 调休</li>*/
+	OUTWORK((byte)7),
 	EXCHANGE((byte)7),
 	/**<li>SICK(6): 病假</li>*/
 	SICK((byte)6),
