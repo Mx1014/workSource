@@ -1060,7 +1060,7 @@ CREATE TABLE `eh_communities`(
     `apt_seg1_sample` VARCHAR(64),
     `apt_seg2_sample` VARCHAR(64),
     `apt_seg3_sample` VARCHAR(64),
-    `apt_count` INTEGER,
+    `apt_count` INTEGER NOT NULL DEFAULT 0,
     `creator_uid` BIGINT COMMENT 'user who suggested the creation',
     `operator_uid` BIGINT COMMENT 'operator uid of last operation',
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
