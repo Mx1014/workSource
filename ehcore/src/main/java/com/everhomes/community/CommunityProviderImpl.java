@@ -449,6 +449,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId) {
         List<Community> result = new ArrayList<Community>();
+        LOGGER.info("findCommunitiesByNameCityIdAreaId-areaId="+areaId+",cityId="+cityId+",name="+name);
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
                 (DSLContext context, Object reducingContext) -> {
@@ -456,8 +457,8 @@ public class CommunityProviderImpl implements CommunityProvider {
                 	Condition condition = Tables.EH_COMMUNITIES.NAME.like("%" + name + "%");
                     if(cityId != null)
                     	condition = condition.and(Tables.EH_COMMUNITIES.CITY_ID.eq(areaId));
-                    if(areaId != null)
-                    	condition = condition.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
+                    /*if(areaId != null)
+                    	condition = condition.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));*/
                     
                     context.select().from(Tables.EH_COMMUNITIES)
                     .where(condition).fetch().map(r ->{
