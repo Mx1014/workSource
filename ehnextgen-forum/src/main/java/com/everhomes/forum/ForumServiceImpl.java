@@ -1998,6 +1998,11 @@ public class ForumServiceImpl implements ForumService {
                             post.setCreatorAvatar(avatar);
                         }
                     }
+                    
+                    /*Group group = this.groupProvider.findGroupById(forum.getOwnerId());
+                    if(group != null) {
+                        post.setForumName(group.getName());
+                    }*/
                 }
             }
             
