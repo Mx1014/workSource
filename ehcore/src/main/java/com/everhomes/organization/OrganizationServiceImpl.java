@@ -1863,6 +1863,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				orgContact.setOrganizationId(org.getId());
 //				this.propertyMgrProvider.createPropContact(orgContact);
 			}
+			orgVos.add(orgVo);
 		}
 		
 		if(LOGGER.isDebugEnabled())
