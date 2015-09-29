@@ -454,7 +454,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
                 (DSLContext context, Object reducingContext) -> {
                 	
-                	Condition condition = Tables.EH_COMMUNITIES.NAME.like("%" + name + "%");
+                	Condition condition = Tables.EH_COMMUNITIES.NAME.eq(name);
                     if(cityId != null)
                     	condition = condition.and(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId));
                     /*if(areaId != null)

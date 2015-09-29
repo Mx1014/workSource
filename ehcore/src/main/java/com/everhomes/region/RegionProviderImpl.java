@@ -349,14 +349,14 @@ public class RegionProviderImpl implements RegionProvider {
         if(status == null)
             status = RegionAdminStatus.ACTIVE;
         
-        String likeVal = "%" + keyword + "%";
+        //String likeVal = "%" + keyword + "%";
         
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
         
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = Tables.EH_REGIONS.NAME.like(likeVal);
+        Condition condition = Tables.EH_REGIONS.NAME.eq(keyword);
         
         if(parentRegionId != null)
             condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
