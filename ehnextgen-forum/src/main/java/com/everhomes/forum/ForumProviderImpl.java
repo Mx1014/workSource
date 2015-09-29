@@ -208,9 +208,13 @@ public class ForumProviderImpl implements ForumProvider {
         post.setUuid(UUID.randomUUID().toString());
         post.setModifySeq(seq);
         
-        Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
-        post.setCreateTime(ts);
-        post.setUpdateTime(ts);
+        if(post.getCreateTime() == null) {
+            Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+            post.setCreateTime(ts);
+        }
+        if(post.getUpdateTime() == null) {
+            post.setUpdateTime(post.getCreateTime());
+        }
                 
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {
