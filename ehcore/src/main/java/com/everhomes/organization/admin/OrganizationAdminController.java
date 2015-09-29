@@ -222,7 +222,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <b>URL: /org/importOrganization</b>
      * <p>导入机构信息</p>
      */
-    @RequestMapping(value="importOrganization", method = RequestMethod.POST)
+    @RequestMapping("importOrganization")
     @RestReturn(value=String.class)
     public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
         this.organizationService.importOrganization(files);
@@ -236,7 +236,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <b>URL: /org/importOrgPost</b>
      * <p>导入机构公告，报修等帖</p>
      */
-    @RequestMapping(value="importOrgPost", method = RequestMethod.POST)
+    @RequestMapping("importOrgPost")
     @RestReturn(value=String.class)
     public RestResponse importOrgPost(@RequestParam(value = "attachment") MultipartFile[] files){
         this.organizationService.importOrgPost(files);

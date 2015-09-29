@@ -1797,7 +1797,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		if(LOGGER.isDebugEnabled())
 			LOGGER.info("importOrganization-list-after="+StringHelper.toJsonString(list));
-		
+
 		List<OrganizationVo> orgVos = new ArrayList<OrganizationVo>();
 		int orgCount = 0;
 		int orgCommCount = 0;
@@ -1809,7 +1809,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Address address = addressProvider.findAddressByRegionAndAddress(r.getCityId(),r.getAreaId(),r.getAddressName());
 			if(LOGGER.isDebugEnabled())
 				LOGGER.info("address not found.cityId="+r.getCityId()+",areaId="+r.getAreaId());
-			
+
 			if(address == null){
 				//创建地址
 				Region city = this.regionProvider.findRegionById(r.getCityId());
@@ -1860,12 +1860,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 					orgVo.setOrgContacts(new ArrayList<CommunityPmContact>());
 				orgVo.getOrgContacts().add(orgContact);
 				orgContactCount++;
-//				orgContact.setOrganizationId(org.getId());
-//				this.propertyMgrProvider.createPropContact(orgContact);
+				//				orgContact.setOrganizationId(org.getId());
+				//				this.propertyMgrProvider.createPropContact(orgContact);
 			}
 			orgVos.add(orgVo);
 		}
-		
+
 		if(LOGGER.isDebugEnabled())
 			LOGGER.info("importOrganization:orgVos="+StringHelper.toJsonString(orgVos));
 		LOGGER.info("importOrganization:orgCount="+orgCount+",addressCount="+addressCount+",orgCommCount="+orgCommCount+",orgContactCount="+orgContactCount);
@@ -2072,7 +2072,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private String getCityName(String cityName) {
-		
+
 		return cityName == null?null:cityName.trim();
 	}
 
@@ -2143,8 +2143,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Region city = this.checkCityName(r.getCityName());
 			r.setCityId(city.getId());
 			//org
-			Organization org = this.checkOrganizationByName(r.getOrgName(),r.getOrgType());
-			this.checkOrgAddressCity(org.getAddressId(),r.getCityId());
+			List<Organization> orgs = this.checkOrganizationByName(r.getOrgName(),r.getOrgType());
+			Organization org = this.checkOrgAddressCity(orgs,r.getCityId());
 			//token
 			User tokenUser = null;
 			if(r.getToken() != null && !r.getToken().trim().equals("")){
@@ -2229,7 +2229,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					task.setCreatorUid(userId);
 				if(tokenUser != null && tokenUser.getId() != null)//token not null and use is found by token
 					task.setCreatorUid(tokenUser.getId());
-				
+
 				task.setCreateTime(currentTime);
 				task.setUnprocessedTime(currentTime);
 
@@ -2341,32 +2341,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return null;
 	}
 
-	private void checkOrgAddressCity(Long addressId, Long cityId) {
-		Address address = this.addressProvider.findAddressById(addressId);
-		if(address == null){
-			LOGGER.error("organization address not found.addressId="+addressId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"organization address not found.");
+	private Organization checkOrgAddressCity(List<Organization> orgs, Long cityId) {
+		if(orgs == null || orgs.isEmpty())
+			return null;
+		for(Organization r:orgs){
+			Address address = this.addressProvider.findAddressById(r.getAddressId());
+			if(address == null || address.getCityId().longValue() != cityId.longValue())
+				continue;
+			return r;
 		}
-		if(address.getCityId().longValue() != cityId.longValue()){
-			LOGGER.error("address cityId not equal to city id.addressCityId="+address.getCityId().longValue()+",cityId="+cityId.longValue());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"address cityId not equal to city id.");
-		}
+		LOGGER.error("address cityId not equal to city id.orgs="+StringHelper.toJsonString(orgs)+",cityId="+cityId.longValue());
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				"address cityId not equal to city id.");
 	}
 
-	private Organization checkOrganizationByName(String orgName, String orgType) {
+	private List<Organization> checkOrganizationByName(String orgName, String orgType) {
 		List<Organization> orgs = this.organizationProvider.listOrganizationByName(orgName,orgType);
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));
 
 		if(orgs == null || orgs.isEmpty()){
 			LOGGER.error("organization not found by orgName.orgName="+orgName);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"organization not found by orgName.");
 		}
-		return orgs.get(0);
+
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));
+
+		return orgs;
 	}
 
 	private List<OrganizationPostDTO> convertToOrgPostDto(ArrayList list,Long userId) {
