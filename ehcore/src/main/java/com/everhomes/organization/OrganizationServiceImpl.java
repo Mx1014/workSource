@@ -1,7 +1,12 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -12,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -2098,23 +2104,157 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"files is null");
 		}
 	}
+	
+	private void storeFile(MultipartFile file, String filePath1)throws Exception{
+		OutputStream out = new FileOutputStream(new File(filePath1));
+		InputStream in = file.getInputStream();
+		byte [] buffer = new byte [1024];
+		while(in.read(buffer) != -1){ 
+			out.write(buffer);
+		}
+		out.close();
+		in.close();
+	}
 
 	@Override
 	public void importOrgPost(MultipartFile[] files) {
-		String password = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 		User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		this.checkFilesIsNull(files,manaUser.getId());
+		
+		String rootPath = System.getProperty("user.dir");
+		String filePath = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		LOGGER.error("importOrgPost-filePath="+filePath);
+		//将原文件暂存在服务器中
+		try {
+			this.storeFile(files[0],filePath);
+		} catch (Exception e) {
+			LOGGER.error("store file fail.message="+e.getMessage());
+		}
+		
+		
+	}
 
+	private Category checkCategory(Long postType) {
+		Category category = this.categoryProvider.findCategoryById(postType);
+		if(category == null){
+			LOGGER.error("category not found.categoryId="+postType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"category not found.");
+		}
+		return category;
+	}
+
+	private OrganizationCommunity checkOrgCommByOrgId(Long orgId) {
+		List<OrganizationCommunity> orgComms = this.organizationProvider.listOrganizationCommunities(orgId);
+		if(orgComms == null || orgComms.isEmpty()){
+			LOGGER.error("organization community not found.orgId="+orgId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"organization community not found.");
+		}
+		if(orgComms.size() != 1)
+			LOGGER.error("organization community not unique found.orgId="+orgId);
+
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("checkOrgCommByOrgId-orgComms="+StringHelper.toJsonString(orgComms));
+
+		return orgComms.get(0);
+	}
+
+	private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
+		if(contentCategoryId != null) {
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
+				return OrganizationTaskType.NOTICE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_REPAIRS) {
+				return OrganizationTaskType.REPAIRS;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
+				return OrganizationTaskType.CONSULT_APPEAL;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
+				return OrganizationTaskType.COMPLAINT_ADVICE;
+			}
+		}
+		LOGGER.error("Content category is not matched in organization type.contentCategoryId=" + contentCategoryId);
+		return null;
+	}
+
+	private Organization checkOrgAddressCity(List<Organization> orgs, Long cityId) {
+		if(orgs == null || orgs.isEmpty())
+			return null;
+		for(Organization r:orgs){
+			Address address = this.addressProvider.findAddressById(r.getAddressId());
+			if(address == null || address.getCityId().longValue() != cityId.longValue())
+				continue;
+			return r;
+		}
+		LOGGER.error("address cityId not equal to city id.orgs="+StringHelper.toJsonString(orgs)+",cityId="+cityId.longValue());
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				"address cityId not equal to city id.");
+	}
+
+	private List<Organization> checkOrganizationByName(String orgName, String orgType) {
+		List<Organization> orgs = this.organizationProvider.listOrganizationByName(orgName,orgType);
+
+		if(orgs == null || orgs.isEmpty()){
+			LOGGER.error("organization not found by orgName.orgName="+orgName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"organization not found by orgName.");
+		}
+
+		/*if(LOGGER.isDebugEnabled())
+			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));*/
+
+		return orgs;
+	}
+
+	private List<OrganizationPostDTO> convertToOrgPostDto(ArrayList list,Long userId) {
+		if(list == null || list.isEmpty()){
+			LOGGER.error("resultList is empty.userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"resultList is empty.");
+		}
+		List<OrganizationPostDTO> result = new ArrayList<OrganizationPostDTO>();
+		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+			RowResult r = (RowResult)list.get(rowIndex);
+			if(r.getA() == null || r.getA().trim().equals("")){
+				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
+				break;
+			}
+			OrganizationPostDTO dto = new OrganizationPostDTO();
+			dto.setCityName(r.getA());
+			dto.setOrgName(r.getB());
+			dto.setOrgType(r.getC());
+			dto.setPostType(Long.valueOf(r.getD()));
+			dto.setSubject(r.getE());
+			dto.setContent(r.getF());
+			dto.setUserName(r.getG());
+			dto.setToken(r.getH());
+			dto.setCreateTime(r.getI());
+			result.add(dto);
+		}
+		return result;
+	}
+
+	@Override
+	public void executeImportOrgPost(String filePath, Long userId) {
+		String password = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 		long parseBeginTime = System.currentTimeMillis();
 		LOGGER.info(parseBeginTime+"importOrgPost-parseBeginTime="+parseBeginTime);
 		
 		ArrayList resultList = new ArrayList();
 		try {
-			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+			File file = new File(filePath);
+			if(!file.exists())
+				LOGGER.error("executeImportOrgPost-file is not exist.filePath="+filePath);
+			InputStream io = new FileInputStream(file);
+			resultList = PropMrgOwnerHandler.processorExcel(io);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("parse file fail.message="+e.getMessage());
 		}
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("executeImportOrgPost-resultList="+StringHelper.toJsonString(resultList));
 
 		List<OrganizationPostDTO> list = this.convertToOrgPostDto(resultList,userId);
 
@@ -2125,8 +2265,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		long parseEndTime = System.currentTimeMillis();
 		LOGGER.info(parseBeginTime+"importOrgPost-parseElapse="+(parseEndTime-parseBeginTime));
 		
-//		if(LOGGER.isDebugEnabled())
-//			LOGGER.info("orgPost-list-before="+StringHelper.toJsonString(list));
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("orgPost-list-before="+StringHelper.toJsonString(list));
 
 		List<OrganizationPostVo> orgPostVos = new ArrayList<OrganizationPostVo>();
 		int postCount = 0;
@@ -2321,107 +2461,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		long endTime = System.currentTimeMillis();
 		LOGGER.info(parseBeginTime+"importOrgPost-executeElapse="+(endTime-beginTime));
-	}
-
-	private Category checkCategory(Long postType) {
-		Category category = this.categoryProvider.findCategoryById(postType);
-		if(category == null){
-			LOGGER.error("category not found.categoryId="+postType);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"category not found.");
-		}
-		return category;
-	}
-
-	private OrganizationCommunity checkOrgCommByOrgId(Long orgId) {
-		List<OrganizationCommunity> orgComms = this.organizationProvider.listOrganizationCommunities(orgId);
-		if(orgComms == null || orgComms.isEmpty()){
-			LOGGER.error("organization community not found.orgId="+orgId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"organization community not found.");
-		}
-		if(orgComms.size() != 1)
-			LOGGER.error("organization community not unique found.orgId="+orgId);
-
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("checkOrgCommByOrgId-orgComms="+StringHelper.toJsonString(orgComms));
-
-		return orgComms.get(0);
-	}
-
-	private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
-		if(contentCategoryId != null) {
-			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
-				return OrganizationTaskType.NOTICE;
-			}
-			if(contentCategoryId == CategoryConstants.CATEGORY_ID_REPAIRS) {
-				return OrganizationTaskType.REPAIRS;
-			}
-			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
-				return OrganizationTaskType.CONSULT_APPEAL;
-			}
-			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
-				return OrganizationTaskType.COMPLAINT_ADVICE;
-			}
-		}
-		LOGGER.error("Content category is not matched in organization type.contentCategoryId=" + contentCategoryId);
-		return null;
-	}
-
-	private Organization checkOrgAddressCity(List<Organization> orgs, Long cityId) {
-		if(orgs == null || orgs.isEmpty())
-			return null;
-		for(Organization r:orgs){
-			Address address = this.addressProvider.findAddressById(r.getAddressId());
-			if(address == null || address.getCityId().longValue() != cityId.longValue())
-				continue;
-			return r;
-		}
-		LOGGER.error("address cityId not equal to city id.orgs="+StringHelper.toJsonString(orgs)+",cityId="+cityId.longValue());
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-				"address cityId not equal to city id.");
-	}
-
-	private List<Organization> checkOrganizationByName(String orgName, String orgType) {
-		List<Organization> orgs = this.organizationProvider.listOrganizationByName(orgName,orgType);
-
-		if(orgs == null || orgs.isEmpty()){
-			LOGGER.error("organization not found by orgName.orgName="+orgName);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"organization not found by orgName.");
-		}
-
-		/*if(LOGGER.isDebugEnabled())
-			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));*/
-
-		return orgs;
-	}
-
-	private List<OrganizationPostDTO> convertToOrgPostDto(ArrayList list,Long userId) {
-		if(list == null || list.isEmpty()){
-			LOGGER.error("resultList is empty.userId="+userId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"resultList is empty.");
-		}
-		List<OrganizationPostDTO> result = new ArrayList<OrganizationPostDTO>();
-		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
-			RowResult r = (RowResult)list.get(rowIndex);
-			if(r.getA() == null || r.getA().trim().equals("")){
-				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
-				break;
-			}
-			OrganizationPostDTO dto = new OrganizationPostDTO();
-			dto.setCityName(r.getA());
-			dto.setOrgName(r.getB());
-			dto.setOrgType(r.getC());
-			dto.setPostType(Long.valueOf(r.getD()));
-			dto.setSubject(r.getE());
-			dto.setContent(r.getF());
-			dto.setUserName(r.getG());
-			dto.setToken(r.getH());
-			dto.setCreateTime(r.getI());
-			result.add(dto);
-		}
-		return result;
+		
 	}
 }
