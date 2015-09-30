@@ -2102,6 +2102,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = manaUser.getId();
 		this.checkFilesIsNull(files,manaUser.getId());
 
+		long parseBeginTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"importOrgPost-parseBeginTime="+parseBeginTime);
+		
 		ArrayList resultList = new ArrayList();
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
@@ -2115,6 +2118,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("orgPost list is empty.userId="+userId);
 			return;
 		}
+		long parseEndTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"importOrgPost-parseElapse="+(parseEndTime-parseBeginTime));
 //		if(LOGGER.isDebugEnabled())
 //			LOGGER.info("orgPost-list-before="+StringHelper.toJsonString(list));
 
@@ -2125,7 +2130,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		int userIdenCount = 0;
 
 		long listBeginTime = System.currentTimeMillis();
-		LOGGER.info("importOrgPost-listBeginTime="+listBeginTime);
+		LOGGER.info(parseBeginTime+"importOrgPost-listBeginTime="+listBeginTime);
 		for(OrganizationPostDTO r:list){
 			OrganizationPostVo orgPostVo = new OrganizationPostVo();
 
@@ -2272,16 +2277,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}*/
 		}
 		long listEndTime = System.currentTimeMillis();
-		LOGGER.info("importOrgPost-listElapse="+(listEndTime-listBeginTime));
+		LOGGER.info(parseBeginTime+"importOrgPost-listElapse="+(listEndTime-listBeginTime));
 
-		LOGGER.info("importOrgPost-count:userCount="+userCount+";userIdenCount="+userIdenCount+";taskCount="+taskCount+";postCount="+postCount);
+		LOGGER.info(parseBeginTime+"importOrgPost-count:userCount="+userCount+";userIdenCount="+userIdenCount+";taskCount="+taskCount+";postCount="+postCount);
 
 		if(orgPostVos == null ||orgPostVos.isEmpty())
 			return;
 
 
 		long beginTime = System.currentTimeMillis();
-		LOGGER.info("importOrgPost-execute-beginTime="+beginTime);	
+		LOGGER.info(parseBeginTime+"importOrgPost-executeBeginTime="+beginTime);	
 		this.dbProvider.execute(s -> {
 			for(OrganizationPostVo r:orgPostVos){
 				if(r.getUser() != null&&r.getUserIden() != null){
@@ -2310,7 +2315,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return s;
 		});
 		long endTime = System.currentTimeMillis();
-		LOGGER.info("importOrgPost-execute-elapse="+(endTime-beginTime));
+		LOGGER.info(parseBeginTime+"importOrgPost-executeElapse="+(endTime-beginTime));
 	}
 
 	private Category checkCategory(Long postType) {
