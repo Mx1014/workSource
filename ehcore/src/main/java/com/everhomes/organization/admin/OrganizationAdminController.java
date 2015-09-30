@@ -226,7 +226,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
         this.organizationService.importOrganization(files);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -240,7 +240,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse importOrgPost(@RequestParam(value = "attachment") MultipartFile[] files){
         this.organizationService.importOrgPost(files);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
