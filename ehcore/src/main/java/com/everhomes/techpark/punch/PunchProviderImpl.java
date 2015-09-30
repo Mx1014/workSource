@@ -23,17 +23,20 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
+import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
 import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
 import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
 import com.everhomes.server.schema.tables.pojos.EhPunchRules;
 import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
+import com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
@@ -578,6 +581,43 @@ public class PunchProviderImpl implements PunchProvider {
 		dao.deleteById(id);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchExceptionApprovals.class, id);
+	}
+
+	@Override
+	public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
+			String format) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Date punchDate = Date.valueOf(format);
+		SelectJoinStep<Record1<Integer>>  step = context.selectOne().from(Tables.EH_PUNCH_DAY_LOGS);
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate));
+		return step.where(condition).fetchOneInto(PunchDayLog.class);
+	}
+
+	@Override
+	public void createPunchDayLog(PunchDayLog punchDayLog) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
+		punchDayLog.setId(id);
+		EhPunchDayLogsRecord record = ConvertHelper.convert(punchDayLog, EhPunchDayLogsRecord.class);
+		InsertQuery<EhPunchDayLogsRecord> query = context.insertQuery(Tables.EH_PUNCH_DAY_LOGS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE,EhPunchDayLogs.class, null);
+	}
+
+	@Override
+	public void updatePunchDayLog(PunchDayLog punchDayLog) {
+		assert (punchDayLog.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPunchDayLogsDao dao = new EhPunchDayLogsDao(
+				context.configuration());
+		dao.update(punchDayLog);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPunchDayLogs.class,
+				punchDayLog.getId());
+		
 	}
 	
 	

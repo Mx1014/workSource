@@ -41,6 +41,9 @@ public class PunchServiceImpl implements PunchService {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
 
+	SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
+	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Autowired
 	PunchProvider punchProvider;
 	@Autowired
@@ -50,7 +53,7 @@ public class PunchServiceImpl implements PunchService {
 	ConfigurationProvider configurationProvider;
 
 	private void checkCompanyIdIsNull(Long companyId) {
-		if ( null == companyId || companyId.equals(0L)) {
+		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -172,34 +175,42 @@ public class PunchServiceImpl implements PunchService {
 						dateSF.format(logDay.getTime()));
 		if (exceptionRequests.size() > 0) {
 			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
-				
+
 				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
 
-				punchExceptionDTO.setRequestType(exceptionRequest.getRequestType());
-				punchExceptionDTO.setCreateTime(exceptionRequest.getCreateTime().getTime());
-				if(exceptionRequest.getRequestType().equals(PunchRquestType.REQUEST.getCode())){
-					//对于申请
-					punchExceptionDTO.setExceptionComment(exceptionRequest.getDescription());
+				punchExceptionDTO.setRequestType(exceptionRequest
+						.getRequestType());
+				punchExceptionDTO.setCreateTime(exceptionRequest
+						.getCreateTime().getTime());
+				if (exceptionRequest.getRequestType().equals(
+						PunchRquestType.REQUEST.getCode())) {
+					// 对于申请
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getDescription());
 					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(exceptionRequest.getUserId());
+							.findGroupContactByUserId(exceptionRequest
+									.getUserId());
 					if (null == groupContact) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(groupContact
-								.getContactName());
+						punchExceptionDTO
+								.setName(groupContact.getContactName());
 					}
-				}else {
-					//审批
-					punchExceptionDTO.setExceptionComment(exceptionRequest.getProcessDetails());
+				} else {
+					// 审批
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getProcessDetails());
 					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(exceptionRequest.getOperatorUid());
+							.findGroupContactByUserId(exceptionRequest
+									.getOperatorUid());
 					if (null == groupContact) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(groupContact
-								.getContactName());
+						punchExceptionDTO
+								.setName(groupContact.getContactName());
 					}
-					punchExceptionDTO.setProcessCode(exceptionRequest.getProcessCode());
+					punchExceptionDTO.setProcessCode(exceptionRequest
+							.getProcessCode());
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
 					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
@@ -207,6 +218,68 @@ public class PunchServiceImpl implements PunchService {
 				pdl.getPunchExceptionDTOs().add(punchExceptionDTO);
 			}
 		}
+	}
+
+	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId,
+			Calendar logDay) throws ParseException {
+		PunchLogsDayList pdl = new PunchLogsDayList();
+		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
+		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+				companyId, dateSF.format(logDay.getTime()));
+		caculateDayLog(userId, companyId, logDay, pdl);
+		if (null == punchDayLog) {
+			// 数据库没有计算好的数据
+			punchDayLog = new PunchDayLog();
+			punchDayLog.setUserId(userId);
+			punchDayLog.setCompanyId(companyId);
+			punchDayLog.setCreatorUid(userId);
+			punchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(logDay
+					.getTime())));
+			punchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			Long arriveTime = null;
+			Long leaveTime = null;
+			for (PunchLogDTO pDto : pdl.getPunchLogs()) {
+				if (pDto.getClockStatus().equals(ClockStatus.LEAVE.getCode())) {
+					leaveTime = pDto.getPunchTime();
+				} else {
+					arriveTime = pDto.getPunchTime();
+				}
+			}
+			Long workTime = leaveTime - arriveTime;
+			punchDayLog.setArriveTime(new java.sql.Time(arriveTime));
+			punchDayLog.setLeaveTime(new java.sql.Time(leaveTime));
+			punchDayLog.setWorkTime(new java.sql.Time(workTime)); 
+			punchDayLog.setStatus(pdl.getPunchStatus());
+			punchProvider.createPunchDayLog(punchDayLog);
+
+		} else {
+			// 数据库有计算好的数据
+			punchDayLog.setUserId(userId);
+			punchDayLog.setCompanyId(companyId);
+			punchDayLog.setCreatorUid(userId);
+			punchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(logDay
+					.getTime())));
+			punchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			Long arriveTime = null;
+			Long leaveTime = null;
+			for (PunchLogDTO pDto : pdl.getPunchLogs()) {
+				if (pDto.getClockStatus().equals(ClockStatus.LEAVE.getCode())) {
+					leaveTime = pDto.getPunchTime();
+				} else {
+					arriveTime = pDto.getPunchTime();
+				}
+			}
+			Long workTime = leaveTime - arriveTime;
+			punchDayLog.setArriveTime(new java.sql.Time(arriveTime));
+			punchDayLog.setLeaveTime(new java.sql.Time(leaveTime));
+			punchDayLog.setWorkTime(new java.sql.Time(workTime));
+			punchDayLog.setStatus(pdl.getPunchStatus());
+			punchProvider.updatePunchDayLog(punchDayLog);
+		}
+		return punchDayLog;
 	}
 
 	/***
@@ -220,18 +293,36 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	private PunchLogsDayList makePunchLogsDayListInfo(Long userId,
 			Long companyId, Calendar logDay) throws ParseException {
-
-		SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
-		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat datetimeSF = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss");
+		Date now = new Date();
 		PunchLogsDayList pdl = new PunchLogsDayList();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+
+		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+				companyId, dateSF.format(logDay.getTime()));
+		if (null == punchDayLog) {
+			// 插入数据
+			punchDayLog = refreshPunchDayLog(userId, companyId, logDay);
+		}
+		PunchLogDTO arriveLogDTO = new PunchLogDTO();
+		arriveLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
+		arriveLogDTO.setPunchTime(punchDayLog.getArriveTime().getTime());
+		pdl.getPunchLogs().add(arriveLogDTO);
+		PunchLogDTO leaveLogDTO = new PunchLogDTO();
+		leaveLogDTO.setClockStatus(ClockStatus.LEAVE.getCode());
+		leaveLogDTO.setPunchTime(punchDayLog.getLeaveTime().getTime());
+		pdl.getPunchLogs().add(leaveLogDTO);
+		pdl.setPunchStatus(punchDayLog.getStatus());
+		makeExceptionForDayList(userId, companyId, logDay, pdl);
+
+		return pdl;
+	}
+
+	private PunchLogsDayList caculateDayLog(Long userId, Long companyId,
+			Calendar logDay, PunchLogsDayList pdl) throws ParseException {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 				companyId, dateSF.format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
-
 		Date now = new Date();
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
@@ -372,7 +463,6 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
-		makeExceptionForDayList(userId, companyId, logDay, pdl);
 
 		return pdl;
 	}
@@ -442,6 +532,15 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(punCalendar
 				.getTime())));
 		punchProvider.createPunchLog(punchLog);
+		try {
+			refreshPunchDayLog(userId, cmd.getCompanyId(), punCalendar);
+		} catch (ParseException e) { 
+			LOGGER.error(e.toString());
+
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+					"Something wrong with refresh PunchDayLog");
+		}
 		request.setPunchTime(punchTime);
 
 		return request;
@@ -730,7 +829,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(
 			ListPunchExceptionRequestCommand cmd) {
 		checkCompanyIdIsNull(cmd.getCompanyId());
-		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse(); 
+		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = punchProvider.countExceptionRequests(cmd.getKeyword(),
 				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
@@ -818,7 +917,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public ListPunchExceptionRequestCommandResponse listExceptionApprovals(
-			ListPunchExceptionApprovalCommand cmd) { 
+			ListPunchExceptionApprovalCommand cmd) {
 		if (null == cmd.getUserId() || cmd.getUserId().equals(0L)) {
 			LOGGER.error("Invalid user Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -873,8 +972,9 @@ public class PunchServiceImpl implements PunchService {
 		// 插入一条eh_punch_exception_requests 记录
 		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
 		punchExceptionRequest.setCompanyId(cmd.getCompanyId());
-		punchExceptionRequest.setRequestType(PunchRquestType.APPROVAL.getCode());
-		punchExceptionRequest.setProcessCode(cmd.getProcessCode()); 
+		punchExceptionRequest
+				.setRequestType(PunchRquestType.APPROVAL.getCode());
+		punchExceptionRequest.setProcessCode(cmd.getProcessCode());
 		punchExceptionRequest.setProcessDetails(cmd.getProcessDetails());
 		punchExceptionRequest.setUserId(cmd.getUserId());
 		punchExceptionRequest.setCreatorUid(cmd.getCreatorUid());
@@ -882,61 +982,71 @@ public class PunchServiceImpl implements PunchService {
 				.currentGMTTime().getTime()));
 		punchExceptionRequest.setOperatorUid(cmd.getOperatorUid());
 		punchExceptionRequest.setOperateTime(new Timestamp(DateHelper
-				.currentGMTTime().getTime())); 
-		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd.getPunchDate())); 
+				.currentGMTTime().getTime()));
+		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
+				.getPunchDate()));
 		punchExceptionRequest.setStatus(cmd.getStatus());
-		punchProvider.createPunchExceptionRequest(punchExceptionRequest);  
-		//  查eh_punch_exception_approvals有无数据：无数据，结果是同意则插入 /有数据 如果结果是同意 则修改，结果是驳回则删除
-		PunchExceptionApproval punchExceptionApproval = punchProvider.getExceptionApproval(cmd.getUserId(),cmd.getCompanyId(),java.sql.Date.valueOf(cmd.getPunchDate()));
-		if(null == punchExceptionApproval){
-			if(cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())){
-			punchExceptionApproval = new PunchExceptionApproval();
-			punchExceptionApproval.setCompanyId(cmd.getCompanyId());
-			punchExceptionApproval.setApprovalStatus(cmd.getProcessCode()); 
-			punchExceptionApproval.setUserId(cmd.getUserId());
-			punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
-			punchExceptionApproval.setCreateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime()));
-			punchExceptionApproval.setOperatorUid(cmd.getOperatorUid());
-			punchExceptionApproval.setOperateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime())); 
-			punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd.getPunchDate()));
-			punchProvider.createPunchExceptionApproval(punchExceptionApproval);}
-		}
-		else{
-			if(cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())){
-			punchExceptionApproval.setCompanyId(cmd.getCompanyId());
-			punchExceptionApproval.setApprovalStatus(cmd.getProcessCode()); 
-			punchExceptionApproval.setUserId(cmd.getUserId());
-			punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
-			punchExceptionApproval.setCreateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime()));
-			punchExceptionApproval.setOperatorUid(cmd.getOperatorUid());
-			punchExceptionApproval.setOperateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime())); 
-			punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd.getPunchDate()));
-			punchProvider.updatePunchExceptionApproval(punchExceptionApproval);}
-			else{
-				punchProvider.deletePunchExceptionApproval(punchExceptionApproval.getId());
+		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
+		// 查eh_punch_exception_approvals有无数据：无数据，结果是同意则插入 /有数据 如果结果是同意
+		// 则修改，结果是驳回则删除
+		PunchExceptionApproval punchExceptionApproval = punchProvider
+				.getExceptionApproval(cmd.getUserId(), cmd.getCompanyId(),
+						java.sql.Date.valueOf(cmd.getPunchDate()));
+		if (null == punchExceptionApproval) {
+			if (cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())) {
+				punchExceptionApproval = new PunchExceptionApproval();
+				punchExceptionApproval.setCompanyId(cmd.getCompanyId());
+				punchExceptionApproval.setApprovalStatus(cmd.getProcessCode());
+				punchExceptionApproval.setUserId(cmd.getUserId());
+				punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
+				punchExceptionApproval.setCreateTime(new Timestamp(DateHelper
+						.currentGMTTime().getTime()));
+				punchExceptionApproval.setOperatorUid(cmd.getOperatorUid());
+				punchExceptionApproval.setOperateTime(new Timestamp(DateHelper
+						.currentGMTTime().getTime()));
+				punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd
+						.getPunchDate()));
+				punchProvider
+						.createPunchExceptionApproval(punchExceptionApproval);
+			}
+		} else {
+			if (cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())) {
+				punchExceptionApproval.setCompanyId(cmd.getCompanyId());
+				punchExceptionApproval.setApprovalStatus(cmd.getProcessCode());
+				punchExceptionApproval.setUserId(cmd.getUserId());
+				punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
+				punchExceptionApproval.setCreateTime(new Timestamp(DateHelper
+						.currentGMTTime().getTime()));
+				punchExceptionApproval.setOperatorUid(cmd.getOperatorUid());
+				punchExceptionApproval.setOperateTime(new Timestamp(DateHelper
+						.currentGMTTime().getTime()));
+				punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd
+						.getPunchDate()));
+				punchProvider
+						.updatePunchExceptionApproval(punchExceptionApproval);
+			} else {
+				punchProvider
+						.deletePunchExceptionApproval(punchExceptionApproval
+								.getId());
 			}
 		}
-		//更新eh_punch_exception_requests当天当人的申请记录
+		// 更新eh_punch_exception_requests当天当人的申请记录
 		List<PunchExceptionRequest> results = punchProvider
 				.listExceptionRequests(cmd.getUserId(), null,
 						cmd.getCompanyId(), cmd.getPunchDate(),
-						cmd.getPunchDate(), null, null, null,
-						null, PunchRquestType.REQUEST.getCode());
-		for(PunchExceptionRequest result : results){
+						cmd.getPunchDate(), null, null, null, null,
+						PunchRquestType.REQUEST.getCode());
+		for (PunchExceptionRequest result : results) {
 
-			result.setProcessCode(cmd.getProcessCode()); 
+			result.setProcessCode(cmd.getProcessCode());
 			result.setProcessDetails(cmd.getProcessDetails());
 			result.setUserId(cmd.getUserId());
 			result.setCreatorUid(cmd.getCreatorUid());
-			result.setCreateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime()));
+			result.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
 			result.setOperatorUid(cmd.getOperatorUid());
-			result.setOperateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime())); 
+			result.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
 			result.setStatus(cmd.getStatus());
 			punchProvider.updatePunchExceptionRequest(result);
 		}
