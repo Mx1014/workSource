@@ -64,6 +64,7 @@ CREATE TABLE `eh_punch_day_logs` (
   `arrive_time` time ,
   `leave_time` time ,
   `work_time` time COMMENT 'how long did employee work',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
 	`creator_uid` bigint,
 	`create_time` datetime,
  
