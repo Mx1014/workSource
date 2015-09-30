@@ -65,7 +65,7 @@ CREATE TABLE `eh_punch_day_logs` (
   `leave_time` time ,
   `work_time` time COMMENT 'how long did employee work',
 	`creator_uid` bigint,
-	`create_time` datetime
+	`create_time` datetime,
  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
