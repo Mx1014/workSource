@@ -2127,8 +2127,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		} catch (Exception e) {
 			LOGGER.error("store file fail.message="+e.getMessage());
 		}
-		
-		
+		ImportOrgPostRunnable r = new ImportOrgPostRunnable(this, filePath, userId);
+		Thread t = new Thread(r);
+		t.start();
 	}
 
 	private Category checkCategory(Long postType) {
