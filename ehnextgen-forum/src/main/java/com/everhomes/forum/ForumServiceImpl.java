@@ -410,7 +410,7 @@ public class ForumServiceImpl implements ForumService {
     public ListPostCommandResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        Long userId = user.getId();
         Long communityId = cmd.getCommunityId();
         Community community = checkCommunityParameter(userId, communityId, "queryTopicsByCategory");
         
@@ -463,6 +463,56 @@ public class ForumServiceImpl implements ForumService {
         }
         
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }
+    
+    private Condition buildPostCategoryQryCondition(Long userId, PostEntityTag entityTag, Community community, Long contentCategoryId, Long actionCategoryId) {
+        Condition categoryCondition = null;
+        
+        Category contentCatogry = null;
+        // contentCategoryId为0表示全部查，此时也不需要给category条件
+        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
+            contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
+        }
+        if(contentCatogry != null) {
+            categoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+        }
+        
+        Category actionCategory = null;
+        if(actionCategoryId != null && actionCategoryId.longValue() > 0) {
+            actionCategory = this.categoryProvider.findCategoryById(actionCategoryId);
+        }
+        if(actionCategory != null) {
+            Condition tempCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
+            if(categoryCondition != null) {
+                categoryCondition = categoryCondition.and(tempCondition);
+            } else {
+                categoryCondition = tempCondition;
+            }
+        }
+        
+        Condition entityCondition = null;
+        if(entityTag != null) {
+            // 既没有查询目标，也没有类型，则只查用户相关的帖子
+            switch(entityTag) {
+            case USER:
+                entityCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(PostEntityTag.USER.getCode());
+                entityCondition = entityCondition.and(Tables.EH_FORUM_POSTS.TARGET_TAG.eq(PostEntityTag.USER.getCode()));
+                break;
+            case PM:
+            case GARC:
+            case GANC:
+            case GAPS:
+            case GACW:
+                //entityCondition = buildGaRelatedPostQryConditionByCategory(user.getId(), entityTag, community, gaRegionIdMap);
+                break;
+            default:
+                LOGGER.error("Unsupported entity tag for query topic by category, userId=" + userId + ", entityTag=" + entityTag);
+                break;
+            }
+            Condition c2 = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(userId);
+        }
+        
+        return null;
     }
     
     @Override
