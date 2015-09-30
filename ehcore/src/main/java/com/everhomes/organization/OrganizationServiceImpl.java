@@ -1781,8 +1781,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("organizations list is empty.userId="+userId);
 			return;
 		}
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("importOrganization-list-before="+StringHelper.toJsonString(list));
+//		if(LOGGER.isDebugEnabled())
+//			LOGGER.info("importOrganization-list-before="+StringHelper.toJsonString(list));
 
 		for(OrganizationDTO2 r:list){
 			this.checkCityNameIsNull(r.getCityName());
@@ -1795,14 +1795,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.setCommunityIdsByCommunityName(r,r.getCommunityNames(),r.getCityId(),r.getAreaId());
 		}
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("importOrganization-list-after="+StringHelper.toJsonString(list));
+//		if(LOGGER.isDebugEnabled())
+//			LOGGER.info("importOrganization-list-after="+StringHelper.toJsonString(list));
 
 		List<OrganizationVo> orgVos = new ArrayList<OrganizationVo>();
 		int orgCount = 0;
 		int orgCommCount = 0;
 		int orgContactCount = 0;
 		int addressCount = 0;
+		
+		long listBeginTime = System.currentTimeMillis();
+		LOGGER.info("importOrganization-listBeginTime="+listBeginTime);
 		for(OrganizationDTO2 r:list){
 			OrganizationVo orgVo = new OrganizationVo();
 			//地址
@@ -1865,11 +1868,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			orgVos.add(orgVo);
 		}
+		long listEndTime = System.currentTimeMillis();
+		LOGGER.info("importOrganization-elapse="+(listEndTime-listBeginTime));
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("importOrganization:orgVos="+StringHelper.toJsonString(orgVos));
+//		if(LOGGER.isDebugEnabled())
+//			LOGGER.info("importOrganization:orgVos="+StringHelper.toJsonString(orgVos));
 		LOGGER.info("importOrganization:orgCount="+orgCount+",addressCount="+addressCount+",orgCommCount="+orgCommCount+",orgContactCount="+orgContactCount);
 
+		
+		long beginTime = System.currentTimeMillis();
+		LOGGER.info("importOrganization-execute-beginTime="+beginTime);
 		this.dbProvider.execute(s -> {
 			for(OrganizationVo r:orgVos){
 				if(r.getAddress()!=null){
@@ -1892,6 +1900,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			return s;
 		});
+		
+		long endTime = System.currentTimeMillis();
+		LOGGER.info("importOrganization-execute-elapse="+(endTime-beginTime));
 	}
 
 	private void checkAreaNameIsNull(String areaName) {
@@ -2104,8 +2115,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("orgPost list is empty.userId="+userId);
 			return;
 		}
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("orgPost-list-before="+StringHelper.toJsonString(list));
+//		if(LOGGER.isDebugEnabled())
+//			LOGGER.info("orgPost-list-before="+StringHelper.toJsonString(list));
 
 		List<OrganizationPostVo> orgPostVos = new ArrayList<OrganizationPostVo>();
 		int postCount = 0;
@@ -2113,6 +2124,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		int userCount = 0;
 		int userIdenCount = 0;
 
+		long listBeginTime = System.currentTimeMillis();
+		LOGGER.info("importOrgPost-listBeginTime="+listBeginTime);
 		for(OrganizationPostDTO r:list){
 			OrganizationPostVo orgPostVo = new OrganizationPostVo();
 
@@ -2120,8 +2133,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			//createTime
 			Date createDate = null;
 			if(r.getCreateTime() != null){
-				if(LOGGER.isDebugEnabled())
-					LOGGER.error("importOrgPost-createDateStr="+r.getCreateTime());
+				/*if(LOGGER.isDebugEnabled())
+					LOGGER.error("importOrgPost-createDateStr="+r.getCreateTime());*/
 				
 				try {
 					createDate = format.parse(r.getCreateTime());
@@ -2258,6 +2271,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				this.organizationProvider.updateOrganizationTask(task);
 			}*/
 		}
+		long listEndTime = System.currentTimeMillis();
+		LOGGER.info("importOrgPost-listElapse="+(listEndTime-listBeginTime));
 
 		LOGGER.info("importOrgPost-count:userCount="+userCount+";userIdenCount="+userIdenCount+";taskCount="+taskCount+";postCount="+postCount);
 
@@ -2366,8 +2381,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"organization not found by orgName.");
 		}
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));
+		/*if(LOGGER.isDebugEnabled())
+			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));*/
 
 		return orgs;
 	}
