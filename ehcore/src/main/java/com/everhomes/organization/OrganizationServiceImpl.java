@@ -1889,13 +1889,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 					r.getOrg().setAddressId(r.getAddress().getId());
 				}
 				this.organizationProvider.createOrganization(r.getOrg());
-				if(r.getOrgComms() != null){
+				if(r.getOrgComms() != null && !r.getOrgComms().isEmpty()){
 					for(OrganizationCommunity om : r.getOrgComms()){
 						om.setOrganizationId(r.getOrg().getId());
 						this.organizationProvider.createOrganizationCommunity(om);
 					}
 				}
-				if(r.getOrgContacts()!=null){
+				if(r.getOrgContacts()!=null && !r.getOrgContacts().isEmpty()){
 					for(CommunityPmContact oc:r.getOrgContacts()){
 						oc.setOrganizationId(r.getOrg().getId());
 						this.propertyMgrProvider.createPropContact(oc);
