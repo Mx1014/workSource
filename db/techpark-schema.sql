@@ -54,6 +54,23 @@ CREATE TABLE `eh_punch_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eh_punch_day_logs`;
+
+CREATE TABLE `eh_punch_day_logs` (
+  `id` bigint(20) NOT NULL COMMENT 'id',
+  `user_id` bigint(20) COMMENT 'user''s id',
+  `company_id` bigint(20) COMMENT 'compay id',
+  `punch_date` date COMMENT 'user punch date',
+  `arrive_time` time ,
+  `leave_time` time ,
+  `work_time` time COMMENT 'how long did employee work',
+	`creator_uid` bigint,
+	`create_time` datetime
+ 
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 /*Table structure for table `eh_punch_rules` */
 
 DROP TABLE IF EXISTS `eh_punch_rules`;
