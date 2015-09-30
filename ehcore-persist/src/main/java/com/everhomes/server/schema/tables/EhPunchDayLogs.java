@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord> {
 
-	private static final long serialVersionUID = -870907983;
+	private static final long serialVersionUID = 1207488168;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_day_logs</code>
@@ -60,6 +60,11 @@ public class EhPunchDayLogs extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_punch_day_logs.work_time</code>. how long did employee work
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.sql.Time> WORK_TIME = createField("work_time", org.jooq.impl.SQLDataType.TIME, this, "how long did employee work");
+
+	/**
+	 * The column <code>ehcore.eh_punch_day_logs.status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
 
 	/**
 	 * The column <code>ehcore.eh_punch_day_logs.creator_uid</code>.

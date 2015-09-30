@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 130109676;
+	private static final long serialVersionUID = -68989074;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
@@ -20,6 +20,7 @@ public class EhPunchDayLogs implements java.io.Serializable {
 	private java.sql.Time      arriveTime;
 	private java.sql.Time      leaveTime;
 	private java.sql.Time      workTime;
+	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 
@@ -33,6 +34,7 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		java.sql.Time      arriveTime,
 		java.sql.Time      leaveTime,
 		java.sql.Time      workTime,
+		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime
 	) {
@@ -43,6 +45,7 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		this.arriveTime = arriveTime;
 		this.leaveTime = leaveTime;
 		this.workTime = workTime;
+		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 	}
@@ -101,6 +104,14 @@ public class EhPunchDayLogs implements java.io.Serializable {
 
 	public void setWorkTime(java.sql.Time workTime) {
 		this.workTime = workTime;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
 	}
 
 	public java.lang.Long getCreatorUid() {

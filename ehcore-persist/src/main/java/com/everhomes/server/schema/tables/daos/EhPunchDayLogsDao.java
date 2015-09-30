@@ -90,6 +90,13 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.STATUS, values);
+	}
+
+	/**
 	 * Fetch records that have <code>creator_uid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByCreatorUid(java.lang.Long... values) {
