@@ -1769,6 +1769,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = user.getId();
 		this.checkFilesIsNull(files,user.getId());
 
+		long parseBeginTime = System.currentTimeMillis();
+		LOGGER.info("importOrganization-parseBeginTime="+parseBeginTime);
 		ArrayList resultList = new ArrayList();
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
@@ -1794,6 +1796,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.setTokenList(r,r.getTokens());
 			this.setCommunityIdsByCommunityName(r,r.getCommunityNames(),r.getCityId(),r.getAreaId());
 		}
+		long parseEndTime = System.currentTimeMillis();
+		LOGGER.info("importOrganization-parseElapse="+(parseEndTime-parseBeginTime));
 
 //		if(LOGGER.isDebugEnabled())
 //			LOGGER.info("importOrganization-list-after="+StringHelper.toJsonString(list));
@@ -1869,7 +1873,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			orgVos.add(orgVo);
 		}
 		long listEndTime = System.currentTimeMillis();
-		LOGGER.info("importOrganization-elapse="+(listEndTime-listBeginTime));
+		LOGGER.info("importOrganization-listElapse="+(listEndTime-listBeginTime));
 
 //		if(LOGGER.isDebugEnabled())
 //			LOGGER.info("importOrganization:orgVos="+StringHelper.toJsonString(orgVos));
@@ -1877,7 +1881,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		
 		long beginTime = System.currentTimeMillis();
-		LOGGER.info("importOrganization-execute-beginTime="+beginTime);
+		LOGGER.info("importOrganization-executeBeginTime="+beginTime);
 		this.dbProvider.execute(s -> {
 			for(OrganizationVo r:orgVos){
 				if(r.getAddress()!=null){
@@ -1902,7 +1906,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		
 		long endTime = System.currentTimeMillis();
-		LOGGER.info("importOrganization-execute-elapse="+(endTime-beginTime));
+		LOGGER.info("importOrganization-executeElapse="+(endTime-beginTime));
 	}
 
 	private void checkAreaNameIsNull(String areaName) {
@@ -2102,6 +2106,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long userId = manaUser.getId();
 		this.checkFilesIsNull(files,manaUser.getId());
 
+		long parseBeginTime = System.currentTimeMillis();
+		LOGGER.info("importOrgPost-parseBeginTime="+parseBeginTime);
+		
 		ArrayList resultList = new ArrayList();
 		try {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
@@ -2115,6 +2122,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("orgPost list is empty.userId="+userId);
 			return;
 		}
+		long parseEndTime = System.currentTimeMillis();
+		LOGGER.info("importOrgPost-parseElapse="+(parseEndTime-parseBeginTime));
+		
 //		if(LOGGER.isDebugEnabled())
 //			LOGGER.info("orgPost-list-before="+StringHelper.toJsonString(list));
 
@@ -2281,7 +2291,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
 		long beginTime = System.currentTimeMillis();
-		LOGGER.info("importOrgPost-execute-beginTime="+beginTime);	
+		LOGGER.info("importOrgPost-executeBeginTime="+beginTime);	
 		this.dbProvider.execute(s -> {
 			for(OrganizationPostVo r:orgPostVos){
 				if(r.getUser() != null&&r.getUserIden() != null){
@@ -2310,7 +2320,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return s;
 		});
 		long endTime = System.currentTimeMillis();
-		LOGGER.info("importOrgPost-execute-elapse="+(endTime-beginTime));
+		LOGGER.info("importOrgPost-executeElapse="+(endTime-beginTime));
 	}
 
 	private Category checkCategory(Long postType) {
