@@ -197,7 +197,7 @@ public class PunchController extends ControllerBase {
 	@RequestMapping("PunchExceptionApproval")
 	@RestReturn(value = String.class)
 	public RestResponse PunchExceptionApproval(@Valid PunchExceptionApprovalCommand cmd) {
-		punchService.PunchExceptionApproval(cmd);
+		punchService.punchExceptionApproval(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

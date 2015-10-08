@@ -227,7 +227,10 @@ public class PunchServiceImpl implements PunchService {
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
 		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
 				companyId, dateSF.format(logDay.getTime()));
-		caculateDayLog(userId, companyId, logDay, pdl);
+		pdl = caculateDayLog(userId, companyId, logDay, pdl);
+		if (null == pdl ){
+			return null;
+		}
 		if (null == punchDayLog) {
 			// 数据库没有计算好的数据
 			punchDayLog = new PunchDayLog();
@@ -303,6 +306,10 @@ public class PunchServiceImpl implements PunchService {
 		if (null == punchDayLog) {
 			// 插入数据
 			punchDayLog = refreshPunchDayLog(userId, companyId, logDay);
+			if(null ==punchDayLog){
+				//验证后为空
+				return null ;
+			}
 		}
 		PunchLogDTO arriveLogDTO = new PunchLogDTO();
 		arriveLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
@@ -961,7 +968,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public void PunchExceptionApproval(PunchExceptionApprovalCommand cmd) {
+	public void punchExceptionApproval(PunchExceptionApprovalCommand cmd) {
 		if (null == cmd.getUserId() || cmd.getUserId().equals(0L)) {
 			LOGGER.error("Invalid user Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,

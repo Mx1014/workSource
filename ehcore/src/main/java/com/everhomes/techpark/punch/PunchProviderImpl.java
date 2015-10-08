@@ -533,13 +533,21 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public PunchExceptionApproval  getExceptionApproval(Long userId, Long companyId,
 			Date punchDate) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		 
-		SelectJoinStep<Record1<Integer>>  step = context.selectOne().from(Tables.EH_PUNCH_EXCEPTION_APPROVALS);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_EXCEPTION_APPROVALS);
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(punchDate));
-		return step.where(condition).fetchOneInto(PunchExceptionApproval.class);
+		step.where(condition);
+		List<PunchExceptionApproval> result = step.orderBy(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, PunchExceptionApproval.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null; 
 	}
 
 	@Override
@@ -586,13 +594,22 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public PunchDayLog getDayPunchLogByDate(Long userId, Long companyId,
 			String format) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
 		Date punchDate = Date.valueOf(format);
-		SelectJoinStep<Record1<Integer>>  step = context.selectOne().from(Tables.EH_PUNCH_DAY_LOGS);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_PUNCH_DAY_LOGS);
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate));
-		return step.where(condition).fetchOneInto(PunchDayLog.class);
+		step.where(condition);
+		List<PunchDayLog> result = step.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, PunchDayLog.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;  
 	}
 
 	@Override
