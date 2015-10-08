@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>status：打卡状态</li>
  * <li>creatorUid：创建人id</li>
  * <li>createTime：创建时间</li>
+ * <li>approvalStatus：审批状态</li>
  * </ul>
  */
 public class PunchStatisticsDTO{
@@ -34,8 +35,9 @@ public class PunchStatisticsDTO{
 	private Byte     status;
 	private Long     creatorUid;
 	private Timestamp createTime;
- 
-    public Long getId() {
+	
+	private Byte     approvalStatus;
+	public Long getId() {
 		return id;
 	}
 
@@ -153,6 +155,16 @@ public class PunchStatisticsDTO{
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+
+	public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
 	}
 
 

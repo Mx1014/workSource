@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
- * <li>exceptionRequestList：打卡异常申报信息列表，参考{@link com.everhomes.techpark.punch.PunchExceptionRequestDTO}</li>
+ * <li>punchList：打卡统计信息列表，参考{@link com.everhomes.techpark.punch.PunchStatisticsDTO}</li>
  * </ul>
  */
 
@@ -17,8 +17,8 @@ public class ListPunchStatisticsCommandResponse{
 
 	private Integer nextPageOffset;
     
-    @ItemType(PunchExceptionRequestDTO.class)
-    private List<PunchExceptionRequestDTO> exceptionRequestList;
+    @ItemType(PunchStatisticsDTO.class)
+    private List<PunchStatisticsDTO> punchList;
  
     
     public Integer getNextPageOffset() {
@@ -31,13 +31,14 @@ public class ListPunchStatisticsCommandResponse{
 	}
 
 
-	public List<PunchExceptionRequestDTO> getExceptionRequestList() {
-		return exceptionRequestList;
+
+	public List<PunchStatisticsDTO> getPunchList() {
+		return punchList;
 	}
 
 
-	public void setExceptionRequestList(List<PunchExceptionRequestDTO> exceptionRequestList) {
-		this.exceptionRequestList = exceptionRequestList;
+	public void setPunchList(List<PunchStatisticsDTO> punchList) {
+		this.punchList = punchList;
 	}
 
 

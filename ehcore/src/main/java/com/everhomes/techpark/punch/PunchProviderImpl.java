@@ -638,5 +638,66 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	
+	@Override
+	public int countPunchDayLogs(String keyword, Long companyId, String startDay, String endDay, Byte status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_DAY_LOGS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		if(!StringUtils.isEmpty(keyword))
+			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
+
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(null!= status && status != 0){
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.eq(status));
+		}
+		return step.where(condition).fetchOneInto(Integer.class);
+	}
+	
+	@Override
+	public List<PunchDayLog> listPunchDayLogs(String keyword, Long companyId, String startDay, String endDay,
+			Byte status, Integer pageOffset, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		if(!StringUtils.isEmpty(keyword))
+			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
+					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
+
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		if(null!= status && status != 0){
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.eq(status));
+		}
+//		List<PunchDayLog> result = step.where(condition).orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
+//				.fetch().map((r) -> {
+//					return ConvertHelper.convert(r, PunchDayLog.class);
+//				});
+		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+				.map(new EhPunchDayLogMapper());
+		
+		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchDayLog.class);
+        }).collect(Collectors.toList());
+		return result;
+	}
+	
 }
 

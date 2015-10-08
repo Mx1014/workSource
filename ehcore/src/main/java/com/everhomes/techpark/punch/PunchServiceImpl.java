@@ -1065,17 +1065,36 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int totalCount = punchProvider.countExceptionRequests(cmd.getKeyword(),
-				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
-				cmd.getExceptionStatus(), cmd.getProcessCode(),
-				PunchRquestType.REQUEST.getCode());
+		int totalCount = punchProvider.countPunchDayLogs(cmd.getKeyword(),
+				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getStatus());
 		if (totalCount == 0)
 			return response;
 
-		int pageSize = PaginationConfigHelper.getPageSize(
+		Integer pageSize = PaginationConfigHelper.getPageSize(
 				configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
 		
+
+		List<PunchDayLog> result = punchProvider
+				.listPunchDayLogs(cmd.getKeyword(),
+						cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getStatus(), cmd.getPageOffset(),
+						pageSize);
+		response.setPunchList(result
+				.stream()
+				.map(r -> {
+					PunchStatisticsDTO dto = ConvertHelper.convert(r,
+							PunchStatisticsDTO.class);
+					if(dto != null){
+						GroupContact groupContact = groupContactProvider
+								.findGroupContactByUserId(dto.getUserId());
+						dto.setUserName(groupContact.getContactName());
+						dto.setToken(groupContact.getContactToken());
+						
+						PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(), dto.getCompanyId(), dto.getPunchDate());
+						dto.setApprovalStatus(approval!=null?approval.getApprovalStatus():0);
+					}
+					return dto;
+				}).collect(Collectors.toList()));
 
 		response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null
 				: cmd.getPageOffset() + 1);
