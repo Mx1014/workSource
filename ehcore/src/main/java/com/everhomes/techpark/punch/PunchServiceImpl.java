@@ -221,7 +221,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId,
-			Calendar logDay) throws ParseException {
+			Calendar logDay ) throws ParseException {
 		PunchLogsDayList pdl = new PunchLogsDayList();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
@@ -305,7 +305,7 @@ public class PunchServiceImpl implements PunchService {
 				companyId, dateSF.format(logDay.getTime()));
 		if (null == punchDayLog) {
 			// 插入数据
-			punchDayLog = refreshPunchDayLog(userId, companyId, logDay);
+			punchDayLog = refreshPunchDayLog(userId, companyId, logDay );
 			if(null ==punchDayLog){
 				//验证后为空
 				return null ;
@@ -320,6 +320,7 @@ public class PunchServiceImpl implements PunchService {
 		leaveLogDTO.setPunchTime(punchDayLog.getLeaveTime().getTime());
 		pdl.getPunchLogs().add(leaveLogDTO);
 		pdl.setPunchStatus(punchDayLog.getStatus());
+		pdl.setExceptionStatus(punchDayLog.getStatus().equals(PunchStatus.NORMAL.getCode())?ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());
 		makeExceptionForDayList(userId, companyId, logDay, pdl);
 
 		return pdl;
