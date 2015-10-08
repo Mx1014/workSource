@@ -1059,4 +1059,27 @@ public class PunchServiceImpl implements PunchService {
 			punchProvider.updatePunchExceptionRequest(result);
 		}
 	}
+	
+	@Override
+	public ListPunchStatisticsCommandResponse listPunchStatistics(ListPunchStatisticsCommand cmd) {
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
+		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+		int totalCount = punchProvider.countExceptionRequests(cmd.getKeyword(),
+				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
+				cmd.getExceptionStatus(), cmd.getProcessCode(),
+				PunchRquestType.REQUEST.getCode());
+		if (totalCount == 0)
+			return response;
+
+		int pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize());
+		int pageCount = getPageCount(totalCount, pageSize);
+		
+
+		response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null
+				: cmd.getPageOffset() + 1);
+		return response;
+
+	}
 }
