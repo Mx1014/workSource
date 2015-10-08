@@ -42,6 +42,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
+import com.everhomes.family.FamilyDTO;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.admin.PostAdminDTO;
 import com.everhomes.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.forum.admin.SearchTopicAdminCommandResponse;
@@ -138,6 +140,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private FamilyProvider familyProvider;
     
     @Override
     public boolean isSystemForum(long forumId) {
@@ -2230,4 +2235,81 @@ public class ForumServiceImpl implements ForumService {
         
         return handler;
     }
+
+	@Override
+	public SearchTopicAdminCommandResponse searchComment(SearchTopicAdminCommand cmd) {
+		PostAdminQueryFilter filter = new PostAdminQueryFilter();
+        String keyword = cmd.getKeyword();
+        if(!StringUtils.isEmpty(keyword)) {
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
+            filter.setQueryString(keyword);
+        }
+        
+        List<String> phones = cmd.getSenderPhones();
+        if(phones != null && phones.size() > 0) {
+            filter.includeFilter(PostAdminQueryFilter.TERM_IDENTIFY, phones);
+        }
+        
+        List<String> nickNames = cmd.getSenderNickNames();
+        if(nickNames != null && nickNames.size() > 0) {
+            filter.includeFilter(PostAdminQueryFilter.TERM_SENDERNAME, nickNames);
+        }
+        
+        List<Long> parentPostId = new ArrayList<Long>();
+        parentPostId.add(0L);
+        filter.excludeFilter(PostAdminQueryFilter.TERM_PARENTPOSTID, parentPostId);
+
+        
+        Long startTime = cmd.getStartTime();
+        if(startTime != null) {
+            filter.dateFrom(new Date(startTime));
+        }
+        
+        Long endTime = cmd.getEndTime();
+        if(endTime != null) {
+            filter.dateTo(new Date(endTime));
+        }
+          
+        int pageNum = 0;
+        if(cmd.getPageAnchor() != null) {
+            pageNum = cmd.getPageAnchor().intValue();
+        } else {
+            pageNum = 0;
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        filter.setPageInfo(pageNum, pageSize);
+        ListPostCommandResponse queryResponse = postSearcher.query(filter);
+        
+        SearchTopicAdminCommandResponse response = new SearchTopicAdminCommandResponse();
+        response.setKeywords(queryResponse.getKeywords());
+        response.setNextPageAnchor(queryResponse.getNextPageAnchor());
+        
+        List<PostAdminDTO> adminPostList = new ArrayList<PostAdminDTO>();
+        List<PostDTO> postList = queryResponse.getPosts();
+        for(PostDTO post : postList) {
+            try {
+                PostDTO temp = getTopicById(post.getId(), cmd.getCommunityId(), false);
+                PostAdminDTO adminPost = ConvertHelper.convert(temp, PostAdminDTO.class);
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(temp.getCreatorUid(),
+                    IdentifierType.MOBILE.getCode());
+                if(identifier != null) {
+                    adminPost.setCreatorPhone(identifier.getIdentifierToken());
+                }
+                
+                List<FamilyDTO> families = familyProvider.getUserFamiliesByUserId(temp.getCreatorUid());
+                if(families != null && families.size() > 0){
+                	String address = families.get(0).getAddress();
+                	adminPost.setCreatorAddress(address);
+                }
+                
+                adminPostList.add(adminPost);
+            } catch(Exception e) {
+                LOGGER.error(e.toString());
+            }
+        }
+        
+        response.setPosts(adminPostList);
+        return response;
+	}
 }

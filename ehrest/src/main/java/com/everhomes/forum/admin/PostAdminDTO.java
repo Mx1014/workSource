@@ -33,6 +33,7 @@ import com.everhomes.util.StringHelper;
  * <li>updateTime: 帖子或评论更新时间</li>
  * <li>createTime: 帖子或评论创建时间</li>
  * <li>assignedFlag: 是否推荐帖，参见{@link com.everhomes.forum.PostAssignedFlag}</li>
+ * <li>creatorAddress:创建者家庭地址</li>
  * </ul>
  */
 public class PostAdminDTO {
@@ -93,8 +94,18 @@ public class PostAdminDTO {
     private Timestamp createTime;
     
     private Byte assignedFlag;
+    
+    private String creatorAddress;
 
-    public Long getId() {
+    public String getCreatorAddress() {
+		return creatorAddress;
+	}
+
+	public void setCreatorAddress(String creatorAddress) {
+		this.creatorAddress = creatorAddress;
+	}
+
+	public Long getId() {
         return id;
     }
 
