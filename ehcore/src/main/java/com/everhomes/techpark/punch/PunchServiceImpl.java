@@ -812,7 +812,7 @@ public class PunchServiceImpl implements PunchService {
 	public void createPunchExceptionRequest(PunchExceptionRequestCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
-		if (cmd.getDescription() == null || cmd.getDescription().equals(0))
+		if (cmd.getRequestDescription() == null || cmd.getRequestDescription().equals(0))
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid description parameter in the command");
@@ -824,7 +824,7 @@ public class PunchServiceImpl implements PunchService {
 		punchExceptionRequest.setCreatorUid(userId);
 		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper
 				.currentGMTTime().getTime()));
-		punchExceptionRequest.setDescription(cmd.getDescription());
+		punchExceptionRequest.setDescription(cmd.getRequestDescription());
 		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
 				.getPunchDate()));
 		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR

@@ -13,7 +13,7 @@ public class PunchExceptionRequestCommand {
 
     private Long companyId;
     private String punchDate;
-    private String description;
+    private String requestDescription;
  
 
      public Long getCompanyId() {
@@ -36,14 +36,14 @@ public class PunchExceptionRequestCommand {
 	public void setPunchDate(String punchDate) {
 		this.punchDate = punchDate;
 	}
+
+	public String getRequestDescription() {
+		return requestDescription;
+	}
+
+	public void setRequestDescription(String requestDescription) {
+		this.requestDescription = requestDescription;
+	}
  
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
+ 
  }
