@@ -1054,6 +1054,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationDTO getOrganizationByComunityidAndOrgType(GetOrgDetailCommand cmd) {
 		List<OrganizationCommunityDTO> orgCommunitys = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getOrganizationByComunityidAndOrgType-orgCommunitys="+StringHelper.toJsonString(orgCommunitys));
+		
 		if(orgCommunitys != null && !orgCommunitys.isEmpty()){
 			for(int i=0;i<orgCommunitys.size();i++){
 				OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(),cmd.getOrganizationType());
