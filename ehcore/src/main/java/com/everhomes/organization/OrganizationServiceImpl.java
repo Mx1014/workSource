@@ -960,6 +960,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Map<String, Long> map = new HashMap<String, Long>();
 
 		List<Organization> list = this.organizationProvider.findOrganizationByCommunityId(communityId);
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getOrganizationRegionMap-orgs="+StringHelper.toJsonString(list));
+		
 		for(Organization organization : list) {
 			OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
 			if(type != null) {

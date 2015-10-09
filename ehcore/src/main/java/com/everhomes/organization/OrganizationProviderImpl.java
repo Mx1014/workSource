@@ -127,6 +127,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, 
 				Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
 		query.setDistinct(true);
+		if(communityId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
 
 		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
