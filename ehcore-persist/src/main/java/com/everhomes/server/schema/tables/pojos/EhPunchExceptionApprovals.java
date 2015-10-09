@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionApprovals implements java.io.Serializable {
 
-	private static final long serialVersionUID = -574016704;
+	private static final long serialVersionUID = -1843934726;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
@@ -22,6 +22,7 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.Byte     viewFlag;
 
 	public EhPunchExceptionApprovals() {}
 
@@ -34,7 +35,8 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.sql.Timestamp operateTime,
+		java.lang.Byte     viewFlag
 	) {
 		this.id = id;
 		this.userId = userId;
@@ -45,6 +47,7 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.viewFlag = viewFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.Byte getViewFlag() {
+		return this.viewFlag;
+	}
+
+	public void setViewFlag(java.lang.Byte viewFlag) {
+		this.viewFlag = viewFlag;
 	}
 }

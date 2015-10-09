@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> {
 
-	private static final long serialVersionUID = 1085206472;
+	private static final long serialVersionUID = 1689423673;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_requests</code>
@@ -90,6 +90,11 @@ public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everho
 	 * The column <code>ehcore.eh_punch_exception_requests.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_punch_exception_requests.view_flag</code>. is view(0) not view(1)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> VIEW_FLAG = createField("view_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is view(0) not view(1)");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_exception_requests</code> table reference

@@ -109,4 +109,11 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>view_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByViewFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.VIEW_FLAG, values);
+	}
 }

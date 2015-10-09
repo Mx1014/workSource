@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = -68989074;
+	private static final long serialVersionUID = 1753620068;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
@@ -23,6 +23,7 @@ public class EhPunchDayLogs implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Byte     viewFlag;
 
 	public EhPunchDayLogs() {}
 
@@ -36,7 +37,8 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		java.sql.Time      workTime,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Byte     viewFlag
 	) {
 		this.id = id;
 		this.userId = userId;
@@ -48,6 +50,7 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.viewFlag = viewFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +131,13 @@ public class EhPunchDayLogs implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Byte getViewFlag() {
+		return this.viewFlag;
+	}
+
+	public void setViewFlag(java.lang.Byte viewFlag) {
+		this.viewFlag = viewFlag;
 	}
 }
