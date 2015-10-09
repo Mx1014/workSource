@@ -135,7 +135,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 
 			try {
-				PunchLogsDayList pdl = makePunchLogsDayListInfo(userId,
+				PunchLogsDayList pdl = makePunchLogsDayStatus(userId,
 						CompanyId, start);
 				if (null != pdl) {
 					pml.getPunchLogsDayList().add(pdl);
@@ -152,10 +152,43 @@ public class PunchServiceImpl implements PunchService {
 		return pyl;
 	}
 
+	private PunchLogsDayList makePunchLogsDayStatus(Long userId,
+			Long companyId, Calendar logDay) throws ParseException { 
+		PunchLogsDayList pdl = new PunchLogsDayList();
+		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH))); 
+
+		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+				companyId, dateSF.format(logDay.getTime()));
+		if (null == punchDayLog) {
+			// 插入数据
+			punchDayLog = refreshPunchDayLog(userId, companyId, logDay );
+			if(null ==punchDayLog){
+				//验证后为空
+				return null ;
+			}
+		} 
+		pdl.setPunchStatus(punchDayLog.getStatus());
+		pdl.setExceptionStatus(punchDayLog.getStatus().equals(PunchStatus.NORMAL.getCode())?ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());
+		PunchExceptionApproval exceptionApproval = punchProvider
+				.getPunchExceptionApprovalByDate(userId, companyId,
+						dateSF.format(logDay.getTime()));
+		if (null != exceptionApproval) {
+			pdl.setApprovalStatus(exceptionApproval.getApprovalStatus());
+			if (pdl.getApprovalStatus().equals(ApprovalStatus.NORMAL.getCode())
+					|| pdl.getPunchStatus()
+							.equals(PunchStatus.NORMAL.getCode())) {
+				// 如果有申报审批结果，并且审批结果和实际打卡结果有一个是正常的话，异常结果为正常 别的为异常
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			} else {
+				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+		}
+		return pdl;
+	}
+
 	private void makeExceptionForDayList(Long userId, Long companyId,
 			Calendar logDay, PunchLogsDayList pdl) {
-		// 异常申报结果的返回
-		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		// 异常申报结果的返回 
 		PunchExceptionApproval exceptionApproval = punchProvider
 				.getPunchExceptionApprovalByDate(userId, companyId,
 						dateSF.format(logDay.getTime()));
@@ -294,7 +327,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		
 	}
-
+	
 	/***
 	 * @param punchLogs
 	 *            ： 当天的全部打卡记录通过punchProvider.listPunchLogsByDate()方法得到;
@@ -304,8 +337,9 @@ public class PunchServiceImpl implements PunchService {
 	 *            : 计算的打卡日期
 	 * @return PunchLogsDayList：计算好的当日打卡状态
 	 * */
-	private PunchLogsDayList makePunchLogsDayListInfo(Long userId,
-			Long companyId, Calendar logDay) throws ParseException {
+	@Override
+	public PunchLogsDayList makePunchLogsDayListInfo(Long userId,
+			Long companyId, Calendar logDay)   {
 		Date now = new Date();
 		PunchLogsDayList pdl = new PunchLogsDayList();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
@@ -315,7 +349,13 @@ public class PunchServiceImpl implements PunchService {
 				companyId, dateSF.format(logDay.getTime()));
 		if (null == punchDayLog) {
 			// 插入数据
-			punchDayLog = refreshPunchDayLog(userId, companyId, logDay );
+			try {
+				punchDayLog = refreshPunchDayLog(userId, companyId, logDay );
+			} catch (ParseException e) {
+				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+						PunchServiceErrorCode.ERROR_PUNCH_REFRESH_DAYLOG,
+						"ERROR IN REFRESHPUNCHDAYLOG  LINE 353");
+			}
 			if(null ==punchDayLog){
 				//验证后为空
 				return null ;
@@ -1134,5 +1174,21 @@ public class PunchServiceImpl implements PunchService {
 		if(PunchDayLogs.size() >0)
 			response.setExceptionCode(ExceptionStatus.EXCEPTION.getCode());
 		return response;
+	}
+
+	@Override
+	public PunchLogsDayList getDayPunchLogs(getDayPunchLogsCommand cmd) { 
+		Long userId = UserContext.current().getUser().getId();
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		Calendar logDay = Calendar.getInstance();
+		try {
+			
+			logDay.setTime(dateSF.parse(cmd.getQueryDate()));
+		} catch (Exception e) {
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid queryDate parameter in the command");
+		}
+		return makePunchLogsDayListInfo(userId, cmd.getCompanyId(), logDay);
 	}
 }

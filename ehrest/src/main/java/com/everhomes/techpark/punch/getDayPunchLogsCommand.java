@@ -8,10 +8,10 @@ import com.everhomes.util.StringHelper;
  * <li>queryYear：查询日期 取年份</li>
  * </ul>
  */
-public class ListPunchLogsCommand {
+public class getDayPunchLogsCommand {
  
     private Long companyId; 
-    private String queryYear;
+    private String queryDate;
      public Long getCompanyId() {
          return companyId;
      }
@@ -24,13 +24,14 @@ public class ListPunchLogsCommand {
      public String toString() {
          return StringHelper.toJsonString(this);
      }
+ 
 
-	public String getQueryYear() {
-		return queryYear;
+	public String getQueryDate() {
+		return queryDate;
 	}
 
-	public void setQueryYear(String queryYear) {
-		this.queryYear = queryYear;
+	public void setQueryDate(String queryDate) {
+		this.queryDate = queryDate;
 	}
  
 

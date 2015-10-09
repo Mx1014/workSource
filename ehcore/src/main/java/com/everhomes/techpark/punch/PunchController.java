@@ -112,6 +112,24 @@ public class PunchController extends ControllerBase {
 		res.setResponseObject(punchLogsYearListResponse);
 		return res;
 	}
+	/**
+	 * <b>URL: /techpark/punch/getDayPunchLogs</b>
+	 * <p>
+	 * 根据请求 companyid和日期 取一年的打卡记录
+	 * </p>
+	 */
+	@RequestMapping("getDayPunchLogs")
+	@RestReturn(value = PunchLogsYearListResponse.class, collection = true)
+	public RestResponse getDayPunchLogs(@Valid getDayPunchLogsCommand cmd) {
+
+		RestResponse res = new RestResponse();
+		PunchLogsDayList pdl = punchService.getDayPunchLogs(cmd);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		res.setResponseObject(pdl);
+		return res;
+	}
+	
 	
 	/**
 	 * <b>URL: /techpark/punch/addPunchRule</b>
