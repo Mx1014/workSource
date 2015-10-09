@@ -82,8 +82,8 @@ public class PunchController extends ControllerBase {
 	 * 查询某人在本月/打卡第一天 到昨天是否有异常
 	 * </p>
 	 */
-	@RequestMapping("punchClock")
-	@RestReturn(value = String.class)
+	@RequestMapping("getPunchNewException")
+	@RestReturn(value = getPunchNewExceptionResponse.class)
 	public RestResponse getPunchNewException(@Valid getPunchNewExceptionCommand cmd) {
 		// 打卡返回打卡时间
 		getPunchNewExceptionResponse res = punchService.getPunchNewException(cmd);
@@ -119,7 +119,7 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getDayPunchLogs")
-	@RestReturn(value = PunchLogsYearListResponse.class, collection = true)
+	@RestReturn(value = PunchLogsDayList.class, collection = true)
 	public RestResponse getDayPunchLogs(@Valid getDayPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();
@@ -217,7 +217,7 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("listPunchExceptionApproval")
-	@RestReturn(value = PunchRuleResponse.class)
+	@RestReturn(value = ListPunchExceptionRequestCommandResponse.class)
 	public RestResponse listPunchExceptionApproval(@Valid ListPunchExceptionApprovalCommand cmd) {
 		ListPunchExceptionRequestCommandResponse commandResponse = punchService.listExceptionApprovals(cmd);
 		RestResponse response = new RestResponse(commandResponse);
