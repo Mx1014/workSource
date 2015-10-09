@@ -440,6 +440,7 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= processCode &&  processCode != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
+		step.limit(pageOffset, pageSize);
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
 				.map(new EhPunchExceptionRequestMapper());
@@ -520,6 +521,7 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= processCode &&  processCode != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
+		step.limit(pageOffset, pageSize);
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
 				.map(new EhPunchExceptionRequestMapper());
@@ -685,10 +687,7 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= status && status != 0){
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.eq(status));
 		}
-//		List<PunchDayLog> result = step.where(condition).orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
-//				.fetch().map((r) -> {
-//					return ConvertHelper.convert(r, PunchDayLog.class);
-//				});
+		step.limit(pageOffset, pageSize);
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
 				.map(new EhPunchDayLogMapper());

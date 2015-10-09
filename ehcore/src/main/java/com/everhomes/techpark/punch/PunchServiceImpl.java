@@ -250,10 +250,10 @@ public class PunchServiceImpl implements PunchService {
 					arriveTime = pDto.getPunchTime();
 				}
 			}
-			Long workTime = leaveTime - arriveTime;
+			long workTime = leaveTime - arriveTime;
 			punchDayLog.setArriveTime(new java.sql.Time(arriveTime));
 			punchDayLog.setLeaveTime(new java.sql.Time(leaveTime));
-			punchDayLog.setWorkTime(new java.sql.Time(workTime)); 
+			punchDayLog.setWorkTime(java.sql.Time.valueOf(getGMTtimeString("HH:mm:ss", workTime))); 
 			punchDayLog.setStatus(pdl.getPunchStatus());
 			punchProvider.createPunchDayLog(punchDayLog);
 
@@ -278,7 +278,7 @@ public class PunchServiceImpl implements PunchService {
 			Long workTime = leaveTime - arriveTime;
 			punchDayLog.setArriveTime(new java.sql.Time(arriveTime));
 			punchDayLog.setLeaveTime(new java.sql.Time(leaveTime));
-			punchDayLog.setWorkTime(new java.sql.Time(workTime));
+			punchDayLog.setWorkTime(java.sql.Time.valueOf(getGMTtimeString("HH:mm:ss", workTime))); 
 			punchDayLog.setStatus(pdl.getPunchStatus());
 			punchProvider.updatePunchDayLog(punchDayLog);
 		}
@@ -897,9 +897,8 @@ public class PunchServiceImpl implements PunchService {
 
 					} else {
 						Long workTime = leaveTime - arriveTime;
-						dto.setArriveTime(getGMTtimeString("HH:mm:ss",
-								arriveTime));
-						dto.setLeaveTime(getGMTtimeString("HH:mm:ss", leaveTime));
+						dto.setArriveTime(timeSF.format(new Date(arriveTime)));
+						dto.setLeaveTime(timeSF.format(new Date(leaveTime)));
 						dto.setWorkTime(getGMTtimeString("HH:mm:ss", workTime));
 					}
 					GroupContact groupContact = groupContactProvider
