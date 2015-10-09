@@ -21,8 +21,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.recommend.RecommendStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
@@ -441,7 +443,8 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
 		 
-		step.limit(pageOffset, pageSize); 
+		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		step.limit(offset , pageSize);
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
 				.map(new EhPunchExceptionRequestMapper());
@@ -522,7 +525,8 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= processCode &&  processCode != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
-		step.limit(pageOffset, pageSize);
+		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		step.limit(offset , pageSize);
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
 				.map(new EhPunchExceptionRequestMapper());
@@ -618,6 +622,7 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchDayLog(PunchDayLog punchDayLog) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
 		punchDayLog.setId(id);
 		EhPunchDayLogsRecord record = ConvertHelper.convert(punchDayLog, EhPunchDayLogsRecord.class);
@@ -631,6 +636,7 @@ public class PunchProviderImpl implements PunchProvider {
 	public void updatePunchDayLog(PunchDayLog punchDayLog) {
 		assert (punchDayLog.getId() == null);
 
+		punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPunchDayLogsDao dao = new EhPunchDayLogsDao(
 				context.configuration());
@@ -688,7 +694,8 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= status && status != 0){
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.eq(status));
 		}
-		step.limit(pageOffset, pageSize);
+		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		step.limit(offset , pageSize);
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
 				.map(new EhPunchDayLogMapper());
@@ -718,6 +725,7 @@ public class PunchProviderImpl implements PunchProvider {
 		}
 		 //不等于正常状态
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.ne(PunchStatus.NORMAL.getCode()) );
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG.eq(ViewFlags.NOTVIEW.getCode()) );
 		 
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
@@ -727,6 +735,57 @@ public class PunchProviderImpl implements PunchProvider {
             return ConvertHelper.convert(r, PunchDayLog.class);
         }).collect(Collectors.toList());
 		return result;
+	}
+
+	@Override
+	public List<PunchExceptionRequest> listExceptionNotViewRequests(
+			Long userId, Long companyId, String startDay, String endDay) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(PunchRquestType.APPROVAL.getCode()));
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.VIEW_FLAG.eq(ViewFlags.NOTVIEW.getCode()) );
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.between(startDate).and(endDate));
+		}     
+		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
+				.map(new EhPunchExceptionRequestMapper());
+		List<PunchExceptionRequest> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchExceptionRequest.class);
+        }).collect(Collectors.toList());
+		return result;
+	}
+
+	@Override
+	public void viewDateFlags(Long userId, Long companyId, String format) {
+		Date logDate = Date.valueOf(format);
+		//update 申请表
+		   DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionRequests.class,companyId));
+	        context.update(Tables.EH_PUNCH_EXCEPTION_REQUESTS).set(Tables.EH_PUNCH_EXCEPTION_REQUESTS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
+	        .where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
+	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.eq(companyId))
+	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(logDate)).execute() ;
+
+			//update 日志表
+	        context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchDayLogs.class,companyId));
+	        context.update(Tables.EH_PUNCH_DAY_LOGS).set(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
+	        .where(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId))
+	        .and(Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.eq(companyId))
+	        .and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(logDate)).execute() ;
+
+			//update 审批表
+	        context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.class,companyId));
+	        context.update(Tables.EH_PUNCH_EXCEPTION_APPROVALS).set(Tables.EH_PUNCH_EXCEPTION_APPROVALS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
+	        .where(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId))
+	        .and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.eq(companyId))
+	        .and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(logDate)).execute() ;
 	}
 	
 }

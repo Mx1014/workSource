@@ -1164,14 +1164,18 @@ public class PunchServiceImpl implements PunchService {
 		Calendar start = Calendar.getInstance();
 		//月初
 		Calendar monthStart = Calendar.getInstance();
-		monthStart.set(GregorianCalendar.DAY_OF_MONTH, 1); 
+		monthStart.add(Calendar.DAY_OF_MONTH,-30); 
 		//前一天
 		Calendar end = Calendar.getInstance();
 		end.add(Calendar.DAY_OF_MONTH, -1);
 		//找出异常的记录
 		List<PunchDayLog> PunchDayLogs = punchProvider.listPunchDayExceptionLogs(
-						userId,cmd.getCompanyId(), dateSF.format(start.getTime()), dateSF.format(end.getTime())); 
+						userId,cmd.getCompanyId(), dateSF.format(monthStart.getTime()), dateSF.format(end.getTime())); 
 		if(PunchDayLogs.size() >0)
+			response.setExceptionCode(ExceptionStatus.EXCEPTION.getCode());
+		List<PunchExceptionRequest> exceptionRequests = punchProvider.listExceptionNotViewRequests(
+				userId,  cmd.getCompanyId(), dateSF.format(monthStart.getTime()), dateSF.format(end.getTime()));
+		if(exceptionRequests.size() >0)
 			response.setExceptionCode(ExceptionStatus.EXCEPTION.getCode());
 		return response;
 	}
@@ -1188,7 +1192,9 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryDate parameter in the command");
-		}
-		return makePunchLogsDayListInfo(userId, cmd.getCompanyId(), logDay);
+		} 
+		PunchLogsDayList  pdl =makePunchLogsDayListInfo(userId, cmd.getCompanyId(), logDay);
+		punchProvider.viewDateFlags(userId, cmd.getCompanyId(), dateSF.format(logDay.getTime()));
+		return pdl;
 	}
 }
