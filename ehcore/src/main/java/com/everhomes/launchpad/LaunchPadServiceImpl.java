@@ -444,7 +444,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         cmd.setOrganizationType(tag);
         OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
         if(organization == null){
-            LOGGER.error("Organization is not exists,communityId=" + communityId);
+            LOGGER.error("Organization is not exists,communityId=" + communityId+",tag="+tag);
             return actionDataJson;
         }
         actionDataJson.put(LaunchPadConstants.ORGANIZATION_ID, organization.getId());
