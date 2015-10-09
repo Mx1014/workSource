@@ -3,23 +3,22 @@ package com.everhomes.group;
 
 /**
  *<ul>
- *<li>anchor:锚点</li>
- *<li>pageSize:每页的个数<li>
+ *<li>pageAnchor:锚点</li>
+ *<li>pageSize:每页的个数</li>
+ *<li>categoryId:group的类型id</li>
+ *<li>keyWord:关键字</li>
  *</ul>
  */
 public class ListGroupCommand {
 
-	private Long anchor;
+	private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private Long categoryId;
+    
+    private String keyWord;
 
-	public Long getAnchor() {
-		return anchor;
-	}
-
-	public void setAnchor(Long anchor) {
-		this.anchor = anchor;
-	}
 
 	public Integer getPageSize() {
 		return pageSize;
@@ -27,6 +26,30 @@ public class ListGroupCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public String getKeyWord() {
+		return keyWord;
+	}
+
+	public void setKeyWord(String keyWord) {
+		this.keyWord = keyWord;
 	}
     
     
