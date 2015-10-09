@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>creatorUid：创建人id</li>
  * <li>createTime：创建时间</li>
  * <li>operatorUid：审核人id</li>
+ * <li>operatorName：审核人名称</li>
  * <li>operateTime：审核时间</li>
  * <li>punchStatus：打卡考勤:正常，迟到等 参考{@link com.everhomes.techpark.punch.PunchStatus}</li>
  * <li>arriveTime：上班时间</li>
@@ -44,6 +45,7 @@ public class PunchExceptionRequestDTO{
 	private Long     creatorUid;
 	private Timestamp createTime;
 	private Long     operatorUid;
+	private String     operatorName;
 	private Timestamp operateTime;
 	private Byte punchStatus;
 	private String arriveTime;
@@ -243,6 +245,16 @@ public class PunchExceptionRequestDTO{
 
 	public void setWorkTime(String workTime) {
 		this.workTime = workTime;
+	}
+
+
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
 	}
 
  

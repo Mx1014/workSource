@@ -958,6 +958,11 @@ public class PunchServiceImpl implements PunchService {
 							.findGroupContactByUserId(dto.getUserId());
 					dto.setUserName(groupContact.getContactName());
 					dto.setToken(groupContact.getContactToken());
+					if(null != dto.getOperatorUid() && 0 != dto.getOperatorUid()){
+						GroupContact groupContactOperator = groupContactProvider
+								.findGroupContactByUserId(dto.getOperatorUid());
+						dto.setOperatorName(groupContactOperator.getContactName());
+					}
 					return dto;
 				}).collect(Collectors.toList()));
 
