@@ -440,7 +440,8 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= processCode &&  processCode != 0){
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
 		}
-		step.limit(pageOffset, pageSize);
+		 
+		step.limit(pageOffset, pageSize); 
 		List<EhPunchExceptionRequestsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.desc()).fetch()
 				.map(new EhPunchExceptionRequestMapper());
@@ -688,6 +689,36 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.eq(status));
 		}
 		step.limit(pageOffset, pageSize);
+		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+				.map(new EhPunchDayLogMapper());
+		
+		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, PunchDayLog.class);
+        }).collect(Collectors.toList());
+		return result;
+	}
+
+	@Override
+	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
+			Long companyId, String startDay, String endDay) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
+//		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+	 
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		condition= condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		 
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
+		}
+		 //不等于正常状态
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.ne(PunchStatus.NORMAL.getCode()) );
+		 
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
 				.map(new EhPunchDayLogMapper());

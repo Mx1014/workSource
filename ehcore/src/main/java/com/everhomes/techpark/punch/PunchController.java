@@ -74,6 +74,26 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 
+	
+
+	/**
+	 * <b>URL: /techpark/punch/getPunchNewException</b>
+	 * <p>
+	 * 查询某人在本月/打卡第一天 到昨天是否有异常
+	 * </p>
+	 */
+	@RequestMapping("punchClock")
+	@RestReturn(value = String.class)
+	public RestResponse getPunchNewException(@Valid getPunchNewExceptionCommand cmd) {
+		// 打卡返回打卡时间
+		getPunchNewExceptionResponse res = punchService.getPunchNewException(cmd);
+		RestResponse response = new RestResponse(res); 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	
 	/**
 	 * <b>URL: /techpark/punch/listYearPunchLogs</b>
 	 * <p>

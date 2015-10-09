@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -73,14 +74,13 @@ public class PunchServiceImpl implements PunchService {
 
 		PunchLogsYearListResponse pyl = new PunchLogsYearListResponse();
 		pyl.setPunchYear(cmd.getQueryYear());
-		pyl.setPunchLogsMonthList(new ArrayList<PunchLogsMonthList>());
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		pyl.setPunchLogsMonthList(new ArrayList<PunchLogsMonthList>()); 
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
 		try {
 			// 从年初开始，如果是查询今年，到今天截止，如果不是查询今年，则到该年年末
 			// 如果要修改，只需要修改范围即可
-			start.setTime(format.parse(cmd.getQueryYear() + "-01-01"));
+			start.setTime(dateSF.parse(cmd.getQueryYear() + "-01-01"));
 			if (end.before(start)) {
 				throw RuntimeErrorException.errorWith(
 						PunchServiceErrorCode.SCOPE,
@@ -88,7 +88,7 @@ public class PunchServiceImpl implements PunchService {
 						"query Year is later than now ,please check again ");
 			}
 			if (start.get(Calendar.YEAR) != end.get(Calendar.YEAR)) {
-				end.setTime(format.parse(cmd.getQueryYear() + "-01-01"));
+				end.setTime(dateSF.parse(cmd.getQueryYear() + "-01-01"));
 				end.add(Calendar.YEAR, 1);
 			}
 		} catch (ParseException e) {
@@ -250,9 +250,9 @@ public class PunchServiceImpl implements PunchService {
 					arriveTime = pDto.getPunchTime();
 				}
 			}
-			long workTime = leaveTime - arriveTime;
-			punchDayLog.setArriveTime(new java.sql.Time(arriveTime));
-			punchDayLog.setLeaveTime(new java.sql.Time(leaveTime));
+			long workTime = leaveTime - arriveTime; 
+			punchDayLog.setArriveTime(getDAOTime(arriveTime));
+			punchDayLog.setLeaveTime(getDAOTime(leaveTime));
 			punchDayLog.setWorkTime(java.sql.Time.valueOf(getGMTtimeString("HH:mm:ss", workTime))); 
 			punchDayLog.setStatus(pdl.getPunchStatus());
 			punchProvider.createPunchDayLog(punchDayLog);
@@ -276,13 +276,23 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 			Long workTime = leaveTime - arriveTime;
-			punchDayLog.setArriveTime(new java.sql.Time(arriveTime));
-			punchDayLog.setLeaveTime(new java.sql.Time(leaveTime));
+			punchDayLog.setArriveTime(getDAOTime(arriveTime));
+			punchDayLog.setLeaveTime(getDAOTime(leaveTime));
 			punchDayLog.setWorkTime(java.sql.Time.valueOf(getGMTtimeString("HH:mm:ss", workTime))); 
 			punchDayLog.setStatus(pdl.getPunchStatus());
 			punchProvider.updatePunchDayLog(punchDayLog);
 		}
 		return punchDayLog;
+	}
+
+	private Time getDAOTime(Long arriveTime) { 
+		if(arriveTime.equals(0L)){
+			return java.sql.Time.valueOf(getGMTtimeString("HH:mm:ss", arriveTime));
+		}
+		else {
+			return new java.sql.Time(arriveTime);	
+		}
+		
 	}
 
 	/***
@@ -326,6 +336,9 @@ public class PunchServiceImpl implements PunchService {
 		return pdl;
 	}
 
+	/***
+	 * 计算每一天的打卡状态，返回值PDL 
+	 * */
 	private PunchLogsDayList caculateDayLog(Long userId, Long companyId,
 			Calendar logDay, PunchLogsDayList pdl) throws ParseException {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
@@ -1041,7 +1054,7 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchExceptionRequest> results = punchProvider
 				.listExceptionRequests(cmd.getUserId(), null,
 						cmd.getCompanyId(), cmd.getPunchDate(),
-						cmd.getPunchDate(), null, null, null, null,
+						cmd.getPunchDate(), null, null, 1, 999999,
 						PunchRquestType.REQUEST.getCode());
 		for (PunchExceptionRequest result : results) {
 
@@ -1099,5 +1112,27 @@ public class PunchServiceImpl implements PunchService {
 				: cmd.getPageOffset() + 1);
 		return response;
 
+	}
+
+	@Override
+	public getPunchNewExceptionResponse getPunchNewException(getPunchNewExceptionCommand cmd) {
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		Long userId = UserContext.current().getUser().getId();
+		getPunchNewExceptionResponse response = new getPunchNewExceptionResponse();
+		response.setExceptionCode(ExceptionStatus.NORMAL.getCode());
+		//TODO：从本月初，或者第一次打卡开始
+		Calendar start = Calendar.getInstance();
+		//月初
+		Calendar monthStart = Calendar.getInstance();
+		monthStart.set(GregorianCalendar.DAY_OF_MONTH, 1); 
+		//前一天
+		Calendar end = Calendar.getInstance();
+		end.add(Calendar.DAY_OF_MONTH, -1);
+		//找出异常的记录
+		List<PunchDayLog> PunchDayLogs = punchProvider.listPunchDayExceptionLogs(
+						userId,cmd.getCompanyId(), dateSF.format(start.getTime()), dateSF.format(end.getTime())); 
+		if(PunchDayLogs.size() >0)
+			response.setExceptionCode(ExceptionStatus.EXCEPTION.getCode());
+		return response;
 	}
 }

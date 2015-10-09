@@ -67,6 +67,7 @@ CREATE TABLE `eh_punch_day_logs` (
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
 	`creator_uid` bigint,
 	`create_time` datetime,
+	'view_flag'TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -127,6 +128,7 @@ CREATE TABLE `eh_punch_exception_requests` (
 	`create_time` datetime,
   `operator_uid` bigint,
   `operate_time` datetime,
+	'view_flag'TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -144,6 +146,7 @@ CREATE TABLE `eh_punch_exception_approvals` (
 	`create_time` datetime,
   `operator_uid` bigint,
   `operate_time` datetime,
+	'view_flag'TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
