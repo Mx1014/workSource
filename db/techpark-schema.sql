@@ -2,8 +2,6 @@
 USE `ehcore`;
 
 
-
-
 /*Table structure for table `eh_company_phone_list` */
 
 DROP TABLE IF EXISTS `eh_group_contacts`;
