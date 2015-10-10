@@ -2246,8 +2246,9 @@ public class ForumServiceImpl implements ForumService {
 		PostAdminQueryFilter filter = new PostAdminQueryFilter();
         String keyword = cmd.getKeyword();
         if(!StringUtils.isEmpty(keyword)) {
-            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
-            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
+//            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
+//            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_CREATORNICKNAME);
             filter.setQueryString(keyword);
         }
         
@@ -2256,10 +2257,10 @@ public class ForumServiceImpl implements ForumService {
             filter.includeFilter(PostAdminQueryFilter.TERM_IDENTIFY, phones);
         }
         
-        List<String> nickNames = cmd.getSenderNickNames();
-        if(nickNames != null && nickNames.size() > 0) {
-            filter.includeFilter(PostAdminQueryFilter.TERM_SENDERNAME, nickNames);
-        }
+//        List<String> nickNames = cmd.getSenderNickNames();
+//        if(nickNames != null && nickNames.size() > 0) {
+//            filter.includeFilter(PostAdminQueryFilter.TERM_CREATORNICKNAME, nickNames);
+//        }
         
         List<Long> parentPostId = new ArrayList<Long>();
         parentPostId.add(0L);

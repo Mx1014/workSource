@@ -97,7 +97,7 @@ public class PostAdminDTO {
     
     private String creatorAddress;
 
-    public String getCreatorAddress() {
+	public String getCreatorAddress() {
 		return creatorAddress;
 	}
 
