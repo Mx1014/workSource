@@ -13,6 +13,7 @@ import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record2;
+import org.jooq.Record3;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
@@ -792,30 +793,31 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public List<UserPunchStatusCount> listUserStatusPunch(Long companyId, Byte status, String startDay,
+	public List<UserPunchStatusCount> listUserStatusPunch(Long companyId,  String startDay,
 			String endDay) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		Condition condition = Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.eq(companyId);
-		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.equal(status));
-		
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
 		}     
 		
-		SelectHavingStep<Record2<Long, Integer>> step = context.select(Tables.EH_PUNCH_DAY_LOGS.USER_ID,
+		
+		SelectHavingStep<Record3<Long, Byte,Integer>> step = context.select(Tables.EH_PUNCH_DAY_LOGS.USER_ID,Tables.EH_PUNCH_DAY_LOGS.STATUS,
 				Tables.EH_PUNCH_DAY_LOGS.ID.count())
-				.from(Tables.EH_PUNCH_DAY_LOGS).where(condition)
-				.groupBy(Tables.EH_PUNCH_DAY_LOGS.USER_ID);
+				.from(Tables.EH_PUNCH_DAY_LOGS)
+				.where(condition)
+				.groupBy(Tables.EH_PUNCH_DAY_LOGS.STATUS,Tables.EH_PUNCH_DAY_LOGS.USER_ID);
 
 		List<UserPunchStatusCount> result = new ArrayList<UserPunchStatusCount>();
 		step.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc())
 				.fetch().map((r) -> {
 					UserPunchStatusCount userPunchStatusCount = new UserPunchStatusCount();
 					userPunchStatusCount.setUserId(r.value1()); 
-			    	userPunchStatusCount.setCount(r.value2());
+					userPunchStatusCount.setStatus(r.value2());
+			    	userPunchStatusCount.setCount(r.value3());
 			    	result.add(userPunchStatusCount);
 			    	return null;
 				});

@@ -15,9 +15,9 @@ import com.everhomes.util.StringHelper;
 public class ListPunchCountCommand {
 	@NotNull
 	private Long    companyId;
-	@NotNull
+	
 	private String startDay;
-	@NotNull
+	
 	private String endDay;
 	
 	
