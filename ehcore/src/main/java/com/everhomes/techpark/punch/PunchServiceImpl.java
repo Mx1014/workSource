@@ -1177,6 +1177,7 @@ public class PunchServiceImpl implements PunchService {
 				.map(r -> {
 					PunchStatisticsDTO dto = ConvertHelper.convert(r,
 							PunchStatisticsDTO.class);
+					processPunchStatisticsDTOTime(dto,r);
 					if(dto != null){
 						GroupContact groupContact = groupContactProvider
 								.findGroupContactByUserId(dto.getUserId());
@@ -1193,6 +1194,12 @@ public class PunchServiceImpl implements PunchService {
 				: cmd.getPageOffset() + 1);
 		return response;
 
+	}
+
+	private void processPunchStatisticsDTOTime(PunchStatisticsDTO dto, PunchDayLog r) {
+		dto.setArriveTime(String.format("%tT", r.getArriveTime()));
+		dto.setLeaveTime(String.format("%tT", r.getLeaveTime()));
+		dto.setWorkTime(String.format("%tT", r.getWorkTime()));
 	}
 
 	@Override
