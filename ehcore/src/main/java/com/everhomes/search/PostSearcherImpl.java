@@ -168,6 +168,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     public void bulkUpdate(List<Post> posts) {
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (Post post : posts) {
+        	if(post.getId() == 189071) {
+        		LOGGER.info("test id:" + post.getId());	
+        	}
             XContentBuilder source = createDoc(post);
             if(null != source) {
                 LOGGER.info("id:" + post.getId());
