@@ -1185,7 +1185,15 @@ public class PunchServiceImpl implements PunchService {
 						dto.setToken(groupContact.getContactToken());
 						
 						PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(), dto.getCompanyId(), dto.getPunchDate());
-						dto.setApprovalStatus(approval!=null?approval.getApprovalStatus():0);
+						if(approval != null){
+							dto.setApprovalStatus(approval.getApprovalStatus());
+							GroupContact groupContactOperator = groupContactProvider
+									.findGroupContactByUserId(approval.getOperatorUid());
+							dto.setOperatorName(groupContactOperator.getContactName());
+						}
+						else{
+							dto.setApprovalStatus((byte) 0);
+						}
 					}
 					return dto;
 				}).collect(Collectors.toList()));
