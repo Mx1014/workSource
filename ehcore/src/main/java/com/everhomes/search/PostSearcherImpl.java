@@ -42,6 +42,7 @@ import com.everhomes.forum.ListPostCommandResponse;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostDTO;
 import com.everhomes.forum.PostQueryResult;
+import com.everhomes.forum.PostStatus;
 import com.everhomes.forum.SearchTopicCommand;
 import com.everhomes.group.GroupDTO;
 import com.everhomes.group.GroupService;
@@ -211,6 +212,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 //query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0l));
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
                 return query;
             }
             
@@ -367,7 +369,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Override
    public ListPostCommandResponse query(QueryMaker filter) {
-       SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+       SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
        filter.makeQueryBuilder(builder);
        
        SearchResponse rsp = builder.execute().actionGet();

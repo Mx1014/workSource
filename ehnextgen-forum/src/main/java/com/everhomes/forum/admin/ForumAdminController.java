@@ -50,8 +50,7 @@ public class ForumAdminController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-        //TODO fix use POST
-        searchSyncManager.SyncDb(SearchSyncType.ALL);
+        searchSyncManager.SyncDb(SearchSyncType.POST);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
