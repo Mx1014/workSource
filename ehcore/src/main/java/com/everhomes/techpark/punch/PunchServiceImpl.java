@@ -815,6 +815,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 
+	//计算两个日期间工作日天数，不包含结束时间
  	private Integer countWorkDayCount(String startDay, String endDay) {
  		Integer workDayCount = 0;
     	try {
@@ -1255,10 +1256,16 @@ public class PunchServiceImpl implements PunchService {
     	return response;
 	}
 
-	private void processPunchCountList(Map<Long, PunchCountDTO> map, Long companyId,String startDay, String endDay) {
-		Integer workDayCount = countWorkDayCount(startDay,endDay);
-		List<UserPunchStatusCount>  countList = punchProvider.listUserStatusPunch(companyId, startDay, endDay);
-		if(countList != null && countList.size() > 0){
+	 private void processPunchCountList(Map<Long, PunchCountDTO> map, Long companyId,String startDay, String endDay) {
+	    	List<UserPunchStatusCount>  approvalCountList = punchProvider.listUserApprovalStatusPunch(companyId, startDay, endDay);
+			List<UserPunchStatusCount>  countList = punchProvider.listUserStatusPunch(companyId, startDay, endDay);
+			Integer workDayCount = countWorkDayCount(startDay,endDay);
+			processMap(map,approvalCountList,workDayCount);
+			processMap(map,countList,workDayCount);
+			
+		}
+    private void processMap(Map<Long, PunchCountDTO> map, List<UserPunchStatusCount> countList,Integer workDayCount) {
+    	if(countList != null && countList.size() > 0){
 			for (UserPunchStatusCount userPunchStatusCount : countList) {
 				Long userId =  userPunchStatusCount.getUserId();
 				if(map.containsKey(userId)){
@@ -1271,29 +1278,34 @@ public class PunchServiceImpl implements PunchService {
 					dto.setUserId(userPunchStatusCount.getUserId());
 					dto.setWorkDayCount(workDayCount);
 					processPunchCountStatus(dto,userPunchStatusCount.getStatus(),userPunchStatusCount);
+					GroupContact groupContact = groupContactProvider
+							.findGroupContactByUserId(dto.getUserId());
+					dto.setUserName(groupContact.getContactName());
+					dto.setToken(groupContact.getContactToken());
 					map.put(userId, dto);
 				}
 			}
 		}
 	}
-   private void processPunchCountStatus(PunchCountDTO dto, Byte status,UserPunchStatusCount userPunchStatusCount) {
-		if(status.equals(ApprovalStatus.NORMAL.getCode())){
+
+    private void processPunchCountStatus(PunchCountDTO dto, Byte status,UserPunchStatusCount userPunchStatusCount) {
+		if(status.equals(ApprovalStatus.NORMAL.getCode()) &&  (dto.getWorkCount() ==null || dto.getWorkCount() ==0 ) ){
 			dto.setWorkCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.ABSENCE.getCode())){
+		}else if(status.equals(ApprovalStatus.ABSENCE.getCode()) &&  (dto.getAbsenceCount() ==null || dto.getAbsenceCount() ==0 )  ){
 			dto.setAbsenceCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.BELATE.getCode())){
+		}else if(status.equals(ApprovalStatus.BELATE.getCode())  &&  (dto.getBelateCount() ==null || dto.getBelateCount() ==0 )  ){
 			dto.setBelateCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.BLANDLE.getCode())){
+		}else if(status.equals(ApprovalStatus.BLANDLE.getCode()) &&  (dto.getBlandleCount() ==null || dto.getBlandleCount() ==0 )  ){
 			dto.setBlandleCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.EXCHANGE.getCode())){
+		}else if(status.equals(ApprovalStatus.EXCHANGE.getCode()) &&  (dto.getExchangeCount() ==null || dto.getExchangeCount() ==0 )  ){
 			dto.setExchangeCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.LEAVEEARLY.getCode())){
+		}else if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()) &&  (dto.getLeaveEarlyCount() ==null || dto.getLeaveEarlyCount() ==0 )  ){
 			dto.setLeaveEarlyCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.OUTWORK.getCode())){
+		}else if(status.equals(ApprovalStatus.OUTWORK.getCode()) &&  (dto.getOutworkCount() ==null || dto.getOutworkCount() ==0 )  ){
 			dto.setOutworkCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.SICK.getCode())){
+		}else if(status.equals(ApprovalStatus.SICK.getCode()) &&  (dto.getSickCount() ==null || dto.getSickCount() ==0 )  ){
 			dto.setSickCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.UNPUNCH.getCode())){
+		}else if(status.equals(ApprovalStatus.UNPUNCH.getCode()) &&  (dto.getUnPunchCount() ==null || dto.getUnPunchCount() ==0 )  ){
 			dto.setUnPunchCount(userPunchStatusCount.getCount());
 		}
 		

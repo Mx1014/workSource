@@ -824,5 +824,38 @@ public class PunchProviderImpl implements PunchProvider {
 		return result;
 		
 	}
+	
+	@Override
+	public List<UserPunchStatusCount> listUserApprovalStatusPunch(Long companyId,  String startDay,
+			String endDay) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.eq(companyId);
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.between(startDate).and(endDate));
+		}     
+		
+		
+		SelectHavingStep<Record3<Long, Byte,Integer>> step = context.select(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID,Tables.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS,
+				Tables.EH_PUNCH_EXCEPTION_APPROVALS.ID.count())
+				.from(Tables.EH_PUNCH_EXCEPTION_APPROVALS)
+				.where(condition)
+				.groupBy(Tables.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS,Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID);
+
+		List<UserPunchStatusCount> result = new ArrayList<UserPunchStatusCount>();
+		step.orderBy(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ID.desc())
+				.fetch().map((r) -> {
+					UserPunchStatusCount userPunchStatusCount = new UserPunchStatusCount();
+					userPunchStatusCount.setUserId(r.value1()); 
+					userPunchStatusCount.setStatus(r.value2());
+			    	userPunchStatusCount.setCount(r.value3());
+			    	result.add(userPunchStatusCount);
+			    	return null;
+				});
+		return result;
+		
+	}
 }
 
