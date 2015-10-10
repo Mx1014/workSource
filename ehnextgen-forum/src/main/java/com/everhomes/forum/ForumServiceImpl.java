@@ -2246,8 +2246,8 @@ public class ForumServiceImpl implements ForumService {
 		PostAdminQueryFilter filter = new PostAdminQueryFilter();
         String keyword = cmd.getKeyword();
         if(!StringUtils.isEmpty(keyword)) {
-//            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
-//            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
             filter.addQueryTerm(PostAdminQueryFilter.TERM_CREATORNICKNAME);
             filter.setQueryString(keyword);
         }
