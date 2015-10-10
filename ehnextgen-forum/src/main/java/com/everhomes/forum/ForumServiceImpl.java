@@ -4,6 +4,7 @@ package com.everhomes.forum;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +145,9 @@ public class ForumServiceImpl implements ForumService {
     @Autowired
     private FamilyProvider familyProvider;
     
+    @Autowired
+    private HotPostService hotPostService;
+    
     @Override
     public boolean isSystemForum(long forumId) {
         return forumId == ForumConstants.SYSTEM_FORUM;
@@ -222,6 +226,23 @@ public class ForumServiceImpl implements ForumService {
                     Post tmpPost = this.forumProvider.findPostById(postId);
                     tmpPost.setViewCount(tmpPost.getViewCount() + 1);
                     this.forumProvider.updatePost(tmpPost);
+                    
+                    String creatorUid = Long.toString(tmpPost.getCreatorUid());
+                    String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
+                    boolean flag = false;
+                    for(String hotuser : hotusers){
+                    	if(creatorUid == hotuser){
+                    		flag = true;
+                    	}
+                    }
+                    if(Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag){
+                    	HotPost hotpost = new HotPost();
+                        hotpost.setPostId(postId);
+                        hotpost.setTimeStamp(Calendar.getInstance().getTimeInMillis());
+                        hotpost.setModifyType(HotPostModifyType.VIEW.getCode());
+                        hotPostService.push(hotpost);
+                    }
+                    
                     return null;
                 });
             } catch(Exception e) {
@@ -676,6 +697,22 @@ public class ForumServiceImpl implements ForumService {
         try {
             this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                 this.forumProvider.likePost(operatorId, topicId);
+                Post tmpPost = this.forumProvider.findPostById(topicId);
+                String creatorUid = Long.toString(tmpPost.getCreatorUid());
+                String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
+                boolean flag = false;
+                for(String hotuser : hotusers){
+                	if(creatorUid == hotuser){
+                		flag = true;
+                	}
+                }
+                if(Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag){
+                	HotPost hotpost = new HotPost();
+                    hotpost.setPostId(topicId);
+                    hotpost.setTimeStamp(Calendar.getInstance().getTimeInMillis());
+                    hotpost.setModifyType(HotPostModifyType.LIKE.getCode());
+                    hotPostService.push(hotpost);
+                }
                return null;
             });
         } catch(Exception e) {
