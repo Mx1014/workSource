@@ -257,4 +257,20 @@ public class PunchController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/punch/listPunchCount</b>
+	 * <p>
+	 * 查询公司考勤的统计结果
+	 * </p>
+	 */
+	@RequestMapping("listPunchCount")
+	@RestReturn(value = ListPunchCountCommandResponse.class)
+	public RestResponse listPunchCount(@Valid ListPunchCountCommand cmd) {
+		ListPunchCountCommandResponse commandResponse = punchService.listPunchCount(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

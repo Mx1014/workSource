@@ -7,9 +7,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -1202,4 +1205,76 @@ public class PunchServiceImpl implements PunchService {
 		punchProvider.viewDateFlags(userId, cmd.getCompanyId(), dateSF.format(logDay.getTime()));
 		return pdl;
 	}
+	
+	@Override
+	public ListPunchCountCommandResponse listPunchCount(ListPunchCountCommand cmd) {
+		ListPunchCountCommandResponse response = new ListPunchCountCommandResponse();
+		List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
+    	Map<Long, PunchCountDTO> map = new HashMap<Long, PunchCountDTO>();
+    	for (byte i = 0; i < ApprovalStatus.OUTWORK.getCode(); i++) {
+    		processPunchCountList(map,cmd.getCompanyId(), i,cmd.getStartDay(), cmd.getEndDay());
+		}
+    	Collection<PunchCountDTO> dtos = map.values();
+    	if(map != null && map.size() > 0){
+	    	for (PunchCountDTO punchCountDTO : dtos) {
+	    		punchCountDTOList.add(punchCountDTO);
+			}
+    	}
+    	response.setPunchCountList(punchCountDTOList);
+    	return response;
+	}
+
+	 private void processPunchCountList(Map<Long, PunchCountDTO> map, Long companyId, Byte status,
+				String startDay, String endDay) {
+			List<UserPunchStatusCount>  countList = punchProvider.listUserStatusPunch(companyId, status,startDay, endDay);
+			if(countList != null && countList.size() > 0){
+				for (UserPunchStatusCount userPunchStatusCount : countList) {
+					Long userId =  userPunchStatusCount.getUserId();
+					if(map.containsKey(userId)){
+						PunchCountDTO dto = map.get(userId);
+						dto.setUserId(userPunchStatusCount.getUserId());
+						GroupContact groupContact = groupContactProvider
+								.findGroupContactByUserId(dto.getUserId());
+						dto.setUserName(groupContact.getContactName());
+						dto.setToken(groupContact.getContactToken());
+						processPunchCountStatus(dto,status,userPunchStatusCount);
+						
+					}
+					else{
+						PunchCountDTO dto = new PunchCountDTO();
+						dto.setUserId(userPunchStatusCount.getUserId());
+						GroupContact groupContact = groupContactProvider
+								.findGroupContactByUserId(dto.getUserId());
+						dto.setUserName(groupContact.getContactName());
+						dto.setToken(groupContact.getContactToken());
+						processPunchCountStatus(dto,status,userPunchStatusCount);
+						map.put(userId, dto);
+					}
+				}
+			}
+		}
+	    private void processPunchCountStatus(PunchCountDTO dto, Byte status,UserPunchStatusCount userPunchStatusCount) {
+			if(status.equals(ApprovalStatus.NORMAL.getCode())){
+				dto.setWorkCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.ABSENCE.getCode())){
+				dto.setAbsenceCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.BELATE.getCode())){
+				dto.setBelateCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.BLANDLE.getCode())){
+				dto.setBlandleCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.EXCHANGE.getCode())){
+				dto.setExchangeCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.LEAVEEARLY.getCode())){
+				dto.setLeaveEarlyCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.OUTWORK.getCode())){
+				dto.setOutworkCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.SICK.getCode())){
+				dto.setSickCount(userPunchStatusCount.getCount());
+			}else if(status.equals(ApprovalStatus.UNPUNCH.getCode())){
+				dto.setUnPunchCount(userPunchStatusCount.getCount());
+			}
+			
+		}
+
+	
 }
