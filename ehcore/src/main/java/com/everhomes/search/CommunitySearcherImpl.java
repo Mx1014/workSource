@@ -127,7 +127,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
 
     @Override
     public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long regionId, int pageNum, int pageSize) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb;
         
