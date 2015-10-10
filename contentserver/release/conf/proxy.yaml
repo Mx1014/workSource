@@ -1,0 +1,18 @@
+servers:
+- localhost:7900 0 1 2 3 4 5 6 7 8 9 A B C D E F 0 1 2 3 4 5 6 7
+- 127.0.0.1:7900 0 1 2 3 4 5 6 7 8 9 A B C D E F 8 9 A B C D E F
+port: 7905
+webport: 7908
+threads: 4
+n: 3
+w: 1
+r: 1
+buckets: 16
+slow: 200
+listen: 0.0.0.0
+proxies:
+- localhost:7905
+accesslog: /data1/ehserver/server/content/logs/beansproxy.log
+errorlog: /data1/ehserver/server/content/logs/beansproxy_error.log
+basepath: /data1/ehserver/server/content
+readonly: false
