@@ -226,12 +226,12 @@ public class ForumServiceImpl implements ForumService {
                     Post tmpPost = this.forumProvider.findPostById(postId);
                     tmpPost.setViewCount(tmpPost.getViewCount() + 1);
                     this.forumProvider.updatePost(tmpPost);
-                    
-                    String creatorUid = Long.toString(tmpPost.getCreatorUid());
+                    UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(tmpPost.getCreatorUid(),IdentifierType.MOBILE.getCode());
+                    String creatorUser = userIdentifier.getIdentifierToken();
                     String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
                     boolean flag = false;
                     for(String hotuser : hotusers){
-                    	if(creatorUid == hotuser){
+                    	if(creatorUser == hotuser || creatorUser.equals(hotuser)){
                     		flag = true;
                     	}
                     }

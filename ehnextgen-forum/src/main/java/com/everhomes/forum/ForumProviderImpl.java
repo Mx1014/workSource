@@ -66,7 +66,6 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 @Component
 public class ForumProviderImpl implements ForumProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ForumProviderImpl.class);
-    private static HotPost hot = null;
     
     @Autowired 
     private SequenceProvider sequenceProvider;
@@ -865,22 +864,23 @@ public class ForumProviderImpl implements ForumProvider {
     }
 
 	@Override
-	@Scheduled(cron="0 0/1 *  * * ? ")
+	@Scheduled(cron="0 0/2 *  * * ? ")
 	public void modifyHotPost() {
-		if(hot != null){
-			modifyHot(hot);
-			hot = null;
-		}
 		
 		while(true){
 			HotPost hotpost = hotPostService.pull();
-			Long current = Calendar.getInstance().getTimeInMillis();
-			long diff = (current-hot.getTimeStamp())/60000;
-			if(diff>=1){
+			if(hotpost != null){
+				long posttime = hotpost.getTimeStamp();
+				long current = Calendar.getInstance().getTimeInMillis();
+				long diff = (current-posttime)/60000;
+				
 				modifyHot(hotpost);
+				
+				if(diff<1){
+					break;
+				}
 			}
-			if(diff<1){
-				hot = hotpost;
+			else{
 				break;
 			}
 		}
