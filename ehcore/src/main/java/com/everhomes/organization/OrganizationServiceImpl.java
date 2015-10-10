@@ -2205,17 +2205,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			//createTime
 			Date createDate = null;
 			if(r.getCreateTime() != null){
-				/*if(LOGGER.isDebugEnabled())
-					LOGGER.error("executeImportOrgPost-createDateStr="+r.getCreateTime());*/
-				
 				try {
 					createDate = format.parse(r.getCreateTime());
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(createDate);
-					cal.set(Calendar.HOUR_OF_DAY, (int)(Math.random()*24));
-					cal.set(Calendar.MINUTE,(int)(Math.random()*60));
-					cal.set(Calendar.SECOND,(int)(Math.random()*60));
-					createDate = cal.getTime();
 				}
 				catch (ParseException e) {
 					LOGGER.error("post create date not format to MM/dd/yy.createDateStr="+r.getCreateTime());
@@ -2223,6 +2214,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 							"post create date not format to MM/dd/yy.");
 				}
 			}
+			else{
+				createDate = new Date();
+			}
+			
+			createDate = this.getRadomTime(createDate);
 			Timestamp currentTime = new Timestamp(createDate.getTime());
 
 			//city
@@ -2381,6 +2377,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		long endTime = System.currentTimeMillis();
 		LOGGER.info(parseBeginTime+"executeImportOrgPost-executeElapse="+(endTime-beginTime));
+	}
+
+	private Date getRadomTime(Date createDate) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(createDate);
+		int hour = (int)(Math.random()*24);
+		if(hour < 8 )
+			hour = 10;
+		else if(hour > 17)
+			hour = 15;
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getRadomTime-hour="+hour);
+			
+		cal.set(Calendar.HOUR_OF_DAY, hour);
+		cal.set(Calendar.MINUTE,(int)(Math.random()*60));
+		cal.set(Calendar.SECOND,(int)(Math.random()*60));
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getRadomTime-time="+cal.getTime());
+		return cal.getTime();
 	}
 
 	private Category checkCategory(Long postType) {
