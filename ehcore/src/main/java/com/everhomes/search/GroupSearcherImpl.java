@@ -46,7 +46,7 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     
     @Override
     public GroupQueryResult query(QueryMaker filter) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         filter.makeQueryBuilder(builder);
         
         SearchResponse rsp = builder.execute().actionGet();

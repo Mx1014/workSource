@@ -293,7 +293,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 
     @Override
     public ListPostCommandResponse query(SearchTopicCommand cmd) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb = null;
         if(cmd.getQueryString() == null || cmd.getQueryString().isEmpty()) {
