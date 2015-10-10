@@ -12,7 +12,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -2218,7 +2217,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				createDate = new Date();
 			}
 			
-			createDate = this.getRadomTime(createDate);
+			createDate = OrgDateUtils.getRadomTime(createDate);
 			Timestamp currentTime = new Timestamp(createDate.getTime());
 
 			//city
@@ -2377,27 +2376,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		long endTime = System.currentTimeMillis();
 		LOGGER.info(parseBeginTime+"executeImportOrgPost-executeElapse="+(endTime-beginTime));
-	}
-
-	private Date getRadomTime(Date createDate) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(createDate);
-		int hour = (int)(Math.random()*24);
-		if(hour < 8 )
-			hour = 10;
-		else if(hour > 17)
-			hour = 15;
-		
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("getRadomTime-hour="+hour);
-			
-		cal.set(Calendar.HOUR_OF_DAY, hour);
-		cal.set(Calendar.MINUTE,(int)(Math.random()*60));
-		cal.set(Calendar.SECOND,(int)(Math.random()*60));
-		
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("getRadomTime-time="+cal.getTime());
-		return cal.getTime();
 	}
 
 	private Category checkCategory(Long postType) {
