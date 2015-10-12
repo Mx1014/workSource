@@ -198,4 +198,17 @@ public class ActivityController extends ControllerBase {
         rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
+    
+    /**
+     * 查询周边和同城活动：周边活动range传入6，同城活动range传入4
+     * @return {@link }
+     */
+    @RequestMapping("listActivitiesByTag")
+    @RestReturn(value=ListActivitiesReponse.class)
+   public RestResponse listActivitiesByTag(@Valid ListActivitiesByTagCommand cmd){
+        Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByTag(cmd);
+        ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
+       return new RestResponse(rsp);
+   }
+    
 }
