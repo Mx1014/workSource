@@ -2188,11 +2188,13 @@ public class ForumServiceImpl implements ForumService {
                 switch(regionType) {
                 case COMMUNITY:
                     Community community = communityProvider.findCommunityById(regionId);
-                    forumName = community.getName() + forumName;
+                    if(community != null)
+                    	forumName = community.getName() + forumName;
                     break;
                 case REGION:
                     Organization organization = organizationProvider.findOrganizationById(regionId);
-                    forumName = organization.getName();
+                    if(organization !=null)
+                    	forumName = organization.getName();
                     break;
                 default:
                     LOGGER.error("Unsupported visible region type, userId=" + userId 
