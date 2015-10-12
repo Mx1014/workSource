@@ -5,23 +5,29 @@ import com.everhomes.util.StringHelper;
  * 
  *<ul>
  *<li>tag:活动标签</li>
- *<li>longitude:经度</li>
- *<li>latitude:纬度</li>
+ *<li>community_id:小区id</li>
  *<li>anchor:分页</li>
  *<li>range:范围,周边活动传入6；同城活动传入4</li>
  *</ul>
  */
 public class ListActivitiesByTagCommand {
     private String tag;
-    private Double longitude;
-
-    private Double latitude;
-
+    
+    private Long community_id;
+    
     private Long anchor;
     
     private int range;
     
-    public int getRange() {
+    public Long getCommunity_id() {
+		return community_id;
+	}
+
+	public void setCommunity_id(Long community_id) {
+		this.community_id = community_id;
+	}
+
+	public int getRange() {
 		return range;
 	}
 
@@ -43,22 +49,6 @@ public class ListActivitiesByTagCommand {
 
     public void setAnchor(Long anchor) {
         this.anchor = anchor;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
     }
 
     @Override

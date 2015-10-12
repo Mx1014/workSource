@@ -1117,19 +1117,27 @@ public class ActivityServiceImpl implements ActivityService {
         if(!StringUtils.isEmpty(cmd.getTag())){
             condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
         }
-        List<Condition> conditions =new ArrayList<Condition>();
-        if(cmd.getLatitude()!=null&&cmd.getLongitude()!=null){     
-            double latitude= cmd.getLatitude();
-            double longitude=cmd.getLongitude();
-            GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, cmd.getRange());
-            GeoHash[] adjacents = geo.getAdjacent();
-            List<String> geoHashCodes = new ArrayList<String>();
-            geoHashCodes.add(geo.toBase32());
-            for(GeoHash g : adjacents) {
-                geoHashCodes.add(g.toBase32());
-            }
-            conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
-        }
+        
+        List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmd.getCommunity_id());
+        int range = cmd.getRange();
+		
+		List<String> geoHashCodes = new ArrayList<String>();
+		
+		for(CommunityGeoPoint geoPoint : geoPoints){
+			
+			double latitude = geoPoint.getLatitude();
+			double longitude = geoPoint.getLongitude();
+			
+			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, range);
+			
+			GeoHash[] adjacents = geo.getAdjacent();
+			geoHashCodes.add(geo.toBase32());
+	        for(GeoHash g : adjacents) {
+	           geoHashCodes.add(g.toBase32());
+	        }
+		}
+		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+        
         int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
         List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
