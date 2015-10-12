@@ -2532,6 +2532,6 @@ CREATE TABLE `eh_push_message_results` (
     `message_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
     `identifier_token` VARCHAR(128)
-)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;
