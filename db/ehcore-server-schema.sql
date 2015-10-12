@@ -2508,4 +2508,30 @@ CREATE TABLE `eh_thirdpart_users` (
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_push_messages`;
+CREATE TABLE `eh_push_messages` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `message_type` int(11) NOT NULL DEFAULT '0',
+    `title` VARCHAR(128) COMMENT 'title of message',
+    `content` VARCHAR(4096) COMMENT 'content for message',
+    `target_type` int(11) NOT NULL DEFAULT '0',
+    `target_id` bigint(20) NOT NULL DEFAULT '0',
+    `status` int(11) NOT NULL DEFAULT '0',
+    `create_time` datetime DEFAULT NULL,
+    `start_time` datetime DEFAULT NULL,
+    `device_type` VARCHAR(64),
+    `device_tag` VARCHAR(64),
+    `app_version` VARCHAR(64),
+    `count` bigint(20) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_push_message_results`;
+CREATE TABLE `eh_push_message_results` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `message_id` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `identifier_token` VARCHAR(128)
+)
+
 SET foreign_key_checks = 1;
