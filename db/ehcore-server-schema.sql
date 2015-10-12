@@ -2519,6 +2519,7 @@ CREATE TABLE `eh_push_messages` (
     `status` INT NOT NULL DEFAULT 0 COMMENT 'WAITING, RUNNING, FINISHED',
     `create_time` DATETIME DEFAULT NULL,
     `start_time` DATETIME DEFAULT NULL,
+    `finish_time` DATETIME DEFAULT NULL,
     `device_type` VARCHAR(64),
     `device_tag` VARCHAR(64),
     `app_version` VARCHAR(64),
