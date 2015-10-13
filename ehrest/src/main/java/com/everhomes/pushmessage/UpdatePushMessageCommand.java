@@ -3,13 +3,14 @@ package com.everhomes.pushmessage;
 import javax.validation.constraints.NotNull;
 
 /**
- * <ul> 创建推送消息
- * <li>title: 推送标题</li>
- * </ul>
+ * 修改为执行的推送消息，修改之后，之前的条目将作废。
  * @author janson
  *
  */
-public class CreatePushMessageCommand {
+public class UpdatePushMessageCommand {
+    @NotNull
+    private Long id;
+    
     @NotNull
     private Byte     messageType;
     
@@ -29,6 +30,12 @@ public class CreatePushMessageCommand {
     private String   deviceTag;
     private String   appVersion;
     
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
     public Byte getMessageType() {
         return messageType;
     }
