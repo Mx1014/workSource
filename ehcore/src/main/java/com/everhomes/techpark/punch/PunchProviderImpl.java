@@ -729,7 +729,7 @@ public class PunchProviderImpl implements PunchProvider {
 		}
 		if(null!= arriveTimeCompareFlag &&!StringUtils.isEmpty(arriveTime)){
 			Time sqlArriveTime = Time.valueOf(arriveTime);
-			if(arriveTimeCompareFlag.equals(0)){
+			if(arriveTimeCompareFlag.equals(TimeCompareFlag.LESSOREQUAL.getCode())){
 				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.lessOrEqual(sqlArriveTime));
 			}else{
 				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.greaterOrEqual(sqlArriveTime));
@@ -737,18 +737,18 @@ public class PunchProviderImpl implements PunchProvider {
 		}
 		if(null!= leaveTimeCompareFlag &&!StringUtils.isEmpty(leaveTime)){
 			Time sqlLeaveTime = Time.valueOf(leaveTime);
-			if(leaveTimeCompareFlag.equals(0)){
-				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.lessOrEqual(sqlLeaveTime));
+			if(leaveTimeCompareFlag.equals(TimeCompareFlag.LESSOREQUAL.getCode())){
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.LEAVE_TIME.lessOrEqual(sqlLeaveTime));
 			}else{
-				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.greaterOrEqual(sqlLeaveTime));
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.LEAVE_TIME.greaterOrEqual(sqlLeaveTime));
 			}
 		}
 		if(null!= workTimeCompareFlag &&!StringUtils.isEmpty(workTime)){
 			Time sqlWorkTime = Time.valueOf(workTime);
-			if(workTimeCompareFlag.equals(0)){
-				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.lessOrEqual(sqlWorkTime));
+			if(workTimeCompareFlag.equals(TimeCompareFlag.LESSOREQUAL.getCode())){
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.WORK_TIME.lessOrEqual(sqlWorkTime));
 			}else{
-				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ARRIVE_TIME.greaterOrEqual(sqlWorkTime));
+				condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.WORK_TIME.greaterOrEqual(sqlWorkTime));
 			}
 		}
 		if(null!= status && status != 0){
