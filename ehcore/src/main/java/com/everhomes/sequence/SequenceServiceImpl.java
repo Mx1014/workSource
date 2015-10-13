@@ -38,6 +38,7 @@ import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
 import com.everhomes.server.schema.tables.pojos.EhPollItems;
 import com.everhomes.server.schema.tables.pojos.EhPollVotes;
 import com.everhomes.server.schema.tables.pojos.EhPolls;
+import com.everhomes.server.schema.tables.pojos.EhPushMessageResults;
 import com.everhomes.server.schema.tables.pojos.EhQrcodes;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserGroups;
@@ -246,6 +247,10 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhBusinessCategories.class, Tables.EH_BUSINESS_CATEGORIES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_BUSINESS_CATEGORIES.ID.max()).from(Tables.EH_BUSINESS_CATEGORIES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhPushMessageResults.class, Tables.EH_PUSH_MESSAGE_RESULTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUSH_MESSAGE_RESULTS.ID.max()).from(Tables.EH_PUSH_MESSAGE_RESULTS).fetchOne().value1(); 
         });
     }
     
