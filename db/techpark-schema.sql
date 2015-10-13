@@ -29,7 +29,7 @@ CREATE TABLE `eh_group_contacts` (
 	`operator_uid` bigint,
 	`operate_time` datetime,
 	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -48,7 +48,7 @@ CREATE TABLE `eh_punch_logs` (
   `punch_time` datetime COMMENT 'user check time',
   `punch_status` tinyint(4) COMMENT '1:Normal ;  0:Not in punch area',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_punch_day_logs`;
 
@@ -66,7 +66,7 @@ CREATE TABLE `eh_punch_day_logs` (
 	`view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
  
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 /*Table structure for table `eh_punch_rules` */
@@ -87,7 +87,7 @@ CREATE TABLE `eh_punch_rules` (
   `operator_uid` bigint,
   `operate_time` datetime,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_punch_geopoints`;
 
@@ -126,7 +126,7 @@ CREATE TABLE `eh_punch_exception_requests` (
   `operate_time` datetime,
 	`view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -144,7 +144,7 @@ CREATE TABLE `eh_punch_exception_approvals` (
   `operate_time` datetime,
 	`view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -159,4 +159,4 @@ CREATE TABLE `eh_punch_workday` (
   `operator_uid` bigint,
   `operate_time` datetime,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

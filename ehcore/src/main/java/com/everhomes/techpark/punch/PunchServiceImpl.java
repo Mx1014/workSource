@@ -1141,10 +1141,7 @@ public class PunchServiceImpl implements PunchService {
 
 			result.setProcessCode(cmd.getProcessCode());
 			result.setProcessDetails(cmd.getProcessDetails());
-			result.setUserId(cmd.getUserId());
-			result.setCreatorUid(cmd.getCreatorUid());
-			result.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
+			result.setUserId(cmd.getUserId()); 
 			result.setOperatorUid(cmd.getOperatorUid());
 			result.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -1159,7 +1156,9 @@ public class PunchServiceImpl implements PunchService {
 		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = punchProvider.countPunchDayLogs(cmd.getKeyword(),
-				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getStatus());
+				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getArriveTimeCompareFlag(),
+				cmd.getArriveTime(),cmd.getLeaveTimeCompareFlag(),cmd.getLeaveTime(),cmd.getWorkTimeCompareFlag(),
+				cmd.getWorkTime(),cmd.getStatus());
 		if (totalCount == 0)
 			return response;
 
@@ -1170,7 +1169,9 @@ public class PunchServiceImpl implements PunchService {
 
 		List<PunchDayLog> result = punchProvider
 				.listPunchDayLogs(cmd.getKeyword(),
-						cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getStatus(), cmd.getPageOffset(),
+						cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getStatus(),cmd.getArriveTimeCompareFlag(),
+						cmd.getArriveTime(),cmd.getLeaveTimeCompareFlag(),cmd.getLeaveTime(),cmd.getWorkTimeCompareFlag(),
+						cmd.getWorkTime(), cmd.getPageOffset(),
 						pageSize);
 		response.setPunchList(result
 				.stream()
@@ -1183,9 +1184,9 @@ public class PunchServiceImpl implements PunchService {
 								.findGroupContactByUserId(dto.getUserId());
 						dto.setUserName(groupContact.getContactName());
 						dto.setToken(groupContact.getContactToken());
-						
+						dto.setUserDepartment(groupContact.getStringTag1());
 						PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(), dto.getCompanyId(), dto.getPunchDate());
-						if(approval != null){
+ 						if(approval != null){
 							dto.setApprovalStatus(approval.getApprovalStatus());
 							GroupContact groupContactOperator = groupContactProvider
 									.findGroupContactByUserId(approval.getOperatorUid());

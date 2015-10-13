@@ -12,6 +12,12 @@ import com.everhomes.util.StringHelper;
  * <li>startDay: 开始时间</li>
  * <li>endDay：结束时间</li>
  * <li>status: 处理状态</li>
+ * <li>arriveTimeCompareFlag：开始工作时间符号，大于等于或者小于等于  参考{@link com.everhomes.techpark.punch.TimeCompareFlag}</li>
+ * <li>arriveTime：开始工作时间 </li>
+ * <li>leaveTimeCompareFlag：结束工作时间符号，大于等于或者小于等于  参考{@link com.everhomes.techpark.punch.TimeCompareFlag}</li>
+ * <li>leaveTime：结束工作时间</li>
+ * <li>workTimeCompareFlag：工作时长时间符号，大于等于或者小于等于  参考{@link com.everhomes.techpark.punch.TimeCompareFlag}</li>
+ * <li>workTime：每天工作时间 </li>
  * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -22,9 +28,16 @@ public class ListPunchStatisticsCommand {
 	private String keyword;
 	private String startDay;
 	private String endDay;
+	private Byte arriveTimeCompareFlag;
+	private String arriveTime;
+	private Byte leaveTimeCompareFlag;
+	private String leaveTime;
+	private Byte workTimeCompareFlag;
+	private String workTime;
 	private Byte status;
 	private Integer pageOffset;
 	private Integer pageSize;
+	
 	
 	public ListPunchStatisticsCommand() {
     }
@@ -74,4 +87,41 @@ public class ListPunchStatisticsCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	  
+	public Byte getWorkTimeCompareFlag() {
+		return workTimeCompareFlag;
+	}
+	public void setWorkTimeCompareFlag(Byte workTimeCompareFlag) {
+		this.workTimeCompareFlag = workTimeCompareFlag;
+	}
+	public String getWorkTime() {
+		return workTime;
+	}
+	public void setWorkTime(String workTime) {
+		this.workTime = workTime;
+	}
+	public Byte getArriveTimeCompareFlag() {
+		return arriveTimeCompareFlag;
+	}
+	public void setArriveTimeCompareFlag(Byte arriveTimeCompareFlag) {
+		this.arriveTimeCompareFlag = arriveTimeCompareFlag;
+	}
+	public String getArriveTime() {
+		return arriveTime;
+	}
+	public void setArriveTime(String arriveTime) {
+		this.arriveTime = arriveTime;
+	}
+	public Byte getLeaveTimeCompareFlag() {
+		return leaveTimeCompareFlag;
+	}
+	public void setLeaveTimeCompareFlag(Byte leaveTimeCompareFlag) {
+		this.leaveTimeCompareFlag = leaveTimeCompareFlag;
+	}
+	public String getLeaveTime() {
+		return leaveTime;
+	}
+	public void setLeaveTime(String leaveTime) {
+		this.leaveTime = leaveTime;
+	}
 }

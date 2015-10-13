@@ -8,9 +8,10 @@ import com.everhomes.util.StringHelper;
  /**
  * <ul>  
  * <li>id：</li>
- * <li>userId：申请人id</li>
- * <li>userName：申请人名称</li>
- * <li>token：申请人联系电话</li>
+ * <li>userId：用户id</li>
+ * <li>userName：用户名称</li>
+ * <li>userDepartment：部门</li>
+ * <li>token：用户联系电话</li>
  * <li>companyId：公司id</li>
  * <li>punchDate: 打卡日期</li>
  * <li>arriveTime：上班打卡时间</li>
@@ -27,6 +28,7 @@ public class PunchStatisticsDTO{
 	private Long     id;
 	private Long     userId;
 	private String     userName;
+	private String userDepartment;
 	private String     token;
 	private Long     companyId;
 	private Date     punchDate;
@@ -183,6 +185,16 @@ public class PunchStatisticsDTO{
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+	public String getUserDepartment() {
+		return userDepartment;
+	}
+
+
+	public void setUserDepartment(String userDepartment) {
+		this.userDepartment = userDepartment;
+	}
 
 
 
