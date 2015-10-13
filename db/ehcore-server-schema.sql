@@ -2529,7 +2529,7 @@ CREATE TABLE `eh_push_messages` (
 
 DROP TABLE IF EXISTS `eh_push_message_results`;
 CREATE TABLE `eh_push_message_results` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL COMMENT 'id of the push message result, not auto increment',
     `message_id` BIGINT NOT NULL DEFAULT 0,
     `user_id` BIGINT NOT NULL DEFAULT 0,
     `identifier_token` VARCHAR(128) COMMENT 'The mobile phone of user',
