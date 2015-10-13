@@ -160,3 +160,138 @@ CREATE TABLE `eh_punch_workday` (
   `operate_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+DROP TABLE IF EXISTS `eh_rental_rules`;
+
+
+CREATE TABLE `eh_rental_rules` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
+  `site_type` TIME COMMENT 'rule for what function ',
+  `rental_start_time` DATETIME,
+  `rental_end_time` DATETIME,
+  `pay_start_time` DATETIME,
+  `pay_end_time` DATETIME,
+  `payment_ratio` INT COMMENT 'payment ratio',
+  `time_tag1` TIME,
+  `time_tag2` TIME,
+  `time_tag3` TIME,
+  `date_tag1` DATE,
+  `date_tag2` DATE,
+  `date_tag3` DATE,
+  `datetime_tag1` DATETIME,
+  `datetime_tag2` DATETIME,
+  `datetime_tag3` DATETIME,
+  `integral_tag1` BIGINT(20) ,
+  `integral_tag2` BIGINT(20) ,
+  `integral_tag3` BIGINT(20) ,
+  `string_tag1` VARCHAR(128) ,
+  `string_tag2` VARCHAR(128) ,
+  `string_tag3` VARCHAR(128) ,
+  `byte_tag1` TINYINT(4),
+  `byte_tag2` TINYINT(4),
+  `byte_tag3` TINYINT(4),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_rental_sites`;
+
+
+CREATE TABLE `eh_rental_sites`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `parent_id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type` TIME COMMENT 'rule for what function ',
+  `building_name` VARCHAR(128) ,
+  `building_id` BIGINT, 
+  `address` VARCHAR(128) ,
+  `address_id` BIGINT,
+  `spec` VARCHAR(255)  COMMENT 'spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on',
+  `company_id` BIGINT,
+  `own_uid` BIGINT COMMENT ' charge   user id',
+  `contact_phonenum` VARCHAR(20),
+  `contact_phonenum2` VARCHAR(20),
+  `contact_phonenum3` VARCHAR(20),
+  `status` TINYINT(4),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_rental_site_items`;
+
+
+CREATE TABLE `eh_rental_site_items`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `rental_site_id` BIGINT NOT NULL COMMENT '  rental_site id', 
+  `name` VARCHAR(128) ,
+  `price` BIGINT, 
+  `counts` INT  COMMENT 'item count',
+  `status` TINYINT(4), 
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_rental_site_rules`;
+
+
+CREATE TABLE `eh_rental_site_rules`(
+  `id` BIGINT  NOT NULL COMMENT 'id',
+  `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
+  `rental_type` TINYINT(4) COMMENT '0: as hour:min  1-as day', 
+  `step_length_time` TIME 'if ordertype = 0 then useful',
+  `step_length_day` INT 'if ordertype = 1 then useful',
+  `begin_time` TIME,
+  `end_time` TIME,
+  `counts` INT  COMMENT 'site count',
+  `unit` DOUBLE COMMENT '1 or 0.5 basketball yard can rental half',
+  `price` BIGINT COMMENT 'how much every step every unit', 
+  `rule_date` DATE COMMENT 'what time',
+  `status` TINYINT(4) COMMENT '0:open  1:closed', 
+  `loop_type` TINYINT(4) COMMENT '0:everyday  1:everyweek 2:everymoth 3:everyyear 4:only one day', 
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_rental_bills`;
+
+
+CREATE TABLE `eh_rental_bills`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `rental_site_id` BIGINT NOT NULL COMMENT 'id',
+  `rental_uid` BIGINT ,
+  `rental_date` DATE ,
+  `start_time` DATETIME ,
+  `end_time` DATETIME, 
+  `rental_count` DOUBLE,
+  `pay_tatol_money` INT,
+  `reserve_money` INT,
+  `reserve_time` DATETIME,
+  `pay_start_time` DATETIME,
+  `pay_end_time` DATETIME,
+  `pay_time` DATETIME,  
+  `status` TINYINT(4) COMMENT'0:reserved and locked 1:canceled and unlock 2:paid and locked 3:overtime unlocked',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
