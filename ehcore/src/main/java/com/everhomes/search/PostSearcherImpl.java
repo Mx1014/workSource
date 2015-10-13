@@ -167,6 +167,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     public void bulkUpdate(List<Post> posts) {
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (Post post : posts) {
+        	
             XContentBuilder source = createDoc(post);
             if(null != source) {
                 LOGGER.info("id:" + post.getId());
@@ -291,7 +292,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 
     @Override
     public ListPostCommandResponse query(SearchTopicCommand cmd) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb = null;
         if(cmd.getQueryString() == null || cmd.getQueryString().isEmpty()) {

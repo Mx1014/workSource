@@ -12,7 +12,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -960,6 +959,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Map<String, Long> map = new HashMap<String, Long>();
 
 		List<Organization> list = this.organizationProvider.findOrganizationByCommunityId(communityId);
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getOrganizationRegionMap-orgs="+StringHelper.toJsonString(list));
+		
 		for(Organization organization : list) {
 			OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
 			if(type != null) {
@@ -1054,6 +1057,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationDTO getOrganizationByComunityidAndOrgType(GetOrgDetailCommand cmd) {
 		List<OrganizationCommunityDTO> orgCommunitys = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getOrganizationByComunityidAndOrgType-orgCommunitys="+StringHelper.toJsonString(orgCommunitys));
+		
 		if(orgCommunitys != null && !orgCommunitys.isEmpty()){
 			for(int i=0;i<orgCommunitys.size();i++){
 				OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(),cmd.getOrganizationType());
@@ -2197,17 +2203,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			//createTime
 			Date createDate = null;
 			if(r.getCreateTime() != null){
-				/*if(LOGGER.isDebugEnabled())
-					LOGGER.error("executeImportOrgPost-createDateStr="+r.getCreateTime());*/
-				
 				try {
 					createDate = format.parse(r.getCreateTime());
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(createDate);
-					cal.set(Calendar.HOUR_OF_DAY, (int)(Math.random()*24));
-					cal.set(Calendar.MINUTE,(int)(Math.random()*60));
-					cal.set(Calendar.SECOND,(int)(Math.random()*60));
-					createDate = cal.getTime();
 				}
 				catch (ParseException e) {
 					LOGGER.error("post create date not format to MM/dd/yy.createDateStr="+r.getCreateTime());
@@ -2215,6 +2212,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 							"post create date not format to MM/dd/yy.");
 				}
 			}
+			else{
+				createDate = new Date();
+			}
+			
+			createDate = OrgDateUtils.getRadomTime(createDate);
 			Timestamp currentTime = new Timestamp(createDate.getTime());
 
 			//city

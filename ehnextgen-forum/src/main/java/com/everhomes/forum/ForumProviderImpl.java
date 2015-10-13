@@ -3,6 +3,7 @@ package com.everhomes.forum;
 import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -91,6 +93,9 @@ public class ForumProviderImpl implements ForumProvider {
     
     @Autowired
     private LocaleStringService localeStringService;
+    
+    @Autowired
+    private HotPostService hotPostService;
     
     @Override
     public void createForum(Forum forum) {
@@ -857,4 +862,44 @@ public class ForumProviderImpl implements ForumProvider {
             forumProvider.deleteAssignedScope(scope);
         }
     }
+
+	@Override
+	@Scheduled(cron="0 0/2 *  * * ? ")
+	public void modifyHotPost() {
+		
+		while(true){
+			HotPost hotpost = hotPostService.pull();
+			if(hotpost != null){
+				long posttime = hotpost.getTimeStamp();
+				long current = Calendar.getInstance().getTimeInMillis();
+				long diff = (current-posttime)/60000;
+				
+				modifyHot(hotpost);
+				
+				if(diff<1){
+					break;
+				}
+			}
+			else{
+				break;
+			}
+		}
+	}
+	
+	private void modifyHot(HotPost hotpost){
+		Post post = this.findPostById(hotpost.getPostId());
+		if(post != null){
+			if(Byte.valueOf(HotPostModifyType.VIEW.getCode()).equals(hotpost.getModifyType())){
+				post.setViewCount(post.getViewCount().longValue() + 20);
+	            ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+	            self.updatePost(post);
+			}
+			
+			if(Byte.valueOf(HotPostModifyType.LIKE.getCode()).equals(hotpost.getModifyType())){
+				post.setLikeCount(post.getLikeCount().longValue() + 20);
+	            ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+	            self.updatePost(post);
+			}
+		}
+	}
  }

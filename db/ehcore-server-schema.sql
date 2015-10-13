@@ -2508,4 +2508,33 @@ CREATE TABLE `eh_thirdpart_users` (
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_push_messages`;
+CREATE TABLE `eh_push_messages` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `message_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'NORMAL_MESSAGE, UPGRADE_MESSAGE, NOTIFY_MESSAGE',
+    `title` VARCHAR(128) COMMENT 'title of message',
+    `content` VARCHAR(4096) COMMENT 'content for message',
+    `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'CITY, COMMUNITY, FAMILY, USER',
+    `target_id` BIGINT NOT NULL DEFAULT 0,
+    `status` INT NOT NULL DEFAULT 0 COMMENT 'WAITING, RUNNING, FINISHED',
+    `create_time` DATETIME DEFAULT NULL,
+    `start_time` DATETIME DEFAULT NULL,
+    `finish_time` DATETIME DEFAULT NULL,
+    `device_type` VARCHAR(64),
+    `device_tag` VARCHAR(64),
+    `app_version` VARCHAR(64),
+    `push_count` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_push_message_results`;
+CREATE TABLE `eh_push_message_results` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `message_id` BIGINT NOT NULL DEFAULT 0,
+    `user_id` BIGINT NOT NULL DEFAULT 0,
+    `identifier_token` VARCHAR(128) COMMENT 'The mobile phone of user',
+    `send_time` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 SET foreign_key_checks = 1;
