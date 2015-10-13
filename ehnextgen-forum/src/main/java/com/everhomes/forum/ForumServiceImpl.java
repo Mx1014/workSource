@@ -990,6 +990,10 @@ public class ForumServiceImpl implements ForumService {
             filter.includeFilter(PostAdminQueryFilter.TERM_SENDERNAME, nickNames);
         }
         
+        List<Long> parentPostId = new ArrayList<Long>();
+        parentPostId.add(0L);
+        filter.includeFilter(PostAdminQueryFilter.TERM_PARENTPOSTID, parentPostId);
+        
         Long startTime = cmd.getStartTime();
         if(startTime != null) {
             filter.dateFrom(new Date(startTime));
