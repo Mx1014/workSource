@@ -202,8 +202,8 @@ public class RecommendationController extends ControllerBase{
       return res;
   }
   
-  @RequestMapping("testAddUser")
-  @RestReturn(String.class)
+  /* @RequestMapping("testAddUser")
+  @RestReturn(String.class) */
   public RestResponse testAddUser(@RequestParam(value="sourceId")Long sourceId) {
       Long userId = UserContext.current().getUser().getId();
       Recommendation r = new Recommendation();
