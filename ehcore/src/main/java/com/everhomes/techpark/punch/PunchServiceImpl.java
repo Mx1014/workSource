@@ -170,21 +170,22 @@ public class PunchServiceImpl implements PunchService {
 				return null ;
 			}
 		} 
+		Date now = new Date();
 		pdl.setPunchStatus(punchDayLog.getStatus());
-		pdl.setExceptionStatus(punchDayLog.getStatus().equals(PunchStatus.NORMAL.getCode())?ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());
+		if (!isWorkDay(logDay.getTime())
+				|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) { 
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+		}else{
+			pdl.setExceptionStatus(punchDayLog.getStatus().equals(PunchStatus.NORMAL.getCode())?ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());}
 		PunchExceptionApproval exceptionApproval = punchProvider
 				.getPunchExceptionApprovalByDate(userId, companyId,
 						dateSF.format(logDay.getTime()));
 		if (null != exceptionApproval) {
 			pdl.setApprovalStatus(exceptionApproval.getApprovalStatus());
-			if (pdl.getApprovalStatus().equals(ApprovalStatus.NORMAL.getCode())
-					|| pdl.getPunchStatus()
-							.equals(PunchStatus.NORMAL.getCode())) {
+			if (pdl.getApprovalStatus().equals(ApprovalStatus.NORMAL.getCode()) ) {
 				// 如果有申报审批结果，并且审批结果和实际打卡结果有一个是正常的话，异常结果为正常 别的为异常
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-			} else {
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			}
+			}  
 		}
 		return pdl;
 	}
@@ -373,7 +374,12 @@ public class PunchServiceImpl implements PunchService {
 		leaveLogDTO.setPunchTime(punchDayLog.getLeaveTime().getTime());
 		pdl.getPunchLogs().add(leaveLogDTO);
 		pdl.setPunchStatus(punchDayLog.getStatus());
-		pdl.setExceptionStatus(punchDayLog.getStatus().equals(PunchStatus.NORMAL.getCode())?ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());
+		//如果是非工作日和当天，则异常为normal
+		if (!isWorkDay(logDay.getTime())
+				|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) { 
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+		}else{
+			pdl.setExceptionStatus(punchDayLog.getStatus().equals(PunchStatus.NORMAL.getCode())?ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());}
 		makeExceptionForDayList(userId, companyId, logDay, pdl);
 
 		return pdl;
@@ -421,7 +427,7 @@ public class PunchServiceImpl implements PunchService {
 			if (!isWorkDay(logDay.getTime())
 					|| dateSF.format(now).equals(
 							dateSF.format(logDay.getTime()))) {
-				pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+				pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 				// 如果非工作日 normal
 				return pdl;
@@ -463,15 +469,6 @@ public class PunchServiceImpl implements PunchService {
 		Calendar leaveCalendar = punchMinAndMaxTime.get(1);
 		arrivePunchLogDTO.setPunchTime(arriveCalendar.getTime().getTime());
 		leavePunchLogDTO.setPunchTime(leaveCalendar.getTime().getTime());
-
-		if (!isWorkDay(logDay.getTime())
-				|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
-			// 如果非工作日 normal
-			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
-			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-
-			return pdl;
-		}
 		// 打卡状态设置为正常或者迟到
 		if (punchMinAndMaxTime.get(0).before(startMaxTime)) {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
@@ -527,6 +524,13 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
+		//如果是非工作日或者是当日，则设置打卡考勤为正常
+				if (!isWorkDay(logDay.getTime())
+						|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) { 
+					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+
+					 
+				}
 
 		return pdl;
 	}

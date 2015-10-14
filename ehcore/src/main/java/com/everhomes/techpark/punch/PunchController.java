@@ -27,7 +27,7 @@ import com.everhomes.user.UserContext;
  * <li>返回打卡记录list</li>
  * </ul>
  */
-@RestDoc(value = "Punch controller", site = "ehccore")
+@RestDoc(value = "Punch controller", site = "ehcore")
 @RestController
 @RequestMapping("/techpark/punch")
 public class PunchController extends ControllerBase {
