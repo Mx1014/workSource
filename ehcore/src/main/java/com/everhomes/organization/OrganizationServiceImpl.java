@@ -1784,7 +1784,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		this.checkFilesIsNull(files,user.getId());
-		
 		String rootPath = System.getProperty("user.dir");
 		String filePath = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
 		LOGGER.error("importOrganization-filePath="+filePath);

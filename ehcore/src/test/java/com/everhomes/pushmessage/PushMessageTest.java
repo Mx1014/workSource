@@ -29,7 +29,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.visibility.VisibilityScope;
 
 public class PushMessageTest extends LoginAuthTestCase {
-    //private PushMessage pushMessage;
+    private PushMessage pushMessage = null;
     
     @Configuration
     @ComponentScan(basePackages = {
@@ -46,10 +46,11 @@ public class PushMessageTest extends LoginAuthTestCase {
     public void setUp() throws Exception {
         super.setUp();
         
-//        pushMessage = new PushMessage();
-//        pushMessage.setAppVersion("abc");
-//        pushMessage.setContent("test for push message");
-//        pushMessage.setDeviceTag("");
+        pushMessage = new PushMessage();
+        pushMessage.setTitle("");
+        pushMessage.setAppVersion("3.0.1");
+        pushMessage.setContent("test for push message");
+        pushMessage.setDeviceTag("");
     }
     
     @After
