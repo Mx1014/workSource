@@ -47,10 +47,10 @@ public class PushMessageTest extends LoginAuthTestCase {
         super.setUp();
         
         pushMessage = new PushMessage();
-        pushMessage.setTitle("");
+        pushMessage.setTitle("title for message");
         pushMessage.setAppVersion("3.0.1");
         pushMessage.setContent("test for push message");
-        pushMessage.setDeviceTag("");
+        pushMessage.setDeviceTag("sunsung");
     }
     
     @After
