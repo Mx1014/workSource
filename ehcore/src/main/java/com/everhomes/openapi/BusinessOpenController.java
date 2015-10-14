@@ -31,19 +31,27 @@ import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.FindTokenByUserIdCommand;
 import com.everhomes.user.GetUserByUuidResponse;
 import com.everhomes.user.GetUserDefaultAddressCommand;
 import com.everhomes.user.GetUserDetailByUuidResponse;
 import com.everhomes.user.GetUserInfoByUuid;
+import com.everhomes.user.IdentifierType;
+import com.everhomes.user.ListUserCommand;
 import com.everhomes.user.MessageChannelType;
+import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
+import com.everhomes.user.UserDtoForBiz;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestDoc(value="Business open Constroller", site="core")
 @RestController
@@ -311,6 +319,34 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
     	UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
     	RestResponse response =  new RestResponse(address);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("listUser")
+    @RestReturn(value=UserDtoForBiz.class,collection=true)
+    public RestResponse listUser(@Valid ListUserCommand cmd) {
+    	List<UserDtoForBiz> users = this.businessService.listUser(cmd);
+    	RestResponse response =  new RestResponse(users);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("findTokenByUserId")
+    @RestReturn(String.class)
+    public RestResponse findTokenByUserId(@Valid FindTokenByUserIdCommand cmd) {
+    	
+    	User user = userProvider.findUserById(cmd.getUserId());
+    	List<UserIdentifier> idens = userProvider.listUserIdentifiersOfUser(user.getId());
+    	UserIdentifier iden = idens.get(0);
+		
+    	
+    	SignupToken signUpToken = new SignupToken(user.getId(),IdentifierType.fromCode(iden.getIdentifierType()),iden.getIdentifierToken());
+    	String token = WebTokenGenerator.getInstance().toWebToken(signUpToken);
+    	
+    	RestResponse response =  new RestResponse(token);
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 		return response;
