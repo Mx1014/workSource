@@ -409,6 +409,31 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhRegions EH_REGIONS = com.everhomes.server.schema.tables.EhRegions.EH_REGIONS;
 
 	/**
+	 * The table ehcore.eh_rental_bills
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalBills EH_RENTAL_BILLS = com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS;
+
+	/**
+	 * The table ehcore.eh_rental_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalRules EH_RENTAL_RULES = com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES;
+
+	/**
+	 * The table ehcore.eh_rental_sites
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSites EH_RENTAL_SITES = com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES;
+
+	/**
+	 * The table ehcore.eh_rental_site_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSiteItems EH_RENTAL_SITE_ITEMS = com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS;
+
+	/**
+	 * The table ehcore.eh_rental_site_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSiteRules EH_RENTAL_SITE_RULES = com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES;
+
+	/**
 	 * The table ehcore.eh_rtxt_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhRtxtResources EH_RTXT_RESOURCES = com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES;
