@@ -1767,6 +1767,7 @@ public class FamilyServiceImpl implements FamilyService {
                 familyMember.setMemberNickName(member.getMemberNickName());
                 familyMember.setMembershipStatus(member.getMemberStatus());
                 familyMember.setId(member.getId());
+                familyMember.setCreateTime(member.getCreateTime());
                 if(group != null){
                     familyMember.setFamilyId(group.getId());
                     familyMember.setFamilyName(group.getName());
