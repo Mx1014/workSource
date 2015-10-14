@@ -21,6 +21,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.sharding.ShardingProvider;
@@ -29,35 +30,52 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.visibility.VisibilityScope;
 
 public class PushMessageTest extends LoginAuthTestCase {
-    //private PushMessage pushMessage;
-    
+    private PushMessage pushMessage;
+
+    @Autowired
+    private PushMessageService pushMessageService;
+
     @Configuration
     @ComponentScan(basePackages = {
         "com.everhomes"
     })
     @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
+            DataSourceAutoConfiguration.class,
             HibernateJpaAutoConfiguration.class,
         })
     static class ContextConfiguration {
     }
-    
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        
-//        pushMessage = new PushMessage();
-//        pushMessage.setAppVersion("abc");
-//        pushMessage.setContent("test for push message");
-//        pushMessage.setDeviceTag("");
+
+        pushMessage = new PushMessage();
+        pushMessage.setMessageType(PushMessageType.NORMAL.getCode());
+        pushMessage.setTitle("title of push message");
+        pushMessage.setContent("test for push message");
+        pushMessage.setAppVersion("3.0.x");
+        pushMessage.setDeviceTag("sunsung");
+        pushMessage.setDeviceType("iOS");
+        pushMessage.setTargetId(1025l);
+        pushMessage.setTargetType(PushMessageTargetType.USER.getCode());
     }
-    
+
     @After
     public void tearDown() {
-        
+//        if(this.pushMessage != null && this.pushMessage.getId() > 0) {
+//            pushMessageService.deleteByPushMesageId(pushMessage.getId());
+//        }
     }
-    
+
     @Test
     public void testPushMessageAdd() {
+        pushMessageService.createPushMessage(pushMessage);
+    }
+
+    @Test
+    public void testListPushMessage() {
+        List<PushMessage> msgs = pushMessageService.queryPushMessages(new ListingLocator(), 10);
+        Assert.assertTrue(msgs.size() > 0);
     }
 }
