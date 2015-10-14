@@ -3,6 +3,11 @@ package com.everhomes.user.admin;
 import java.sql.Timestamp;
 
 public class InvitatedUsers {
+	
+	private Long userId;
+	
+	private Long inviterId;
+	
 	private String userNickName;
 	
 	private String userCellPhone;
@@ -15,6 +20,22 @@ public class InvitatedUsers {
 	
 	private String inviterCellPhone;
 	
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public Long getInviterId() {
+		return inviterId;
+	}
+
+	public void setInviterId(Long inviterId) {
+		this.inviterId = inviterId;
+	}
+
 	public String getUserNickName() {
 		return userNickName;
 	}
