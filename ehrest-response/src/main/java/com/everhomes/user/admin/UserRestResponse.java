@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-09-18 18:44:17
+// generated at 2015-10-14 12:36:35
 package com.everhomes.user.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.ListVestResponse;
+import com.everhomes.user.admin.ListUsersWithAddrResponse;
 
 public class UserRestResponse extends RestResponseBase {
 
-    private ListVestResponse response;
+    private ListUsersWithAddrResponse response;
 
     public UserRestResponse () {
     }
 
-    public ListVestResponse getResponse() {
+    public ListUsersWithAddrResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListVestResponse response) {
+    public void setResponse(ListUsersWithAddrResponse response) {
         this.response = response;
     }
 }
