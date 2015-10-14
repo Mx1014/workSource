@@ -200,7 +200,7 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
-     * 查询周边和同城活动：周边活动range传入6，同城活动range传入4
+     * 查询周边和同城活动：周边活动range传入5，同城活动range传入4
      * @return {@link }
      */
     @RequestMapping("listActivitiesByTag")
@@ -208,7 +208,10 @@ public class ActivityController extends ControllerBase {
    public RestResponse listActivitiesByTag(@Valid ListActivitiesByTagCommand cmd){
         Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByTag(cmd);
         ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
-       return new RestResponse(rsp);
+        RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
    }
     
 }

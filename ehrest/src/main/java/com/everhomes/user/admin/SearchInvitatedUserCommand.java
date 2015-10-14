@@ -6,7 +6,7 @@ public class SearchInvitatedUserCommand {
 	
 	private String inviterPhone;
 	
-	private Long anchor;
+	private Long pageAnchor;
     
     private Integer pageSize;
 
@@ -26,12 +26,12 @@ public class SearchInvitatedUserCommand {
 		this.inviterPhone = inviterPhone;
 	}
 
-	public Long getAnchor() {
-		return anchor;
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setAnchor(Long anchor) {
-		this.anchor = anchor;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getPageSize() {
