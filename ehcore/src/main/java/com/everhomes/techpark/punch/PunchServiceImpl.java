@@ -819,6 +819,24 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 	}
+	
+	//如果查询时间为空，重置时间范围。默认为上个月。
+	private void processQueryCommandDay(ListPunchCountCommand cmd) {
+		Calendar startCalendar = Calendar.getInstance();
+		Calendar endCalendar = Calendar.getInstance();
+		String startDay = cmd.getStartDay();
+		String endDay = cmd.getEndDay();
+		if(StringUtils.isEmpty(startDay) && StringUtils.isEmpty(endDay)) {
+			startCalendar.setTime(new Date());
+			startCalendar.add(Calendar.MONTH, -1);
+			startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+			cmd.setStartDay(String.format("%tF", startCalendar.getTime()));
+			
+			endCalendar.setTime(new Date());
+			endCalendar.set(Calendar.DAY_OF_MONTH, 1);
+			cmd.setEndDay(String.format("%tF", endCalendar.getTime()));
+		}
+	}
 
 	//计算两个日期间工作日天数，不包含结束时间
  	private Integer countWorkDayCount(String startDay, String endDay) {
@@ -1262,6 +1280,7 @@ public class PunchServiceImpl implements PunchService {
 	
 	@Override
 	public ListPunchCountCommandResponse listPunchCount(ListPunchCountCommand cmd) {
+		processQueryCommandDay(cmd);
 		ListPunchCountCommandResponse response = new ListPunchCountCommandResponse();
 		List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
     	Integer workDayCount = countWorkDayCount(cmd.getStartDay(),cmd.getEndDay());
