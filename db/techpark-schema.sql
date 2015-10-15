@@ -175,6 +175,7 @@ CREATE TABLE `eh_rental_rules` (
   `pay_start_time` DATETIME,
   `pay_end_time` DATETIME,
   `payment_ratio` INT COMMENT 'payment ratio',
+  ``
   `time_tag1` TIME,
   `time_tag2` TIME,
   `time_tag3` TIME,
