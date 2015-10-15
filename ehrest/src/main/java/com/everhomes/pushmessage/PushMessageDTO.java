@@ -9,7 +9,7 @@ import java.sql.Timestamp;
  * <li>targetType: {@link com.everhomes.pushmessage.PushMessageTargetType} CITY((byte)3), COMMUNITY((byte)2), FAMILY((byte)1), USER((byte)0)</li>
  * <li>status: {@link com.everhomes.pushmessage.PushMessageStatus} Processing(2), Finished(1), Ready(0)</li>
  * <li>deviceType: iOS/Android</li>
- * <li>startTime: The start for pushing job</li>
+ * <li>startTime: The start for pushing job, if null execute redirectly</li>
  * </ul>
  * @author janson
  *

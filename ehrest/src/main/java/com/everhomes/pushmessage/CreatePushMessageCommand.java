@@ -1,10 +1,18 @@
 package com.everhomes.pushmessage;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.NotNull;
 
 /**
  * <ul> 创建推送消息
  * <li>title: 推送标题</li>
+ * <li>id: The result of message Id</li>
+ * <li>messageType: {@link com.everhomes.pushmessage.PushMessageType} VERSION_UPGRADE((byte)2), NOTIFY((byte)1), NORMAL((byte)0)</li>
+ * <li>targetType: {@link com.everhomes.pushmessage.PushMessageTargetType} CITY((byte)3), COMMUNITY((byte)2), FAMILY((byte)1), USER((byte)0)</li>
+ * <li>status: {@link com.everhomes.pushmessage.PushMessageStatus} Processing(2), Finished(1), Ready(0)</li>
+ * <li>deviceType: iOS/Android</li>
+ * <li>startTime: The start for pushing job, if null execute redirectly</li>
  * </ul>
  * @author janson
  *
@@ -24,6 +32,8 @@ public class CreatePushMessageCommand {
     
     @NotNull
     private Long     targetId;
+    
+    private Timestamp startTime;
     
     private String   deviceType;
     private String   deviceTag;
@@ -76,6 +86,12 @@ public class CreatePushMessageCommand {
     }
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+    public Timestamp getStartTime() {
+        return startTime;
+    }
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
     }
     
     
