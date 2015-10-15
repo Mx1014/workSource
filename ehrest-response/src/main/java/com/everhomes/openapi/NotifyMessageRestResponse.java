@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-10-14 12:36:35
+// generated at 2015-10-15 09:49:20
 package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
