@@ -23,6 +23,9 @@ import org.springframework.transaction.TransactionStatus;
 
 import ch.hsr.geohash.GeoHash;
 
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.business.admin.BusinessAdminDTO;
@@ -121,6 +124,8 @@ public class BusinessServiceImpl implements BusinessService {
 	private AddressProvider addressProvider;
 	@Autowired
 	private GroupProvider groupProvider;
+	@Autowired
+	private AclProvider aclProvider;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -1142,32 +1147,45 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public List<UserDtoForBiz> listUser(ListUserCommand cmd) {
-		List<UserDtoForBiz> list = new ArrayList<UserDtoForBiz>();
-		if(StringUtils.isEmpty(cmd.getKeyword()))
-			return list;
+		List<UserDtoForBiz> usersForBiz = new ArrayList<UserDtoForBiz>();
+		/*if(StringUtils.isEmpty(cmd.getKeyword()))
+			return usersForBiz;*/
 
-		List<User> users = this.userProvider.listUserByKeyword(cmd.getKeyword());
-		if(users != null && users.size() > 0)
-			users.stream().map(r -> {
+		List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
+		for(RoleAssignment r : roleAssignments){
+			if(r.getTargetType().equals(EntityType.USER.getCode())){
+				User user = this.userProvider.findUserById(r.getTargetId());
+				if(user != null && user.getNickName() != null){
+					if(StringUtils.isEmpty(cmd.getKeyword())){
+						UserDtoForBiz userForBiz = new UserDtoForBiz();
+						userForBiz.setId(user.getId());
+						userForBiz.setName(user.getNickName());
+						usersForBiz.add(userForBiz);
+					}
+					else if(user.getNickName().contains(cmd.getKeyword())){
+						UserDtoForBiz userForBiz = new UserDtoForBiz();
+						userForBiz.setId(user.getId());
+						userForBiz.setName(user.getNickName());
+						usersForBiz.add(userForBiz);
+					}
+				}
+			}
+		}
 
-				UserIdentifier iden = this.getUserIdentifierByUid(r.getId());
+		if(usersForBiz != null && usersForBiz.size() > 0)
+			for(UserDtoForBiz userBiz : usersForBiz){
+				UserIdentifier iden = this.getUserIdentifierByUid(userBiz.getId());
 				if(iden != null){
-					UserDtoForBiz tmp = new UserDtoForBiz();
-					tmp.setId(r.getId());
-					tmp.setName(r.getNickName());
-					
-					SignupToken signUpToken = new SignupToken(r.getId(),IdentifierType.fromCode(iden.getIdentifierType()),iden.getIdentifierToken());
+					SignupToken signUpToken = new SignupToken(userBiz.getId(),IdentifierType.fromCode(iden.getIdentifierType()),iden.getIdentifierToken());
 					String token = WebTokenGenerator.getInstance().toWebToken(signUpToken);
-					tmp.setToken(token);
-					
-					list.add(tmp);
+					userBiz.setToken(token);
 				}
 				else{	
-					LOGGER.info("listUser-UserIdentifier not find by UserId="+r.getId());
+					LOGGER.info("listUser-UserIdentifier not find by UserId="+userBiz.getId());
 				}
-				return null;
-			}).toArray();
-		return list;
+			}
+
+		return usersForBiz;
 	}
 
 	private UserIdentifier getUserIdentifierByUid(Long userId) {
