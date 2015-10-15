@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-10-14 12:36:35
+// generated at 2015-10-15 09:49:20
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -117,14 +117,13 @@ public interface ApiConstants {
     public static final String ADMIN_REGISTERLOGIN_URL = "/admin/registerLogin";
     public static final String ADMIN_REMOVEBORDER_URL = "/admin/removeBorder";
     public static final String ADMIN_SAMPLE_URL = "/admin/sample";
-    public static final String ADMIN_STATISTICS_LISTSTATISTICSBYCHANNEL_URL = "/admin/statistics/listStatisticsByChannel";
-    public static final String ADMIN_STATISTICS_LISTSTATISTICSBYDAY_URL = "/admin/statistics/listStatisticsByDay";
     public static final String ADMIN_SYNCSEQUENCE_URL = "/admin/syncSequence";
     public static final String ADMIN_UNREGISTERLOGIN_URL = "/admin/unregisterLogin";
     public static final String ADMIN_UPDATEBORDER_URL = "/admin/updateBorder";
     public static final String ADMIN_UPDATENAMESPACE_URL = "/admin/updateNamespace";
     public static final String ADMIN_UPDATEPERSISTSERVER_URL = "/admin/updatePersistServer";
     public static final String ADMIN_USER_GETUSERBYIDENTIFIER_URL = "/admin/user/getUserByIdentifier";
+    public static final String ADMIN_USER_IMPORTUSERDATA_URL = "/admin/user/importUserData";
     public static final String ADMIN_USER_LISTINVITATEDUSER_URL = "/admin/user/listInvitatedUser";
     public static final String ADMIN_USER_LISTREGISTERUSERS_URL = "/admin/user/listRegisterUsers";
     public static final String ADMIN_USER_LISTUSERSWITHADDR_URL = "/admin/user/listUsersWithAddr";
@@ -252,12 +251,14 @@ public interface ApiConstants {
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
     public static final String OAUTH2API_GETUSERINFO_URL = "/oauth2api/getUserInfo";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
+    public static final String OPENAPI_FINDTOKENBYUSERID_URL = "/openapi/findTokenByUserId";
     public static final String OPENAPI_GETUSERDEFAULTADDRESS_URL = "/openapi/getUserDefaultAddress";
     public static final String OPENAPI_GETUSERDETAILBYUUID_URL = "/openapi/getUserDetailByUuid";
     public static final String OPENAPI_GETUSERINFOBYUUID_URL = "/openapi/getUserInfoByUuid";
     public static final String OPENAPI_GETUSERSERVICEADDRESS_URL = "/openapi/getUserServiceAddress";
     public static final String OPENAPI_INVALIDCOUPON_URL = "/openapi/invalidCoupon";
     public static final String OPENAPI_LISTBIZCATEGORIES_URL = "/openapi/listBizCategories";
+    public static final String OPENAPI_LISTUSER_URL = "/openapi/listUser";
     public static final String OPENAPI_NOTIFYDOORLOCK_URL = "/openapi/notifyDoorLock";
     public static final String OPENAPI_NOTIFYMESSAGE_URL = "/openapi/notifyMessage";
     public static final String OPENAPI_RECEIVECOUPON_URL = "/openapi/receiveCoupon";
