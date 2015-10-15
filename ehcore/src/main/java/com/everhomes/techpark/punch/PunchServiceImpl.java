@@ -13,6 +13,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -1263,73 +1264,71 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchCountCommandResponse listPunchCount(ListPunchCountCommand cmd) {
 		ListPunchCountCommandResponse response = new ListPunchCountCommandResponse();
 		List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
-    	Map<Long, PunchCountDTO> map = new HashMap<Long, PunchCountDTO>();
-    	processPunchCountList(map,cmd.getCompanyId(),cmd.getStartDay(), cmd.getEndDay());
-		
-    	Collection<PunchCountDTO> dtos = map.values();
-    	if(map != null && map.size() > 0){
-	    	for (PunchCountDTO punchCountDTO : dtos) {
-	    		punchCountDTOList.add(punchCountDTO);
-			}
-    	}
+    	Integer workDayCount = countWorkDayCount(cmd.getStartDay(),cmd.getEndDay());
+	 	List<PunchDayLogDTO> punchDayLogDTOList = punchProvider.listPunchDayLogs(cmd.getCompanyId(), cmd.getStartDay(),cmd.getEndDay());
+    	Map<Long, List<PunchDayLogDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
+    	
+    	Set<Long> userIds = map.keySet();
+    	for (Long userId : userIds) {
+    		PunchCountDTO dto = new PunchCountDTO();
+    		dto.setUserId(userId);
+    		GroupContact groupContact = groupContactProvider
+					.findGroupContactByUserId(dto.getUserId());
+			dto.setUserName(groupContact.getContactName());
+			dto.setToken(groupContact.getContactToken());
+    		List<PunchDayLogDTO> list = map.get(userId);
+    		dto.setAbsenceCount(processListCount(list,ApprovalStatus.ABSENCE.getCode()));
+    		dto.setBelateCount(processListCount(list,ApprovalStatus.BELATE.getCode()));
+    		dto.setBlandleCount(processListCount(list,ApprovalStatus.BLANDLE.getCode()));
+    		dto.setExchangeCount(processListCount(list,ApprovalStatus.EXCHANGE.getCode()));
+    		dto.setLeaveEarlyCount(processListCount(list,ApprovalStatus.LEAVEEARLY.getCode()));
+    		dto.setOutworkCount(processListCount(list,ApprovalStatus.OUTWORK.getCode()));
+    		dto.setSickCount(processListCount(list,ApprovalStatus.SICK.getCode()));
+    		dto.setUnPunchCount(processListCount(list,ApprovalStatus.UNPUNCH.getCode()));
+    		dto.setWorkCount(processListCount(list,ApprovalStatus.NORMAL.getCode()));
+    		dto.setWorkDayCount(workDayCount);
+    		punchCountDTOList.add(dto);
+		}
     	response.setPunchCountList(punchCountDTOList);
     	return response;
 	}
-
-	 private void processPunchCountList(Map<Long, PunchCountDTO> map, Long companyId,String startDay, String endDay) {
-	    	List<UserPunchStatusCount>  approvalCountList = punchProvider.listUserApprovalStatusPunch(companyId, startDay, endDay);
-			List<UserPunchStatusCount>  countList = punchProvider.listUserStatusPunch(companyId, startDay, endDay);
-			Integer workDayCount = countWorkDayCount(startDay,endDay);
-			processMap(map,approvalCountList,workDayCount);
-			processMap(map,countList,workDayCount);
-			
+	//创建每个user的打卡map信息
+	private Map<Long, List<PunchDayLogDTO>> buildUserPunchCountMap(List<PunchDayLogDTO> punchDayLogDTOList) {
+		Map<Long, List<PunchDayLogDTO>> map = new HashMap<Long,List<PunchDayLogDTO>>();
+		if(punchDayLogDTOList != null && punchDayLogDTOList.size() > 0){
+	    	for (PunchDayLogDTO punchDayLogDTO : punchDayLogDTOList) {
+	    		Long userId = punchDayLogDTO.getUserId();
+	    		if(map.containsKey(userId)){
+	    			List<PunchDayLogDTO> list = map.get(userId);
+	    			list.add(punchDayLogDTO);
+	    		}
+	    		else{
+	    			List<PunchDayLogDTO> list = new ArrayList<PunchDayLogDTO>();
+	    			list.add(punchDayLogDTO);
+	    			map.put(userId, list);
+	    		}
+			}
 		}
-    private void processMap(Map<Long, PunchCountDTO> map, List<UserPunchStatusCount> countList,Integer workDayCount) {
-    	if(countList != null && countList.size() > 0){
-			for (UserPunchStatusCount userPunchStatusCount : countList) {
-				Long userId =  userPunchStatusCount.getUserId();
-				if(map.containsKey(userId)){
-					PunchCountDTO dto = map.get(userId);
-					processPunchCountStatus(dto,userPunchStatusCount.getStatus(),userPunchStatusCount);
-					
+		return map;
+	}
+	
+	//计算user的每个打卡状态的总数
+	private Integer processListCount(List<PunchDayLogDTO> list, Byte absence) {
+		Integer count = 0;
+		for (PunchDayLogDTO punchDayLogDTO : list) {
+			if(punchDayLogDTO.getApprovalStatus() != null){
+				if(absence == punchDayLogDTO.getApprovalStatus()){
+					count ++ ;
 				}
-				else{
-					PunchCountDTO dto = new PunchCountDTO();
-					dto.setUserId(userPunchStatusCount.getUserId());
-					dto.setWorkDayCount(workDayCount);
-					processPunchCountStatus(dto,userPunchStatusCount.getStatus(),userPunchStatusCount);
-					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(dto.getUserId());
-					dto.setUserName(groupContact.getContactName());
-					dto.setToken(groupContact.getContactToken());
-					map.put(userId, dto);
+			}
+			else{
+				if(absence == punchDayLogDTO.getStatus()){
+					count ++ ;
 				}
 			}
 		}
+		return count;
 	}
-
-    private void processPunchCountStatus(PunchCountDTO dto, Byte status,UserPunchStatusCount userPunchStatusCount) {
-		if(status.equals(ApprovalStatus.NORMAL.getCode()) &&  (dto.getWorkCount() ==null || dto.getWorkCount() ==0 ) ){
-			dto.setWorkCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.ABSENCE.getCode()) &&  (dto.getAbsenceCount() ==null || dto.getAbsenceCount() ==0 )  ){
-			dto.setAbsenceCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.BELATE.getCode())  &&  (dto.getBelateCount() ==null || dto.getBelateCount() ==0 )  ){
-			dto.setBelateCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.BLANDLE.getCode()) &&  (dto.getBlandleCount() ==null || dto.getBlandleCount() ==0 )  ){
-			dto.setBlandleCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.EXCHANGE.getCode()) &&  (dto.getExchangeCount() ==null || dto.getExchangeCount() ==0 )  ){
-			dto.setExchangeCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()) &&  (dto.getLeaveEarlyCount() ==null || dto.getLeaveEarlyCount() ==0 )  ){
-			dto.setLeaveEarlyCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.OUTWORK.getCode()) &&  (dto.getOutworkCount() ==null || dto.getOutworkCount() ==0 )  ){
-			dto.setOutworkCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.SICK.getCode()) &&  (dto.getSickCount() ==null || dto.getSickCount() ==0 )  ){
-			dto.setSickCount(userPunchStatusCount.getCount());
-		}else if(status.equals(ApprovalStatus.UNPUNCH.getCode()) &&  (dto.getUnPunchCount() ==null || dto.getUnPunchCount() ==0 )  ){
-			dto.setUnPunchCount(userPunchStatusCount.getCount());
-		}
-		
-	}
-
+	
 	
 }
