@@ -6,7 +6,7 @@ public class ListInvitatedUserResponse {
 
 	private List<InvitatedUsers> invitatedUsers;
 	
-	private Long nextAnchor;
+	private Long nextPageAnchor;
 
 	public List<InvitatedUsers> getInvitatedUsers() {
 		return invitatedUsers;
@@ -16,13 +16,12 @@ public class ListInvitatedUserResponse {
 		this.invitatedUsers = invitatedUsers;
 	}
 
-	public Long getNextAnchor() {
-		return nextAnchor;
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
 
-	public void setNextAnchor(Long nextAnchor) {
-		this.nextAnchor = nextAnchor;
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
-	
-	
+
 }
