@@ -28,7 +28,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.o
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.coupon.url', '/app/static/coupon/coupon.html', 'the relative path for user coupon');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.detail.url', '/web/app/user/index.html#/store/details/', 'business details');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.image.url', 'http://121.199.69.107:8081/imageService/', 'business image url');
-
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('biz.back.url', 'http://biz.zuolin.com/Zl-MallMgt/bizmgt/main/tokenlogin.ihtml', 'biz.back.url');
 -- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('prefix.url', 'http://biz.zuolin.com/zl-ec?hideNavigationBar=0&sourceUrl=http://biz.zuolin.com', null);
 -- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('common.pay.url', 'http://pay.zuolin.com/EDS_PAY/', null);
 -- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('apply.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
