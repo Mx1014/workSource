@@ -15,10 +15,11 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.techpark.punch.ListPunchExceptionRequestCommandResponse;
 import com.everhomes.techpark.punch.PunchController;
+
 /**
  * <ul>
  * 预定系统：
- * <li>后台维护 某种场所  的预定规则  维护 具体场所 </li>
+ * <li>后台维护 某种场所 的预定规则 维护 具体场所</li>
  * <li>客户端可以查询某日，某具体场所 的开放时间，预定状态</li>
  * <li>客户端下预定订单，付费</li>
  * </ul>
@@ -31,8 +32,7 @@ public class RentalController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PunchController.class);
 
 	@Autowired
-	private RentalService rentalService ;
-	
+	private RentalService rentalService;
 
 	/**
 	 * <b>URL: /techpark/rental/updateRentalRule</b>
@@ -41,16 +41,16 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("updateRentalRule")
-	@RestReturn(value = UpdateRentalRuleCommandResponse.class)	
-public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd){
-		UpdateRentalRuleCommandResponse updateRentalRuleCommandResponse = rentalService.updateRentalRule(cmd);
-		RestResponse response = new RestResponse(updateRentalRuleCommandResponse);
+	@RestReturn(value = UpdateRentalRuleCommandResponse.class)
+	public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd) {
+		UpdateRentalRuleCommandResponse updateRentalRuleCommandResponse = rentalService
+				.updateRentalRule(cmd);
+		RestResponse response = new RestResponse(
+				updateRentalRuleCommandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
 
 	/**
 	 * <b>URL: /techpark/rental/addRentalSite</b>
@@ -58,9 +58,15 @@ public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd){
 	 * 添加具体场所
 	 * </p>
 	 */
-	
-	
-	
+	@RequestMapping("addRentalSite")
+	@RestReturn(value = String.class)
+	public RestResponse addRentalSite(@Valid AddRentalSiteCommand cmd) {
+		rentalService.addRentalSite(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
@@ -68,18 +74,32 @@ public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd){
 	 * 添加具体场所商品信息
 	 * </p>
 	 */
-	
-	
+	@RequestMapping("addRentalSiteItems")
+	@RestReturn(value = String.class)
+	public RestResponse addRentalSiteItems(@Valid AddRentalSiteItemsCommand cmd) {
+		rentalService.addRentalSiteItems(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
-	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
+	 * <b>URL: /techpark/rental/addRentalSiteRules</b>
 	 * <p>
 	 * 添加具体场所预定规则
 	 * </p>
 	 */
-	
-	
-	
+
+	@RequestMapping("addRentalSiteRules")
+	@RestReturn(value = String.class)
+	public RestResponse addRentalSiteRules(@Valid AddRentalSiteRulesCommand cmd) {
+		rentalService.addRentalSiteRules(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /techpark/rental/findRentalSiteDayStatus</b>
@@ -87,9 +107,20 @@ public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd){
 	 * 查询某日某场所的状态
 	 * </p>
 	 */
-	
-	
-	
+
+	@RequestMapping("updateRentalRule")
+	@RestReturn(value = FindRentalSiteDayStatusCommandResponse.class)
+	public RestResponse findRentalSiteDayStatus(
+			@Valid FindRentalSiteDayStatusCommand cmd) {
+		FindRentalSiteDayStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findRentalSiteDayStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	
 	
 }

@@ -175,7 +175,8 @@ CREATE TABLE `eh_rental_rules` (
   `pay_start_time` DATETIME,
   `pay_end_time` DATETIME,
   `payment_ratio` INT COMMENT 'payment ratio',
-  ``
+  `refund_flag` TINYINT(4)  NOT NULL  DEFAULT 1 COMMENT '0 allow refund , 1 can not refund ',
+  `contact_num` VARCHAR(20) COMMENT 'phone number',
   `time_tag1` TIME,
   `time_tag2` TIME,
   `time_tag3` TIME,
@@ -205,7 +206,7 @@ DROP TABLE IF EXISTS `eh_rental_sites`;
 
 CREATE TABLE `eh_rental_sites`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `parent_id` BIGINT NOT NULL COMMENT 'id',
+  `parent_id` BIGINT ,
   `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type` TIME COMMENT 'rule for what function ',
   `building_name` VARCHAR(128) ,
@@ -281,13 +282,26 @@ CREATE TABLE `eh_rental_bills`(
   `start_time` DATETIME ,
   `end_time` DATETIME, 
   `rental_count` DOUBLE,
-  `pay_tatol_money` INT,
-  `reserve_money` INT,
+  `pay_tatol_money` INT COMMENT 'total money ,include items and site',
+  `reserve_money` INT COMMENT 'total money * reserve ratio',
   `reserve_time` DATETIME,
   `pay_start_time` DATETIME,
   `pay_end_time` DATETIME,
   `pay_time` DATETIME,  
   `status` TINYINT(4) COMMENT'0:reserved and locked 1:canceled and unlock 2:paid and locked 3:overtime unlocked',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_rental_items_bills`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `rental_bill_id` BIGINT ,
+  `rental_site_items` BIGINT ,  
+  `rental_count` INT,
+  `item_total_money` INT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
