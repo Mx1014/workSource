@@ -1265,9 +1265,14 @@ public class PunchServiceImpl implements PunchService {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		Calendar logDay = Calendar.getInstance();
+		
 		try {
 			
 			logDay.setTime(dateSF.parse(cmd.getQueryDate()));
+			Calendar today = Calendar.getInstance();
+			//对于今天以后的查询，都返回为null
+			if(logDay.after(today))
+				return null;
 		} catch (Exception e) {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
