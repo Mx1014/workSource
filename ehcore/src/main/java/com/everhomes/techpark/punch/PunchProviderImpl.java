@@ -74,8 +74,10 @@ public class PunchProviderImpl implements PunchProvider {
 		Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.equal(date);
 		Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
 		Condition condition3 = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+		Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(clockCode);
 		condition = condition.and(condition2);
 		condition = condition.and(condition3);
+		condition = condition.and(condition4);
 		step.where(condition);
 		List<PunchLog> result = step.orderBy(Tables.EH_PUNCH_LOGS.ID.desc())
 				.fetch().map((r) -> {
@@ -758,7 +760,7 @@ public class PunchProviderImpl implements PunchProvider {
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
 		step.limit(offset , pageSize);
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
-				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch()
 				.map(new EhPunchDayLogMapper());
 		
 		List<PunchDayLog> result = resultRecord.stream().map((r) -> {

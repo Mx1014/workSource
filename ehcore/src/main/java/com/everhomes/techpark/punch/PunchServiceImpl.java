@@ -420,7 +420,7 @@ public class PunchServiceImpl implements PunchService {
 			PunchLogDTO arriveLogDTO = new PunchLogDTO();
 			arriveLogDTO.setClockStatus(ClockStatus.ARRIVE.getCode());
 			arriveLogDTO
-					.setPunchTime(punchLogs.get(0).getPunchDate().getTime());
+					.setPunchTime(punchLogs.get(0).getPunchTime().getTime());
 			pdl.getPunchLogs().add(arriveLogDTO);
 			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
