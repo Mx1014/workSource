@@ -17,6 +17,5 @@ public class FindTokenByUserIdCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 
 }
