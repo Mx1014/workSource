@@ -33,11 +33,47 @@ public class RentalController extends ControllerBase {
 
 	@Autowired
 	private RentalService rentalService;
+	/**
+	 * <b>URL: /techpark/rental/getRentalSiteType</b>
+	 * <p>
+	 * 获取场所类型
+	 * </p>
+	 */
+	@RequestMapping("getRentalSiteType")
+	@RestReturn(value = GetRentalSiteTypeResponse.class)
+	public RestResponse getRentalSiteType() {
+		GetRentalSiteTypeResponse updateRentalRuleCommandResponse = rentalService
+				.findRentalSiteTypes();
+		RestResponse response = new RestResponse(
+				updateRentalRuleCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /techpark/rental/getRentalTypeRule</b>
+	 * <p>
+	 * 查询某类场所的通用设置
+	 * </p>
+	 */
+	@RequestMapping("getRentalTypeRule")
+	@RestReturn(value = GetRentalTypeRuleCommandResponse.class)
+	public RestResponse getRentalTypeRule(
+			@Valid GetRentalTypeRuleCommand cmd) {
+		GetRentalTypeRuleCommandResponse getRentalTypeRuleCommandResponse = rentalService
+				.getRentalTypeRule(cmd);
+		RestResponse response = new RestResponse(
+				getRentalTypeRuleCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 
 	/**
 	 * <b>URL: /techpark/rental/updateRentalRule</b>
 	 * <p>
-	 * 通用设置
+	 * 设置通用设置
 	 * </p>
 	 */
 	@RequestMapping("updateRentalRule")
@@ -68,6 +104,27 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 
+	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSites</b>
+	 * <p>
+	 * 查询某场所
+	 * </p>
+	 */
+	@RequestMapping("findRentalSites")
+	@RestReturn(value = FindRentalSitesCommandResponse.class)
+	public RestResponse findRentalSites(
+			@Valid FindRentalSitesCommand cmd) {
+		FindRentalSitesCommandResponse findRentalSitesCommandResponse = rentalService
+				.findRentalSites(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSitesCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
 	/**
 	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
 	 * <p>
@@ -84,6 +141,7 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 
+	
 	/**
 	 * <b>URL: /techpark/rental/addRentalSiteRules</b>
 	 * <p>
@@ -100,6 +158,60 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSiteRules</b>
+	 * <p>
+	 * 查询某场所的预定规则
+	 * </p>
+	 */
+	@RequestMapping("findRentalSiteRules")
+	@RestReturn(value = FindRentalSiteRulesCommandResponse.class)
+	public RestResponse findRentalSiteRules(@Valid FindRentalSiteRulesCommand cmd) {
+		FindRentalSiteRulesCommandResponse findRentalSiteRulesCommandResponse = rentalService
+				.findRentalSiteRules(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteRulesCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/rental/addRentalBill</b>
+	 * <p>
+	 * 添加订单
+	 * </p>
+	 */
+	@RequestMapping("addRentalBill")
+	@RestReturn(value = String.class)
+	public RestResponse addRentalBill(@Valid AddRentalBillCommand cmd) {
+		rentalService.addRentalBill(cmd);
+		//TODO:
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/rental/findRentalBills</b>
+	 * <p>
+	 * 查询订单
+	 * </p>
+	 */
+	@RequestMapping("findRentalBills")
+	@RestReturn(value = FindRentalBillsCommandResponse.class)
+	public RestResponse findRentalBillsRules(@Valid FindRentalBillsCommand cmd) {
+		//TODO：
+		FindRentalBillsCommandResponse findRentalBillsCommandResponse = rentalService
+				.findRentalBills(cmd);
+		RestResponse response = new RestResponse(
+				findRentalBillsCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /techpark/rental/findRentalSiteDayStatus</b>
@@ -108,10 +220,10 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 
-	@RequestMapping("updateRentalRule")
+	@RequestMapping("findRentalSiteDayStatus")
 	@RestReturn(value = FindRentalSiteDayStatusCommandResponse.class)
-	public RestResponse findRentalSiteDayStatus(
-			@Valid FindRentalSiteDayStatusCommand cmd) {
+	public RestResponse findRentalSiteDayStatus(@Valid FindRentalSiteDayStatusCommand cmd) {
+		//TODO：
 		FindRentalSiteDayStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findRentalSiteDayStatus(cmd);
 		RestResponse response = new RestResponse(
@@ -121,6 +233,23 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 
-	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSiteItems</b>
+	 * <p>
+	 * 查询某场所的可预订物品
+	 * </p>
+	 */
+	@RequestMapping("findRentalSiteItems")
+	@RestReturn(value = FindRentalSiteItemsCommandResponse.class)
+	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsCommand cmd) {
+		//TODO：
+		FindRentalSiteItemsCommandResponse findRentalSiteItemsCommandResponse = rentalService
+				.findRentalSiteItems(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteItemsCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }

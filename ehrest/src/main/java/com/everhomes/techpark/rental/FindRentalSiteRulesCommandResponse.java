@@ -1,0 +1,28 @@
+package com.everhomes.techpark.rental;
+
+import java.util.List;
+
+import com.everhomes.util.StringHelper;
+
+
+/**
+ * <ul>
+ * <li>rentalSiteRules：  参考{@link com.everhomes.techpark.rental.RentalSiteRulesDTO} </li>
+ * </ul>
+ */
+public class FindRentalSiteRulesCommandResponse {
+	private List<RentalSiteRulesDTO> rentalSiteRules;
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+	public List<RentalSiteRulesDTO> getRentalSiteRules() {
+		return rentalSiteRules;
+	}
+
+	public void setRentalSiteRules(List<RentalSiteRulesDTO> rentalSiteRules) {
+		this.rentalSiteRules = rentalSiteRules;
+	}
+}

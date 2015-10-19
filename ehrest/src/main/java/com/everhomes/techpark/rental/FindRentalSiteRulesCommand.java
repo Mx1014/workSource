@@ -1,21 +1,20 @@
 package com.everhomes.techpark.rental;
 
 import com.everhomes.util.StringHelper;
-
 /**
- * <ul>某日某场所预定状态
+ * <ul>
  * <li>rentalSiteId：场所id</li>
  * <li>ruleDate：日期</li> 
  * </ul>
  */
-public class FindRentalSiteDayStatusCommand {
+
+public class FindRentalSiteRulesCommand {
+
 	private Long rentalSiteId;
 	private String ruleDate;
-	
+
 	@Override
     public String toString() {
-
-		
         return StringHelper.toJsonString(this);
     }
 

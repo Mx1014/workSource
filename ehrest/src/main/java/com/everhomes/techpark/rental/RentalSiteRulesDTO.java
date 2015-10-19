@@ -3,6 +3,7 @@ package com.everhomes.techpark.rental;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
+ * <li>id：id</li>
  * <li>rentalSiteId：场所id</li>
  * <li>rentalType：按日还是按小时预定 参考{@link com.everhomes.techpark.rental.RentalType} </li>
  * <li>StepLength：长度(MM:SS OR INT)</li>
@@ -16,7 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>Status：循环方式 参考{@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 
  * </ul>
  */
-public class AddRentalSiteRulesCommand {
+public class RentalSiteRulesDTO {
+	private Long id;
 	private Long rentalSiteId;
 	private Byte rentalType;
 	private String StepLength;
@@ -166,5 +168,17 @@ public class AddRentalSiteRulesCommand {
 
 	public void setStatus(Byte status) {
 		Status = status;
+	}
+
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

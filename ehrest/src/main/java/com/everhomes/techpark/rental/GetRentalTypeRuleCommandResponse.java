@@ -3,7 +3,7 @@ package com.everhomes.techpark.rental;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
-*更新预定规则
+*获取预定规则
  * <li>enterpriseCommunityId：园区id</li>
  * <li>siteType：场所类型</li>
  * <li>rentalStartTime：最早预定时间</li>
@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactNum：电话号码</li>
  * </ul>
  */
-public class UpdateRentalRuleCommand {
+public class GetRentalTypeRuleCommandResponse {
 	private Long enterpriseCommunityId;
 	private String siteType ;
 	private String rentalStartTime;

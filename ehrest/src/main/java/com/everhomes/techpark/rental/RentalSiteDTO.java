@@ -1,10 +1,12 @@
 package com.everhomes.techpark.rental;
 
-import com.everhomes.util.StringHelper;
+import java.util.List;
 
+import com.everhomes.util.StringHelper;
 /**
  * <ul>
- * 更新预定规则
+ * 场所
+ * <li>rentalSiteId：场所id</li>
  * <li>enterpriseCommunityId：园区id</li>
  * <li>siteType：场所类型</li>
  * <li>buildingName：楼栋名称</li>
@@ -13,10 +15,11 @@ import com.everhomes.util.StringHelper;
  * <li>companyId：场所隶属的公司id</li>
  * <li>ownId：负责人id</li>
  * <li>contactPhonenum：电话号码</li>
- * <li>siteItems：场所商品json字符串</li>
+ * <li>siteItems：场所商品</li>
  * </ul>
  */
-public class AddRentalSiteCommand {
+public class RentalSiteDTO {
+	private Long rentalSiteId;
 	private Long enterpriseCommunityId;
 	private String siteType;
 	private String buildingName;
@@ -25,12 +28,12 @@ public class AddRentalSiteCommand {
 	private Long companyId;
 	private Long ownId;
 	private String contactPhonenum;
-	private String siteItems;
-
+	private List<SiteItemDTO> siteItems;
+	
 	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
 	public Long getEnterpriseCommunityId() {
 		return enterpriseCommunityId;
@@ -71,23 +74,6 @@ public class AddRentalSiteCommand {
 	public void setSpec(String spec) {
 		this.spec = spec;
 	}
- 
-
-	public String getContactPhonenum() {
-		return contactPhonenum;
-	}
-
-	public void setContactPhonenum(String contactPhonenum) {
-		this.contactPhonenum = contactPhonenum;
-	}
-
-	public String getSiteItems() {
-		return siteItems;
-	}
-
-	public void setSiteItems(String siteItems) {
-		this.siteItems = siteItems;
-	}
 
 	public Long getCompanyId() {
 		return companyId;
@@ -103,5 +89,29 @@ public class AddRentalSiteCommand {
 
 	public void setOwnId(Long ownId) {
 		this.ownId = ownId;
+	}
+
+	public String getContactPhonenum() {
+		return contactPhonenum;
+	}
+
+	public void setContactPhonenum(String contactPhonenum) {
+		this.contactPhonenum = contactPhonenum;
+	}
+
+	public List<SiteItemDTO> getSiteItems() {
+		return siteItems;
+	}
+
+	public void setSiteItems(List<SiteItemDTO> siteItems) {
+		this.siteItems = siteItems;
+	}
+
+	public Long getRentalSiteId() {
+		return rentalSiteId;
+	}
+
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
 	}
 }
