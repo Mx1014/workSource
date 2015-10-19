@@ -54,16 +54,15 @@ public class RentalServiceImpl implements RentalService {
 	
 	@Override
 	public UpdateRentalRuleCommandResponse updateRentalRule(
-			UpdateRentalRuleCommand cmd) {
-		// TODO Auto-generated method stub
+			UpdateRentalRuleCommand cmd) { 
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
 		RentalRule rentalRule = rentalProvider.getRentalRule(cmd.getEnterpriseCommunityId(),cmd.getSiteType());
-//		rentalRule.setContactNum(cmd.ContactNum()); 
+		rentalRule.setContactNum(cmd.getContactNum()); 
 		rentalRule.setPayEndTime(Timestamp.valueOf(cmd.getPayEndTime()));
 		rentalRule.setPaymentRatio(cmd.getPayRatio());
 		rentalRule.setPayStartTime(Timestamp.valueOf(cmd.getPayStartTime()));
-//		rentalRule.setRefundFlag(cmd.getRefundFlag);
+ 		rentalRule.setRefundFlag(cmd.getRefundFlag());
 		rentalRule.setRentalEndTime(Timestamp.valueOf(cmd.getRentalEndTime()));
 		rentalRule.setRentalStartTime(Timestamp.valueOf(cmd.getRentalStartTime())); 
 		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -82,9 +81,8 @@ public class RentalServiceImpl implements RentalService {
 		rentalsite.setCompanyId(cmd.getCompanyId());
 		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
 		rentalsite.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
-		rentalsite.setOwnUid(cmd.getOwnId());
-		//TODO:
-//		rentalsite.setSiteType(cmd.getSiteType()); 
+		rentalsite.setOwnUid(cmd.getOwnId()); 
+ 		rentalsite.setSiteType(cmd.getSiteType()); 
 		rentalsite.setSpec(cmd.getSpec());
 		rentalProvider.createRentalSite(rentalsite);
 		  
@@ -98,7 +96,7 @@ public class RentalServiceImpl implements RentalService {
 		siteItem.setRentalSiteId(cmd.getRentalSiteId());
 		siteItem.setCounts(cmd.getCounts());
 		siteItem.setName(cmd.getItemName());
-//		TODO : siteItem.setPrice(cmd.getItemPrice());
+		siteItem.setPrice(cmd.getItemPrice());
 		rentalProvider.createRentalSiteItem(siteItem);
 	}
 
@@ -122,7 +120,7 @@ public class RentalServiceImpl implements RentalService {
 		rsr.setEndTime(Time.valueOf(cmd.getEndTime()));
 		rsr.setCounts(cmd.getCounts());
 		rsr.setUnit(cmd.getUnit());
-//		TODO: rsr.setPrice(cmd.getPrice());
+ 		rsr.setPrice(cmd.getPrice());
 		rsr.setRuleDate(Date.valueOf(cmd.getRuleDate()));
 		rsr.setStatus(cmd.getStatus());
 		rentalProvider.createRentalSiteRule(rsr);
@@ -164,8 +162,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public FindRentalSitesCommandResponse findRentalSites(
-			FindRentalSitesCommand cmd) {
-		// TODO Auto-generated method stub
+			FindRentalSitesCommand cmd) { 
 
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
@@ -187,11 +184,10 @@ public class RentalServiceImpl implements RentalService {
 				SiteItemDTO siteItemDTO= new SiteItemDTO();
 				siteItemDTO.setCounts(item.getCounts());
 				siteItemDTO.setItemName(item.getName());
-//		TODO:		siteItemDTO.setItemPrice(item.getPrice());
+				siteItemDTO.setItemPrice(item.getPrice());
 				rSiteDTO.getSiteItems().add(siteItemDTO);
 			}
-			//TODO:
-//	TODO:		rSiteDTO.setSiteType(rentalSite.getSiteType());
+			rSiteDTO.setSiteType(rentalSite.getSiteType());
 			rSiteDTO.setSiteType("meetingRoom");
 			rSiteDTO.setSpec(rentalSite.getSpec());
 			response.getRentalSites().add(rSiteDTO);
@@ -201,8 +197,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public FindRentalSiteRulesCommandResponse findRentalSiteRules(
-			FindRentalSiteRulesCommand cmd) {
-		// TODO Auto-generated method stub
+			FindRentalSiteRulesCommand cmd) { 
 		FindRentalSiteRulesCommandResponse response = new FindRentalSiteRulesCommandResponse();
 		response.setRentalSiteRules( new ArrayList<RentalSiteRulesDTO>());
 		List<RentalSiteRule> rsrs= rentalProvider.findRentalSiteRules(cmd.getRentalSiteId(),cmd.getRuleDate(),null);
@@ -219,7 +214,7 @@ public class RentalServiceImpl implements RentalService {
 			dto.setEndTime(timeSF.format(rsr.getEndTime().getTime()));
 			dto.setCounts(rsr.getCounts());
 			dto.setUnit(rsr.getUnit());
-			//TODO : dto.setPrice(rsr.getPrice());
+			dto.setPrice(rsr.getPrice());
 			if(rsr.getLoopType().equals(LoopType.EVERYDAY.getCode())){
 
 				dto.setRuleDate(dateSF.format(rsr.getRuleDate()));
@@ -244,10 +239,8 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public void addRentalBill(AddRentalBillCommand cmd) {
-		// TODO Auto-generated method stub
-
-		
+	public void addRentalBill(AddRentalBillCommand cmd) { 
+ //TODO: add bill 
 		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getRentalItems());
 		JSONArray locationValue = (JSONArray) jsonObject.get("rentalItems");
 		Gson gson = new Gson();
@@ -265,17 +258,16 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public GetRentalTypeRuleCommandResponse getRentalTypeRule(
-			GetRentalTypeRuleCommand cmd) {
-		// TODO Auto-generated method stub
+			GetRentalTypeRuleCommand cmd) { 
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
 		GetRentalTypeRuleCommandResponse response = new GetRentalTypeRuleCommandResponse();
 		RentalRule rentalRule = rentalProvider.getRentalRule(cmd.getEnterpriseCommunityId(),cmd.getSiteType());
-//		response.setContactNum(rentalRule.ContactNum());
+		response.setContactNum(rentalRule.getContactNum());
 		response.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
 		response.setPayEndTime(datetimeSF.format(rentalRule.getPayEndTime()));
 		response.setPayRatio(rentalRule.getPaymentRatio());
 		response.setPayStartTime(datetimeSF.format(rentalRule.getPayStartTime()));
-//		response.setRefundFlag(rentalRule.getRefundFlag);
+		response.setRefundFlag(rentalRule.getRefundFlag());
 		response.setRentalEndTime(datetimeSF.format(rentalRule.getRentalEndTime()));
 		response.setRentalStartTime(datetimeSF.format(rentalRule.getRentalStartTime()));
 		response.setSiteType("meetingRoom");

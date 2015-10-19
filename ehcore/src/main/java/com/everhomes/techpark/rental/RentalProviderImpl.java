@@ -1,13 +1,13 @@
 package com.everhomes.techpark.rental;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,11 +39,13 @@ public class RentalProviderImpl implements RentalProvider {
 	private SequenceProvider sequenceProvider;
 	@Override
 	public List<String> findRentalSiteTypes() {
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//		SelectJoinStep<Record1<String>> step = context.selectDistinct(
-//				Tables.EH_RENTAL_RULES.SITE_TYPE).from(Tables.EH_RENTAL_RULES);
-		//TODO: 
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<String>> step = context.selectDistinct(
+				Tables.EH_RENTAL_RULES.SITE_TYPE).from(Tables.EH_RENTAL_RULES); 
+		List<String> result =step.fetch().map((r) -> {
+			return ConvertHelper.convert(r, String.class);
+		});
+		return result;
 	}
 	
 	@Override
@@ -52,8 +54,7 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_RULES);
 		Condition condition = Tables.EH_RENTAL_RULES.ENTERPRISE_COMMUNITY_ID.equal(enterpriseCommunityId);
-		//TODO:
-//		condition = condition.add(Tables.EH_RENTAL_RULES.SITE_TYPE.equal(siteType));
+		 condition = condition.and(Tables.EH_RENTAL_RULES.SITE_TYPE.equal(siteType));
 		step.where(condition);
 		List<RentalRule> result = step.orderBy(Tables.EH_RENTAL_RULES.ID.desc())
 				.fetch().map((r) -> {
@@ -101,8 +102,7 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
 		Condition condition = Tables.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID.equal(enterpriseCommunityId);
-		//TODO:
-//		condition = condition.add(Tables.EH_RENTAL_SITES.SITE_TYPE.equal(siteType));
+		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE.equal(siteType));
 		step.where(condition);
 		List<RentalSite> result = step.orderBy(Tables.EH_RENTAL_SITES.ID.desc())
 				.fetch().map((r) -> {
@@ -147,8 +147,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public void createRentalSiteRule(RentalSiteRule rsr) {
-		// TODO Auto-generated method stub
+	public void createRentalSiteRule(RentalSiteRule rsr) { 
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalSiteRules.class));
 		rsr.setId(id);
