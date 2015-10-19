@@ -169,7 +169,7 @@ DROP TABLE IF EXISTS `eh_rental_rules`;
 CREATE TABLE `eh_rental_rules` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `enterprise_community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
-  `site_type` varchar(20) COMMENT 'rule for what function ',
+  `site_type` VARCHAR(20) COMMENT 'rule for what function ',
   `rental_start_time` DATETIME,
   `rental_end_time` DATETIME,
   `pay_start_time` DATETIME,
@@ -295,6 +295,8 @@ CREATE TABLE `eh_rental_bills`(
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS  `eh_rental_items_bills`;
 
 CREATE TABLE `eh_rental_items_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',

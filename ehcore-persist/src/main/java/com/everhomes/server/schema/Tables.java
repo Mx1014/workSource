@@ -414,6 +414,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhRentalBills EH_RENTAL_BILLS = com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS;
 
 	/**
+	 * The table ehcore.eh_rental_items_bills
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalItemsBills EH_RENTAL_ITEMS_BILLS = com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS;
+
+	/**
 	 * The table ehcore.eh_rental_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalRules EH_RENTAL_RULES = com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES;
