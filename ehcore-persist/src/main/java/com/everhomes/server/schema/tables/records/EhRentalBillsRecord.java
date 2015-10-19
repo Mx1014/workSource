@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> implements org.jooq.Record18<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.sql.Timestamp, java.sql.Timestamp, java.lang.Double, java.lang.Integer, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp, java.sql.Timestamp, java.sql.Timestamp, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1519580259;
+	private static final long serialVersionUID = 1146294643;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -112,28 +112,28 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.pay_tatol_money</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.pay_tatol_money</code>. total money ,include items and site
 	 */
 	public void setPayTatolMoney(java.lang.Integer value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.pay_tatol_money</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.pay_tatol_money</code>. total money ,include items and site
 	 */
 	public java.lang.Integer getPayTatolMoney() {
 		return (java.lang.Integer) getValue(7);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.reserve_money</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
 	 */
 	public void setReserveMoney(java.lang.Integer value) {
 		setValue(8, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.reserve_money</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
 	 */
 	public java.lang.Integer getReserveMoney() {
 		return (java.lang.Integer) getValue(8);

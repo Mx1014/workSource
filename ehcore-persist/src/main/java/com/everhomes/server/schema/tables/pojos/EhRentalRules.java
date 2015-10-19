@@ -11,16 +11,18 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -654620858;
+	private static final long serialVersionUID = 278504828;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
-	private java.sql.Time      siteType;
+	private java.lang.String   siteType;
 	private java.sql.Timestamp rentalStartTime;
 	private java.sql.Timestamp rentalEndTime;
 	private java.sql.Timestamp payStartTime;
 	private java.sql.Timestamp payEndTime;
 	private java.lang.Integer  paymentRatio;
+	private java.lang.Byte     refundFlag;
+	private java.lang.String   contactNum;
 	private java.sql.Time      timeTag1;
 	private java.sql.Time      timeTag2;
 	private java.sql.Time      timeTag3;
@@ -47,12 +49,14 @@ public class EhRentalRules implements java.io.Serializable {
 	public EhRentalRules(
 		java.lang.Long     id,
 		java.lang.Long     enterpriseCommunityId,
-		java.sql.Time      siteType,
+		java.lang.String   siteType,
 		java.sql.Timestamp rentalStartTime,
 		java.sql.Timestamp rentalEndTime,
 		java.sql.Timestamp payStartTime,
 		java.sql.Timestamp payEndTime,
 		java.lang.Integer  paymentRatio,
+		java.lang.Byte     refundFlag,
+		java.lang.String   contactNum,
 		java.sql.Time      timeTag1,
 		java.sql.Time      timeTag2,
 		java.sql.Time      timeTag3,
@@ -82,6 +86,8 @@ public class EhRentalRules implements java.io.Serializable {
 		this.payStartTime = payStartTime;
 		this.payEndTime = payEndTime;
 		this.paymentRatio = paymentRatio;
+		this.refundFlag = refundFlag;
+		this.contactNum = contactNum;
 		this.timeTag1 = timeTag1;
 		this.timeTag2 = timeTag2;
 		this.timeTag3 = timeTag3;
@@ -120,11 +126,11 @@ public class EhRentalRules implements java.io.Serializable {
 		this.enterpriseCommunityId = enterpriseCommunityId;
 	}
 
-	public java.sql.Time getSiteType() {
+	public java.lang.String getSiteType() {
 		return this.siteType;
 	}
 
-	public void setSiteType(java.sql.Time siteType) {
+	public void setSiteType(java.lang.String siteType) {
 		this.siteType = siteType;
 	}
 
@@ -166,6 +172,22 @@ public class EhRentalRules implements java.io.Serializable {
 
 	public void setPaymentRatio(java.lang.Integer paymentRatio) {
 		this.paymentRatio = paymentRatio;
+	}
+
+	public java.lang.Byte getRefundFlag() {
+		return this.refundFlag;
+	}
+
+	public void setRefundFlag(java.lang.Byte refundFlag) {
+		this.refundFlag = refundFlag;
+	}
+
+	public java.lang.String getContactNum() {
+		return this.contactNum;
+	}
+
+	public void setContactNum(java.lang.String contactNum) {
+		this.contactNum = contactNum;
 	}
 
 	public java.sql.Time getTimeTag1() {

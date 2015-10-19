@@ -106,7 +106,7 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>price IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByPrice(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByPrice(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.PRICE, values);
 	}
 

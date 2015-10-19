@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 136248781;
+	private static final long serialVersionUID = 825601901;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalSiteId;
@@ -22,7 +22,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.sql.Time      endTime;
 	private java.lang.Integer  counts;
 	private java.lang.Double   unit;
-	private java.lang.Long     price;
+	private java.lang.Integer  price;
 	private java.sql.Date      ruleDate;
 	private java.lang.Byte     status;
 	private java.lang.Byte     loopType;
@@ -43,7 +43,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Time      endTime,
 		java.lang.Integer  counts,
 		java.lang.Double   unit,
-		java.lang.Long     price,
+		java.lang.Integer  price,
 		java.sql.Date      ruleDate,
 		java.lang.Byte     status,
 		java.lang.Byte     loopType,
@@ -143,11 +143,11 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.unit = unit;
 	}
 
-	public java.lang.Long getPrice() {
+	public java.lang.Integer getPrice() {
 		return this.price;
 	}
 
-	public void setPrice(java.lang.Long price) {
+	public void setPrice(java.lang.Integer price) {
 		this.price = price;
 	}
 

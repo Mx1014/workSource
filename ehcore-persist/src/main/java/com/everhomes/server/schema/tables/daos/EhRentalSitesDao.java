@@ -64,7 +64,7 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>site_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchBySiteType(java.sql.Time... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchBySiteType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.SITE_TYPE, values);
 	}
 

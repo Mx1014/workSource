@@ -57,7 +57,7 @@ public class EhRentalRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>site_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchBySiteType(java.sql.Time... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchBySiteType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.SITE_TYPE, values);
 	}
 
@@ -94,6 +94,20 @@ public class EhRentalRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByPaymentRatio(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.PAYMENT_RATIO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByRefundFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.REFUND_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact_num IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByContactNum(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.CONTACT_NUM, values);
 	}
 
 	/**

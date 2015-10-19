@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = 1952742739;
+	private static final long serialVersionUID = 942176460;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.id</code>. id
@@ -44,15 +44,15 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.site_type</code>. rule for what function 
 	 */
-	public void setSiteType(java.sql.Time value) {
+	public void setSiteType(java.lang.String value) {
 		setValue(2, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.site_type</code>. rule for what function 
 	 */
-	public java.sql.Time getSiteType() {
-		return (java.sql.Time) getValue(2);
+	public java.lang.String getSiteType() {
+		return (java.lang.String) getValue(2);
 	}
 
 	/**
@@ -126,283 +126,311 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_rental_rules.refund_flag</code>. 0 allow refund , 1 can not refund 
+	 */
+	public void setRefundFlag(java.lang.Byte value) {
+		setValue(8, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_rules.refund_flag</code>. 0 allow refund , 1 can not refund 
+	 */
+	public java.lang.Byte getRefundFlag() {
+		return (java.lang.Byte) getValue(8);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_rules.contact_num</code>. phone number
+	 */
+	public void setContactNum(java.lang.String value) {
+		setValue(9, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_rules.contact_num</code>. phone number
+	 */
+	public java.lang.String getContactNum() {
+		return (java.lang.String) getValue(9);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_rental_rules.time_tag1</code>.
 	 */
 	public void setTimeTag1(java.sql.Time value) {
-		setValue(8, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.time_tag1</code>.
 	 */
 	public java.sql.Time getTimeTag1() {
-		return (java.sql.Time) getValue(8);
+		return (java.sql.Time) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.time_tag2</code>.
 	 */
 	public void setTimeTag2(java.sql.Time value) {
-		setValue(9, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.time_tag2</code>.
 	 */
 	public java.sql.Time getTimeTag2() {
-		return (java.sql.Time) getValue(9);
+		return (java.sql.Time) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.time_tag3</code>.
 	 */
 	public void setTimeTag3(java.sql.Time value) {
-		setValue(10, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.time_tag3</code>.
 	 */
 	public java.sql.Time getTimeTag3() {
-		return (java.sql.Time) getValue(10);
+		return (java.sql.Time) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.date_tag1</code>.
 	 */
 	public void setDateTag1(java.sql.Date value) {
-		setValue(11, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.date_tag1</code>.
 	 */
 	public java.sql.Date getDateTag1() {
-		return (java.sql.Date) getValue(11);
+		return (java.sql.Date) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.date_tag2</code>.
 	 */
 	public void setDateTag2(java.sql.Date value) {
-		setValue(12, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.date_tag2</code>.
 	 */
 	public java.sql.Date getDateTag2() {
-		return (java.sql.Date) getValue(12);
+		return (java.sql.Date) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.date_tag3</code>.
 	 */
 	public void setDateTag3(java.sql.Date value) {
-		setValue(13, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.date_tag3</code>.
 	 */
 	public java.sql.Date getDateTag3() {
-		return (java.sql.Date) getValue(13);
+		return (java.sql.Date) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.datetime_tag1</code>.
 	 */
 	public void setDatetimeTag1(java.sql.Timestamp value) {
-		setValue(14, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.datetime_tag1</code>.
 	 */
 	public java.sql.Timestamp getDatetimeTag1() {
-		return (java.sql.Timestamp) getValue(14);
+		return (java.sql.Timestamp) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.datetime_tag2</code>.
 	 */
 	public void setDatetimeTag2(java.sql.Timestamp value) {
-		setValue(15, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.datetime_tag2</code>.
 	 */
 	public java.sql.Timestamp getDatetimeTag2() {
-		return (java.sql.Timestamp) getValue(15);
+		return (java.sql.Timestamp) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.datetime_tag3</code>.
 	 */
 	public void setDatetimeTag3(java.sql.Timestamp value) {
-		setValue(16, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.datetime_tag3</code>.
 	 */
 	public java.sql.Timestamp getDatetimeTag3() {
-		return (java.sql.Timestamp) getValue(16);
+		return (java.sql.Timestamp) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.integral_tag1</code>.
 	 */
 	public void setIntegralTag1(java.lang.Long value) {
-		setValue(17, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.integral_tag1</code>.
 	 */
 	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(17);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.integral_tag2</code>.
 	 */
 	public void setIntegralTag2(java.lang.Long value) {
-		setValue(18, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.integral_tag2</code>.
 	 */
 	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.integral_tag3</code>.
 	 */
 	public void setIntegralTag3(java.lang.Long value) {
-		setValue(19, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.integral_tag3</code>.
 	 */
 	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.integral_tag4</code>.
 	 */
 	public void setIntegralTag4(java.lang.Long value) {
-		setValue(20, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.integral_tag4</code>.
 	 */
 	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.string_tag1</code>.
 	 */
 	public void setStringTag1(java.lang.String value) {
-		setValue(21, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.string_tag1</code>.
 	 */
 	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(21);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.string_tag2</code>.
 	 */
 	public void setStringTag2(java.lang.String value) {
-		setValue(22, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.string_tag2</code>.
 	 */
 	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(22);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.string_tag3</code>.
 	 */
 	public void setStringTag3(java.lang.String value) {
-		setValue(23, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.string_tag3</code>.
 	 */
 	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(23);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.creator_uid</code>.
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(24, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.creator_uid</code>.
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(24);
+		return (java.lang.Long) getValue(26);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(25, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(25);
+		return (java.sql.Timestamp) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.operator_uid</code>.
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(26, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.operator_uid</code>.
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(26);
+		return (java.lang.Long) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.operate_time</code>.
 	 */
 	public void setOperateTime(java.sql.Timestamp value) {
-		setValue(27, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.operate_time</code>.
 	 */
 	public java.sql.Timestamp getOperateTime() {
-		return (java.sql.Timestamp) getValue(27);
+		return (java.sql.Timestamp) getValue(29);
 	}
 
 	// -------------------------------------------------------------------------
@@ -431,7 +459,7 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalRulesRecord
 	 */
-	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.sql.Time siteType, java.sql.Timestamp rentalStartTime, java.sql.Timestamp rentalEndTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.lang.Integer paymentRatio, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.sql.Timestamp rentalStartTime, java.sql.Timestamp rentalEndTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES);
 
 		setValue(0, id);
@@ -442,25 +470,27 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(5, payStartTime);
 		setValue(6, payEndTime);
 		setValue(7, paymentRatio);
-		setValue(8, timeTag1);
-		setValue(9, timeTag2);
-		setValue(10, timeTag3);
-		setValue(11, dateTag1);
-		setValue(12, dateTag2);
-		setValue(13, dateTag3);
-		setValue(14, datetimeTag1);
-		setValue(15, datetimeTag2);
-		setValue(16, datetimeTag3);
-		setValue(17, integralTag1);
-		setValue(18, integralTag2);
-		setValue(19, integralTag3);
-		setValue(20, integralTag4);
-		setValue(21, stringTag1);
-		setValue(22, stringTag2);
-		setValue(23, stringTag3);
-		setValue(24, creatorUid);
-		setValue(25, createTime);
-		setValue(26, operatorUid);
-		setValue(27, operateTime);
+		setValue(8, refundFlag);
+		setValue(9, contactNum);
+		setValue(10, timeTag1);
+		setValue(11, timeTag2);
+		setValue(12, timeTag3);
+		setValue(13, dateTag1);
+		setValue(14, dateTag2);
+		setValue(15, dateTag3);
+		setValue(16, datetimeTag1);
+		setValue(17, datetimeTag2);
+		setValue(18, datetimeTag3);
+		setValue(19, integralTag1);
+		setValue(20, integralTag2);
+		setValue(21, integralTag3);
+		setValue(22, integralTag4);
+		setValue(23, stringTag1);
+		setValue(24, stringTag2);
+		setValue(25, stringTag3);
+		setValue(26, creatorUid);
+		setValue(27, createTime);
+		setValue(28, operatorUid);
+		setValue(29, operateTime);
 	}
 }
