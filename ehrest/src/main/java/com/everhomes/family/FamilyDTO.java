@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.family;
 
+import java.sql.Timestamp;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -37,6 +39,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressStatus: 地址状态, {@link com.everhomes.address.AddressAdminStatus}</li>
  * <li>proofResourceUri: 用于加速审核的图片URI</li>
  * <li>proofResourceUrl: 用于加速审核的图片URI</li>
+ * <li>createTime: 创建时间</li>
  * </ul>
  */
 public class FamilyDTO {
@@ -75,12 +78,25 @@ public class FamilyDTO {
     private String proofResourceUri;
     private String proofResourceUrl;
     
+    private Timestamp createTime;
+    
     
     
     public FamilyDTO () {
     }
+    
 
-    public Long getId() {
+    public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+
+	public Long getId() {
         return id;
     }
 

@@ -436,6 +436,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 						f.setProofResourceUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI));
 						f.setProofResourceUrl(parserUri(r.getValue(Tables.EH_GROUP_MEMBERS.PROOF_RESOURCE_URI),EntityType.FAMILY.getCode(),
 								r.getValue(Tables.EH_GROUP_MEMBERS.CREATOR_UID)));
+						f.setCreateTime(r.getValue(Tables.EH_GROUP_MEMBERS.CREATE_TIME));
 						List<UserIdentifier> userIdentifiers = this.userProvider.listUserIdentifiersOfUser(r.getValue(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
 						if(userIdentifiers != null && !userIdentifiers.isEmpty()){
 							userIdentifiers.forEach((u) ->{
