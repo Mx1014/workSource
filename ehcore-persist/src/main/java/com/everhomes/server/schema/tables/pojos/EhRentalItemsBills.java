@@ -11,13 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -599111205;
+	private static final long serialVersionUID = -890703983;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalBillId;
-	private java.lang.Long     rentalSiteItems;
+	private java.lang.Long     rentalSiteItemId;
 	private java.lang.Integer  rentalCount;
-	private java.lang.Integer  itemTotalMoney;
+	private java.lang.Integer  totalMoney;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -28,9 +28,9 @@ public class EhRentalItemsBills implements java.io.Serializable {
 	public EhRentalItemsBills(
 		java.lang.Long     id,
 		java.lang.Long     rentalBillId,
-		java.lang.Long     rentalSiteItems,
+		java.lang.Long     rentalSiteItemId,
 		java.lang.Integer  rentalCount,
-		java.lang.Integer  itemTotalMoney,
+		java.lang.Integer  totalMoney,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
@@ -38,9 +38,9 @@ public class EhRentalItemsBills implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.rentalBillId = rentalBillId;
-		this.rentalSiteItems = rentalSiteItems;
+		this.rentalSiteItemId = rentalSiteItemId;
 		this.rentalCount = rentalCount;
-		this.itemTotalMoney = itemTotalMoney;
+		this.totalMoney = totalMoney;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
@@ -63,12 +63,12 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.rentalBillId = rentalBillId;
 	}
 
-	public java.lang.Long getRentalSiteItems() {
-		return this.rentalSiteItems;
+	public java.lang.Long getRentalSiteItemId() {
+		return this.rentalSiteItemId;
 	}
 
-	public void setRentalSiteItems(java.lang.Long rentalSiteItems) {
-		this.rentalSiteItems = rentalSiteItems;
+	public void setRentalSiteItemId(java.lang.Long rentalSiteItemId) {
+		this.rentalSiteItemId = rentalSiteItemId;
 	}
 
 	public java.lang.Integer getRentalCount() {
@@ -79,12 +79,12 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.rentalCount = rentalCount;
 	}
 
-	public java.lang.Integer getItemTotalMoney() {
-		return this.itemTotalMoney;
+	public java.lang.Integer getTotalMoney() {
+		return this.totalMoney;
 	}
 
-	public void setItemTotalMoney(java.lang.Integer itemTotalMoney) {
-		this.itemTotalMoney = itemTotalMoney;
+	public void setTotalMoney(java.lang.Integer totalMoney) {
+		this.totalMoney = totalMoney;
 	}
 
 	public java.lang.Long getCreatorUid() {

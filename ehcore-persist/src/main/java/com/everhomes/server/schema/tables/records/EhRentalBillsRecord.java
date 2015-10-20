@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> implements org.jooq.Record18<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.sql.Timestamp, java.sql.Timestamp, java.lang.Double, java.lang.Integer, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp, java.sql.Timestamp, java.sql.Timestamp, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1146294643;
+	private static final long serialVersionUID = 1873170129;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -42,70 +42,70 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.rental_uid</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.rental_uid</code>. rental user id
 	 */
 	public void setRentalUid(java.lang.Long value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.rental_uid</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.rental_uid</code>. rental user id
 	 */
 	public java.lang.Long getRentalUid() {
 		return (java.lang.Long) getValue(2);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.rental_date</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.rental_date</code>. rental target date
 	 */
 	public void setRentalDate(java.sql.Date value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.rental_date</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.rental_date</code>. rental target date
 	 */
 	public java.sql.Date getRentalDate() {
 		return (java.sql.Date) getValue(3);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.start_time</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.start_time</code>. begin datetime unuse 
 	 */
 	public void setStartTime(java.sql.Timestamp value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.start_time</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.start_time</code>. begin datetime unuse 
 	 */
 	public java.sql.Timestamp getStartTime() {
 		return (java.sql.Timestamp) getValue(4);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.end_time</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.end_time</code>. end datetime unuse
 	 */
 	public void setEndTime(java.sql.Timestamp value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.end_time</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.end_time</code>. end datetime unuse
 	 */
 	public java.sql.Timestamp getEndTime() {
 		return (java.sql.Timestamp) getValue(5);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.rental_count</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.rental_count</code>. amount of rental sites 
 	 */
 	public void setRentalCount(java.lang.Double value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.rental_count</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.rental_count</code>. amount of rental sites 
 	 */
 	public java.lang.Double getRentalCount() {
 		return (java.lang.Double) getValue(6);
@@ -140,14 +140,14 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.reserve_time</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time 
 	 */
 	public void setReserveTime(java.sql.Timestamp value) {
 		setValue(9, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.reserve_time</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time 
 	 */
 	public java.sql.Timestamp getReserveTime() {
 		return (java.sql.Timestamp) getValue(9);

@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1574788387;
+	private static final long serialVersionUID = 1044765085;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
 	private java.lang.Long     enterpriseCommunityId;
-	private java.lang.String   siteType;
+	private java.sql.Time      siteType;
 	private java.lang.String   buildingName;
 	private java.lang.Long     buildingId;
 	private java.lang.String   address;
@@ -39,7 +39,7 @@ public class EhRentalSites implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     parentId,
 		java.lang.Long     enterpriseCommunityId,
-		java.lang.String   siteType,
+		java.sql.Time      siteType,
 		java.lang.String   buildingName,
 		java.lang.Long     buildingId,
 		java.lang.String   address,
@@ -101,11 +101,11 @@ public class EhRentalSites implements java.io.Serializable {
 		this.enterpriseCommunityId = enterpriseCommunityId;
 	}
 
-	public java.lang.String getSiteType() {
+	public java.sql.Time getSiteType() {
 		return this.siteType;
 	}
 
-	public void setSiteType(java.lang.String siteType) {
+	public void setSiteType(java.sql.Time siteType) {
 		this.siteType = siteType;
 	}
 

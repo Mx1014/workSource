@@ -55,10 +55,10 @@ public class EhRentalItemsBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>rental_site_items IN (values)</code>
+	 * Fetch records that have <code>rental_site_item_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByRentalSiteItems(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEMS, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByRentalSiteItemId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEM_ID, values);
 	}
 
 	/**
@@ -69,10 +69,10 @@ public class EhRentalItemsBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
-	 * Fetch records that have <code>item_total_money IN (values)</code>
+	 * Fetch records that have <code>total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByItemTotalMoney(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.ITEM_TOTAL_MONEY, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByTotalMoney(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.TOTAL_MONEY, values);
 	}
 
 	/**

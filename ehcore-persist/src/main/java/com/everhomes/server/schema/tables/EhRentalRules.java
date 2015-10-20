@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = -747881795;
+	private static final long serialVersionUID = -1083057364;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_rules</code>
@@ -39,7 +39,7 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_rental_rules.site_type</code>. rule for what function 
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.sql.Time> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.TIME, this, "rule for what function ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "rule for what function ");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.rental_start_time</code>.
@@ -65,6 +65,16 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_rental_rules.payment_ratio</code>. payment ratio
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Integer> PAYMENT_RATIO = createField("payment_ratio", org.jooq.impl.SQLDataType.INTEGER, this, "payment ratio");
+
+	/**
+	 * The column <code>ehcore.eh_rental_rules.refund_flag</code>. 0 allow refund , 1 can not refund 
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Byte> REFUND_FLAG = createField("refund_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0 allow refund , 1 can not refund ");
+
+	/**
+	 * The column <code>ehcore.eh_rental_rules.contact_num</code>. phone number
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> CONTACT_NUM = createField("contact_num", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "phone number");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.time_tag1</code>.

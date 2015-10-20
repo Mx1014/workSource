@@ -62,30 +62,16 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>step_length_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByStepLengthTime(java.sql.Time... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.STEP_LENGTH_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>step_length_day IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByStepLengthDay(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.STEP_LENGTH_DAY, values);
-	}
-
-	/**
 	 * Fetch records that have <code>begin_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByBeginTime(java.sql.Time... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByBeginTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.BEGIN_TIME, values);
 	}
 
 	/**
 	 * Fetch records that have <code>end_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByEndTime(java.sql.Time... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByEndTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.END_TIME, values);
 	}
 
@@ -111,10 +97,10 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>rule_date IN (values)</code>
+	 * Fetch records that have <code>site_rental_date IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByRuleDate(java.sql.Date... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.RULE_DATE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchBySiteRentalDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE, values);
 	}
 
 	/**
@@ -122,13 +108,6 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.STATUS, values);
-	}
-
-	/**
-	 * Fetch records that have <code>loop_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByLoopType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.LOOP_TYPE, values);
 	}
 
 	/**

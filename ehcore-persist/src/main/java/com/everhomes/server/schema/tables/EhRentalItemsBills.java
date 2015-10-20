@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord> {
 
-	private static final long serialVersionUID = -800682909;
+	private static final long serialVersionUID = 1558849990;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_items_bills</code>
@@ -37,9 +37,9 @@ public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Long> RENTAL_BILL_ID = createField("rental_bill_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_items_bills.rental_site_items</code>.
+	 * The column <code>ehcore.eh_rental_items_bills.rental_site_item_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Long> RENTAL_SITE_ITEMS = createField("rental_site_items", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Long> RENTAL_SITE_ITEM_ID = createField("rental_site_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_items_bills.rental_count</code>.
@@ -47,9 +47,9 @@ public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Integer> RENTAL_COUNT = createField("rental_count", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_items_bills.item_total_money</code>.
+	 * The column <code>ehcore.eh_rental_items_bills.total_money</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Integer> ITEM_TOTAL_MONEY = createField("item_total_money", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Integer> TOTAL_MONEY = createField("total_money", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_items_bills.creator_uid</code>.

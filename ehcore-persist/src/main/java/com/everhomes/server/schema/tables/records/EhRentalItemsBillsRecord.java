@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord> implements org.jooq.Record9<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1279784490;
+	private static final long serialVersionUID = 1748094559;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_items_bills.id</code>. id
@@ -42,16 +42,16 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_items_bills.rental_site_items</code>.
+	 * Setter for <code>ehcore.eh_rental_items_bills.rental_site_item_id</code>.
 	 */
-	public void setRentalSiteItems(java.lang.Long value) {
+	public void setRentalSiteItemId(java.lang.Long value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_items_bills.rental_site_items</code>.
+	 * Getter for <code>ehcore.eh_rental_items_bills.rental_site_item_id</code>.
 	 */
-	public java.lang.Long getRentalSiteItems() {
+	public java.lang.Long getRentalSiteItemId() {
 		return (java.lang.Long) getValue(2);
 	}
 
@@ -70,16 +70,16 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_items_bills.item_total_money</code>.
+	 * Setter for <code>ehcore.eh_rental_items_bills.total_money</code>.
 	 */
-	public void setItemTotalMoney(java.lang.Integer value) {
+	public void setTotalMoney(java.lang.Integer value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_items_bills.item_total_money</code>.
+	 * Getter for <code>ehcore.eh_rental_items_bills.total_money</code>.
 	 */
-	public java.lang.Integer getItemTotalMoney() {
+	public java.lang.Integer getTotalMoney() {
 		return (java.lang.Integer) getValue(4);
 	}
 
@@ -192,7 +192,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field3() {
-		return com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEMS;
+		return com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEM_ID;
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Integer> field5() {
-		return com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.ITEM_TOTAL_MONEY;
+		return com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.TOTAL_MONEY;
 	}
 
 	/**
@@ -264,7 +264,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public java.lang.Long value3() {
-		return getRentalSiteItems();
+		return getRentalSiteItemId();
 	}
 
 	/**
@@ -280,7 +280,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public java.lang.Integer value5() {
-		return getItemTotalMoney();
+		return getTotalMoney();
 	}
 
 	/**
@@ -338,7 +338,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public EhRentalItemsBillsRecord value3(java.lang.Long value) {
-		setRentalSiteItems(value);
+		setRentalSiteItemId(value);
 		return this;
 	}
 
@@ -356,7 +356,7 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	 */
 	@Override
 	public EhRentalItemsBillsRecord value5(java.lang.Integer value) {
-		setItemTotalMoney(value);
+		setTotalMoney(value);
 		return this;
 	}
 
@@ -418,14 +418,14 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	/**
 	 * Create a detached, initialised EhRentalItemsBillsRecord
 	 */
-	public EhRentalItemsBillsRecord(java.lang.Long id, java.lang.Long rentalBillId, java.lang.Long rentalSiteItems, java.lang.Integer rentalCount, java.lang.Integer itemTotalMoney, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalItemsBillsRecord(java.lang.Long id, java.lang.Long rentalBillId, java.lang.Long rentalSiteItemId, java.lang.Integer rentalCount, java.lang.Integer totalMoney, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS);
 
 		setValue(0, id);
 		setValue(1, rentalBillId);
-		setValue(2, rentalSiteItems);
+		setValue(2, rentalSiteItemId);
 		setValue(3, rentalCount);
-		setValue(4, itemTotalMoney);
+		setValue(4, totalMoney);
 		setValue(5, creatorUid);
 		setValue(6, createTime);
 		setValue(7, operatorUid);

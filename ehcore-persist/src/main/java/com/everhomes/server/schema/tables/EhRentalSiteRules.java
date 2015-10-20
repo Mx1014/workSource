@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -1313739086;
+	private static final long serialVersionUID = 672155906;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -42,24 +42,14 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min  1-as day");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.step_length_time</code>. if ordertype = 0 then useful
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Time> STEP_LENGTH_TIME = createField("step_length_time", org.jooq.impl.SQLDataType.TIME, this, "if ordertype = 0 then useful");
-
-	/**
-	 * The column <code>ehcore.eh_rental_site_rules.step_length_day</code>. if ordertype = 1 then useful
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> STEP_LENGTH_DAY = createField("step_length_day", org.jooq.impl.SQLDataType.INTEGER, this, "if ordertype = 1 then useful");
-
-	/**
 	 * The column <code>ehcore.eh_rental_site_rules.begin_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Time> BEGIN_TIME = createField("begin_time", org.jooq.impl.SQLDataType.TIME, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> BEGIN_TIME = createField("begin_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.end_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Time> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIME, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.counts</code>. site count
@@ -74,22 +64,17 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.price</code>. how much every step every unit
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> PRICE = createField("price", org.jooq.impl.SQLDataType.BIGINT, this, "how much every step every unit");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> PRICE = createField("price", org.jooq.impl.SQLDataType.INTEGER, this, "how much every step every unit");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.rule_date</code>. what time
+	 * The column <code>ehcore.eh_rental_site_rules.site_rental_date</code>. which day
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Date> RULE_DATE = createField("rule_date", org.jooq.impl.SQLDataType.DATE, this, "what time");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Date> SITE_RENTAL_DATE = createField("site_rental_date", org.jooq.impl.SQLDataType.DATE, this, "which day");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.status</code>. 0:open  1:closed
+	 * The column <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open  1:closed
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0:open  1:closed");
-
-	/**
-	 * The column <code>ehcore.eh_rental_site_rules.loop_type</code>. 0:everyday  1:everyweek 2:everymoth 3:everyyear 4:only one day
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> LOOP_TYPE = createField("loop_type", org.jooq.impl.SQLDataType.TINYINT, this, "0:everyday  1:everyweek 2:everymoth 3:everyyear 4:only one day");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "unuse 0:open  1:closed");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.creator_uid</code>.

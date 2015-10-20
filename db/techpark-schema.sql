@@ -252,17 +252,14 @@ DROP TABLE IF EXISTS `eh_rental_site_rules`;
 CREATE TABLE `eh_rental_site_rules`(
   `id` BIGINT  NOT NULL COMMENT 'id',
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
-  `rental_type` TINYINT(4) COMMENT '0: as hour:min  1-as day', 
-  `step_length_time` TIME COMMENT 'if ordertype = 0 then useful',
-  `step_length_day` INT COMMENT 'if ordertype = 1 then useful',
-  `begin_time` TIME,
-  `end_time` TIME,
+  `rental_type` TINYINT(4) COMMENT '0: as hour:min  1-as day',
+  `begin_time` DATETIME,
+  `end_time` DATETIME,
   `counts` INT  COMMENT 'site count',
   `unit` DOUBLE COMMENT '1 or 0.5 basketball yard can rental half',
   `price` INT COMMENT 'how much every step every unit', 
-  `rule_date` DATE COMMENT 'what time',
-  `status` TINYINT(4) COMMENT '0:open  1:closed', 
-  `loop_type` TINYINT(4) COMMENT '0:everyday  1:everyweek 2:everymoth 3:everyyear 4:only one day', 
+  `site_rental_date` DATE COMMENT 'which day',
+  `status` TINYINT(4) COMMENT 'unuse 0:open  1:closed', 
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,
@@ -277,17 +274,17 @@ DROP TABLE IF EXISTS `eh_rental_bills`;
 CREATE TABLE `eh_rental_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `rental_site_id` BIGINT NOT NULL COMMENT 'id',
-  `rental_uid` BIGINT ,
-  `rental_date` DATE ,
-  `start_time` DATETIME ,
-  `end_time` DATETIME, 
-  `rental_count` DOUBLE,
+  `rental_uid` BIGINT COMMENT 'rental user id',
+  `rental_date` DATE COMMENT 'rental target date',
+  `start_time` DATETIME COMMENT 'begin datetime unuse ',
+  `end_time` DATETIME COMMENT 'end datetime unuse',
+  `rental_count` DOUBLE COMMENT 'amount of rental sites ',
   `pay_tatol_money` INT COMMENT 'total money ,include items and site',
   `reserve_money` INT COMMENT 'total money * reserve ratio',
-  `reserve_time` DATETIME,
-  `pay_start_time` DATETIME,
+  `reserve_time` DATETIME COMMENT 'reserve time ',
+  `pay_start_time` DATETIME ,
   `pay_end_time` DATETIME,
-  `pay_time` DATETIME,  
+  `pay_time` DATETIME ,  
   `status` TINYINT(4) COMMENT'0:reserved and locked 1:canceled and unlock 2:paid and locked 3:overtime unlocked',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -296,14 +293,28 @@ CREATE TABLE `eh_rental_bills`(
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS  `eh_rental_sites_bills`;
+
+CREATE TABLE `eh_rental_sites_bills`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `rental_bill_id` BIGINT ,
+  `rental_site_rule_id` BIGINT ,  
+  `rental_count` DOUBLE ,
+  `total_money` INT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 DROP TABLE IF EXISTS  `eh_rental_items_bills`;
 
 CREATE TABLE `eh_rental_items_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `rental_bill_id` BIGINT ,
-  `rental_site_items` BIGINT ,  
+  `rental_site_item_id` BIGINT ,  
   `rental_count` INT,
-  `item_total_money` INT,
+  `total_money` INT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `operator_uid` BIGINT,

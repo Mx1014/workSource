@@ -11,21 +11,18 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 825601901;
+	private static final long serialVersionUID = 1284583323;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalSiteId;
 	private java.lang.Byte     rentalType;
-	private java.sql.Time      stepLengthTime;
-	private java.lang.Integer  stepLengthDay;
-	private java.sql.Time      beginTime;
-	private java.sql.Time      endTime;
+	private java.sql.Timestamp beginTime;
+	private java.sql.Timestamp endTime;
 	private java.lang.Integer  counts;
 	private java.lang.Double   unit;
 	private java.lang.Integer  price;
-	private java.sql.Date      ruleDate;
+	private java.sql.Date      siteRentalDate;
 	private java.lang.Byte     status;
-	private java.lang.Byte     loopType;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -37,16 +34,13 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     rentalSiteId,
 		java.lang.Byte     rentalType,
-		java.sql.Time      stepLengthTime,
-		java.lang.Integer  stepLengthDay,
-		java.sql.Time      beginTime,
-		java.sql.Time      endTime,
+		java.sql.Timestamp beginTime,
+		java.sql.Timestamp endTime,
 		java.lang.Integer  counts,
 		java.lang.Double   unit,
 		java.lang.Integer  price,
-		java.sql.Date      ruleDate,
+		java.sql.Date      siteRentalDate,
 		java.lang.Byte     status,
-		java.lang.Byte     loopType,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
@@ -55,16 +49,13 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
-		this.stepLengthTime = stepLengthTime;
-		this.stepLengthDay = stepLengthDay;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		this.counts = counts;
 		this.unit = unit;
 		this.price = price;
-		this.ruleDate = ruleDate;
+		this.siteRentalDate = siteRentalDate;
 		this.status = status;
-		this.loopType = loopType;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
@@ -95,35 +86,19 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.rentalType = rentalType;
 	}
 
-	public java.sql.Time getStepLengthTime() {
-		return this.stepLengthTime;
-	}
-
-	public void setStepLengthTime(java.sql.Time stepLengthTime) {
-		this.stepLengthTime = stepLengthTime;
-	}
-
-	public java.lang.Integer getStepLengthDay() {
-		return this.stepLengthDay;
-	}
-
-	public void setStepLengthDay(java.lang.Integer stepLengthDay) {
-		this.stepLengthDay = stepLengthDay;
-	}
-
-	public java.sql.Time getBeginTime() {
+	public java.sql.Timestamp getBeginTime() {
 		return this.beginTime;
 	}
 
-	public void setBeginTime(java.sql.Time beginTime) {
+	public void setBeginTime(java.sql.Timestamp beginTime) {
 		this.beginTime = beginTime;
 	}
 
-	public java.sql.Time getEndTime() {
+	public java.sql.Timestamp getEndTime() {
 		return this.endTime;
 	}
 
-	public void setEndTime(java.sql.Time endTime) {
+	public void setEndTime(java.sql.Timestamp endTime) {
 		this.endTime = endTime;
 	}
 
@@ -151,12 +126,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.price = price;
 	}
 
-	public java.sql.Date getRuleDate() {
-		return this.ruleDate;
+	public java.sql.Date getSiteRentalDate() {
+		return this.siteRentalDate;
 	}
 
-	public void setRuleDate(java.sql.Date ruleDate) {
-		this.ruleDate = ruleDate;
+	public void setSiteRentalDate(java.sql.Date siteRentalDate) {
+		this.siteRentalDate = siteRentalDate;
 	}
 
 	public java.lang.Byte getStatus() {
@@ -165,14 +140,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
-	}
-
-	public java.lang.Byte getLoopType() {
-		return this.loopType;
-	}
-
-	public void setLoopType(java.lang.Byte loopType) {
-		this.loopType = loopType;
 	}
 
 	public java.lang.Long getCreatorUid() {
