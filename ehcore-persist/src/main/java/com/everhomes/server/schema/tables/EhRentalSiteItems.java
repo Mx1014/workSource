@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord> {
 
-	private static final long serialVersionUID = -790340771;
+	private static final long serialVersionUID = 896013658;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_items</code>
@@ -44,7 +44,7 @@ public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_rental_site_items.price</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> PRICE = createField("price", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Integer> PRICE = createField("price", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_items.counts</code>. item count
