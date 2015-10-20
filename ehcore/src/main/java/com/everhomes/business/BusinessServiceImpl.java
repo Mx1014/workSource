@@ -145,7 +145,13 @@ public class BusinessServiceImpl implements BusinessService {
 		long userId = user.getId();
 		this.dbProvider.execute((TransactionStatus status) -> {
 			Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
-
+			if(LOGGER.isDebugEnabled()){
+				if(business == null)
+					LOGGER.info("syncBusiness-business=null");
+				else
+					LOGGER.info("syncBusiness-business="+StringHelper.toJsonString(business));
+			}
+			
 			if(business == null){
 				business = createBusiness(cmd, userId);
 			}else{
@@ -157,7 +163,6 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 			return true;
 		});
-
 	}
 
 	private Business createBusiness(BusinessCommand cmd, long userId){
@@ -255,6 +260,10 @@ public class BusinessServiceImpl implements BusinessService {
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
 					"Invalid paramter communityId,communityId is not exists.");
 		}
+		
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.info("getBusinessesByCategory-community="+StringHelper.toJsonString(community));
+		}
 
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
@@ -275,23 +284,52 @@ public class BusinessServiceImpl implements BusinessService {
 			LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
 			return response;
 		}
+		
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.info("getBusinessesByCategory-points="+StringHelper.toJsonString(points));
+		}
+		
 		CommunityGeoPoint point = points.get(0);
 		final double lat = point != null ? point.getLatitude() : 0;
 		final double lon = point != null ? point.getLongitude() : 0;
 
 		List<String> geoHashList = getGeoHashCodeList(lat, lon);
 		List<Business> businesses = null;
+		
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.info("getBusinessesByCategory-geoHashList="+StringHelper.toJsonString(geoHashList));
+		}
 
 		//recommend to user
 		List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
 				.map(r->r.getOwnerId()).collect(Collectors.toList());
+		
+		if(LOGGER.isDebugEnabled()){
+			if(recommendBizIds == null)
+				LOGGER.info("getBusinessesByCategory-recommendBizIds=null");
+			else
+				LOGGER.info("getBusinessesByCategory-recommendBizIds="+StringHelper.toJsonString(recommendBizIds));
+		}
+		
 		//查询推荐列表
 		if(cmd.getCategoryId() == CATEOGRY_RECOMMEND){
 			businesses = this.businessProvider.findBusinessByIds(recommendBizIds);
 		}else{
 			//获取指定类型的服务
 			List<Long> categoryIds = this.categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
+			
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.info("getBusinessesByCategory-categoryIds="+StringHelper.toJsonString(categoryIds));
+			}
+			
 			businesses = this.businessProvider.findBusinessByCategroy(categoryIds,geoHashList);
+		}
+		
+		if(LOGGER.isDebugEnabled()){
+			if(businesses == null)
+				LOGGER.info("getBusinessesByCategory-businesses=null");
+			else
+				LOGGER.info("getBusinessesByCategory-businesses="+StringHelper.toJsonString(businesses));
 		}
 
 		Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
@@ -304,6 +342,13 @@ public class BusinessServiceImpl implements BusinessService {
 		//        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
 		//                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
 		List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
+		
+		if(LOGGER.isDebugEnabled()){
+			if(recommendBizIds == null)
+				LOGGER.info("getBusinessesByCategory-favoriteBizIds=null");
+			else
+				LOGGER.info("getBusinessesByCategory-favoriteBizIds="+StringHelper.toJsonString(favoriteBizIds));
+		}
 
 		//final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
 		final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
@@ -344,6 +389,10 @@ public class BusinessServiceImpl implements BusinessService {
 
 			dtos.add(dto);
 		});
+		
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.info("getBusinessesByCategory-processRecommendBusinesses");
+		}
 
 		processRecommendBusinesses(recommendBizIds,dtos,category,userId,favoriteBizIds);
 
