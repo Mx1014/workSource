@@ -1,0 +1,32 @@
+package com.everhomes.business;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>ids: 店铺ID列表</li>
+ * </ul>
+ */
+public class FavoriteBusinessesCommand {
+	
+	@ItemType(Long.class)
+    private List<Long> ids;
+
+	public List<Long> getIds() {
+		return ids;
+	}
+
+	public void setIds(List<Long> ids) {
+		this.ids = ids;
+	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+	
+
+}

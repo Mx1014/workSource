@@ -357,6 +357,10 @@ public class BusinessServiceImpl implements BusinessService {
 		final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
 		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
 		final Category c = category;
+		
+		//从算法过滤的范围中再缩小范围
+		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
+		
 		businesses.forEach(r ->{
 			BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
 			List<CategoryDTO> categories = new ArrayList<>();
@@ -404,6 +408,28 @@ public class BusinessServiceImpl implements BusinessService {
 				+ ",communityId=" + cmd.getCommunityId() + ",elapse=" + (endTime - startTime));
 
 		return response;
+	}
+
+	private List<Business> filterDistance(List<Business> businesses, double lat,double lon, List<Long> recommendBizIds) {
+		List<Business> list = new ArrayList<Business>();
+		if(businesses == null || businesses.isEmpty())
+			return null;
+		
+		for(Business r:businesses){
+			if(recommendBizIds != null && recommendBizIds.contains(r.getId())){
+				list.add(r);
+				continue;
+			}
+			if(lat != 0 || lon != 0){
+				int distance = (int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon);
+				if(distance <= 5000){
+					list.add(r);
+				}
+			}
+		}
+		
+		return list;
+		
 	}
 
 	private String processUrl(Business business, String authenticatePrefix,String detailUrl){
@@ -471,6 +497,7 @@ public class BusinessServiceImpl implements BusinessService {
 	private double calculateDistance(double latitude, double longitude, double lat, double lon){
 		//getDistanceMi计算的是英里
 		final double MILES_KILOMETRES_RATIO = 1.609344;
+		//return  单位:米
 		return DistanceUtils.getDistanceMi(latitude,longitude,lat , lon) * MILES_KILOMETRES_RATIO * 1000;
 	}
 	private List<BusinessDTO> sortBusinesses(List<BusinessDTO> dtos){
@@ -846,7 +873,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-		favoriteBusiness(cmd.getUserId(), business.getId());
+		favoriteBusiness(cmd.getUserId(), business.getId(),true);
 
 	}
 
@@ -904,20 +931,34 @@ public class BusinessServiceImpl implements BusinessService {
 	public void favoriteBusiness(FavoriteBusinessCommand cmd) {
 		if(cmd.getId() == null)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid paramter id null,categoryId is null");
+					"Invalid paramter id is null or empty");
 
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		favoriteBusiness(userId, cmd.getId());
+		favoriteBusiness(userId, cmd.getId(),true);
 
 	}
+	
+	@Override
+	public void favoriteBusinesses(FavoriteBusinessesCommand cmd) {
+		if(cmd.getIds() == null || cmd.getIds().isEmpty())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter ids is null or empty");
 
-	private void favoriteBusiness(long userId,long businessId){
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		for(Long id:cmd.getIds())
+			favoriteBusiness(userId, id,false);
+	}
+
+	private void favoriteBusiness(long userId,long businessId,boolean isException){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
-			throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
-					"Business is not exists.");
+			if(isException)
+				throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST,"Business is not exists.");
+			else
+				return ;
 		}
 		List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId);
 		LaunchPadItem item = null;
