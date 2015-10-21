@@ -85,6 +85,21 @@ public class BusinessController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /business/favoriteBusinesses</b>
+     * <p>店铺收藏（放到服务市场首页）</p>
+     */
+    @RequestMapping("favoriteBusinesses")
+    @RestReturn(value=String.class)
+    public RestResponse favoriteBusinesses(FavoriteBusinessesCommand cmd) {
+        
+        businessService.favoriteBusinesses(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /business/cancelFavoriteBusiness</b>
      * <p>用户取消收藏</p>
      */
