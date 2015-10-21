@@ -1,5 +1,9 @@
 // @formatter:off
+<<<<<<< HEAD
 // generated at 2015-11-03 16:20:54
+=======
+// generated at 2015-10-21 17:44:18
+>>>>>>> update ehrest-response 2015/10/21
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -85,6 +89,12 @@ public interface ApiConstants {
     public static final String ADMIN_FORUM_SEARCHTOPICS_URL = "/admin/forum/searchTopics";
     public static final String ADMIN_FORUM_SYNCPOSTINDEX_URL = "/admin/forum/syncPostIndex";
     public static final String ADMIN_GETIOSZIP_URL = "/admin/getIosZip";
+<<<<<<< HEAD
+=======
+    public static final String ADMIN_GROUP_DELETEGROUP_URL = "/admin/group/deleteGroup";
+    public static final String ADMIN_GROUP_SEARCHGROUP_URL = "/admin/group/searchGroup";
+    public static final String ADMIN_GROUP_SEARCHGROUPTOPICS_URL = "/admin/group/searchGroupTopics";
+>>>>>>> update ehrest-response 2015/10/21
     public static final String ADMIN_GROUP_SYNCGROUPINDEX_URL = "/admin/group/syncGroupIndex";
     public static final String ADMIN_LAUNCHPAD_CREATELAUNCHPADITEM_URL = "/admin/launchpad/createLaunchPadItem";
     public static final String ADMIN_LAUNCHPAD_CREATELAUNCHPADLAYOUT_URL = "/admin/launchpad/createLaunchPadLayout";
@@ -114,6 +124,14 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
     public static final String ADMIN_PINGBORDER_URL = "/admin/pingBorder";
+<<<<<<< HEAD
+=======
+    public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
+    public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
+    public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
+    public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGERESULT_URL = "/admin/pushmessage/listPushMessageResult";
+    public static final String ADMIN_PUSHMESSAGE_UPDATEPUSHMESSAGE_URL = "/admin/pushmessage/updatePushMessage";
+>>>>>>> update ehrest-response 2015/10/21
     public static final String ADMIN_RECOMMEND_CREATECONFIG_URL = "/admin/recommend/createConfig";
     public static final String ADMIN_RECOMMEND_LISTCONFIG_URL = "/admin/recommend/listConfig";
     public static final String ADMIN_REGISTERLOGIN_URL = "/admin/registerLogin";
@@ -147,6 +165,7 @@ public interface ApiConstants {
     public static final String BUSINESS_CANCELFAVORITEBUSINESS_URL = "/business/cancelFavoriteBusiness";
     public static final String BUSINESS_DELETEBUSINESS_URL = "/business/deleteBusiness";
     public static final String BUSINESS_FAVORITEBUSINESS_URL = "/business/favoriteBusiness";
+    public static final String BUSINESS_FAVORITEBUSINESSES_URL = "/business/favoriteBusinesses";
     public static final String BUSINESS_GETBUSINESSESBYCATEGORY_URL = "/business/getBusinessesByCategory";
     public static final String BUSINESS_UPDATEBUSINESS_URL = "/business/updateBusiness";
     public static final String CATEGORY_LISTACTIONCATEGORIES_URL = "/category/listActionCategories";
@@ -455,6 +474,7 @@ public interface ApiConstants {
     public static final String USER_FEEDBACK_URL = "/user/feedback";
     public static final String USER_FETCHPASTTORECENTMESSAGES_URL = "/user/fetchPastToRecentMessages";
     public static final String USER_FETCHRECENTTOPASTMESSAGES_URL = "/user/fetchRecentToPastMessages";
+    public static final String USER_FINDTOKENBYUSERID_URL = "/user/findTokenByUserId";
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";

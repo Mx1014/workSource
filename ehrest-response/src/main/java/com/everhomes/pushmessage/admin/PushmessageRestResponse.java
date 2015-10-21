@@ -1,5 +1,9 @@
 // @formatter:off
+<<<<<<< HEAD
 // generated at 2015-10-30 14:21:35
+=======
+// generated at 2015-10-21 17:44:17
+>>>>>>> update ehrest-response 2015/10/21
 package com.everhomes.pushmessage.admin;
 
 import com.everhomes.rest.RestResponseBase;
