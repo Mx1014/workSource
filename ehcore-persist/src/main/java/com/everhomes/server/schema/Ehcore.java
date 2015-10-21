@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 897657364;
+	private static final long serialVersionUID = -561075757;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -60,6 +60,12 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES,
 			com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS,
 			com.everhomes.server.schema.tables.EhDevices.EH_DEVICES,
+			com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES,
+			com.everhomes.server.schema.tables.EhEnterpriseCommunityMembers.EH_ENTERPRISE_COMMUNITY_MEMBERS,
+			com.everhomes.server.schema.tables.EhEnterpriseContacts.EH_ENTERPRISE_CONTACTS,
+			com.everhomes.server.schema.tables.EhEnterpriseContactEntries.EH_ENTERPRISE_CONTACT_ENTRIES,
+			com.everhomes.server.schema.tables.EhEnterpriseContactGroups.EH_ENTERPRISE_CONTACT_GROUPS,
+			com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS,
 			com.everhomes.server.schema.tables.EhEvents.EH_EVENTS,
 			com.everhomes.server.schema.tables.EhEventProfiles.EH_EVENT_PROFILES,
 			com.everhomes.server.schema.tables.EhEventRoster.EH_EVENT_ROSTER,
