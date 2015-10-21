@@ -1,34 +1,38 @@
 package com.everhomes.techpark.rental;
 
+import java.util.List;
+
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
- * <li>rentalType：按日还是按小时预定 参考{@link com.everhomes.techpark.rental.RentalType} </li>
- * <li>StepLength：长度(MM:SS OR INT)</li>
- * <li>beginTime：开始时间(MM:SS)</li>
- * <li>endTime：结束时间(MM:SS)</li>
+ * <li>rentalType：按日还是按小时预定 参考{@link com.everhomes.techpark.rental.RentalType} </li> 
+ * <li>beginDate：开始日期(Long)</li>
+ * <li>endDate：结束日期(Long)</li>
+ * <li>beginTime：开始时间(hour)</li>
+ * <li>endTime：结束时间(hour)</li>
  * <li>counts：场所数量</li> 
  * <li>unit：场所单位:1or0.5</li> 
  * <li>price：场所数量</li> 
  * <li>ruleDate：规则日期</li> 
  * <li>loopType：循环方式 参考{@link com.everhomes.techpark.rental.LoopType} </li> 
- * <li>Status：循环方式 参考{@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 
+ * <li>Status：状态 参考{@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 
+ * <li>choosen：选择的日期</li>
  * </ul>
  */
 public class AddRentalSiteRulesCommand {
 	private Long rentalSiteId;
 	private Byte rentalType;
-	private String StepLength;
-	private String beginTime;
-	private String endTime;
+	private Long beginDate;
+	private Long endDate;
+	private Integer beginTime;
+	private Integer endTime;
 	private Integer counts;
 	private Double unit;
 	private Integer price;
-	private String ruleDate;
 	private Byte loopType;
 	private Byte Status;
-	
+	private String choosen;
 	
 	
 	@Override
@@ -61,41 +65,7 @@ public class AddRentalSiteRulesCommand {
 	}
 
 
-
-	public String getStepLength() {
-		return StepLength;
-	}
-
-
-
-	public void setStepLength(String stepLength) {
-		StepLength = stepLength;
-	}
-
-
-
-	public String getBeginTime() {
-		return beginTime;
-	}
-
-
-
-	public void setBeginTime(String beginTime) {
-		this.beginTime = beginTime;
-	}
-
-
-
-	public String getEndTime() {
-		return endTime;
-	}
-
-
-
-	public void setEndTime(String endTime) {
-		this.endTime = endTime;
-	}
-
+  
 
 
 	public Integer getCounts() {
@@ -132,19 +102,7 @@ public class AddRentalSiteRulesCommand {
 		this.price = price;
 	}
 
-
-
-	public String getRuleDate() {
-		return ruleDate;
-	}
-
-
-
-	public void setRuleDate(String ruleDate) {
-		this.ruleDate = ruleDate;
-	}
-
-
+ 
 
 	public Byte getLoopType() {
 		return loopType;
@@ -167,4 +125,66 @@ public class AddRentalSiteRulesCommand {
 	public void setStatus(Byte status) {
 		Status = status;
 	}
+
+
+
+	public Long getBeginDate() {
+		return beginDate;
+	}
+
+
+
+	public void setBeginDate(Long beginDate) {
+		this.beginDate = beginDate;
+	}
+
+
+
+	public Long getEndDate() {
+		return endDate;
+	}
+
+
+
+	public void setEndDate(Long endDate) {
+		this.endDate = endDate;
+	}
+
+
+
+	public Integer getBeginTime() {
+		return beginTime;
+	}
+
+
+
+	public void setBeginTime(Integer beginTime) {
+		this.beginTime = beginTime;
+	}
+
+
+
+	public Integer getEndTime() {
+		return endTime;
+	}
+
+
+
+	public void setEndTime(Integer endTime) {
+		this.endTime = endTime;
+	}
+
+
+
+	public String getChoosen() {
+		return choosen;
+	}
+
+
+
+	public void setChoosen(String choosen) {
+		this.choosen = choosen;
+	}
+
+ 
 }

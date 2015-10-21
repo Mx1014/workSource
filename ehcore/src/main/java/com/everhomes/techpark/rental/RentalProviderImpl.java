@@ -42,9 +42,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<String>> step = context.selectDistinct(
 				Tables.EH_RENTAL_RULES.SITE_TYPE).from(Tables.EH_RENTAL_RULES); 
-		List<String> result =step.fetch().map((r) -> {
-			return ConvertHelper.convert(r, String.class);
-		});
+		List<String> result =step.fetch().getValues(Tables.EH_RENTAL_RULES.SITE_TYPE);
 		return result;
 	}
 	
@@ -171,11 +169,11 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTAL_SITE_RULES);
 		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.equal(rentalSiteId); 
 		if(null != ruleDate){
-			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.RULE_DATE.equal(Date.valueOf(ruleDate))); 
+			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.equal(Date.valueOf(ruleDate))); 
 		}
-		if(null != loopType){
-			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.LOOP_TYPE.equal(loopType)); 
-		}
+//		if(null != loopType){
+//			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.LOOP_TYPE.equal(loopType)); 
+//		}
 		step.where(condition);
 		List<RentalSiteRule> result = step.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc())
 				.fetch().map((r) -> {
