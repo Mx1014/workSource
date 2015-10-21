@@ -291,7 +291,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 }else
                     itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
                 distinctDto.add(itemDTO);
-               
             });
             if(distinctDto != null && !distinctDto.isEmpty()){
                 distinctDto.forEach(r ->{
