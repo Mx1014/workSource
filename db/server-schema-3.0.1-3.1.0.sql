@@ -1,4 +1,8 @@
-#
+# It is mainly for enterprise communities, which is a little different from communities;
+# so the enterprise related tables are added below.
+
+USE ehcore;
+
 SET foreign_key_checks = 0;
 
 

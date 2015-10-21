@@ -76,6 +76,20 @@ public class EhEnterpriseContactGroupMembersDao extends org.jooq.impl.DAOImpl<co
 	}
 
 	/**
+	 * Fetch records that have <code>contact_avatar IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers> fetchByContactAvatar(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_AVATAR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact_nick_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers> fetchByContactNickName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_NICK_NAME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>contact_status IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers> fetchByContactStatus(java.lang.Byte... values) {

@@ -11,13 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseContactGroupMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1287622366;
+	private static final long serialVersionUID = 1817061880;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
 	private java.lang.Long     contactGroupId;
 	private java.lang.Long     contactId;
 	private java.lang.Long     role;
+	private java.lang.String   contactAvatar;
+	private java.lang.String   contactNickName;
 	private java.lang.Byte     contactStatus;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
@@ -40,6 +42,8 @@ public class EhEnterpriseContactGroupMembers implements java.io.Serializable {
 		java.lang.Long     contactGroupId,
 		java.lang.Long     contactId,
 		java.lang.Long     role,
+		java.lang.String   contactAvatar,
+		java.lang.String   contactNickName,
 		java.lang.Byte     contactStatus,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
@@ -59,6 +63,8 @@ public class EhEnterpriseContactGroupMembers implements java.io.Serializable {
 		this.contactGroupId = contactGroupId;
 		this.contactId = contactId;
 		this.role = role;
+		this.contactAvatar = contactAvatar;
+		this.contactNickName = contactNickName;
 		this.contactStatus = contactStatus;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
@@ -112,6 +118,22 @@ public class EhEnterpriseContactGroupMembers implements java.io.Serializable {
 
 	public void setRole(java.lang.Long role) {
 		this.role = role;
+	}
+
+	public java.lang.String getContactAvatar() {
+		return this.contactAvatar;
+	}
+
+	public void setContactAvatar(java.lang.String contactAvatar) {
+		this.contactAvatar = contactAvatar;
+	}
+
+	public java.lang.String getContactNickName() {
+		return this.contactNickName;
+	}
+
+	public void setContactNickName(java.lang.String contactNickName) {
+		this.contactNickName = contactNickName;
 	}
 
 	public java.lang.Byte getContactStatus() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseContactGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMembersRecord> {
 
-	private static final long serialVersionUID = 254178608;
+	private static final long serialVersionUID = 942603480;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_contact_group_members</code>
@@ -50,6 +50,16 @@ public class EhEnterpriseContactGroupMembers extends org.jooq.impl.TableImpl<com
 	 * The column <code>ehcore.eh_enterprise_contact_group_members.role</code>. The role in company
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMembersRecord, java.lang.Long> ROLE = createField("role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "The role in company");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_contact_group_members.contact_avatar</code>. contact avatar image identifier in storage sub-system
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMembersRecord, java.lang.String> CONTACT_AVATAR = createField("contact_avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "contact avatar image identifier in storage sub-system");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_contact_group_members.contact_nick_name</code>. contact nick name within the group
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMembersRecord, java.lang.String> CONTACT_NICK_NAME = createField("contact_nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "contact nick name within the group");
 
 	/**
 	 * The column <code>ehcore.eh_enterprise_contact_group_members.contact_status</code>. 0: inactive, 1: waitingForApproval, 2: active

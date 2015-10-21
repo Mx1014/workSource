@@ -149,9 +149,9 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhEnterpriseAddresses EH_ENTERPRISE_ADDRESSES = com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES;
 
 	/**
-	 * The table ehcore.eh_enterprise_community_members
+	 * The table ehcore.eh_enterprise_community_map
 	 */
-	public static final com.everhomes.server.schema.tables.EhEnterpriseCommunityMembers EH_ENTERPRISE_COMMUNITY_MEMBERS = com.everhomes.server.schema.tables.EhEnterpriseCommunityMembers.EH_ENTERPRISE_COMMUNITY_MEMBERS;
+	public static final com.everhomes.server.schema.tables.EhEnterpriseCommunityMap EH_ENTERPRISE_COMMUNITY_MAP = com.everhomes.server.schema.tables.EhEnterpriseCommunityMap.EH_ENTERPRISE_COMMUNITY_MAP;
 
 	/**
 	 * The table ehcore.eh_enterprise_contacts

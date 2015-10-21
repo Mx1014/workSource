@@ -55,7 +55,7 @@
         eh_version_realm | eh_version_upgrade_rules | eh_versioned_content | eh_version_urls |
         eh_cooperation_requests | eh_thirdpart_users | eh_push_messages | eh_push_message_results |
         eh_enterprise_addresses | eh_enterprise_contacts | eh_enterprise_contact_entries | eh_enterprise_contact_groups |
-        eh_enterprise_contact_group_members | eh_enterprise_community_members
+        eh_enterprise_contact_group_members | eh_enterprise_community_map
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
