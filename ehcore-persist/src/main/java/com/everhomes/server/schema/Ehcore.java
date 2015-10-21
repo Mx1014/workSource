@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1303630865;
+	private static final long serialVersionUID = -656292903;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -99,6 +99,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhOrganizationOrders.EH_ORGANIZATION_ORDERS,
 			com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS,
 			com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS,
+			com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
 			com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES,
@@ -110,6 +111,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES,
 			com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY,
 			com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES,
+			com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO,
 			com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS,
 			com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS,
 			com.everhomes.server.schema.tables.EhRegions.EH_REGIONS,
@@ -117,6 +119,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS,
 			com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES,
 			com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES,
+			com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS,
 			com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS,
 			com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES,
 			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,

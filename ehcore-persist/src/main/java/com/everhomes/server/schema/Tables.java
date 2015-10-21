@@ -339,6 +339,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+	 * The table ehcore.eh_park_charge
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkCharge EH_PARK_CHARGE = com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE;
+
+	/**
 	 * The table ehcore.eh_polls
 	 */
 	public static final com.everhomes.server.schema.tables.EhPolls EH_POLLS = com.everhomes.server.schema.tables.EhPolls.EH_POLLS;
@@ -394,6 +399,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;
 
 	/**
+	 * The table ehcore.eh_recharge_info
+	 */
+	public static final com.everhomes.server.schema.tables.EhRechargeInfo EH_RECHARGE_INFO = com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO;
+
+	/**
 	 * The table ehcore.eh_recommendations
 	 */
 	public static final com.everhomes.server.schema.tables.EhRecommendations EH_RECOMMENDATIONS = com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS;
@@ -427,6 +437,11 @@ public class Tables {
 	 * The table ehcore.eh_rental_sites
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalSites EH_RENTAL_SITES = com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES;
+
+	/**
+	 * The table ehcore.eh_rental_sites_bills
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSitesBills EH_RENTAL_SITES_BILLS = com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS;
 
 	/**
 	 * The table ehcore.eh_rental_site_items
