@@ -1,23 +1,23 @@
 // @formatter:off
-// generated at 2015-10-15 10:45:21
+// generated at 2015-10-21 17:44:17
 package com.everhomes.pushmessage.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.pushmessage.ListPushMessageResponse;
+import com.everhomes.pushmessage.ListPushMessageResultResponse;
 
 public class PushmessageRestResponse extends RestResponseBase {
 
-    private ListPushMessageResponse response;
+    private ListPushMessageResultResponse response;
 
     public PushmessageRestResponse () {
     }
 
-    public ListPushMessageResponse getResponse() {
+    public ListPushMessageResultResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListPushMessageResponse response) {
+    public void setResponse(ListPushMessageResultResponse response) {
         this.response = response;
     }
 }
