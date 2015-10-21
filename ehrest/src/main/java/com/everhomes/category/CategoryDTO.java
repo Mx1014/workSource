@@ -27,6 +27,8 @@ public class CategoryDTO {
     private String   path;
     private Integer  defaultOrder;
     private Byte     status;
+    private String iconUri;
+    private String iconUrl;
     
     private Timestamp createTime;
     private Timestamp deleteTime;
@@ -98,7 +100,23 @@ public class CategoryDTO {
         this.deleteTime = deleteTime;
     }   
     
-    @Override
+    public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
+
+	@Override
     public boolean equals(Object obj){
         if (! (obj instanceof FamilyDTO)) {
             return false;
