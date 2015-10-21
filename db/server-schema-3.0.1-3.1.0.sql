@@ -1,4 +1,7 @@
 #
+SET foreign_key_checks = 0;
+
+
 # member of eh_groups partition
 # the relationship between eh_enterprises and eh_enterprise_communities
 #
@@ -107,6 +110,8 @@ CREATE TABLE `eh_enterprise_contact_group_members` (
     `contact_group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_contact_groups',
     `contact_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_contacts',
     `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
+    `contact_avatar` VARCHAR(128) COMMENT 'contact avatar image identifier in storage sub-system',
+    `contact_nick_name` VARCHAR(128) COMMENT 'contact nick name within the group',
     `contact_status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `creator_uid` BIGINT COMMENT 'record creator user id',
     `create_time` DATETIME,
@@ -129,8 +134,8 @@ CREATE TABLE `eh_enterprise_contact_group_members` (
 # member of eh_communities partition
 # the relationship between eh_enterprises and eh_enterprise_communities
 #
-DROP TABLE IF EXISTS `eh_enterprise_community_members`;
-CREATE TABLE `eh_enterprise_community_members` (
+DROP TABLE IF EXISTS `eh_enterprise_community_map`;
+CREATE TABLE `eh_enterprise_community_map` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_communities',
     `member_type` VARCHAR(32) NOT NULL COMMENT 'enterprise',
@@ -165,3 +170,4 @@ CREATE TABLE `eh_enterprise_community_members` (
 
 # reuse eh_communities for eh_enterprise_communities
 ALTER TABLE `ehcore`.`eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0;
+SET foreign_key_checks = 1;
