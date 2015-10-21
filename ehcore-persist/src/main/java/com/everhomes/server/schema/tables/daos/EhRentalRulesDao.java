@@ -64,28 +64,28 @@ public class EhRentalRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>rental_start_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByRentalStartTime(java.sql.Timestamp... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByRentalStartTime(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.RENTAL_START_TIME, values);
 	}
 
 	/**
 	 * Fetch records that have <code>rental_end_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByRentalEndTime(java.sql.Timestamp... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByRentalEndTime(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.RENTAL_END_TIME, values);
 	}
 
 	/**
 	 * Fetch records that have <code>pay_start_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByPayStartTime(java.sql.Timestamp... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByPayStartTime(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.PAY_START_TIME, values);
 	}
 
 	/**
 	 * Fetch records that have <code>pay_end_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByPayEndTime(java.sql.Timestamp... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByPayEndTime(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.PAY_END_TIME, values);
 	}
 

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = -1083057364;
+	private static final long serialVersionUID = 862788202;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_rules</code>
@@ -44,22 +44,22 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_rental_rules.rental_start_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.sql.Timestamp> RENTAL_START_TIME = createField("rental_start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> RENTAL_START_TIME = createField("rental_start_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.rental_end_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.sql.Timestamp> RENTAL_END_TIME = createField("rental_end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> RENTAL_END_TIME = createField("rental_end_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.pay_start_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.sql.Timestamp> PAY_START_TIME = createField("pay_start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> PAY_START_TIME = createField("pay_start_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.pay_end_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.sql.Timestamp> PAY_END_TIME = createField("pay_end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> PAY_END_TIME = createField("pay_end_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_rules.payment_ratio</code>. payment ratio

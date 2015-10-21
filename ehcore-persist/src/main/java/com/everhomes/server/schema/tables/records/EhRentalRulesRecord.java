@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = 942176460;
+	private static final long serialVersionUID = 1344226712;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.id</code>. id
@@ -58,57 +58,57 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.rental_start_time</code>.
 	 */
-	public void setRentalStartTime(java.sql.Timestamp value) {
+	public void setRentalStartTime(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.rental_start_time</code>.
 	 */
-	public java.sql.Timestamp getRentalStartTime() {
-		return (java.sql.Timestamp) getValue(3);
+	public java.lang.Long getRentalStartTime() {
+		return (java.lang.Long) getValue(3);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.rental_end_time</code>.
 	 */
-	public void setRentalEndTime(java.sql.Timestamp value) {
+	public void setRentalEndTime(java.lang.Long value) {
 		setValue(4, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.rental_end_time</code>.
 	 */
-	public java.sql.Timestamp getRentalEndTime() {
-		return (java.sql.Timestamp) getValue(4);
+	public java.lang.Long getRentalEndTime() {
+		return (java.lang.Long) getValue(4);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.pay_start_time</code>.
 	 */
-	public void setPayStartTime(java.sql.Timestamp value) {
+	public void setPayStartTime(java.lang.Long value) {
 		setValue(5, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.pay_start_time</code>.
 	 */
-	public java.sql.Timestamp getPayStartTime() {
-		return (java.sql.Timestamp) getValue(5);
+	public java.lang.Long getPayStartTime() {
+		return (java.lang.Long) getValue(5);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.pay_end_time</code>.
 	 */
-	public void setPayEndTime(java.sql.Timestamp value) {
+	public void setPayEndTime(java.lang.Long value) {
 		setValue(6, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_rules.pay_end_time</code>.
 	 */
-	public java.sql.Timestamp getPayEndTime() {
-		return (java.sql.Timestamp) getValue(6);
+	public java.lang.Long getPayEndTime() {
+		return (java.lang.Long) getValue(6);
 	}
 
 	/**
@@ -459,7 +459,7 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalRulesRecord
 	 */
-	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.sql.Timestamp rentalStartTime, java.sql.Timestamp rentalEndTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES);
 
 		setValue(0, id);

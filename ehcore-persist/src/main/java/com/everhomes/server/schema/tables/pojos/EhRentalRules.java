@@ -11,15 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 278504828;
+	private static final long serialVersionUID = 778940412;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
 	private java.lang.String   siteType;
-	private java.sql.Timestamp rentalStartTime;
-	private java.sql.Timestamp rentalEndTime;
-	private java.sql.Timestamp payStartTime;
-	private java.sql.Timestamp payEndTime;
+	private java.lang.Long     rentalStartTime;
+	private java.lang.Long     rentalEndTime;
+	private java.lang.Long     payStartTime;
+	private java.lang.Long     payEndTime;
 	private java.lang.Integer  paymentRatio;
 	private java.lang.Byte     refundFlag;
 	private java.lang.String   contactNum;
@@ -50,10 +50,10 @@ public class EhRentalRules implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     enterpriseCommunityId,
 		java.lang.String   siteType,
-		java.sql.Timestamp rentalStartTime,
-		java.sql.Timestamp rentalEndTime,
-		java.sql.Timestamp payStartTime,
-		java.sql.Timestamp payEndTime,
+		java.lang.Long     rentalStartTime,
+		java.lang.Long     rentalEndTime,
+		java.lang.Long     payStartTime,
+		java.lang.Long     payEndTime,
 		java.lang.Integer  paymentRatio,
 		java.lang.Byte     refundFlag,
 		java.lang.String   contactNum,
@@ -134,35 +134,35 @@ public class EhRentalRules implements java.io.Serializable {
 		this.siteType = siteType;
 	}
 
-	public java.sql.Timestamp getRentalStartTime() {
+	public java.lang.Long getRentalStartTime() {
 		return this.rentalStartTime;
 	}
 
-	public void setRentalStartTime(java.sql.Timestamp rentalStartTime) {
+	public void setRentalStartTime(java.lang.Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
 
-	public java.sql.Timestamp getRentalEndTime() {
+	public java.lang.Long getRentalEndTime() {
 		return this.rentalEndTime;
 	}
 
-	public void setRentalEndTime(java.sql.Timestamp rentalEndTime) {
+	public void setRentalEndTime(java.lang.Long rentalEndTime) {
 		this.rentalEndTime = rentalEndTime;
 	}
 
-	public java.sql.Timestamp getPayStartTime() {
+	public java.lang.Long getPayStartTime() {
 		return this.payStartTime;
 	}
 
-	public void setPayStartTime(java.sql.Timestamp payStartTime) {
+	public void setPayStartTime(java.lang.Long payStartTime) {
 		this.payStartTime = payStartTime;
 	}
 
-	public java.sql.Timestamp getPayEndTime() {
+	public java.lang.Long getPayEndTime() {
 		return this.payEndTime;
 	}
 
-	public void setPayEndTime(java.sql.Timestamp payEndTime) {
+	public void setPayEndTime(java.lang.Long payEndTime) {
 		this.payEndTime = payEndTime;
 	}
 
