@@ -321,3 +321,27 @@ CREATE TABLE `eh_rental_items_bills`(
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `eh_park_charge`;
+
+CREATE TABLE `eh_park_charge`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `months` TINYINT,
+  `amount` INT,
+  `community_id` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `eh_recharge_info`;
+
+CREATE TABLE `eh_recharge_info`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `bill_id` BIGINT,
+  `plate_number` VARCHAR,
+  `owner_id` BIGINT,
+  `recharge_phone` VARCHAR,
+  `recharge_time` DATETIME,
+  `recharge_month` TINYINT,
+  `recharge_amount` INT,
+  `payment_status` TINYINT,
+  `recharge_status` TINYINT,
+  `community_id` BIGINT
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
