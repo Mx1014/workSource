@@ -14,17 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryAdminStatus;
-import com.everhomes.category.CategoryDTO;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.category.ListCategoryCommand;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.util.RequireAuthentication;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -44,6 +43,8 @@ public class CategoryController extends ControllerBase {
 //    private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
     @Autowired
     private CategoryProvider categoryProvider;    
+    @Autowired 
+    private ContentServerService contentServerService;
     
     
     /**
@@ -246,6 +247,9 @@ public class CategoryController extends ControllerBase {
     @RequestMapping("listBusinessCategories")
     @RestReturn(value = CategoryDTO.class, collection = true)
     public RestResponse listBusinessCategories(HttpServletRequest request, HttpServletResponse response) {
+    	User user = UserContext.current().getUser();
+    	long userId = user.getId();
+    	
         Tuple[] orderBy = defaultSort();
         //暂时去掉
 //        Category category = new Category();
@@ -260,7 +264,12 @@ public class CategoryController extends ControllerBase {
         if(result != null && !result.isEmpty())
             entityResultList.addAll(result);
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
-            return ConvertHelper.convert(r, CategoryDTO.class);
+        	CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
+        	String defaultIconUri = "cs://1/image/aW1hZ2UvTVRvd00yRTJaRGN4WWpWaFpUVTRNekZqTTJFM09ESXpObUZoTldWbFlqVTFNZw";
+        	dto.setIconUri(defaultIconUri);
+        	dto.setIconUrl(parserUri(defaultIconUri,EntityType.USER.getCode(),userId));
+        	//parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId)
+            return dto;
         }).collect(Collectors.toList());
         
         if(dtoResultList != null){
@@ -270,6 +279,18 @@ public class CategoryController extends ControllerBase {
             }
         }
         return new RestResponse();
+    }
+    
+    private String parserUri(String uri,String ownerType, long ownerId){
+        try {
+            if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+                return contentServerService.parserUri(uri,ownerType,ownerId);
+            
+        } catch (Exception e) {
+            LOGGER.error("Parser uri is error." + e.getMessage());
+        }
+        return null;
+
     }
     
     /**
