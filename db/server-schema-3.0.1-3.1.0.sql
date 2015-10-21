@@ -61,7 +61,6 @@ CREATE TABLE `eh_enterprise_contact_entries` (
     `contact_id` BIGINT NOT NULL COMMENT 'contact id',
     `entry_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
     `entry_value` VARCHAR(128),
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: free standing, 1: claiming, 2: claim verifying, 3: claimed',
     `creator_uid` BIGINT COMMENT 'record creator user id',
     `create_time` DATETIME,
 
@@ -76,6 +75,7 @@ DROP TABLE IF EXISTS `eh_enterprise_contact_groups`;
 CREATE TABLE `eh_enterprise_contact_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
+    `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
     `name` VARCHAR(256),
     `parent_id` BIGINT NOT NULL DEFAULT 0,
 	`path` VARCHAR(128) COMMENT 'path from the root',
@@ -106,6 +106,7 @@ CREATE TABLE `eh_enterprise_contact_group_members` (
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
     `contact_group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_contact_groups',
     `contact_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_contacts',
+    `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
     `contact_status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `creator_uid` BIGINT COMMENT 'record creator user id',
     `create_time` DATETIME,
