@@ -246,7 +246,6 @@
             <artifactId>ehcodegen</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-		
 		<dependency>
 			<groupId>xmlbeans</groupId>
 			<artifactId>xbean</artifactId>
@@ -262,7 +261,6 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6</version>
 		</dependency>
-		
 	</dependencies>
 
 	<build>
