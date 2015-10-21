@@ -4,9 +4,9 @@
 <!-- Configure the database connection here -->
 <jdbc>
     <driver>com.mysql.jdbc.Driver</driver>
-    <url>jdbc:mysql://localhost:3306/ehcore</url>
-    <user>root</user>
-    <password>123456</password>
+    <url>jdbc:mysql://db-master:3306/ehcore</url>
+    <user>ehcore</user>
+    <password>ehcore</password>
 </jdbc>
 
 <generator>
@@ -20,7 +20,7 @@
         <!-- The database type. The format here is:
         org.util.[database].[database]Database -->
         <name>org.jooq.util.mysql.MySQLDatabase</name>
-        
+
         <!-- The database schema (or in the absence of schema support, in your RDBMS this
             can be the owner, user, database name) to be generated -->
         <inputSchema>ehcore</inputSchema>
@@ -33,19 +33,19 @@
         eh_groups | eh_group_members | eh_group_profiles | eh_group_op_requests | eh_group_visible_scopes |
         eh_forums | eh_forum_posts | eh_forum_attachments | eh_forum_visible_scopes | eh_forum_assigned_scopes |
         eh_borders | eh_categories | eh_state_triggers | eh_search_keywords | eh_app_promotions |
-        eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks | 
+        eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks |
         eh_audit_logs | eh_locale_strings | eh_locale_templates | eh_devices | eh_certs |
         eh_regions | eh_communities | eh_community_geopoints | eh_organizations | eh_organization_communities |
-        eh_organization_members | eh_organization_tasks | eh_organization_address_mappings | eh_organization_bills | 
-        eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts | 
-        eh_organization_billing_accounts | eh_organization_billing_transactions | eh_community_profiles | eh_addresses | 
+        eh_organization_members | eh_organization_tasks | eh_organization_address_mappings | eh_organization_bills |
+        eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts |
+        eh_organization_billing_accounts | eh_organization_billing_transactions | eh_community_profiles | eh_addresses |
         eh_family_billing_accounts | eh_family_billing_transactions |
-        eh_family_followers | eh_banners | eh_banner_clicks | 
-        eh_banner_orders | eh_binary_resources | eh_rtxt_resources | 
+        eh_family_followers | eh_banners | eh_banner_clicks |
+        eh_banner_orders | eh_binary_resources | eh_rtxt_resources |
         eh_events | eh_event_roster | eh_event_ticket_groups | eh_event_tickets |
         eh_event_profiles | eh_activities | eh_activity_roster | eh_polls |
-        eh_poll_items | eh_poll_votes | 
-        eh_client_package_files | eh_client_packages | 
+        eh_poll_items | eh_poll_votes |
+        eh_client_package_files | eh_client_packages |
         eh_user_locations | eh_user_behaviors | eh_user_contacts | eh_user_installed_apps | eh_user_activities |
         eh_content_server_resources | eh_content_server |
         eh_launch_pad_layouts | eh_launch_pad_items | eh_recommendations | eh_recommendation_configs |
@@ -53,21 +53,21 @@
         eh_businesses | eh_business_visible_scopes | eh_business_assigned_scopes | eh_business_categories |
         eh_oauth2_codes | eh_oauth2_tokens | eh_qrcodes |
         eh_version_realm | eh_version_upgrade_rules | eh_versioned_content | eh_version_urls |
-        eh_cooperation_requests | eh_thirdpart_users | eh_group_contacts | 
-        eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday |
-        eh_punch_exception_approvals | eh_punch_day_logs | eh_rental_rules | eh_rental_sites | eh_rental_site_items |
+        eh_cooperation_requests | eh_thirdpart_users | eh_push_messages | eh_push_message_results |
+        eh_enterprise_addresses | eh_enterprise_contacts | eh_enterprise_contact_entries | eh_enterprise_contact_groups |
+        eh_enterprise_contact_group_members | eh_enterprise_community_members
         eh_rental_site_rules | eh_rental_bills | eh_rental_items_bills
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
             Excludes match before includes -->
-        <excludes></excludes>   
+        <excludes></excludes>
     </database>
     <target>
         <!-- The destination package of your generated classes (within the destination directory) -->
         <packageName>com.everhomes.server.schema</packageName>
-        <!-- The destination directory of your generated classes --> 
-        <!-- code generation will be run under the project root using maven, it is then relative to where POM file locates -->   
+        <!-- The destination directory of your generated classes -->
+        <!-- code generation will be run under the project root using maven, it is then relative to where POM file locates -->
         <directory>src/main/java</directory>
     </target>
 </generator>
