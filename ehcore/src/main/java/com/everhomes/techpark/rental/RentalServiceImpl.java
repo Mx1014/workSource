@@ -80,7 +80,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalsite.setSiteType(cmd.getSiteType());
 		rentalsite.setSpec(cmd.getSpec());
 		Long siteId = rentalProvider.createRentalSite(rentalsite);
-		if (null != cmd.getSiteItems()) {
+		if (null != cmd.getSiteItems()&&!StringUtils.isEmpty(cmd.getSiteItems())) {
 			JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
 					.getSiteItems());
 			JSONArray itemValue = (JSONArray) jsonObject.get("siteItems");
@@ -168,6 +168,9 @@ public class RentalServiceImpl implements RentalService {
 		for (RentalSite rs : rentalSites) {
 			RentalSiteDTO rsDTO = new RentalSiteDTO();
 			rsDTO.setBuildingName(rs.getBuildingName());
+			rsDTO.setSiteName(rs.getSiteName());
+			rsDTO.setContactName(rs.getContactName());
+			rsDTO.setCompanyName(rs.getOwnCompanyName());
 			rsDTO.setSpec(rs.getSpec());
 			rsDTO.setAddress(rs.getAddress());
 			rsDTO.setContactPhonenum(rs.getContactPhonenum());
@@ -271,7 +274,7 @@ public class RentalServiceImpl implements RentalService {
 			rSiteDTO.setCompanyName(rentalSite.getOwnCompanyName());
 			rSiteDTO.setContactPhonenum(rentalSite.getContactPhonenum());
 			rSiteDTO.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
-			rSiteDTO.setCompanyName(rentalSite.getContactName());
+			rSiteDTO.setContactName(rentalSite.getContactName());
 			rSiteDTO.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalSiteItem> items = rentalProvider
 					.findRentalSiteItems(rentalSite.getId());
