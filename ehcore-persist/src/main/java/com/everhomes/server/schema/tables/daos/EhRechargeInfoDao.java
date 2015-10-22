@@ -62,10 +62,24 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
+	 * Fetch records that have <code>owner_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.OWNER_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByOwnerName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.OWNER_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByOwnerPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.OWNER_PHONE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>recharge_username IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByRechargeUsername(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.RECHARGE_USERNAME, values);
 	}
 
 	/**

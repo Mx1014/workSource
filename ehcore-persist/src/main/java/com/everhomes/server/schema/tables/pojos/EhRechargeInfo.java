@@ -11,12 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = 946704700;
+	private static final long serialVersionUID = -1868669800;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
 	private java.lang.String   plateNumber;
-	private java.lang.Long     ownerId;
+	private java.lang.String   ownerName;
+	private java.lang.String   ownerPhone;
+	private java.lang.String   rechargeUsername;
 	private java.lang.String   rechargePhone;
 	private java.sql.Timestamp rechargeTime;
 	private java.lang.Byte     rechargeMonth;
@@ -31,7 +33,9 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     billId,
 		java.lang.String   plateNumber,
-		java.lang.Long     ownerId,
+		java.lang.String   ownerName,
+		java.lang.String   ownerPhone,
+		java.lang.String   rechargeUsername,
 		java.lang.String   rechargePhone,
 		java.sql.Timestamp rechargeTime,
 		java.lang.Byte     rechargeMonth,
@@ -43,7 +47,9 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.id = id;
 		this.billId = billId;
 		this.plateNumber = plateNumber;
-		this.ownerId = ownerId;
+		this.ownerName = ownerName;
+		this.ownerPhone = ownerPhone;
+		this.rechargeUsername = rechargeUsername;
 		this.rechargePhone = rechargePhone;
 		this.rechargeTime = rechargeTime;
 		this.rechargeMonth = rechargeMonth;
@@ -77,12 +83,28 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.plateNumber = plateNumber;
 	}
 
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
+	public java.lang.String getOwnerName() {
+		return this.ownerName;
 	}
 
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
+	public void setOwnerName(java.lang.String ownerName) {
+		this.ownerName = ownerName;
+	}
+
+	public java.lang.String getOwnerPhone() {
+		return this.ownerPhone;
+	}
+
+	public void setOwnerPhone(java.lang.String ownerPhone) {
+		this.ownerPhone = ownerPhone;
+	}
+
+	public java.lang.String getRechargeUsername() {
+		return this.rechargeUsername;
+	}
+
+	public void setRechargeUsername(java.lang.String rechargeUsername) {
+		this.rechargeUsername = rechargeUsername;
 	}
 
 	public java.lang.String getRechargePhone() {

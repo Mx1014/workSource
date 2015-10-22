@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> {
 
-	private static final long serialVersionUID = 346274661;
+	private static final long serialVersionUID = -1224293423;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recharge_info</code>
@@ -42,9 +42,19 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> PLATE_NUMBER = createField("plate_number", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_recharge_info.owner_id</code>. pay user id
+	 * The column <code>ehcore.eh_recharge_info.owner_name</code>. plate number owner name
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT, this, "pay user id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> OWNER_NAME = createField("owner_name", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "plate number owner name");
+
+	/**
+	 * The column <code>ehcore.eh_recharge_info.owner_phone</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> OWNER_PHONE = createField("owner_phone", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recharge_info.recharge_username</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> RECHARGE_USERNAME = createField("recharge_username", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recharge_info.recharge_phone</code>.
