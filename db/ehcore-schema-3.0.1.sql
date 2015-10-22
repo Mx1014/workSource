@@ -69,8 +69,8 @@ CREATE TABLE `eh_push_messages` (
 #
 # member of eh_communities partition
 #
-DROP TABLE IF EXISTS `eh_nearby_communities`;
-CREATE TABLE `eh_nearby_communities` (
+DROP TABLE IF EXISTS `eh_nearby_community_map`;
+CREATE TABLE `eh_nearby_community_map` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL DEFAULT 0,
     `nearby_community_id` BIGINT NOT NULL DEFAULT 0,
