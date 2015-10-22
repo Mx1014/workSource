@@ -66,6 +66,21 @@ CREATE TABLE `eh_push_messages` (
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+#
+# member of eh_communities partition
+#
+DROP TABLE IF EXISTS `eh_nearby_communities`;
+CREATE TABLE `eh_nearby_communities` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL DEFAULT 0,
+    `nearby_community_id` BIGINT NOT NULL DEFAULT 0,
+	
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_community_relation`(`community_id`, `nearby_community_id`),
+    INDEX `u_eh_community_id`(`community_id`),
+    INDEX `u_eh_nearby_community_id`(`nearby_community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_push_message_results`;
 CREATE TABLE `eh_push_message_results` (
     `id` BIGINT NOT NULL COMMENT 'id of the push message result, not auto increment',
@@ -79,7 +94,7 @@ CREATE TABLE `eh_push_message_results` (
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('user.avatar.male.url', 'cs://1/image/aW1hZ2UvTVRvME1qVTBZalpqT1dGa05USm1aVEE1WVRnMU9EWmhOVE0zTm1Nd1pXSTVZUQ','默认男头像url'); 
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('user.avatar.female.url', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ','默认女头像url'); 
 INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('user.def.pwd', '123456','用户默认密码');
-INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('hotusers', '', 'phone numbers split by ,')
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('hotusers', '', 'phone numbers split by ,');
 
 UPDATE `eh_groups` SET member_count=1105 WHERE ID=173130; -- 旅行
 UPDATE `eh_groups` SET member_count=1089 WHERE ID=173132; -- 透过镜头看世界
@@ -87,5 +102,19 @@ UPDATE `eh_groups` SET member_count=956 WHERE ID=173131; -- 吃货
 UPDATE `eh_groups` SET member_count=923 WHERE ID=173127; -- 音乐
 UPDATE `eh_groups` SET member_count=907 WHERE ID=173129; -- 化妆
 UPDATE `eh_groups` SET member_count=884 WHERE ID=172789; -- 每天一句话
+
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045916,'24206890946790807',null,40.077585,116.415726,'wx4gcpgkg52f');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045917,'24206890946790808',null,40.083216,116.41524,'wx4u10fvxtn8');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045918,'24206890946790809',null,40.071049,116.41873,'wx4gcntwc0by');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045919,'24206890946790810',null,40.083009,116.431377,'wx4u12ysrwrn');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045920,'24206890946790811',null,40.082974,116.423714,'wx4u12chjpvj');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045921,'24206890946790812',null,40.06962,116.446003,'wx4gcy3qkw91');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045922,'24206890946790813',null,40.079172,116.446201,'wx4u1b1w15ht');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045923,'24206890946790814',null,40.072064,116.439218,'wx4gcwukwqju');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045924,'24206890946790815',null,40.079683,116.434904,'wx4u18331fmj');
+INSERT INTO `eh_community_geopoints` (`id`,`community_id`,`description`,`latitude`,`longitude`,`geohash`) VALUES (240111044331045925,'24206890946791216',null,40.07098,116.422939,'wx4gcq8w7h56');
+
+ALTER TABLE `eh_businesses` ADD COLUMN `visible_distance` DOUBLE NOT NULL DEFAULT 5000 COMMENT 'the distance between shop and user who can find the shop, unit: meter';
+ALTER TABLE `eh_categories` ADD COLUMN `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category';
 
 SET foreign_key_checks = 1;
