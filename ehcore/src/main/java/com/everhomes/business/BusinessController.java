@@ -37,6 +37,16 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    @RequestMapping("updateBusinessDistance")
+    @RestReturn(value=String.class)
+    public RestResponse updateBusinessDistance(@Valid UpdateBusinessDistanceCommand cmd) {
+        businessService.updateBusinessDistance(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     
     /**
