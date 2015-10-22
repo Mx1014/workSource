@@ -21,6 +21,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalSiteRulesCommand {
+	private Long enterpriseCommunityId;
+	private String siteType;
 	private Long rentalSiteId;
 	private Byte rentalType;
 	private Long beginDate;
@@ -184,6 +186,30 @@ public class AddRentalSiteRulesCommand {
 
 	public void setChoosen(String choosen) {
 		this.choosen = choosen;
+	}
+
+
+
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
+	}
+
+
+
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
+
+
+
+	public String getSiteType() {
+		return siteType;
+	}
+
+
+
+	public void setSiteType(String siteType) {
+		this.siteType = siteType;
 	}
 
  

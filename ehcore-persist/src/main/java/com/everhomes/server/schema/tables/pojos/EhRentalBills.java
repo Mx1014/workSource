@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 649869619;
+	private static final long serialVersionUID = -1291625945;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalSiteId;
@@ -26,6 +26,7 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.sql.Timestamp payStartTime;
 	private java.sql.Timestamp payEndTime;
 	private java.sql.Timestamp payTime;
+	private java.lang.Integer  paidMoney;
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
@@ -48,6 +49,7 @@ public class EhRentalBills implements java.io.Serializable {
 		java.sql.Timestamp payStartTime,
 		java.sql.Timestamp payEndTime,
 		java.sql.Timestamp payTime,
+		java.lang.Integer  paidMoney,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
@@ -67,6 +69,7 @@ public class EhRentalBills implements java.io.Serializable {
 		this.payStartTime = payStartTime;
 		this.payEndTime = payEndTime;
 		this.payTime = payTime;
+		this.paidMoney = paidMoney;
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
@@ -176,6 +179,14 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setPayTime(java.sql.Timestamp payTime) {
 		this.payTime = payTime;
+	}
+
+	public java.lang.Integer getPaidMoney() {
+		return this.paidMoney;
+	}
+
+	public void setPaidMoney(java.lang.Integer paidMoney) {
+		this.paidMoney = paidMoney;
 	}
 
 	public java.lang.Byte getStatus() {

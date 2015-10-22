@@ -11,19 +11,21 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1574788387;
+	private static final long serialVersionUID = 1435295133;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
 	private java.lang.Long     enterpriseCommunityId;
 	private java.lang.String   siteType;
+	private java.lang.String   siteName;
+	private java.lang.Byte     siteType2;
 	private java.lang.String   buildingName;
 	private java.lang.Long     buildingId;
 	private java.lang.String   address;
 	private java.lang.Long     addressId;
 	private java.lang.String   spec;
-	private java.lang.Long     companyId;
-	private java.lang.Long     ownUid;
+	private java.lang.String   ownCompanyName;
+	private java.lang.String   contactName;
 	private java.lang.String   contactPhonenum;
 	private java.lang.String   contactPhonenum2;
 	private java.lang.String   contactPhonenum3;
@@ -40,13 +42,15 @@ public class EhRentalSites implements java.io.Serializable {
 		java.lang.Long     parentId,
 		java.lang.Long     enterpriseCommunityId,
 		java.lang.String   siteType,
+		java.lang.String   siteName,
+		java.lang.Byte     siteType2,
 		java.lang.String   buildingName,
 		java.lang.Long     buildingId,
 		java.lang.String   address,
 		java.lang.Long     addressId,
 		java.lang.String   spec,
-		java.lang.Long     companyId,
-		java.lang.Long     ownUid,
+		java.lang.String   ownCompanyName,
+		java.lang.String   contactName,
 		java.lang.String   contactPhonenum,
 		java.lang.String   contactPhonenum2,
 		java.lang.String   contactPhonenum3,
@@ -60,13 +64,15 @@ public class EhRentalSites implements java.io.Serializable {
 		this.parentId = parentId;
 		this.enterpriseCommunityId = enterpriseCommunityId;
 		this.siteType = siteType;
+		this.siteName = siteName;
+		this.siteType2 = siteType2;
 		this.buildingName = buildingName;
 		this.buildingId = buildingId;
 		this.address = address;
 		this.addressId = addressId;
 		this.spec = spec;
-		this.companyId = companyId;
-		this.ownUid = ownUid;
+		this.ownCompanyName = ownCompanyName;
+		this.contactName = contactName;
 		this.contactPhonenum = contactPhonenum;
 		this.contactPhonenum2 = contactPhonenum2;
 		this.contactPhonenum3 = contactPhonenum3;
@@ -109,6 +115,22 @@ public class EhRentalSites implements java.io.Serializable {
 		this.siteType = siteType;
 	}
 
+	public java.lang.String getSiteName() {
+		return this.siteName;
+	}
+
+	public void setSiteName(java.lang.String siteName) {
+		this.siteName = siteName;
+	}
+
+	public java.lang.Byte getSiteType2() {
+		return this.siteType2;
+	}
+
+	public void setSiteType2(java.lang.Byte siteType2) {
+		this.siteType2 = siteType2;
+	}
+
 	public java.lang.String getBuildingName() {
 		return this.buildingName;
 	}
@@ -149,20 +171,20 @@ public class EhRentalSites implements java.io.Serializable {
 		this.spec = spec;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.String getOwnCompanyName() {
+		return this.ownCompanyName;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setOwnCompanyName(java.lang.String ownCompanyName) {
+		this.ownCompanyName = ownCompanyName;
 	}
 
-	public java.lang.Long getOwnUid() {
-		return this.ownUid;
+	public java.lang.String getContactName() {
+		return this.contactName;
 	}
 
-	public void setOwnUid(java.lang.Long ownUid) {
-		this.ownUid = ownUid;
+	public void setContactName(java.lang.String contactName) {
+		this.contactName = contactName;
 	}
 
 	public java.lang.String getContactPhonenum() {

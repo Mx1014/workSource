@@ -22,13 +22,15 @@ public class RentalSiteDTO {
 	private Long rentalSiteId;
 	private Long enterpriseCommunityId;
 	private String siteType;
+	private String siteName;
 	private String buildingName;
 	private String address;
 	private String spec;
-	private Long companyId;
-	private Long ownId;
+	private String companyName;
+	private String contactName;
 	private String contactPhonenum;
 	private List<SiteItemDTO> siteItems;
+	private List<RentalSiteRulesDTO> siteRules;
 	
 	@Override
     public String toString() {
@@ -74,22 +76,7 @@ public class RentalSiteDTO {
 	public void setSpec(String spec) {
 		this.spec = spec;
 	}
-
-	public Long getCompanyId() {
-		return companyId;
-	}
-
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
-
-	public Long getOwnId() {
-		return ownId;
-	}
-
-	public void setOwnId(Long ownId) {
-		this.ownId = ownId;
-	}
+ 
 
 	public String getContactPhonenum() {
 		return contactPhonenum;
@@ -113,5 +100,37 @@ public class RentalSiteDTO {
 
 	public void setRentalSiteId(Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
+	}
+
+	public List<RentalSiteRulesDTO> getSiteRules() {
+		return siteRules;
+	}
+
+	public void setSiteRules(List<RentalSiteRulesDTO> siteRules) {
+		this.siteRules = siteRules;
+	}
+
+	public String getSiteName() {
+		return siteName;
+	}
+
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
 }

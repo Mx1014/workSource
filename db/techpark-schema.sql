@@ -200,7 +200,7 @@ CREATE TABLE `eh_rental_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
+ 
 DROP TABLE IF EXISTS `eh_rental_sites`;
 
 
@@ -208,14 +208,16 @@ CREATE TABLE `eh_rental_sites`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `parent_id` BIGINT ,
   `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
-  `site_type`  VARCHAR(128) COMMENT 'rule for what function ',
+  `site_type`  VARCHAR(128) ,
+  `site_name` VARCHAR(127),
+  `site_type2` TINYINT(4),
   `building_name` VARCHAR(128) ,
   `building_id` BIGINT, 
   `address` VARCHAR(128) ,
   `address_id` BIGINT,
   `spec` VARCHAR(255)  COMMENT 'spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on',
-  `company_id` BIGINT,
-  `own_uid` BIGINT COMMENT ' charge   user id',
+  `own_company_name` VARCHAR(60) ,
+  `contact_name` VARCHAR(40) ,
   `contact_phonenum` VARCHAR(20),
   `contact_phonenum2` VARCHAR(20),
   `contact_phonenum3` VARCHAR(20),
@@ -226,7 +228,6 @@ CREATE TABLE `eh_rental_sites`(
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 
 DROP TABLE IF EXISTS `eh_rental_site_items`;
 

@@ -18,10 +18,10 @@ import com.everhomes.util.StringHelper;
 public class UpdateRentalRuleCommand {
 	private Long enterpriseCommunityId;
 	private String siteType ;
-	private String rentalStartTime;
-	private String rentalEndTime;
-	private String payStartTime;
-	private String payEndTime;
+	private Long rentalStartTime;
+	private Long rentalEndTime;
+	private Long payStartTime;
+	private Long payEndTime;
 	private Integer payRatio;
 	private Byte refundFlag;
 	private String contactNum;
@@ -41,30 +41,7 @@ public class UpdateRentalRuleCommand {
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
 	}
-	public String getRentalStartTime() {
-		return rentalStartTime;
-	}
-	public void setRentalStartTime(String rentalStartTime) {
-		this.rentalStartTime = rentalStartTime;
-	}
-	public String getRentalEndTime() {
-		return rentalEndTime;
-	}
-	public void setRentalEndTime(String rentalEndTime) {
-		this.rentalEndTime = rentalEndTime;
-	}
-	public String getPayStartTime() {
-		return payStartTime;
-	}
-	public void setPayStartTime(String payStartTime) {
-		this.payStartTime = payStartTime;
-	}
-	public String getPayEndTime() {
-		return payEndTime;
-	}
-	public void setPayEndTime(String payEndTime) {
-		this.payEndTime = payEndTime;
-	} 
+	 
 	public Byte getRefundFlag() {
 		return refundFlag;
 	}
@@ -82,5 +59,29 @@ public class UpdateRentalRuleCommand {
 	}
 	public void setPayRatio(Integer payRatio) {
 		this.payRatio = payRatio;
+	}
+	public Long getRentalStartTime() {
+		return rentalStartTime;
+	}
+	public void setRentalStartTime(Long rentalStartTime) {
+		this.rentalStartTime = rentalStartTime;
+	}
+	public Long getRentalEndTime() {
+		return rentalEndTime;
+	}
+	public void setRentalEndTime(Long rentalEndTime) {
+		this.rentalEndTime = rentalEndTime;
+	}
+	public Long getPayStartTime() {
+		return payStartTime;
+	}
+	public void setPayStartTime(Long payStartTime) {
+		this.payStartTime = payStartTime;
+	}
+	public Long getPayEndTime() {
+		return payEndTime;
+	}
+	public void setPayEndTime(Long payEndTime) {
+		this.payEndTime = payEndTime;
 	}
 }

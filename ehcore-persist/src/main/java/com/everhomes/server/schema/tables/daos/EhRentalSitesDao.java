@@ -69,6 +69,20 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
+	 * Fetch records that have <code>site_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchBySiteName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.SITE_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>site_type2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchBySiteType2(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.SITE_TYPE2, values);
+	}
+
+	/**
 	 * Fetch records that have <code>building_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByBuildingName(java.lang.String... values) {
@@ -104,17 +118,17 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>own_company_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnCompanyName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWN_COMPANY_NAME, values);
 	}
 
 	/**
-	 * Fetch records that have <code>own_uid IN (values)</code>
+	 * Fetch records that have <code>contact_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWN_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByContactName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.CONTACT_NAME, values);
 	}
 
 	/**

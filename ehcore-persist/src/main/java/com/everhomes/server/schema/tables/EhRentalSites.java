@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = 1262455894;
+	private static final long serialVersionUID = -1902534995;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites</code>
@@ -42,9 +42,19 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, " enterprise  community id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.site_type</code>. rule for what function 
+	 * The column <code>ehcore.eh_rental_sites.site_type</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "rule for what function ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.site_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SITE_NAME = createField("site_name", org.jooq.impl.SQLDataType.VARCHAR.length(127), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.site_type2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> SITE_TYPE2 = createField("site_type2", org.jooq.impl.SQLDataType.TINYINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.building_name</code>.
@@ -72,14 +82,14 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SPEC = createField("spec", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.company_id</code>.
+	 * The column <code>ehcore.eh_rental_sites.own_company_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> COMPANY_ID = createField("company_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> OWN_COMPANY_NAME = createField("own_company_name", org.jooq.impl.SQLDataType.VARCHAR.length(60), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.own_uid</code>.  charge   user id
+	 * The column <code>ehcore.eh_rental_sites.contact_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> OWN_UID = createField("own_uid", org.jooq.impl.SQLDataType.BIGINT, this, " charge   user id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> CONTACT_NAME = createField("contact_name", org.jooq.impl.SQLDataType.VARCHAR.length(40), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.contact_phonenum</code>.

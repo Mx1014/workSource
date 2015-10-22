@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  */
 
 public class FindRentalSiteRulesCommand {
+	private Long enterpriseCommunityId;
+	private String siteType;
 
 	private Long rentalSiteId;
 	private String ruleDate;
@@ -32,5 +34,21 @@ public class FindRentalSiteRulesCommand {
 
 	public void setRuleDate(String ruleDate) {
 		this.ruleDate = ruleDate;
+	}
+
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
+	}
+
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
+
+	public String getSiteType() {
+		return siteType;
+	}
+
+	public void setSiteType(String siteType) {
+		this.siteType = siteType;
 	}
 }

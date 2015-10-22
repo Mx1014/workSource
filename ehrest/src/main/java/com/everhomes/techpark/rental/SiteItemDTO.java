@@ -3,13 +3,14 @@ package com.everhomes.techpark.rental;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
-*
+*<li>id：商品id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li> 
  * </ul>
  */
 public class SiteItemDTO {
+	private Long id;
 	private String itemName;
 	private Integer itemPrice;
 	private Integer counts;
@@ -55,5 +56,17 @@ public class SiteItemDTO {
 
 	public void setCounts(Integer counts) {
 		this.counts = counts;
+	}
+
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

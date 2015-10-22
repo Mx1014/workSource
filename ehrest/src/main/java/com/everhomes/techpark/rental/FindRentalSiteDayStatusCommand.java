@@ -9,29 +9,44 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSiteDayStatusCommand {
-	private Long rentalSiteId;
-	private String ruleDate;
+	private Long enterpriseCommunityId;
+	private String siteType; 
+	private Long ruleDate;
 	
 	@Override
     public String toString() {
 
 		
         return StringHelper.toJsonString(this);
-    }
+    } 
 
-	public Long getRentalSiteId() {
-		return rentalSiteId;
+	 
+
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
 	}
 
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
 	}
 
-	public String getRuleDate() {
+	public String getSiteType() {
+		return siteType;
+	}
+
+	public void setSiteType(String siteType) {
+		this.siteType = siteType;
+	}
+
+
+
+	public Long getRuleDate() {
 		return ruleDate;
 	}
 
-	public void setRuleDate(String ruleDate) {
+
+
+	public void setRuleDate(Long ruleDate) {
 		this.ruleDate = ruleDate;
 	}
 }

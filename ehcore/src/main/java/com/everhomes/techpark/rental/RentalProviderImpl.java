@@ -1,6 +1,7 @@
 package com.everhomes.techpark.rental;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.Condition;
@@ -20,12 +21,18 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
+import com.everhomes.server.schema.tables.pojos.EhRentalBills;
+import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
+import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
+import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesRecord;
 import com.everhomes.util.ConvertHelper;
 
@@ -77,7 +84,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public void createRentalSite(RentalSite rentalsite) {
+	public Long createRentalSite(RentalSite rentalsite) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalSites.class));
 		rentalsite.setId(id);
@@ -91,6 +98,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalSites.class,
 				null);
+		return id;
 	}
 
 	@Override
@@ -111,11 +119,11 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalSiteItem> findRentalSiteItems(Long id) {
+	public List<RentalSiteItem> findRentalSiteItems(Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_ITEMS);
-		Condition condition = Tables.EH_RENTAL_SITE_ITEMS.RENTAL_SITE_ID.equal(id); 
+		Condition condition = Tables.EH_RENTAL_SITE_ITEMS.RENTAL_SITE_ID.equal(rentalSiteId); 
 		step.where(condition);
 		List<RentalSiteItem> result = step.orderBy(Tables.EH_RENTAL_SITE_ITEMS.ID.desc())
 				.fetch().map((r) -> {
@@ -164,16 +172,16 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalSiteRule> findRentalSiteRules(Long rentalSiteId,
-			String ruleDate, Byte loopType) {
+			String ruleDate,Timestamp beginDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTAL_SITE_RULES);
-		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.equal(rentalSiteId); 
-		if(null != ruleDate){
-			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.equal(Date.valueOf(ruleDate))); 
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.equal(Date.valueOf(ruleDate)); 
+		if(null != rentalSiteId){
+			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.equal(rentalSiteId)); 
 		}
-//		if(null != loopType){
-//			condition = condition.and( Tables.EH_RENTAL_SITE_RULES.LOOP_TYPE.equal(loopType)); 
-//		}
+		if(null!=beginDate){
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME.lessOrEqual(beginDate));
+		}
 		step.where(condition);
 		List<RentalSiteRule> result = step.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc())
 				.fetch().map((r) -> {
@@ -183,4 +191,105 @@ public class RentalProviderImpl implements RentalProvider {
 		return result;
 	}
 
+	@Override
+	public RentalSiteRule findRentalSiteRuleById(Long siteRuleId) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_RULES);
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.ID.equal(siteRuleId); 
+		step.where(condition);
+		List<RentalSiteRule> result = step.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteRule.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+	}
+
+	@Override
+	public Long createRentalBill(RentalBill rentalBill) { 
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalBills.class));
+		rentalBill.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalBillsRecord record = ConvertHelper.convert(rentalBill,
+				EhRentalBillsRecord.class);
+		InsertQuery<EhRentalBillsRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_BILLS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalBills.class,
+				null);
+		return id;
+	}
+
+	@Override
+	public Long createRentalItemBill(RentalItemsBill rib) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalItemsBills.class));
+		rib.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalItemsBillsRecord record = ConvertHelper.convert(rib,
+				EhRentalItemsBillsRecord.class);
+		InsertQuery<EhRentalItemsBillsRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_ITEMS_BILLS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalItemsBills.class,
+				null);
+		return id;
+	}
+
+	@Override
+	public Long createRentalSiteBill(RentalSitesBill rsb) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalSitesBills.class));
+		rsb.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalSitesBillsRecord record = ConvertHelper.convert(rsb,
+				EhRentalSitesBillsRecord.class);
+		InsertQuery<EhRentalSitesBillsRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_SITES_BILLS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalSitesBills.class,
+				null);
+		return id;
+	}
+
+	@Override
+	public List<RentalSitesBill> findRentalSiteBillBySiteId(Long siteRuleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTAL_SITES_BILLS);
+		Condition condition = Tables.EH_RENTAL_SITES_BILLS.RENTAL_SITE_RULE_ID.equal(siteRuleId); 
+	 
+		step.where(condition);
+		List<RentalSitesBill> result = step.orderBy(Tables.EH_RENTAL_SITES_BILLS.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSitesBill.class);
+				});
+		 
+		return result;
+	}
+
+	@Override
+	public List<RentalItemsBill> findRentalItemsBillById(Long siteItemId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTAL_ITEMS_BILLS);
+		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEM_ID.equal(siteItemId); 
+ 
+		step.where(condition);
+		List<RentalItemsBill> result = step.orderBy(Tables.EH_RENTAL_ITEMS_BILLS.ID.desc())
+				.fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalItemsBill.class);
+				});
+		 
+		return result;
+	}
+
+ 
+ 
 }
