@@ -8,12 +8,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -24,6 +26,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -265,10 +268,12 @@ public class CategoryController extends ControllerBase {
             entityResultList.addAll(result);
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
         	CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
-        	String defaultIconUri = "cs://1/image/aW1hZ2UvTVRvd00yRTJaRGN4WWpWaFpUVTRNekZqTTJFM09ESXpObUZoTldWbFlqVTFNZw";
-        	dto.setIconUri(defaultIconUri);
-        	dto.setIconUrl(parserUri(defaultIconUri,EntityType.USER.getCode(),userId));
-        	//parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId)
+        	
+        	String logoUri = r.getLogoUri();
+        	if(StringUtils.isEmpty(logoUri))
+        		logoUri = "cs://1/image/aW1hZ2UvTVRvd00yRTJaRGN4WWpWaFpUVTRNekZqTTJFM09ESXpObUZoTldWbFlqVTFNZw";
+        	dto.setIconUri(logoUri);
+        	dto.setIconUrl(parserUri(logoUri,EntityType.USER.getCode(),userId));
             return dto;
         }).collect(Collectors.toList());
         
@@ -281,7 +286,40 @@ public class CategoryController extends ControllerBase {
         return new RestResponse();
     }
     
-    private String parserUri(String uri,String ownerType, long ownerId){
+    @RequestMapping("updateCategoryLogoUri")
+    @RestReturn(String.class)
+    public RestResponse updateCategoryLogoUri(UpdateCategoryLogoUriCommand cmd) {
+    	this.checkIdIsNull(cmd.getId());
+    	Category cat = this.checkCategory(cmd.getId(),true);
+    	cat.setLogoUri(cmd.getLogoUri());
+    	this.categoryProvider.updateCategory(cat);
+    	
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    private Category checkCategory(Long id,boolean isThrowExcept) {
+    	Category cat = this.categoryProvider.findCategoryById(id);
+    	if(cat == null){
+    		LOGGER.error("Category is not exist.id="+id);
+			if(isThrowExcept)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"Category is not exist.");
+    	}
+		return cat;
+	}
+
+	private void checkIdIsNull(Long id) {
+    	if(id == null){
+    		LOGGER.error("Category id is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Category id is null or empty.");
+    	}
+	}
+
+	private String parserUri(String uri,String ownerType, long ownerId){
         try {
             if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
                 return contentServerService.parserUri(uri,ownerType,ownerId);
