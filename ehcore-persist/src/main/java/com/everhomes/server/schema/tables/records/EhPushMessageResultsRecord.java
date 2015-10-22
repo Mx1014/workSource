@@ -11,17 +11,17 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPushMessageResultsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPushMessageResultsRecord> implements org.jooq.Record5<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1740827132;
+	private static final long serialVersionUID = 430419724;
 
 	/**
-	 * Setter for <code>ehcore.eh_push_message_results.id</code>.
+	 * Setter for <code>ehcore.eh_push_message_results.id</code>. id of the push message result, not auto increment
 	 */
 	public void setId(java.lang.Long value) {
 		setValue(0, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_push_message_results.id</code>.
+	 * Getter for <code>ehcore.eh_push_message_results.id</code>. id of the push message result, not auto increment
 	 */
 	public java.lang.Long getId() {
 		return (java.lang.Long) getValue(0);

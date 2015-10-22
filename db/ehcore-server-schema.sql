@@ -127,6 +127,7 @@ CREATE TABLE `eh_categories`(
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used', 
+    `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_category_name`(`parent_id`, `name`),
@@ -1107,6 +1108,21 @@ CREATE TABLE `eh_community_geopoints` (
     PRIMARY KEY (`id`),
     INDEX `i_eh_comm_description`(`description`),
 	INDEX `i_eh_comm_geopoints`(`geohash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_communities partition
+#
+DROP TABLE IF EXISTS `eh_nearby_communities`;
+CREATE TABLE `eh_nearby_communities` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL DEFAULT 0,
+    `nearby_community_id` BIGINT NOT NULL DEFAULT 0,
+	
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_community_relation`(`community_id`, `nearby_community_id`),
+    INDEX `u_eh_community_id`(`community_id`),
+    INDEX `u_eh_nearby_community_id`(`nearby_community_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
@@ -2292,6 +2308,7 @@ CREATE TABLE `eh_businesses` (
   `update_time` DATETIME,
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
+  `visible_distance` DOUBLE NOT NULL DEFAULT 5000 COMMENT 'the distance between shop and user who can find the shop, unit: meter',
   
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -2508,5 +2525,33 @@ CREATE TABLE `eh_thirdpart_users` (
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_push_messages`;
+CREATE TABLE `eh_push_messages` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `message_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'NORMAL_MESSAGE, UPGRADE_MESSAGE, NOTIFY_MESSAGE',
+    `title` VARCHAR(128) COMMENT 'title of message',
+    `content` VARCHAR(4096) COMMENT 'content for message',
+    `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'CITY, COMMUNITY, FAMILY, USER',
+    `target_id` BIGINT NOT NULL DEFAULT 0,
+    `status` INT NOT NULL DEFAULT 0 COMMENT 'WAITING, RUNNING, FINISHED',
+    `create_time` DATETIME DEFAULT NULL,
+    `start_time` DATETIME DEFAULT NULL,
+    `finish_time` DATETIME DEFAULT NULL,
+    `device_type` VARCHAR(64),
+    `device_tag` VARCHAR(64),
+    `app_version` VARCHAR(64),
+    `push_count` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_push_message_results`;
+CREATE TABLE `eh_push_message_results` (
+    `id` BIGINT NOT NULL COMMENT 'id of the push message result, not auto increment',
+    `message_id` BIGINT NOT NULL DEFAULT 0,
+    `user_id` BIGINT NOT NULL DEFAULT 0,
+    `identifier_token` VARCHAR(128) COMMENT 'The mobile phone of user',
+    `send_time` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;

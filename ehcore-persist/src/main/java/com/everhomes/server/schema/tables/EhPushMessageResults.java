@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPushMessageResults extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPushMessageResultsRecord> {
 
-	private static final long serialVersionUID = 1515891187;
+	private static final long serialVersionUID = 1136231476;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_push_message_results</code>
@@ -27,9 +27,9 @@ public class EhPushMessageResults extends org.jooq.impl.TableImpl<com.everhomes.
 	}
 
 	/**
-	 * The column <code>ehcore.eh_push_message_results.id</code>.
+	 * The column <code>ehcore.eh_push_message_results.id</code>. id of the push message result, not auto increment
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPushMessageResultsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPushMessageResultsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the push message result, not auto increment");
 
 	/**
 	 * The column <code>ehcore.eh_push_message_results.message_id</code>.
@@ -71,14 +71,6 @@ public class EhPushMessageResults extends org.jooq.impl.TableImpl<com.everhomes.
 
 	private EhPushMessageResults(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhPushMessageResultsRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhPushMessageResultsRecord, java.lang.Long> getIdentity() {
-		return com.everhomes.server.schema.Keys.IDENTITY_EH_PUSH_MESSAGE_RESULTS;
 	}
 
 	/**
