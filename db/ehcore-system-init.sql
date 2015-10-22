@@ -38,6 +38,11 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('biz.ba
 -- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.image.url', 'http://bizimg.zuolin.com/imageService/', 'image url');
 -- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.detail.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', 'detail url');
 
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('user.avatar.male.url', 'cs://1/image/aW1hZ2UvTVRvME1qVTBZalpqT1dGa05USm1aVEE1WVRnMU9EWmhOVE0zTm1Nd1pXSTVZUQ','默认男头像url'); 
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('user.avatar.female.url', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ','默认女头像url'); 
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('user.def.pwd', '123456','用户默认密码');
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('hotusers', '', 'phone numbers split by ,');
+
 
 
 ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;

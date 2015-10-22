@@ -309,6 +309,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_nearby_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhNearbyCommunities EH_NEARBY_COMMUNITIES = com.everhomes.server.schema.tables.EhNearbyCommunities.EH_NEARBY_COMMUNITIES;
+
+	/**
 	 * The table ehcore.eh_oauth2_codes
 	 */
 	public static final com.everhomes.server.schema.tables.EhOauth2Codes EH_OAUTH2_CODES = com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES;
