@@ -318,6 +318,7 @@ public class BusinessProviderImpl implements BusinessProvider {
                 b.setTargetId(r.getValue(Tables.EH_BUSINESSES.TARGET_ID));
                 b.setTargetType(r.getValue(Tables.EH_BUSINESSES.TARGET_TYPE));
                 b.setUrl(r.getValue(Tables.EH_BUSINESSES.URL));
+                b.setVisibleDistance(r.getValue(Tables.EH_BUSINESSES.VISIBLE_DISTANCE));
                 return b;
         }
         ).collect(Collectors.toList());

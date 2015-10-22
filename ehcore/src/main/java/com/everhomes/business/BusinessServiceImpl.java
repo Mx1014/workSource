@@ -151,7 +151,7 @@ public class BusinessServiceImpl implements BusinessService {
 				else
 					LOGGER.info("syncBusiness-business="+StringHelper.toJsonString(business));
 			}
-			
+
 			if(business == null){
 				business = createBusiness(cmd, userId);
 			}else{
@@ -260,7 +260,7 @@ public class BusinessServiceImpl implements BusinessService {
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
 					"Invalid paramter communityId,communityId is not exists.");
 		}
-		
+
 		if(LOGGER.isDebugEnabled()){
 			LOGGER.info("getBusinessesByCategory-community="+StringHelper.toJsonString(community));
 		}
@@ -284,18 +284,18 @@ public class BusinessServiceImpl implements BusinessService {
 			LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
 			return response;
 		}
-		
+
 		if(LOGGER.isDebugEnabled()){
 			LOGGER.info("getBusinessesByCategory-points="+StringHelper.toJsonString(points));
 		}
-		
+
 		CommunityGeoPoint point = points.get(0);
 		final double lat = point != null ? point.getLatitude() : 0;
 		final double lon = point != null ? point.getLongitude() : 0;
 
 		List<String> geoHashList = getGeoHashCodeList(lat, lon);
 		List<Business> businesses = null;
-		
+
 		if(LOGGER.isDebugEnabled()){
 			LOGGER.info("getBusinessesByCategory-geoHashList="+StringHelper.toJsonString(geoHashList));
 		}
@@ -303,28 +303,28 @@ public class BusinessServiceImpl implements BusinessService {
 		//recommend to user
 		List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
 				.map(r->r.getOwnerId()).collect(Collectors.toList());
-		
+
 		if(LOGGER.isDebugEnabled()){
 			if(recommendBizIds == null)
 				LOGGER.info("getBusinessesByCategory-recommendBizIds=null");
 			else
 				LOGGER.info("getBusinessesByCategory-recommendBizIds="+StringHelper.toJsonString(recommendBizIds));
 		}
-		
+
 		//查询推荐列表
 		if(cmd.getCategoryId() == CATEOGRY_RECOMMEND){
 			businesses = this.businessProvider.findBusinessByIds(recommendBizIds);
 		}else{
 			//获取指定类型的服务
 			List<Long> categoryIds = this.categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
-			
+
 			if(LOGGER.isDebugEnabled()){
 				LOGGER.info("getBusinessesByCategory-categoryIds="+StringHelper.toJsonString(categoryIds));
 			}
-			
+
 			businesses = this.businessProvider.findBusinessByCategroy(categoryIds,geoHashList);
 		}
-		
+
 		if(LOGGER.isDebugEnabled()){
 			if(businesses == null)
 				LOGGER.info("getBusinessesByCategory-businesses=null");
@@ -342,7 +342,7 @@ public class BusinessServiceImpl implements BusinessService {
 		//        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
 		//                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
 		List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
-		
+
 		if(LOGGER.isDebugEnabled()){
 			if(recommendBizIds == null)
 				LOGGER.info("getBusinessesByCategory-favoriteBizIds=null");
@@ -357,10 +357,10 @@ public class BusinessServiceImpl implements BusinessService {
 		final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
 		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
 		final Category c = category;
-		
+
 		//从算法过滤的范围中再缩小范围
 		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
-		
+
 		businesses.forEach(r ->{
 			BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
 			List<CategoryDTO> categories = new ArrayList<>();
@@ -393,7 +393,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 			dtos.add(dto);
 		});
-		
+
 		if(LOGGER.isDebugEnabled()){
 			LOGGER.info("getBusinessesByCategory-processRecommendBusinesses");
 		}
@@ -413,8 +413,8 @@ public class BusinessServiceImpl implements BusinessService {
 	private List<Business> filterDistance(List<Business> businesses, double lat,double lon, List<Long> recommendBizIds) {
 		List<Business> list = new ArrayList<Business>();
 		if(businesses == null || businesses.isEmpty())
-			return null;
-		
+			return businesses;
+
 		for(Business r:businesses){
 			if(recommendBizIds != null && recommendBizIds.contains(r.getId())){
 				list.add(r);
@@ -422,14 +422,22 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 			if(lat != 0 || lon != 0){
 				int distance = (int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon);
-				if(distance <= 5000){
-					list.add(r);
+				if(r.getVisibleDistance() == null || r.getVisibleDistance().doubleValue() == 0){
+					if(distance <= 5000)
+						list.add(r);
+				}
+				else{
+					if(distance <= r.getVisibleDistance().doubleValue())
+						list.add(r);
 				}
 			}
+			else{
+				list.add(r);
+			}
 		}
-		
+
 		return list;
-		
+
 	}
 
 	private String processUrl(Business business, String authenticatePrefix,String detailUrl){
@@ -938,7 +946,7 @@ public class BusinessServiceImpl implements BusinessService {
 		favoriteBusiness(userId, cmd.getId(),true);
 
 	}
-	
+
 	@Override
 	public void favoriteBusinesses(FavoriteBusinessesCommand cmd) {
 		if(cmd.getIds() == null || cmd.getIds().isEmpty())
@@ -1287,6 +1295,42 @@ public class BusinessServiceImpl implements BusinessService {
 			return idens.get(0);
 		}
 		return null;
+	}
+
+	@Override
+	public void updateBusinessDistance(UpdateBusinessDistanceCommand cmd) {
+		this.checkBizIdIsNull(cmd.getId());
+		this.checkBizDistanceIsNull(cmd.getVisibleDistance());
+		Business biz = this.checkBusiness(cmd.getId(),true);
+		biz.setVisibleDistance(cmd.getVisibleDistance());
+		this.businessProvider.updateBusiness(biz);
+	}
+
+	private void checkBizDistanceIsNull(Double visibleDistance) {
+		if(visibleDistance == null){
+			LOGGER.error("Business visibleDistance is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Business visibleDistance is null or empty.");
+		}
+	}
+
+	private Business checkBusiness(Long id,boolean isThrowExcept) {
+		Business biz = this.businessProvider.findBusinessById(id);
+		if(biz == null){
+			LOGGER.error("Business is not exist.id="+id);
+			if(isThrowExcept)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"Business is not exist.");
+		}
+		return biz;
+	}
+
+	private void checkBizIdIsNull(Long id) {
+		if(id == null){
+			LOGGER.error("Business id is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Business id is null or empty.");
+		}
 	}
 
 }
