@@ -35,7 +35,7 @@
         eh_borders | eh_categories | eh_state_triggers | eh_search_keywords | eh_app_promotions |
         eh_scoped_configurations | eh_stats_by_city | eh_templates | eh_feedbacks |
         eh_audit_logs | eh_locale_strings | eh_locale_templates | eh_devices | eh_certs |
-        eh_regions | eh_communities | eh_community_geopoints | eh_nearby_communities | eh_organizations | eh_organization_communities |
+        eh_regions | eh_communities | eh_community_geopoints | eh_nearby_community_map | eh_organizations | eh_organization_communities |
         eh_organization_members | eh_organization_tasks | eh_organization_address_mappings | eh_organization_bills |
         eh_organization_orders | eh_organization_bill_items | eh_organization_owners | eh_organization_contacts |
         eh_organization_billing_accounts | eh_organization_billing_transactions | eh_community_profiles | eh_addresses |
