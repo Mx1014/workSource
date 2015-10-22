@@ -211,30 +211,81 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         return result[0];
     }
-    @Cacheable(value="Communities", key="#communityId" ,unless="#result.size() == 0")
+    
+    @Cacheable(value="nearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
     @Override
     public List<Community> findNearyByCommunityById(long communityId){
         long startTime = System.currentTimeMillis();
-        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
-        List<CommunityGeoPoint> pointList = self.listCommunityGeoPoints(communityId);
-        List<Community> results = new ArrayList<Community>();
-        List<CommunityGeoPoint> nearyByPointList = new ArrayList<CommunityGeoPoint>();
+//        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
+//        List<CommunityGeoPoint> pointList = self.listCommunityGeoPoints(communityId);
+//        List<Community> results = new ArrayList<Community>();
+//        List<CommunityGeoPoint> nearyByPointList = new ArrayList<CommunityGeoPoint>();
         
 //        pointList.forEach((CommunityGeoPoint p) ->{
 //            List<CommunityGeoPoint> l = self.findCommunityGeoPointByGeoHash(p.getLatitude(),p.getLongitude());
 //            if(l != null && !l.isEmpty())
 //                nearyByPointList.addAll(l);
 //        });
-        nearyByPointList = findCommunityGeoPointByGeoHash(pointList);
+//        nearyByPointList = findCommunityGeoPointByGeoHash(pointList);
+//        
+//        List<Long> communityIds = new ArrayList<Long>();
+//        if(nearyByPointList == null || nearyByPointList.isEmpty()) {
+//            return results;
+//        }
+//        
+//        for(CommunityGeoPoint p : nearyByPointList){
+//            if(!communityIds.contains(p.getCommunityId().longValue()))
+//                communityIds.add(p.getCommunityId());
+//        }
+//        
+//        communityIds.forEach((Long id) ->{
+//            Community community = self.findCommunityById(id);
+//            if(community != null)
+//                results.add(community);
+//        });
+
+        // 获取周边社区时分两种情况：1）若数据库有指定则优先使用数据库指定的；2）数据库没有时则进行计算取得；
+        // 由于运营的要求，需要能够手工调整周边社区的范围 by lqs 20151022
+        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
+        List<Community> results = self.findFixNearbyCommunityById(communityId);
+        if(results == null || results.size() == 0) {
+            results = self.calculateNearbyCommunityByGeoPoints(communityId);
+        }
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Find nearby community elapse=" + (endTime - startTime));
+        return results;
+    }
+    
+    @Cacheable(value="nearbyCommunityMap", key="#communityId" ,unless="#result.size() == 0")
+    @Override
+    public List<NearbyCommunityMap> findNearbyCommunityMap(Long communityId) {
+        List<NearbyCommunityMap> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, communityId));
+        context.select().from(Tables.EH_NEARBY_COMMUNITY_MAP)
+            .where(Tables.EH_NEARBY_COMMUNITY_MAP.COMMUNITY_ID.equal(communityId))
+            .fetch().map((r) -> {
+                list.add(ConvertHelper.convert(r, NearbyCommunityMap.class));
+               return null; 
+            });
+        
+        return list;
+    }
+    
+    @Cacheable(value="fixNearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
+    @Override
+    public List<Community> findFixNearbyCommunityById(Long communityId) {
+        long startTime = System.currentTimeMillis();
+        List<Community> results = new ArrayList<Community>();
+
+        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
+        List<NearbyCommunityMap> list = self.findNearbyCommunityMap(communityId);
         
         List<Long> communityIds = new ArrayList<Long>();
-        if(nearyByPointList == null || nearyByPointList.isEmpty()) {
-            return results;
-        }
-        
-        for(CommunityGeoPoint p : nearyByPointList){
-            if(!communityIds.contains(p.getCommunityId().longValue()))
-                communityIds.add(p.getCommunityId());
+        if(list != null) {
+            for(NearbyCommunityMap m : list){
+                if(!communityIds.contains(m.getNearbyCommunityId()))
+                    communityIds.add(m.getNearbyCommunityId());
+            }
         }
         
         communityIds.forEach((Long id) ->{
@@ -242,8 +293,56 @@ public class CommunityProviderImpl implements CommunityProvider {
             if(community != null)
                 results.add(community);
         });
+        
+        if(LOGGER.isDebugEnabled()) {
+            List<Long> ids = new ArrayList<Long>();
+            for(Community community : results) {
+                ids.add(community.getId());
+            }
+            LOGGER.debug("Find fix nearby communities, communityId=" + communityId + ", nearbyCommunities=" + ids);
+        }
+        
         long endTime = System.currentTimeMillis();
-        LOGGER.info("Find nearby community elapse=" + (endTime - startTime));
+        LOGGER.info("Find fix nearby communities, communityId=" + communityId + ", elapse=" + (endTime - startTime));
+        
+        return results;
+    }
+    
+    @Cacheable(value="calNearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
+    @Override
+    public List<Community> calculateNearbyCommunityByGeoPoints(Long communityId) {
+        long startTime = System.currentTimeMillis();
+        List<Community> results = new ArrayList<Community>();
+        
+        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
+        List<CommunityGeoPoint> pointList = self.listCommunityGeoPoints(communityId);
+        List<CommunityGeoPoint> nearyByPointList = findCommunityGeoPointByGeoHash(pointList);
+        
+        List<Long> communityIds = new ArrayList<Long>();
+        if(nearyByPointList != null) {
+            for(CommunityGeoPoint p : nearyByPointList){
+                if(!communityIds.contains(p.getCommunityId().longValue()))
+                    communityIds.add(p.getCommunityId());
+            }
+        }
+        
+        communityIds.forEach((Long id) ->{
+            Community community = self.findCommunityById(id);
+            if(community != null)
+                results.add(community);
+        });
+        
+        if(LOGGER.isDebugEnabled()) {
+            List<Long> ids = new ArrayList<Long>();
+            for(Community community : results) {
+                ids.add(community.getId());
+            }
+            LOGGER.debug("Calculate nearby communities, communityId=" + communityId + ", nearbyCommunities=" + ids);
+        }
+        
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("Calculate nearby communities, communityId=" + communityId + ", elapse=" + (endTime - startTime));
+        
         return results;
     }
     
