@@ -11,11 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1868669800;
+	private static final long serialVersionUID = 827117302;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
 	private java.lang.String   plateNumber;
+	private java.lang.Byte     numberType;
 	private java.lang.String   ownerName;
 	private java.lang.String   ownerPhone;
 	private java.lang.String   rechargeUsername;
@@ -33,6 +34,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     billId,
 		java.lang.String   plateNumber,
+		java.lang.Byte     numberType,
 		java.lang.String   ownerName,
 		java.lang.String   ownerPhone,
 		java.lang.String   rechargeUsername,
@@ -47,6 +49,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.id = id;
 		this.billId = billId;
 		this.plateNumber = plateNumber;
+		this.numberType = numberType;
 		this.ownerName = ownerName;
 		this.ownerPhone = ownerPhone;
 		this.rechargeUsername = rechargeUsername;
@@ -81,6 +84,14 @@ public class EhRechargeInfo implements java.io.Serializable {
 
 	public void setPlateNumber(java.lang.String plateNumber) {
 		this.plateNumber = plateNumber;
+	}
+
+	public java.lang.Byte getNumberType() {
+		return this.numberType;
+	}
+
+	public void setNumberType(java.lang.Byte numberType) {
+		this.numberType = numberType;
 	}
 
 	public java.lang.String getOwnerName() {

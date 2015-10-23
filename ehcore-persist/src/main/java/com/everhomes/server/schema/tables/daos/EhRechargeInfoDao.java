@@ -62,6 +62,13 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>number_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByNumberType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.NUMBER_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>owner_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByOwnerName(java.lang.String... values) {

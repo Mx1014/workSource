@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> {
 
-	private static final long serialVersionUID = -1224293423;
+	private static final long serialVersionUID = 1937831631;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recharge_info</code>
@@ -40,6 +40,11 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_recharge_info.plate_number</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> PLATE_NUMBER = createField("plate_number", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recharge_info.number_type</code>. 0-car plate
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Byte> NUMBER_TYPE = createField("number_type", org.jooq.impl.SQLDataType.TINYINT, this, "0-car plate");
 
 	/**
 	 * The column <code>ehcore.eh_recharge_info.owner_name</code>. plate number owner name
