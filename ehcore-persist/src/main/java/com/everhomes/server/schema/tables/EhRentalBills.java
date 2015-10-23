@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1457253318;
+	private static final long serialVersionUID = -1758343077;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bills</code>
@@ -92,6 +92,11 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> PAY_TIME = createField("pay_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_rental_bills.cancel_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.sql.Timestamp> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_rental_bills.paid_money</code>. already paid money 
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Integer> PAID_MONEY = createField("paid_money", org.jooq.impl.SQLDataType.INTEGER, this, "already paid money ");
@@ -100,6 +105,11 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> INVOICE_FLAG = createField("invoice_flag", org.jooq.impl.SQLDataType.TINYINT, this, "0:want invocie 1 no need");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.creator_uid</code>.

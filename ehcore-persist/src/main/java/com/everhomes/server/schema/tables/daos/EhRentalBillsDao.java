@@ -132,6 +132,13 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
+	 * Fetch records that have <code>cancel_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByCancelTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.CANCEL_TIME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>paid_money IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.lang.Integer... values) {
@@ -143,6 +150,13 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>invoice_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByInvoiceFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.INVOICE_FLAG, values);
 	}
 
 	/**

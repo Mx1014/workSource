@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1291625945;
+	private static final long serialVersionUID = -494506357;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalSiteId;
@@ -26,8 +26,10 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.sql.Timestamp payStartTime;
 	private java.sql.Timestamp payEndTime;
 	private java.sql.Timestamp payTime;
+	private java.sql.Timestamp cancelTime;
 	private java.lang.Integer  paidMoney;
 	private java.lang.Byte     status;
+	private java.lang.Byte     invoiceFlag;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -49,8 +51,10 @@ public class EhRentalBills implements java.io.Serializable {
 		java.sql.Timestamp payStartTime,
 		java.sql.Timestamp payEndTime,
 		java.sql.Timestamp payTime,
+		java.sql.Timestamp cancelTime,
 		java.lang.Integer  paidMoney,
 		java.lang.Byte     status,
+		java.lang.Byte     invoiceFlag,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
@@ -69,8 +73,10 @@ public class EhRentalBills implements java.io.Serializable {
 		this.payStartTime = payStartTime;
 		this.payEndTime = payEndTime;
 		this.payTime = payTime;
+		this.cancelTime = cancelTime;
 		this.paidMoney = paidMoney;
 		this.status = status;
+		this.invoiceFlag = invoiceFlag;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
@@ -181,6 +187,14 @@ public class EhRentalBills implements java.io.Serializable {
 		this.payTime = payTime;
 	}
 
+	public java.sql.Timestamp getCancelTime() {
+		return this.cancelTime;
+	}
+
+	public void setCancelTime(java.sql.Timestamp cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+
 	public java.lang.Integer getPaidMoney() {
 		return this.paidMoney;
 	}
@@ -195,6 +209,14 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Byte getInvoiceFlag() {
+		return this.invoiceFlag;
+	}
+
+	public void setInvoiceFlag(java.lang.Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
 	}
 
 	public java.lang.Long getCreatorUid() {
