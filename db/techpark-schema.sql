@@ -338,6 +338,7 @@ CREATE TABLE `eh_recharge_info`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `bill_id` BIGINT,
   `plate_number` VARCHAR(20),
+  `number_type` TINYINT COMMENT '0-car plate',
   `owner_name` VARCHAR(20) COMMENT 'plate number owner name',
   `owner_phone` VARCHAR(20) ,
   `recharge_username` VARCHAR(20) ,
