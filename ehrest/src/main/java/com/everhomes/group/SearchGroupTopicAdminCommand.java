@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>communityId: 用户当前所有小区ID</li>
- * <li>groupId: 圈id</li>
+ * <li>forumId: 圈对应的论坛id</li>
  * <li>senderPhones: 发送者手机号（要写全整个手机号，不分词），可多个</li>
  * <li>senderNickNames: 发送者昵称（要写全整个昵称，不分词），可多个</li>
  * <li>keyword: 帖子标题、内容关键字</li>
@@ -22,7 +22,7 @@ public class SearchGroupTopicAdminCommand {
 
 	private Long communityId;
 	
-	private Long groupId;
+	private Long forumId;
 	
 	@ItemType(String.class)
     private List<String> senderPhones;
@@ -48,12 +48,12 @@ public class SearchGroupTopicAdminCommand {
 		this.communityId = communityId;
 	}
 
-	public Long getGroupId() {
-		return groupId;
+	public Long getForumId() {
+		return forumId;
 	}
 
-	public void setGroupId(Long groupId) {
-		this.groupId = groupId;
+	public void setForumId(Long forumId) {
+		this.forumId = forumId;
 	}
 
 	public List<String> getSenderPhones() {
