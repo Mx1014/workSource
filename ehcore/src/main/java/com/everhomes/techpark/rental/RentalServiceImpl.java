@@ -68,7 +68,7 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public void addRentalSite(AddRentalSiteCommand cmd) {
+	public Long addRentalSite(AddRentalSiteCommand cmd) {
 		RentalSite rentalsite = new RentalSite();
 		rentalsite.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
 		rentalsite.setAddress(cmd.getAddress());
@@ -97,7 +97,7 @@ public class RentalServiceImpl implements RentalService {
 				rentalProvider.createRentalSiteItem(siteItem);
 			}
 		}
-
+	return siteId;
 	}
 
 	@Override
@@ -131,14 +131,13 @@ public class RentalServiceImpl implements RentalService {
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (choosenInts.contains(weekday)) {
-				for (int i = cmd.getBeginTime(); i < cmd.getEndTime(); i++) {
+				for (double i = cmd.getBeginTime(); i < cmd.getEndTime(); ) {
 					rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
-							.getTime()) + " " + String.valueOf(i) + ":00:00"));
+							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
+					
+					i=i+cmd.getTimeStep();
 					rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
-							.getTime())
-							+ " "
-							+ String.valueOf(i + 1)
-							+ ":00:00"));
+							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts());
@@ -435,11 +434,11 @@ public class RentalServiceImpl implements RentalService {
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
-			rsb.setRentalBillId(rentalBillId);
+			rsb.setRentalBillId(rentalBillId); 
 			rsb.setTotalMoney(rsr.getPrice()
 					* (int) (cmd.getRentalcount() / rsr.getUnit()));
 			rsb.setRentalCount(cmd.getRentalcount());
-			rsb.setRentalSiteRuleId(rsb.getId());
+			rsb.setRentalSiteRuleId(rsr.getId());
 			rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			rsb.setCreatorUid(userId);
@@ -472,6 +471,69 @@ public class RentalServiceImpl implements RentalService {
 		response.setRentalStartTime(rentalRule.getRentalStartTime());
 		response.setSiteType("meetingRoom");
 		return response;
+	}
+
+	@Override
+	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
+		//TODO: DELETE rules
+		Integer deleteCount = rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(),cmd.getBeginDate(),cmd.getEndDate());
+		LOGGER.debug("delete count = "+String.valueOf(deleteCount)+"  from rental site rules  ");
+		RentalSiteRule rsr = new RentalSiteRule();
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		start.setTime(new Date(cmd.getBeginDate()));
+		end.setTime(new Date(cmd.getEndDate()));
+		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
+		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
+		Gson gson = new Gson();
+		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
+				new TypeToken<List<Integer>>() {
+				}.getType());
+		// String[] arr = cmd.getChoosen().split(",");
+		// List<String> list = new ArrayList<String>(arr);
+		while (start.before(end)) {
+			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
+			if (choosenInts.contains(weekday)) {
+				for (double i = cmd.getBeginTime(); i < cmd.getEndTime(); ) {
+					rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
+							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
+					
+					i=i+cmd.getTimeStep();
+					rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
+							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
+					rsr.setRentalSiteId(cmd.getRentalSiteId());
+					rsr.setRentalType(cmd.getRentalType());
+					rsr.setCounts(cmd.getCounts());
+					rsr.setUnit(cmd.getUnit());
+					if(weekday ==1|| weekday == 7){
+						rsr.setPrice(cmd.getWeekendPrice());
+					}
+					else{
+						rsr.setPrice(cmd.getWorkdayPrice());
+					}
+					rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
+							.getTime())));
+					rsr.setStatus(cmd.getStatus());
+					rentalProvider.createRentalSiteRule(rsr);
+
+				}
+			}
+			start.add(Calendar.DAY_OF_MONTH, 1);
+		}
+	}
+
+	@Override
+	public void deleteRentalSiteRules(
+			DeleteRentalSiteRulesCommand cmd) { 
+		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getRuleDates());
+		JSONArray choosenValue = (JSONArray) jsonObject.get("ruleDates");
+		Gson gson = new Gson();
+		List<Long> deleteDates = gson.fromJson(choosenValue.toString(),
+				new TypeToken<List<Long>>() {
+				}.getType());
+		for (Long deleteDate : deleteDates){
+			rentalProvider.deleteRentalSiteRules(Long.valueOf(cmd.getRentalSiteId()), deleteDate, deleteDate);
+		}
 	}
 
 }

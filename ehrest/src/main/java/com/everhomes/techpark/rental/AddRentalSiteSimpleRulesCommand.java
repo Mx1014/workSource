@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>choosen：选择的日期</li>
  * </ul>
  */
-public class AddRentalSiteRulesCommand {
+public class AddRentalSiteSimpleRulesCommand {
 	private Long enterpriseCommunityId;
 	private String siteType;
 	private Long rentalSiteId;
@@ -33,7 +33,8 @@ public class AddRentalSiteRulesCommand {
 	private Double endTime;
 	private Integer counts;
 	private Double unit;
-	private Integer price;
+	private Integer WorkdayPrice;
+	private Integer WeekendPrice;
 	private Byte loopType;
 	private Byte Status;
 	private String choosen;
@@ -93,21 +94,7 @@ public class AddRentalSiteRulesCommand {
 	public void setUnit(Double unit) {
 		this.unit = unit;
 	}
-
-
-
-	public Integer getPrice() {
-		return price;
-	}
-
-
-
-	public void setPrice(Integer price) {
-		this.price = price;
-	}
-
  
-
 	public Byte getLoopType() {
 		return loopType;
 	}
@@ -224,6 +211,30 @@ public class AddRentalSiteRulesCommand {
 
 	public void setTimeStep(Double timeStep) {
 		this.timeStep = timeStep;
+	}
+
+
+
+	public Integer getWorkdayPrice() {
+		return WorkdayPrice;
+	}
+
+
+
+	public void setWorkdayPrice(Integer workdayPrice) {
+		WorkdayPrice = workdayPrice;
+	}
+
+
+
+	public Integer getWeekendPrice() {
+		return WeekendPrice;
+	}
+
+
+
+	public void setWeekendPrice(Integer weekendPrice) {
+		WeekendPrice = weekendPrice;
 	}
 
  
