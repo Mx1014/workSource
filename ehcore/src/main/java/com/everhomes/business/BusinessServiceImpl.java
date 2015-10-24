@@ -420,6 +420,10 @@ public class BusinessServiceImpl implements BusinessService {
 				list.add(r);
 				continue;
 			}
+			if(r.getTargetType().byteValue() != BusinessTargetType.ZUOLIN.getCode()){
+				list.add(r);
+				continue;
+			}
 			if(lat != 0 || lon != 0){
 				int distance = (int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon);
 				if(r.getVisibleDistance() == null || r.getVisibleDistance().doubleValue() == 0){
