@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-10-21 17:44:18
+// generated at 2015-10-26 15:50:45
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -148,6 +148,7 @@ public interface ApiConstants {
     public static final String BUSINESS_FAVORITEBUSINESSES_URL = "/business/favoriteBusinesses";
     public static final String BUSINESS_GETBUSINESSESBYCATEGORY_URL = "/business/getBusinessesByCategory";
     public static final String BUSINESS_UPDATEBUSINESS_URL = "/business/updateBusiness";
+    public static final String BUSINESS_UPDATEBUSINESSDISTANCE_URL = "/business/updateBusinessDistance";
     public static final String CATEGORY_LISTACTIONCATEGORIES_URL = "/category/listActionCategories";
     public static final String CATEGORY_LISTALLCATEGORIES_URL = "/category/listAllCategories";
     public static final String CATEGORY_LISTBUSINESSCATEGORIES_URL = "/category/listBusinessCategories";
@@ -157,6 +158,7 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTDESCENDANTS_URL = "/category/listDescendants";
     public static final String CATEGORY_LISTINTERESTCATEGORIES_URL = "/category/listInterestCategories";
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
+    public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
@@ -243,6 +245,7 @@ public interface ApiConstants {
     public static final String GROUP_SEARCH_URL = "/group/search";
     public static final String GROUP_UPDATE_URL = "/group/update";
     public static final String GROUP_UPDATEGROUPMEMBER_URL = "/group/updateGroupMember";
+    public static final String LAUNCHPAD_DELETELAUNCHPADBYID_URL = "/launchpad/deleteLaunchPadById";
     public static final String LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYVERSIONCODE_URL = "/launchpad/getLastLaunchPadLayoutByVersionCode";
     public static final String LAUNCHPAD_GETLAUNCHPADITEMBYID_URL = "/launchpad/getLaunchPadItemById";
     public static final String LAUNCHPAD_GETLAUNCHPADITEMS_URL = "/launchpad/getLaunchPadItems";

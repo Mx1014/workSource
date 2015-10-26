@@ -914,6 +914,73 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		
 		return response;
 	}
+
+	@Override
+	public void deleteLaunchPadById(DeleteLaunchPadByIdCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		this.checkIdIsNull(cmd.getId());
+		LaunchPadItem item = this.checkLaunchPadItem(cmd.getId(),true);
+		this.deleteLaunchPadItem(item,userId);
+	}
+
+	private void deleteLaunchPadItem(LaunchPadItem item,Long userId) {
+		if(item.getScopeCode() == ScopeType.USER.getCode()){
+			//boolean tue = this.isExistsUnUserItem(item);
+			item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+			item.setScopeId(userId);
+			item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+			item.setScopeCode(ScopeType.USER.getCode());
+			this.launchPadProvider.updateLaunchPadItem(item);
+		}else{
+			item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
+			item.setScopeId(userId);
+			item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+			item.setScopeCode(ScopeType.USER.getCode());
+			item.setId(0L);
+			this.launchPadProvider.createLaunchPadItem(item);
+		}
+	}
+
+	/*private boolean isExistsUnUserItem(LaunchPadItem item) {
+		List<LaunchPadItem> result = this.getUnUserItems(item);
+		if(result != null && !result.isEmpty())
+			return true;
+		return false;
+	}*/
+
+	/*private List<LaunchPadItem> getUnUserItems(LaunchPadItem item) {
+		List<LaunchPadItem> result = new ArrayList<LaunchPadItem>();
+		List<LaunchPadItem> countyItems = this.launchPadProvider.findLaunchPadItemByGroupAndName(item.getTargetType(), item, ScopeType.ALL.getCode(), 0);
+		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByGroupAndName(ItemTargetType.BIZ.getCode(), businessId, ScopeType.CITY.getCode(), 0);
+		List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByGroupAndName(ItemTargetType.BIZ.getCode(), businessId, ScopeType.COMMUNITY.getCode(), 0);
+		if(countyItems != null && !countyItems.isEmpty())
+			result.addAll(countyItems);
+		if(cityItems != null && !cityItems.isEmpty())
+			result.addAll(cityItems);
+		if(cmmtyItems != null && !cmmtyItems.isEmpty())
+			result.addAll(cmmtyItems);
+		return result;
+	}*/
+
+	private LaunchPadItem checkLaunchPadItem(Long id,boolean isThrowExcept) {
+		LaunchPadItem item = this.launchPadProvider.findLaunchPadItemById(id);
+		if(item == null){
+			LOGGER.error("can not found launchPadItem by id.id="+id);
+			if(isThrowExcept)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+						"can not found launchPadItem by id.");
+		}
+		return item;
+	}
+
+	private void checkIdIsNull(Long id) {
+		if(id == null){
+			LOGGER.error("propterty id paramter can not be null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"propterty id paramter can not be null or empty.");
+		}
+	}
     
  
 }

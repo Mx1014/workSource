@@ -55,6 +55,7 @@ public class LaunchPadItemDTO {
     private String  displayLayout;
     private Integer    bgcolor;
     private Byte    scaleType;
+    
 
     public Long getId() {
         return id;
