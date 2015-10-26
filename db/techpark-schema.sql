@@ -346,6 +346,8 @@ CREATE TABLE `eh_recharge_info`(
   `recharge_time` DATETIME,
   `recharge_month` TINYINT,
   `recharge_amount` INT,
+  `old_validityperiod` DATETIME,
+  `new_validityperiod` DATETIME,
   `payment_status` TINYINT COMMENT '3rd plat :0-fail 1-unpay 2-success',
   `recharge_status` TINYINT COMMENT '0-fail 1-waiting paying 2-refreshing data 3-success',
   `enterprise_community_id` BIGINT,
