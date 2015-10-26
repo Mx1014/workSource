@@ -95,13 +95,13 @@ public class PushMessageTest extends LoginAuthTestCase {
         List<PushMessageResult> results = pushMessageService.queryPushMessageResultByIdentify(locator, 10, null);
         Assert.assertTrue(results.size() > 0);
         
-        locator = new CrossShardListingLocator();
-        results = pushMessageService.queryPushMessageResultByIdentify(locator, 10, "139");
-        Assert.assertTrue(results.size() > 0);
+//        locator = new CrossShardListingLocator();
+//        results = pushMessageService.queryPushMessageResultByIdentify(locator, 10, "139");
+//        Assert.assertTrue(results.size() > 0);
         
-        locator = new CrossShardListingLocator();
-        results = pushMessageService.queryPushMessageResultByIdentify(locator, 10, "13922553366");
-        Assert.assertTrue(results.size() > 0);
+//        locator = new CrossShardListingLocator();
+//        results = pushMessageService.queryPushMessageResultByIdentify(locator, 10, "13922553366");
+//        Assert.assertTrue(results.size() > 0);
     }
     
 //    @Test
