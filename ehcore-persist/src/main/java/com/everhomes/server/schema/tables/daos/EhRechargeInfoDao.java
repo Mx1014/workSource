@@ -76,10 +76,10 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>owner_phone IN (values)</code>
+	 * Fetch records that have <code>recharge_userid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByOwnerPhone(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.OWNER_PHONE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByRechargeUserid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.RECHARGE_USERID, values);
 	}
 
 	/**
@@ -115,6 +115,20 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByRechargeAmount(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.RECHARGE_AMOUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>old_validityperiod IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByOldValidityperiod(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.OLD_VALIDITYPERIOD, values);
+	}
+
+	/**
+	 * Fetch records that have <code>new_validityperiod IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByNewValidityperiod(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.NEW_VALIDITYPERIOD, values);
 	}
 
 	/**

@@ -11,19 +11,21 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = 827117302;
+	private static final long serialVersionUID = -310235792;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
 	private java.lang.String   plateNumber;
 	private java.lang.Byte     numberType;
 	private java.lang.String   ownerName;
-	private java.lang.String   ownerPhone;
+	private java.lang.Long     rechargeUserid;
 	private java.lang.String   rechargeUsername;
 	private java.lang.String   rechargePhone;
 	private java.sql.Timestamp rechargeTime;
 	private java.lang.Byte     rechargeMonth;
 	private java.lang.Integer  rechargeAmount;
+	private java.sql.Timestamp oldValidityperiod;
+	private java.sql.Timestamp newValidityperiod;
 	private java.lang.Byte     paymentStatus;
 	private java.lang.Byte     rechargeStatus;
 	private java.lang.Long     enterpriseCommunityId;
@@ -36,12 +38,14 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.lang.String   plateNumber,
 		java.lang.Byte     numberType,
 		java.lang.String   ownerName,
-		java.lang.String   ownerPhone,
+		java.lang.Long     rechargeUserid,
 		java.lang.String   rechargeUsername,
 		java.lang.String   rechargePhone,
 		java.sql.Timestamp rechargeTime,
 		java.lang.Byte     rechargeMonth,
 		java.lang.Integer  rechargeAmount,
+		java.sql.Timestamp oldValidityperiod,
+		java.sql.Timestamp newValidityperiod,
 		java.lang.Byte     paymentStatus,
 		java.lang.Byte     rechargeStatus,
 		java.lang.Long     enterpriseCommunityId
@@ -51,12 +55,14 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.plateNumber = plateNumber;
 		this.numberType = numberType;
 		this.ownerName = ownerName;
-		this.ownerPhone = ownerPhone;
+		this.rechargeUserid = rechargeUserid;
 		this.rechargeUsername = rechargeUsername;
 		this.rechargePhone = rechargePhone;
 		this.rechargeTime = rechargeTime;
 		this.rechargeMonth = rechargeMonth;
 		this.rechargeAmount = rechargeAmount;
+		this.oldValidityperiod = oldValidityperiod;
+		this.newValidityperiod = newValidityperiod;
 		this.paymentStatus = paymentStatus;
 		this.rechargeStatus = rechargeStatus;
 		this.enterpriseCommunityId = enterpriseCommunityId;
@@ -102,12 +108,12 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.ownerName = ownerName;
 	}
 
-	public java.lang.String getOwnerPhone() {
-		return this.ownerPhone;
+	public java.lang.Long getRechargeUserid() {
+		return this.rechargeUserid;
 	}
 
-	public void setOwnerPhone(java.lang.String ownerPhone) {
-		this.ownerPhone = ownerPhone;
+	public void setRechargeUserid(java.lang.Long rechargeUserid) {
+		this.rechargeUserid = rechargeUserid;
 	}
 
 	public java.lang.String getRechargeUsername() {
@@ -148,6 +154,22 @@ public class EhRechargeInfo implements java.io.Serializable {
 
 	public void setRechargeAmount(java.lang.Integer rechargeAmount) {
 		this.rechargeAmount = rechargeAmount;
+	}
+
+	public java.sql.Timestamp getOldValidityperiod() {
+		return this.oldValidityperiod;
+	}
+
+	public void setOldValidityperiod(java.sql.Timestamp oldValidityperiod) {
+		this.oldValidityperiod = oldValidityperiod;
+	}
+
+	public java.sql.Timestamp getNewValidityperiod() {
+		return this.newValidityperiod;
+	}
+
+	public void setNewValidityperiod(java.sql.Timestamp newValidityperiod) {
+		this.newValidityperiod = newValidityperiod;
 	}
 
 	public java.lang.Byte getPaymentStatus() {

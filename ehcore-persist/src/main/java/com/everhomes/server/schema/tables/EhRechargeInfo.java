@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> {
 
-	private static final long serialVersionUID = 1937831631;
+	private static final long serialVersionUID = -958932496;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recharge_info</code>
@@ -52,9 +52,9 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> OWNER_NAME = createField("owner_name", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "plate number owner name");
 
 	/**
-	 * The column <code>ehcore.eh_recharge_info.owner_phone</code>.
+	 * The column <code>ehcore.eh_recharge_info.recharge_userid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.String> OWNER_PHONE = createField("owner_phone", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Long> RECHARGE_USERID = createField("recharge_userid", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recharge_info.recharge_username</code>.
@@ -80,6 +80,16 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_recharge_info.recharge_amount</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Integer> RECHARGE_AMOUNT = createField("recharge_amount", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recharge_info.old_validityperiod</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.sql.Timestamp> OLD_VALIDITYPERIOD = createField("old_validityperiod", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_recharge_info.new_validityperiod</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.sql.Timestamp> NEW_VALIDITYPERIOD = createField("new_validityperiod", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recharge_info.payment_status</code>. 3rd plat :0-fail 1-unpay 2-success
