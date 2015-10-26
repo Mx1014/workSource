@@ -6,13 +6,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.business.CancelFavoriteBusinessCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -123,4 +123,18 @@ public class LaunchPadController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /launchpad/deleteLaunchPadById</b>
+     * <p>用户取消收藏</p>
+     */
+    @RequestMapping("deleteLaunchPadById")
+    @RestReturn(value=String.class)
+    public RestResponse deleteLaunchPadById(DeleteLaunchPadByIdCommand cmd) {
+        
+        this.launchPadService.deleteLaunchPadById(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
