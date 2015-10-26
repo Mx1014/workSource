@@ -430,12 +430,12 @@ public class BusinessProviderImpl implements BusinessProvider {
         if(cityId != 0){
             Condition conCity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(ScopeType.CITY.getCode());
             conCity = conCity.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(cityId));
-            condition.or(conCity);
+            condition = condition.or(conCity);
         }
         if(communityId != 0){
             Condition conCommunity = Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode());
             conCommunity = conCommunity.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(communityId));
-            condition.or(conCommunity);
+            condition = condition.or(conCommunity);
         }
         selectStep.where(condition);
         @SuppressWarnings({ "unchecked", "rawtypes" })

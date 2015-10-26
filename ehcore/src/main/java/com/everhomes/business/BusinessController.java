@@ -123,5 +123,4 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
 }
