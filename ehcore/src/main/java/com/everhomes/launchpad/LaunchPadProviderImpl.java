@@ -280,5 +280,25 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         context.delete(Tables.EH_LAUNCH_PAD_ITEMS).where(condition).execute();
         
     }
+	@Override
+	public List<LaunchPadItem> findLaunchPadItem(String itemGroup,String itemName, Byte scopeCode, long scopeId) {
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup).and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
+        if(scopeCode != null){
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
+            if(scopeId != 0)
+                condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+        }
+       
+        step.where(condition).fetch().map(r ->{
+            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
+	}
 
 }
