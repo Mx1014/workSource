@@ -17,7 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -33,6 +37,8 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 	@Autowired
 	RentalProvider rentalProvider;
 
@@ -80,7 +86,8 @@ public class RentalServiceImpl implements RentalService {
 		rentalsite.setSiteType(cmd.getSiteType());
 		rentalsite.setSpec(cmd.getSpec());
 		Long siteId = rentalProvider.createRentalSite(rentalsite);
-		if (null != cmd.getSiteItems()&&!StringUtils.isEmpty(cmd.getSiteItems())) {
+		if (null != cmd.getSiteItems()
+				&& !StringUtils.isEmpty(cmd.getSiteItems())) {
 			JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
 					.getSiteItems());
 			JSONArray itemValue = (JSONArray) jsonObject.get("siteItems");
@@ -97,7 +104,7 @@ public class RentalServiceImpl implements RentalService {
 				rentalProvider.createRentalSiteItem(siteItem);
 			}
 		}
-	return siteId;
+		return siteId;
 	}
 
 	@Override
@@ -131,13 +138,23 @@ public class RentalServiceImpl implements RentalService {
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (choosenInts.contains(weekday)) {
-				for (double i = cmd.getBeginTime(); i < cmd.getEndTime(); ) {
+				for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
 					rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
-							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
-					
-					i=i+cmd.getTimeStep();
+							.getTime())
+							+ " "
+							+ String.valueOf((int) i / 1)
+							+ ":"
+							+ String.valueOf((int) ((i % 1) * 60))
+							+ ":00"));
+
+					i = i + cmd.getTimeStep();
 					rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
-							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
+							.getTime())
+							+ " "
+							+ String.valueOf((int) i / 1)
+							+ ":"
+							+ String.valueOf((int) ((i % 1) * 60))
+							+ ":00"));
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts());
@@ -180,8 +197,9 @@ public class RentalServiceImpl implements RentalService {
 			// 查rules
 
 			java.util.Date nowTime = new java.util.Date();
-			
-			Timestamp beginTime = new Timestamp(nowTime.getTime() + rentalRule.getRentalStartTime());
+
+			Timestamp beginTime = new Timestamp(nowTime.getTime()
+					+ rentalRule.getRentalStartTime());
 			List<RentalSiteRule> rentalSiteRules = rentalProvider
 					.findRentalSiteRules(rsDTO.getRentalSiteId(), dateSF
 							.format(new java.util.Date(cmd.getRuleDate())),
@@ -198,7 +216,7 @@ public class RentalServiceImpl implements RentalService {
 					dto.setPrice(rsr.getPrice());
 					dto.setRuleDate(rsr.getSiteRentalDate().getTime());
 					List<RentalSitesBill> rsbs = rentalProvider
-							.findRentalSiteBillBySiteId(rsr.getId());
+							.findRentalSiteBillBySiteRuleId(rsr.getId());
 					dto.setStatus(SiteRuleStatus.OPEN.getCode());
 					dto.setCounts((double) rsr.getCounts());
 					if (null != rsbs && rsbs.size() > 0) {
@@ -213,27 +231,27 @@ public class RentalServiceImpl implements RentalService {
 					rsDTO.getSiteRules().add(dto);
 				}
 			}
-			//TODO: 查items---将来扣除用掉的
-			List<RentalSiteItem> rsitItems = rentalProvider
-					.findRentalSiteItems(rsDTO.getRentalSiteId());
-			if (null != rsitItems && rsitItems.size() > 0) {
-				for (RentalSiteItem rsi : rsitItems) {
-					SiteItemDTO riDTO = new SiteItemDTO();
-					riDTO.setItemName(rsi.getName());
-					riDTO.setItemPrice(rsi.getPrice());
-					riDTO.setId(rsi.getId());
-//					List<RentalItemsBill> ribs = rentalProvider
-//							.findRentalItemsBillById(rsi.getId());
-					riDTO.setCounts(rsi.getCounts());
-//					if (null != ribs && ribs.size() > 0) {
-//						for (RentalItemsBill rib : ribs) {
-//							riDTO.setCounts(riDTO.getCounts()
-//									- rib.getRentalCount());
-//						}
-//					}
-					rsDTO.getSiteItems().add(riDTO);
-				}
-			}
+			// //TODO: 查items---将来扣除用掉的
+			// List<RentalSiteItem> rsitItems = rentalProvider
+			// .findRentalSiteItems(rsDTO.getRentalSiteId());
+			// if (null != rsitItems && rsitItems.size() > 0) {
+			// for (RentalSiteItem rsi : rsitItems) {
+			// SiteItemDTO riDTO = new SiteItemDTO();
+			// riDTO.setItemName(rsi.getName());
+			// riDTO.setItemPrice(rsi.getPrice());
+			// riDTO.setId(rsi.getId());
+			// // List<RentalItemsBill> ribs = rentalProvider
+			// // .findRentalItemsBillById(rsi.getId());
+			// riDTO.setCounts(rsi.getCounts());
+			// // if (null != ribs && ribs.size() > 0) {
+			// // for (RentalItemsBill rib : ribs) {
+			// // riDTO.setCounts(riDTO.getCounts()
+			// // - rib.getRentalCount());
+			// // }
+			// // }
+			// rsDTO.getSiteItems().add(riDTO);
+			// }
+			// }
 			response.getSites().add(rsDTO);
 		}
 
@@ -250,9 +268,48 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public FindRentalSiteItemsCommandResponse findRentalSiteItems(
-			FindRentalSiteItemsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+			FindRentalSiteItemsCommand cmd) { 
+		FindRentalSiteItemsCommandResponse response = new FindRentalSiteItemsCommandResponse();
+		response.setSiteItems(new ArrayList<SiteItemDTO>());
+		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+				.getRentalSiteRuleIds());
+		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
+
+		Gson gson = new Gson();
+		if (null == idValue)
+			return null;
+		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
+				new TypeToken<List<Long>>() {
+				}.getType());
+		List<RentalSiteItem> rsiSiteItems = rentalProvider
+				.findRentalSiteItems(cmd.getRentalSiteId());
+		for (RentalSiteItem rsi : rsiSiteItems) {
+			int maxOrder = 0;
+			for (Long siteRuleId : RuleIdList) {
+				//对于每一个物品，通过每一个siteRuleID找到它对应的BillIds 
+				int ruleOrderSum = 0;
+				List<RentalSitesBill> rsbs =  rentalProvider.findRentalSiteBillBySiteRuleId(siteRuleId);
+				//通过每一个billID找已预订的数量
+				if (null == rsbs ||rsbs.size()==0) {
+					continue;
+				}
+				for (RentalSitesBill rsb:rsbs){
+					RentalItemsBill rib = rentalProvider.findRentalItemBill(rsb.getRentalBillId(),rsi.getId());
+					ruleOrderSum += rib.getRentalCount();
+				}
+				//获取该物品的最大预订量
+				if (ruleOrderSum >maxOrder)
+					maxOrder=ruleOrderSum;
+			}
+			rsi.setCounts(rsi.getCounts()-maxOrder);
+			SiteItemDTO dto = new SiteItemDTO();
+			dto.setCounts(rsi.getCounts());
+			dto.setId(rsi.getId());
+			dto.setItemName(rsi.getName());
+			dto.setItemPrice(rsi.getPrice());
+			response.getSiteItems().add(dto);
+		}
+		return response;
 	}
 
 	@Override
@@ -344,23 +401,24 @@ public class RentalServiceImpl implements RentalService {
 		java.util.Date reserveTime = new java.util.Date();
 		Gson gson = new Gson();
 		List<SiteItemDTO> siteItemDTOs = null;
-		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getRentalSiteRuleIds());
+		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+				.getRentalSiteRuleIds());
 		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
 		if (null == idValue)
 			return;
 		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
 				new TypeToken<List<Long>>() {
 				}.getType());
-		if(null!=cmd.getRentalItems()&&!StringUtils.isEmpty(cmd.getRentalItems())){
-		 jsonObject = (JSONObject) JSONValue.parse(cmd
-				.getRentalItems());
-		JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
-		
-		siteItemDTOs= gson.fromJson(itemValue.toString(),
-				new TypeToken<List<SiteItemDTO>>() {
-				}.getType());
+		if (null != cmd.getRentalItems()
+				&& !StringUtils.isEmpty(cmd.getRentalItems())) {
+			jsonObject = (JSONObject) JSONValue.parse(cmd.getRentalItems());
+			JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
+
+			siteItemDTOs = gson.fromJson(itemValue.toString(),
+					new TypeToken<List<SiteItemDTO>>() {
+					}.getType());
 		}
-		
+
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
@@ -381,6 +439,7 @@ public class RentalServiceImpl implements RentalService {
 		RentalBill rentalBill = new RentalBill();
 		rentalBill.setRentalSiteId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
+		rentalBill.setInvoiceFlag(cmd.getInvoiceFlag());
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 		rentalBill.setStartTime(new Timestamp(cmd.getStartTime()));
 		rentalBill.setEndTime(new Timestamp(cmd.getEndTime()));
@@ -393,7 +452,7 @@ public class RentalServiceImpl implements RentalService {
 			totalMoney += rentalSiteRule.getPrice()
 					* (int) (cmd.getRentalcount() / rentalSiteRule.getUnit());
 		}
-		 
+
 		for (SiteItemDTO siDto : siteItemDTOs) {
 			totalMoney += siDto.getItemPrice() * siDto.getCounts();
 		}
@@ -434,7 +493,7 @@ public class RentalServiceImpl implements RentalService {
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
-			rsb.setRentalBillId(rentalBillId); 
+			rsb.setRentalBillId(rentalBillId);
 			rsb.setTotalMoney(rsr.getPrice()
 					* (int) (cmd.getRentalcount() / rsr.getUnit()));
 			rsb.setRentalCount(cmd.getRentalcount());
@@ -451,7 +510,70 @@ public class RentalServiceImpl implements RentalService {
 	public FindRentalBillsCommandResponse findRentalBills(
 			FindRentalBillsCommand cmd) {
 		// TODO Auto-generated method stub
-		return null;
+		if (cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(9223372036854775807L);
+		int pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize());
+
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<RentalBill> billList = this.rentalProvider.listRentalBills(
+				locator, pageSize + 1, cmd.getBillStatus());
+		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
+		response.setRentalBills(new ArrayList<RentalBillDTO>());
+		for (RentalBill bill : billList) {
+			RentalSite rs = rentalProvider.getRentalSiteById(bill
+					.getRentalSiteId());
+			RentalBillDTO dto = new RentalBillDTO();
+			dto.setRentalBillId(bill.getId());
+			dto.setEnterpriseCommunityId(rs.getEnterpriseCommunityId());
+			dto.setSiteType(rs.getSiteType());
+			dto.setSiteName(rs.getSiteName());
+			dto.setBuildingName(rs.getBuildingName());
+			dto.setAddress(rs.getAddress());
+			dto.setSpec(rs.getSpec());
+			dto.setCompanyName(rs.getOwnCompanyName());
+			dto.setContactName(rs.getContactName());
+			dto.setContactPhonenum(rs.getContactPhonenum());
+			dto.setStartTime(bill.getStartTime().getTime());
+			dto.setEndTime(bill.getEndTime().getTime());
+			dto.setReserveTime(bill.getReserveTime().getTime());
+			if (null != bill.getPayStartTime()) {
+				dto.setPayStartTime(bill.getPayStartTime().getTime());
+			}
+			if (null != bill.getPayTime()) {
+				dto.setPayTime(bill.getPayTime().getTime());
+			}
+			if (null != bill.getPayEndTime()) {
+				dto.setPayDeadLineTime(bill.getPayEndTime().getTime());
+			}
+			if (null != bill.getCancelTime()) {
+				dto.setCancelTime(bill.getCancelTime().getTime());
+			}
+			Integer sitePrice = rentalProvider.getSumSitePrice(dto
+					.getRentalBillId());
+			dto.setSitePrice(sitePrice);
+			dto.setTotalPrice(bill.getPayTatolMoney());
+			dto.setReservePrice(bill.getReserveMoney());
+			dto.setPaidPrice(bill.getPaidMoney());
+			dto.setUnPayPrice(bill.getPayTatolMoney() - bill.getPaidMoney());
+			dto.setInvoiceFlag(bill.getInvoiceFlag());
+			dto.setStatus(bill.getStatus());
+			dto.setSiteItems(new ArrayList<SiteItemDTO>());
+			List<RentalItemsBill> rentalSiteItems = rentalProvider
+					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+			for (RentalItemsBill rib : rentalSiteItems) {
+				SiteItemDTO siDTO = new SiteItemDTO();
+				siDTO.setCounts(rib.getRentalCount());
+				RentalSiteItem rsItem = rentalProvider
+						.findRentalSiteItemById(rib.getRentalSiteItemId());
+				siDTO.setItemName(rsItem.getName());
+				siDTO.setItemPrice(rib.getTotalMoney());
+				dto.getSiteItems().add(siDTO);
+			}
+			response.getRentalBills().add(dto);
+		}
+		return response;
 	}
 
 	@Override
@@ -469,15 +591,16 @@ public class RentalServiceImpl implements RentalService {
 		response.setRefundFlag(rentalRule.getRefundFlag());
 		response.setRentalEndTime(rentalRule.getRentalEndTime());
 		response.setRentalStartTime(rentalRule.getRentalStartTime());
-		response.setSiteType("meetingRoom");
+		response.setSiteType(rentalRule.getSiteType());
 		return response;
 	}
 
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
-		//TODO: DELETE rules
-		Integer deleteCount = rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(),cmd.getBeginDate(),cmd.getEndDate());
-		LOGGER.debug("delete count = "+String.valueOf(deleteCount)+"  from rental site rules  ");
+		Integer deleteCount = rentalProvider.deleteRentalSiteRules(
+				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
+		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
+				+ "  from rental site rules  ");
 		RentalSiteRule rsr = new RentalSiteRule();
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
@@ -486,29 +609,37 @@ public class RentalServiceImpl implements RentalService {
 		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
 		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
 		Gson gson = new Gson();
+		//TODO: 按日预定
 		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
 				new TypeToken<List<Integer>>() {
 				}.getType());
-		// String[] arr = cmd.getChoosen().split(",");
-		// List<String> list = new ArrayList<String>(arr);
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (choosenInts.contains(weekday)) {
-				for (double i = cmd.getBeginTime(); i < cmd.getEndTime(); ) {
+				for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
 					rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
-							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
-					
-					i=i+cmd.getTimeStep();
+							.getTime())
+							+ " "
+							+ String.valueOf((int) i / 1)
+							+ ":"
+							+ String.valueOf((int) ((i % 1) * 60))
+							+ ":00"));
+
+					i = i + cmd.getTimeStep();
 					rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
-							.getTime()) + " " + String.valueOf((int)i/1) + ":"+String.valueOf((int)((i%1)*60)) +":00"));
+							.getTime())
+							+ " "
+							+ String.valueOf((int) i / 1)
+							+ ":"
+							+ String.valueOf((int) ((i % 1) * 60))
+							+ ":00"));
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts());
 					rsr.setUnit(cmd.getUnit());
-					if(weekday ==1|| weekday == 7){
+					if (weekday == 1 || weekday == 7) {
 						rsr.setPrice(cmd.getWeekendPrice());
-					}
-					else{
+					} else {
 						rsr.setPrice(cmd.getWorkdayPrice());
 					}
 					rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
@@ -523,16 +654,18 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public void deleteRentalSiteRules(
-			DeleteRentalSiteRulesCommand cmd) { 
-		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getRuleDates());
+	public void deleteRentalSiteRules(DeleteRentalSiteRulesCommand cmd) {
+		JSONObject jsonObject = (JSONObject) JSONValue
+				.parse(cmd.getRuleDates());
 		JSONArray choosenValue = (JSONArray) jsonObject.get("ruleDates");
 		Gson gson = new Gson();
 		List<Long> deleteDates = gson.fromJson(choosenValue.toString(),
 				new TypeToken<List<Long>>() {
 				}.getType());
-		for (Long deleteDate : deleteDates){
-			rentalProvider.deleteRentalSiteRules(Long.valueOf(cmd.getRentalSiteId()), deleteDate, deleteDate);
+		for (Long deleteDate : deleteDates) {
+			rentalProvider
+					.deleteRentalSiteRules(Long.valueOf(cmd.getRentalSiteId()),
+							deleteDate, deleteDate);
 		}
 	}
 

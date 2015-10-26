@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li> 
  * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串 </li> 
+ * <li>invoiceFlag：要不要发票，0 要 1 不要 参考{@link com.everhomes.techpark.rental.InvoiceFlag}</li>  
  * <li>rentalcounts：预定场所数量</li> 
  * <li>rentalItems：预定商品的json字符串</li> 
  * </ul>
@@ -23,6 +24,7 @@ public class AddRentalBillCommand {
 	private Long startTime;
 	private Long endTime;
 	private String rentalSiteRuleIds;
+	private Byte invoiceFlag;
 	private Double rentalcount;
 	private String rentalItems;
 	@Override
@@ -84,5 +86,11 @@ public class AddRentalBillCommand {
 	}
 	public void setRentalcount(Double rentalcount) {
 		this.rentalcount = rentalcount;
+	}
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
 	}
 }

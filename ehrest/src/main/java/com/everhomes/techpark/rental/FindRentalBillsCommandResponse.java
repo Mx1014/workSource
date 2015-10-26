@@ -1,5 +1,21 @@
 package com.everhomes.techpark.rental;
 
-public class FindRentalBillsCommandResponse {
+import java.util.List;
 
+import com.everhomes.util.StringHelper;
+
+public class FindRentalBillsCommandResponse {
+	private List<RentalBillDTO> rentalBills; 
+	@Override
+    public String toString() {
+
+		
+        return StringHelper.toJsonString(this);
+    }
+	public List<RentalBillDTO> getRentalBills() {
+		return rentalBills;
+	}
+	public void setRentalBills(List<RentalBillDTO> rentalBills) {
+		this.rentalBills = rentalBills;
+	} 
 }

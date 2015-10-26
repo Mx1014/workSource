@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：场所id</li>
  * <li>enterpriseCommunityId：园区id</li>
  * <li>siteType：场所类型</li>
+ * <li>siteName：场所名称</li>
  * <li>buildingName：楼栋名称</li>
  * <li>address：位置</li>
  * <li>spec：用户设置座位数等</li>
