@@ -1,34 +1,437 @@
 package com.everhomes.enterprise;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactEntriesDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactGroupMembersDao;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMembersRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class EnterpriseContactProviderImpl implements EnterpriseContactProvider {
     @Autowired
     private DbProvider dbProvider;
+   
+    @Autowired
+    private ShardingProvider shardingProvider;
     
+    // TODO for cache. member of eh_groups partition
     public void createContact(EnterpriseContact contact) {
-        
+        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
+        contact.setId(id);
+        //Default approving state
+        contact.setStatus(EnterpriseContactStatus.Approving.getCode());
+        contact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
+        dao.insert(contact);
     }
     
     public void updateContact(EnterpriseContact contact) {
-        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
+        EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
+        dao.update(contact);
     }
     
-    public void deleteContactById(Long id) {
-        
+    public void deleteContactById(EnterpriseContact contact) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
+        EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
+        dao.deleteById(contact.getId());        
     }
     
     public EnterpriseContact getContactById(Long id) {
-        return null;
+        EnterpriseContact[] result = new EnterpriseContact[1];
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+            (DSLContext context, Object reducingContext) -> {
+                result[0] = context.select().from(Tables.EH_ENTERPRISE_CONTACTS)
+                    .where(Tables.EH_ENTERPRISE_CONTACTS.ID.eq(id))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, EnterpriseContact.class);
+                    });
+
+                if (result[0] != null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+        
+        return result[0];
     }
     
-    public List<EnterpriseContact> queryContact() {
-        return null;
+    public List<EnterpriseContact> queryContactByEnterpriseId(ListingLocator locator, Long enterpriseId
+            , int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+ 
+        SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+ 
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
+            }
+        
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContact.class);
+        });
+    }
+    
+    public List<EnterpriseContact> queryContacts(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.ID.asc());
+            query.addLimit(count - contacts.size());
+            
+            query.fetch().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
+                return null;
+            });
+           
+            if(contacts.size() >= count) {
+                locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+ 
+        });
+        return contacts;
+    }
+    
+    public void createContactEntry(EnterpriseContactEntry entry) {
+        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
+        entry.setId(id);
+        entry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactEntriesDao dao = new EhEnterpriseContactEntriesDao(context.configuration());
+        dao.insert(entry);
+    }
+    
+    public void updateContactEntry(EnterpriseContactEntry entry) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
+        entry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactEntriesDao dao = new EhEnterpriseContactEntriesDao(context.configuration());
+        dao.update(entry);        
+    }
+    
+    public void deleteContactEntry(EnterpriseContactEntry entry) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
+        entry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactEntriesDao dao = new EhEnterpriseContactEntriesDao(context.configuration());
+        dao.delete(entry);        
+    }
+    
+    public EnterpriseContactEntry getContactEntryById(Long id) {
+        EnterpriseContactEntry[] result = new EnterpriseContactEntry[1];
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+            (DSLContext context, Object reducingContext) -> {
+                result[0] = context.select().from(Tables.EH_ENTERPRISE_CONTACT_ENTRIES)
+                    .where(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ID.eq(id))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, EnterpriseContactEntry.class);
+                    });
+
+                if (result[0] != null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+        
+        return result[0];
+    }
+    
+    public List<EnterpriseContactEntry> queryContactEntryByEnterpriseId(ListingLocator locator, Long enterpriseId
+            , int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+ 
+        SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+ 
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ID.gt(locator.getAnchor()));
+            }
+        
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContactEntry.class);
+        });
+    }
+    
+    public List<EnterpriseContactEntry> queryContactEntries(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        final List<EnterpriseContactEntry> contacts = new ArrayList<EnterpriseContactEntry>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.ID.asc());
+            query.addLimit(count - contacts.size());
+            
+            query.fetch().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContactEntry.class));
+                return null;
+            });
+           
+            if(contacts.size() >= count) {
+                locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+ 
+        });
+        return contacts;
+    }
+    
+    public void createContactGroup(EnterpriseContactGroup group) {
+        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
+        group.setId(id);
+        group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactGroupsDao dao = new EhEnterpriseContactGroupsDao(context.configuration());
+        dao.insert(group);
+    }
+    
+    public void updateContactGroup(EnterpriseContactGroup group) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
+        group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactGroupsDao dao = new EhEnterpriseContactGroupsDao(context.configuration());
+        dao.update(group);        
+    }
+    
+    public void deleteContactGroup(EnterpriseContactGroup group) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
+        group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactGroupsDao dao = new EhEnterpriseContactGroupsDao(context.configuration());
+        dao.delete(group);        
+    }
+    
+    public EnterpriseContactGroup getContactGroupById(Long id) {
+        EnterpriseContactGroup[] result = new EnterpriseContactGroup[1];
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+            (DSLContext context, Object reducingContext) -> {
+                result[0] = context.select().from(Tables.EH_ENTERPRISE_CONTACT_GROUPS)
+                    .where(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.eq(id))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, EnterpriseContactGroup.class);
+                    });
+
+                if (result[0] != null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+        
+        return result[0];
+    }
+    
+    public List<EnterpriseContactGroup> queryContactGroupByEnterpriseId(ListingLocator locator, Long enterpriseId
+            , int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+ 
+        SelectQuery<EhEnterpriseContactGroupsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUPS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+ 
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
+            }
+        
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContactGroup.class);
+        });
+    }
+    
+    public List<EnterpriseContactGroup> queryContactGroups(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        final List<EnterpriseContactGroup> contacts = new ArrayList<EnterpriseContactGroup>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactGroupsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUPS);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.asc());
+            query.addLimit(count - contacts.size());
+            
+            query.fetch().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContactGroup.class));
+                return null;
+            });
+           
+            if(contacts.size() >= count) {
+                locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+ 
+        });
+        return contacts;
+    }
+    
+    public void createContactGroupMember(EnterpriseContactGroupMember member) {
+        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
+        member.setId(id);
+        member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactGroupMembersDao dao = new EhEnterpriseContactGroupMembersDao(context.configuration());
+        dao.insert(member);
+    }
+    
+    public void updateContactGroupMember(EnterpriseContactGroupMember member) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
+        member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactGroupMembersDao dao = new EhEnterpriseContactGroupMembersDao(context.configuration());
+        dao.update(member);        
+    }
+    
+    public void deleteContactGroupMember(EnterpriseContactGroupMember member) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
+        member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseContactGroupMembersDao dao = new EhEnterpriseContactGroupMembersDao(context.configuration());
+        dao.delete(member);        
+    }
+    
+    public EnterpriseContactGroupMember getContactGroupMemberById(Long id) {
+        EnterpriseContactGroupMember[] result = new EnterpriseContactGroupMember[1];
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+            (DSLContext context, Object reducingContext) -> {
+                result[0] = context.select().from(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS)
+                    .where(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.eq(id))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, EnterpriseContactGroupMember.class);
+                    });
+
+                if (result[0] != null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+        
+        return result[0];
+    }
+    
+    public List<EnterpriseContactGroupMember> queryContactGroupMemberByEnterpriseId(ListingLocator locator, Long enterpriseId
+            , int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+ 
+        SelectQuery<EhEnterpriseContactGroupMembersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+ 
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+            }
+        
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContactGroupMember.class);
+        });
+    }
+    
+    public List<EnterpriseContactGroupMember> queryContactGroupMembers(CrossShardListingLocator locator, int count, 
+            ListingQueryBuilderCallback queryBuilderCallback) {
+        final List<EnterpriseContactGroupMember> contacts = new ArrayList<EnterpriseContactGroupMember>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactGroupMembersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS);
+
+            if(queryBuilderCallback != null)
+                queryBuilderCallback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.asc());
+            query.addLimit(count - contacts.size());
+            
+            query.fetch().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContactGroupMember.class));
+                return null;
+            });
+           
+            if(contacts.size() >= count) {
+                locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+ 
+        });
+        return contacts;
     }
 }

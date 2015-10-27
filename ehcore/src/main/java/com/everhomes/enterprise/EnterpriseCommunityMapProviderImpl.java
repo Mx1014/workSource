@@ -1,25 +1,25 @@
 package com.everhomes.enterprise;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupDiscriminator;
-import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCommunityMap;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -29,64 +29,38 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
-public class EnterpriseProviderImpl implements EnterpriseProvider {
+public class EnterpriseCommunityMapProviderImpl {
     @Autowired
     private DbProvider dbProvider;
-    
-    @Autowired
-    private GroupProvider groupProvider;
-    
+   
     @Autowired
     private ShardingProvider shardingProvider;
     
-    //TODO enterprise field
-    public void createEnterprise(Enterprise enterprise) {
-        enterprise.setDiscriminator(GroupDiscriminator.Enterprise.toString());
-        this.groupProvider.createGroup(enterprise);
-    }
-    
-    public void updateEnterprise(Enterprise enterprise) {
-        this.groupProvider.updateGroup(enterprise);
-    }
-    
-    public Enterprise getEnterpriseById(Long id) {
-        Group g = this.groupProvider.findGroupById(id);
-        return ConvertHelper.convert(g, Enterprise.class);
-    }
-    
-    public void deleteEnterpriseById(Long id) {
-        this.groupProvider.deleteGroup(id);
-    }
-    
-    public List<Enterprise> queryEnterprise() {
-        //TODO query enterprise
-        //this.groupProvider.queryGroups(locator, count, callback);
-        return null;
-    }
-    
-    public void createEnterpriseCommunityMap(EnterpriseCommunityMap ec) {
+    // TODO member of eh_communities partition
+    public void createEnterpriseCommunityMap(EnterpriseCommunityMap m) {
         long id = this.shardingProvider.allocShardableContentId(EhCommunities.class).second();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, ec.getCommunityId()));
-        ec.setId(id);
-        ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, m.getCommunityId()));
+        m.setId(id);
+        //Default approving state
+        //m.setStatus(EnterpriseContactStatus.Approving.getCode());
+        m.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
-        dao.insert(ec);
+        dao.insert(m);
     }
     
-    public void updateEnterpriseCommunityMap(EnterpriseCommunityMap ec) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
-        ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    public void updateEnterpriseCommunityMap(EnterpriseCommunityMap m) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, m.getCommunityId()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
-        dao.update(ec);        
+        dao.update(m);
     }
     
-    public void deleteEnterpriseCommunityMapById(EnterpriseCommunityMap ec) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
-        ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    public void deleteEnterpriseCommunityMapById(EnterpriseCommunityMap m) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, m.getCommunityId()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
-        dao.delete(ec);        
+        dao.deleteById(m.getId());        
     }
     
+    //TODO for cache
     public EnterpriseCommunityMap getEnterpriseCommunityMapById(Long id) {
         EnterpriseCommunityMap[] result = new EnterpriseCommunityMap[1];
         
@@ -108,30 +82,30 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         return result[0];
     }
     
-    public List<EnterpriseCommunityMap> queryEnterpriseMapByCommunityId(ListingLocator locator, Long comunityId
+    public List<EnterpriseContact> queryContactByEnterpriseId(ListingLocator locator, Long enterpriseId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, comunityId));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, enterpriseId));
  
         SelectQuery<EhEnterpriseCommunityMapRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_COMMUNITY_MAP);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
  
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
             }
         
         //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
         query.addLimit(count);
         return query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, EnterpriseCommunityMap.class);
+            return ConvertHelper.convert(r, EnterpriseContact.class);
         });
     }
     
-    public List<EnterpriseCommunityMap> queryContactGroupMembers(CrossShardListingLocator locator, int count, 
+    public List<EnterpriseContact> queryContacts(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
-        final List<EnterpriseCommunityMap> contacts = new ArrayList<EnterpriseCommunityMap>();
+        final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
         if(locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhCommunities.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             
             locator.setShardIterator(shardIterator);
@@ -149,7 +123,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             query.addLimit(count - contacts.size());
             
             query.fetch().map((r) -> {
-                contacts.add(ConvertHelper.convert(r, EnterpriseCommunityMap.class));
+                contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
                 return null;
             });
            

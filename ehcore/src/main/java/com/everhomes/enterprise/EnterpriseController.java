@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -12,7 +13,7 @@ import com.everhomes.rest.RestResponse;
 @RestDoc(value="Enterprise controller", site="core")
 @RestController
 @RequestMapping("/enterprise")
-public class EnterpriseController {
+public class EnterpriseController extends ControllerBase {
 
     /**
      * <b>URL: /enterprise/listEnterpriseByCommunityId</b>
