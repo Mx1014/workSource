@@ -171,8 +171,40 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
+	 * <p>
+	 * 添加具体场所商品信息
+	 * </p>
+	 */
+	@RequestMapping("listRentalSiteItems")
+	@RestReturn(value = ListRentalSiteItemsCommandResponse.class)
+	public RestResponse listRentalSiteItems(@Valid ListRentalSiteItemsCommand cmd) {
+		ListRentalSiteItemsCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
+		RestResponse response = new RestResponse(listRentalSiteItemsCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	
+	/**
+	 * <b>URL: /techpark/rental/deleteRentalSiteItem</b>
+	 * <p>
+	 * 添加具体场所商品信息
+	 * </p>
+	 */
+	@RequestMapping("deleteRentalSiteItem")
+	@RestReturn(value = String.class)
+	public RestResponse deleteRentalSiteItem(@Valid DeleteRentalSiteItemCommand cmd) {
+		rentalService.deleteRentalSiteItem(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /techpark/rental/addRentalSiteRules</b>
 	 * <p>

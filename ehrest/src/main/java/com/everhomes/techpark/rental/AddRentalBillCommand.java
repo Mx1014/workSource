@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串</li>
  * <li>invoiceFlag：要不要发票，0 要 1 不要 参考
  * {@link com.everhomes.techpark.rental.InvoiceFlag}</li>
- * <li>rentalcounts：预定场所数量</li>
+ * <li>rentalcount：预定场所数量</li>
  * <li>rentalItems：预定商品的json字符串</li>
  * </ul>
  */

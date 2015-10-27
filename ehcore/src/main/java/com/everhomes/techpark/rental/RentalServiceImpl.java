@@ -258,17 +258,7 @@ public class RentalServiceImpl implements RentalService {
 	public FindRentalSiteItemsCommandResponse findRentalSiteItems(
 			FindRentalSiteItemsCommand cmd) {
 		FindRentalSiteItemsCommandResponse response = new FindRentalSiteItemsCommandResponse();
-		response.setSiteItems(new ArrayList<SiteItemDTO>());
-		// JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-		// .getRentalSiteRuleIds());
-		// JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
-		//
-		// Gson gson = new Gson();
-		// if (null == idValue)
-		// return null;
-		// List<Long> RuleIdList = gson.fromJson(idValue.toString(),
-		// new TypeToken<List<Long>>() {
-		// }.getType());
+		response.setSiteItems(new ArrayList<SiteItemDTO>()); 
 		List<RentalSiteItem> rsiSiteItems = rentalProvider
 				.findRentalSiteItems(cmd.getRentalSiteId());
 		for (RentalSiteItem rsi : rsiSiteItems) {
@@ -400,28 +390,7 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void addRentalBill(AddRentalBillCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		java.util.Date reserveTime = new java.util.Date();
-		Gson gson = new Gson();
-		// List<SiteItemDTO> siteItemDTOs = null;
-		// JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-		// .getRentalSiteRuleIds());
-		// JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
-		// if (null == idValue)
-		// return;
-		// List<Long> RuleIdList = gson.fromJson(idValue.toString(),
-		// new TypeToken<List<Long>>() {
-		// }.getType());
-		// if (null != cmd.getRentalItems()
-		// && !StringUtils.isEmpty(cmd.getRentalItems())) {
-		// JSONObject jsonObject = (JSONObject)
-		// JSONValue.parse(cmd.getRentalItems());
-		// JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
-		//
-		// siteItemDTOs = gson.fromJson(itemValue.toString(),
-		// new TypeToken<List<SiteItemDTO>>() {
-		// }.getType());
-		// }
-
+		java.util.Date reserveTime = new java.util.Date(); 
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
@@ -440,6 +409,8 @@ public class RentalServiceImpl implements RentalService {
 					"reserve Time after reserve end time");
 		}
 		RentalBill rentalBill = new RentalBill();
+		rentalBill.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+		rentalBill.setSiteType(cmd.getSiteType());
 		rentalBill.setRentalSiteId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
 		rentalBill.setInvoiceFlag(cmd.getInvoiceFlag());
@@ -485,6 +456,9 @@ public class RentalServiceImpl implements RentalService {
 		for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			RentalItemsBill rib = new RentalItemsBill();
 			rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
+
+			rib.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+			rib.setSiteType(cmd.getSiteType());
 			rib.setRentalSiteItemId(siDto.getId());
 			rib.setRentalCount(siDto.getCounts());
 			rib.setRentalBillId(rentalBillId);
@@ -496,6 +470,8 @@ public class RentalServiceImpl implements RentalService {
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
+			rsb.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+			rsb.setSiteType(cmd.getSiteType());
 			rsb.setRentalBillId(rentalBillId);
 			rsb.setTotalMoney(rsr.getPrice()
 					* (int) (cmd.getRentalcount() / rsr.getUnit()));
@@ -512,7 +488,8 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalBillsCommandResponse findRentalBills(
 			FindRentalBillsCommand cmd) {
-		
+
+		Long userId = UserContext.current().getUser().getId();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(9223372036854775807L);
 		int pageSize = PaginationConfigHelper.getPageSize(
@@ -520,7 +497,7 @@ public class RentalServiceImpl implements RentalService {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<RentalBill> billList = this.rentalProvider.listRentalBills(
+		List<RentalBill> billList = this.rentalProvider.listRentalBills(userId,cmd.getEnterpriseCommunityId(),cmd.getSiteType(),
 				locator, pageSize + 1, cmd.getBillStatus());
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
@@ -720,11 +697,38 @@ public class RentalServiceImpl implements RentalService {
 		Integer billCount = rentalProvider.countRentalSiteBills(
 				cmd.getRentalSiteId(), null, null);
 		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid price   parameter in the command");
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_HAVE_BILL,
+					"HAS BILL IN YOUR DELETE STUFF");
 		}
 		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),RentalSiteStatus.DELETED.getCode());
+	}
+	@Override
+	public void deleteRentalSiteItem(DeleteRentalSiteItemCommand cmd) { 
+		Integer billCount = rentalProvider.countRentalSiteItemBills(cmd.getRentalSiteItemId());
+		if (billCount > 0) {
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_HAVE_BILL,
+					"HAS BILL IN YOUR DELETE STUFF");
+		}
+		rentalProvider.deleteRentalSiteItemById(cmd.getRentalSiteItemId());
+	}
+	@Override
+	public ListRentalSiteItemsCommandResponse listRentalSiteItems(
+			ListRentalSiteItemsCommand cmd) { 
+		ListRentalSiteItemsCommandResponse response = new ListRentalSiteItemsCommandResponse(); 
+		response.setSiteItems(new ArrayList<SiteItemDTO>()); 
+		List<RentalSiteItem> rsiSiteItems = rentalProvider
+				.findRentalSiteItems(cmd.getRentalSiteId());
+		for (RentalSiteItem rsi : rsiSiteItems) {
+			SiteItemDTO dto = new SiteItemDTO();
+			dto.setCounts(rsi.getCounts());
+			dto.setId(rsi.getId());
+			dto.setItemName(rsi.getName());
+			dto.setItemPrice(rsi.getPrice());
+			response.getSiteItems().add(dto);
+		}
+		return response;
 	}
 
 }
