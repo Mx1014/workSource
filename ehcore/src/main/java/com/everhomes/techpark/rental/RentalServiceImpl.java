@@ -41,7 +41,15 @@ public class RentalServiceImpl implements RentalService {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	RentalProvider rentalProvider;
+	
+	private int getPageCount(int totalCount, int pageSize) {
+		int pageCount = totalCount / pageSize;
 
+		if (totalCount % pageSize != 0) {
+			pageCount++;
+		}
+		return pageCount;
+	}
 	private void checkEnterpriseCommunityIdIsNull(Long enterpriseCommunityId) {
 		if (null == enterpriseCommunityId || enterpriseCommunityId.equals(0L)) {
 			LOGGER.error("Invalid enterpriseCommunityId   parameter in the command");
@@ -85,6 +93,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
 		rentalsite.setSiteType(cmd.getSiteType());
 		rentalsite.setSpec(cmd.getSpec());
+		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
 		Long siteId = rentalProvider.createRentalSite(rentalsite);
 		if (null != cmd.getSiteItems()
 				&& !StringUtils.isEmpty(cmd.getSiteItems())) {
@@ -180,7 +189,7 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),null);
 		for (RentalSite rs : rentalSites) {
 			RentalSiteDTO rsDTO = new RentalSiteDTO();
 			rsDTO.setBuildingName(rs.getBuildingName());
@@ -230,28 +239,7 @@ public class RentalServiceImpl implements RentalService {
 					}
 					rsDTO.getSiteRules().add(dto);
 				}
-			}
-			// //TODO: 查items---将来扣除用掉的
-			// List<RentalSiteItem> rsitItems = rentalProvider
-			// .findRentalSiteItems(rsDTO.getRentalSiteId());
-			// if (null != rsitItems && rsitItems.size() > 0) {
-			// for (RentalSiteItem rsi : rsitItems) {
-			// SiteItemDTO riDTO = new SiteItemDTO();
-			// riDTO.setItemName(rsi.getName());
-			// riDTO.setItemPrice(rsi.getPrice());
-			// riDTO.setId(rsi.getId());
-			// // List<RentalItemsBill> ribs = rentalProvider
-			// // .findRentalItemsBillById(rsi.getId());
-			// riDTO.setCounts(rsi.getCounts());
-			// // if (null != ribs && ribs.size() > 0) {
-			// // for (RentalItemsBill rib : ribs) {
-			// // riDTO.setCounts(riDTO.getCounts()
-			// // - rib.getRentalCount());
-			// // }
-			// // }
-			// rsDTO.getSiteItems().add(riDTO);
-			// }
-			// }
+			} 
 			response.getSites().add(rsDTO);
 		}
 
@@ -268,40 +256,42 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public FindRentalSiteItemsCommandResponse findRentalSiteItems(
-			FindRentalSiteItemsCommand cmd) { 
+			FindRentalSiteItemsCommand cmd) {
 		FindRentalSiteItemsCommandResponse response = new FindRentalSiteItemsCommandResponse();
 		response.setSiteItems(new ArrayList<SiteItemDTO>());
-//		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-//				.getRentalSiteRuleIds());
-//		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
-//
-//		Gson gson = new Gson();
-//		if (null == idValue)
-//			return null;
-//		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
-//				new TypeToken<List<Long>>() {
-//				}.getType());
+		// JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+		// .getRentalSiteRuleIds());
+		// JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
+		//
+		// Gson gson = new Gson();
+		// if (null == idValue)
+		// return null;
+		// List<Long> RuleIdList = gson.fromJson(idValue.toString(),
+		// new TypeToken<List<Long>>() {
+		// }.getType());
 		List<RentalSiteItem> rsiSiteItems = rentalProvider
 				.findRentalSiteItems(cmd.getRentalSiteId());
 		for (RentalSiteItem rsi : rsiSiteItems) {
 			int maxOrder = 0;
 			for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
-				//对于每一个物品，通过每一个siteRuleID找到它对应的BillIds 
+				// 对于每一个物品，通过每一个siteRuleID找到它对应的BillIds
 				int ruleOrderSum = 0;
-				List<RentalSitesBill> rsbs =  rentalProvider.findRentalSiteBillBySiteRuleId(siteRuleId);
-				//通过每一个billID找已预订的数量
-				if (null == rsbs ||rsbs.size()==0) {
+				List<RentalSitesBill> rsbs = rentalProvider
+						.findRentalSiteBillBySiteRuleId(siteRuleId);
+				// 通过每一个billID找已预订的数量
+				if (null == rsbs || rsbs.size() == 0) {
 					continue;
 				}
-				for (RentalSitesBill rsb:rsbs){
-					RentalItemsBill rib = rentalProvider.findRentalItemBill(rsb.getRentalBillId(),rsi.getId());
+				for (RentalSitesBill rsb : rsbs) {
+					RentalItemsBill rib = rentalProvider.findRentalItemBill(
+							rsb.getRentalBillId(), rsi.getId());
 					ruleOrderSum += rib.getRentalCount();
 				}
-				//获取该物品的最大预订量
-				if (ruleOrderSum >maxOrder)
-					maxOrder=ruleOrderSum;
+				// 获取该物品的最大预订量
+				if (ruleOrderSum > maxOrder)
+					maxOrder = ruleOrderSum;
 			}
-			rsi.setCounts(rsi.getCounts()-maxOrder);
+			rsi.setCounts(rsi.getCounts() - maxOrder);
 			SiteItemDTO dto = new SiteItemDTO();
 			dto.setCounts(rsi.getCounts());
 			dto.setId(rsi.getId());
@@ -315,11 +305,20 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalSitesCommandResponse findRentalSites(
 			FindRentalSitesCommand cmd) {
+		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
+		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+		int totalCount = rentalProvider.countRentalSites(cmd.getEnterpriseCommunityId(),cmd.getSiteType(),cmd.getKeyword());
+		if (totalCount == 0)
+			return response;
 
+		Integer pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize());
+		int pageCount = getPageCount(totalCount, pageSize);
+		
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
-		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),cmd.getKeyword());
+		
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO = new RentalSiteDTO();
@@ -346,6 +345,9 @@ public class RentalServiceImpl implements RentalService {
 			rSiteDTO.setSpec(rentalSite.getSpec());
 			response.getRentalSites().add(rSiteDTO);
 		}
+		response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null
+				: cmd.getPageOffset() + 1);
+		
 		return response;
 	}
 
@@ -400,24 +402,25 @@ public class RentalServiceImpl implements RentalService {
 		Long userId = UserContext.current().getUser().getId();
 		java.util.Date reserveTime = new java.util.Date();
 		Gson gson = new Gson();
-//		List<SiteItemDTO> siteItemDTOs = null;
-//		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-//				.getRentalSiteRuleIds());
-//		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
-//		if (null == idValue)
-//			return;
-//		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
-//				new TypeToken<List<Long>>() {
-//				}.getType());
-//		if (null != cmd.getRentalItems()
-//				&& !StringUtils.isEmpty(cmd.getRentalItems())) {
-//			JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getRentalItems());
-//			JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
-//
-//			siteItemDTOs = gson.fromJson(itemValue.toString(),
-//					new TypeToken<List<SiteItemDTO>>() {
-//					}.getType());
-//		}
+		// List<SiteItemDTO> siteItemDTOs = null;
+		// JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+		// .getRentalSiteRuleIds());
+		// JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
+		// if (null == idValue)
+		// return;
+		// List<Long> RuleIdList = gson.fromJson(idValue.toString(),
+		// new TypeToken<List<Long>>() {
+		// }.getType());
+		// if (null != cmd.getRentalItems()
+		// && !StringUtils.isEmpty(cmd.getRentalItems())) {
+		// JSONObject jsonObject = (JSONObject)
+		// JSONValue.parse(cmd.getRentalItems());
+		// JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
+		//
+		// siteItemDTOs = gson.fromJson(itemValue.toString(),
+		// new TypeToken<List<SiteItemDTO>>() {
+		// }.getType());
+		// }
 
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -509,7 +512,7 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalBillsCommandResponse findRentalBills(
 			FindRentalBillsCommand cmd) {
-		// TODO Auto-generated method stub
+		
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(9223372036854775807L);
 		int pageSize = PaginationConfigHelper.getPageSize(
@@ -597,8 +600,9 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
-		Integer billCount = rentalProvider.countRentalSiteBills(cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
-		if(billCount >0 ){
+		Integer billCount = rentalProvider.countRentalSiteBills(
+				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
+		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid price   parameter in the command");
@@ -607,7 +611,7 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 				+ "  from rental site rules  ");
-		if(null == cmd.getWeekendPrice()||null == cmd.getWorkdayPrice())
+		if (null == cmd.getWeekendPrice() || null == cmd.getWorkdayPrice())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid price   parameter in the command");
@@ -619,7 +623,7 @@ public class RentalServiceImpl implements RentalService {
 		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
 		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
 		Gson gson = new Gson();
-		//TODO: 按日预定
+		// TODO: 按日预定
 		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
 				new TypeToken<List<Integer>>() {
 				}.getType());
@@ -680,16 +684,17 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public void cancelRentalBill(CancelRentalBillCommand cmd) { 
-		  rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
-		  
+	public void cancelRentalBill(CancelRentalBillCommand cmd) {
+		rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
+
 	}
 
 	@Override
 	public void updateRentalSite(UpdateRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能修改
-		Integer billCount = rentalProvider.countRentalSiteBills(cmd.getRentalSiteId(),null, null);
-		if(billCount >0 ){
+		Integer billCount = rentalProvider.countRentalSiteBills(
+				cmd.getRentalSiteId(), null, null);
+		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid price   parameter in the command");
@@ -705,7 +710,21 @@ public class RentalServiceImpl implements RentalService {
 		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
 		rentalsite.setSiteType(cmd.getSiteType());
 		rentalsite.setSpec(cmd.getSpec());
+		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
 		rentalProvider.updateRentalSite(rentalsite);
+	}
+
+	@Override
+	public void deleteRentalSite(DeleteRentalSiteCommand cmd) {
+		// 已有未取消的预定，不能删除
+		Integer billCount = rentalProvider.countRentalSiteBills(
+				cmd.getRentalSiteId(), null, null);
+		if (billCount > 0) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid price   parameter in the command");
+		}
+		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),RentalSiteStatus.DELETED.getCode());
 	}
 
 }

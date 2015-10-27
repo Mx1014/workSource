@@ -119,7 +119,22 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 
-	
+
+	/**
+	 * <b>URL: /techpark/rental/deleteRentalSite</b>
+	 * <p>
+	 * 删除具体场所
+	 * </p>
+	 */
+	@RequestMapping("deleteRentalSite")
+	@RestReturn(value = String.class)
+	public RestResponse deleteRentalSite(@Valid DeleteRentalSiteCommand cmd) {
+		rentalService.deleteRentalSite(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * <b>URL: /techpark/rental/findRentalSites</b>
 	 * <p>

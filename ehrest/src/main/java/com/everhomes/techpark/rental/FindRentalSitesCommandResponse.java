@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSitesCommandResponse {
-
+	private Integer nextPageOffset;
     @ItemType(RentalSiteDTO.class)
 	private List<RentalSiteDTO> rentalSites;
 	
@@ -26,6 +26,14 @@ public class FindRentalSitesCommandResponse {
 
 	public void setRentalSites(List<RentalSiteDTO> rentalSites) {
 		this.rentalSites = rentalSites;
+	}
+
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
  
 }

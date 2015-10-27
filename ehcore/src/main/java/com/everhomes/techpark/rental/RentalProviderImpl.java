@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteWhereStep;
@@ -112,7 +113,8 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalSite> findRentalSites(Long enterpriseCommunityId,
-			String siteType) {
+			String siteType,
+			String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
@@ -120,6 +122,11 @@ public class RentalProviderImpl implements RentalProvider {
 				.equal(enterpriseCommunityId);
 		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
 				.equal(siteType));
+		if(!StringUtils.isEmpty(keyword)){
+			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS.like("%"+keyword+"%").
+					or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%"+keyword+"%")).or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%"+keyword+"%")));
+		}
+		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS.eq(RentalSiteStatus.NORMAL.getCode()));
 		step.where(condition);
 		List<RentalSite> result = step
 				.orderBy(Tables.EH_RENTAL_SITES.ID.desc()).fetch().map((r) -> {
@@ -413,7 +420,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public RentalSiteItem findRentalSiteItemById(Long rentalSiteItemId) { 
+	public RentalSiteItem findRentalSiteItemById(Long rentalSiteItemId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_ITEMS);
@@ -461,7 +468,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public void cancelRentalBillById(Long rentalBillId) { 
+	public void cancelRentalBillById(Long rentalBillId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.equal(rentalBillId);
 		UpdateConditionStep<EhRentalBillsRecord> step = context
@@ -469,7 +476,7 @@ public class RentalProviderImpl implements RentalProvider {
 				.set(Tables.EH_RENTAL_BILLS.STATUS,
 						SiteBillStatus.FAIL.getCode()).where(condition);
 		step.execute();
-		
+
 	}
 
 	@Override
@@ -477,12 +484,18 @@ public class RentalProviderImpl implements RentalProvider {
 			Long endDate) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectOnConditionStep<Record1<Integer>> step = context
-				.selectCount().from(Tables.EH_RENTAL_SITE_RULES).join(Tables.EH_RENTAL_SITES_BILLS)
-				.on(Tables.EH_RENTAL_SITE_RULES.ID.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_SITE_RULE_ID))
-				.join(Tables.EH_RENTAL_BILLS).on(Tables.EH_RENTAL_BILLS.ID.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
+				.selectCount()
+				.from(Tables.EH_RENTAL_SITE_RULES)
+				.join(Tables.EH_RENTAL_SITES_BILLS)
+				.on(Tables.EH_RENTAL_SITE_RULES.ID
+						.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_SITE_RULE_ID))
+				.join(Tables.EH_RENTAL_BILLS)
+				.on(Tables.EH_RENTAL_BILLS.ID
+						.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
 		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID
 				.equal(rentalSiteId);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+				.ne(SiteBillStatus.FAIL.getCode()));
 		if (null != beginDate && null != endDate) {
 			condition = condition
 					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.between(
@@ -494,7 +507,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public void updateRentalSite(RentalSite rentalsite) { 
+	public void updateRentalSite(RentalSite rentalsite) {
 		assert (rentalsite.getId() == null);
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -503,4 +516,46 @@ public class RentalProviderImpl implements RentalProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalSites.class,
 				rentalsite.getId());
 	}
+
+	@Override
+	public void deleteRentalSite(Long rentalSiteId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalSitesRecord> step = context
+				.delete(Tables.EH_RENTAL_SITES);
+		Condition condition = Tables.EH_RENTAL_SITES.ID.equal(rentalSiteId);
+
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void updateRentalSiteStatus(Long rentalSiteId, byte status) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_RENTAL_SITES.ID.equal(rentalSiteId);
+		UpdateConditionStep<EhRentalSitesRecord> step = context
+				.update(Tables.EH_RENTAL_SITES)
+				.set(Tables.EH_RENTAL_SITES.STATUS,
+						status).where(condition);
+		step.execute();
+	}
+
+	@Override
+	public int countRentalSites(Long enterpriseCommunityId, String siteType,
+			String keyword) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(
+				Tables.EH_RENTAL_SITES);
+		Condition condition = Tables.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID
+				.equal(enterpriseCommunityId);
+		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
+				.equal(siteType));
+		if(!StringUtils.isEmpty(keyword)){
+			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS.like("%"+keyword+"%").
+					or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%"+keyword+"%")).or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%"+keyword+"%")));
+		}
+		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS.eq(RentalSiteStatus.NORMAL.getCode()));
+		return step.where(condition).fetchOneInto(Integer.class);
+		
+	}	
 }
