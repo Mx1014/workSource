@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -85,6 +86,30 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             });
         
         return result[0];
+    }
+    
+    @Override
+    public EnterpriseContact queryContactByUserId(Long enterpriseId, Long userId) {
+        ListingLocator locator = new ListingLocator();
+        int count = 1;
+        
+        List<EnterpriseContact> contacts = this.queryContactByEnterpriseId(locator, enterpriseId, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.Inactive.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(contacts != null && contacts.size() > 0) {
+            return contacts.get(0);
+        }
+        return null;
     }
     
     @Override
@@ -230,8 +255,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                 queryBuilderCallback.buildCondition(locator, query);
                 
             if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
-            query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.ID.asc());
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ID.asc());
             query.addLimit(count - contacts.size());
             
             query.fetch().map((r) -> {
@@ -315,6 +340,29 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return query.fetch().map((r) -> {
             return ConvertHelper.convert(r, EnterpriseContactGroup.class);
         });
+    }
+    
+    @Override
+    public EnterpriseContactGroup getContactGroupByName(Long enterpriseId, String group) {
+        ListingLocator locator = new ListingLocator();
+        List<EnterpriseContactGroup> groups = this.queryContactGroupByEnterpriseId(locator, enterpriseId, 1
+                , new ListingQueryBuilderCallback() {
+
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                            SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ENTERPRISE_ID.eq(enterpriseId));
+                        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.NAME.eq(group));
+                        return query;
+                    }
+            
+        });
+        
+        if(groups != null && groups.size() > 0) {
+            return groups.get(0);
+        }
+        
+        return null;
     }
     
     @Override
@@ -420,6 +468,31 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return query.fetch().map((r) -> {
             return ConvertHelper.convert(r, EnterpriseContactGroupMember.class);
         });
+    }
+    
+    @Override
+    public EnterpriseContactGroupMember getContactGroupMemberByContactId(Long enterpriseId, Long contactId, Long groupId) {
+        ListingLocator locator = new ListingLocator();
+        
+        List<EnterpriseContactGroupMember> members = this.queryContactGroupMemberByEnterpriseId(locator, enterpriseId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ENTERPRISE_ID.eq(enterpriseId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_ID.eq(contactId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_GROUP_ID.eq(groupId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.Inactive.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(null != members && members.size() > 0) {
+            return members.get(0);
+        }
+        
+        return null;
     }
     
     @Override

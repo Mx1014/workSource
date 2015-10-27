@@ -11,20 +11,16 @@ import javax.validation.constraints.NotNull;
  *
  */
 public class CreateContactByUserIdCommand {
-    @NotNull
+    //Use current user as userId
+    //@NotNull
     private Long userId;
     
     private Long enterpriseId;
     private String   name;
     private String   nickName;
     private String   avatar;
+    private String applyGroup;
     
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
     public Long getEnterpriseId() {
         return enterpriseId;
     }
@@ -48,5 +44,18 @@ public class CreateContactByUserIdCommand {
     }
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-    }  
+    }
+    public String getApplyGroup() {
+        return applyGroup;
+    }
+    public void setApplyGroup(String applyGroup) {
+        this.applyGroup = applyGroup;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+    
 }

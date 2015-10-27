@@ -1,10 +1,10 @@
 package com.everhomes.enterprise;
 
-public enum EnterpriseContactStatus {
+public enum EnterpriseCommunityStatus {
     Approving((byte)2), Approved((byte)1), Inactive((byte)0);
     
     private byte code;
-    private EnterpriseContactStatus(byte code) {
+    private EnterpriseCommunityStatus(byte code) {
         this.code = code;
     }
     
@@ -12,8 +12,8 @@ public enum EnterpriseContactStatus {
         return this.code;
     }
     
-    public static EnterpriseContactStatus fromCode(byte code) {
-        for(EnterpriseContactStatus t : EnterpriseContactStatus.values()) {
+    public static EnterpriseCommunityStatus fromCode(byte code) {
+        for(EnterpriseCommunityStatus t : EnterpriseCommunityStatus.values()) {
             if (t.code == code) {
                 return t;
             }

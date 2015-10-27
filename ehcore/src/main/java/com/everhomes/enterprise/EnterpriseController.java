@@ -84,8 +84,8 @@ public class EnterpriseController extends ControllerBase {
    }
    
    /**
-   * <b>URL: /enterprise/joinEnterpriseToCommunity</b>
-   * <p>显示拥有手机联系人的用户</p>
+   * <b>URL: /enterprise/listEnterpriseByPhone</b>
+   * <p>显示拥有手机联系人的企业</p>
    * @return {@link QueryEnterpriseByPhoneResponse}
    */
   @RequestMapping("listEnterpriseByPhone")

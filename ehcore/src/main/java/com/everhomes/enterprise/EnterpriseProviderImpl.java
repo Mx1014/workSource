@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,7 +48,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     //TODO enterprise field
     @Override
     public void createEnterprise(Enterprise enterprise) {
-        enterprise.setDiscriminator(GroupDiscriminator.Enterprise.toString());
+        enterprise.setDiscriminator(GroupDiscriminator.Enterprise.getCode());
         this.groupProvider.createGroup(enterprise);
     }
     
@@ -68,10 +69,25 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     }
     
     @Override
-    public List<Enterprise> queryEnterprise() {
-        //TODO query enterprise
-        //this.groupProvider.queryGroups(locator, count, callback);
-        return null;
+    public List<Enterprise> queryEnterprises(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback) {
+        List<Group> groups = this.groupProvider.queryGroups(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                if(callback != null)
+                    callback.buildCondition(locator, query);
+                query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.Enterprise.getCode()));
+                return query;
+            }
+            
+        });
+        
+        List<Enterprise> ents = new ArrayList<Enterprise>();
+        for(Group g : groups) {
+            ents.add(ConvertHelper.convert(g, Enterprise.class));
+        }
+        return ents;
     }
     
     @Override
@@ -95,6 +111,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
         ec.setId(id);
         ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        ec.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
         dao.insert(ec);
     }
@@ -104,6 +121,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
         ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
+        ec.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(ec);        
     }
     
