@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-10-15 10:45:21
+// generated at 2015-10-27 15:08:14
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -78,6 +78,7 @@ public interface ApiConstants {
     public static final String ADMIN_FORUM_SEARCHTOPICS_URL = "/admin/forum/searchTopics";
     public static final String ADMIN_FORUM_SYNCPOSTINDEX_URL = "/admin/forum/syncPostIndex";
     public static final String ADMIN_GETIOSZIP_URL = "/admin/getIosZip";
+    public static final String ADMIN_GROUP_DELETEGROUP_URL = "/admin/group/deleteGroup";
     public static final String ADMIN_GROUP_SEARCHGROUP_URL = "/admin/group/searchGroup";
     public static final String ADMIN_GROUP_SEARCHGROUPTOPICS_URL = "/admin/group/searchGroupTopics";
     public static final String ADMIN_GROUP_SYNCGROUPINDEX_URL = "/admin/group/syncGroupIndex";
@@ -110,7 +111,9 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
     public static final String ADMIN_PINGBORDER_URL = "/admin/pingBorder";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
+    public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
     public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
+    public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGERESULT_URL = "/admin/pushmessage/listPushMessageResult";
     public static final String ADMIN_PUSHMESSAGE_UPDATEPUSHMESSAGE_URL = "/admin/pushmessage/updatePushMessage";
     public static final String ADMIN_RECOMMEND_CREATECONFIG_URL = "/admin/recommend/createConfig";
     public static final String ADMIN_RECOMMEND_LISTCONFIG_URL = "/admin/recommend/listConfig";
@@ -156,6 +159,10 @@ public interface ApiConstants {
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
+    public static final String CONTACT_CREATECONTACTBYPHONECOMMAND_URL = "/contact/createContactByPhoneCommand";
+    public static final String CONTACT_CREATECONTACTBYUSERIDCOMMAND_URL = "/contact/createContactByUserIdCommand";
+    public static final String CONTACT_LISTCONTACTSBYENTERPRISEID_URL = "/contact/listContactsByEnterpriseId";
+    public static final String CONTACT_LISTCONTACTSBYPHONE_URL = "/contact/listContactsByPhone";
     public static final String CONTENTSERVER_ADDCONFIG_URL = "/contentServer/addConfig";
     public static final String CONTENTSERVER_ADDCONTENTSERVER_URL = "/contentServer/addContentServer";
     public static final String CONTENTSERVER_DELETECONTENTSERVER_URL = "/contentServer/deleteContentServer";
@@ -164,6 +171,12 @@ public interface ApiConstants {
     public static final String COURSE_POST_URL = "/course/post";
     public static final String DISCOVER_URL = "/discover";
     public static final String ECARD_POST_URL = "/ecard/post";
+    public static final String ENTERPRISE_ENTERPRISECOMMUNITIES_URL = "/enterprise/enterpriseCommunities";
+    public static final String ENTERPRISE_ENTERPRISEDETAIL_URL = "/enterprise/enterpriseDetail";
+    public static final String ENTERPRISE_INVITETOJOINCOMMUNITY_URL = "/enterprise/inviteToJoinCommunity";
+    public static final String ENTERPRISE_JOINENTERPRISETOCOMMUNITY_URL = "/enterprise/joinEnterpriseToCommunity";
+    public static final String ENTERPRISE_LISTENTERPRISEBYCOMMUNITYID_URL = "/enterprise/listEnterpriseByCommunityId";
+    public static final String ENTERPRISE_LISTENTERPRISEBYPHONE_URL = "/enterprise/listEnterpriseByPhone";
     public static final String FAMILY_APPROVEMEMBER_URL = "/family/approveMember";
     public static final String FAMILY_FINDFAMILYBYADDRESSID_URL = "/family/findFamilyByAddressId";
     public static final String FAMILY_FINDFAMILYBYKEYWORD_URL = "/family/findFamilyByKeyword";
@@ -390,6 +403,7 @@ public interface ApiConstants {
     public static final String USER_FEEDBACK_URL = "/user/feedback";
     public static final String USER_FETCHPASTTORECENTMESSAGES_URL = "/user/fetchPastToRecentMessages";
     public static final String USER_FETCHRECENTTOPASTMESSAGES_URL = "/user/fetchRecentToPastMessages";
+    public static final String USER_FINDTOKENBYUSERID_URL = "/user/findTokenByUserId";
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
