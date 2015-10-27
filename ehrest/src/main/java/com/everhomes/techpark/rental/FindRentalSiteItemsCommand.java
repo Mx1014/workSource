@@ -1,5 +1,8 @@
 package com.everhomes.techpark.rental;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -15,7 +18,9 @@ public class FindRentalSiteItemsCommand {
 	private Long rentalSiteId;
 	private Long enterpriseCommunityId;
 	private String siteType;  
-	private String rentalSiteRuleIds;
+
+    @ItemType(Long.class)
+	private List<Long> rentalSiteRuleIds;
 	
 	@Override
     public String toString() {
@@ -36,15 +41,7 @@ public class FindRentalSiteItemsCommand {
 
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
-	}
-
-	public String getRentalSiteRuleIds() {
-		return rentalSiteRuleIds;
-	}
-
-	public void setRentalSiteRuleIds(String rentalSiteRuleIds) {
-		this.rentalSiteRuleIds = rentalSiteRuleIds;
-	}
+	} 
 
 	public Long getRentalSiteId() {
 		return rentalSiteId;
@@ -53,4 +50,14 @@ public class FindRentalSiteItemsCommand {
 	public void setRentalSiteId(Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
 	}
+
+	public List<Long> getRentalSiteRuleIds() {
+		return rentalSiteRuleIds;
+	}
+
+	public void setRentalSiteRuleIds(List<Long> rentalSiteRuleIds) {
+		this.rentalSiteRuleIds = rentalSiteRuleIds;
+	}
+
+ 
 }

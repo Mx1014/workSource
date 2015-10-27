@@ -271,21 +271,21 @@ public class RentalServiceImpl implements RentalService {
 			FindRentalSiteItemsCommand cmd) { 
 		FindRentalSiteItemsCommandResponse response = new FindRentalSiteItemsCommandResponse();
 		response.setSiteItems(new ArrayList<SiteItemDTO>());
-		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-				.getRentalSiteRuleIds());
-		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
-
-		Gson gson = new Gson();
-		if (null == idValue)
-			return null;
-		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
-				new TypeToken<List<Long>>() {
-				}.getType());
+//		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+//				.getRentalSiteRuleIds());
+//		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
+//
+//		Gson gson = new Gson();
+//		if (null == idValue)
+//			return null;
+//		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
+//				new TypeToken<List<Long>>() {
+//				}.getType());
 		List<RentalSiteItem> rsiSiteItems = rentalProvider
 				.findRentalSiteItems(cmd.getRentalSiteId());
 		for (RentalSiteItem rsi : rsiSiteItems) {
 			int maxOrder = 0;
-			for (Long siteRuleId : RuleIdList) {
+			for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
 				//对于每一个物品，通过每一个siteRuleID找到它对应的BillIds 
 				int ruleOrderSum = 0;
 				List<RentalSitesBill> rsbs =  rentalProvider.findRentalSiteBillBySiteRuleId(siteRuleId);
@@ -400,24 +400,24 @@ public class RentalServiceImpl implements RentalService {
 		Long userId = UserContext.current().getUser().getId();
 		java.util.Date reserveTime = new java.util.Date();
 		Gson gson = new Gson();
-		List<SiteItemDTO> siteItemDTOs = null;
-		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
-				.getRentalSiteRuleIds());
-		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
-		if (null == idValue)
-			return;
-		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
-				new TypeToken<List<Long>>() {
-				}.getType());
-		if (null != cmd.getRentalItems()
-				&& !StringUtils.isEmpty(cmd.getRentalItems())) {
-			jsonObject = (JSONObject) JSONValue.parse(cmd.getRentalItems());
-			JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
-
-			siteItemDTOs = gson.fromJson(itemValue.toString(),
-					new TypeToken<List<SiteItemDTO>>() {
-					}.getType());
-		}
+//		List<SiteItemDTO> siteItemDTOs = null;
+//		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd
+//				.getRentalSiteRuleIds());
+//		JSONArray idValue = (JSONArray) jsonObject.get("rentalSiteRuleIds");
+//		if (null == idValue)
+//			return;
+//		List<Long> RuleIdList = gson.fromJson(idValue.toString(),
+//				new TypeToken<List<Long>>() {
+//				}.getType());
+//		if (null != cmd.getRentalItems()
+//				&& !StringUtils.isEmpty(cmd.getRentalItems())) {
+//			JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getRentalItems());
+//			JSONArray itemValue = (JSONArray) jsonObject.get("rentalItems");
+//
+//			siteItemDTOs = gson.fromJson(itemValue.toString(),
+//					new TypeToken<List<SiteItemDTO>>() {
+//					}.getType());
+//		}
 
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -445,7 +445,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setEndTime(new Timestamp(cmd.getEndTime()));
 		rentalBill.setRentalCount(cmd.getRentalcount());
 		int totalMoney = 0;
-		for (Long siteRuleId : RuleIdList) {
+		for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
 			RentalSiteRule rentalSiteRule = rentalProvider
 					.findRentalSiteRuleById(siteRuleId);
 			rentalSiteRules.add(rentalSiteRule);
@@ -453,7 +453,7 @@ public class RentalServiceImpl implements RentalService {
 					* (int) (cmd.getRentalcount() / rentalSiteRule.getUnit());
 		}
 
-		for (SiteItemDTO siDto : siteItemDTOs) {
+		for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			totalMoney += siDto.getItemPrice() * siDto.getCounts();
 		}
 		rentalBill.setPayTatolMoney(totalMoney);
@@ -479,7 +479,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setCreatorUid(userId);
 		Long rentalBillId = rentalProvider.createRentalBill(rentalBill);
 		// 循环存物品订单
-		for (SiteItemDTO siDto : siteItemDTOs) {
+		for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			RentalItemsBill rib = new RentalItemsBill();
 			rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
 			rib.setRentalSiteItemId(siDto.getId());
@@ -667,6 +667,12 @@ public class RentalServiceImpl implements RentalService {
 					.deleteRentalSiteRules(Long.valueOf(cmd.getRentalSiteId()),
 							deleteDate, deleteDate);
 		}
+	}
+
+	@Override
+	public void cancelRentalBill(CancelRentalBillCommand cmd) { 
+		  rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
+		  
 	}
 
 }

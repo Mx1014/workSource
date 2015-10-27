@@ -2,6 +2,7 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -10,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetRentalSiteTypeResponse {
-	
+
+    @ItemType(String.class)
 	private List<String> siteTypes;
 	@Override
     public String toString() {

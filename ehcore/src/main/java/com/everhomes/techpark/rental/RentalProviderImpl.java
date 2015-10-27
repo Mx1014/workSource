@@ -14,6 +14,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.RecordMapper;
 import org.jooq.SelectJoinStep;
+import org.jooq.UpdateConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -383,7 +384,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public Integer getSumSitePrice(Long rentalBillId) { 
+	public Integer getSumSitePrice(Long rentalBillId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<BigDecimal>> step = context.select(
 				Tables.EH_RENTAL_ITEMS_BILLS.TOTAL_MONEY.sum()).from(
@@ -391,7 +392,7 @@ public class RentalProviderImpl implements RentalProvider {
 		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_BILL_ID
 				.equal(rentalBillId);
 		step.where(condition);
-		Integer result = step.fetchOne().value1().intValue(); 
+		Integer result = step.fetchOne().value1().intValue();
 		return result;
 	}
 
@@ -436,14 +437,15 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public RentalItemsBill findRentalItemBill(Long rentalBillId,
-			Long rentalSiteItemId) {  
+			Long rentalSiteItemId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_ITEMS_BILLS);
 		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_BILL_ID
 				.equal(rentalBillId);
-		condition = condition.and( Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEM_ID
-				.equal(rentalSiteItemId));
+		condition = condition
+				.and(Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEM_ID
+						.equal(rentalSiteItemId));
 
 		step.where(condition);
 		List<RentalItemsBill> result = step
@@ -455,5 +457,24 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != result && result.size() > 0)
 			return result.get(0);
 		return null;
+	}
+
+	@Override
+	public RentalBill findRentalBillById(Long rentalBillId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void cancelRentalBillById(Long rentalBillId) {
+		// TODO Auto-generated method stub
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_RENTAL_BILLS.ID.equal(rentalBillId);
+		UpdateConditionStep<EhRentalBillsRecord> step = context
+				.update(Tables.EH_RENTAL_BILLS)
+				.set(Tables.EH_RENTAL_BILLS.STATUS,
+						SiteBillStatus.FAIL.getCode()).where(condition);
+		step.execute();
+		
 	}
 }

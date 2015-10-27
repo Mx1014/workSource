@@ -2,9 +2,11 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class FindRentalSiteDayStatusCommandResponse {
+    @ItemType(RentalSiteDTO.class)
 	private List<RentalSiteDTO> sites;
 	
 	

@@ -2,9 +2,12 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.util.StringHelper;
 
 public class FindRentalBillsCommandResponse {
+    @ItemType(RentalBillDTO.class)
 	private List<RentalBillDTO> rentalBills; 
 	@Override
     public String toString() {
