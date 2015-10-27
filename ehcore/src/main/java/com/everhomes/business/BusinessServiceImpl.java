@@ -171,6 +171,7 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter categories,categories is null");
 
 		Business business = ConvertHelper.convert(cmd, Business.class);
+		business.setVisibleDistance(Double.valueOf(5000));
 		business.setCreatorUid(userId);
 		business.setBizOwnerUid(cmd.getBizOwnerUid() == null ? userId : cmd.getBizOwnerUid());
 		business.setTargetId(cmd.getTargetId() == null ? "" : cmd.getTargetId());
@@ -265,10 +266,6 @@ public class BusinessServiceImpl implements BusinessService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		long startTime = System.currentTimeMillis();
-		int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
-		int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
-				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
-		int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
 
 		GetBusinessesByCategoryCommandResponse response = new GetBusinessesByCategoryCommandResponse();
 		//只作校验用
@@ -398,13 +395,32 @@ public class BusinessServiceImpl implements BusinessService {
 		processRecommendBusinesses(recommendBizIds,dtos,category,userId,favoriteBizIds);
 
 		sortBusinesses(dtos);
+		
+		List<BusinessDTO> dtos2 = this.operatorByPage(dtos,response,cmd.getPageOffset(),cmd.getPageSize());
 
-		response.setRequests(dtos);
+		response.setRequests(dtos2);
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("GetBusinesses by category,categoryId=" + cmd.getCategoryId() 
 				+ ",communityId=" + cmd.getCommunityId() + ",elapse=" + (endTime - startTime));
 
 		return response;
+	}
+
+	private List<BusinessDTO> operatorByPage(List<BusinessDTO> dtos,GetBusinessesByCategoryCommandResponse resposne,Integer cmdPageOffset, Integer cmdPageSize) {
+		if(dtos == null || dtos.size() < 1)
+			return new ArrayList<BusinessDTO>();
+		int pageOffset = cmdPageOffset == null ? 1 : cmdPageOffset;
+		int pageSize = cmdPageSize == null ? 10 : cmdPageSize;
+		int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
+		
+		int needRow = offset+pageSize;
+		if(dtos.size() > needRow){
+			resposne.setNextPageOffset(pageOffset+1);
+			return dtos.subList(offset, needRow);
+		}
+		else{
+			return dtos.subList(offset, dtos.size());
+		}
 	}
 
 	private List<Business> filterDistance(List<Business> businesses, double lat,double lon, List<Long> recommendBizIds) {
