@@ -278,6 +278,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
 				itemDTO.setScaleType(ScaleType.TAILOR.getCode());
 				if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
+					itemDTO.setDeleteFlag(DeleteFlagType.YES.getCode());
 					Business b = this.businessProvider.findBusinessById(r.getTargetId());
 					if(b != null){
 						itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
@@ -288,8 +289,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						//if(b.getCreatorUid().longValue() == userId)
 							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel()+"(店铺)" : b.getName()+"(店铺)");
 					}
-				}else
+				}else{
+					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
 					itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+				}
+				
 				distinctDto.add(itemDTO);
 			});
 			if(distinctDto != null && !distinctDto.isEmpty()){
