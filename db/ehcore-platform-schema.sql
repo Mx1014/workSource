@@ -15,7 +15,7 @@ CREATE TABLE `eh_servers`(
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_servers_config_tag`(`config_tag`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_shards`;
 CREATE TABLE `eh_shards`(
@@ -28,7 +28,7 @@ CREATE TABLE `eh_shards`(
     UNIQUE `u_eh_shards_domain_anchor` (`sharding_domain`, `anchor`),
     INDEX `i_eh_shards_anchor`(`anchor`),
     INDEX `i_eh_shards_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_server_shard_map`;
 CREATE TABLE `eh_server_shard_map` (
@@ -38,7 +38,7 @@ CREATE TABLE `eh_server_shard_map` (
 
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_ssm_server_shard` (`server_id`, `shard_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_content_shard_map`;
 CREATE TABLE `eh_content_shard_map` (
@@ -49,7 +49,7 @@ CREATE TABLE `eh_content_shard_map` (
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_csm_domain_page` (`sharding_domain`, `sharding_page`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_configurations`;
 CREATE TABLE `eh_configurations` (
@@ -59,7 +59,7 @@ CREATE TABLE `eh_configurations` (
     `description` VARCHAR(256),
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_conf_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_messages`;
 CREATE TABLE `eh_messages` (
@@ -68,8 +68,8 @@ CREATE TABLE `eh_messages` (
     `app_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'default to messaging app itself',
     `message_seq` BIGINT NOT NULL COMMENT 'message sequence id generated at server side',
     `sender_uid` BIGINT NOT NULL,
-    `context_type` VARCHAR(32) NOT NULL,
-    `context_token` VARCHAR(32) NOT NULL,
+    `context_type` VARCHAR(32),
+    `context_token` VARCHAR(32),
     `channel_type` VARCHAR(32) NOT NULL,
     `channel_token` VARCHAR(32) NOT NULL,
     `message_text` TEXT COMMENT 'message content',
@@ -81,7 +81,7 @@ CREATE TABLE `eh_messages` (
     PRIMARY KEY (`id`),
     INDEX `i_eh_msgs_namespace`(`namespace_id`),
     INDEX `i_eh_msgs_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_message_boxs`;
 CREATE TABLE `eh_message_boxs` (
@@ -99,7 +99,7 @@ CREATE TABLE `eh_message_boxs` (
     INDEX `i_eh_mbx_msg_seq`(`message_seq`),
     INDEX `i_eh_mbx_box_seq`(`box_seq`),
     INDEX `i_eh_mbx_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_acls`;
 CREATE TABLE `eh_acls` (
@@ -118,7 +118,7 @@ CREATE TABLE `eh_acls` (
     INDEX `i_eh_acl_owner_order_seq`(`order_seq`),
     INDEX `i_eh_acl_creator`(`creator_uid`),
     INDEX `i_eh_acl_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_acl_privileges`;
 CREATE TABLE `eh_acl_privileges` (
@@ -129,7 +129,7 @@ CREATE TABLE `eh_acl_privileges` (
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_acl_priv_app_id_name`(`app_id`, `name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_acl_roles`;
 CREATE TABLE `eh_acl_roles` (
@@ -139,7 +139,7 @@ CREATE TABLE `eh_acl_roles` (
     `description` VARCHAR(512),
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_acl_role_app_id_name`(`app_id`, `name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_acl_role_assignments`;
 CREATE TABLE `eh_acl_role_assignments` (
@@ -157,7 +157,7 @@ CREATE TABLE `eh_acl_role_assignments` (
     UNIQUE `u_eh_acl_role_asgn_unique`(`owner_type`, `owner_id`, `target_type`, `target_id`, `role_id`),
     INDEX `i_eh_acl_role_asgn_creator`(`creator_uid`),
     INDEX `i_eh_acl_role_asgn_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_apps`;
 CREATE TABLE `eh_apps` (
@@ -176,7 +176,7 @@ CREATE TABLE `eh_apps` (
     UNIQUE `u_eh_app_reg_app_key`(`app_key`),
     UNIQUE `u_eh_app_reg_name`(`name`),
     INDEX `i_eh_app_reg_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_app_profiles`;
 CREATE TABLE `eh_app_profiles` (
@@ -199,7 +199,7 @@ CREATE TABLE `eh_sequences` (
     `start_seq` BIGINT NOT NULL DEFAULT 1,
     
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_namespaces`;
 CREATE TABLE `eh_namespaces` (
@@ -208,6 +208,6 @@ CREATE TABLE `eh_namespaces` (
     
     PRIMARY KEY (`id`),
     UNIQUE `u_ns_name`(`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET foreign_key_checks = 1;
