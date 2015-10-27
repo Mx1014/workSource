@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1284583323;
+	private static final long serialVersionUID = 1776568129;
 
 	private java.lang.Long     id;
+	private java.lang.Long     enterpriseCommunityId;
+	private java.lang.String   siteType;
 	private java.lang.Long     rentalSiteId;
 	private java.lang.Byte     rentalType;
 	private java.sql.Timestamp beginTime;
@@ -32,6 +34,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public EhRentalSiteRules(
 		java.lang.Long     id,
+		java.lang.Long     enterpriseCommunityId,
+		java.lang.String   siteType,
 		java.lang.Long     rentalSiteId,
 		java.lang.Byte     rentalType,
 		java.sql.Timestamp beginTime,
@@ -47,6 +51,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
+		this.enterpriseCommunityId = enterpriseCommunityId;
+		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
 		this.beginTime = beginTime;
@@ -68,6 +74,22 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getEnterpriseCommunityId() {
+		return this.enterpriseCommunityId;
+	}
+
+	public void setEnterpriseCommunityId(java.lang.Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
+
+	public java.lang.String getSiteType() {
+		return this.siteType;
+	}
+
+	public void setSiteType(java.lang.String siteType) {
+		this.siteType = siteType;
 	}
 
 	public java.lang.Long getRentalSiteId() {

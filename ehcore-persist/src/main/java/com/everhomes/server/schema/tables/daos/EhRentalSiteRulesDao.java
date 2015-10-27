@@ -48,6 +48,20 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>enterprise_community_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByEnterpriseCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.ENTERPRISE_COMMUNITY_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>site_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchBySiteType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.SITE_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>rental_site_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByRentalSiteId(java.lang.Long... values) {

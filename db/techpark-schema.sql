@@ -253,6 +253,8 @@ DROP TABLE IF EXISTS `eh_rental_site_rules`;
 
 CREATE TABLE `eh_rental_site_rules`(
   `id` BIGINT  NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `rental_type` TINYINT(4) COMMENT '0: as hour:min  1-as day',
   `begin_time` DATETIME,
@@ -275,6 +277,8 @@ DROP TABLE IF EXISTS `eh_rental_bills`;
 
 CREATE TABLE `eh_rental_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'id',
   `rental_uid` BIGINT COMMENT 'rental user id',
   `rental_date` DATE COMMENT 'rental target date',
@@ -302,6 +306,8 @@ DROP TABLE IF EXISTS  `eh_rental_sites_bills`;
 
 CREATE TABLE `eh_rental_sites_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `rental_site_rule_id` BIGINT ,  
   `rental_count` DOUBLE ,
@@ -316,6 +322,8 @@ DROP TABLE IF EXISTS  `eh_rental_items_bills`;
 
 CREATE TABLE `eh_rental_items_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `rental_site_item_id` BIGINT ,  
   `rental_count` INT,
