@@ -2,6 +2,8 @@ package com.everhomes.user.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 
 
 
@@ -19,6 +21,7 @@ public class ImportDataResponse {
 		
 	private Long failCount;
 	
+	@ItemType(String.class)
 	private List<String> logs;
 
 	public Long getTotalCount() {
