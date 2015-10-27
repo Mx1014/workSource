@@ -10,6 +10,17 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+/**
+ * <ul>
+ * <li>企业通讯录管理类，主要功能：</li>
+ * <li>基于手机号创建企业通讯录</li>
+ * <li>基于已有用户信息创建企业通讯录</li>
+ * <li>创建通讯录分组</li>
+ * <li>查询通讯录信息</li>
+ * </ul>
+ * @author janson
+ *
+ */
 @RestDoc(value="Enterprise contact controller", site="core")
 @RestController
 @RequestMapping("/contact")

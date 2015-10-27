@@ -10,6 +10,19 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+/**
+ * <ul>
+ * <li>企业管理相关接口：</li>
+ * <li>一个企业对应着一个组，相当于Group的概念</li>
+ * <li>每个企业下面有多个通讯录，{@link com.everhomes.enterprise.EnterpriseContact}</li>
+ * <li>每个通讯录可能绑定着一个具体的用户，也可能还没有对应着用户。</li>
+ * <li>同时，每个企业可以入驻多个园区</li>
+ * <li>每个园区对应着过去的Community</li>
+ * <li>当然，每个园区有多家企业入驻</li>
+ * </ul>
+ * @author janson
+ *
+ */
 @RestDoc(value="Enterprise controller", site="core")
 @RestController
 @RequestMapping("/enterprise")
