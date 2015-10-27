@@ -6,10 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,7 +23,6 @@ import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
-import com.everhomes.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.business.admin.BusinessAdminDTO;
@@ -915,7 +912,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserCancelFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId()); 
-		cancelFavoriteBusiness(cmd.getUserId(), business.getId());
+		cancelFavoriteBusiness(cmd.getUserId(), business.getId(),true);
 
 	}
 
@@ -953,14 +950,27 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public void favoriteBusinesses(FavoriteBusinessesCommand cmd) {
-		if(cmd.getIds() == null || cmd.getIds().isEmpty())
+		if(cmd.getBizs() == null || cmd.getBizs().size() < 1)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid paramter ids is null or empty");
+					"Invalid paramter bizs is null or empty");
 
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		for(Long id:cmd.getIds())
-			favoriteBusiness(userId, id,false);
+		for(FavoriteBusinessDTO r:cmd.getBizs()){
+			FavoriteFlagType flag = FavoriteFlagType.fromCode(r.getFavoriteFlag());
+			if(flag == null){
+				LOGGER.error("FavoriteFlag is error.bizId=" + r.getId()+",favoriteFlag="+r.getFavoriteFlag());
+				continue ;
+			}
+			if(r.getId() == null){
+				LOGGER.error("biz id is null.bizId=" + r.getId()+",favoriteFlag="+r.getFavoriteFlag());
+				continue ;
+			}
+			if(r.getFavoriteFlag() == FavoriteFlagType.FAVORITE.getCode())
+				favoriteBusiness(userId, r.getId(),false);
+			else if(r.getFavoriteFlag() == FavoriteFlagType.CANCEL_FAVORITE.getCode())
+				cancelFavoriteBusiness(userId, r.getId(),false);
+		}
 	}
 
 	private void favoriteBusiness(long userId,long businessId,boolean isException){
@@ -1047,15 +1057,18 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter id null,categoryId is null");
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		cancelFavoriteBusiness(userId, cmd.getId());
+		cancelFavoriteBusiness(userId, cmd.getId(),true);
 	}
 
-	private void cancelFavoriteBusiness(long userId, long businessId){
+	private void cancelFavoriteBusiness(long userId, long businessId,boolean isThrowExcept){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
-			throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
-					"Business is not exists.");
+			if(isThrowExcept)
+				throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST, 
+						"Business is not exists.");
+			else
+				return ;
 		}
 
 		List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId);
