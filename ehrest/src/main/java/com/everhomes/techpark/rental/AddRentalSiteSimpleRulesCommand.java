@@ -33,10 +33,10 @@ public class AddRentalSiteSimpleRulesCommand {
 	private Double endTime;
 	private Integer counts;
 	private Double unit;
-	private Integer WorkdayPrice;
-	private Integer WeekendPrice;
+	private Integer workdayPrice;
+	private Integer weekendPrice;
 	private Byte loopType;
-	private Byte Status;
+	private Byte status;
 	private String choosen;
 	
 	
@@ -106,17 +106,7 @@ public class AddRentalSiteSimpleRulesCommand {
 	}
 
 
-
-	public Byte getStatus() {
-		return Status;
-	}
-
-
-
-	public void setStatus(Byte status) {
-		Status = status;
-	}
-
+ 
 
 
 	public Long getBeginDate() {
@@ -216,26 +206,39 @@ public class AddRentalSiteSimpleRulesCommand {
 
 
 	public Integer getWorkdayPrice() {
-		return WorkdayPrice;
+		return workdayPrice;
 	}
 
 
 
 	public void setWorkdayPrice(Integer workdayPrice) {
-		WorkdayPrice = workdayPrice;
+		this.workdayPrice = workdayPrice;
 	}
 
 
 
 	public Integer getWeekendPrice() {
-		return WeekendPrice;
+		return weekendPrice;
 	}
 
 
 
 	public void setWeekendPrice(Integer weekendPrice) {
-		WeekendPrice = weekendPrice;
+		this.weekendPrice = weekendPrice;
 	}
 
+
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+ 
  
 }

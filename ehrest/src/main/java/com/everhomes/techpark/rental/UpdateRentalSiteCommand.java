@@ -1,33 +1,36 @@
 package com.everhomes.techpark.rental;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 添加场所
+ * 更新预定规则
  * <li>enterpriseCommunityId：园区id</li>
  * <li>siteType：场所类型</li>
+ * <li>rentalSiteId：场所id</li>
  * <li>siteName：场所名称</li>
  * <li>buildingName：楼栋名称</li>
  * <li>address：位置</li>
  * <li>spec：用户设置座位数等</li>
  * <li>company：所属公司名</li>
  * <li>contactName：联系人</li>
- * <li>contactPhonenum：电话号码</li>
- * <li>siteItems：场所商品json字符串</li>
+ * <li>contactPhonenum：电话号码</li> 
  * </ul>
  */
-public class AddRentalSiteCommand {
+public class UpdateRentalSiteCommand {
 	private Long enterpriseCommunityId;
 	private String siteType;
+	@NotNull
+	private Long rentalSiteId;
 	private String siteName;
 	private String buildingName;
 	private String address;
 	private String spec;
 	private String company;
 	private String contactName;
-	private String contactPhonenum;
-	private String siteItems;
+	private String contactPhonenum; 
 
 	@Override
 	public String toString() {
@@ -82,14 +85,7 @@ public class AddRentalSiteCommand {
 	public void setContactPhonenum(String contactPhonenum) {
 		this.contactPhonenum = contactPhonenum;
 	}
-
-	public String getSiteItems() {
-		return siteItems;
-	}
-
-	public void setSiteItems(String siteItems) {
-		this.siteItems = siteItems;
-	}
+ 
  
 
 	public String getSiteName() {
@@ -114,5 +110,13 @@ public class AddRentalSiteCommand {
 
 	public void setCompany(String company) {
 		this.company = company;
+	}
+
+	public Long getRentalSiteId() {
+		return rentalSiteId;
+	}
+
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
 	}
 }

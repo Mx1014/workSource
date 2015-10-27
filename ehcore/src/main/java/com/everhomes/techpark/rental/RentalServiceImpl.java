@@ -597,10 +597,20 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
+		Integer billCount = rentalProvider.countRentalSiteBills(cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
+		if(billCount >0 ){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid price   parameter in the command");
+		}
 		Integer deleteCount = rentalProvider.deleteRentalSiteRules(
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 				+ "  from rental site rules  ");
+		if(null == cmd.getWeekendPrice()||null == cmd.getWorkdayPrice())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid price   parameter in the command");
 		RentalSiteRule rsr = new RentalSiteRule();
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
@@ -673,6 +683,29 @@ public class RentalServiceImpl implements RentalService {
 	public void cancelRentalBill(CancelRentalBillCommand cmd) { 
 		  rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
 		  
+	}
+
+	@Override
+	public void updateRentalSite(UpdateRentalSiteCommand cmd) {
+		// 已有未取消的预定，不能修改
+		Integer billCount = rentalProvider.countRentalSiteBills(cmd.getRentalSiteId(),null, null);
+		if(billCount >0 ){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid price   parameter in the command");
+		}
+		RentalSite rentalsite = new RentalSite();
+		rentalsite.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+		rentalsite.setAddress(cmd.getAddress());
+		rentalsite.setId(cmd.getRentalSiteId());
+		rentalsite.setBuildingName(cmd.getBuildingName());
+		rentalsite.setSiteName(cmd.getSiteName());
+		rentalsite.setOwnCompanyName(cmd.getCompany());
+		rentalsite.setContactName(cmd.getContactName());
+		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
+		rentalsite.setSiteType(cmd.getSiteType());
+		rentalsite.setSpec(cmd.getSpec());
+		rentalProvider.updateRentalSite(rentalsite);
 	}
 
 }

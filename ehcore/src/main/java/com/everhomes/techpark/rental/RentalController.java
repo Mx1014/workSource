@@ -103,6 +103,21 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /techpark/rental/updateRentalSite</b>
+	 * <p>
+	 * 添加具体场所
+	 * </p>
+	 */
+	@RequestMapping("updateRentalSite")
+	@RestReturn(value = String.class)
+	public RestResponse updateRentalSite(@Valid UpdateRentalSiteCommand cmd) {
+		rentalService.updateRentalSite(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	
 	/**
@@ -115,6 +130,7 @@ public class RentalController extends ControllerBase {
 	@RestReturn(value = FindRentalSitesCommandResponse.class)
 	public RestResponse findRentalSites(
 			@Valid FindRentalSitesCommand cmd) {
+		//TODO:查询场所带条件
 		FindRentalSitesCommandResponse findRentalSitesCommandResponse = rentalService
 				.findRentalSites(cmd);
 		RestResponse response = new RestResponse(

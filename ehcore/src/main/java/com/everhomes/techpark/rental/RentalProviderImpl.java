@@ -12,16 +12,12 @@ import org.jooq.DeleteWhereStep;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.Record1;
-import org.jooq.RecordMapper;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectOnConditionStep;
 import org.jooq.UpdateConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import ch.qos.logback.classic.Logger;
-
-import com.everhomes.address.CommunityAdminStatus;
-import com.everhomes.community.Community;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -31,7 +27,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
-import com.everhomes.server.schema.tables.daos.EhRentalSiteRulesDao;
+import com.everhomes.server.schema.tables.daos.EhRentalSitesDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
@@ -417,8 +413,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public RentalSiteItem findRentalSiteItemById(Long rentalSiteItemId) {
-		// TODO Auto-generated method stub
+	public RentalSiteItem findRentalSiteItemById(Long rentalSiteItemId) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_ITEMS);
@@ -466,8 +461,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public void cancelRentalBillById(Long rentalBillId) {
-		// TODO Auto-generated method stub
+	public void cancelRentalBillById(Long rentalBillId) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.equal(rentalBillId);
 		UpdateConditionStep<EhRentalBillsRecord> step = context
@@ -476,5 +470,37 @@ public class RentalProviderImpl implements RentalProvider {
 						SiteBillStatus.FAIL.getCode()).where(condition);
 		step.execute();
 		
+	}
+
+	@Override
+	public Integer countRentalSiteBills(Long rentalSiteId, Long beginDate,
+			Long endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectOnConditionStep<Record1<Integer>> step = context
+				.selectCount().from(Tables.EH_RENTAL_SITE_RULES).join(Tables.EH_RENTAL_SITES_BILLS)
+				.on(Tables.EH_RENTAL_SITE_RULES.ID.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_SITE_RULE_ID))
+				.join(Tables.EH_RENTAL_BILLS).on(Tables.EH_RENTAL_BILLS.ID.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID
+				.equal(rentalSiteId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS.ne(SiteBillStatus.FAIL.getCode()));
+		if (null != beginDate && null != endDate) {
+			condition = condition
+					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.between(
+							new Date(beginDate), new Date(endDate)));
+		}
+		step.where(condition);
+		Integer result = step.fetchOne().value1().intValue();
+		return result;
+	}
+
+	@Override
+	public void updateRentalSite(RentalSite rentalsite) { 
+		assert (rentalsite.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalSitesDao dao = new EhRentalSitesDao(context.configuration());
+		dao.update(rentalsite);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalSites.class,
+				rentalsite.getId());
 	}
 }
