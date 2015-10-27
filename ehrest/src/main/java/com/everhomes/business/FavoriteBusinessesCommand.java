@@ -7,22 +7,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>ids: 店铺ID列表</li>
+ * <li>bizs: 店铺是否收藏对象列表，{id:business's id,favoriteFlag:0-取消收藏,1-收藏},详情:{@link com.everhomes.business.FavoriteBusinessDTO}</li>
  * </ul>
  */
 public class FavoriteBusinessesCommand {
 	
-	@ItemType(Long.class)
-    private List<Long> ids;
+	@ItemType(FavoriteBusinessDTO.class)
+    private List<FavoriteBusinessDTO> bizs;
 
-	public List<Long> getIds() {
-		return ids;
+	public List<FavoriteBusinessDTO> getBizs() {
+		return bizs;
 	}
 
-	public void setIds(List<Long> ids) {
-		this.ids = ids;
+	public void setBizs(List<FavoriteBusinessDTO> bizs) {
+		this.bizs = bizs;
 	}
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
