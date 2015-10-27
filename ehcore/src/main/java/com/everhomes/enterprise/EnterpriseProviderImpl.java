@@ -92,7 +92,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     @Override
     public void createEnterpriseCommunityMap(EnterpriseCommunityMap ec) {
         long id = this.shardingProvider.allocShardableContentId(EhCommunities.class).second();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, ec.getCommunityId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
         ec.setId(id);
         ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseCommunityMapDao dao = new EhEnterpriseCommunityMapDao(context.configuration());
