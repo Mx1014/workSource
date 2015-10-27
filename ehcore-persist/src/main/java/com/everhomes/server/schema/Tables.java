@@ -339,6 +339,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+	 * The table ehcore.eh_park_apply_card
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkApplyCard EH_PARK_APPLY_CARD = com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD;
+
+	/**
 	 * The table ehcore.eh_park_charge
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkCharge EH_PARK_CHARGE = com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE;
