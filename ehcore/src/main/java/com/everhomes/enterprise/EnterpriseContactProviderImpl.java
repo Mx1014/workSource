@@ -39,6 +39,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     private ShardingProvider shardingProvider;
     
     // TODO for cache. member of eh_groups partition
+    @Override
     public void createContact(EnterpriseContact contact) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
@@ -50,18 +51,21 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.insert(contact);
     }
     
+    @Override
     public void updateContact(EnterpriseContact contact) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
         EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
         dao.update(contact);
     }
     
+    @Override
     public void deleteContactById(EnterpriseContact contact) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
         EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
         dao.deleteById(contact.getId());        
     }
     
+    @Override
     public EnterpriseContact getContactById(Long id) {
         EnterpriseContact[] result = new EnterpriseContact[1];
         
@@ -83,6 +87,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return result[0];
     }
     
+    @Override
     public List<EnterpriseContact> queryContactByEnterpriseId(ListingLocator locator, Long enterpriseId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
@@ -102,6 +107,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
     }
     
+    @Override
     public List<EnterpriseContact> queryContacts(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
@@ -138,6 +144,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return contacts;
     }
     
+    @Override
     public void createContactEntry(EnterpriseContactEntry entry) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
@@ -147,6 +154,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.insert(entry);
     }
     
+    @Override
     public void updateContactEntry(EnterpriseContactEntry entry) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
         entry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -154,6 +162,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.update(entry);        
     }
     
+    @Override
     public void deleteContactEntry(EnterpriseContactEntry entry) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
         entry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -161,6 +170,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.delete(entry);        
     }
     
+    @Override
     public EnterpriseContactEntry getContactEntryById(Long id) {
         EnterpriseContactEntry[] result = new EnterpriseContactEntry[1];
         
@@ -182,6 +192,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return result[0];
     }
     
+    @Override
     public List<EnterpriseContactEntry> queryContactEntryByEnterpriseId(ListingLocator locator, Long enterpriseId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
@@ -201,6 +212,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
     }
     
+    @Override
     public List<EnterpriseContactEntry> queryContactEntries(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContactEntry> contacts = new ArrayList<EnterpriseContactEntry>();
@@ -237,6 +249,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return contacts;
     }
     
+    @Override
     public void createContactGroup(EnterpriseContactGroup group) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
@@ -246,6 +259,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.insert(group);
     }
     
+    @Override
     public void updateContactGroup(EnterpriseContactGroup group) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
         group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -253,6 +267,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.update(group);        
     }
     
+    @Override
     public void deleteContactGroup(EnterpriseContactGroup group) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
         group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -260,6 +275,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.delete(group);        
     }
     
+    @Override
     public EnterpriseContactGroup getContactGroupById(Long id) {
         EnterpriseContactGroup[] result = new EnterpriseContactGroup[1];
         
@@ -281,6 +297,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return result[0];
     }
     
+    @Override
     public List<EnterpriseContactGroup> queryContactGroupByEnterpriseId(ListingLocator locator, Long enterpriseId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
@@ -300,6 +317,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
     }
     
+    @Override
     public List<EnterpriseContactGroup> queryContactGroups(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContactGroup> contacts = new ArrayList<EnterpriseContactGroup>();
@@ -336,6 +354,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return contacts;
     }
     
+    @Override
     public void createContactGroupMember(EnterpriseContactGroupMember member) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
@@ -345,6 +364,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.insert(member);
     }
     
+    @Override
     public void updateContactGroupMember(EnterpriseContactGroupMember member) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
         member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -352,6 +372,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.update(member);        
     }
     
+    @Override
     public void deleteContactGroupMember(EnterpriseContactGroupMember member) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
         member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -359,6 +380,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         dao.delete(member);        
     }
     
+    @Override
     public EnterpriseContactGroupMember getContactGroupMemberById(Long id) {
         EnterpriseContactGroupMember[] result = new EnterpriseContactGroupMember[1];
         
@@ -380,6 +402,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return result[0];
     }
     
+    @Override
     public List<EnterpriseContactGroupMember> queryContactGroupMemberByEnterpriseId(ListingLocator locator, Long enterpriseId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
@@ -399,6 +422,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
     }
     
+    @Override
     public List<EnterpriseContactGroupMember> queryContactGroupMembers(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContactGroupMember> contacts = new ArrayList<EnterpriseContactGroupMember>();

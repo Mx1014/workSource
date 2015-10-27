@@ -9,6 +9,8 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.Group;
@@ -37,33 +39,57 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     private GroupProvider groupProvider;
     
     @Autowired
+    private CommunityProvider communityProvider;
+    
+    @Autowired
     private ShardingProvider shardingProvider;
     
     //TODO enterprise field
+    @Override
     public void createEnterprise(Enterprise enterprise) {
         enterprise.setDiscriminator(GroupDiscriminator.Enterprise.toString());
         this.groupProvider.createGroup(enterprise);
     }
     
+    @Override
     public void updateEnterprise(Enterprise enterprise) {
         this.groupProvider.updateGroup(enterprise);
     }
     
+    @Override
     public Enterprise getEnterpriseById(Long id) {
         Group g = this.groupProvider.findGroupById(id);
         return ConvertHelper.convert(g, Enterprise.class);
     }
     
+    @Override
     public void deleteEnterpriseById(Long id) {
         this.groupProvider.deleteGroup(id);
     }
     
+    @Override
     public List<Enterprise> queryEnterprise() {
         //TODO query enterprise
         //this.groupProvider.queryGroups(locator, count, callback);
         return null;
     }
     
+    @Override
+    public void createEnterpriseCommunity(Long creatorId, EnterpriseCommunity ec) {
+        ec.setCommunityType(EnterpriseCommunityType.Enterprise.getCode());
+        this.communityProvider.createCommunity(creatorId, ec);
+    }
+    
+    @Override
+    public EnterpriseCommunity getEnterpriseCommunityById(Long id) {
+        Community c = this.communityProvider.findCommunityById(id);
+        if(c.getCommunityType() == EnterpriseCommunityType.Enterprise.getCode()) {
+            return ConvertHelper.convert(c, EnterpriseCommunity.class);    
+        }
+        return null;
+    }
+    
+    @Override
     public void createEnterpriseCommunityMap(EnterpriseCommunityMap ec) {
         long id = this.shardingProvider.allocShardableContentId(EhCommunities.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, ec.getCommunityId()));
@@ -73,6 +99,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         dao.insert(ec);
     }
     
+    @Override
     public void updateEnterpriseCommunityMap(EnterpriseCommunityMap ec) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
         ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -80,6 +107,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         dao.update(ec);        
     }
     
+    @Override
     public void deleteEnterpriseCommunityMapById(EnterpriseCommunityMap ec) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, ec.getCommunityId()));
         ec.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -87,6 +115,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         dao.delete(ec);        
     }
     
+    @Override
     public EnterpriseCommunityMap getEnterpriseCommunityMapById(Long id) {
         EnterpriseCommunityMap[] result = new EnterpriseCommunityMap[1];
         
@@ -108,6 +137,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         return result[0];
     }
     
+    @Override
     public List<EnterpriseCommunityMap> queryEnterpriseMapByCommunityId(ListingLocator locator, Long comunityId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, comunityId));
@@ -127,6 +157,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         });
     }
     
+    @Override
     public List<EnterpriseCommunityMap> queryContactGroupMembers(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseCommunityMap> contacts = new ArrayList<EnterpriseCommunityMap>();
