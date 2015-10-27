@@ -30,6 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>displayLayout: 图标尺寸 格式：1x2</li>
  * <li>bgcolor: item的背景颜色</li>
  * <li>scaleType: 图标是否需要裁剪0-不需要，1-需要</li>
+ * <li>deleteFlag: 是否可删除,0-不可删除,1-可删除,详情{@link com.everhomes.launchpad.DeleteFlagType}</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -55,6 +56,7 @@ public class LaunchPadItemDTO {
     private String  displayLayout;
     private Integer    bgcolor;
     private Byte    scaleType;
+    private Byte deleteFlag;
     
 
     public Long getId() {
@@ -232,8 +234,16 @@ public class LaunchPadItemDTO {
     public void setScaleType(Byte scaleType) {
         this.scaleType = scaleType;
     }
+    
+    public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
 
-    @Override
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this,new String[]{"id","scopeType","scopeId","applyPolicy"} );
     }

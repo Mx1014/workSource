@@ -18,6 +18,9 @@ import com.everhomes.family.FamilyDTO;
  * <li>status: 状态，{@link com.everhomes.category.CategoryAdminStatus}</li>
  * <li>createTime: 创建时间</li>
  * <li>deleteTime: 删除时间</li>
+ * <li>iconUri: 图标uri</li>
+ * <li>iconUrl: 图标url</li>
+ * <li>description: 描述</li>
  * </ul>
  */
 public class CategoryDTO {
@@ -29,6 +32,7 @@ public class CategoryDTO {
     private Byte     status;
     private String iconUri;
     private String iconUrl;
+    private String description;
     
     private Timestamp createTime;
     private Timestamp deleteTime;
@@ -114,6 +118,14 @@ public class CategoryDTO {
 
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override

@@ -274,6 +274,11 @@ public class CategoryController extends ControllerBase {
         		logoUri = "cs://1/image/aW1hZ2UvTVRvd00yRTJaRGN4WWpWaFpUVTRNekZqTTJFM09ESXpObUZoTldWbFlqVTFNZw";
         	dto.setIconUri(logoUri);
         	dto.setIconUrl(parserUri(logoUri,EntityType.USER.getCode(),userId));
+        	
+        	String des = null;
+        	if(StringUtils.isEmpty(des))
+        		des = "默认描述";
+        	dto.setDescription(des);
             return dto;
         }).collect(Collectors.toList());
         
