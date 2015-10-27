@@ -1,4 +1,4 @@
-﻿USE `ehcore`;
+﻿UUSE `ehcore`;
 
 
 /*Table structure for table `eh_company_phone_list` */
@@ -334,6 +334,7 @@ CREATE TABLE `eh_rental_items_bills`(
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 
 
 
