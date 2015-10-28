@@ -21,19 +21,13 @@ import com.everhomes.util.StringHelper;
  * <li>rentalItems：预定商品的json字符串</li>
  * </ul>
  */
-public class AddRentalBillCommand {
+public class AddRentalBillItemCommand {
 	private Long rentalSiteId;
 	private Long enterpriseCommunityId;
 	private String siteType;
-	private Long rentalDate;
-	private Long startTime;
-	private Long endTime;
-	@ItemType(Long.class)
-	private List<Long> rentalSiteRuleIds;
-	private Byte invoiceFlag;
-	private Double rentalcount;
-//	@ItemType(SiteItemDTO.class)
-//	private List<SiteItemDTO> rentalItems;
+	private Long rentalBillId;
+	@ItemType(SiteItemDTO.class)
+	private List<SiteItemDTO> rentalItems;
 
 	@Override
 	public String toString() {
@@ -48,29 +42,7 @@ public class AddRentalBillCommand {
 		this.rentalSiteId = rentalSiteId;
 	}
 
-	public Long getRentalDate() {
-		return rentalDate;
-	}
-
-	public void setRentalDate(Long rentalDate) {
-		this.rentalDate = rentalDate;
-	}
-
-	public Long getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(Long startTime) {
-		this.startTime = startTime;
-	}
-
-	public Long getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
-	}
+	 
  
 	public String getSiteType() {
 		return siteType;
@@ -87,38 +59,24 @@ public class AddRentalBillCommand {
 	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
 		this.enterpriseCommunityId = enterpriseCommunityId;
 	}
+ 
 
-	public Double getRentalcount() {
-		return rentalcount;
+	public Long getRentalBillId() {
+		return rentalBillId;
 	}
 
-	public void setRentalcount(Double rentalcount) {
-		this.rentalcount = rentalcount;
+	public void setRentalBillId(Long rentalBillId) {
+		this.rentalBillId = rentalBillId;
 	}
 
-	public Byte getInvoiceFlag() {
-		return invoiceFlag;
+	public List<SiteItemDTO> getRentalItems() {
+		return rentalItems;
 	}
 
-	public void setInvoiceFlag(Byte invoiceFlag) {
-		this.invoiceFlag = invoiceFlag;
+	public void setRentalItems(List<SiteItemDTO> rentalItems) {
+		this.rentalItems = rentalItems;
 	}
-
-	public List<Long> getRentalSiteRuleIds() {
-		return rentalSiteRuleIds;
-	}
-
-	public void setRentalSiteRuleIds(List<Long> rentalSiteRuleIds) {
-		this.rentalSiteRuleIds = rentalSiteRuleIds;
-	}
-
-//	public List<SiteItemDTO> getRentalItems() {
-//		return rentalItems;
-//	}
-//
-//	public void setRentalItems(List<SiteItemDTO> rentalItems) {
-//		this.rentalItems = rentalItems;
-//	}
+ 
  
  
  

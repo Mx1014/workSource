@@ -421,8 +421,7 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_ITEMS_BILLS);
 		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_BILL_ID
-				.equal(rentalBillId);
-
+				.equal(rentalBillId); 
 		step.where(condition);
 		List<RentalItemsBill> result = step
 				.orderBy(Tables.EH_RENTAL_ITEMS_BILLS.ID.desc()).fetch()
