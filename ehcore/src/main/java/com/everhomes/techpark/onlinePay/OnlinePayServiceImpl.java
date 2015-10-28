@@ -27,7 +27,7 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 	private CoordinationProvider coordinationProvider;
 	
 	@Override
-	public void onlinePayBill(OnlinePayBillCommand cmd) {
+	public RechargeInfo onlinePayBill(OnlinePayBillCommand cmd) {
 		
 		//fail
 		if(cmd.getPayStatus().toLowerCase().equals("fail"))
@@ -36,9 +36,10 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		if(cmd.getPayStatus().toLowerCase().equals("success"))
 			this.onlinePayPmBillSuccess(cmd);
 
+		return null;
 	}
 	
-	private void onlinePayPmBillFail(OnlinePayBillCommand cmd) {
+	private RechargeInfo onlinePayPmBillFail(OnlinePayBillCommand cmd) {
 		
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayPmBillFail");
@@ -50,9 +51,11 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		Date cunnentTime = new Date();
 		Timestamp currentTimestamp = new Timestamp(cunnentTime.getTime());
 		this.updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode(), RechargeStatus.INACTIVE.getCode());
+		
+		return order;
 	}
 	
-	private void onlinePayPmBillSuccess(OnlinePayBillCommand cmd) {
+	private RechargeInfo onlinePayPmBillSuccess(OnlinePayBillCommand cmd) {
 		
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayPmBillSuccess");
@@ -76,20 +79,7 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 			
 		}
 		
-		if(order.getNumberType().byteValue() == 0) {
-			//停车系统接口：根据车牌查到有效期结束时间，加上充值月份，为新的到期时间
-			
-			while(true) {
-				//调用停车系统接口：返回充值结果
-				
-				if(true) {
-					this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode(), RechargeStatus.SUCCESS.getCode());
-					break;
-				}
-			}
-			
-		}
-		
+		return order;
 	}
 	
 	private void checkPayAmountIsNull(String payAmount) {

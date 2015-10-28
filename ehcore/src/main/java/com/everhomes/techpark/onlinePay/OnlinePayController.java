@@ -8,6 +8,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.techpark.park.RechargeInfo;
 
 @RestDoc(value = "OnlinePay controller", site = "ehcore")
 @RestController
@@ -24,8 +25,8 @@ public class OnlinePayController {
 	@RestReturn(value=String.class)
 	public RestResponse onlinePayBill(OnlinePayBillCommand cmd){
 		
-		onlinePay.onlinePayBill(cmd);
-		RestResponse response = new RestResponse();
+		RechargeInfo order = onlinePay.onlinePayBill(cmd);
+		RestResponse response = new RestResponse(order);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
