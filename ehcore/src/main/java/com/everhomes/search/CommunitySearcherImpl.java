@@ -26,6 +26,7 @@ import com.everhomes.address.ListAllCommunitesCommand;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.enterprise.EnterpriseCommunityType;
 
 @Service
 public class CommunitySearcherImpl extends AbstractElasticSearch implements CommunitySearcher {
@@ -52,6 +53,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             b.field("cityId", community.getCityId());
             b.field("cityName", community.getCityName());
             b.field("regionId", (community.getAreaId() == null ? community.getCityId() : community.getAreaId()));
+            b.field("communityType", community.getCommunityType());
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -124,9 +126,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
 
         return null;
     }
-
-    @Override
-    public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long regionId, int pageNum, int pageSize) {
+    
+    private List<CommunityDoc> searchDocsByType(String queryString, EnterpriseCommunityType t, Long cityId, Long regionId, int pageNum, int pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb;
@@ -146,6 +147,12 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         if((null != regionId) && (regionId > 0)) {
             fb = FilterBuilders.orFilter(FilterBuilders.termFilter("cityId", regionId)
                     , FilterBuilders.termFilter("regionId", regionId));
+        }
+        
+        if(null == fb) {
+            fb = FilterBuilders.termFilter("communityType", t.getCode());
+        } else {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", EnterpriseCommunityType.Normal.getCode()));
         }
         
         if(null != fb) {
@@ -169,7 +176,17 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             }
         }
         
-        return comIds;
+        return comIds;        
+    }
+
+    @Override
+    public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString, EnterpriseCommunityType.Normal, cityId, regionId, pageNum, pageSize);
+    }
+    
+    @Override
+    public List<CommunityDoc> searchEnterprise(String queryString, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString, EnterpriseCommunityType.Enterprise, null, regionId, pageNum, pageSize);
     }
 
 }

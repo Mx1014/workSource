@@ -31,6 +31,10 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
             "regionId": {
                 "type": "long",
                 "index": "not_analyzed"
+                },
+            "communityType": {
+                "type": "long",
+                "index": "not_analyzed"
                 }
             }
         }

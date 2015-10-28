@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.SearchCommunityCommand;
+import com.everhomes.community.CommunityDoc;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -63,6 +65,17 @@ public class EnterpriseController extends ControllerBase {
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
+    }
+    
+    @RequestMapping("searchCommunities")
+    @RestReturn(value=CommunityDoc.class, collection=true)
+    public RestResponse searchCommunities(@Valid SearchEnterpriseCommunityCommand cmd) {
+        List<CommunityDoc> results = this.enterpriseService.searchCommunities(cmd);
+        RestResponse response =  new RestResponse(results);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**

@@ -8,14 +8,20 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.address.SearchCommunityCommand;
+import com.everhomes.community.CommunityDoc;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.core.AppConfig;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class EnterpriseServiceImpl implements EnterpriseService {
@@ -25,6 +31,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
    
     @Autowired
     private ConfigurationProvider configProvider;
+    
+    @Autowired
+    private CommunitySearcher communitySearcher;
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
@@ -73,6 +82,19 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         resp.setEnterprises(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+    
+    @Override
+    public List<CommunityDoc> searchCommunities(SearchEnterpriseCommunityCommand cmd) {
+        if(cmd.getKeyword() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid keyword paramter.");
+        }
+        int pageNum = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
+        final int pageSize = cmd.getPageSize() == null ? this.configProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        
+        return communitySearcher.searchEnterprise(cmd.getKeyword(), cmd.getRegionId(), pageNum - 1, pageSize);
     }
     
     @Override
