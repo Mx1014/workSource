@@ -1,12 +1,14 @@
 package com.everhomes.enterprise;
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 
 public class ListEnterpriseResponse {
     private Long nextPageAnchor;
     
     @ItemType(EnterpriseDTO.class)
-    private EnterpriseDTO enterprises;
+    private List<EnterpriseDTO> enterprises;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -16,11 +18,11 @@ public class ListEnterpriseResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public EnterpriseDTO getEnterprises() {
+    public List<EnterpriseDTO> getEnterprises() {
         return enterprises;
     }
 
-    public void setEnterprises(EnterpriseDTO enterprises) {
+    public void setEnterprises(List<EnterpriseDTO> enterprises) {
         this.enterprises = enterprises;
     }
     

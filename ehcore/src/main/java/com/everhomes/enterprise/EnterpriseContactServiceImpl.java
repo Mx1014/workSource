@@ -1,5 +1,6 @@
 package com.everhomes.enterprise;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -7,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserService;
@@ -20,7 +24,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     UserService userService;
     
     @Autowired
+    EnterpriseService enterpriseService;
+    
+    @Autowired
     private EnterpriseContactProvider enterpriseContactProvider;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
     
     @Override
     public List<EnterpriseContact> listContacts() {
@@ -90,8 +100,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
     @Override
     public List<Enterprise> queryEnterpriseByPhone(String phone) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.enterpriseService.listEnterpriseByPhone(phone);
     }
 
     @Override
@@ -116,6 +125,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
      * 申请加入企业
      * @param contact
      */
+    @Override
     public EnterpriseContact applyForContact(CreateContactByUserIdCommand cmd) {
         //Check exists
         EnterpriseContact existContact = this.enterpriseContactProvider.queryContactByUserId(cmd.getEnterpriseId(), cmd.getUserId());
@@ -197,5 +207,53 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             this.enterpriseContactProvider.updateContactGroupMember(member);
         }
         
+    }
+    
+    /**
+     * 显示所有通讯录列表
+     * @param locator
+     * @param enterpriseId
+     * @param count
+     * @return
+     */
+    @Override
+    public List<EnterpriseContactDetail> listContactByEnterpriseId(ListingLocator locator, Long enterpriseId, Integer pageSize) {
+        int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+        List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactByEnterpriseId(locator, enterpriseId, count);
+        List<EnterpriseContactDetail> details = new ArrayList<EnterpriseContactDetail>();
+        for(EnterpriseContact contact : contacts) {
+            EnterpriseContactDetail detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
+            EnterpriseContactGroupMember member = this.enterpriseContactProvider.getContactGroupMemberByContactId(enterpriseId, contact.getId());
+            if (member != null) {
+                EnterpriseContactGroup group = this.enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+                if(group != null) {
+                    detail.setGroupName(group.getName());
+                }
+            }
+            
+            List<EnterpriseContactEntry> entries = this.enterpriseContactProvider.queryContactEntryByContactId(contact);
+            if(entries != null && entries.size() > 0) {
+                detail.setPhone(entries.get(0).getEntryValue());
+            }
+            
+            details.add(detail);
+            
+        }
+        
+        return details;
+    }
+    
+    public EnterpriseContactDetail getContactByPhone(String phone) {
+        EnterpriseContactDetail detail = null;
+        EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(phone);
+        if(entry != null) {
+            EnterpriseContact contact = this.enterpriseContactProvider.getContactById(entry.getContactId());
+            if(contact != null) {
+                detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
+                detail.setPhone(phone);
+            }
+        }
+        
+        return detail;
     }
 }

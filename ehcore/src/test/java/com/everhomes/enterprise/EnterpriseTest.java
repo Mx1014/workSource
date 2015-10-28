@@ -94,7 +94,7 @@ public class EnterpriseTest extends LoginAuthTestCase {
         Assert.assertTrue(ents.size() > 0);
         
         CrossShardListingLocator l2 = new CrossShardListingLocator();
-        List<EnterpriseCommunityMap> ents2 = this.enterpriseProvider.queryContactGroupMembers(l2, 100, null);
+        List<EnterpriseCommunityMap> ents2 = this.enterpriseProvider.queryEnterpriseCommunityMap(l2, 100, null);
         Assert.assertTrue(ents2.size() > 0);
         
         ep.setIntegralTag1(333l);
@@ -107,7 +107,7 @@ public class EnterpriseTest extends LoginAuthTestCase {
         //Assert.assertTrue(e3 == null);
     }
     
-    @Test
+    //@Test
     public void testContact() {
         Long enterpriseId = 125565l;
         EnterpriseContact contact = new EnterpriseContact();
@@ -167,5 +167,11 @@ public class EnterpriseTest extends LoginAuthTestCase {
         CrossShardListingLocator l5 = new CrossShardListingLocator();
         List<EnterpriseContactGroupMember> members = this.enterpriseContactProvider.queryContactGroupMembers(l5, count, null);
         Assert.assertTrue(member.getId() > 0);
+    }
+    
+    @Test
+    public void testJoin() {
+        List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone("1234567890");
+        Assert.assertTrue(enterprises.size() > 0);
     }
 }

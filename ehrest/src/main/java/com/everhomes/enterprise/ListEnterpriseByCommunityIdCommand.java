@@ -14,7 +14,7 @@ public class ListEnterpriseByCommunityIdCommand {
     @NotNull
     Long communityId;
     
-    Long status;
+    Integer status;
     
     private Long pageAnchor;
     private Integer pageSize;
@@ -42,4 +42,14 @@ public class ListEnterpriseByCommunityIdCommand {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+    
+    
 }

@@ -1,14 +1,21 @@
 package com.everhomes.enterprise;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.ConvertHelper;
 
 /**
  * <ul>
@@ -26,6 +33,8 @@ import com.everhomes.rest.RestResponse;
 @RequestMapping("/contact")
 public class EnterpriseContactController extends ControllerBase {
 
+    @Autowired
+    EnterpriseContactService enterpriseContactService;
     
     /**
      * <b>URL: /contact/createContactByPhoneCommand</b>
@@ -46,7 +55,20 @@ public class EnterpriseContactController extends ControllerBase {
     @RequestMapping("createContactByUserIdCommand")
     @RestReturn(value=EnterpriseContactDTO.class)
     public RestResponse createContactByUserIdCommand(@Valid CreateContactByUserIdCommand cmd) {
-        return null;
+        EnterpriseContact contact = this.enterpriseContactService.applyForContact(cmd);
+        
+        RestResponse res = new RestResponse();
+        if (null == contact) {
+            //TODO for error code
+            res.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION); 
+        } else {
+            res.setResponseObject(ConvertHelper.convert(contact, EnterpriseContactDTO.class));
+        }
+        
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
     }
     
     /**
@@ -57,7 +79,23 @@ public class EnterpriseContactController extends ControllerBase {
     @RequestMapping("listContactsByEnterpriseId")
     @RestReturn(value=ListEnterpriseContactResponse.class)
     public RestResponse listContactsByEnterpriseId(@Valid ListContactsByEnterpriseIdCommand cmd) {
-        return null;
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize());
+        List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
+        for(EnterpriseContactDetail detail : details) {
+            dtos.add(ConvertHelper.convert(detail, EnterpriseContactDTO.class));
+        }
+        
+        ListEnterpriseContactResponse resp = new ListEnterpriseContactResponse();
+        resp.setContacts(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        RestResponse res = new RestResponse();
+        res.setResponseObject(resp);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
     }
     
     /**

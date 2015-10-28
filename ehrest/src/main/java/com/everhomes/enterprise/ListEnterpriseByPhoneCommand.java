@@ -2,7 +2,7 @@ package com.everhomes.enterprise;
 
 import javax.validation.constraints.NotNull;
 
-public class ListEnterpriseByPhone {
+public class ListEnterpriseByPhoneCommand {
     @NotNull
     private String phone;
 

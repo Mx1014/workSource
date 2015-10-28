@@ -2,6 +2,8 @@ package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -133,6 +135,20 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     @Override
+    public List<EnterpriseContact> listContactByEnterpriseId(ListingLocator locator, Long enterpriseId, int count) {
+        return this.queryContactByEnterpriseId(locator, enterpriseId, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.Approved.getCode()));
+                return query;
+            }
+            
+        });
+    }
+    
+    @Override
     public List<EnterpriseContact> queryContacts(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
@@ -238,6 +254,21 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     @Override
+    public List<EnterpriseContactEntry> queryContactEntryByContactId(EnterpriseContact contact) {
+        ListingLocator locator = new ListingLocator();
+        return this.queryContactEntryByEnterpriseId(locator, contact.getEnterpriseId(), 100, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(contact.getEnterpriseId()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(contact.getId()));
+                return query;
+            }
+        });
+    }
+    
+    @Override
     public List<EnterpriseContactEntry> queryContactEntries(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContactEntry> contacts = new ArrayList<EnterpriseContactEntry>();
@@ -272,6 +303,30 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
  
         });
         return contacts;
+    }
+    
+    /**
+     * 通过手机好查询通讯录
+     */
+    @Override
+    public  EnterpriseContactEntry getEnterpriseContactEntryByPhone(String value) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<EnterpriseContactEntry>  entries = this.queryContactEntries(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(value));
+                return query;
+            }
+            
+        });
+        
+        if(entries != null && entries.size() > 0) {
+            return entries.get(0);
+        }
+        
+        return null;
     }
     
     @Override
@@ -496,6 +551,38 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     @Override
+    public EnterpriseContactGroupMember getContactGroupMemberByContactId(Long enterpriseId, Long contactId) {
+        ListingLocator locator = new ListingLocator();
+        
+        List<EnterpriseContactGroupMember> members = this.queryContactGroupMemberByEnterpriseId(locator, enterpriseId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ENTERPRISE_ID.eq(enterpriseId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_ID.eq(contactId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.Inactive.getCode()));
+                return query;
+            }
+            
+        });
+        
+        //Now, the contact only has a parent group 
+//        Collections.sort(members, new Comparator<EnterpriseContactGroupMember>() {
+//            @Override
+//            public int compare(EnterpriseContactGroupMember o1, EnterpriseContactGroupMember o2) {
+//            }
+//            
+//        });
+        
+        if(null != members && members.size() > 0) {
+            return members.get(0);
+        }
+        
+        return null;
+    }
+    
+    @Override
     public List<EnterpriseContactGroupMember> queryContactGroupMembers(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseContactGroupMember> contacts = new ArrayList<EnterpriseContactGroupMember>();
@@ -531,4 +618,9 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
         return contacts;
     }
+    
+//    @Override
+//    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {
+//        EnterpriseContactRecordMapper
+//    }
 }

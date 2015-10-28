@@ -1,14 +1,20 @@
 package com.everhomes.enterprise;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.ConvertHelper;
 
 /**
  * <ul>
@@ -28,6 +34,9 @@ import com.everhomes.rest.RestResponse;
 @RequestMapping("/enterprise")
 public class EnterpriseController extends ControllerBase {
 
+    @Autowired
+    EnterpriseService enterpriseService;
+    
     /**
      * <b>URL: /enterprise/listEnterpriseByCommunityId</b>
      * <p>获取小区下的所有企业 TODO: 放管理后台？</p>
@@ -36,7 +45,10 @@ public class EnterpriseController extends ControllerBase {
     @RequestMapping("listEnterpriseByCommunityId")
     @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse listEnterpriseByCommunityId(@Valid ListEnterpriseByCommunityIdCommand cmd) {
-        return null;
+        RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     /**
@@ -47,7 +59,10 @@ public class EnterpriseController extends ControllerBase {
     @RequestMapping("enterpriseCommunities")
     @RestReturn(value=EnterpriseCommunityResponse.class)
     public RestResponse getEnterpriseCommunities(@Valid GetEnterpriseInfoCommand cmd) {
-        return null;
+        RestResponse res = new RestResponse(enterpriseService.listEnterpriseEnrollCommunties(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     /**
@@ -58,7 +73,12 @@ public class EnterpriseController extends ControllerBase {
     @RequestMapping("enterpriseDetail")
     @RestReturn(value=EnterpriseDTO.class)
     public RestResponse getEnterpriseDetail(@Valid GetEnterpriseInfoCommand cmd) {
-        return null;
+        EnterpriseCommunity ec = this.enterpriseService.getEnterpriseCommunityById(cmd.getEnterpriseId());
+        EnterpriseCommunityDTO dto = ConvertHelper.convert(ec, EnterpriseCommunityDTO.class);
+        RestResponse res = new RestResponse(dto);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     /**
@@ -90,8 +110,18 @@ public class EnterpriseController extends ControllerBase {
    */
   @RequestMapping("listEnterpriseByPhone")
   @RestReturn(value=QueryEnterpriseByPhoneResponse.class)
-   public RestResponse listEnterpriseByPhone(@Valid ListEnterpriseByPhone cmd) {
-      return null;
+   public RestResponse listEnterpriseByPhone(@Valid ListEnterpriseByPhoneCommand cmd) {
+      QueryEnterpriseByPhoneResponse resp = new QueryEnterpriseByPhoneResponse();
+      List<EnterpriseDTO> dtos = new ArrayList<EnterpriseDTO>();
+      for(Enterprise en : this.enterpriseService.listEnterpriseByPhone(cmd.getPhone())) {
+          dtos.add(ConvertHelper.convert(en, EnterpriseDTO.class));
+      }
+      resp.setEnterprises(dtos);
+      RestResponse res = new RestResponse();
+      res.setErrorCode(ErrorCodes.SUCCESS);
+      res.setErrorDescription("OK");
+      
+      return res;
   }
    
    

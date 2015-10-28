@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
+import org.jooq.Record1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +28,8 @@ import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
+import com.everhomes.server.schema.tables.records.EhGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -48,6 +53,8 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     //TODO enterprise field
     @Override
     public void createEnterprise(Enterprise enterprise) {
+        
+        //TODO for forum
         enterprise.setDiscriminator(GroupDiscriminator.Enterprise.getCode());
         this.groupProvider.createGroup(enterprise);
     }
@@ -90,8 +97,13 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         return ents;
     }
     
+//    public List<Enterprise> queryEnterpriseByCommunityId(CrossShardListingLocator locator, int count) {
+//        public List<Enterprise> listEnterpriseByCommunityId(Long communityId)
+//    }
+    
     @Override
     public void createEnterpriseCommunity(Long creatorId, EnterpriseCommunity ec) {
+        //TODO for forum
         ec.setCommunityType(EnterpriseCommunityType.Enterprise.getCode());
         this.communityProvider.createCommunity(creatorId, ec);
     }
@@ -176,7 +188,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     }
     
     @Override
-    public List<EnterpriseCommunityMap> queryContactGroupMembers(CrossShardListingLocator locator, int count, 
+    public List<EnterpriseCommunityMap> queryEnterpriseCommunityMap(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<EnterpriseCommunityMap> contacts = new ArrayList<EnterpriseCommunityMap>();
         if(locator.getShardIterator() == null) {
@@ -210,5 +222,39 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
  
         });
         return contacts;
+    }
+    
+    //Use join
+    @Override
+    public List<Enterprise> queryEnterpriseByPhone(String phone) {
+        final List<Enterprise> enterprises = new ArrayList<>();
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhGroupsRecord> query = context.selectQuery(Tables.EH_GROUPS);     
+            SelectConditionStep<Record1<Long>> step2 = context.select(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID)
+                    .from(Tables.EH_ENTERPRISE_CONTACTS).join(Tables.EH_ENTERPRISE_CONTACT_ENTRIES)
+                    .on(Tables.EH_ENTERPRISE_CONTACTS.ID.eq(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID))
+                    .where(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(phone));
+            query.addConditions(Tables.EH_GROUPS.ID.in(step2));
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_GROUPS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_GROUPS.ID.asc());
+            
+            query.fetch().map((r) -> {
+                enterprises.add(ConvertHelper.convert(r, Enterprise.class));
+                return null;
+            });
+           
+            return AfterAction.next;
+        });
+        
+        return enterprises;
     }
 }
