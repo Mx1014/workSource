@@ -12,7 +12,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 
@@ -21,7 +23,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseContactServiceImpl.class);
     
     @Autowired
-    UserService userService;
+    private UserProvider userProvider;
     
     @Autowired
     EnterpriseService enterpriseService;
@@ -32,53 +34,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     @Autowired
     private ConfigurationProvider configProvider;
     
-    @Override
-    public List<EnterpriseContact> listContacts() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void createContact(EnterpriseContact contact) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void updateContact(EnterpriseContact contact) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void deleteContactById(Long contactId) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public List<EnterpriseContactGroupMember> listMembersByGroupId(Long groupId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void createGroup(EnterpriseContactGroup group) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void updateGroup(EnterpriseContactGroup group) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void deleteByGroupId(Long groupId) {
-        // TODO Auto-generated method stub
-        
-    }
+    @Autowired
+    private UserService userService;
 
     @Override
     public void addContactGroupMember(EnterpriseContactGroup group, EnterpriseContactGroupMember member) {
@@ -94,8 +51,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
     @Override
     public List<EnterpriseContact> queryContactByPhone(String phone) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.enterpriseContactProvider.queryEnterpriseContactByPhone(phone);
     }
 
     @Override
@@ -104,21 +60,58 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     }
 
     @Override
-    public void bindUserToContact(User user, EnterpriseContact contact) {
-        // TODO Auto-generated method stub
+    public void processUserForContact(UserIdentifier identifier) {
+        //UserInfo user = userService.getUserSnapshotInfoWithPhone(identifier.getOwnerUid());
+        User user = userProvider.findUserById(identifier.getOwnerUid());
+        List<Enterprise> enterprises = this.enterpriseService.listEnterpriseByPhone(identifier.getIdentifierToken());
+        for(Enterprise en : enterprises) {
+            //Try to create a contact for this enterprise
+            EnterpriseContact contact = this.enterpriseContactProvider.queryContactByUserId(en.getId(), identifier.getOwnerUid());
+            if(null == contact) {
+                //create new contact for it
+                contact = new EnterpriseContact();
+                contact.setAvatar(user.getAvatar());
+                contact.setEnterpriseId(en.getId());
+                contact.setName(user.getNickName());
+                contact.setNickName(user.getNickName());
+                contact.setUserId(user.getId());
+                
+                //auto approved
+                contact.setStatus(EnterpriseContactStatus.Approved.getCode());
+                this.enterpriseContactProvider.createContact(contact);
+                
+                //create a entry for it, but not for all  user identifier
+                EnterpriseContactEntry entry = new EnterpriseContactEntry();
+                entry.setContactId(contact.getId());
+                entry.setCreatorUid(0l);
+                entry.setEnterpriseId(contact.getEnterpriseId());
+                entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
+                entry.setEntryValue(identifier.getIdentifierToken());
+                this.enterpriseContactProvider.createContactEntry(entry);
+            }
+        }
         
     }
 
+    /**
+     * 同意某用户绑定到某企业通讯录，此接口应该用不到
+     */
     @Override
     public void approveUserToContact(User user, EnterpriseContact contact) {
         // TODO Auto-generated method stub
         
     }
 
+    /**
+     * 拒绝用户申请某企业的通讯录
+     */
     @Override
     public void rejectUserFromContact(EnterpriseContact contact) {
-        // TODO Auto-generated method stub
+        //设置为删除
+        contact.setStatus(EnterpriseContactStatus.Inactive.getCode());
+        this.enterpriseContactProvider.updateContact(contact);
         
+        //TODO 发消息
     }
 
     /**
@@ -144,7 +137,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         
         //Create it
         contact.setStatus(EnterpriseContactStatus.Approving.getCode());
-        this.createContact(contact);
+        this.enterpriseContactProvider.createContact(contact);
         
         //Create contact entry from userinfo
         UserInfo userInfo = this.userService.getUserSnapshotInfoWithPhone(contact.getUserId());
@@ -169,7 +162,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     /**
      * 批准用户加入企业
      */
-    public void approveContact(EnterpriseContact contact) {
+    public void approveContact(EnterpriseContact contact) {        
+        //TODO 发消息
+        
         //assert contact is from db and status is approve
         contact.setStatus(EnterpriseContactStatus.Approved.getCode());
         this.enterpriseContactProvider.updateContact(contact);
@@ -243,9 +238,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         return details;
     }
     
-    public EnterpriseContactDetail getContactByPhone(String phone) {
+    /**
+     * 同一个手机好可能在多个企业，可以搜索某一个手机号属于的企业，在查询企业下的具体手机号。
+     * @param phone
+     * @return
+     */
+    public EnterpriseContactDetail getContactByPhone(Long enterpriseId, String phone) {
         EnterpriseContactDetail detail = null;
-        EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(phone);
+        EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(enterpriseId, phone);
         if(entry != null) {
             EnterpriseContact contact = this.enterpriseContactProvider.getContactById(entry.getContactId());
             if(contact != null) {

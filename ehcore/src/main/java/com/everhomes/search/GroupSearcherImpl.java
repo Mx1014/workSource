@@ -34,11 +34,6 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     
     @Autowired
     private ConfigurationProvider  configProvider;
-    
-    @Override
-    public String getIndexName() {
-        return SearchUtils.GROUPINDEXNAME;
-    }
 
     @Override
     public String getIndexType() {

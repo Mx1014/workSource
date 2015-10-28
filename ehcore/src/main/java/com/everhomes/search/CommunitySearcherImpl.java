@@ -36,11 +36,6 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     private CommunityProvider communityProvider;
     
     @Override
-    public String getIndexName() {
-        return SearchUtils.COMMUNITYINDEXNAME;
-    }
-
-    @Override
     public String getIndexType() {
         return SearchUtils.COMMUNITYINDEXTYPE;
     }

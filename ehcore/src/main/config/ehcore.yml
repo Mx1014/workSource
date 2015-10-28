@@ -91,7 +91,7 @@ web.location: /resources/
 redis.bus.host: redis-server
 redis.bus.port: 6379
 redis.store.master.host: redis-server
-redis.store.master.port: 6379
+redis.store.master.port: 6380
 
 #
 # Database configuration
@@ -106,7 +106,8 @@ db.tx.timeout: 600
 #
 # ElasticSearch configuration
 #
-elastic:
+elastic:    
+    index: everhomesv3
     nodes:
         hosts: elasticsearch
         ports: 9300

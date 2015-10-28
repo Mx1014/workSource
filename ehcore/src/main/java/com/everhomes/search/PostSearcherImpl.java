@@ -85,11 +85,6 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     private final String contentcategory = "contentcategory";
     private final String actioncategory = "actioncategory";
-    
-    @Override
-    public String getIndexName() {
-        return SearchUtils.TOPICINDEXNAME;
-    }
 
     @Override
     public String getIndexType() {

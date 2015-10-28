@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -17,6 +18,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.recommend.Recommendation;
+import com.everhomes.recommend.RecommendationRecordMapper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactEntriesDao;
@@ -27,6 +30,7 @@ import com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupsRecor
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMembersRecord;
+import com.everhomes.server.schema.tables.records.EhRecommendationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -48,7 +52,10 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
         contact.setId(id);
         //Default approving state
-        contact.setStatus(EnterpriseContactStatus.Approving.getCode());
+        if(contact.getStatus() == null) {
+            contact.setStatus(EnterpriseContactStatus.Approving.getCode());    
+        }
+        
         contact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
         dao.insert(contact);
@@ -186,6 +193,35 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     @Override
+    public List<EnterpriseContact> queryEnterpriseContactByPhone(String phone) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        
+        final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+            query.addJoin(Tables.EH_ENTERPRISE_CONTACT_ENTRIES
+                    , Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(Tables.EH_ENTERPRISE_CONTACTS.ID));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(EnterpriseContactEntryType.Mobile.getCode()));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(phone));
+            
+            List<EhEnterpriseContactsRecord> records = query.fetch().map(new EnterpriseContactRecordMapper());
+            records.stream().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
+                return null;
+            }).collect(Collectors.toList());
+            return AfterAction.next;
+        });
+        return contacts;
+    }
+    
+    @Override
     public void createContactEntry(EnterpriseContactEntry entry) {
         long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
@@ -306,17 +342,18 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     /**
-     * 通过手机好查询通讯录
+     * 通过手机号查询某一家公司下面的通讯录
      */
     @Override
-    public  EnterpriseContactEntry getEnterpriseContactEntryByPhone(String value) {
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<EnterpriseContactEntry>  entries = this.queryContactEntries(locator, 1, new ListingQueryBuilderCallback() {
+    public  EnterpriseContactEntry getEnterpriseContactEntryByPhone(Long enterpriseId, String value) {
+        ListingLocator locator = new ListingLocator();
+        List<EnterpriseContactEntry>  entries = this.queryContactEntryByEnterpriseId(locator, enterpriseId, 1, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(value));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(enterpriseId));
                 return query;
             }
             

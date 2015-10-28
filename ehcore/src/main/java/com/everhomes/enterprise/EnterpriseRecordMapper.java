@@ -8,7 +8,7 @@ import org.jooq.RecordMapper;
 
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
 
-public class EnterpriseMapper implements RecordMapper<Record, EhGroupsRecord> {
+public class EnterpriseRecordMapper implements RecordMapper<Record, EhGroupsRecord> {
 
     @SuppressWarnings("unchecked")
     @Override
