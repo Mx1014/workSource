@@ -31,7 +31,7 @@ public class AddRentalBillCommand {
 	@ItemType(Long.class)
 	private List<Long> rentalSiteRuleIds;
 	private Byte invoiceFlag;
-	private Double rentalcount;
+	private Double rentalCount;
 //	@ItemType(SiteItemDTO.class)
 //	private List<SiteItemDTO> rentalItems;
 
@@ -88,13 +88,7 @@ public class AddRentalBillCommand {
 		this.enterpriseCommunityId = enterpriseCommunityId;
 	}
 
-	public Double getRentalcount() {
-		return rentalcount;
-	}
-
-	public void setRentalcount(Double rentalcount) {
-		this.rentalcount = rentalcount;
-	}
+	 
 
 	public Byte getInvoiceFlag() {
 		return invoiceFlag;
@@ -110,6 +104,14 @@ public class AddRentalBillCommand {
 
 	public void setRentalSiteRuleIds(List<Long> rentalSiteRuleIds) {
 		this.rentalSiteRuleIds = rentalSiteRuleIds;
+	}
+
+	public Double getRentalCount() {
+		return rentalCount;
+	}
+
+	public void setRentalCount(Double rentalCount) {
+		this.rentalCount = rentalCount;
 	}
 
 //	public List<SiteItemDTO> getRentalItems() {

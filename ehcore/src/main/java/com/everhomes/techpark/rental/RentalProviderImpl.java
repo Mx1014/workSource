@@ -112,35 +112,6 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalSite> findRentalSites(Long enterpriseCommunityId,
-			String siteType, String keyword) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID
-				.equal(enterpriseCommunityId);
-		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
-				.equal(siteType));
-		if (!StringUtils.isEmpty(keyword)) {
-			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
-					.like("%" + keyword + "%")
-					.or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%" + keyword
-							+ "%"))
-					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
-							+ "%")));
-		}
-		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-				.eq(RentalSiteStatus.NORMAL.getCode()));
-		step.where(condition);
-		List<RentalSite> result = step
-				.orderBy(Tables.EH_RENTAL_SITES.ID.desc()).fetch().map((r) -> {
-					return ConvertHelper.convert(r, RentalSite.class);
-				});
-
-		return result;
-	}
-
-	@Override
 	public List<RentalSiteItem> findRentalSiteItems(Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
@@ -421,7 +392,7 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_ITEMS_BILLS);
 		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_BILL_ID
-				.equal(rentalBillId); 
+				.equal(rentalBillId);
 		step.where(condition);
 		List<RentalItemsBill> result = step
 				.orderBy(Tables.EH_RENTAL_ITEMS_BILLS.ID.desc()).fetch()
@@ -578,11 +549,11 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public Integer countRentalSiteItemBills(Long rentalSiteItemId) {
-		 
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectOnConditionStep<Record1<Integer>> step = context
 				.selectCount()
-				.from(Tables.EH_RENTAL_ITEMS_BILLS) 
+				.from(Tables.EH_RENTAL_ITEMS_BILLS)
 				.join(Tables.EH_RENTAL_BILLS)
 				.on(Tables.EH_RENTAL_BILLS.ID
 						.eq(Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_BILL_ID));
@@ -590,7 +561,7 @@ public class RentalProviderImpl implements RentalProvider {
 				.equal(rentalSiteItemId);
 		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 				.ne(SiteBillStatus.FAIL.getCode()));
-		 
+
 		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
@@ -610,7 +581,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectOnConditionStep<Record1<BigDecimal>> step = context
 				.select(Tables.EH_RENTAL_SITES_BILLS.RENTAL_COUNT.sum())
-				.from(Tables.EH_RENTAL_SITES_BILLS) 
+				.from(Tables.EH_RENTAL_SITES_BILLS)
 				.join(Tables.EH_RENTAL_BILLS)
 				.on(Tables.EH_RENTAL_BILLS.ID
 						.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
@@ -618,7 +589,92 @@ public class RentalProviderImpl implements RentalProvider {
 				.equal(siteRuleId);
 		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 				.ne(SiteBillStatus.FAIL.getCode()));
-		 
+
 		return step.where(condition).fetchOneInto(Double.class);
+	}
+
+	@Override
+	public int countRentalBills(Long enterpriseCommunityId, String siteType,
+			Long rentalSiteId, Byte billStatus) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
+				Tables.EH_RENTAL_BILLS);
+		Condition condition = Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
+				.equal(enterpriseCommunityId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+				.equal(siteType));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
+					.equal(rentalSiteId));
+
+		if (null != billStatus)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+					.equal(billStatus));
+		return step.where(condition).fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public List<RentalBill> listRentalBills(Long enterpriseCommunityId,
+			String siteType, Long rentalSiteId, Byte billStatus ,Integer pageOffset,
+			Integer pageSize) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_BILLS);
+		Condition condition = Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
+				.equal(enterpriseCommunityId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+				.equal(siteType));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
+					.equal(rentalSiteId));
+
+		if (null != billStatus)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+					.equal(billStatus));
+		Integer offset = pageOffset == null ? 1 : (pageOffset - 1)
+				* pageSize;
+		step.limit(offset, pageSize);
+
+		List<RentalBill> result = step
+				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalBill.class);
+				});
+
+		return result;
+	}
+
+	@Override
+	public List<RentalSite> findRentalSites(Long enterpriseCommunityId,
+			String siteType, String keyword, Integer pageOffset,
+			Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITES);
+		Condition condition = Tables.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID
+				.equal(enterpriseCommunityId);
+		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
+				.equal(siteType));
+		if (!StringUtils.isEmpty(keyword)) {
+			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
+					.like("%" + keyword + "%")
+					.or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%" + keyword
+							+ "%"))
+					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
+							+ "%")));
+		}
+		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+				.eq(RentalSiteStatus.NORMAL.getCode()));
+		step.where(condition);
+		if (null != pageSize) {
+			Integer offset = pageOffset == null ? 1 : (pageOffset - 1)
+					* pageSize;
+			step.limit(offset, pageSize);
+		}
+		List<RentalSite> result = step
+				.orderBy(Tables.EH_RENTAL_SITES.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSite.class);
+				});
+
+		return result;
 	}
 }

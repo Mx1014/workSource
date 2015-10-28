@@ -6,19 +6,20 @@ import com.everhomes.util.StringHelper;
  * <ul>查询订单
  * <li>enterpriseCommunityId：场所id</li>
  * <li>siteType：场所类型</li> 
- * <li>rentalSiteId：场所ID</li> 
+ * <li>rentalSiteId：场所id</li> 
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
 * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.techpark.rental.SiteBillStatus}</li>   
  * </ul>
  */
-public class FindRentalBillsCommand {
+public class ListRentalBillsCommand {
 
 	private Long enterpriseCommunityId;
 	private String siteType;  
-	
-	private Long pageAnchor;
-	
+	private Long rentalSiteId ;
+
+
+	private Integer pageOffset;
 	private Integer pageSize;
 	private Byte billStatus;
 	@Override
@@ -46,18 +47,7 @@ public class FindRentalBillsCommand {
 		this.siteType = siteType;
 	}
 
-
-
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-
-
-
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-
+ 
 
 
 	public Integer getPageSize() {
@@ -82,7 +72,29 @@ public class FindRentalBillsCommand {
 		this.billStatus = billStatus;
 	}
 
- 
+
+
+	public Long getRentalSiteId() {
+		return rentalSiteId;
+	}
+
+
+
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
+	}
+
+
+
+	public Integer getPageOffset() {
+		return pageOffset;
+	}
+
+
+
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
+	}
 
 
 

@@ -195,7 +195,7 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getEnterpriseCommunityId(), cmd.getSiteType(), null);
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(), null, null, null);
 		for (RentalSite rs : rentalSites) {
 			RentalSiteDTO rsDTO = new RentalSiteDTO();
 			rsDTO.setBuildingName(rs.getBuildingName());
@@ -316,7 +316,7 @@ public class RentalServiceImpl implements RentalService {
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
-				cmd.getKeyword());
+				cmd.getKeyword(),cmd.getPageOffset(), pageSize);
 
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
@@ -425,8 +425,8 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setRentalUid(userId);
 		rentalBill.setInvoiceFlag(cmd.getInvoiceFlag());
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
-		this.valiRentalBill(cmd.getRentalcount(), cmd.getRentalSiteRuleIds());
-		rentalBill.setRentalCount(cmd.getRentalcount());
+		this.valiRentalBill(cmd.getRentalCount(), cmd.getRentalSiteRuleIds());
+		rentalBill.setRentalCount(cmd.getRentalCount());
 		int totalMoney = 0;
 		for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
 			RentalSiteRule rentalSiteRule = rentalProvider
@@ -443,7 +443,7 @@ public class RentalServiceImpl implements RentalService {
 				rentalBill.setEndTime(rentalSiteRule.getEndTime());
 			}
 			totalMoney += rentalSiteRule.getPrice()
-					* (int) (cmd.getRentalcount() / rentalSiteRule.getUnit());
+					* (int) (cmd.getRentalCount() / rentalSiteRule.getUnit());
 		}
 
 		// for (SiteItemDTO siDto : cmd.getRentalItems()) {
@@ -477,7 +477,7 @@ public class RentalServiceImpl implements RentalService {
 				.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
 				.enter(() -> {
 					// this.groupProvider.updateGroup(group);
-					this.valiRentalBill(cmd.getRentalcount(),
+					this.valiRentalBill(cmd.getRentalCount(),
 							cmd.getRentalSiteRuleIds());
 					return this.rentalProvider.createRentalBill(rentalBill);
 				});
@@ -490,8 +490,8 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setSiteType(cmd.getSiteType());
 			rsb.setRentalBillId(rentalBillId);
 			rsb.setTotalMoney(rsr.getPrice()
-					* (int) (cmd.getRentalcount() / rsr.getUnit()));
-			rsb.setRentalCount(cmd.getRentalcount());
+					* (int) (cmd.getRentalCount() / rsr.getUnit()));
+			rsb.setRentalCount(cmd.getRentalCount());
 			rsb.setRentalSiteRuleId(rsr.getId());
 			rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -508,9 +508,11 @@ public class RentalServiceImpl implements RentalService {
 		for (Long siteRuleId : rentalSiteRuleIds) {
 			Double totalCount = Double.valueOf(this.rentalProvider
 					.findRentalSiteRuleById(siteRuleId).getCounts());
-			Double rentalCount = this.rentalProvider
+			Double rentaledCount = this.rentalProvider
 					.sumRentalRuleBillSumCounts(siteRuleId);
-			if ((totalCount - rentalCount) < rentalcount) {
+			if (null == rentaledCount )
+				rentaledCount=0.0;
+			if ((totalCount - rentaledCount) < rentalcount) {
 				throw RuntimeErrorException.errorWith(
 						RentalServiceErrorCode.SCOPE,
 						RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
@@ -795,6 +797,33 @@ public class RentalServiceImpl implements RentalService {
 			rib.setCreatorUid(userId);
 			rentalProvider.createRentalItemBill(rib);
 		}
+	}
+
+	@Override
+	public ListRentalBillsCommandResponse listRentalBills(
+			ListRentalBillsCommand cmd) { 
+		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
+		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+		int totalCount = rentalProvider.countRentalBills(
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),cmd.getRentalSiteId(),
+				cmd.getBillStatus());
+		if (totalCount == 0)
+			return response;
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(
+				configurationProvider, cmd.getPageSize());
+		int pageCount = getPageCount(totalCount, pageSize);
+		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
+		List<RentalBill> bills = rentalProvider.listRentalBills(
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),cmd.getRentalSiteId(),
+				cmd.getBillStatus(), cmd.getPageOffset(), pageCount );
+		response.setRentalBills(new ArrayList<RentalBillDTO>());
+		for(RentalBill bill : bills){
+			RentalBillDTO dto = new RentalBillDTO();
+			mappingRentalBillDTO(dto, bill);
+			response.getRentalBills().add(dto);
+		}
+		return response;
 	}
 
 }
