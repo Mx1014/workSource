@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.naming.java.javaURLContextFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -19,12 +18,15 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -37,6 +39,9 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+    
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	@Autowired
@@ -390,6 +395,7 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void addRentalBill(AddRentalBillCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
+	  
 		java.util.Date reserveTime = new java.util.Date(); 
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -415,14 +421,21 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setRentalUid(userId);
 		rentalBill.setInvoiceFlag(cmd.getInvoiceFlag());
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
-		rentalBill.setStartTime(new Timestamp(cmd.getStartTime()));
-		rentalBill.setEndTime(new Timestamp(cmd.getEndTime()));
+		this.valiRentalBill(cmd.getRentalcount(),cmd.getRentalSiteRuleIds());
 		rentalBill.setRentalCount(cmd.getRentalcount());
 		int totalMoney = 0;
 		for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
 			RentalSiteRule rentalSiteRule = rentalProvider
 					.findRentalSiteRuleById(siteRuleId);
 			rentalSiteRules.add(rentalSiteRule);
+			if(null == rentalBill.getStartTime()||rentalBill.getStartTime().after(rentalSiteRule.getBeginTime()))
+			{
+				rentalBill.setStartTime(rentalSiteRule.getBeginTime());
+			} 
+			if(null == rentalBill.getEndTime()||rentalBill.getEndTime().before(rentalSiteRule.getEndTime()))
+			{
+				rentalBill.setEndTime(rentalSiteRule.getEndTime());
+			}
 			totalMoney += rentalSiteRule.getPrice()
 					* (int) (cmd.getRentalcount() / rentalSiteRule.getUnit());
 		}
@@ -451,7 +464,15 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
 		rentalBill.setCreatorUid(userId);
-		Long rentalBillId = rentalProvider.createRentalBill(rentalBill);
+		
+//		Long rentalBillId = this.rentalProvider.createRentalBill(rentalBill);
+ 
+		Tuple<Long, Boolean> tuple = (Tuple<Long, Boolean>) this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()).enter(()-> {
+//	        this.groupProvider.updateGroup(group);
+			this.valiRentalBill(cmd.getRentalcount(),cmd.getRentalSiteRuleIds());	 
+			return this.rentalProvider.createRentalBill(rentalBill); 
+	    }); 
+		Long rentalBillId = tuple.first();
 		// 循环存物品订单
 		for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			RentalItemsBill rib = new RentalItemsBill();
@@ -480,11 +501,25 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			rsb.setCreatorUid(userId);
+			
 			rentalProvider.createRentalSiteBill(rsb);
 		}
 
 	}
 
+	private void valiRentalBill(Double rentalcount, List<Long> rentalSiteRuleIds) {
+		// 如果有一个规则，剩余的数量少于预定的数量
+		for(Long siteRuleId : rentalSiteRuleIds){
+			Double totalCount= Double.valueOf(this.rentalProvider.findRentalSiteRuleById(siteRuleId).getCounts());
+			Double rentalCount = this.rentalProvider.sumRentalRuleBillSumCounts(siteRuleId);
+			if((totalCount -rentalCount) < rentalcount ){
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
+						" has no enough sites to rental "); 
+			}
+		}
+		
+	}
 	@Override
 	public FindRentalBillsCommandResponse findRentalBills(
 			FindRentalBillsCommand cmd) {

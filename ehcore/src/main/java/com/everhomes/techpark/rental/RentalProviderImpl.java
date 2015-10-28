@@ -605,4 +605,21 @@ public class RentalProviderImpl implements RentalProvider {
 		step.where(condition);
 		step.execute();
 	}
+
+	@Override
+	public Double sumRentalRuleBillSumCounts(Long siteRuleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectOnConditionStep<Record1<BigDecimal>> step = context
+				.select(Tables.EH_RENTAL_SITES_BILLS.RENTAL_COUNT.sum())
+				.from(Tables.EH_RENTAL_SITES_BILLS) 
+				.join(Tables.EH_RENTAL_BILLS)
+				.on(Tables.EH_RENTAL_BILLS.ID
+						.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
+		Condition condition = Tables.EH_RENTAL_SITES_BILLS.RENTAL_SITE_RULE_ID
+				.equal(siteRuleId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+				.ne(SiteBillStatus.FAIL.getCode()));
+		 
+		return step.where(condition).fetchOneInto(Double.class);
+	}
 }

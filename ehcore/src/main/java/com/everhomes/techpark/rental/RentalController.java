@@ -173,9 +173,9 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
+	 * <b>URL: /techpark/rental/listRentalSiteItems</b>
 	 * <p>
-	 * 添加具体场所商品信息
+	 * 查询具体场所商品信息
 	 * </p>
 	 */
 	@RequestMapping("listRentalSiteItems")
@@ -192,7 +192,7 @@ public class RentalController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/rental/deleteRentalSiteItem</b>
 	 * <p>
-	 * 添加具体场所商品信息
+	 * 删除具体场所商品信息
 	 * </p>
 	 */
 	@RequestMapping("deleteRentalSiteItem")
