@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = 1622948514;
+	private static final long serialVersionUID = 2052133830;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -64,7 +64,7 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.counts</code>. site count
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> COUNTS = createField("counts", org.jooq.impl.SQLDataType.INTEGER, this, "site count");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> COUNTS = createField("counts", org.jooq.impl.SQLDataType.DOUBLE, this, "site count");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.unit</code>. 1 or 0.5 basketball yard can rental half
@@ -74,7 +74,7 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.price</code>. how much every step every unit
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> PRICE = createField("price", org.jooq.impl.SQLDataType.INTEGER, this, "how much every step every unit");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> PRICE = createField("price", org.jooq.impl.SQLDataType.DOUBLE, this, "how much every step every unit");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.site_rental_date</code>. which day

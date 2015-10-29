@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1288464193;
+	private static final long serialVersionUID = -2125557921;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
@@ -22,14 +22,15 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp endTime;
 	private java.lang.Double   rentalCount;
-	private java.lang.Integer  payTatolMoney;
-	private java.lang.Integer  reserveMoney;
+	private java.lang.Double   payTotalMoney;
+	private java.lang.Double   siteTotalMoney;
+	private java.lang.Double   reserveMoney;
 	private java.sql.Timestamp reserveTime;
 	private java.sql.Timestamp payStartTime;
 	private java.sql.Timestamp payEndTime;
 	private java.sql.Timestamp payTime;
 	private java.sql.Timestamp cancelTime;
-	private java.lang.Integer  paidMoney;
+	private java.lang.Double   paidMoney;
 	private java.lang.Byte     status;
 	private java.lang.Byte     invoiceFlag;
 	private java.lang.Long     creatorUid;
@@ -49,14 +50,15 @@ public class EhRentalBills implements java.io.Serializable {
 		java.sql.Timestamp startTime,
 		java.sql.Timestamp endTime,
 		java.lang.Double   rentalCount,
-		java.lang.Integer  payTatolMoney,
-		java.lang.Integer  reserveMoney,
+		java.lang.Double   payTotalMoney,
+		java.lang.Double   siteTotalMoney,
+		java.lang.Double   reserveMoney,
 		java.sql.Timestamp reserveTime,
 		java.sql.Timestamp payStartTime,
 		java.sql.Timestamp payEndTime,
 		java.sql.Timestamp payTime,
 		java.sql.Timestamp cancelTime,
-		java.lang.Integer  paidMoney,
+		java.lang.Double   paidMoney,
 		java.lang.Byte     status,
 		java.lang.Byte     invoiceFlag,
 		java.lang.Long     creatorUid,
@@ -73,7 +75,8 @@ public class EhRentalBills implements java.io.Serializable {
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.rentalCount = rentalCount;
-		this.payTatolMoney = payTatolMoney;
+		this.payTotalMoney = payTotalMoney;
+		this.siteTotalMoney = siteTotalMoney;
 		this.reserveMoney = reserveMoney;
 		this.reserveTime = reserveTime;
 		this.payStartTime = payStartTime;
@@ -161,19 +164,27 @@ public class EhRentalBills implements java.io.Serializable {
 		this.rentalCount = rentalCount;
 	}
 
-	public java.lang.Integer getPayTatolMoney() {
-		return this.payTatolMoney;
+	public java.lang.Double getPayTotalMoney() {
+		return this.payTotalMoney;
 	}
 
-	public void setPayTatolMoney(java.lang.Integer payTatolMoney) {
-		this.payTatolMoney = payTatolMoney;
+	public void setPayTotalMoney(java.lang.Double payTotalMoney) {
+		this.payTotalMoney = payTotalMoney;
 	}
 
-	public java.lang.Integer getReserveMoney() {
+	public java.lang.Double getSiteTotalMoney() {
+		return this.siteTotalMoney;
+	}
+
+	public void setSiteTotalMoney(java.lang.Double siteTotalMoney) {
+		this.siteTotalMoney = siteTotalMoney;
+	}
+
+	public java.lang.Double getReserveMoney() {
 		return this.reserveMoney;
 	}
 
-	public void setReserveMoney(java.lang.Integer reserveMoney) {
+	public void setReserveMoney(java.lang.Double reserveMoney) {
 		this.reserveMoney = reserveMoney;
 	}
 
@@ -217,11 +228,11 @@ public class EhRentalBills implements java.io.Serializable {
 		this.cancelTime = cancelTime;
 	}
 
-	public java.lang.Integer getPaidMoney() {
+	public java.lang.Double getPaidMoney() {
 		return this.paidMoney;
 	}
 
-	public void setPaidMoney(java.lang.Integer paidMoney) {
+	public void setPaidMoney(java.lang.Double paidMoney) {
 		this.paidMoney = paidMoney;
 	}
 

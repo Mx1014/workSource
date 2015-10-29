@@ -85,7 +85,7 @@ public class EhRentalSitesBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	/**
 	 * Fetch records that have <code>total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByTotalMoney(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByTotalMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.TOTAL_MONEY, values);
 	}
 

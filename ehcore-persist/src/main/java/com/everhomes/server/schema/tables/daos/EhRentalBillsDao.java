@@ -104,16 +104,23 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>pay_tatol_money IN (values)</code>
+	 * Fetch records that have <code>pay_total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPayTatolMoney(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAY_TATOL_MONEY, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPayTotalMoney(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAY_TOTAL_MONEY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>site_total_money IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchBySiteTotalMoney(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.SITE_TOTAL_MONEY, values);
 	}
 
 	/**
 	 * Fetch records that have <code>reserve_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByReserveMoney(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByReserveMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.RESERVE_MONEY, values);
 	}
 
@@ -155,7 +162,7 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>paid_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAID_MONEY, values);
 	}
 

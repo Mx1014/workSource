@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1217596928;
+	private static final long serialVersionUID = -1631097236;
 
 	private java.lang.Long     id;
 	private java.lang.Long     rentalSiteId;
 	private java.lang.String   name;
-	private java.lang.Integer  price;
+	private java.lang.Double   price;
 	private java.lang.Integer  counts;
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
@@ -30,7 +30,7 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     rentalSiteId,
 		java.lang.String   name,
-		java.lang.Integer  price,
+		java.lang.Double   price,
 		java.lang.Integer  counts,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
@@ -74,11 +74,11 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public java.lang.Integer getPrice() {
+	public java.lang.Double getPrice() {
 		return this.price;
 	}
 
-	public void setPrice(java.lang.Integer price) {
+	public void setPrice(java.lang.Double price) {
 		this.price = price;
 	}
 

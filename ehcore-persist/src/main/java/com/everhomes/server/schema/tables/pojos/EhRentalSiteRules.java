@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1776568129;
+	private static final long serialVersionUID = -1645865723;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
@@ -20,9 +20,9 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.lang.Byte     rentalType;
 	private java.sql.Timestamp beginTime;
 	private java.sql.Timestamp endTime;
-	private java.lang.Integer  counts;
+	private java.lang.Double   counts;
 	private java.lang.Double   unit;
-	private java.lang.Integer  price;
+	private java.lang.Double   price;
 	private java.sql.Date      siteRentalDate;
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
@@ -40,9 +40,9 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Byte     rentalType,
 		java.sql.Timestamp beginTime,
 		java.sql.Timestamp endTime,
-		java.lang.Integer  counts,
+		java.lang.Double   counts,
 		java.lang.Double   unit,
-		java.lang.Integer  price,
+		java.lang.Double   price,
 		java.sql.Date      siteRentalDate,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
@@ -124,11 +124,11 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.endTime = endTime;
 	}
 
-	public java.lang.Integer getCounts() {
+	public java.lang.Double getCounts() {
 		return this.counts;
 	}
 
-	public void setCounts(java.lang.Integer counts) {
+	public void setCounts(java.lang.Double counts) {
 		this.counts = counts;
 	}
 
@@ -140,11 +140,11 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.unit = unit;
 	}
 
-	public java.lang.Integer getPrice() {
+	public java.lang.Double getPrice() {
 		return this.price;
 	}
 
-	public void setPrice(java.lang.Integer price) {
+	public void setPrice(java.lang.Double price) {
 		this.price = price;
 	}
 

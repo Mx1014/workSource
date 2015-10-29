@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord> {
 
-	private static final long serialVersionUID = 910282903;
+	private static final long serialVersionUID = 1760066503;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_items_bills</code>
@@ -59,7 +59,7 @@ public class EhRentalItemsBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	/**
 	 * The column <code>ehcore.eh_rental_items_bills.total_money</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Integer> TOTAL_MONEY = createField("total_money", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord, java.lang.Double> TOTAL_MONEY = createField("total_money", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_items_bills.creator_uid</code>.

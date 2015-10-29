@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1578695403;
+	private static final long serialVersionUID = -1663862641;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
@@ -19,7 +19,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 	private java.lang.Long     rentalBillId;
 	private java.lang.Long     rentalSiteItemId;
 	private java.lang.Integer  rentalCount;
-	private java.lang.Integer  totalMoney;
+	private java.lang.Double   totalMoney;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -34,7 +34,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		java.lang.Long     rentalBillId,
 		java.lang.Long     rentalSiteItemId,
 		java.lang.Integer  rentalCount,
-		java.lang.Integer  totalMoney,
+		java.lang.Double   totalMoney,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
@@ -101,11 +101,11 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.rentalCount = rentalCount;
 	}
 
-	public java.lang.Integer getTotalMoney() {
+	public java.lang.Double getTotalMoney() {
 		return this.totalMoney;
 	}
 
-	public void setTotalMoney(java.lang.Integer totalMoney) {
+	public void setTotalMoney(java.lang.Double totalMoney) {
 		this.totalMoney = totalMoney;
 	}
 

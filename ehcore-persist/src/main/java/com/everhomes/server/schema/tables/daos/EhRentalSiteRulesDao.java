@@ -92,7 +92,7 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>counts IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByCounts(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByCounts(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.COUNTS, values);
 	}
 
@@ -106,7 +106,7 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>price IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByPrice(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByPrice(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.PRICE, values);
 	}
 

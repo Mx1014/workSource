@@ -451,8 +451,20 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public RentalBill findRentalBillById(Long rentalBillId) {
-		// TODO Auto-generated method stub
+	public RentalBill findRentalBillById(Long rentalBillId) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_BILLS);
+		Condition condition = Tables.EH_RENTAL_BILLS.ID
+				.equal(rentalBillId); 
+		step.where(condition);
+		List<RentalBill> result = step
+				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalBill.class);
+				});
+
+		if (null != result && result.size() > 0)
+			return result.get(0);
 		return null;
 	}
 

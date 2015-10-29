@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = 1427410264;
+	private static final long serialVersionUID = 348579507;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -140,199 +140,213 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.pay_tatol_money</code>. total money ,include items and site
+	 * Setter for <code>ehcore.eh_rental_bills.pay_total_money</code>. total money ,include items and site
 	 */
-	public void setPayTatolMoney(java.lang.Integer value) {
+	public void setPayTotalMoney(java.lang.Double value) {
 		setValue(9, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.pay_tatol_money</code>. total money ,include items and site
+	 * Getter for <code>ehcore.eh_rental_bills.pay_total_money</code>. total money ,include items and site
 	 */
-	public java.lang.Integer getPayTatolMoney() {
-		return (java.lang.Integer) getValue(9);
+	public java.lang.Double getPayTotalMoney() {
+		return (java.lang.Double) getValue(9);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_bills.site_total_money</code>.
+	 */
+	public void setSiteTotalMoney(java.lang.Double value) {
+		setValue(10, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_bills.site_total_money</code>.
+	 */
+	public java.lang.Double getSiteTotalMoney() {
+		return (java.lang.Double) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
 	 */
-	public void setReserveMoney(java.lang.Integer value) {
-		setValue(10, value);
+	public void setReserveMoney(java.lang.Double value) {
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
 	 */
-	public java.lang.Integer getReserveMoney() {
-		return (java.lang.Integer) getValue(10);
+	public java.lang.Double getReserveMoney() {
+		return (java.lang.Double) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time 
 	 */
 	public void setReserveTime(java.sql.Timestamp value) {
-		setValue(11, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time 
 	 */
 	public java.sql.Timestamp getReserveTime() {
-		return (java.sql.Timestamp) getValue(11);
+		return (java.sql.Timestamp) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.pay_start_time</code>.
 	 */
 	public void setPayStartTime(java.sql.Timestamp value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.pay_start_time</code>.
 	 */
 	public java.sql.Timestamp getPayStartTime() {
-		return (java.sql.Timestamp) getValue(12);
+		return (java.sql.Timestamp) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.pay_end_time</code>.
 	 */
 	public void setPayEndTime(java.sql.Timestamp value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.pay_end_time</code>.
 	 */
 	public java.sql.Timestamp getPayEndTime() {
-		return (java.sql.Timestamp) getValue(13);
+		return (java.sql.Timestamp) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.pay_time</code>.
 	 */
 	public void setPayTime(java.sql.Timestamp value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.pay_time</code>.
 	 */
 	public java.sql.Timestamp getPayTime() {
-		return (java.sql.Timestamp) getValue(14);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.cancel_time</code>.
 	 */
 	public void setCancelTime(java.sql.Timestamp value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.cancel_time</code>.
 	 */
 	public java.sql.Timestamp getCancelTime() {
-		return (java.sql.Timestamp) getValue(15);
+		return (java.sql.Timestamp) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.paid_money</code>. already paid money 
 	 */
-	public void setPaidMoney(java.lang.Integer value) {
-		setValue(16, value);
+	public void setPaidMoney(java.lang.Double value) {
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.paid_money</code>. already paid money 
 	 */
-	public java.lang.Integer getPaidMoney() {
-		return (java.lang.Integer) getValue(16);
+	public java.lang.Double getPaidMoney() {
+		return (java.lang.Double) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(17);
+		return (java.lang.Byte) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
 	 */
 	public void setInvoiceFlag(java.lang.Byte value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
 	 */
 	public java.lang.Byte getInvoiceFlag() {
-		return (java.lang.Byte) getValue(18);
+		return (java.lang.Byte) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.creator_uid</code>.
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.creator_uid</code>.
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(19);
+		return (java.lang.Long) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(20);
+		return (java.sql.Timestamp) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.operator_uid</code>.
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.operator_uid</code>.
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(21);
+		return (java.lang.Long) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.operate_time</code>.
 	 */
 	public void setOperateTime(java.sql.Timestamp value) {
-		setValue(22, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.operate_time</code>.
 	 */
 	public java.sql.Timestamp getOperateTime() {
-		return (java.sql.Timestamp) getValue(22);
+		return (java.sql.Timestamp) getValue(23);
 	}
 
 	// -------------------------------------------------------------------------
@@ -361,7 +375,7 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalBillsRecord
 	 */
-	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Integer payTatolMoney, java.lang.Integer reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Integer paidMoney, java.lang.Byte status, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Double payTotalMoney, java.lang.Double siteTotalMoney, java.lang.Double reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Double paidMoney, java.lang.Byte status, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS);
 
 		setValue(0, id);
@@ -373,19 +387,20 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(6, startTime);
 		setValue(7, endTime);
 		setValue(8, rentalCount);
-		setValue(9, payTatolMoney);
-		setValue(10, reserveMoney);
-		setValue(11, reserveTime);
-		setValue(12, payStartTime);
-		setValue(13, payEndTime);
-		setValue(14, payTime);
-		setValue(15, cancelTime);
-		setValue(16, paidMoney);
-		setValue(17, status);
-		setValue(18, invoiceFlag);
-		setValue(19, creatorUid);
-		setValue(20, createTime);
-		setValue(21, operatorUid);
-		setValue(22, operateTime);
+		setValue(9, payTotalMoney);
+		setValue(10, siteTotalMoney);
+		setValue(11, reserveMoney);
+		setValue(12, reserveTime);
+		setValue(13, payStartTime);
+		setValue(14, payEndTime);
+		setValue(15, payTime);
+		setValue(16, cancelTime);
+		setValue(17, paidMoney);
+		setValue(18, status);
+		setValue(19, invoiceFlag);
+		setValue(20, creatorUid);
+		setValue(21, createTime);
+		setValue(22, operatorUid);
+		setValue(23, operateTime);
 	}
 }
