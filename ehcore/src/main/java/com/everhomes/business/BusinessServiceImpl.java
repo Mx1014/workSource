@@ -355,6 +355,9 @@ public class BusinessServiceImpl implements BusinessService {
 
 		//从算法过滤的范围中再缩小范围
 		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
+		
+		final Integer [] favoriteCount = new Integer [1];
+		favoriteCount[0] = 0;
 
 		businesses.forEach(r ->{
 			BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
@@ -363,8 +366,10 @@ public class BusinessServiceImpl implements BusinessService {
 			dto.setCategories(categories);
 			dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
 			dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
-			if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
+			if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
 				dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
+				favoriteCount[0] += 1;
+			}
 			else{
 				dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
 			}
@@ -393,13 +398,14 @@ public class BusinessServiceImpl implements BusinessService {
 			LOGGER.info("getBusinessesByCategory-processRecommendBusinesses");
 		}
 
-		processRecommendBusinesses(recommendBizIds,dtos,category,userId,favoriteBizIds);
+		processRecommendBusinesses(recommendBizIds,dtos,category,userId,favoriteBizIds,favoriteCount);
 
 		sortBusinesses(dtos);
 		
 		List<BusinessDTO> dtos2 = this.operatorByPage(dtos,response,cmd.getPageOffset(),cmd.getPageSize());
 
 		response.setRequests(dtos2);
+		response.setFavoriteCount(favoriteCount[0]);
 		long endTime = System.currentTimeMillis();
 		LOGGER.info("GetBusinesses by category,categoryId=" + cmd.getCategoryId() 
 				+ ",communityId=" + cmd.getCommunityId() + ",elapse=" + (endTime - startTime));
@@ -483,7 +489,7 @@ public class BusinessServiceImpl implements BusinessService {
 	 *	 
 	 */
 	private void processRecommendBusinesses( List<Long> recommendBizIds, List<BusinessDTO> dtos, 
-			Category category, long userId,List<Long> favoriteBizIds){
+			Category category, long userId,List<Long> favoriteBizIds, Integer[] favoriteCount){
 		if(category.getId().longValue() == CATEOGRY_RECOMMEND)
 			return;
 
@@ -500,8 +506,10 @@ public class BusinessServiceImpl implements BusinessService {
 				categories.add(ConvertHelper.convert(category, CategoryDTO.class));
 				dto.setCategories(categories);
 				dto.setLogoUrl(processLogoUrl(r,userId,imageUrl));
-				if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
+				if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
 					dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
+					favoriteCount[0] += 1;
+				}
 				else
 					dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
 				dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());
