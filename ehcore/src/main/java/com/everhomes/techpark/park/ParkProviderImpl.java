@@ -1,13 +1,16 @@
 package com.everhomes.techpark.park;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -17,10 +20,14 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhRechargeInfo;
+import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhParkChargeDao;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhParkCharge;
+import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -101,7 +108,7 @@ public class ParkProviderImpl implements ParkProvider {
 		
 		List<RechargeInfo> rechargeInfo = new ArrayList<RechargeInfo>();
 		if (locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUserIdentifiers.class);
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhRechargeInfo.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             locator.setShardIterator(shardIterator);
         }
@@ -136,5 +143,255 @@ public class ParkProviderImpl implements ParkProvider {
 		return rechargeInfo;
 	}
 
+	@Override
+	public void applyParkingCard(ParkApplyCard apply) {
+		
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkApplyCard.class));
+		apply.setId(id);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkApplyCardRecord record = ConvertHelper.convert(apply, EhParkApplyCardRecord.class);
+		InsertQuery<EhParkApplyCardRecord> query = context.insertQuery(Tables.EH_PARK_APPLY_CARD);
+		query.setRecord(record);
+		query.execute();
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkApplyCard.class, null);
+	}
 
+	@Override
+	public int waitingCardCount() {
+		final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_PARK_APPLY_CARD)
+                            .where(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.WAITING.getCode()))
+                    .fetchOneInto(Integer.class);
+                    return true;
+                });
+		return count[0];
+	}
+
+	@Override
+	public boolean isApplied(String plateNumber) {
+		
+		final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	Condition condition = Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.WAITING.getCode());
+                	condition = condition.or(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.NOTIFIED.getCode()));
+                    count[0] = context.selectCount().from(Tables.EH_PARK_APPLY_CARD)
+                            .where(condition)
+                            .and(Tables.EH_PARK_APPLY_CARD.PLATE_NUMBER.equal(plateNumber))
+                    .fetchOneInto(Integer.class);
+                    return true;
+                });
+		if(count[0] > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public List<ParkApplyCard> searchApply(String applierName, String applierPhone,
+			 String plateNumber, Byte applyStatus, Timestamp beginDay, Timestamp endDay, 
+			 CrossShardListingLocator locator,  int count) {
+		
+		List<ParkApplyCard> apply = new ArrayList<ParkApplyCard>();
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhParkApplyCard.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			
+			if(!StringUtils.isEmpty(applierName))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLIER_NAME.eq(applierName));
+			
+			if(!StringUtils.isEmpty(applierPhone))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLIER_PHONE.eq(applierPhone));
+			
+			if(!StringUtils.isEmpty(plateNumber))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.PLATE_NUMBER.eq(plateNumber));
+			
+			if(applyStatus != null && !"".equals(applyStatus))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(applyStatus));
+			
+			if(beginDay != null && !"".equals(beginDay))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_TIME.ge(beginDay));
+			
+			if(endDay != null && !"".equals(endDay))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_TIME.le(endDay));
+			
+			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
+			query.addLimit(count);
+
+			query.fetch().map((r) -> {
+				apply.add(ConvertHelper.convert(r, ParkApplyCard.class));
+				return null;
+			});
+			
+			if(apply.size() >= count) {
+				locator.setAnchor(apply.get(apply.size()-1).getId());
+				return AfterAction.done;
+			}
+			
+			return AfterAction.next;
+		});
+		
+		if(apply.size() > 0) {
+			locator.setAnchor(apply.get(apply.size()-1).getId());
+		}
+		
+		return apply;
+	}
+
+	@Override
+	public List<RechargeInfo> searchRechargeRecord(Long communityId,
+			String ownerName, String rechargePhone, String plateNumber,
+			CrossShardListingLocator locator, int count) {
+		List<RechargeInfo> rechargeInfo = new ArrayList<RechargeInfo>();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhRechargeInfo.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhRechargeInfoRecord> query = context.selectQuery(Tables.EH_RECHARGE_INFO);
+			query.addConditions(Tables.EH_RECHARGE_INFO.ENTERPRISE_COMMUNITY_ID.eq(communityId));
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_RECHARGE_INFO.ID.lt(locator.getAnchor()));
+			
+			if(!StringUtils.isEmpty(ownerName))
+				query.addConditions(Tables.EH_RECHARGE_INFO.OWNER_NAME.eq(ownerName));
+			
+			if(!StringUtils.isEmpty(rechargePhone))
+				query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_PHONE.eq(rechargePhone));
+			
+			if(!StringUtils.isEmpty(plateNumber))
+				query.addConditions(Tables.EH_RECHARGE_INFO.PLATE_NUMBER.eq(plateNumber));
+			
+			query.addOrderBy(Tables.EH_RECHARGE_INFO.ID.desc());
+			query.addLimit(count);
+
+			query.fetch().map((r) -> {
+				rechargeInfo.add(ConvertHelper.convert(r, RechargeInfo.class));
+				return null;
+			});
+			
+			if(rechargeInfo.size() >= count) {
+				locator.setAnchor(rechargeInfo.get(rechargeInfo.size()-1).getId());
+				return AfterAction.done;
+			}
+			return AfterAction.next;
+		});
+		
+		if(rechargeInfo.size() > 0) {
+			locator.setAnchor(rechargeInfo.get(rechargeInfo.size()-1).getId());
+		}
+		
+		return rechargeInfo;
+	}
+
+	@Override
+	public List<ParkApplyCard> searchTopAppliers(int count) {
+		
+		List<ParkApplyCard> apply = new ArrayList<ParkApplyCard>();
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhParkApplyCard.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.WAITING.getCode()));
+			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
+			query.addLimit(count);
+			
+			query.fetch().map((r) -> {
+				apply.add(ConvertHelper.convert(r, ParkApplyCard.class));
+				return null;
+			});
+			return AfterAction.next;
+		});
+		
+		return apply;
+	}
+
+	@Override
+	public void updateParkApplyCard(ParkApplyCard apply) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhParkApplyCard.class, apply.getId()));
+        EhParkApplyCardDao dao = new EhParkApplyCardDao(context.configuration());
+        dao.update(apply);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkApplyCard.class, apply.getId());
+	}
+
+	@Override
+	public ParkApplyCard findApplierByPhone(String applierPhone) {
+		
+		List<ParkApplyCard> apply = new ArrayList<ParkApplyCard>();
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhParkApplyCard.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.NOTIFIED.getCode()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLIER_PHONE.eq(applierPhone));
+			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
+			
+			query.fetch().map((r) -> {
+				apply.add(ConvertHelper.convert(r, ParkApplyCard.class));
+				return null;
+			});
+			return AfterAction.next;
+		});
+		
+		if(apply != null && apply.size() > 0)
+			return apply.get(0);
+		
+		return null;
+	}
+
+	@Override
+	public void updateInvalidAppliers() {
+		
+		Timestamp current = new Timestamp(System.currentTimeMillis());
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhParkApplyCard.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.NOTIFIED.getCode()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.DEADLINE.lt(current));
+			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
+			
+			query.fetch().map((r) -> {
+				r.setApplyStatus(ApplyParkingCardStatus.INACTIVE.getCode());
+				EhParkApplyCard applier = ConvertHelper.convert(r, EhParkApplyCard.class);
+				EhParkApplyCardDao dao = new EhParkApplyCardDao(context.configuration());
+		        dao.update(applier);
+		        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkApplyCard.class, applier.getId());
+				return null;
+			});
+			return AfterAction.next;
+		});
+		
+	}
+
+	
 }

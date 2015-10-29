@@ -22,7 +22,7 @@ public class OnlinePayController {
 	 * <p>线上支付
 	 */
 	@RequestMapping("onlinePayBill")
-	@RestReturn(value=String.class)
+	@RestReturn(value=RechargeInfo.class)
 	public RestResponse onlinePayBill(OnlinePayBillCommand cmd){
 		
 		RechargeInfo order = onlinePay.onlinePayBill(cmd);

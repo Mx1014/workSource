@@ -9,6 +9,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.techpark.punch.PunchLogsDayList;
 
 
@@ -72,21 +73,6 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/park/searchPlateInfoByNumber</b>
-	 * search plate info by plate number
-	 * @return
-	 */
-	@RequestMapping("searchPlateInfoByNumber")
-	@RestReturn(value = PlateInfo.class, collection = true)
-	public RestResponse searchByNumber(){
-		
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
 	 * <b>URL: /techpark/listParkingCharge</b>
 	 * list all parking charge rule
 	 * @return
@@ -102,5 +88,35 @@ public class ParkController extends ControllerBase{
 		return response;
 	}
 	
-
+	/**
+	 * <b>URL: /techpark/applyParkingCard</b>
+	 * apply for parking card
+	 * @return
+	 */
+	@RequestMapping("applyParkingCard")
+	@RestReturn(value = WaitingLine.class)
+	public RestResponse applyParkingCard(PlateNumberCommand cmd) {
+		
+		WaitingLine waiting = new WaitingLine();
+		waiting.setWaitingPeople(parkService.applyParkingCard(cmd));
+		RestResponse response = new RestResponse(waiting);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/refreshParkingSystem</b>
+	 * pay order and return parameters the parking system need
+	 * @return
+	 */
+	@RequestMapping("refreshParkingSystem")
+	@RestReturn(value = RefreshParkingSystemResponse.class)
+	public RestResponse refreshParkingSystem(OnlinePayBillCommand cmd) {
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
