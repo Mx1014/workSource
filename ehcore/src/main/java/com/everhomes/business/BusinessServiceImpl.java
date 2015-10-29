@@ -61,6 +61,7 @@ import com.everhomes.launchpad.ScaleType;
 import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.GetUserDefaultAddressCommand;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.ListUserCommand;
@@ -1364,6 +1365,97 @@ public class BusinessServiceImpl implements BusinessService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Business id is null or empty.");
 		}
+	}
+
+	@Override
+	public BusinessDTO findBusinessById(FindBusinessByIdCommand cmd) {
+		this.checkBizIdIsNull(cmd.getId());
+		
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		
+		Business r = this.businessProvider.findBusinessById(cmd.getId());
+		
+		final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
+		final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
+		final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
+		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
+		
+		BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
+		List<CategoryDTO> categories = new ArrayList<>();
+		dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
+		dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
+		//店铺图标需要裁剪
+		if(r.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode()){
+			dto.setScaleType(ScaleType.TAILOR.getCode());
+		}
+		
+		if(cmd.getCommunityId() != null){
+			Community community = this.checkCommunity(cmd.getCommunityId(),true);
+			List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+			if(points == null || points.isEmpty()){
+				LOGGER.error("Community geo points is not exists,communityId=" + cmd.getCommunityId());
+				throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST,"Community geo points is not exists.");
+			}
+			CommunityGeoPoint point = points.get(0);
+			final double lat = point != null ? point.getLatitude() : 0;
+			final double lon = point != null ? point.getLongitude() : 0;
+			
+			List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
+					.map(r2->r2.getOwnerId()).collect(Collectors.toList());
+			List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
+			
+			if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
+				dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
+			else
+				dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
+			
+			if(recommendBizIds != null && recommendBizIds.contains(r.getId()))
+				dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());
+			else
+				dto.setRecommendStatus(BusinessRecommendStatus.NONE.getCode());
+			
+			if(lat != 0 || lon != 0)
+				dto.setDistance((int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
+			else
+				dto.setDistance(0);
+		}
+		return dto;
+	}
+
+	private Community checkCommunity(Long communityId, boolean isException) {
+		Community com = this.communityProvider.findCommunityById(communityId);
+		if(com == null){
+			LOGGER.error("Community is not exists.id=" + communityId);
+			if(isException)
+				throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BUSINESS_NOT_EXIST,"Community is not exists.");
+			else
+				return null;
+		}
+		return com;
+	}
+
+	@Override
+	public ListBusinessByKeywordCommandResponse listBusinessByKeyword(ListBusinessByKeywordCommand cmd) {
+		ListBusinessByKeywordCommandResponse response = new ListBusinessByKeywordCommandResponse();
+		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
+		
+		cmd.setPageOffset(cmd.getPageOffset() == null?1:cmd.getPageOffset());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long offset = PaginationHelper.offsetFromPageOffset((long)cmd.getPageOffset(), (long)pageSize);
+		List<Business> list = this.businessProvider.listBusinessesByKeyword(cmd.getKeyword(), (int)offset, pageSize+1);
+		if(list != null && !list.isEmpty()){
+			if(list.size()>pageSize){
+				response.setNextPageOffset(cmd.getPageOffset()+1);
+				list.remove(list.size()-1);
+			}
+			dtos = list.stream().map(r -> {
+				BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
+				return dto;
+			}).collect(Collectors.toList());
+		}
+		response.setList(dtos);
+		return response;
 	}
 
 }
