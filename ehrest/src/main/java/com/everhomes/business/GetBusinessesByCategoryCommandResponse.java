@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>requests: 商家列表，参考{@link com.everhomes.business.BusinessDTO}</li>
  * <li>nextPageOffset: 下一页页码</li>
+ * <li>favoriteCount: 收藏的店铺个数</li>
  * </ul>
  */
 
@@ -18,6 +19,7 @@ public class GetBusinessesByCategoryCommandResponse{
     @ItemType(BusinessDTO.class)
     private List<BusinessDTO> requests;
     private Integer nextPageOffset;
+    private Integer favoriteCount;
 
     public List<BusinessDTO> getRequests() {
         return requests;
@@ -35,7 +37,15 @@ public class GetBusinessesByCategoryCommandResponse{
         this.nextPageOffset = nextPageOffset;
     }
 
-    @Override
+    public Integer getFavoriteCount() {
+		return favoriteCount;
+	}
+
+	public void setFavoriteCount(Integer favoriteCount) {
+		this.favoriteCount = favoriteCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
