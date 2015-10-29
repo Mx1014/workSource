@@ -7,6 +7,7 @@ package com.everhomes.techpark.rental;
  * <li>SUCCESS(2): 全部支付预定成功</li>
  * <li>PAYINGFINAL(3): 待支付全款</li>
  * <li>FAIL(4): 失败，解锁</li>
+ * <li>DELETED(5): 用户删除，不展示</li>
  * </ul>
  */
 public enum SiteBillStatus {

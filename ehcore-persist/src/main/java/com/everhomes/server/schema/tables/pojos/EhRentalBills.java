@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2125557921;
+	private static final long serialVersionUID = 1542935901;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
@@ -31,6 +31,7 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.sql.Timestamp payTime;
 	private java.sql.Timestamp cancelTime;
 	private java.lang.Double   paidMoney;
+	private java.lang.Byte     visibleFlag;
 	private java.lang.Byte     status;
 	private java.lang.Byte     invoiceFlag;
 	private java.lang.Long     creatorUid;
@@ -59,6 +60,7 @@ public class EhRentalBills implements java.io.Serializable {
 		java.sql.Timestamp payTime,
 		java.sql.Timestamp cancelTime,
 		java.lang.Double   paidMoney,
+		java.lang.Byte     visibleFlag,
 		java.lang.Byte     status,
 		java.lang.Byte     invoiceFlag,
 		java.lang.Long     creatorUid,
@@ -84,6 +86,7 @@ public class EhRentalBills implements java.io.Serializable {
 		this.payTime = payTime;
 		this.cancelTime = cancelTime;
 		this.paidMoney = paidMoney;
+		this.visibleFlag = visibleFlag;
 		this.status = status;
 		this.invoiceFlag = invoiceFlag;
 		this.creatorUid = creatorUid;
@@ -234,6 +237,14 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setPaidMoney(java.lang.Double paidMoney) {
 		this.paidMoney = paidMoney;
+	}
+
+	public java.lang.Byte getVisibleFlag() {
+		return this.visibleFlag;
+	}
+
+	public void setVisibleFlag(java.lang.Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
 	}
 
 	public java.lang.Byte getStatus() {

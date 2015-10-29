@@ -888,9 +888,28 @@ public class RentalServiceImpl implements RentalService {
 		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
 			mappingRentalBillDTO(dto, bill);
+			dto.setSiteItems(new ArrayList<SiteItemDTO>());
+			List<RentalItemsBill> rentalSiteItems = rentalProvider
+					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+			for (RentalItemsBill rib : rentalSiteItems) {
+				SiteItemDTO siDTO = new SiteItemDTO();
+				siDTO.setCounts(rib.getRentalCount());
+				RentalSiteItem rsItem = rentalProvider
+						.findRentalSiteItemById(rib.getRentalSiteItemId());
+				siDTO.setItemName(rsItem.getName());
+				siDTO.setItemPrice(rib.getTotalMoney());
+				dto.getSiteItems().add(siDTO);
+			}
 			response.getRentalBills().add(dto);
 		}
 		return response;
+	}
+
+	@Override
+	public void deleteRentalBill(DeleteRentalBillCommand cmd) {
+		// TODO Auto-generated method stub
+		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
+
 	}
 
 }

@@ -337,6 +337,7 @@ public class RentalProviderImpl implements RentalProvider {
 		}
 		if (null != status)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS.eq(status));
+		condition = condition.and(Tables.EH_RENTAL_BILLS.VISIBLE_FLAG.eq(VisibleFlag.VISIBLE.getCode()));
 		final Condition condition2 = condition;
 		this.dbProvider.mapReduce(
 				AccessSpec.readOnlyWith(EhCommunities.class),
@@ -726,5 +727,16 @@ public class RentalProviderImpl implements RentalProvider {
 		dao.update(bill);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalBills.class,
 				bill.getId());
+	}
+
+	@Override
+	public void deleteRentalBillById(Long rentalBillId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_RENTAL_BILLS.ID.equal(rentalBillId);
+		UpdateConditionStep<EhRentalBillsRecord> step = context
+				.update(Tables.EH_RENTAL_BILLS)
+				.set(Tables.EH_RENTAL_BILLS.VISIBLE_FLAG,
+						VisibleFlag.UNVISIBLE.getCode()).where(condition);
+		step.execute();
 	}
 }

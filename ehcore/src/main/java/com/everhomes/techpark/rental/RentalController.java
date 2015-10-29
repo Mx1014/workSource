@@ -319,6 +319,22 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/rental/deleteRentalBill</b>
+	 * <p>
+	 * 取消订单
+	 * </p>
+	 */
+	@RequestMapping("deleteRentalBill")
+	@RestReturn(value = String.class)
+	public RestResponse deleteRentalBill(@Valid DeleteRentalBillCommand cmd) {
+		rentalService.deleteRentalBill(cmd); 
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * <b>URL: /techpark/rental/findRentalBills</b>
 	 * <p>
