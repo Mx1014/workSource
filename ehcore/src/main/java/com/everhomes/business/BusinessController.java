@@ -3,6 +3,8 @@ package com.everhomes.business;
 
 
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,36 @@ public class BusinessController extends ControllerBase {
     
     @Autowired
     private BusinessService businessService;
+    
+    /**
+     * <b>URL: /business/findBusinessById</b>
+     *
+     */
+    @RequestMapping("findBusinessById")
+    @RestReturn(value=BusinessDTO.class)
+    public RestResponse findBusinessById(@Valid FindBusinessByIdCommand cmd) {
+        
+    	BusinessDTO res = businessService.findBusinessById(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /business/listBusinessByKeyword</b>
+     *
+     */
+    @RequestMapping("listBusinessByKeyword")
+    @RestReturn(value=ListBusinessByKeywordCommandResponse.class)
+    public RestResponse listBusinessByKeyword(@Valid ListBusinessByKeywordCommand cmd) {
+        
+    	ListBusinessByKeywordCommandResponse res = businessService.listBusinessByKeyword(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /business/getBusinessesByCategory</b>
