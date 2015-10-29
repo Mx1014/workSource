@@ -55,6 +55,8 @@ public class CommunityDTO {
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
     private java.lang.Long     requestStatus;
+    private java.lang.Byte     communityType;
+    
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
 
@@ -259,6 +261,14 @@ public class CommunityDTO {
 
     public void setGeoPointList(List<CommunityGeoPointDTO> geoPointList) {
         this.geoPointList = geoPointList;
+    }
+
+    public java.lang.Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(java.lang.Byte communityType) {
+        this.communityType = communityType;
     }
 
     @Override
