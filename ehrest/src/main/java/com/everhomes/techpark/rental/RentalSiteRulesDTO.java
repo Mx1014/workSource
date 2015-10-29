@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>unit：场所单位:1or0.5</li> 
  * <li>price：场所数量</li> 
  * <li>ruleDate：规则日期</li>  
- * <li>Status：循环方式 参考{@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 
+ * <li>Status： OPEN(0),CLOSE(1){@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 
  * </ul>
  */
 public class RentalSiteRulesDTO {
@@ -23,7 +23,7 @@ public class RentalSiteRulesDTO {
 	private Double unit;
 	private Integer price;
 	private Long ruleDate; 
-	private Byte Status;
+	private Byte status;
 	
 	
 	
@@ -73,13 +73,13 @@ public class RentalSiteRulesDTO {
 
 
 	public Byte getStatus() {
-		return Status;
+		return status;
 	}
 
 
 
 	public void setStatus(Byte status) {
-		Status = status;
+		this.status = status;
 	}
 
 

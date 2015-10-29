@@ -22,6 +22,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -41,7 +42,8 @@ public class RentalServiceImpl implements RentalService {
 
 	@Autowired
 	private CoordinationProvider coordinationProvider;
-
+	@Autowired
+	private LocaleStringService localeStringService;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	@Autowired
@@ -281,6 +283,8 @@ public class RentalServiceImpl implements RentalService {
 				for (RentalSitesBill rsb : rsbs) {
 					RentalItemsBill rib = rentalProvider.findRentalItemBill(
 							rsb.getRentalBillId(), rsi.getId());
+					if(null == rib || null == rib.getRentalCount())
+						continue;
 					ruleOrderSum += rib.getRentalCount();
 				}
 				// 获取该物品的最大预订量
@@ -409,21 +413,25 @@ public class RentalServiceImpl implements RentalService {
 			LOGGER.error("reserve Time before reserve start time");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
-					"reserve Time before reserve start time");
+					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY),    UserContext.current().getUser().getLocale(),
+							"reserve Time before reserve start time"));
 		}
 		if (reserveTime.after(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getRentalEndTime()))) {
 			LOGGER.error("reserve Time after reserve end time");
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
-					"reserve Time after reserve end time");
+					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE),    UserContext.current().getUser().getLocale(),
+							"reserve Time after reserve end time"));
 		}
 		RentalBill rentalBill = new RentalBill();
 		rentalBill.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
 		rentalBill.setSiteType(cmd.getSiteType());
 		rentalBill.setRentalSiteId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
-		rentalBill.setInvoiceFlag(cmd.getInvoiceFlag());
+		rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 		this.valiRentalBill(cmd.getRentalCount(), cmd.getRentalSiteRuleIds());
 		rentalBill.setRentalCount(cmd.getRentalCount());
@@ -516,7 +524,9 @@ public class RentalServiceImpl implements RentalService {
 				throw RuntimeErrorException.errorWith(
 						RentalServiceErrorCode.SCOPE,
 						RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
-						" has no enough sites to rental ");
+						localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
+								String.valueOf(RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES),    UserContext.current().getUser().getLocale(),
+								" has no enough sites to rental "));
 			}
 		}
 
@@ -743,7 +753,9 @@ public class RentalServiceImpl implements RentalService {
 		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					"HAS BILL IN YOUR DELETE STUFF");
+					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),    UserContext.current().getUser().getLocale(),
+							"HAS BILL IN YOUR DELETE STUFF"));
 		}
 		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
 				RentalSiteStatus.DELETED.getCode());
@@ -756,7 +768,10 @@ public class RentalServiceImpl implements RentalService {
 		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					"HAS BILL IN YOUR DELETE STUFF");
+					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),    UserContext.current().getUser().getLocale(),
+			                "HAS BILL IN YOUR DELETE STUFF"));
+			
 		}
 		rentalProvider.deleteRentalSiteItemById(cmd.getRentalSiteItemId());
 	}
@@ -783,6 +798,8 @@ public class RentalServiceImpl implements RentalService {
 	public void addRentalItemBill(AddRentalBillItemCommand cmd) {
 		// 循环存物品订单
 		Long userId = UserContext.current().getUser().getId();
+		if(cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
+			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),cmd.getInvoiceFlag());
 		for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			RentalItemsBill rib = new RentalItemsBill();
 			rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());

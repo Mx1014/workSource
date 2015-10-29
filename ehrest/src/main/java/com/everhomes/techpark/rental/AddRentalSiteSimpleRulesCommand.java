@@ -2,6 +2,8 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -22,21 +24,35 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalSiteSimpleRulesCommand {
+	@NotNull
 	private Long enterpriseCommunityId;
+	@NotNull
 	private String siteType;
+	@NotNull
 	private Long rentalSiteId;
+	@NotNull
 	private Byte rentalType;
+	@NotNull
 	private Long beginDate;
+	@NotNull
 	private Long endDate;
-	private Double timeStep;
-	private Double beginTime;
+	@NotNull
+	private Double timeStep; 
+	private Double beginTime; 
 	private Double endTime;
+	@NotNull
 	private Integer counts;
+	@NotNull
 	private Double unit;
+	@NotNull
 	private Integer workdayPrice;
+	@NotNull
 	private Integer weekendPrice;
+	@NotNull
 	private Byte loopType;
+	@NotNull
 	private Byte status;
+	@NotNull
 	private String choosen;
 	
 	

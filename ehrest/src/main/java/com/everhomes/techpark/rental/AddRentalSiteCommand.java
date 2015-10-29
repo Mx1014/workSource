@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,14 +20,23 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalSiteCommand {
+	@NotNull
 	private Long enterpriseCommunityId;
+	@NotNull
 	private String siteType;
+	@NotNull
 	private String siteName;
+	@NotNull
 	private String buildingName;
+	@NotNull
 	private String address;
+	@NotNull
 	private String spec;
+	@NotNull
 	private String company;
+	@NotNull
 	private String contactName;
+	@NotNull
 	private String contactPhonenum;
 	private String siteItems;
 

@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -37,12 +38,15 @@ import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
+import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesRecord;
+import com.everhomes.techpark.punch.EhPunchExceptionRequestMapper;
+import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -264,16 +268,19 @@ public class RentalProviderImpl implements RentalProvider {
 	public List<RentalSitesBill> findRentalSiteBillBySiteRuleId(Long siteRuleId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTAL_SITES_BILLS);
+				Tables.EH_RENTAL_SITES_BILLS).join(Tables.EH_RENTAL_BILLS).on(Tables.EH_RENTAL_BILLS.ID.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
+		
 		Condition condition = Tables.EH_RENTAL_SITES_BILLS.RENTAL_SITE_RULE_ID
 				.equal(siteRuleId);
-
+		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS.ne(SiteBillStatus.FAIL.getCode()));
 		step.where(condition);
-		List<RentalSitesBill> result = step
+		List<EhRentalSitesBillsRecord> resultRecord =step
 				.orderBy(Tables.EH_RENTAL_SITES_BILLS.ID.desc()).fetch()
-				.map((r) -> {
-					return ConvertHelper.convert(r, RentalSitesBill.class);
-				});
+				.map(new RentalSitesBillRecordMapper());
+		
+		List<RentalSitesBill> result = resultRecord.stream().map((r) -> {
+            return ConvertHelper.convert(r, RentalSitesBill.class);
+        }).collect(Collectors.toList()); 
 
 		return result;
 	}
@@ -324,8 +331,8 @@ public class RentalProviderImpl implements RentalProvider {
 		condition = condition
 				.and(Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
 						.eq(enterpriseCommunityId));
-		condition = condition
-				.and(Tables.EH_RENTAL_BILLS.SITE_TYPE.eq(siteType));
+		if(StringUtils.isNotEmpty(siteType))
+			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE.eq(siteType));
 		if (null != userId) {
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_UID
 					.eq(userId));
@@ -601,7 +608,8 @@ public class RentalProviderImpl implements RentalProvider {
 				Tables.EH_RENTAL_BILLS);
 		Condition condition = Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
 				.equal(enterpriseCommunityId);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+		if(StringUtils.isNotEmpty(siteType))
+			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
 				.equal(siteType));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
@@ -622,7 +630,8 @@ public class RentalProviderImpl implements RentalProvider {
 				Tables.EH_RENTAL_BILLS);
 		Condition condition = Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
 				.equal(enterpriseCommunityId);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+		if(StringUtils.isNotEmpty(siteType))
+			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
 				.equal(siteType));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
@@ -676,5 +685,16 @@ public class RentalProviderImpl implements RentalProvider {
 				});
 
 		return result;
+	}
+
+	@Override
+	public Integer updateBillInvoice(Long rentalBillId, Byte invoiceFlag) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_RENTAL_BILLS.ID.equal(rentalBillId);
+		UpdateConditionStep<EhRentalBillsRecord> step = context
+				.update(Tables.EH_RENTAL_BILLS)
+				.set(Tables.EH_RENTAL_BILLS.INVOICE_FLAG, invoiceFlag).where(condition);
+		
+		return step.execute();
 	}
 }

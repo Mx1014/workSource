@@ -2,6 +2,8 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.util.StringHelper;
@@ -22,10 +24,16 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalBillItemCommand {
+	@NotNull
 	private Long rentalSiteId;
+	@NotNull
 	private Long enterpriseCommunityId;
+	@NotNull
+	private Byte invoiceFlag;
+	@NotNull
 	private String siteType;
-	private Long rentalBillId;
+	@NotNull
+	private Long rentalBillId; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
 
@@ -75,6 +83,14 @@ public class AddRentalBillItemCommand {
 
 	public void setRentalItems(List<SiteItemDTO> rentalItems) {
 		this.rentalItems = rentalItems;
+	}
+
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
 	}
  
  

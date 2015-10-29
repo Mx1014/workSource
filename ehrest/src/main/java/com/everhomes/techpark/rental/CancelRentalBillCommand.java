@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -8,8 +10,11 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CancelRentalBillCommand {
+	@NotNull
 	private Long enterpriseCommunityId;
+	@NotNull
 	private String siteType; 
+	@NotNull
 	private Long rentalBillId; 
 	
 	@Override

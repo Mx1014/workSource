@@ -379,8 +379,7 @@ public class RentalController extends ControllerBase {
 	 */
 	@RequestMapping("findRentalSiteItems")
 	@RestReturn(value = FindRentalSiteItemsCommandResponse.class)
-	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsCommand cmd) {
-		//TODO：
+	public RestResponse findRentalSiteItems(@Valid FindRentalSiteItemsCommand cmd) { 
 		FindRentalSiteItemsCommandResponse findRentalSiteItemsCommandResponse = rentalService
 				.findRentalSiteItems(cmd);
 		RestResponse response = new RestResponse(
