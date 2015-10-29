@@ -23,7 +23,7 @@ public class RentalSitesBillRecordMapper implements
 		o.setRentalSiteRuleId(r.getValue((Field<Long>) r
 				.field("rental_site_rule_id")));
 		o.setRentalCount(r.getValue((Field<Double>) r.field("rental_count")));
-		o.setTotalMoney(r.getValue((Field<Integer>) r.field("total_money")));
+		o.setTotalMoney(r.getValue((Field<Double>) r.field("total_money")));
 		o.setCreatorUid(r.getValue((Field<Long>) r.field("creator_uid")));
 		o.setCreateTime(r.getValue((Field<Timestamp>) r.field("create_time")));
 		o.setOperatorUid(r.getValue((Field<Long>) r.field("operator_uid")));

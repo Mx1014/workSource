@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,12 +15,14 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListRentalBillsCommand {
-
+	@NotNull
 	private Long enterpriseCommunityId;
 	private String siteType;  
 	private Long rentalSiteId ;
-
-
+	
+	private Long startTime; 
+	private Long endTime;
+	
 	private Integer pageOffset;
 	private Integer pageSize;
 	private Byte billStatus;
@@ -94,6 +98,30 @@ public class ListRentalBillsCommand {
 
 	public void setPageOffset(Integer pageOffset) {
 		this.pageOffset = pageOffset;
+	}
+
+
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
 	}
 
 

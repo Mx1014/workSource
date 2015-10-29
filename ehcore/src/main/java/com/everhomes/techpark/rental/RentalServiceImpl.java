@@ -197,7 +197,8 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getEnterpriseCommunityId(), cmd.getSiteType(), null, null, null);
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(), null, null,
+				null);
 		for (RentalSite rs : rentalSites) {
 			RentalSiteDTO rsDTO = new RentalSiteDTO();
 			rsDTO.setBuildingName(rs.getBuildingName());
@@ -283,7 +284,7 @@ public class RentalServiceImpl implements RentalService {
 				for (RentalSitesBill rsb : rsbs) {
 					RentalItemsBill rib = rentalProvider.findRentalItemBill(
 							rsb.getRentalBillId(), rsi.getId());
-					if(null == rib || null == rib.getRentalCount())
+					if (null == rib || null == rib.getRentalCount())
 						continue;
 					ruleOrderSum += rib.getRentalCount();
 				}
@@ -320,7 +321,7 @@ public class RentalServiceImpl implements RentalService {
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
-				cmd.getKeyword(),cmd.getPageOffset(), pageSize);
+				cmd.getKeyword(), cmd.getPageOffset(), pageSize);
 
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
@@ -411,20 +412,28 @@ public class RentalServiceImpl implements RentalService {
 		if (reserveTime.before(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getRentalStartTime()))) {
 			LOGGER.error("reserve Time before reserve start time");
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
-					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
-							String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY),    UserContext.current().getUser().getLocale(),
-							"reserve Time before reserve start time"));
+			throw RuntimeErrorException
+					.errorWith(
+							RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
+							localeStringService.getLocalizedString(
+									String.valueOf(RentalServiceErrorCode.SCOPE),
+									String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY),
+									UserContext.current().getUser().getLocale(),
+									"reserve Time before reserve start time"));
 		}
 		if (reserveTime.after(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getRentalEndTime()))) {
 			LOGGER.error("reserve Time after reserve end time");
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
-					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
-							String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE),    UserContext.current().getUser().getLocale(),
-							"reserve Time after reserve end time"));
+			throw RuntimeErrorException
+					.errorWith(
+							RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
+							localeStringService.getLocalizedString(
+									String.valueOf(RentalServiceErrorCode.SCOPE),
+									String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE),
+									UserContext.current().getUser().getLocale(),
+									"reserve Time after reserve end time"));
 		}
 		RentalBill rentalBill = new RentalBill();
 		rentalBill.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
@@ -435,8 +444,10 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 		this.valiRentalBill(cmd.getRentalCount(), cmd.getRentalSiteRuleIds());
 		rentalBill.setRentalCount(cmd.getRentalCount());
-		int totalMoney = 0;
+		Double siteTotalMoney = 0.0;
 		for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
+			if(null == siteRuleId)
+				continue;
 			RentalSiteRule rentalSiteRule = rentalProvider
 					.findRentalSiteRuleById(siteRuleId);
 			rentalSiteRules.add(rentalSiteRule);
@@ -450,23 +461,24 @@ public class RentalServiceImpl implements RentalService {
 							rentalSiteRule.getEndTime())) {
 				rentalBill.setEndTime(rentalSiteRule.getEndTime());
 			}
-			totalMoney += rentalSiteRule.getPrice()
-					* (int) (cmd.getRentalCount() / rentalSiteRule.getUnit());
+			siteTotalMoney += rentalSiteRule.getPrice()
+					* (cmd.getRentalCount() / rentalSiteRule.getUnit());
 		}
 
 		// for (SiteItemDTO siDto : cmd.getRentalItems()) {
 		// totalMoney += siDto.getItemPrice() * siDto.getCounts();
 		// }
-		rentalBill.setPayTatolMoney(totalMoney);
-		rentalBill.setReserveMoney(totalMoney * rentalRule.getPaymentRatio()
-				/ 100);
+		rentalBill.setSiteTotalMoney(siteTotalMoney);
+		rentalBill.setPayTotalMoney(siteTotalMoney);
+		rentalBill.setReserveMoney(siteTotalMoney
+				* rentalRule.getPaymentRatio() / 100);
 		rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
 				.format(reserveTime)));
 		rentalBill.setPayStartTime(new Timestamp(cmd.getStartTime()
 				- rentalRule.getPayStartTime()));
 		rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
 				- rentalRule.getPayEndTime()));
-		rentalBill.setPaidMoney(0);
+		rentalBill.setPaidMoney(0.0);
 		if (reserveTime.before(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getPayStartTime()))) {
 			// 在支付时间之前 为锁定待支付
@@ -514,19 +526,25 @@ public class RentalServiceImpl implements RentalService {
 	private void valiRentalBill(Double rentalcount, List<Long> rentalSiteRuleIds) {
 		// 如果有一个规则，剩余的数量少于预定的数量
 		for (Long siteRuleId : rentalSiteRuleIds) {
+			if(siteRuleId == null )
+				continue;
 			Double totalCount = Double.valueOf(this.rentalProvider
 					.findRentalSiteRuleById(siteRuleId).getCounts());
 			Double rentaledCount = this.rentalProvider
 					.sumRentalRuleBillSumCounts(siteRuleId);
-			if (null == rentaledCount )
-				rentaledCount=0.0;
+			if (null == rentaledCount)
+				rentaledCount = 0.0;
 			if ((totalCount - rentaledCount) < rentalcount) {
-				throw RuntimeErrorException.errorWith(
-						RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
-						localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
-								String.valueOf(RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES),    UserContext.current().getUser().getLocale(),
-								" has no enough sites to rental "));
+				throw RuntimeErrorException
+						.errorWith(
+								RentalServiceErrorCode.SCOPE,
+								RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
+								localeStringService.getLocalizedString(
+										String.valueOf(RentalServiceErrorCode.SCOPE),
+										String.valueOf(RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES),
+										UserContext.current().getUser()
+												.getLocale(),
+										" has no enough sites to rental "));
 			}
 		}
 
@@ -602,10 +620,11 @@ public class RentalServiceImpl implements RentalService {
 		// Integer sitePrice = rentalProvider.getSumSitePrice(dto
 		// .getRentalBillId());
 		// dto.setSitePrice(sitePrice);
-		dto.setTotalPrice(bill.getPayTatolMoney());
+		dto.setTotalPrice(bill.getPayTotalMoney());
+		dto.setSitePrice(bill.getSiteTotalMoney());
 		dto.setReservePrice(bill.getReserveMoney());
 		dto.setPaidPrice(bill.getPaidMoney());
-		dto.setUnPayPrice(bill.getPayTatolMoney() - bill.getPaidMoney());
+		dto.setUnPayPrice(bill.getPayTotalMoney() - bill.getPaidMoney());
 		dto.setInvoiceFlag(bill.getInvoiceFlag());
 		dto.setStatus(bill.getStatus());
 	}
@@ -753,8 +772,10 @@ public class RentalServiceImpl implements RentalService {
 		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
-							String.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),    UserContext.current().getUser().getLocale(),
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+							UserContext.current().getUser().getLocale(),
 							"HAS BILL IN YOUR DELETE STUFF"));
 		}
 		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
@@ -768,10 +789,12 @@ public class RentalServiceImpl implements RentalService {
 		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					localeStringService.getLocalizedString(String.valueOf(RentalServiceErrorCode.SCOPE),
-							String.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),    UserContext.current().getUser().getLocale(),
-			                "HAS BILL IN YOUR DELETE STUFF"));
-			
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+							UserContext.current().getUser().getLocale(),
+							"HAS BILL IN YOUR DELETE STUFF"));
+
 		}
 		rentalProvider.deleteRentalSiteItemById(cmd.getRentalSiteItemId());
 	}
@@ -795,35 +818,60 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public void addRentalItemBill(AddRentalBillItemCommand cmd) {
-		// 循环存物品订单
-		Long userId = UserContext.current().getUser().getId();
-		if(cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
-			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),cmd.getInvoiceFlag());
-		for (SiteItemDTO siDto : cmd.getRentalItems()) {
-			RentalItemsBill rib = new RentalItemsBill();
-			rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
+	public AddRentalBillItemCommandResponse addRentalItemBill(
+			AddRentalBillItemCommand cmd) {
 
-			rib.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
-			rib.setSiteType(cmd.getSiteType());
-			rib.setRentalSiteItemId(siDto.getId());
-			rib.setRentalCount(siDto.getCounts());
-			rib.setRentalBillId(cmd.getRentalBillId());
-			rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			rib.setCreatorUid(userId);
-			rentalProvider.createRentalItemBill(rib);
+		//循环存物品订单
+		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
+		Long userId = UserContext.current().getUser().getId();
+		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
+			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
+					cmd.getInvoiceFlag());
+		if (cmd.getRentalItems() != null) {
+			double itemMoney = 0.0;
+			for (SiteItemDTO siDto : cmd.getRentalItems()) {
+				RentalItemsBill rib = new RentalItemsBill();
+				rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
+
+				rib.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+				rib.setSiteType(cmd.getSiteType());
+				rib.setRentalSiteItemId(siDto.getId());
+				rib.setRentalCount(siDto.getCounts());
+				rib.setRentalBillId(cmd.getRentalBillId());
+				rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				rib.setCreatorUid(userId);
+				itemMoney += rib.getTotalMoney();
+				rentalProvider.createRentalItemBill(rib);
+			}
+			RentalBill bill = rentalProvider.findRentalBillById(cmd
+					.getRentalBillId());
+			if (itemMoney > 0) {
+				bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
+				bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
+			}
+			rentalProvider.updateRentalBill(bill);
+			if (bill.getStatus() == 0) {
+				response.setAmount(bill.getReserveMoney());
+			}
+			if (bill.getStatus() == 3) {
+				response.setAmount(bill.getPayTotalMoney()
+						- bill.getPaidMoney());
+			} 
+			//TODO: 生成订单
 		}
+		return response;
 	}
 
 	@Override
 	public ListRentalBillsCommandResponse listRentalBills(
-			ListRentalBillsCommand cmd) { 
+			ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = rentalProvider.countRentalBills(
-				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),cmd.getRentalSiteId(),
-				cmd.getBillStatus());
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
+				cmd.getRentalSiteId(), cmd.getBillStatus(), cmd.getStartTime(),
+				cmd.getEndTime());
 		if (totalCount == 0)
 			return response;
 
@@ -832,10 +880,12 @@ public class RentalServiceImpl implements RentalService {
 		int pageCount = getPageCount(totalCount, pageSize);
 		checkEnterpriseCommunityIdIsNull(cmd.getEnterpriseCommunityId());
 		List<RentalBill> bills = rentalProvider.listRentalBills(
-				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),cmd.getRentalSiteId(),
-				cmd.getBillStatus(), cmd.getPageOffset(), pageCount );
+				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
+				cmd.getRentalSiteId(), cmd.getBillStatus(),
+				cmd.getPageOffset(), pageCount, cmd.getStartTime(),
+				cmd.getEndTime());
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
-		for(RentalBill bill : bills){
+		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
 			mappingRentalBillDTO(dto, bill);
 			response.getRentalBills().add(dto);

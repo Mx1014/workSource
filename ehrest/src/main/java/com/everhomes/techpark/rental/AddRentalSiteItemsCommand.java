@@ -23,7 +23,7 @@ public class AddRentalSiteItemsCommand {
 	@NotNull
 	private String itemName;
 	@NotNull
-	private Integer itemPrice;
+	private Double itemPrice;
 	@NotNull
 	private Integer counts;
 	@Override
@@ -41,13 +41,7 @@ public class AddRentalSiteItemsCommand {
 	}
 	public void setItemName(String itemName) {
 		this.itemName = itemName;
-	}
-	public Integer getItemPrice() {
-		return itemPrice;
-	}
-	public void setItemPrice(Integer itemPrice) {
-		this.itemPrice = itemPrice;
-	}
+	} 
 	public Integer getCounts() {
 		return counts;
 	}
@@ -65,5 +59,11 @@ public class AddRentalSiteItemsCommand {
 	}
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
+	}
+	public Double getItemPrice() {
+		return itemPrice;
+	}
+	public void setItemPrice(Double itemPrice) {
+		this.itemPrice = itemPrice;
 	}
 }

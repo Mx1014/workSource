@@ -28,6 +28,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhRentalBillsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSitesDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -38,15 +39,12 @@ import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
-import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesRecord;
-import com.everhomes.techpark.punch.EhPunchExceptionRequestMapper;
-import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -602,7 +600,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public int countRentalBills(Long enterpriseCommunityId, String siteType,
-			Long rentalSiteId, Byte billStatus) {
+			Long rentalSiteId, Byte billStatus, Long startTime, Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
@@ -614,7 +612,12 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
-
+		if(null!=startTime   )
+			condition=condition.and(Tables.EH_RENTAL_BILLS.START_TIME
+					.greaterOrEqual(new Timestamp(startTime)));
+		if(null!=endTime   )
+			condition=condition.and(Tables.EH_RENTAL_BILLS.END_TIME
+					.greaterOrEqual(new Timestamp(endTime)));
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 					.equal(billStatus));
@@ -624,7 +627,7 @@ public class RentalProviderImpl implements RentalProvider {
 	@Override
 	public List<RentalBill> listRentalBills(Long enterpriseCommunityId,
 			String siteType, Long rentalSiteId, Byte billStatus ,Integer pageOffset,
-			Integer pageSize) { 
+			Integer pageSize, Long startTime, Long endTime) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
@@ -636,7 +639,12 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
-
+		if(null!=startTime   )
+			condition=condition.and(Tables.EH_RENTAL_BILLS.START_TIME
+					.greaterOrEqual(new Timestamp(startTime)));
+		if(null!=endTime   )
+			condition=condition.and(Tables.EH_RENTAL_BILLS.END_TIME
+					.greaterOrEqual(new Timestamp(endTime)));
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 					.equal(billStatus));
@@ -696,5 +704,15 @@ public class RentalProviderImpl implements RentalProvider {
 				.set(Tables.EH_RENTAL_BILLS.INVOICE_FLAG, invoiceFlag).where(condition);
 		
 		return step.execute();
+	}
+
+	@Override
+	public void updateRentalBill(RentalBill bill) { 
+		assert (bill.getId() == null); 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalBillsDao dao = new EhRentalBillsDao(context.configuration());
+		dao.update(bill);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalBills.class,
+				bill.getId());
 	}
 }

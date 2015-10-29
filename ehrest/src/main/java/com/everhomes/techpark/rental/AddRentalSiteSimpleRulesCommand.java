@@ -41,13 +41,13 @@ public class AddRentalSiteSimpleRulesCommand {
 	private Double beginTime; 
 	private Double endTime;
 	@NotNull
-	private Integer counts;
+	private Double counts;
 	@NotNull
 	private Double unit;
 	@NotNull
-	private Integer workdayPrice;
+	private Double workdayPrice;
 	@NotNull
-	private Integer weekendPrice;
+	private Double weekendPrice;
 	@NotNull
 	private Byte loopType;
 	@NotNull
@@ -86,19 +86,7 @@ public class AddRentalSiteSimpleRulesCommand {
 	}
 
 
-  
-
-
-	public Integer getCounts() {
-		return counts;
-	}
-
-
-
-	public void setCounts(Integer counts) {
-		this.counts = counts;
-	}
-
+   
 
 
 	public Double getUnit() {
@@ -220,28 +208,7 @@ public class AddRentalSiteSimpleRulesCommand {
 	}
 
 
-
-	public Integer getWorkdayPrice() {
-		return workdayPrice;
-	}
-
-
-
-	public void setWorkdayPrice(Integer workdayPrice) {
-		this.workdayPrice = workdayPrice;
-	}
-
-
-
-	public Integer getWeekendPrice() {
-		return weekendPrice;
-	}
-
-
-
-	public void setWeekendPrice(Integer weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
+ 
 
 
 
@@ -253,6 +220,42 @@ public class AddRentalSiteSimpleRulesCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+
+
+	public Double getCounts() {
+		return counts;
+	}
+
+
+
+	public void setCounts(Double counts) {
+		this.counts = counts;
+	}
+
+
+
+	public Double getWorkdayPrice() {
+		return workdayPrice;
+	}
+
+
+
+	public void setWorkdayPrice(Double workdayPrice) {
+		this.workdayPrice = workdayPrice;
+	}
+
+
+
+	public Double getWeekendPrice() {
+		return weekendPrice;
+	}
+
+
+
+	public void setWeekendPrice(Double weekendPrice) {
+		this.weekendPrice = weekendPrice;
 	}
 
  

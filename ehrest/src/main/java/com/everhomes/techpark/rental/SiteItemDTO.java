@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
 public class SiteItemDTO {
 	private Long id;
 	private String itemName;
-	private Integer itemPrice;
+	private Double itemPrice;
 	private Integer counts;
 	
 	
@@ -23,28 +23,8 @@ public class SiteItemDTO {
     }
 
 
-
-	public String getItemName() {
-		return itemName;
-	}
-
-
-
-	public void setItemName(String itemName) {
-		this.itemName = itemName;
-	}
-
-
-
-	public Integer getItemPrice() {
-		return itemPrice;
-	}
-
-
-
-	public void setItemPrice(Integer itemPrice) {
-		this.itemPrice = itemPrice;
-	}
+ 
+ 
 
 
 
@@ -69,4 +49,49 @@ public class SiteItemDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+
+
+
+
+
+
+	public Double getItemPrice() {
+		return itemPrice;
+	}
+
+
+
+
+
+
+
+	public void setItemPrice(Double itemPrice) {
+		this.itemPrice = itemPrice;
+	}
+
+
+
+
+
+
+
+	public String getItemName() {
+		return itemName;
+	}
+
+
+
+
+
+
+
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
+	}
+
+
+
+
+ 
 }

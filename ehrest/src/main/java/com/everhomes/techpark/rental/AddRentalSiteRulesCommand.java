@@ -43,11 +43,11 @@ public class AddRentalSiteRulesCommand {
 	@NotNull
 	private Double endTime;
 	@NotNull
-	private Integer counts;
+	private Double counts;
 	@NotNull
 	private Double unit;
 	@NotNull
-	private Integer price;
+	private Double price;
 	@NotNull
 	private Byte loopType;
 	@NotNull
@@ -84,21 +84,8 @@ public class AddRentalSiteRulesCommand {
 	public void setRentalType(Byte rentalType) {
 		this.rentalType = rentalType;
 	}
-
-
-  
-
-
-	public Integer getCounts() {
-		return counts;
-	}
-
-
-
-	public void setCounts(Integer counts) {
-		this.counts = counts;
-	}
-
+ 
+ 
 
 
 	public Double getUnit() {
@@ -112,17 +99,7 @@ public class AddRentalSiteRulesCommand {
 	}
 
 
-
-	public Integer getPrice() {
-		return price;
-	}
-
-
-
-	public void setPrice(Integer price) {
-		this.price = price;
-	}
-
+ 
  
 
 	public Byte getLoopType() {
@@ -241,6 +218,30 @@ public class AddRentalSiteRulesCommand {
 
 	public void setTimeStep(Double timeStep) {
 		this.timeStep = timeStep;
+	}
+
+
+
+	public Double getPrice() {
+		return price;
+	}
+
+
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
+
+
+	public Double getCounts() {
+		return counts;
+	}
+
+
+
+	public void setCounts(Double counts) {
+		this.counts = counts;
 	}
 
  

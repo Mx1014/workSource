@@ -21,7 +21,7 @@ public class RentalSiteRulesDTO {
 	private Long endTime;
 	private Double counts;
 	private Double unit;
-	private Integer price;
+	private Double price;
 	private Long ruleDate; 
 	private Byte status;
 	
@@ -53,19 +53,7 @@ public class RentalSiteRulesDTO {
 	public void setUnit(Double unit) {
 		this.unit = unit;
 	}
-
-
-
-	public Integer getPrice() {
-		return price;
-	}
-
-
-
-	public void setPrice(Integer price) {
-		this.price = price;
-	}
-
+ 
  
 
 
@@ -140,5 +128,17 @@ public class RentalSiteRulesDTO {
 
 	public void setRuleDate(Long ruleDate) {
 		this.ruleDate = ruleDate;
+	}
+
+
+
+	public Double getPrice() {
+		return price;
+	}
+
+
+
+	public void setPrice(Double price) {
+		this.price = price;
 	}
 }

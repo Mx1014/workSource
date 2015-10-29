@@ -51,11 +51,11 @@ public class RentalBillDTO {
 	private Long payTime;
 	private Long cancelTime;
 	private Long payDeadLineTime;
-	private Integer sitePrice;
-	private Integer totalPrice;
-	private Integer reservePrice;
-	private Integer paidPrice;
-	private Integer unPayPrice;
+	private Double sitePrice;
+	private Double totalPrice;
+	private Double reservePrice;
+	private Double paidPrice;
+	private Double unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
 	private List<SiteItemDTO> siteItems; 
@@ -154,47 +154,7 @@ public class RentalBillDTO {
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
 	}
-
-	public Integer getUnPayPrice() {
-		return unPayPrice;
-	}
-
-	public void setUnPayPrice(Integer unPayPrice) {
-		this.unPayPrice = unPayPrice;
-	}
-
-	public Integer getPaidPrice() {
-		return paidPrice;
-	}
-
-	public void setPaidPrice(Integer paidPrice) {
-		this.paidPrice = paidPrice;
-	}
-
-	public Integer getReservePrice() {
-		return reservePrice;
-	}
-
-	public void setReservePrice(Integer reservePrice) {
-		this.reservePrice = reservePrice;
-	}
-
-	public Integer getTotalPrice() {
-		return totalPrice;
-	}
-
-	public void setTotalPrice(Integer totalPrice) {
-		this.totalPrice = totalPrice;
-	}
-
-	public Integer getSitePrice() {
-		return sitePrice;
-	}
-
-	public void setSitePrice(Integer sitePrice) {
-		this.sitePrice = sitePrice;
-	}
-
+ 
 	public Long getPayDeadLineTime() {
 		return payDeadLineTime;
 	}
@@ -265,5 +225,45 @@ public class RentalBillDTO {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Double getSitePrice() {
+		return sitePrice;
+	}
+
+	public void setSitePrice(Double sitePrice) {
+		this.sitePrice = sitePrice;
+	}
+
+	public Double getTotalPrice() {
+		return totalPrice;
+	}
+
+	public void setTotalPrice(Double totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+
+	public Double getReservePrice() {
+		return reservePrice;
+	}
+
+	public void setReservePrice(Double reservePrice) {
+		this.reservePrice = reservePrice;
+	}
+
+	public Double getPaidPrice() {
+		return paidPrice;
+	}
+
+	public void setPaidPrice(Double paidPrice) {
+		this.paidPrice = paidPrice;
+	}
+
+	public Double getUnPayPrice() {
+		return unPayPrice;
+	}
+
+	public void setUnPayPrice(Double unPayPrice) {
+		this.unPayPrice = unPayPrice;
 	}
 }

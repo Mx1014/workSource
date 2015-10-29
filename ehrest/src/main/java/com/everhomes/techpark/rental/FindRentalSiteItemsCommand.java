@@ -2,6 +2,8 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -14,11 +16,14 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSiteItemsCommand {
-
+ 
 	private Long rentalSiteId;
-	private Long enterpriseCommunityId;
+	@NotNull
+	private Long enterpriseCommunityId; 
+	@NotNull
 	private String siteType;  
-
+	private Long startTime; 
+	private Long endTime;
     @ItemType(Long.class)
 	private List<Long> rentalSiteRuleIds;
 	
@@ -57,6 +62,22 @@ public class FindRentalSiteItemsCommand {
 
 	public void setRentalSiteRuleIds(List<Long> rentalSiteRuleIds) {
 		this.rentalSiteRuleIds = rentalSiteRuleIds;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
 	}
 
  
