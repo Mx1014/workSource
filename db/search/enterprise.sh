@@ -1,11 +1,11 @@
 ELASTIC=elasticsearch:9200
 INDEX=everhomesv31x
+curl -XDELETE http://$ELASTIC/$INDEX/_mapping/enterprise
 
-curl -XDELETE http://$ELASTIC/$INDEX/_mapping/community
-curl -XPUT "http://$ELASTIC/$INDEX/_mapping/community" -d '
+curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
 {
-    "community": {
-        "properties": {
+    "enterprise" : {
+        "properties" : {
             "name": {
                 "type": "multi_field", 
                 "analyzer":"simple",
@@ -24,20 +24,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/community" -d '
                     }
                 }
             }, 
-            "cityName":{"type":"string","index":"no", "store":"yes"},
-            "cityId": {
-                "type": "long",
-                "index": "not_analyzed"
-                },
-            "regionId": {
-                "type": "long",
-                "index": "not_analyzed"
-                },
-            "communityType": {
-                "type": "long",
-                "index": "not_analyzed"
-                }
-            }
+            "description":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+            "createTime":{"type":"date"}
         }
+    }
 }
 '

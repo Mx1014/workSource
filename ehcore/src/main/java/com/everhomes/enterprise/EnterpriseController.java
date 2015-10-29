@@ -78,6 +78,17 @@ public class EnterpriseController extends ControllerBase {
         return response;
     }
     
+    @RequestMapping("searchEnterprise")
+    @RestReturn(value=ListEnterpriseResponse.class)
+    public RestResponse searchEnterprise(@Valid SearchEnterpriseCommand cmd) {
+        ListEnterpriseResponse resp = this.enterpriseService.searchEnterprise(cmd);
+        RestResponse res =  new RestResponse(resp);
+
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
     /**
      * <b>URL: /enterprise/enterpriseDetail</b>
      * <p>获取企业的详细信息</p>

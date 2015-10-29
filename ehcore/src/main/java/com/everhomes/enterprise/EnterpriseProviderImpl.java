@@ -75,9 +75,53 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         this.groupProvider.deleteGroup(id);
     }
     
+    public List<Group> queryGroupsWithOk(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback) {
+        final List<Group> groups = new ArrayList<>();
+        
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhGroupsRecord> query = context.selectQuery(Tables.EH_GROUPS);
+
+            if(callback != null)
+                callback.buildCondition(locator, query);
+                
+            if(locator.getAnchor() != null)
+                query.addConditions(Tables.EH_GROUPS.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_GROUPS.ID.asc());
+            query.addLimit(count - groups.size() + 1);
+            
+            query.fetch().map((r) -> {
+                groups.add(ConvertHelper.convert(r, Group.class));
+                return null;
+            });
+            
+            if(groups.size() > count) {
+                return AfterAction.done;
+            }
+           
+            return AfterAction.next;
+        });
+        
+        if(groups.size() > count) {
+            //Bigger than origin, so has more data
+            groups.remove(groups.size() - 1);
+            locator.setAnchor(groups.get(groups.size() - 1).getId());            
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return groups;
+    }
+    
     @Override
     public List<Enterprise> queryEnterprises(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback) {
-        List<Group> groups = this.groupProvider.queryGroups(locator, count, new ListingQueryBuilderCallback() {
+        List<Group> groups = this.queryGroupsWithOk(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -97,9 +141,10 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         return ents;
     }
     
-//    public List<Enterprise> queryEnterpriseByCommunityId(CrossShardListingLocator locator, int count) {
-//        public List<Enterprise> listEnterpriseByCommunityId(Long communityId)
-//    }
+    @Override
+    public List<Enterprise> listEnterprises(CrossShardListingLocator locator, int count) {
+        return this.queryEnterprises(locator, count, null);
+    }
     
     @Override
     public void createEnterpriseCommunity(Long creatorId, EnterpriseCommunity ec) {

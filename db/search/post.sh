@@ -1,8 +1,9 @@
 ELASTIC=elasticsearch:9200
+INDEX=everhomesv31x
 
-curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/topic
+curl -XDELETE http://$ELASTIC/$INDEX/_mapping/topic
 
-curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
+curl -XPUT "http://$ELASTIC/$INDEX/_mapping/topic" -d '
 {
 	"topic": {
 		"properties": {

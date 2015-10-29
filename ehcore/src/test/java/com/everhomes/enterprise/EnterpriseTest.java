@@ -17,6 +17,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 
@@ -29,6 +30,9 @@ public class EnterpriseTest extends LoginAuthTestCase {
     
     @Autowired
     private EnterpriseContactProvider enterpriseContactProvider;
+    
+    @Autowired
+    private EnterpriseSearcher enterpriseSearcher;
     
     @Configuration
     @ComponentScan(basePackages = {
@@ -169,9 +173,14 @@ public class EnterpriseTest extends LoginAuthTestCase {
         Assert.assertTrue(member.getId() > 0);
     }
     
-    @Test
+    //@Test
     public void testJoin() {
         List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone("1234567890");
         Assert.assertTrue(enterprises.size() > 0);
+    }
+    
+    @Test
+    public void testEnterpriseSearcher() {
+        enterpriseSearcher.syncFromDb();
     }
 }

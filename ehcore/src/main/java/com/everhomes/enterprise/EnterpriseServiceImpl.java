@@ -17,6 +17,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.search.EnterpriseSearcher;
+import com.everhomes.search.GroupQueryResult;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -34,6 +36,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
     private CommunitySearcher communitySearcher;
+    
+    @Autowired
+    EnterpriseSearcher enterpriseSearcher;
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
@@ -96,6 +101,24 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         
         return communitySearcher.searchEnterprise(cmd.getKeyword(), cmd.getRegionId(), pageNum - 1, pageSize);
     }
+    
+    @Override
+    public ListEnterpriseResponse searchEnterprise(SearchEnterpriseCommand cmd) {
+        ListEnterpriseResponse resp = new ListEnterpriseResponse();
+        GroupQueryResult rlt = this.enterpriseSearcher.query(cmd);
+        resp.setNextPageAnchor(rlt.getPageAnchor());
+        List<EnterpriseDTO> ents = new ArrayList<EnterpriseDTO>();
+        for(Long id : rlt.getIds()) {
+            EnterpriseDTO en = ConvertHelper.convert(this.enterpriseProvider.getEnterpriseById(id), EnterpriseDTO.class);
+            if(en != null) {
+                ents.add(en);
+            }
+        }
+        
+        resp.setEnterprises(ents);
+        return resp;
+    }
+    
     
     @Override
     public List<EnterpriseCommunity> listEnterpriseEnrollCommunties(CrossShardListingLocator locator, Long enterpriseId, int pageSize) {

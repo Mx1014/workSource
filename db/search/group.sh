@@ -1,14 +1,15 @@
 ELASTIC=elasticsearch:9200
+INDEX=everhomesv31x
 
-curl -XPUT "http://$ELASTIC/everhomesv3" -d '
+curl -XPUT "http://$ELASTIC/$INDEX" -d '
     "settings" : {
         "number_of_shards" : 1
     },
 '
 
-curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/group
+curl -XDELETE http://$ELASTIC/$INDEX/_mapping/group
 
-curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/group" -d '
+curl -XPUT "http://$ELASTIC/$INDEX/_mapping/group" -d '
 {
     "group" : {
         "properties" : {
