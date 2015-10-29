@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-10-27 15:48:23
+// generated at 2015-10-29 16:34:51
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -146,7 +146,9 @@ public interface ApiConstants {
     public static final String BUSINESS_DELETEBUSINESS_URL = "/business/deleteBusiness";
     public static final String BUSINESS_FAVORITEBUSINESS_URL = "/business/favoriteBusiness";
     public static final String BUSINESS_FAVORITEBUSINESSES_URL = "/business/favoriteBusinesses";
+    public static final String BUSINESS_FINDBUSINESSBYID_URL = "/business/findBusinessById";
     public static final String BUSINESS_GETBUSINESSESBYCATEGORY_URL = "/business/getBusinessesByCategory";
+    public static final String BUSINESS_LISTBUSINESSBYKEYWORD_URL = "/business/listBusinessByKeyword";
     public static final String BUSINESS_UPDATEBUSINESS_URL = "/business/updateBusiness";
     public static final String BUSINESS_UPDATEBUSINESSDISTANCE_URL = "/business/updateBusinessDistance";
     public static final String CATEGORY_LISTACTIONCATEGORIES_URL = "/category/listActionCategories";
