@@ -177,6 +177,8 @@ ALTER TABLE `ehcore`.`eh_communities` ADD COLUMN `community_type` TINYINT NOT NU
 
 
 # TODO move to somewhare?
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
+
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 2, 'zh_CN', '发给企业其它所有成员', '${userName}已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 3, 'zh_CN', '拒绝加入公司', '$您被拒绝加入公司“${enterpriseName}”。');

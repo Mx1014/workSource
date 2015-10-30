@@ -1,5 +1,6 @@
 package com.everhomes.enterprise;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,9 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -110,6 +113,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public Enterprise getEnterpriseById(Long id) {
         return this.enterpriseProvider.getEnterpriseById(id);
+    }
+    
+    @Override
+    public void createEnterprise(Enterprise enterprise) {
+        enterprise.setCreatorUid(UserContext.current().getUser().getId());
+        this.enterpriseProvider.createEnterprise(enterprise);
     }
     
     @Override
@@ -194,33 +203,49 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
     @Override
-    public void requestToJoinCommunity(Enterprise enterprise, Long communtyId) {
+    public void requestToJoinCommunity(User admin, Long enterpriseId, Long communityId) {
+        EnterpriseCommunityMap ec = new EnterpriseCommunityMap();
+        ec.setCommunityId(communityId);
+        ec.setCreatorUid(admin.getId());
+        ec.setMemberId(enterpriseId);
+        ec.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.Approving.getCode());
+        ec.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.enterpriseProvider.createEnterpriseCommunityMap(ec);
+    }
+
+    @Override
+    public void approve(User admin, Long enterpriseId, Long communityId) {
+        EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(enterpriseId, communityId);
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.Approved.getCode());
+        ec.setOperatorUid(admin.getId());
+        this.enterpriseProvider.updateEnterpriseCommunityMap(ec);        
+    }
+
+    @Override
+    public void reject(User admin, Long enterpriseId, Long communityId) {
+        EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(enterpriseId, communityId);
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.Inactive.getCode());
+        ec.setOperatorUid(admin.getId());
+        this.enterpriseProvider.updateEnterpriseCommunityMap(ec);        
+    }
+
+    @Override
+    public void revoke(User admin, Long enterpriseId, Long communityId) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void approve(User admin, Enterprise enterprise, EnterpriseCommunityDTO community) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void reject(User admin, Enterprise enterprise, EnterpriseCommunityDTO community) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void revoke(User admin, Enterprise enterprise, EnterpriseCommunityDTO community) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void inviteToJoinCommunity(Enterprise enterprise, EnterpriseCommunityDTO community) {
-        // TODO Auto-generated method stub
-        
+    public void inviteToJoinCommunity(Long enterpriseId, Long communityId) {
+        EnterpriseCommunityMap ec = new EnterpriseCommunityMap();
+        ec.setCommunityId(communityId);
+        ec.setCreatorUid(UserContext.current().getUser().getId());
+        ec.setMemberId(enterpriseId);
+        ec.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.Inviting.getCode());
+        ec.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.enterpriseProvider.createEnterpriseCommunityMap(ec);
     }
 
     @Override

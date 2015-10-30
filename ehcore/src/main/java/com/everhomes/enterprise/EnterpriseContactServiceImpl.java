@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,9 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupNotificationTemplateCode;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
@@ -29,9 +33,11 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
@@ -98,6 +104,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         Map<Long,Long> ctx = new HashMap<Long, Long>();
         for(Enterprise en : enterprises) {
             //Try to create a contact for this enterprise
+            //TODO change to queryContactByPhone
             EnterpriseContact contact = this.enterpriseContactProvider.queryContactByUserId(en.getId(), identifier.getOwnerUid());
             if(null == contact) {
                 //create new contact for it
@@ -115,7 +122,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 //create a entry for it, but not for all  user identifier
                 EnterpriseContactEntry entry = new EnterpriseContactEntry();
                 entry.setContactId(contact.getId());
-                entry.setCreatorUid(0l);
+                entry.setCreatorUid(UserContext.current().getUser().getId());
                 entry.setEnterpriseId(contact.getEnterpriseId());
                 entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
                 entry.setEntryValue(identifier.getIdentifierToken());
@@ -188,7 +195,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             //TODO for email
             EnterpriseContactEntry entry = new EnterpriseContactEntry();
             entry.setContactId(contact.getId());
-            entry.setCreatorUid(0l);
+            entry.setCreatorUid(UserContext.current().getUser().getId());
             entry.setEnterpriseId(contact.getEnterpriseId());
             entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
             entry.setEntryValue(phone);
@@ -286,6 +293,41 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         return details;
     }
     
+    @Override
+    public List<EnterpriseContactDetail> listContactByStatus(CrossShardListingLocator locator, EnterpriseContactStatus status, Integer pageSize) {
+        int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+        List<EnterpriseContact> contacts = this.enterpriseContactProvider.queryContacts(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(status.getCode()));
+                return query;
+            }
+            
+        });
+        
+        List<EnterpriseContactDetail> details = new ArrayList<EnterpriseContactDetail>();
+        for(EnterpriseContact contact : contacts) {
+            EnterpriseContactDetail detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
+            EnterpriseContactGroupMember member = this.enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+            if (member != null) {
+                EnterpriseContactGroup group = this.enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+                if(group != null) {
+                    detail.setGroupName(group.getName());
+                }
+            }
+            
+            List<EnterpriseContactEntry> entries = this.enterpriseContactProvider.queryContactEntryByContactId(contact);
+            if(entries != null && entries.size() > 0) {
+                detail.setPhone(entries.get(0).getEntryValue());
+            }
+            
+            details.add(detail);
+        }
+        return details;
+    }
+    
     /**
      * 同一个手机好可能在多个企业，可以搜索某一个手机号属于的企业，在查询企业下的具体手机号。
      * @param phone
@@ -305,6 +347,28 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         return detail;
     }
     
+    /**
+     * 后台管理员员创建公司通讯录 TODO for privilege
+     * @param contact
+     * @return
+     */
+    @Override
+    public void createEnterpriseContact(EnterpriseContact contact) {
+        contact.setCreatorUid(UserContext.current().getUser().getId());
+        this.enterpriseContactProvider.createContact(contact);
+    }
+    
+    /**
+     * 后台管理员创建公司通讯录条目
+     */
+    @Override
+    public void createEnterpriseContactEntry(EnterpriseContactEntry entry) {
+        this.enterpriseContactProvider.createContactEntry(entry);
+    }
+    
+    /**
+     * 仅仅用于消息路由
+     */
     @Override
     public List<GroupMember> listMessageGroupMembers(Group group, int pageSize) {
         List<GroupMember> members = new ArrayList<GroupMember>(); 

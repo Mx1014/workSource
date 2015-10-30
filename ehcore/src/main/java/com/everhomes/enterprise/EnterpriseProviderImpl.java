@@ -225,11 +225,35 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
             }
         
-        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc()); ERROR hear
         query.addLimit(count);
         return query.fetch().map((r) -> {
             return ConvertHelper.convert(r, EnterpriseCommunityMap.class);
         });
+    }
+    
+    @Override
+    public EnterpriseCommunityMap findEnterpriseCommunityByEnterpriseId(Long communityId, Long enterpriseId) {
+        ListingLocator locator = new ListingLocator();
+        List<EnterpriseCommunityMap> enterprises = this.queryEnterpriseMapByCommunityId(locator, communityId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(enterpriseId));
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if (null != enterprises && enterprises.size() > 0) {
+            return enterprises.get(0);
+        }
+        
+        return null;
     }
     
     @Override

@@ -234,6 +234,12 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     
     @Override
     public void createContactEntry(EnterpriseContactEntry entry) {
+        Long enterpriseId = entry.getEnterpriseId();
+        if(enterpriseId == null) {
+            EnterpriseContact ec = this.getContactById(entry.getContactId());
+            enterpriseId = ec.getEnterpriseId();
+        }
+        entry.setEnterpriseId(enterpriseId);
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseContactEntries.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
         entry.setId(id);

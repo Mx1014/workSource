@@ -1,22 +1,40 @@
 package com.everhomes.enterprise.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.enterprise.CreateContactCommand;
 import com.everhomes.enterprise.CreateContactEntryCommand;
+import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactDTO;
+import com.everhomes.enterprise.EnterpriseContactDetail;
+import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactEntryDTO;
+import com.everhomes.enterprise.EnterpriseContactService;
+import com.everhomes.enterprise.EnterpriseContactStatus;
+import com.everhomes.enterprise.ListContactCommand;
+import com.everhomes.enterprise.ListEnterpriseContactResponse;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="Enterprise contact admin controller", site="core")
 @RestController
 @RequestMapping("/admin/contact")
-public class EnterpriseContactAdminController {
+public class EnterpriseContactAdminController extends ControllerBase {
+    @Autowired
+    EnterpriseContactService enterpriseContactService;
+    
     /**
      * <b>URL: /admin/contact/createContact</b>
      * <p>创建一个空的待真实用户绑定的通讯录</p>
@@ -25,7 +43,13 @@ public class EnterpriseContactAdminController {
     @RequestMapping("createContact")
     @RestReturn(value=EnterpriseContactDTO.class)
     public RestResponse createContact(@Valid CreateContactCommand cmd) {
-        return null;
+        EnterpriseContact contact = ConvertHelper.convert(cmd, EnterpriseContact.class);
+        this.enterpriseContactService.createEnterpriseContact(contact);
+        EnterpriseContactDTO dto = ConvertHelper.convert(contact, EnterpriseContactDTO.class);
+        RestResponse res = new RestResponse(dto);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     /**
@@ -36,7 +60,32 @@ public class EnterpriseContactAdminController {
     @RequestMapping("createContactEntry")
     @RestReturn(value=EnterpriseContactEntryDTO.class)
     public RestResponse createContactEntry(@Valid CreateContactEntryCommand cmd) {
-        return null;
+        EnterpriseContactEntry entry = ConvertHelper.convert(cmd, EnterpriseContactEntry.class);
+        this.enterpriseContactService.createEnterpriseContactEntry(entry);
+        EnterpriseContactEntryDTO dto = ConvertHelper.convert(entry, EnterpriseContactEntryDTO.class);
+        RestResponse res = new RestResponse(dto);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    @RequestMapping("listAprovingContact")
+    @RestReturn(value=ListEnterpriseContactResponse.class)
+    public RestResponse listAprovingContacts(@Valid ListContactCommand cmd) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByStatus(locator, EnterpriseContactStatus.Approving, cmd.getPageSize());
+        ListEnterpriseContactResponse o = new ListEnterpriseContactResponse();
+        List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
+        for(EnterpriseContactDetail detail : details) {
+            EnterpriseContactDTO dto = ConvertHelper.convert(detail, EnterpriseContactDTO.class);
+            dtos.add(dto);
+        }
+        o.setContacts(dtos);
+        RestResponse res = new RestResponse(o);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;        
     }
     
 }

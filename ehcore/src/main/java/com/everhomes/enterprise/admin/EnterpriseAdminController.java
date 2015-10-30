@@ -2,20 +2,30 @@ package com.everhomes.enterprise.admin;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.enterprise.CreateEnterpriseCommand;
+import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseApproveCommand;
 import com.everhomes.enterprise.EnterpriseDTO;
+import com.everhomes.enterprise.EnterpriseService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="Enterprise Admin controller", site="core")
 @RestController
 @RequestMapping("/admin/enterprise")
-public class EnterpriseAdminController {
+public class EnterpriseAdminController extends ControllerBase {
+    @Autowired
+    EnterpriseService enterpriseService;
+    
     /**
      * <b>URL: /admin/enterprise/approve</b>
      * <p>审批加入园区的企业</p>
@@ -24,25 +34,43 @@ public class EnterpriseAdminController {
     @RequestMapping("approve")
     @RestReturn(value=String.class)
     public RestResponse approve(@Valid EnterpriseApproveCommand cmd) {
-        return null;
+        this.enterpriseService.approve(UserContext.current().getUser(), cmd.getEnterpriseId(), cmd.getCommunityId());
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     @RequestMapping("reject")
     @RestReturn(value=String.class)
     public RestResponse reject(@Valid EnterpriseApproveCommand cmd) {
-        return null;
+        this.enterpriseService.reject(UserContext.current().getUser(), cmd.getEnterpriseId(), cmd.getCommunityId());
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     @RequestMapping("revoke")
     @RestReturn(value=String.class)
     public RestResponse revoke(@Valid EnterpriseApproveCommand cmd) {
-        return null;
+        this.enterpriseService.revoke(UserContext.current().getUser(), cmd.getEnterpriseId(), cmd.getCommunityId());
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
-    @RequestMapping("create")
+    @RequestMapping("createEnterprise")
     @RestReturn(value=EnterpriseDTO.class)
     public RestResponse createEnterpriseCommand(@Valid CreateEnterpriseCommand cmd) {
-        return null;
+        Enterprise entry = ConvertHelper.convert(cmd, Enterprise.class);
+        this.enterpriseService.createEnterprise(entry);
+        EnterpriseDTO dto = ConvertHelper.convert(entry, EnterpriseDTO.class);
+        RestResponse res = new RestResponse(dto);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
 }

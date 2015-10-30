@@ -16,6 +16,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
 /**
@@ -106,14 +107,18 @@ public class EnterpriseController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /enterprise/joinEnterpriseToCommunity</b>
+     * <b>URL: /enterprise/requestToJoinCommunity</b>
      * <p>企业请求加入园区 TODO：客户端完成还是后台管理员完成？</p>
      * @return
      */
-    @RequestMapping("joinEnterpriseToCommunity")
+    @RequestMapping("requestToJoinCommunity")
     @RestReturn(value=String.class)
     public RestResponse joinEnterpriseToCommunity(@Valid JoinEnterpriseToCommunityCommand cmd) {
-        return null;
+        this.enterpriseService.requestToJoinCommunity(UserContext.current().getUser(), cmd.getEnterpriseId(), cmd.getCommunityId());
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     /**
@@ -124,7 +129,11 @@ public class EnterpriseController extends ControllerBase {
    @RequestMapping("inviteToJoinCommunity")
    @RestReturn(value=String.class)
     public RestResponse inviteToJoinCommunity(@Valid JoinEnterpriseToCommunityCommand cmd) {
-       return null;
+       this.enterpriseService.inviteToJoinCommunity(cmd.getEnterpriseId(), cmd.getCommunityId());
+       RestResponse res = new RestResponse();
+       res.setErrorCode(ErrorCodes.SUCCESS);
+       res.setErrorDescription("OK");
+       return res;
    }
    
    /**
