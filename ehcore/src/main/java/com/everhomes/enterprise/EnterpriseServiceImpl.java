@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.address.SearchCommunityCommand;
+import com.everhomes.app.AppConstants;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -16,14 +17,25 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessageBodyType;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessageMetaConstant;
+import com.everhomes.messaging.MessagingConstants;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.MetaObjectType;
+import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.GroupQueryResult;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class EnterpriseServiceImpl implements EnterpriseService {
@@ -39,6 +51,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
     EnterpriseSearcher enterpriseSearcher;
+    
+    @Autowired
+    MessagingService messagingService;
+    
+    @Autowired
+    LocaleTemplateService localeTemplateService;
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {

@@ -26,6 +26,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
 import com.everhomes.server.schema.tables.pojos.EhCooperationRequests;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseContacts;
 import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -251,6 +252,10 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhPushMessageResults.class, Tables.EH_PUSH_MESSAGE_RESULTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_PUSH_MESSAGE_RESULTS.ID.max()).from(Tables.EH_PUSH_MESSAGE_RESULTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhEnterpriseContacts.class, Tables.EH_ENTERPRISE_CONTACTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_CONTACTS.ID.max()).from(Tables.EH_ENTERPRISE_CONTACTS).fetchOne().value1(); 
         });
     }
     

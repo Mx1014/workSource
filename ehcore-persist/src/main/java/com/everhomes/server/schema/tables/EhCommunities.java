@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = 2060871273;
+	private static final long serialVersionUID = -2084245490;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -69,7 +69,7 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_communities.address</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.zipcode</code>.
@@ -119,7 +119,7 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_communities.apt_count</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> APT_COUNT = createField("apt_count", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> APT_COUNT = createField("apt_count", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_communities.creator_uid</code>. user who suggested the creation

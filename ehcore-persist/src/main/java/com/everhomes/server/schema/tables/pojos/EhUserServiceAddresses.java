@@ -11,20 +11,20 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserServiceAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 901447167;
+	private static final long serialVersionUID = -459165905;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
 	private java.lang.Long     addressId;
+	private java.sql.Timestamp createTime;
 	private java.lang.Byte     contactType;
-	private java.lang.String   contactToken;
-	private java.lang.String   contactName;
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   contactToken;
+	private java.lang.String   contactName;
 
 	public EhUserServiceAddresses() {}
 
@@ -32,28 +32,28 @@ public class EhUserServiceAddresses implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Long     ownerUid,
 		java.lang.Long     addressId,
+		java.sql.Timestamp createTime,
 		java.lang.Byte     contactType,
-		java.lang.String   contactToken,
-		java.lang.String   contactName,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
 		java.sql.Timestamp updateTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   contactToken,
+		java.lang.String   contactName
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
 		this.addressId = addressId;
+		this.createTime = createTime;
 		this.contactType = contactType;
-		this.contactToken = contactToken;
-		this.contactName = contactName;
 		this.status = status;
 		this.creatorUid = creatorUid;
-		this.createTime = createTime;
 		this.updateTime = updateTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.contactToken = contactToken;
+		this.contactName = contactName;
 	}
 
 	public java.lang.Long getId() {
@@ -80,28 +80,20 @@ public class EhUserServiceAddresses implements java.io.Serializable {
 		this.addressId = addressId;
 	}
 
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
 	public java.lang.Byte getContactType() {
 		return this.contactType;
 	}
 
 	public void setContactType(java.lang.Byte contactType) {
 		this.contactType = contactType;
-	}
-
-	public java.lang.String getContactToken() {
-		return this.contactToken;
-	}
-
-	public void setContactToken(java.lang.String contactToken) {
-		this.contactToken = contactToken;
-	}
-
-	public java.lang.String getContactName() {
-		return this.contactName;
-	}
-
-	public void setContactName(java.lang.String contactName) {
-		this.contactName = contactName;
 	}
 
 	public java.lang.Byte getStatus() {
@@ -118,14 +110,6 @@ public class EhUserServiceAddresses implements java.io.Serializable {
 
 	public void setCreatorUid(java.lang.Long creatorUid) {
 		this.creatorUid = creatorUid;
-	}
-
-	public java.sql.Timestamp getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
 	}
 
 	public java.sql.Timestamp getUpdateTime() {
@@ -150,5 +134,21 @@ public class EhUserServiceAddresses implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getContactToken() {
+		return this.contactToken;
+	}
+
+	public void setContactToken(java.lang.String contactToken) {
+		this.contactToken = contactToken;
+	}
+
+	public java.lang.String getContactName() {
+		return this.contactName;
+	}
+
+	public void setContactName(java.lang.String contactName) {
+		this.contactName = contactName;
 	}
 }

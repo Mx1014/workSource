@@ -3,6 +3,9 @@ package com.everhomes.enterprise;
 public class SearchEnterpriseCommand {
     String keyword;
     
+    //TODO for communityId, not support now.
+    Long communityId;
+    
     private Long pageAnchor;
     private Integer pageSize;
     
@@ -23,6 +26,12 @@ public class SearchEnterpriseCommand {
     }
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+    public Long getCommunityId() {
+        return communityId;
+    }
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
     
 }

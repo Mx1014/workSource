@@ -165,4 +165,11 @@ public class EhBusinessesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>visible_distance IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBusinesses> fetchByVisibleDistance(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES.VISIBLE_DISTANCE, values);
+	}
 }

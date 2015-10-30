@@ -8,15 +8,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessageBodyType;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessageMetaConstant;
+import com.everhomes.messaging.MessagingConstants;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.messaging.MetaObjectType;
+import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class EnterpriseContactServiceImpl implements EnterpriseContactService {
@@ -36,6 +48,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    MessagingService messagingService;
+    
+    @Autowired
+    LocaleTemplateService localeTemplateService;
 
     @Override
     public void addContactGroupMember(EnterpriseContactGroup group, EnterpriseContactGroupMember member) {
@@ -88,6 +106,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
                 entry.setEntryValue(identifier.getIdentifierToken());
                 this.enterpriseContactProvider.createContactEntry(entry);
+                
+                //TODO send message for this contact
+                //sendMessageForContactApproved(contact);
             }
         }
         
@@ -175,6 +196,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             EnterpriseContactGroup group = this.enterpriseContactProvider.getContactGroupByName(contact.getEnterpriseId(), applyGroup);
             approveContactToGroup(contact, group);
         }
+        
+        //sendMessageForContactApproved(contact);
     }
     
     /**
@@ -255,5 +278,32 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         }
         
         return detail;
+    }
+    
+    private void sendEnterpriseNotification(Long enterpriseId, List<Long> includeList, List<Long> excludeList, 
+            String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
+        if(message != null && message.length() != 0) {
+            String channelType = MessageChannelType.GROUP.getCode();
+            String channelToken = String.valueOf(enterpriseId);
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel(channelType, channelToken));
+            messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
+            if(includeList != null && includeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.INCLUDE, StringHelper.toJsonString(includeList));
+            }
+            if(excludeList != null && excludeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.EXCLUDE, StringHelper.toJsonString(excludeList));
+            }
+            if(metaObjectType != null && metaObject != null) {
+                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
+                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+            }
+            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
+                channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+        }
     }
 }

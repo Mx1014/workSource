@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 976689606;
+	private static final long serialVersionUID = -433518916;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -25,11 +25,11 @@ public class EhOrganizationTasks implements java.io.Serializable {
 	private java.lang.Byte     taskStatus;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp unprocessedTime;
 	private java.sql.Timestamp processingTime;
 	private java.sql.Timestamp processedTime;
-	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
 
 	public EhOrganizationTasks() {}
 
@@ -46,11 +46,11 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		java.lang.Byte     taskStatus,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
+		java.lang.Long     creatorUid,
+		java.sql.Timestamp createTime,
 		java.sql.Timestamp unprocessedTime,
 		java.sql.Timestamp processingTime,
-		java.sql.Timestamp processedTime,
-		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp processedTime
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -64,11 +64,11 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		this.taskStatus = taskStatus;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.creatorUid = creatorUid;
+		this.createTime = createTime;
 		this.unprocessedTime = unprocessedTime;
 		this.processingTime = processingTime;
 		this.processedTime = processedTime;
-		this.creatorUid = creatorUid;
-		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -167,6 +167,22 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
+	}
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
 	public java.sql.Timestamp getUnprocessedTime() {
 		return this.unprocessedTime;
 	}
@@ -189,21 +205,5 @@ public class EhOrganizationTasks implements java.io.Serializable {
 
 	public void setProcessedTime(java.sql.Timestamp processedTime) {
 		this.processedTime = processedTime;
-	}
-
-	public java.lang.Long getCreatorUid() {
-		return this.creatorUid;
-	}
-
-	public void setCreatorUid(java.lang.Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
-	public java.sql.Timestamp getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
 	}
 }
