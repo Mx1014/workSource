@@ -146,9 +146,11 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 	}
 
 	@Override
-	public Long createBillId() {
+	public Long createBillId(Long time) {
 		
-		return null;
+		String bill = String.valueOf(time) + (int) (Math.random()*1000);
+		return Long.valueOf(bill);
 	}
+	
 
 }

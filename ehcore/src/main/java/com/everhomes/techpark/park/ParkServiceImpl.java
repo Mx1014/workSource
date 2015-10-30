@@ -160,8 +160,8 @@ public class ParkServiceImpl implements ParkService {
 		order.setRechargeUsername(user.getNickName());
 		Long time = System.currentTimeMillis();
 		order.setRechargeTime(new Timestamp(time));
-		String bill = String.valueOf(time)+String.valueOf(order.getRechargeAmount());
-		order.setBillId(Long.valueOf(bill));
+		Long bill = onlinePayService.createBillId(time);
+		order.setBillId(bill);
 		order.setPaymentStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setRechargeStatus(RechargeStatus.HANDING.getCode());
 		order.setEnterpriseCommunityId(233L);
