@@ -89,6 +89,7 @@ import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.user.UserServiceErrorCode;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -1593,7 +1594,7 @@ public class FamilyServiceImpl implements FamilyService {
         if(type == ParamType.FAMILY.getCode()){
             Group group = this.groupProvider.findGroupById(id);
             if(group == null)
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST, 
                            "Invalid familyId parameter");
             return true;
         }

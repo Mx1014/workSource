@@ -55,7 +55,7 @@ public class BusinessTest extends CoreServerTestCase {
         List<BusinessScope> scopes = new ArrayList<>();
         BusinessScope scope = new BusinessScope();
         scope.setScopeId(0L);
-        scope.setScopeType((byte)0);
+        scope.setScopeCode((byte)0);
         scopes.add(scope);
         //cmd.setScopes(scopes);
         cmd.setDescription("xxxxxxxxxxxx");
@@ -91,7 +91,7 @@ public class BusinessTest extends CoreServerTestCase {
         List<BusinessScope> scopes = new ArrayList<>();
         BusinessScope scope = new BusinessScope();
         scope.setScopeId(0L);
-        scope.setScopeType((byte)0);
+        scope.setScopeCode((byte)0);
         scopes.add(scope);
         //cmd.setScopes(scopes);
         cmd.setDescription("xxxxxxxxxxxx");
@@ -103,7 +103,7 @@ public class BusinessTest extends CoreServerTestCase {
         cmd.setId(14L);
         BusinessScope scope = new BusinessScope();
         scope.setScopeId(0l);
-        scope.setScopeType((byte)0);
+        scope.setScopeCode((byte)0);
         List<BusinessScope> scopes = new ArrayList<>();
         scopes.add(scope);
         cmd.setScopes(scopes);
