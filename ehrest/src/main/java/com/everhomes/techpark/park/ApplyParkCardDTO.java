@@ -18,6 +18,15 @@ public class ApplyParkCardDTO {
 	
 	private Byte fetchStatus;
 
+	private Timestamp deadline;
+	public Timestamp getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(Timestamp deadline) {
+		this.deadline = deadline;
+	}
+
 	public Long getId() {
 		return id;
 	}
