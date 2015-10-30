@@ -108,6 +108,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
     
     @Override
+    public Enterprise getEnterpriseById(Long id) {
+        return this.enterpriseProvider.getEnterpriseById(id);
+    }
+    
+    @Override
     public List<CommunityDoc> searchCommunities(SearchEnterpriseCommunityCommand cmd) {
         if(cmd.getKeyword() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 

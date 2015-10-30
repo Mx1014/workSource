@@ -12,7 +12,7 @@ package com.everhomes.user;
  *
  */
 public enum MessageChannelType {
-    USER("user"), GROUP("group"), ADDRESS("address");
+    USER("user"), GROUP("group"), ADDRESS("address"), ENTERPRISE("enterprise");
     
     private String code;
     
@@ -33,6 +33,12 @@ public enum MessageChannelType {
         }
         if(code.equalsIgnoreCase(GROUP.getCode())) {
             return GROUP;
+        }
+        if(code.equalsIgnoreCase(ENTERPRISE.getCode())) {
+            return ENTERPRISE;
+        }
+        if(code.equalsIgnoreCase(ADDRESS.getCode())) {
+            return ADDRESS;
         }
         
         return null;

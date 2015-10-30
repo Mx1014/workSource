@@ -1,7 +1,9 @@
 package com.everhomes.enterprise;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.group.GroupNotificationTemplateCode;
+import com.everhomes.group.GroupService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
@@ -54,17 +58,18 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     
     @Autowired
     LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    GroupService groupService;
 
     @Override
-    public void addContactGroupMember(EnterpriseContactGroup group, EnterpriseContactGroupMember member) {
-        // TODO Auto-generated method stub
-        
+    public void addContactGroupMember(EnterpriseContactGroupMember member) {
+        this.enterpriseContactProvider.createContactGroupMember(member);
     }
 
     @Override
-    public void removeContactGroupMember(EnterpriseContactGroup group, EnterpriseContactGroupMember member) {
-        // TODO Auto-generated method stub
-        
+    public void removeContactGroupMember(EnterpriseContactGroupMember member) {
+        this.enterpriseContactProvider.deleteContactGroupMember(member);
     }
 
     @Override
@@ -82,6 +87,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         //UserInfo user = userService.getUserSnapshotInfoWithPhone(identifier.getOwnerUid());
         User user = userProvider.findUserById(identifier.getOwnerUid());
         List<Enterprise> enterprises = this.enterpriseService.listEnterpriseByPhone(identifier.getIdentifierToken());
+        Map<Long,Long> ctx = new HashMap<Long, Long>();
         for(Enterprise en : enterprises) {
             //Try to create a contact for this enterprise
             EnterpriseContact contact = this.enterpriseContactProvider.queryContactByUserId(en.getId(), identifier.getOwnerUid());
@@ -107,8 +113,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 entry.setEntryValue(identifier.getIdentifierToken());
                 this.enterpriseContactProvider.createContactEntry(entry);
                 
-                //TODO send message for this contact
-                //sendMessageForContactApproved(contact);
+                sendMessageForContactApproved(ctx, contact);
             }
         }
         
@@ -132,7 +137,15 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         contact.setStatus(EnterpriseContactStatus.Inactive.getCode());
         this.enterpriseContactProvider.updateContact(contact);
         
-        //TODO 发消息
+        //发消息
+        Map<String, Object> map = new HashMap<String, Object>();
+        Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
+        User user = userProvider.findUserById(contact.getUserId());
+        map.put("enterpriseName", enterprise.getName());
+        String scope = EnterpriseNotifyTemplateCode.SCOPE;
+        int code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+        sendUserNotification(user.getId(), notifyTextForApplicant);
     }
 
     /**
@@ -177,18 +190,21 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 LOGGER.info("create phone entry error contactId " + contact.getId() + " phone " + phone);
             }
         }
+        
+        //TODO 发消息给所有根管理员
+        
         return contact;
     }
     
     /**
      * 批准用户加入企业
      */
-    public void approveContact(EnterpriseContact contact) {        
-        //TODO 发消息
-        
+    public void approveContact(EnterpriseContact contact) {
         //assert contact is from db and status is approve
         contact.setStatus(EnterpriseContactStatus.Approved.getCode());
         this.enterpriseContactProvider.updateContact(contact);
+        
+        //TODO create group member for this user???
         
         //Set group for this contact
         String applyGroup = contact.getApplyGroup();
@@ -198,6 +214,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         }
         
         //sendMessageForContactApproved(contact);
+        sendMessageForContactApproved(null, contact);
     }
     
     /**
@@ -280,6 +297,48 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         return detail;
     }
     
+    private void sendMessageForContactApproved(Map<Long,Long> ctx, EnterpriseContact contact) {
+        Long check = null;
+        if(ctx != null) {
+            check = ctx.get(contact.getEnterpriseId());    
+        }
+        
+        if(check == null) {
+            ctx.put(contact.getEnterpriseId(), 1l);
+            Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
+            User user = userProvider.findUserById(contact.getUserId());
+            
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("enterpriseName", enterprise.getName());;
+            
+            String userName = "";
+            if(contact.getNickName() != null && !contact.getNickName().trim().isEmpty()) {
+                userName = contact.getNickName();
+            } else {
+                userName = contact.getName();
+                if (null != userName) {
+                    userName = "";
+                    }
+                }
+            map.put("userName", userName);
+            String locale = user.getLocale();
+            
+            // send notification to who is requesting to join the enterprise
+            String scope = EnterpriseNotifyTemplateCode.SCOPE;
+            int code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            List<Long> includeList = new ArrayList<Long>();
+            includeList.add(contact.getUserId());
+            sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, null, null);
+            
+            // send notification to all the other members in the group
+            code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER;
+            notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            sendEnterpriseNotification(enterprise.getId(), null, includeList, notifyTextForApplicant, null, null);
+        }
+    }
+    
+    
     private void sendEnterpriseNotification(Long enterpriseId, List<Long> includeList, List<Long> excludeList, 
             String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message != null && message.length() != 0) {
@@ -302,6 +361,22 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
                 messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
             }
+            messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
+                channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+        }
+    }
+    
+    private void sendUserNotification(Long userId, String message) {
+        if(message != null && message.length() != 0) {
+            String channelType = MessageChannelType.USER.getCode();
+            String channelToken = String.valueOf(userId);
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setChannels(new MessageChannel(channelType, channelToken));
+            messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType, 
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
