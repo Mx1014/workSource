@@ -191,6 +191,8 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalSiteDayStatusCommandResponse findRentalSiteDayStatus(
 			FindRentalSiteDayStatusCommand cmd) {
+
+		java.util.Date reserveTime = new java.util.Date();
 		FindRentalSiteDayStatusCommandResponse response = new FindRentalSiteDayStatusCommandResponse();
 		response.setSites(new ArrayList<RentalSiteDTO>());
 		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -246,7 +248,16 @@ public class RentalServiceImpl implements RentalService {
 					if (dto.getCounts() == 0) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
+					if (reserveTime.before(new java.util.Date(rsr.getBeginTime().getTime()
+							- rentalRule.getRentalStartTime()))) {
+						dto.setStatus(SiteRuleStatus.LATE.getCode());
+					}
+					if (reserveTime.after(new java.util.Date(rsr.getBeginTime().getTime()
+							- rentalRule.getRentalEndTime()))) {
+						dto.setStatus(SiteRuleStatus.EARLY.getCode());
+					}
 					rsDTO.getSiteRules().add(dto);
+					
 				}
 			}
 			response.getSites().add(rsDTO);
@@ -490,6 +501,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
 		rentalBill.setCreatorUid(userId);
+		rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
 
 		// Long rentalBillId = this.rentalProvider.createRentalBill(rentalBill);
 
@@ -871,7 +883,7 @@ public class RentalServiceImpl implements RentalService {
 		int totalCount = rentalProvider.countRentalBills(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
 				cmd.getRentalSiteId(), cmd.getBillStatus(), cmd.getStartTime(),
-				cmd.getEndTime());
+				cmd.getEndTime(),cmd.getInvoiceFlag());
 		if (totalCount == 0)
 			return response;
 
@@ -882,8 +894,8 @@ public class RentalServiceImpl implements RentalService {
 		List<RentalBill> bills = rentalProvider.listRentalBills(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
 				cmd.getRentalSiteId(), cmd.getBillStatus(),
-				cmd.getPageOffset(), pageCount, cmd.getStartTime(),
-				cmd.getEndTime());
+				cmd.getPageOffset(), pageSize, cmd.getStartTime(),
+				cmd.getEndTime(),cmd.getInvoiceFlag());
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
@@ -902,12 +914,15 @@ public class RentalServiceImpl implements RentalService {
 			}
 			response.getRentalBills().add(dto);
 		}
+
+		response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null
+				: cmd.getPageOffset() + 1);
 		return response;
 	}
 
 	@Override
 	public void deleteRentalBill(DeleteRentalBillCommand cmd) {
-		// TODO Auto-generated method stub
+	
 		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
 
 	}

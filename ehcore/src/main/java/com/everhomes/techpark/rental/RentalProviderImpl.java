@@ -613,7 +613,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public int countRentalBills(Long enterpriseCommunityId, String siteType,
-			Long rentalSiteId, Byte billStatus, Long startTime, Long endTime) {
+			Long rentalSiteId, Byte billStatus, Long startTime, Long endTime,Byte invoiceFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
@@ -633,14 +633,18 @@ public class RentalProviderImpl implements RentalProvider {
 					.greaterOrEqual(new Timestamp(endTime)));
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
-					.equal(billStatus));
+					.equal(billStatus)); 
+		if(null != invoiceFlag){
+			condition = condition.and(Tables.EH_RENTAL_BILLS.INVOICE_FLAG
+					.equal(invoiceFlag)); 
+		}
 		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
 	@Override
 	public List<RentalBill> listRentalBills(Long enterpriseCommunityId,
 			String siteType, Long rentalSiteId, Byte billStatus ,Integer pageOffset,
-			Integer pageSize, Long startTime, Long endTime) { 
+			Integer pageSize, Long startTime, Long endTime,Byte invoiceFlag) { 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
@@ -657,14 +661,18 @@ public class RentalProviderImpl implements RentalProvider {
 					.greaterOrEqual(new Timestamp(startTime)));
 		if(null!=endTime   )
 			condition=condition.and(Tables.EH_RENTAL_BILLS.END_TIME
-					.greaterOrEqual(new Timestamp(endTime)));
+					.lessOrEqual(new Timestamp(endTime)));
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 					.equal(billStatus));
+		if(null != invoiceFlag){
+			condition = condition.and(Tables.EH_RENTAL_BILLS.INVOICE_FLAG
+					.equal(invoiceFlag)); 
+		}
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1)
 				* pageSize;
 		step.limit(offset, pageSize);
-
+		step.where(condition);
 		List<RentalBill> result = step
 				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalBill.class);

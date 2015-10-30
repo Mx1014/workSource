@@ -26,6 +26,7 @@ public class ListRentalBillsCommand {
 	private Integer pageOffset;
 	private Integer pageSize;
 	private Byte billStatus;
+	private Byte invoiceFlag;
 	@Override
     public String toString() {
 
@@ -122,6 +123,18 @@ public class ListRentalBillsCommand {
 
 	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
+	}
+
+
+
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+
+
+
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
 	}
 
 
