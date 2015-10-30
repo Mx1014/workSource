@@ -12,7 +12,12 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupNotificationTemplateCode;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -61,6 +66,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     
     @Autowired
     GroupService groupService;
+    
+    @Autowired 
+    private GroupProvider groupProvider;
 
     @Override
     public void addContactGroupMember(EnterpriseContactGroupMember member) {
@@ -295,6 +303,23 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         }
         
         return detail;
+    }
+    
+    @Override
+    public List<GroupMember> listMessageGroupMembers(Group group, int pageSize) {
+        List<GroupMember> members = new ArrayList<GroupMember>(); 
+        if (group.getDiscriminator() == GroupDiscriminator.Enterprise.getCode()) {
+                ListingLocator locator = new ListingLocator();
+                //List approved members
+                List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactByEnterpriseId(locator, group.getId(), pageSize);
+                for(EnterpriseContact contact : contacts) {
+                    GroupMember gb = new GroupMember();
+                    gb.setMemberId(contact.getUserId());
+                    gb.setMemberType(EntityType.USER.getCode());
+                    members.add(gb);
+                }
+        }
+        return members;
     }
     
     private void sendMessageForContactApproved(Map<Long,Long> ctx, EnterpriseContact contact) {

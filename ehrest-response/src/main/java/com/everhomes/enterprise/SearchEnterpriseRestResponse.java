@@ -6,11 +6,11 @@ import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.enterprise.ListEnterpriseResponse;
 
-public class ListEnterpriseByCommunityIdRestResponse extends RestResponseBase {
+public class SearchEnterpriseRestResponse extends RestResponseBase {
 
     private ListEnterpriseResponse response;
 
-    public ListEnterpriseByCommunityIdRestResponse () {
+    public SearchEnterpriseRestResponse () {
     }
 
     public ListEnterpriseResponse getResponse() {
