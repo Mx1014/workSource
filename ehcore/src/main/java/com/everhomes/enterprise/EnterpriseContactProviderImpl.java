@@ -18,13 +18,20 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.recommend.Recommendation;
 import com.everhomes.recommend.RecommendationRecordMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactEntriesDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactGroupMembersDao;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactEntries;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroups;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseContacts;
+import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
@@ -45,10 +52,14 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     @Autowired
     private ShardingProvider shardingProvider;
     
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
     // TODO for cache. member of eh_groups partition
     @Override
     public void createContact(EnterpriseContact contact) {
-        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseContacts.class));
+        //long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
         contact.setId(id);
         //Default approving state
@@ -223,7 +234,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     
     @Override
     public void createContactEntry(EnterpriseContactEntry entry) {
-        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseContactEntries.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, entry.getEnterpriseId()));
         entry.setId(id);
         entry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -368,7 +379,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     
     @Override
     public void createContactGroup(EnterpriseContactGroup group) {
-        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseContactGroups.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, group.getEnterpriseId()));
         group.setId(id);
         group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -496,7 +507,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     
     @Override
     public void createContactGroupMember(EnterpriseContactGroupMember member) {
-        long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseContactGroupMembers.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, member.getEnterpriseId()));
         member.setId(id);
         member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
