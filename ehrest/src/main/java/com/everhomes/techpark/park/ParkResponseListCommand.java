@@ -6,16 +6,6 @@ public class ParkResponseListCommand {
 	
 	private Integer pageSize;
 	
-	private String rechargePhone;
-	
-	public String getRechargePhone() {
-		return rechargePhone;
-	}
-
-	public void setRechargePhone(String rechargePhone) {
-		this.rechargePhone = rechargePhone;
-	}
-
 	public Integer getPageOffset() {
 		return pageOffset;
 	}

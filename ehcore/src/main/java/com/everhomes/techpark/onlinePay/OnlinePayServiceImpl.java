@@ -145,4 +145,10 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		return Long.valueOf(orderNo);
 	}
 
+	@Override
+	public Long createBillId() {
+		
+		return null;
+	}
+
 }

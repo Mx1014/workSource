@@ -1,5 +1,10 @@
 package com.everhomes.techpark.park;
 
+/**
+ * 
+ * billId:订单号
+ *
+ */
 public class RechargeResultSearchCommand {
 	
 	private Long billId;

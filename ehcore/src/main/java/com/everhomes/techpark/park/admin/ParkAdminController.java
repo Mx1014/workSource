@@ -98,6 +98,11 @@ public class ParkAdminController extends ControllerBase{
 		
 	}
 	
+	/**
+	 * <b>URL: /admin/techpark/park/searchRechargeRecordList</b>
+	 * 
+	 * @return
+	 */
 	@RequestMapping("searchRechargeRecordList")
 	@RestReturn(value = RechargeRecordList.class, collection = true)
 	public RestResponse searchRechargeRecordList(SearchRechargeRecordCommand cmd) {
@@ -111,6 +116,11 @@ public class ParkAdminController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /admin/techpark/park/searchApplyCardList</b>
+	 * 
+	 * @return
+	 */
 	@RequestMapping("searchApplyCardList")
 	@RestReturn(value = ApplyParkCardList.class)
 	public RestResponse searchApplyCardList(SearchApplyCardCommand cmd) {
@@ -124,6 +134,11 @@ public class ParkAdminController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /admin/techpark/park/offerCard</b>
+	 * 
+	 * @return
+	 */
 	@RequestMapping("offerCard")
 	@RestReturn(value = ApplyParkCardList.class)
 	public RestResponse offerCard(OfferCardCommand cmd) {
@@ -137,6 +152,11 @@ public class ParkAdminController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /admin/techpark/park/fetchCard</b>
+	 * 
+	 * @return
+	 */
 	@RequestMapping("fetchCard")
 	@RestReturn(value = ApplyParkCardDTO.class)
 	public RestResponse fetchCard(FetchCardCommand cmd) {

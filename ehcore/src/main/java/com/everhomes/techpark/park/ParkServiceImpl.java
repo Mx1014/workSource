@@ -8,13 +8,19 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+
+
+
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -176,7 +182,7 @@ public class ParkServiceImpl implements ParkService {
 		
 		Timestamp ts = null;
 		try {
-			ts = new Timestamp(sdf.parse("str").getTime());
+			ts = new Timestamp(sdf.parse(str).getTime());
 		} catch (ParseException e) {
 			LOGGER.error("validityPeriod data format is not yyyymmdd.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -210,6 +216,12 @@ public class ParkServiceImpl implements ParkService {
 	public RechargeSuccessResponse getRechargeStatus(RechargeResultSearchCommand cmd) {
 		
 		RechargeInfo rechargeInfo = onlinePayProvider.findRechargeInfoByOrderId(cmd.getBillId());
+		
+		if(rechargeInfo == null) {
+			LOGGER.error("the bill id is not in list.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the bill id is not in list.");
+		}
 		
 		RechargeSuccessResponse rechargeResponse = new RechargeSuccessResponse();
 		rechargeResponse.setBillId(rechargeInfo.getBillId());
@@ -302,8 +314,15 @@ public class ParkServiceImpl implements ParkService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		
-		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), cmd.getBeginDay(), cmd.getEndDay(), locator, pageSize + 1);
+		Timestamp begin = null;
+		Timestamp end = null;
+		if(!StringUtils.isEmpty(cmd.getBeginDay())) {
+			begin = strToTimestamp(cmd.getBeginDay());
+		}
+		if(!StringUtils.isEmpty(cmd.getEndDay())) {
+			end = addDays(cmd.getEndDay(), 1);
+		}
+ 		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);
 		List<ApplyParkCardDTO> applyDto = new ArrayList<ApplyParkCardDTO>();
 		
 		appliers.forEach(apply -> {
@@ -458,7 +477,8 @@ public class ParkServiceImpl implements ParkService {
 	}
 
 	@Override
-	public void updateRechargeOrder(RechargeInfo order) {
+	public void updateRechargeOrder(RechargeResultSearchCommand cmd) {
+		RechargeInfo order = onlinePayProvider.findRechargeInfoByOrderId(cmd.getBillId());
 		order.setRechargeStatus(RechargeStatus.SUCCESS.getCode());
 		onlinePayProvider.updateRehargeInfo(order);
 	}
@@ -476,7 +496,7 @@ public class ParkServiceImpl implements ParkService {
 		RechargeInfo info = onlinePayService.onlinePayBill(cmd);
 		RefreshParkingSystemResponse response = new RefreshParkingSystemResponse();
 		response.setCarNumber(info.getPlateNumber());
-		response.setCost(info.getRechargeAmount()+"");
+		response.setCost(info.getRechargeAmount()+"00");
 		response.setFlag("2"); //停车场系统接口的传入参数，2表示是车牌号
 		response.setPayTime(info.getRechargeTime().toString());
 //		response.setSign(sign);
@@ -484,5 +504,12 @@ public class ParkServiceImpl implements ParkService {
 		response.setValidStart(timestampToStr(info.getNewValidityperiod()));
 		
 		return response;
+	}
+
+	@Override
+	public Set<String> getRechargedPlate() {
+		User user = UserContext.current().getUser();
+		Set<String> plateNumber = parkProvider.getRechargedPlate(user.getId());
+		return plateNumber;
 	}
 }

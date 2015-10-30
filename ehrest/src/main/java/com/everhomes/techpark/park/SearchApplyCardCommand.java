@@ -24,9 +24,9 @@ public class SearchApplyCardCommand {
 	
 	private String plateNumber;
 	
-	private Timestamp beginDay;
+	private String beginDay;
 	
-	private Timestamp endDay;
+	private String endDay;
 	
 	private Long pageAnchor;
 	
@@ -64,19 +64,19 @@ public class SearchApplyCardCommand {
 		this.plateNumber = plateNumber;
 	}
 
-	public Timestamp getBeginDay() {
+	public String getBeginDay() {
 		return beginDay;
 	}
 
-	public void setBeginDay(Timestamp beginDay) {
+	public void setBeginDay(String beginDay) {
 		this.beginDay = beginDay;
 	}
 
-	public Timestamp getEndDay() {
+	public String getEndDay() {
 		return endDay;
 	}
 
-	public void setEndDay(Timestamp endDay) {
+	public void setEndDay(String endDay) {
 		this.endDay = endDay;
 	}
 

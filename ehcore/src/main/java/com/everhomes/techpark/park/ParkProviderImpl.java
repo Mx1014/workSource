@@ -2,7 +2,10 @@ package com.everhomes.techpark.park;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -26,11 +29,11 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhParkCharge;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.techpark.onlinePay.RechargeStatus;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
@@ -205,7 +208,8 @@ public class ParkProviderImpl implements ParkProvider {
         }
 		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
 			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
-			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
 			
 			if(!StringUtils.isEmpty(applierName))
 				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLIER_NAME.eq(applierName));
@@ -308,7 +312,9 @@ public class ParkProviderImpl implements ParkProvider {
         }
 		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
 			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
-			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.WAITING.getCode()));
 			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
 			query.addLimit(count);
@@ -342,9 +348,12 @@ public class ParkProviderImpl implements ParkProvider {
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             locator.setShardIterator(shardIterator);
         }
+		
 		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
 			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
-			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.NOTIFIED.getCode()));
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLIER_PHONE.eq(applierPhone));
 			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
@@ -375,7 +384,9 @@ public class ParkProviderImpl implements ParkProvider {
         }
 		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
 			SelectQuery<EhParkApplyCardRecord> query = context.selectQuery(Tables.EH_PARK_APPLY_CARD);
-			query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
+			
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.NOTIFIED.getCode()));
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.DEADLINE.lt(current));
 			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
@@ -391,6 +402,42 @@ public class ParkProviderImpl implements ParkProvider {
 			return AfterAction.next;
 		});
 		
+	}
+
+	@Override
+	public Set<String> getRechargedPlate(Long rechargeUid) {
+		
+		Set<String> plateNumber = new HashSet<String>();
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhRechargeInfo.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhRechargeInfoRecord> query = context.selectQuery(Tables.EH_RECHARGE_INFO);
+			query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_USERID.eq(rechargeUid));
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_RECHARGE_INFO.ID.lt(locator.getAnchor()));
+			
+			
+			query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.eq(RechargeStatus.SUCCESS.getCode()));
+			
+			query.addOrderBy(Tables.EH_RECHARGE_INFO.ID.desc());
+
+			query.fetch().map((r) -> {
+				plateNumber.add(r.getPlateNumber());
+				return null;
+			});
+			
+			
+			return AfterAction.next;
+		});
+		
+		
+		
+		return plateNumber;
 	}
 
 	

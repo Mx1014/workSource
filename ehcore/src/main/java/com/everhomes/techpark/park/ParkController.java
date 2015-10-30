@@ -1,5 +1,7 @@
 package com.everhomes.techpark.park;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,7 +12,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
-import com.everhomes.techpark.punch.PunchLogsDayList;
 
 
 
@@ -57,7 +58,7 @@ public class ParkController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/park/listRechargeRecord</b>
-	 * list recharge record
+	 * list logon user's recharge record
 	 * @return
 	 */
 	@RequestMapping("listRechargeRecord")
@@ -114,9 +115,43 @@ public class ParkController extends ControllerBase{
 	@RestReturn(value = RefreshParkingSystemResponse.class)
 	public RestResponse refreshParkingSystem(OnlinePayBillCommand cmd) {
 		
+		RefreshParkingSystemResponse refresh = parkService.refreshParkingSystem(cmd);
+		RestResponse response = new RestResponse(refresh);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/updateRechargeOrder</b>
+	 * update recharge info while refresh parking system success
+	 * @return
+	 */
+	@RequestMapping("updateRechargeOrder")
+	@RestReturn(value = String.class)
+	public RestResponse updateRechargeOrder(RechargeResultSearchCommand cmd) {
+		
+		parkService.updateRechargeOrder(cmd);
+		
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/getRechargedPlate</b>
+	 * @return
+	 */
+	@RequestMapping("getRechargedPlate")
+	@RestReturn(value = String.class)
+	public RestResponse getRechargedPlate() {
+		
+		Set<String> plates = parkService.getRechargedPlate();
+		RestResponse response = new RestResponse(plates);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
 	}
 }
