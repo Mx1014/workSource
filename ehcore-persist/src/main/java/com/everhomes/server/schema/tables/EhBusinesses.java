@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBusinessesRecord> {
 
-	private static final long serialVersionUID = -762430201;
+	private static final long serialVersionUID = 815817030;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_businesses</code>
@@ -119,7 +119,7 @@ public class EhBusinesses extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_businesses.visible_distance</code>. the distance between shop and user who can find the shop, unit: meter
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Double> VISIBLE_DISTANCE = createField("visible_distance", org.jooq.impl.SQLDataType.DOUBLE.nullable(false).defaulted(true), this, "the distance between shop and user who can find the shop, unit: meter");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBusinessesRecord, java.lang.Double> VISIBLE_DISTANCE = createField("visible_distance", org.jooq.impl.SQLDataType.DOUBLE.defaulted(true), this, "the distance between shop and user who can find the shop, unit: meter");
 
 	/**
 	 * Create a <code>ehcore.eh_businesses</code> table reference
