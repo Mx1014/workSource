@@ -109,4 +109,11 @@ public class EhCategoriesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCategories> fetchByLogoUri(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.LOGO_URI, values);
 	}
+
+	/**
+	 * Fetch records that have <code>description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCategories> fetchByDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.DESCRIPTION, values);
+	}
 }

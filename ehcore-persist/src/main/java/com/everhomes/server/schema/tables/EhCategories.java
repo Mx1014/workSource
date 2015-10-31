@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCategoriesRecord> {
 
-	private static final long serialVersionUID = -111455935;
+	private static final long serialVersionUID = 867164017;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_categories</code>
@@ -75,6 +75,11 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_categories.logo_uri</code>. the logo uri of the category
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.String> LOGO_URI = createField("logo_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "the logo uri of the category");
+
+	/**
+	 * The column <code>ehcore.eh_categories.description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_categories</code> table reference

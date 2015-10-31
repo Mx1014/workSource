@@ -128,6 +128,7 @@ CREATE TABLE `eh_categories`(
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used', 
     `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
+	`description` TEXT,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_category_name`(`parent_id`, `name`),
@@ -2308,7 +2309,7 @@ CREATE TABLE `eh_businesses` (
   `update_time` DATETIME,
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
-  `visible_distance` DOUBLE NOT NULL DEFAULT 5000 COMMENT 'the distance between shop and user who can find the shop, unit: meter',
+  `visible_distance` DOUBLE DEFAULT 5000 COMMENT 'the distance between shop and user who can find the shop, unit: meter',
   
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
