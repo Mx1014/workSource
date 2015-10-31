@@ -286,8 +286,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
 						jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
 						itemDTO.setActionData(jsonObject.toJSONString());
-						//if(b.getCreatorUid().longValue() == userId)
-							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel()+"(店铺)" : b.getName()+"(店铺)");
+						if(b.getCreatorUid().longValue() == userId)
+							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
 					}
 				}else{
 					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
