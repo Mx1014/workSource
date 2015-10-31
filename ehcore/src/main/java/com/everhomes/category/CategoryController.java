@@ -281,9 +281,9 @@ public class CategoryController extends ControllerBase {
 				}
 			}
 
-			String des = null;
+			String des = r.getDescription();
 			if(StringUtils.isEmpty(des))
-				des = "默认描述";
+				des = "";
 			dto.setDescription(des);
 			return dto;
 		}).collect(Collectors.toList());
