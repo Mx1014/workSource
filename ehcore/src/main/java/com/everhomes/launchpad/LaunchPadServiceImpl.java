@@ -288,6 +288,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						itemDTO.setActionData(jsonObject.toJSONString());
 						if(b.getCreatorUid().longValue() == userId)
 							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
+						else
+							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
 					}
 				}else{
 					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
