@@ -44,7 +44,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
@@ -52,10 +51,9 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
 import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
@@ -584,6 +582,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             familyDTO.setCommunityName(community.getName());
             familyDTO.setCityId(community.getCityId());
             familyDTO.setCityName(community.getCityName());
+            
+            familyDTO.setAreaId(community.getAreaId());
+            familyDTO.setAreaName(community.getAreaName());
         }
         familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
         if(address != null){
@@ -886,7 +887,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     @Override
-    public AddressDTO createServiceAddress(CreateServiceAddressCommand cmd) {
+    public UserServiceAddressDTO createServiceAddress(CreateServiceAddressCommand cmd) {
         if(cmd.getRegionId() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid regionId, regionId parameter");
@@ -894,6 +895,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if(cmd.getAddress() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid address, address parameter");
+        }
+        if(cmd.getContactName() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid contactName, contactName parameter");
+        }
+        if(cmd.getContactToken() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid contactToken, contactToken parameter");
         }
         Region region = this.regionProvider.findRegionById(cmd.getRegionId());
         if(region == null){
@@ -946,11 +955,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                      addr.setCreatorUid(userId);
                      this.addressProvider.createAddress(addr);
                      
-                     //insert user_service_addresses
-                     UserServiceAddress serviceAddress = new UserServiceAddress();
-                     serviceAddress.setAddressId(addr.getId());
-                     serviceAddress.setOwnerUid(userId);
-                     this.userActivityProvider.addUserServiceAddress(serviceAddress);
                 }
                 long lcEndTime = System.currentTimeMillis();
                 LOGGER.info("create address in the lock,elapse=" + (lcEndTime - lcStartTime));
@@ -959,10 +963,46 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
              
              address = result.first();
          }
-         return ConvertHelper.convert(address, AddressDTO.class);
+        
+        //insert user_service_addresses
+        UserServiceAddress serviceAddress = new UserServiceAddress();
+        serviceAddress.setAddressId(address.getId());
+        serviceAddress.setOwnerUid(userId);
+        serviceAddress.setCreatorUid(userId);
+        serviceAddress.setContactName(cmd.getContactName());
+        serviceAddress.setContactToken(cmd.getContactToken());
+        serviceAddress.setContactType(cmd.getContactType());
+        serviceAddress.setStatus((byte)2);
+        
+        this.userActivityProvider.addUserServiceAddress(serviceAddress);
+        
+        UserServiceAddressDTO dto = new UserServiceAddressDTO();
+        dto.setId(serviceAddress.getId());
+        dto.setAddress(cmd.getAddress());
+        dto.setCity(cityName);
+        dto.setArea(areaName);
+        dto.setUserName(cmd.getContactName());
+        dto.setCallPhone(cmd.getContactToken());
+        return dto;
     }
     
 
+    @Override
+    public void deleteServiceAddress(DeleteServiceAddressCommand cmd) {
+        if(cmd.getId() == null){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid address id, id parameter");
+        }
+        Address address = this.addressProvider.findAddressById(cmd.getId());
+        if(address == null){
+            throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_ADDRESS_NOT_EXIST, 
+                    "Address is not exists");
+        }
+        User user = UserContext.current().getUser();
+        
+        this.userActivityProvider.deleteUserServieAddress(address.getId(),user.getId());
+        this.addressProvider.deleteAddress(address);
+    }
 	@Override
 	public void importCommunityInfos(MultipartFile[] files) {
 		long startTime = System.currentTimeMillis();
@@ -1269,6 +1309,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		}
 		return count;
 	}
+
 
 
 }

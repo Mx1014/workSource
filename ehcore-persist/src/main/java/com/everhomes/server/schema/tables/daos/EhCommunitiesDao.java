@@ -284,4 +284,11 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.STRING_TAG5, values);
 	}
+
+	/**
+	 * Fetch records that have <code>community_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCommunityType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.COMMUNITY_TYPE, values);
+	}
 }

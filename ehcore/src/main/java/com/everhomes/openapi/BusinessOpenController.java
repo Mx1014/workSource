@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.address.AddressDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.business.BusinessService;
 import com.everhomes.business.SyncBusinessCommand;
@@ -32,14 +31,27 @@ import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.FindTokenByUserIdCommand;
+import com.everhomes.user.GetUserByUuidResponse;
+import com.everhomes.user.GetUserDefaultAddressCommand;
+import com.everhomes.user.GetUserDetailByUuidResponse;
+import com.everhomes.user.GetUserInfoByUuid;
+import com.everhomes.user.IdentifierType;
+import com.everhomes.user.ListUserCommand;
 import com.everhomes.user.MessageChannelType;
+import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
+import com.everhomes.user.UserDtoForBiz;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestDoc(value="Business open Constroller", site="core")
 @RestController
@@ -73,7 +85,9 @@ public class BusinessOpenController extends ControllerBase {
         
         Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
         @SuppressWarnings("unchecked")
-        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+//        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+//                CategoryAdminStatus.ACTIVE, orderBy);
+        List<Category> entityResultList = this.categoryProvider.listBusinessSubCategories(CategoryConstants.CATEGORY_ID_SERVICE,
                 CategoryAdminStatus.ACTIVE, orderBy);
 
         List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
@@ -212,6 +226,130 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/receiveCoupon</b>
+     * <p>同步用户领取优惠券</p>
+     */
+    @RequestMapping("receiveCoupon")
+    @RestReturn(String.class)
+    public RestResponse receiveCoupon(UserCouponsCommand cmd) {
+    	userActivityService.receiveCoupon(cmd.getUserId());
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /openapi/invalidCoupon</b>
+     * <p>同步用户不能使用的优惠券</p>
+     */
+    @RequestMapping("invalidCoupon")
+    @RestReturn(String.class)
+    public RestResponse invalidCoupon(UserCouponsCommand cmd) {
+    	userActivityService.invalidCoupon(cmd.getUserId());
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    @RequestMapping("getUserInfoByUuid")
+    @RestReturn(GetUserByUuidResponse.class)
+    public RestResponse getUserInfoByUuid(@Valid GetUserInfoByUuid cmd) {
+        UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        if(null == user) {
+            response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
+            response.setErrorDescription("User not found");
+            return response;
+        }
+        
+        GetUserByUuidResponse resp = new GetUserByUuidResponse();
+        resp.setMobile(user.getPhones().get(0));
+        resp.setNickName(user.getNickName());
+        resp.setAvatarUrl(user.getAvatarUrl());
+        resp.setUuid(user.getUuid());
+        resp.setGender(user.getGender());
+        
+        response.setResponseObject(resp);
+        return response;
+    }
+    
+    @RequestMapping("getUserDetailByUuid")
+    @RestReturn(GetUserDetailByUuidResponse.class)
+    public RestResponse getUserDetailByUuid(@Valid GetUserInfoByUuid cmd) {
+        UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        if(null == user) {
+            response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
+            response.setErrorDescription("User not found");
+            return response;
+        }
+        
+        GetUserDetailByUuidResponse resp = new GetUserDetailByUuidResponse();
+        resp.setMobile(user.getPhones().get(0));
+        resp.setNickName(user.getNickName());
+        resp.setAvatarUrl(user.getAvatarUrl());
+        resp.setUuid(user.getUuid());
+        resp.setGender(user.getGender());
+        
+        GetUserServiceAddressCommand getUserCmd = new GetUserServiceAddressCommand();
+        getUserCmd.setUserId(user.getId());
+        List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(getUserCmd);
+        if(result != null && result.size() > 0) {
+            resp.setAddress(result.get(0));
+        }
+        
+        response.setResponseObject(resp);
+        return response;
+    }
+    
+    @RequestMapping("getUserDefaultAddress")
+    @RestReturn(UserServiceAddressDTO.class)
+    public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
+    	UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
+    	RestResponse response =  new RestResponse(address);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("listUser")
+    @RestReturn(value=UserDtoForBiz.class,collection=true)
+    public RestResponse listUser(@Valid ListUserCommand cmd) {
+    	List<UserDtoForBiz> users = this.businessService.listUser(cmd);
+    	RestResponse response =  new RestResponse(users);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("findTokenByUserId")
+    @RestReturn(String.class)
+    public RestResponse findTokenByUserId(@Valid FindTokenByUserIdCommand cmd) {
+    	
+    	User user = userProvider.findUserById(cmd.getUserId());
+    	List<UserIdentifier> idens = userProvider.listUserIdentifiersOfUser(user.getId());
+    	UserIdentifier iden = idens.get(0);
+		
+    	
+    	SignupToken signUpToken = new SignupToken(user.getId(),IdentifierType.fromCode(iden.getIdentifierType()),iden.getIdentifierToken());
+    	String token = WebTokenGenerator.getInstance().toWebToken(signUpToken);
+    	
+    	RestResponse response =  new RestResponse(token);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
     }
     
 }

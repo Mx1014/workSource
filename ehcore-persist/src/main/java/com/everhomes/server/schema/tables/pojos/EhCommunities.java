@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1556177156;
+	private static final long serialVersionUID = -953778854;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -47,6 +47,7 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Byte     communityType;
 
 	public EhCommunities() {}
 
@@ -84,7 +85,8 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.lang.String   stringTag5,
+		java.lang.Byte     communityType
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -120,6 +122,7 @@ public class EhCommunities implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.communityType = communityType;
 	}
 
 	public java.lang.Long getId() {
@@ -392,5 +395,13 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Byte getCommunityType() {
+		return this.communityType;
+	}
+
+	public void setCommunityType(java.lang.Byte communityType) {
+		this.communityType = communityType;
 	}
 }

@@ -49,6 +49,7 @@ import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.app.AppConstants;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -87,6 +88,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
@@ -114,6 +116,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationStatus;
 import com.everhomes.organization.OrganizationTaskStatus;
+import com.everhomes.organization.OrganizationTaskType;
 import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.PaidType;
 import com.everhomes.organization.TxType;
@@ -696,7 +699,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		ApproveMemberCommand comand = new ApproveMemberCommand();
 		comand.setId(cmd.getFamilyId());
 		comand.setMemberUid(cmd.getUserId());
-		comand.setOperatorRole(Role.ResourceAdmin);
+		comand.setOperatorRole(Role.SystemAdmin);
 		familySerivce.approveMember(comand);
 	}
 
@@ -720,7 +723,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		RejectMemberCommand command = new RejectMemberCommand();
 		command.setId(cmd.getFamilyId());
 		command.setMemberUid(cmd.getUserId());
-		command.setOperatorRole(Role.ResourceAdmin);
+		command.setOperatorRole(Role.SystemAdmin);
 		command.setReason(reason);
 		familySerivce.rejectMember(command );
 	}
@@ -1149,7 +1152,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		//按楼栋发送：
 		else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
 			for (String buildingName : buildingNames) {
-				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(orgId, buildingName, 1, Integer.MAX_VALUE);
+				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
 				if(addresses != null && addresses.size() > 0){
 					for (ApartmentDTO address : addresses) {
 						Family family = familyProvider.findFamilyByAddressId(address.getAddressId());
@@ -1175,25 +1178,30 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	public void sendNoticeToFamilyById(Long familyId,String message){
 		MessageDTO messageDto = new MessageDTO();
-		messageDto.setAppId(AppConstants.APPID_FAMILY);
-		messageDto.setSenderUid(UserContext.current().getUser().getId());
+		//messageDto.setAppId(AppConstants.APPID_FAMILY);
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_UID);
+		//messageDto.setSenderUid(UserContext.current().getUser().getId());
 		messageDto.setChannels(new MessageChannel(MessageChannelType.GROUP.getCode(), String.valueOf(familyId)));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_FAMILY, MessageChannelType.GROUP.getCode(), 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.GROUP.getCode(), 
 				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 
 	public void sendNoticeToUserById(Long userId,String message){
 		MessageDTO messageDto = new MessageDTO();
-		messageDto.setAppId(AppConstants.APPID_FAMILY);
-		messageDto.setSenderUid(UserContext.current().getUser().getId());
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(userId)));
-		messageDto.setMetaAppId(AppConstants.APPID_USER);
+		messageDto.setSenderUid(User.SYSTEM_UID);
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_USER, MessageChannelType.USER.getCode(), 
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
 				String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 	}
 
@@ -1345,7 +1353,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public ListPropTopicStatisticCommandResponse getPMTopicStatistics(ListPropTopicStatisticCommand cmd) {
 		ListPropTopicStatisticCommandResponse response = new ListPropTopicStatisticCommandResponse();
-		String taskType = null; // OrganizationTaskType.fromCode(cmd.getCategoryId()).getCode();
+		OrganizationTaskType taskTypeObj = this.convertContentCategoryToTaskType(cmd.getCategoryId());
+		String taskType = taskTypeObj == null ? null:taskTypeObj.getCode();
 		String startStrTime = cmd.getStartStrTime();
 		String endStrTime = cmd.getEndStrTime();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
@@ -1380,8 +1389,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			Date startTime;
 			Date endTime;
 			try {
-				startTime = DateStatisticHelper.parseDateStr(startStrTime);
-				endTime = DateStatisticHelper.parseDateStr(endStrTime);
+				startTime = DateStatisticHelper.parseDateStrToMin(startStrTime);
+				endTime = DateStatisticHelper.parseDateStrToMax(endStrTime);
 				createList(organizationId,taskType,dateList,startTime.getTime(), endTime.getTime());
 			} catch (ParseException e) {
 				LOGGER.error("failed to parse date.startStrTime=" + startStrTime +",endStrTime=" + endStrTime);
@@ -1396,6 +1405,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		response.setWeekList(weekList);
 		response.setYesterdayList(yesterdayList);
 		return response;
+	}
+	
+	
+	private OrganizationTaskType convertContentCategoryToTaskType(Long contentCategoryId) {
+		if(contentCategoryId != null) {
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
+				return OrganizationTaskType.NOTICE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_REPAIRS) {
+				return OrganizationTaskType.REPAIRS;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
+				return OrganizationTaskType.CONSULT_APPEAL;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
+				return OrganizationTaskType.COMPLAINT_ADVICE;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -1901,8 +1929,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	{
 		int todayCount = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,null,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 		todayList.add(todayCount);
-		int num = OrganizationTaskStatus.PROCESSED.getCode();
-		for (int i = 0; i <= num ; i++)
+		int num = OrganizationTaskStatus.OTHER.getCode();
+		for (int i = 1; i <= num ; i++)
 		{
 			int count = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 			todayList.add(count);

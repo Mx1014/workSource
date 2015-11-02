@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -13,20 +12,16 @@ import org.jooq.Record;
 import org.jooq.SelectJoinStep;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.common.ScopeType;
-import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.region.Region;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhBusinessVisibleScopes;
@@ -40,8 +35,6 @@ import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.server.schema.tables.records.EhBusinessesRecord;
 import com.everhomes.util.ConvertHelper;
 
-import freemarker.core.ReturnInstruction.Return;
-
 
 @Component
 public class BusinessProviderImpl implements BusinessProvider {
@@ -49,6 +42,8 @@ public class BusinessProviderImpl implements BusinessProvider {
 	private DbProvider dbProvider;
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	@Autowired
+	private CategoryProvider categoryProvider;
 	
 //	@Caching(evict = { @CacheEvict(value="BusinessesByCreatorId", key="#business.creatorUid") })
     @Override
@@ -288,7 +283,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         return businesses.get(0);
     }
     @Override
-    public List<Business> findBusinessByCategroy(long categoryId, List<String> geoHashList) {
+    public List<Business> findBusinessByCategroy(List<Long> categoryIds, List<String> geoHashList) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
         Condition c = null;
         for(String geoHashStr : geoHashList){
@@ -302,7 +297,7 @@ public class BusinessProviderImpl implements BusinessProvider {
         //List<Business> businesses = new ArrayList<>();
         return context.select(Tables.EH_BUSINESSES.fields()).from(Tables.EH_BUSINESSES)
         .rightOuterJoin(Tables.EH_BUSINESS_CATEGORIES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID))
-        .where(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.eq(categoryId))
+        .where(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.in(categoryIds))
         .and(c.or(Tables.EH_BUSINESSES.TARGET_TYPE.eq(BusinessTargetType.THIRDPART.getCode())))
         .fetch().stream().map(r ->{
                 Business b = new Business();
@@ -467,4 +462,15 @@ public class BusinessProviderImpl implements BusinessProvider {
         return dao.fetchByOwnerId(id).stream().map(r -> 
             ConvertHelper.convert(r, BusinessAssignedScope.class)).collect(Collectors.toList());
     }
+	@Override
+	public List<BusinessCategory> listBusinessCategoriesByCatPIdAndOwnerIds(
+			Long id, List<Long> recommendBizIds) {
+		List<Long> categoryIds = this.categoryProvider.getBusinessSubCategories(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+        List<BusinessCategory> businessCategories = context.select().from(Tables.EH_BUSINESS_CATEGORIES)
+        .where(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID.in(recommendBizIds))
+        .and(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.in(categoryIds))
+        .fetch().stream().map(r ->ConvertHelper.convert(r, BusinessCategory.class)).collect(Collectors.toList());
+        return businessCategories;
+	}
 }

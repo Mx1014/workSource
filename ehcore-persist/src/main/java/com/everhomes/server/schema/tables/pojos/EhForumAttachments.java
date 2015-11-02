@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumAttachments implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1925303912;
+	private static final long serialVersionUID = 885611688;
 
 	private java.lang.Long     id;
 	private java.lang.Long     postId;
@@ -20,6 +20,7 @@ public class EhForumAttachments implements java.io.Serializable {
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.String   orignialPath;
+	private java.lang.Long     targetId;
 
 	public EhForumAttachments() {}
 
@@ -30,7 +31,8 @@ public class EhForumAttachments implements java.io.Serializable {
 		java.lang.String   contentUri,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
-		java.lang.String   orignialPath
+		java.lang.String   orignialPath,
+		java.lang.Long     targetId
 	) {
 		this.id = id;
 		this.postId = postId;
@@ -39,6 +41,7 @@ public class EhForumAttachments implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.orignialPath = orignialPath;
+		this.targetId = targetId;
 	}
 
 	public java.lang.Long getId() {
@@ -95,5 +98,13 @@ public class EhForumAttachments implements java.io.Serializable {
 
 	public void setOrignialPath(java.lang.String orignialPath) {
 		this.orignialPath = orignialPath;
+	}
+
+	public java.lang.Long getTargetId() {
+		return this.targetId;
+	}
+
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
 	}
 }

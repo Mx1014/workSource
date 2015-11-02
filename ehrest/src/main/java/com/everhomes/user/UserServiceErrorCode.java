@@ -23,4 +23,6 @@ public interface UserServiceErrorCode {
     static final int ERROR_INVALID_PARAMS=100016;
     static final int ERROR_INVALID_PERMISSION=100017;
     static final int ERROR_UNAUTHENTITICATION=401;
+    static final int ERROR_FORBIDDEN=403;
+    static final int ERROR_FILE_CONTEXT_ISNULL=200001;
 }

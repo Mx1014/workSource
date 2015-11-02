@@ -1,5 +1,10 @@
 package com.everhomes.category;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * <ul>
  * <li>CATEGORY_ID_TOPIC(1): 帖子类型（根类型）</li>
@@ -26,6 +31,9 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_SERVICE = 3L;
     /** 活动 */
     public static final long CATEGORY_ID_ACTIVITY = 4L;
+
+    /** 帖子/普通 */
+    public static final long CATEGORY_ID_TOPIC_COMMON = 1001L;
     
     /** 帖子/紧急通知 */
     public static final long CATEGORY_ID_URGENT_NOTICE = 1002L;
@@ -48,4 +56,19 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_TOPIC_ACTIVITY = 1010L;
     /** 帖子/投票 */
     public static final long CATEGORY_ID_TOPIC_POLLING = 1011L;
+    
+    /** 政府机构相关的类型 */
+    public static final List<Long> GA_RELATED_CATEGORIES = Arrays.asList(
+        CATEGORY_ID_NOTICE, 
+        CATEGORY_ID_REPAIRS, 
+        CATEGORY_ID_CONSULT_APPEAL, 
+        CATEGORY_ID_COMPLAINT_ADVICE
+    );
+    
+    /** 政府机构相关的有隐私的类型，使用这些类型的帖子对政府机关来说需要有权控制是否公开 */
+    public static final List<Long> GA_PRIVACY_CATEGORIES = Arrays.asList(
+        CATEGORY_ID_REPAIRS, 
+        CATEGORY_ID_CONSULT_APPEAL, 
+        CATEGORY_ID_COMPLAINT_ADVICE
+    );
 }

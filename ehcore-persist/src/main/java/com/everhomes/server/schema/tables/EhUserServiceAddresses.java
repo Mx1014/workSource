@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserServiceAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord> {
 
-	private static final long serialVersionUID = -146343209;
+	private static final long serialVersionUID = 2115169855;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_service_addresses</code>
@@ -45,6 +45,46 @@ public class EhUserServiceAddresses extends org.jooq.impl.TableImpl<com.everhome
 	 * The column <code>ehcore.eh_user_service_addresses.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.contact_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.lang.Byte> CONTACT_TYPE = createField("contact_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.status</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.creator_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.deleter_uid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.delete_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.contact_token</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.lang.String> CONTACT_TOKEN = createField("contact_token", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_service_addresses.contact_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserServiceAddressesRecord, java.lang.String> CONTACT_NAME = createField("contact_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_user_service_addresses</code> table reference

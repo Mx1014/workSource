@@ -18,10 +18,15 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhBusinessAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhBusinessCategories;
+import com.everhomes.server.schema.tables.pojos.EhBusinessVisibleScopes;
+import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
 import com.everhomes.server.schema.tables.pojos.EhCooperationRequests;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseContacts;
 import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -34,6 +39,7 @@ import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
 import com.everhomes.server.schema.tables.pojos.EhPollItems;
 import com.everhomes.server.schema.tables.pojos.EhPollVotes;
 import com.everhomes.server.schema.tables.pojos.EhPolls;
+import com.everhomes.server.schema.tables.pojos.EhPushMessageResults;
 import com.everhomes.server.schema.tables.pojos.EhQrcodes;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserGroups;
@@ -51,6 +57,7 @@ import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserServiceAddress;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -124,6 +131,10 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(EhUsers.class, EhUserProfiles.class, Tables.EH_USER_PROFILES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_PROFILES.ID.max()).from(Tables.EH_USER_PROFILES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhUsers.class, UserServiceAddress.class, Tables.EH_USER_SERVICE_ADDRESSES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_USER_SERVICE_ADDRESSES.ID.max()).from(Tables.EH_USER_SERVICE_ADDRESSES).fetchOne().value1(); 
         });
         
         syncTableSequence(EhForums.class, EhForums.class, Tables.EH_FORUMS.getName(), (dbContext) -> { 
@@ -221,6 +232,30 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhCooperationRequests.class, Tables.EH_COOPERATION_REQUESTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_COOPERATION_REQUESTS.ID.max()).from(Tables.EH_COOPERATION_REQUESTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinesses.class, Tables.EH_BUSINESSES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESSES.ID.max()).from(Tables.EH_BUSINESSES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinessVisibleScopes.class, Tables.EH_BUSINESS_VISIBLE_SCOPES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESS_VISIBLE_SCOPES.ID.max()).from(Tables.EH_BUSINESS_VISIBLE_SCOPES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinessAssignedScopes.class, Tables.EH_BUSINESS_ASSIGNED_SCOPES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESS_ASSIGNED_SCOPES.ID.max()).from(Tables.EH_BUSINESS_ASSIGNED_SCOPES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhBusinessCategories.class, Tables.EH_BUSINESS_CATEGORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_BUSINESS_CATEGORIES.ID.max()).from(Tables.EH_BUSINESS_CATEGORIES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhPushMessageResults.class, Tables.EH_PUSH_MESSAGE_RESULTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUSH_MESSAGE_RESULTS.ID.max()).from(Tables.EH_PUSH_MESSAGE_RESULTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhEnterpriseContacts.class, Tables.EH_ENTERPRISE_CONTACTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_CONTACTS.ID.max()).from(Tables.EH_ENTERPRISE_CONTACTS).fetchOne().value1(); 
         });
     }
     

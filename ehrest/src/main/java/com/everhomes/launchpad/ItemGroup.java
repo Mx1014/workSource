@@ -11,11 +11,12 @@ package com.everhomes.launchpad;
  * <li>CALLPHONES(CallPhones): 电话</li>
  * <li>PAYACTIONS(PayActions): 缴费</li>
  * <li>COUPONS(Coupons): 优惠劵</li>
+ * <li>GAPOSTS(GaPosts): 分类查帖</li>
  * </ul>
  */
 public enum ItemGroup {
     DEFAULT("Default"),GOVAGENCIES("GovAgencies"),BIZS("Bizs"),GAACTIONS("GaActions"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones"),
-    PAYACTIONS("PayActions"),COUPONS("Coupons");
+    PAYACTIONS("PayActions"),COUPONS("Coupons"),GAPOSTS("GaPosts");
     
     private String code;
        

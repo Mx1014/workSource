@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1397618595;
+	private static final long serialVersionUID = 1833071881;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -39,12 +39,12 @@ public class EhUsers implements java.io.Serializable {
 	private java.sql.Timestamp deleteTime;
 	private java.sql.Timestamp lastLoginTime;
 	private java.lang.String   lastLoginIp;
-	private java.lang.String   regIp;
-	private java.lang.Long     regCityId;
-	private java.lang.Long     regChannelId;
-	private java.lang.String   originalAvatar;
 	private java.lang.String   salt;
 	private java.lang.String   passwordHash;
+	private java.lang.String   regIp;
+	private java.lang.String   originalAvatar;
+	private java.lang.Long     regCityId;
+	private java.lang.Long     regChannelId;
 
 	public EhUsers() {}
 
@@ -75,12 +75,12 @@ public class EhUsers implements java.io.Serializable {
 		java.sql.Timestamp deleteTime,
 		java.sql.Timestamp lastLoginTime,
 		java.lang.String   lastLoginIp,
-		java.lang.String   regIp,
-		java.lang.Long     regCityId,
-		java.lang.Long     regChannelId,
-		java.lang.String   originalAvatar,
 		java.lang.String   salt,
-		java.lang.String   passwordHash
+		java.lang.String   passwordHash,
+		java.lang.String   regIp,
+		java.lang.String   originalAvatar,
+		java.lang.Long     regCityId,
+		java.lang.Long     regChannelId
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -108,12 +108,12 @@ public class EhUsers implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 		this.lastLoginTime = lastLoginTime;
 		this.lastLoginIp = lastLoginIp;
-		this.regIp = regIp;
-		this.regCityId = regCityId;
-		this.regChannelId = regChannelId;
-		this.originalAvatar = originalAvatar;
 		this.salt = salt;
 		this.passwordHash = passwordHash;
+		this.regIp = regIp;
+		this.originalAvatar = originalAvatar;
+		this.regCityId = regCityId;
+		this.regChannelId = regChannelId;
 	}
 
 	public java.lang.Long getId() {
@@ -324,12 +324,36 @@ public class EhUsers implements java.io.Serializable {
 		this.lastLoginIp = lastLoginIp;
 	}
 
+	public java.lang.String getSalt() {
+		return this.salt;
+	}
+
+	public void setSalt(java.lang.String salt) {
+		this.salt = salt;
+	}
+
+	public java.lang.String getPasswordHash() {
+		return this.passwordHash;
+	}
+
+	public void setPasswordHash(java.lang.String passwordHash) {
+		this.passwordHash = passwordHash;
+	}
+
 	public java.lang.String getRegIp() {
 		return this.regIp;
 	}
 
 	public void setRegIp(java.lang.String regIp) {
 		this.regIp = regIp;
+	}
+
+	public java.lang.String getOriginalAvatar() {
+		return this.originalAvatar;
+	}
+
+	public void setOriginalAvatar(java.lang.String originalAvatar) {
+		this.originalAvatar = originalAvatar;
 	}
 
 	public java.lang.Long getRegCityId() {
@@ -346,29 +370,5 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setRegChannelId(java.lang.Long regChannelId) {
 		this.regChannelId = regChannelId;
-	}
-
-	public java.lang.String getOriginalAvatar() {
-		return this.originalAvatar;
-	}
-
-	public void setOriginalAvatar(java.lang.String originalAvatar) {
-		this.originalAvatar = originalAvatar;
-	}
-
-	public java.lang.String getSalt() {
-		return this.salt;
-	}
-
-	public void setSalt(java.lang.String salt) {
-		this.salt = salt;
-	}
-
-	public java.lang.String getPasswordHash() {
-		return this.passwordHash;
-	}
-
-	public void setPasswordHash(java.lang.String passwordHash) {
-		this.passwordHash = passwordHash;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1361766207;
+	private static final long serialVersionUID = 903285479;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -22,6 +22,7 @@ public class EhCategories implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   logoUri;
 
 	public EhCategories() {}
 
@@ -34,7 +35,8 @@ public class EhCategories implements java.io.Serializable {
 		java.lang.Integer  defaultOrder,
 		java.lang.Byte     status,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   logoUri
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -45,6 +47,7 @@ public class EhCategories implements java.io.Serializable {
 		this.status = status;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
+		this.logoUri = logoUri;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhCategories implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getLogoUri() {
+		return this.logoUri;
+	}
+
+	public void setLogoUri(java.lang.String logoUri) {
+		this.logoUri = logoUri;
 	}
 }

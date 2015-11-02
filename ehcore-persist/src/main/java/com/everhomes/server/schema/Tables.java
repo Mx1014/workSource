@@ -144,6 +144,36 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhDevices EH_DEVICES = com.everhomes.server.schema.tables.EhDevices.EH_DEVICES;
 
 	/**
+	 * The table ehcore.eh_enterprise_addresses
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseAddresses EH_ENTERPRISE_ADDRESSES = com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES;
+
+	/**
+	 * The table ehcore.eh_enterprise_community_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseCommunityMap EH_ENTERPRISE_COMMUNITY_MAP = com.everhomes.server.schema.tables.EhEnterpriseCommunityMap.EH_ENTERPRISE_COMMUNITY_MAP;
+
+	/**
+	 * The table ehcore.eh_enterprise_contacts
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseContacts EH_ENTERPRISE_CONTACTS = com.everhomes.server.schema.tables.EhEnterpriseContacts.EH_ENTERPRISE_CONTACTS;
+
+	/**
+	 * The table ehcore.eh_enterprise_contact_entries
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseContactEntries EH_ENTERPRISE_CONTACT_ENTRIES = com.everhomes.server.schema.tables.EhEnterpriseContactEntries.EH_ENTERPRISE_CONTACT_ENTRIES;
+
+	/**
+	 * The table ehcore.eh_enterprise_contact_groups
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseContactGroups EH_ENTERPRISE_CONTACT_GROUPS = com.everhomes.server.schema.tables.EhEnterpriseContactGroups.EH_ENTERPRISE_CONTACT_GROUPS;
+
+	/**
+	 * The table ehcore.eh_enterprise_contact_group_members
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers EH_ENTERPRISE_CONTACT_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS;
+
+	/**
 	 * The table ehcore.eh_events
 	 */
 	public static final com.everhomes.server.schema.tables.EhEvents EH_EVENTS = com.everhomes.server.schema.tables.EhEvents.EH_EVENTS;
@@ -364,6 +394,7 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
+<<<<<<< HEAD
 	 * The table ehcore.eh_punch_day_logs
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchDayLogs EH_PUNCH_DAY_LOGS = com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS;
@@ -397,7 +428,16 @@ public class Tables {
 	 * The table ehcore.eh_punch_workday
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchWorkday EH_PUNCH_WORKDAY = com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY;
+	/**
+	 * The table ehcore.eh_push_messages
+	 */
+	public static final com.everhomes.server.schema.tables.EhPushMessages EH_PUSH_MESSAGES = com.everhomes.server.schema.tables.EhPushMessages.EH_PUSH_MESSAGES;
 
+	/**
+	 * The table ehcore.eh_push_message_results
+	 */
+	public static final com.everhomes.server.schema.tables.EhPushMessageResults EH_PUSH_MESSAGE_RESULTS = com.everhomes.server.schema.tables.EhPushMessageResults.EH_PUSH_MESSAGE_RESULTS;
+ 
 	/**
 	 * The table ehcore.eh_qrcodes
 	 */

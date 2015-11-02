@@ -127,6 +127,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, 
 				Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
 		query.setDistinct(true);
+		if(communityId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
 
 		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
@@ -971,6 +973,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(records.get(0), CommunityAddressMapping.class);
 		}
 		return null;
+	}
+
+
+	@Override
+	public List<Organization> listOrganizationByName(String orgName,String orgType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Organization> list = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(orgType).and(Tables.EH_ORGANIZATIONS.NAME.eq(orgName)))
+				.fetch().map(r -> {
+					return ConvertHelper.convert(r, Organization.class);
+				});
+				
+		if(list == null || list.isEmpty())
+			return null;
+		return list;
 	}
 
 }

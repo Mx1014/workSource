@@ -14,6 +14,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostEntityTag;
+import com.everhomes.forum.PostPrivacy;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -46,6 +47,8 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			if(organization == null){
 				LOGGER.warn("Unable to find the organization.postId=" + post.getId() + ", creatorId=" + post.getCreatorUid() 
 					+ ", subject=" + post.getSubject());
+				post.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
+				post.setEmbeddedAppId(0L);
 				return post;
 				/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 						"Unable to find the organization.");*/
@@ -57,10 +60,10 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setApplyEntityId(0L); // 还没有帖子ID
 			task.setTargetType(post.getTargetTag());
 			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
-				task.setTargetId(0L);
+				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			else
 				task.setTargetId(organization.getId());
-			task.setCreatorUid(post.getCreatorUid());
+			task.setCreatorUid(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
@@ -90,20 +93,19 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 	public Post postProcessEmbeddedObject(Post post) {
 		Long taskId = post.getEmbeddedId();
 		if(taskId == null) {
-			LOGGER.warn("could not get taskId.");
+			LOGGER.warn("Task id not found, postId=" + post.getId() + ", taskId=" + taskId);
 			return post;
 			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"could not get taskId.");*/
 		} 
 		OrganizationTask task = this.organizationProvider.findOrganizationTaskById(taskId);
 		if(task == null) {
-			LOGGER.error("could not found task.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"could not found task.");
+			LOGGER.error("Task not find, postId=" + post.getId() + ", taskId=" + taskId);
+		} else {
+    		task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
+    		task.setApplyEntityId(post.getId());
+    		this.organizationProvider.updateOrganizationTask(task);
 		}
-		task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
-		task.setApplyEntityId(post.getId());
-		this.organizationProvider.updateOrganizationTask(task);
 		return post;
 	}
 
@@ -113,35 +115,38 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 		Organization organization = null;
 		if(creatorTag == null) {
-			LOGGER.error("creatorTag could not be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"creatorTag could not be null.");
+			LOGGER.error("creatorTag is null, postId=" + post.getId() + ", creatorTag=" + creatorTag);
+			return organization;
 		}
 		if(targetTag == null) {
-			LOGGER.error("targetTag could not be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"targetTag could not be null.");
+			LOGGER.error("targetTag is null, postId=" + post.getId() + ", targetTag=" + targetTag);
+            return organization;
 		}
+		
 		//PostEntityTag.USER
 		switch(targetTag){
 		case USER:
 			if(creatorTag.getCode().equals(PostEntityTag.PM.getCode()) || creatorTag.getCode().equals(PostEntityTag.GARC.getCode())){
-				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getCreatorTag());break;
+				organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getCreatorTag());
 			}
-			else if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
-				organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());break;
+			else {
+			    if(!creatorTag.getCode().equals(PostEntityTag.USER.getCode())){
+			        organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());
+			    }
 			}
+			break;
 		case PM:
 		case GARC:
-			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getTargetTag());break;
+			organization = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(post.getVisibleRegionId(), post.getTargetTag());
+			break;
 		case GANC:
 		case GAPS:
 		case GACW:
-			organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());break;
+			organization = this.organizationProvider.findOrganizationById(post.getVisibleRegionId());
+			break;
 		default:
-			LOGGER.error("creatorTag or targetTag format is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"creatorTag or targetTag format is wrong.");
+			LOGGER.error("targetTag is not supported, postId=" + post.getId() + ", targetTag=" + targetTag);
+			break;
 		}
 
 		return organization;
@@ -165,9 +170,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			}
 		}
 
-		LOGGER.error("contentCategory format is wrong.");
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-				"contentCategory format is wrong.");
+		LOGGER.error("Content category is not matched in organization type, postId=" + post.getId() 
+		    + ", contentCategoryId=" + contentCategoryId + ", subject=" + post.getSubject());
+		return null;
 	}
 
 	private String getOrganizationTaskRenderString(Post post) {

@@ -3,7 +3,9 @@ package com.everhomes.recommend;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -139,7 +141,7 @@ public class RecommendationController extends ControllerBase{
             List<Recommendation> recommends = recommendationService.getRecommendsByUserId(userId
                     , RecommendSourceType.USER.getCode().intValue()
                     , PaginationConfigHelper.getPageSize(configProvider, null));
-            
+            Map<String, Long> recMap = new HashMap<String, Long>();
             for(Recommendation rec : recommends) {
                 UserInfo userInfo = userService.getUserSnapshotInfo(rec.getSourceId());
                 RecommendUserInfo reUser = ConvertHelper.convert(userInfo, RecommendUserInfo.class);
@@ -147,6 +149,13 @@ public class RecommendationController extends ControllerBase{
                 if(rec.getEmbeddedJson() == null) {
                     continue;
                     }
+                
+                    //排除重复
+                String key = "" + rec.getAppid() + ":" + rec.getSourceId() + ":" + rec.getUserId() + ":" + rec.getSourceType() + ":" + rec.getSuggestType();
+                if(recMap.get(key) != null) {
+                    continue;
+                        }
+                recMap.put(key, 1l);
                 
                 JSONObject jsonObject = (JSONObject) JSONValue.parse(rec.getEmbeddedJson());
                 if(jsonObject != null) {
@@ -193,8 +202,8 @@ public class RecommendationController extends ControllerBase{
       return res;
   }
   
-  @RequestMapping("testAddUser")
-  @RestReturn(String.class)
+  /* @RequestMapping("testAddUser")
+  @RestReturn(String.class) */
   public RestResponse testAddUser(@RequestParam(value="sourceId")Long sourceId) {
       Long userId = UserContext.current().getUser().getId();
       Recommendation r = new Recommendation();

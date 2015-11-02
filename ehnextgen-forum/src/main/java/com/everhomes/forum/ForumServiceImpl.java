@@ -4,6 +4,7 @@ package com.everhomes.forum;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.app.AppConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
+import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -36,8 +39,12 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyDTO;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.admin.PostAdminDTO;
 import com.everhomes.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.forum.admin.SearchTopicAdminCommandResponse;
@@ -60,14 +67,18 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserLikeType;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -127,6 +138,15 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private FamilyProvider familyProvider;
+    
+    @Autowired
+    private HotPostService hotPostService;
     
     @Override
     public boolean isSystemForum(long forumId) {
@@ -206,6 +226,23 @@ public class ForumServiceImpl implements ForumService {
                     Post tmpPost = this.forumProvider.findPostById(postId);
                     tmpPost.setViewCount(tmpPost.getViewCount() + 1);
                     this.forumProvider.updatePost(tmpPost);
+                    UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(tmpPost.getCreatorUid(),IdentifierType.MOBILE.getCode());
+                    String creatorUser = userIdentifier.getIdentifierToken();
+                    String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
+                    boolean flag = false;
+                    for(String hotuser : hotusers){
+                    	if(creatorUser == hotuser || creatorUser.equals(hotuser)){
+                    		flag = true;
+                    	}
+                    }
+                    if(Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag){
+                    	HotPost hotpost = new HotPost();
+                        hotpost.setPostId(postId);
+                        hotpost.setTimeStamp(Calendar.getInstance().getTimeInMillis());
+                        hotpost.setModifyType(HotPostModifyType.VIEW.getCode());
+                        hotPostService.push(hotpost);
+                    }
+                    
                     return null;
                 });
             } catch(Exception e) {
@@ -258,9 +295,11 @@ public class ForumServiceImpl implements ForumService {
         Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
         if(post != null) {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
-                LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-                throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+            	if(!(post.getCreatorUid() != post.getDeleterUid() && post.getCreatorUid() == userId)){
+            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
+            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+            	}
             }
             
             this.forumProvider.populatePostAttachments(post);
@@ -285,6 +324,21 @@ public class ForumServiceImpl implements ForumService {
         Long embededAppId = post.getEmbeddedAppId();
         ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
         
+        List<Long> userIds = new ArrayList<Long>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    context.select().from(Tables.EH_USER_FAVORITES)
+                        .where(Tables.EH_USER_FAVORITES.TARGET_ID.eq(postId))
+                        .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq("topic"))
+                        .fetch().map( (r) ->{
+                        	
+                        	userIds.add(r.getValue(Tables.EH_USER_FAVORITES.OWNER_UID));
+
+                            return null;
+                        });
+                    return true;
+                });
+        
         if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
             post.setStatus(PostStatus.INACTIVE.getCode());
             post.setDeleterUid(userId);
@@ -292,6 +346,14 @@ public class ForumServiceImpl implements ForumService {
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
+                    if(userId.equals(post.getCreatorUid())){
+                    	userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+                    }
+                    if(userIds.size() != 0){
+                    	for(Long id:userIds){
+                    		userActivityProvider.deleteFavorite(id, postId, "topic");
+                    	}
+                    }
                    return null;
                 });
                 
@@ -374,7 +436,7 @@ public class ForumServiceImpl implements ForumService {
     public ListPostCommandResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd) {
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        Long userId = user.getId();
         Long communityId = cmd.getCommunityId();
         Community community = checkCommunityParameter(userId, communityId, "queryTopicsByCategory");
         
@@ -427,6 +489,56 @@ public class ForumServiceImpl implements ForumService {
         }
         
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }
+    
+    private Condition buildPostCategoryQryCondition(Long userId, PostEntityTag entityTag, Community community, Long contentCategoryId, Long actionCategoryId) {
+        Condition categoryCondition = null;
+        
+        Category contentCatogry = null;
+        // contentCategoryId为0表示全部查，此时也不需要给category条件
+        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
+            contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
+        }
+        if(contentCatogry != null) {
+            categoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+        }
+        
+        Category actionCategory = null;
+        if(actionCategoryId != null && actionCategoryId.longValue() > 0) {
+            actionCategory = this.categoryProvider.findCategoryById(actionCategoryId);
+        }
+        if(actionCategory != null) {
+            Condition tempCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
+            if(categoryCondition != null) {
+                categoryCondition = categoryCondition.and(tempCondition);
+            } else {
+                categoryCondition = tempCondition;
+            }
+        }
+        
+        Condition entityCondition = null;
+        if(entityTag != null) {
+            // 既没有查询目标，也没有类型，则只查用户相关的帖子
+            switch(entityTag) {
+            case USER:
+                entityCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(PostEntityTag.USER.getCode());
+                entityCondition = entityCondition.and(Tables.EH_FORUM_POSTS.TARGET_TAG.eq(PostEntityTag.USER.getCode()));
+                break;
+            case PM:
+            case GARC:
+            case GANC:
+            case GAPS:
+            case GACW:
+                //entityCondition = buildGaRelatedPostQryConditionByCategory(user.getId(), entityTag, community, gaRegionIdMap);
+                break;
+            default:
+                LOGGER.error("Unsupported entity tag for query topic by category, userId=" + userId + ", entityTag=" + entityTag);
+                break;
+            }
+            Condition c2 = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(userId);
+        }
+        
+        return null;
     }
     
     @Override
@@ -585,6 +697,22 @@ public class ForumServiceImpl implements ForumService {
         try {
             this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                 this.forumProvider.likePost(operatorId, topicId);
+                Post tmpPost = this.forumProvider.findPostById(topicId);
+                String creatorUid = Long.toString(tmpPost.getCreatorUid());
+                String[] hotusers = configProvider.getValue(ConfigConstants.HOT_USERS, "").split(",");
+                boolean flag = false;
+                for(String hotuser : hotusers){
+                	if(creatorUid == hotuser){
+                		flag = true;
+                	}
+                }
+                if(Byte.valueOf(PostAssignedFlag.ASSIGNED.getCode()).equals(tmpPost.getAssignedFlag()) || flag){
+                	HotPost hotpost = new HotPost();
+                    hotpost.setPostId(topicId);
+                    hotpost.setTimeStamp(Calendar.getInstance().getTimeInMillis());
+                    hotpost.setModifyType(HotPostModifyType.LIKE.getCode());
+                    hotPostService.push(hotpost);
+                }
                return null;
             });
         } catch(Exception e) {
@@ -861,6 +989,10 @@ public class ForumServiceImpl implements ForumService {
         if(nickNames != null && nickNames.size() > 0) {
             filter.includeFilter(PostAdminQueryFilter.TERM_SENDERNAME, nickNames);
         }
+        
+        List<Long> parentPostId = new ArrayList<Long>();
+        parentPostId.add(0L);
+        filter.includeFilter(PostAdminQueryFilter.TERM_PARENTPOSTID, parentPostId);
         
         Long startTime = cmd.getStartTime();
         if(startTime != null) {
@@ -1299,7 +1431,9 @@ public class ForumServiceImpl implements ForumService {
         
         processPostCategory(userId, cmd, post);
         processPostLocation(userId, cmd, post);
-        processPostVisibility(userId, forumId, cmd, post);
+//        processPostVisibility(userId, forumId, cmd, post);
+        post.setVisibleRegionType(cmd.getVisibleRegionType());
+        post.setVisibleRegionId(cmd.getVisibleRegionId());
         
         post.setForumId(cmd.getForumId());
         post.setParentPostId(0L);
@@ -1387,22 +1521,25 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private void processPostCategory(long userId, NewTopicCommand cmd, Post post) {
-        if(cmd.getContentCategory() != null && cmd.getContentCategory().longValue() > 0) {
-            Category category = this.categoryProvider.findCategoryById(cmd.getContentCategory());
-            if(category == null) {
-                if(LOGGER.isErrorEnabled()) {
-                    LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
-                }
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid content category");
-            }
-            
-            post.setCategoryId(cmd.getContentCategory());
-            post.setCategoryPath(category.getPath());
+        Long contentCategory = cmd.getContentCategory();
+        if(contentCategory == null || contentCategory.longValue() == 0 || contentCategory.longValue() == -1) {
+            contentCategory = CategoryConstants.CATEGORY_ID_TOPIC_COMMON;
         }
         
+        Category category = this.categoryProvider.findCategoryById(contentCategory);
+        if(category == null) {
+            if(LOGGER.isErrorEnabled()) {
+                LOGGER.error("Content category not found, userId=" + userId + ", cmd=" + cmd);
+            }
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid content category");
+        }
+        
+        post.setCategoryId(contentCategory);
+        post.setCategoryPath(category.getPath());
+        
         if(cmd.getActionCategory() != null && cmd.getActionCategory().longValue() > 0) {
-            Category category = this.categoryProvider.findCategoryById(cmd.getActionCategory());
+            category = this.categoryProvider.findCategoryById(cmd.getActionCategory());
             if(category == null) {
                 if(LOGGER.isErrorEnabled()) {
                     LOGGER.error("Action category not found, userId=" + userId + ", cmd=" + cmd);
@@ -1888,6 +2025,8 @@ public class ForumServiceImpl implements ForumService {
                 
                 populatePostRegionInfo(userId, post);
                 
+                populatePostForumNameInfo(userId, post);
+                
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
                 if(homeUrl.length() == 0 || relativeUrl.length() == 0) {
@@ -1910,15 +2049,20 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostCreatorInfo(long userId, Post post) {
         Long forumId = post.getForumId();
         if(forumId != null) {
+            String creatorNickName = post.getCreatorNickName();
+            String creatorAvatar = post.getCreatorAvatar();
+            
             // 社区论坛的意见反馈论坛直接使用USER表中的信息作为发帖人的信息
             if(forumId == ForumConstants.SYSTEM_FORUM || forumId == ForumConstants.FEEDBACK_FORUM) {
                 User creator = userProvider.findUserById(post.getCreatorUid());
                 if(creator != null) {
-                    post.setCreatorNickName(creator.getNickName());
-                    post.setCreatorAvatar(creator.getAvatar());
-                    String avatarUrl = getResourceUrlByUir(userId, creator.getAvatar(), 
-                        EntityType.USER.getCode(), creator.getId());
-                    post.setCreatorAvatarUrl(avatarUrl);
+                    // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                        post.setCreatorNickName(creator.getNickName());
+                    }
+                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                        post.setCreatorAvatar(creator.getAvatar());
+                    }
                 }
                 // TODO: set the admin flag of system forum
             } else {
@@ -1928,18 +2072,36 @@ public class ForumServiceImpl implements ForumService {
                     GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
                         EntityType.USER.getCode(), post.getCreatorUid());
                     if(member != null) {
-                        post.setCreatorNickName(member.getMemberNickName());
-                        post.setCreatorAvatar(member.getMemberAvatar());
-                        String avatarUrl = getResourceUrlByUir(userId, member.getMemberAvatar(), 
-                            EntityType.USER.getCode(), member.getMemberId());
-                        post.setCreatorAvatarUrl(avatarUrl); 
-                    }
-                    
-                    Group group = this.groupProvider.findGroupById(forum.getOwnerId());
-                    if(group != null) {
-                        post.setForumName(group.getName());
+                        String nickName = member.getMemberNickName();
+                        String avatar = member.getMemberAvatar();
+                        if(nickName == null || nickName.trim().length() == 0) {
+                            User creator = userProvider.findUserById(post.getCreatorUid());
+                            if(creator != null) {
+                                nickName = creator.getNickName();
+                            }
+                        }
+                        if(avatar == null || avatar.trim().length() == 0){
+                        	User creator = userProvider.findUserById(post.getCreatorUid());
+                        	if(creator != null) {
+                        		avatar = creator.getAvatar();
+                            }
+                        }
+                        // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+                        if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                            post.setCreatorNickName(nickName);
+                        }
+                        if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                            post.setCreatorAvatar(avatar);
+                        }
                     }
                 }
+            }
+            
+            creatorAvatar = post.getCreatorAvatar();
+            if(creatorAvatar != null && creatorAvatar.length() > 0) {
+                String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, 
+                    EntityType.USER.getCode(), post.getCreatorUid());
+                post.setCreatorAvatarUrl(avatarUrl);
             }
         }
         
@@ -1979,7 +2141,11 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostRegionInfo(long userId, Post post) {
         VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
         Long regionId = post.getVisibleRegionId();
-        if(regionType != null && regionId != null) {
+        
+        if(regionId == 0L){
+        	post.setCreatorNickName(post.getCreatorNickName());
+        }
+        else if(regionType != null && regionId != null) {
             String creatorNickName = post.getCreatorNickName();
             if(creatorNickName == null) {
                 creatorNickName = "";
@@ -1987,11 +2153,13 @@ public class ForumServiceImpl implements ForumService {
             switch(regionType) {
             case COMMUNITY:
                 Community community = communityProvider.findCommunityById(regionId);
-                creatorNickName = creatorNickName + "@" + community.getName();
+                if(community != null)
+                	creatorNickName = creatorNickName + "@" + community.getName();
                 break;
             case REGION:
                 Organization organization = organizationProvider.findOrganizationById(regionId);
-                creatorNickName = creatorNickName + "@" + organization.getName();
+                if(organization !=null)
+                	creatorNickName = creatorNickName + "@" + organization.getName();
                 break;
             default:
                 LOGGER.error("Unsupported visible region type, userId=" + userId 
@@ -2002,6 +2170,49 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
         }
         
+    }
+    
+    private void populatePostForumNameInfo(long userId, Post post) {
+        Long forumId = post.getForumId();
+        Forum forum = forumProvider.findForumById(forumId);
+        
+        if(forumId == ForumConstants.SYSTEM_FORUM) {
+            VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+            Long regionId = post.getVisibleRegionId();
+            if(regionType != null && regionId != null) {
+                String forumName = forum.getName();
+                if(forumName == null) {
+                    forumName = "";
+                }
+                switch(regionType) {
+                case COMMUNITY:
+                    Community community = communityProvider.findCommunityById(regionId);
+                    if(community != null)
+                    	forumName = community.getName() + forumName;
+                    break;
+                case REGION:
+                    Organization organization = organizationProvider.findOrganizationById(regionId);
+                    if(organization !=null)
+                    	forumName = organization.getName();
+                    break;
+                default:
+                    LOGGER.error("Unsupported visible region type, userId=" + userId 
+                        + ", regionType=" + regionType + ", postId=" + post.getId());
+                }
+                post.setForumName(forumName);
+            } else {
+                LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
+            }
+        } else {
+            if(forumId == ForumConstants.FEEDBACK_FORUM) {
+                post.setForumName(forum.getName());
+            } else {
+                Group group = this.groupProvider.findGroupById(forum.getOwnerId());
+                if(group != null) {
+                    post.setForumName(group.getName());
+                }
+            }
+        }
     }
     
     private void populatePostAttachements(long userId, Post post, List<Attachment> attachmentList) {
@@ -2069,4 +2280,82 @@ public class ForumServiceImpl implements ForumService {
         
         return handler;
     }
+
+	@Override
+	public SearchTopicAdminCommandResponse searchComment(SearchTopicAdminCommand cmd) {
+		PostAdminQueryFilter filter = new PostAdminQueryFilter();
+        String keyword = cmd.getKeyword();
+        if(!StringUtils.isEmpty(keyword)) {
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_CREATORNICKNAME);
+            filter.setQueryString(keyword);
+        }
+        
+        List<String> phones = cmd.getSenderPhones();
+        if(phones != null && phones.size() > 0) {
+            filter.includeFilter(PostAdminQueryFilter.TERM_IDENTIFY, phones);
+        }
+        
+//        List<String> nickNames = cmd.getSenderNickNames();
+//        if(nickNames != null && nickNames.size() > 0) {
+//            filter.includeFilter(PostAdminQueryFilter.TERM_CREATORNICKNAME, nickNames);
+//        }
+        
+        List<Long> parentPostId = new ArrayList<Long>();
+        parentPostId.add(0L);
+        filter.excludeFilter(PostAdminQueryFilter.TERM_PARENTPOSTID, parentPostId);
+
+        
+        Long startTime = cmd.getStartTime();
+        if(startTime != null) {
+            filter.dateFrom(new Date(startTime));
+        }
+        
+        Long endTime = cmd.getEndTime();
+        if(endTime != null) {
+            filter.dateTo(new Date(endTime));
+        }
+          
+        int pageNum = 0;
+        if(cmd.getPageAnchor() != null) {
+            pageNum = cmd.getPageAnchor().intValue();
+        } else {
+            pageNum = 0;
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        filter.setPageInfo(pageNum, pageSize);
+        ListPostCommandResponse queryResponse = postSearcher.query(filter);
+        
+        SearchTopicAdminCommandResponse response = new SearchTopicAdminCommandResponse();
+        response.setKeywords(queryResponse.getKeywords());
+        response.setNextPageAnchor(queryResponse.getNextPageAnchor());
+        
+        List<PostAdminDTO> adminPostList = new ArrayList<PostAdminDTO>();
+        List<PostDTO> postList = queryResponse.getPosts();
+        for(PostDTO post : postList) {
+            try {
+                PostDTO temp = getTopicById(post.getId(), cmd.getCommunityId(), false);
+                PostAdminDTO adminPost = ConvertHelper.convert(temp, PostAdminDTO.class);
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(temp.getCreatorUid(),
+                    IdentifierType.MOBILE.getCode());
+                if(identifier != null) {
+                    adminPost.setCreatorPhone(identifier.getIdentifierToken());
+                }
+                
+                List<FamilyDTO> families = familyProvider.getUserFamiliesByUserId(temp.getCreatorUid());
+                if(families != null && families.size() > 0){
+                	String address = families.get(0).getAddress();
+                	adminPost.setCreatorAddress(address);
+                }
+                
+                adminPostList.add(adminPost);
+            } catch(Exception e) {
+                LOGGER.error(e.toString());
+            }
+        }
+        
+        response.setPosts(adminPostList);
+        return response;
+	}
 }

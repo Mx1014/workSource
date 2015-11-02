@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.cfg.annotations.Nullability;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
-import org.jooq.SortField;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.jooq.JooqHelper;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRegionsDao;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
@@ -44,317 +41,366 @@ import com.everhomes.util.Tuple;
  */
 @Component
 public class RegionProviderImpl implements RegionProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegionProviderImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegionProviderImpl.class);
 
-    @Autowired
-    private DbProvider dbProvider;
-    
-    @Caching(evict = { @CacheEvict(value="listRegion"),
-            @CacheEvict(value="listChildRegion"),
-            @CacheEvict(value="listDescendantRegion") })
-    @Override
-    public void createRegion(Region region) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        
-        EhRegionsRecord record = ConvertHelper.convert(region, EhRegionsRecord.class);
-        InsertQuery<EhRegionsRecord> query = context.insertQuery(Tables.EH_REGIONS);
-        query.setRecord(record);
-        query.setReturning(Tables.EH_REGIONS.ID);
-        query.execute();
-        
-        region.setId(query.getReturnedRecord().getId());
-        
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhRegions.class, null);
-    }
+	@Autowired
+	private DbProvider dbProvider;
 
-    @Override
-    @Caching(evict = { @CacheEvict(value="Region", key="#region.id"),
-            @CacheEvict(value="listRegion"),
-            @CacheEvict(value="listChildRegion"),
-            @CacheEvict(value="listDescendantRegion")})
-    public void updateRegion(Region region) {
-        assert(region.getId() != null);
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        dao.update(region);
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
-   }
+	@Caching(evict = { @CacheEvict(value="listRegion"),
+			@CacheEvict(value="listChildRegion"),
+			@CacheEvict(value="listDescendantRegion") })
+	@Override
+	public void createRegion(Region region) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
-    @Caching(evict = { @CacheEvict(value="Region", key="#region.id"),
-            @CacheEvict(value="listRegion"),
-            @CacheEvict(value="listChildRegion"),
-            @CacheEvict(value="listDescendantRegion")})
-    @Override
-    public void deleteRegion(Region region) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        
-        dao.deleteById(region.getId());
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
-    }
-    
-    @Caching(evict = { @CacheEvict(value="Region", key="#regionId"),
-            @CacheEvict(value="listRegion"),
-            @CacheEvict(value="listChildRegion"),
-            @CacheEvict(value="listDescendantRegion") })
-    @Override
-    public void deleteRegionById(long regionId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        
-        dao.deleteById(regionId);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, regionId);
-    }
+		EhRegionsRecord record = ConvertHelper.convert(region, EhRegionsRecord.class);
+		InsertQuery<EhRegionsRecord> query = context.insertQuery(Tables.EH_REGIONS);
+		query.setRecord(record);
+		query.setReturning(Tables.EH_REGIONS.ID);
+		query.execute();
 
-    @Cacheable(value="Region", key="#regionId")
-    @Override
-    public Region findRegionById(long regionId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhRegionsDao dao = new EhRegionsDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(regionId), Region.class);
-    }
+		region.setId(query.getReturnedRecord().getId());
 
-    @Cacheable(value = "listRegion")
-    @SuppressWarnings({"unchecked", "rawtypes" })
-    @Override
-    public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRegions.class, null);
+	}
 
-      //暂不向客户端开放排序字段指定 20150729
-        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
-        List<Region> result;
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = null;
-        if(scope != null)
-            condition = Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode());
-        if(status == null){
-            status = RegionAdminStatus.ACTIVE;
-        }
-        if(condition != null)
-            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
-        else
-            condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
-        
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-//        if(orderByFields != null) {
-//            result = selectStep.orderBy(orderByFields).fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        } else {
-//            result = selectStep.fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        }
-        result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        return result;
-    }
-    
-    @Cacheable(value = "listChildRegion")
-    @SuppressWarnings({"unchecked", "rawtypes" })
-    @Override
-    public List<Region> listChildRegions(Long parentRegionId, RegionScope scope, 
-            RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        //暂不向客户端开放排序字段指定 20150729
-        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
-        List<Region> result;
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = null;
-        
-        if(parentRegionId != null)
-            condition = Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue());
-        else
-            condition = Tables.EH_REGIONS.PARENT_ID.isNull();
-            
-        if(scope != null)
-            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
-        
-        if(status == null){
-            status = RegionAdminStatus.ACTIVE;
-        }
-        if(condition != null)
-            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
-        else
-            condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
-        
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-//        if(orderByFields != null) {
-//            result = selectStep.orderBy(orderByFields).fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        } else {
-//            result = selectStep.fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        }
-        result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        return result;
-    }
-    
-    @Cacheable(value = "listDescendantRegion")
-    @SuppressWarnings({"unchecked", "rawtypes" })
-    @Override
-    public List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, 
-            RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+	@Override
+	@Caching(evict = { @CacheEvict(value="Region", key="#region.id"),
+			@CacheEvict(value="listRegion"),
+			@CacheEvict(value="listChildRegion"),
+			@CacheEvict(value="listDescendantRegion")})
+	public void updateRegion(Region region) {
+		assert(region.getId() != null);
 
-        List<Region> result = new ArrayList<>();
-        
-        String pathLike = "%";
-        if(parentRegionId != null) {
-            Region parentRegion = this.findRegionById(parentRegionId);
-            if(parentRegion == null) {
-                LOGGER.error("Could not find parent region " + parentRegionId);
-                return result;
-            }
-            
-            if(parentRegion.getPath() == null || parentRegion.getPath().isEmpty()) {
-                LOGGER.error("Parent region " + parentRegionId + " does not have valid path info" );
-                return result;
-            }
-            
-            pathLike = parentRegion.getPath() + "/%"; 
-        }
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionsDao dao = new EhRegionsDao(context.configuration());
+		dao.update(region);
 
-        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = Tables.EH_REGIONS.PATH.like(pathLike);
-        
-        if(parentRegionId != null)
-            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
-        else
-            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.isNull());
-            
-        if(scope != null)
-            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
-        
-        if(status == null){
-            status = RegionAdminStatus.ACTIVE;
-        }
-        if(condition != null)
-            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
-        else
-            condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
-        
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-//        if(orderByFields != null) {
-//            result = selectStep.orderBy(orderByFields).fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        } else {
-//            result = selectStep.fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        }
-        result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        return result;
-    }
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
+	}
 
-    @SuppressWarnings({"unchecked", "rawtypes" })
-    @Override
-    public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
-            Tuple<String, SortOrder> orderBy, String keyword) {
-        List<Region> result = new ArrayList<>();
-        if(StringUtils.isEmpty(keyword)){
-            LOGGER.error("Keyword is null or empty" );
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid keyword parameter,keyword is null or empty.");
-        }
-        if(scope == null){
-            LOGGER.error("Scope is null." );
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid scope parameter,scope is null.");
-        }
-        
-        //如果为空，只查状态正常的
-        if(status == null)
-            status = RegionAdminStatus.ACTIVE;
-        
-        String likeVal = "%" + keyword + "%";
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+	@Caching(evict = { @CacheEvict(value="Region", key="#region.id"),
+			@CacheEvict(value="listRegion"),
+			@CacheEvict(value="listChildRegion"),
+			@CacheEvict(value="listDescendantRegion")})
+	@Override
+	public void deleteRegion(Region region) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionsDao dao = new EhRegionsDao(context.configuration());
 
-        //SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = Tables.EH_REGIONS.NAME.like(likeVal);
-        condition = condition.or(Tables.EH_REGIONS.PINYIN_NAME.like(likeVal.toUpperCase()));
-        condition = condition.or(Tables.EH_REGIONS.PINYIN_PREFIX.like(likeVal.toUpperCase()));
-        
-        if(parentRegionId != null)
-            condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
-        
-        if(scope != null)
-            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
-        
-        if(status != null)
-            condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
-        
-        
-        if(condition != null) {
-            selectStep.where(condition);
-        }
-        
-//        if(orderByFields != null) {
-//            result = selectStep.orderBy(orderByFields).fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        } else {
-//            result = selectStep.fetch().map(
-//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-//            );
-//        }
-        result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        return result;
-    }
+		dao.deleteById(region.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, region.getId());
+	}
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public List<Region> listActiveRegion(RegionScope scope) {
-        
-        List<Region> result = new ArrayList<>();
-        
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        
-        SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
-        Condition condition = Tables.EH_REGIONS.STATUS.eq(RegionAdminStatus.ACTIVE.getCode());
-        condition = condition.and(Tables.EH_REGIONS.HOT_FLAG.eq(RegionActiveStatus.ACTIVE.getCode()));
-        
-        if(scope != null)
-            condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
-        
-        if(condition != null) {
-            
-            selectStep.where(condition);
-        }
-        result = selectStep.fetch().map(
-                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
-            );
-        
-        return result;
-    }
+	@Caching(evict = { @CacheEvict(value="Region", key="#regionId"),
+			@CacheEvict(value="listRegion"),
+			@CacheEvict(value="listChildRegion"),
+			@CacheEvict(value="listDescendantRegion") })
+	@Override
+	public void deleteRegionById(long regionId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionsDao dao = new EhRegionsDao(context.configuration());
+
+		dao.deleteById(regionId);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRegions.class, regionId);
+	}
+
+	@Cacheable(value="Region", key="#regionId")
+	@Override
+	public Region findRegionById(long regionId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRegionsDao dao = new EhRegionsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(regionId), Region.class);
+	}
+
+	@Cacheable(value = "listRegion")
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	@Override
+	public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		//暂不向客户端开放排序字段指定 20150729
+		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+		List<Region> result;
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = null;
+		if(scope != null)
+			condition = Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode());
+		if(status == null){
+			status = RegionAdminStatus.ACTIVE;
+		}
+		if(condition != null)
+			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+		else
+			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
+
+		if(condition != null) {
+			selectStep.where(condition);
+		}
+
+		//        if(orderByFields != null) {
+			//            result = selectStep.orderBy(orderByFields).fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        } else {
+		//            result = selectStep.fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        }
+		result = selectStep.fetch().map(
+				new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+				);
+		return result;
+	}
+
+	@Cacheable(value = "listChildRegion")
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	@Override
+	public List<Region> listChildRegions(Long parentRegionId, RegionScope scope, 
+			RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		//暂不向客户端开放排序字段指定 20150729
+		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+		List<Region> result;
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = null;
+
+		if(parentRegionId != null)
+			condition = Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue());
+		else
+			condition = Tables.EH_REGIONS.PARENT_ID.isNull();
+
+		if(scope != null)
+			condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+
+		if(status == null){
+			status = RegionAdminStatus.ACTIVE;
+		}
+		if(condition != null)
+			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+		else
+			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
+
+		if(condition != null) {
+			selectStep.where(condition);
+		}
+
+		//        if(orderByFields != null) {
+			//            result = selectStep.orderBy(orderByFields).fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        } else {
+		//            result = selectStep.fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        }
+		result = selectStep.fetch().map(
+				new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+				);
+		return result;
+	}
+
+	@Cacheable(value = "listDescendantRegion")
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	@Override
+	public List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, 
+			RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+
+		List<Region> result = new ArrayList<>();
+
+		String pathLike = "%";
+		if(parentRegionId != null) {
+			Region parentRegion = this.findRegionById(parentRegionId);
+			if(parentRegion == null) {
+				LOGGER.error("Could not find parent region " + parentRegionId);
+				return result;
+			}
+
+			if(parentRegion.getPath() == null || parentRegion.getPath().isEmpty()) {
+				LOGGER.error("Parent region " + parentRegionId + " does not have valid path info" );
+				return result;
+			}
+
+			pathLike = parentRegion.getPath() + "/%"; 
+		}
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = Tables.EH_REGIONS.PATH.like(pathLike);
+
+		if(parentRegionId != null)
+			condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
+		else
+			condition = condition.and(Tables.EH_REGIONS.PARENT_ID.isNull());
+
+		if(scope != null)
+			condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+
+		if(status == null){
+			status = RegionAdminStatus.ACTIVE;
+		}
+		if(condition != null)
+			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+		else
+			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
+
+		if(condition != null) {
+			selectStep.where(condition);
+		}
+
+		//        if(orderByFields != null) {
+			//            result = selectStep.orderBy(orderByFields).fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        } else {
+		//            result = selectStep.fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        }
+		result = selectStep.fetch().map(
+				new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+				);
+		return result;
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	@Override
+	public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
+			Tuple<String, SortOrder> orderBy, String keyword) {
+		List<Region> result = new ArrayList<>();
+		if(StringUtils.isEmpty(keyword)){
+			LOGGER.error("Keyword is null or empty" );
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid keyword parameter,keyword is null or empty.");
+		}
+		if(scope == null){
+			LOGGER.error("Scope is null." );
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid scope parameter,scope is null.");
+		}
+
+		//如果为空，只查状态正常的
+		if(status == null)
+			status = RegionAdminStatus.ACTIVE;
+
+		String likeVal = "%" + keyword + "%";
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = Tables.EH_REGIONS.NAME.like(likeVal);
+		condition = condition.or(Tables.EH_REGIONS.PINYIN_NAME.like(likeVal.toUpperCase()));
+		condition = condition.or(Tables.EH_REGIONS.PINYIN_PREFIX.like(likeVal.toUpperCase()));
+
+		if(parentRegionId != null)
+			condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
+
+		if(scope != null)
+			condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+
+		if(status != null)
+			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+
+
+		if(condition != null) {
+			selectStep.where(condition);
+		}
+
+		//        if(orderByFields != null) {
+		//            result = selectStep.orderBy(orderByFields).fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        } else {
+		//            result = selectStep.fetch().map(
+		//                new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+		//            );
+		//        }
+		result = selectStep.fetch().map(
+				new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+				);
+		return result;
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes" })
+	@Override
+	public List<Region> listRegionByName(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
+			Tuple<String, SortOrder> orderBy, String keyword) {
+		List<Region> result = new ArrayList<Region>();
+		if(StringUtils.isEmpty(keyword)){
+			LOGGER.error("Keyword is null or empty" );
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid keyword parameter,keyword is null or empty.");
+		}
+		if(scope == null){
+			LOGGER.error("Scope is null." );
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid scope parameter,scope is null.");
+		}
+
+		//如果为空，只查状态正常的
+		if(status == null)
+			status = RegionAdminStatus.ACTIVE;
+
+		//String likeVal = "%" + keyword + "%";
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = Tables.EH_REGIONS.NAME.eq(keyword);
+
+		if(parentRegionId != null)
+			condition = condition.and(Tables.EH_REGIONS.PARENT_ID.eq(parentRegionId.longValue()));
+
+		if(scope != null)
+			condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+
+		if(status != null)
+			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
+
+		if(condition != null) {
+			selectStep.where(condition);
+		}
+
+		selectStep.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r, Region.class));
+			return null;
+		});
+		return result;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List<Region> listActiveRegion(RegionScope scope) {
+
+		List<Region> result = new ArrayList<>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = Tables.EH_REGIONS.STATUS.eq(RegionAdminStatus.ACTIVE.getCode());
+		condition = condition.and(Tables.EH_REGIONS.HOT_FLAG.eq(RegionActiveStatus.ACTIVE.getCode()));
+
+		if(scope != null)
+			condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
+
+		if(condition != null) {
+
+			selectStep.where(condition);
+		}
+		result = selectStep.fetch().map(
+				new DefaultRecordMapper(Tables.EH_REGIONS.recordType(), Region.class)
+				);
+
+		return result;
+	}
 }

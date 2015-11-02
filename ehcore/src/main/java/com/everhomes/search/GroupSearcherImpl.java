@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
@@ -33,11 +34,6 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     
     @Autowired
     private ConfigurationProvider  configProvider;
-    
-    @Override
-    public String getIndexName() {
-        return SearchUtils.GROUPINDEXNAME;
-    }
 
     @Override
     public String getIndexType() {
@@ -46,7 +42,7 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     
     @Override
     public GroupQueryResult query(QueryMaker filter) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName());
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         filter.makeQueryBuilder(builder);
         
         SearchResponse rsp = builder.execute().actionGet();
@@ -139,7 +135,8 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         this.deleteAll();
         
         this.groupProvider.iterateGroups(pageSize, GroupDiscriminator.GROUP, (group)->{
-            if((group.getPrivateFlag().equals(GroupPrivacy.PUBLIC.getCode()))){
+            if((group.getPrivateFlag().equals(GroupPrivacy.PUBLIC.getCode())) 
+            		&& Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(group.getStatus())){
                 groups.add(group); 
                 }
             

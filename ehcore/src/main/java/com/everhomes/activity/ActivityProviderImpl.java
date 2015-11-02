@@ -318,9 +318,13 @@ public class ActivityProviderImpl implements ActivityProivider {
                 query.addConditions(op,conditions);
             }
             
-            if (locator.getAnchor() == null)
-                locator.setAnchor(0L);
-            query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            if (locator.getAnchor() == null){
+            	locator.setAnchor(0L);
+            	query.addConditions(Tables.EH_ACTIVITIES.ID.gt(locator.getAnchor()));
+            }
+            if(locator.getAnchor() != 0L){
+            	query.addConditions(Tables.EH_ACTIVITIES.ID.lt(locator.getAnchor()));
+            }
             
             if(condition1!=null){
                 query.addConditions(condition1);

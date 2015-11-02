@@ -258,15 +258,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 allItems = overrideOrRevertItems(allItems, userItems);
         }
         //获取用户相关组织，如果用户加入组织，则获取相应的item（如某个item物业人员可见）
-        ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
-        List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
-        if(dtos != null && !dtos.isEmpty()){
-            List<String> tags = new  ArrayList<String>();
-            dtos.forEach(r -> tags.add(r.getOrganizationType()));
-            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,tags);
-            if(adminItems != null && !adminItems.isEmpty())
-                allItems.addAll(adminItems);
-        }
+        //目前这个版本不考虑管理员相关的item
+//        ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
+//        List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
+//        if(dtos != null && !dtos.isEmpty()){
+//            List<String> tags = new  ArrayList<String>();
+//            dtos.forEach(r -> tags.add(r.getOrganizationType()));
+//            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,tags);
+//            if(adminItems != null && !adminItems.isEmpty())
+//                allItems.addAll(adminItems);
+//        }
         try{ 
             List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
@@ -417,7 +418,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             cmd.setOrganizationType(targetEntityTag);
             OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
             if(organization == null){
-                LOGGER.error("Organization is not exists,communityId=" + communityId);
+                LOGGER.error("Organization is not exists,communityId=" + communityId+",targetEntityTag="+targetEntityTag);
                 return actionDataJson;
             }
             //actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.REGION.getCode());
@@ -443,7 +444,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         cmd.setOrganizationType(tag);
         OrganizationDTO organization = organizationService.getOrganizationByComunityidAndOrgType(cmd);
         if(organization == null){
-            LOGGER.error("Organization is not exists,communityId=" + communityId);
+            LOGGER.error("Organization is not exists,communityId=" + communityId+",tag="+tag);
             return actionDataJson;
         }
         actionDataJson.put(LaunchPadConstants.ORGANIZATION_ID, organization.getId());
@@ -451,6 +452,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
     }
     
     private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
+        
+        Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+            @Override
+            public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+               return o1.getId().intValue() - o2.getId().intValue();
+            }
+        });
+        //优先根据defaultOrder排序显示
         Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
             @Override
             public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){

@@ -3,6 +3,7 @@ package com.everhomes.forum;
 import java.security.InvalidParameterException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -31,11 +33,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupVisibilityScope;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -43,7 +44,6 @@ import com.everhomes.server.schema.tables.daos.EhForumAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhForumPostsDao;
 import com.everhomes.server.schema.tables.daos.EhForumsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupVisibleScopesDao;
 import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -54,6 +54,7 @@ import com.everhomes.server.schema.tables.records.EhForumPostsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserLikeType;
 import com.everhomes.user.UserProfileContstant;
@@ -89,6 +90,12 @@ public class ForumProviderImpl implements ForumProvider {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Autowired
+    private LocaleStringService localeStringService;
+    
+    @Autowired
+    private HotPostService hotPostService;
     
     @Override
     public void createForum(Forum forum) {
@@ -206,9 +213,13 @@ public class ForumProviderImpl implements ForumProvider {
         post.setUuid(UUID.randomUUID().toString());
         post.setModifySeq(seq);
         
-        Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
-        post.setCreateTime(ts);
-        post.setUpdateTime(ts);
+        if(post.getCreateTime() == null) {
+            Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
+            post.setCreateTime(ts);
+        }
+        if(post.getUpdateTime() == null) {
+            post.setUpdateTime(post.getCreateTime());
+        }
                 
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {
@@ -262,16 +273,26 @@ public class ForumProviderImpl implements ForumProvider {
             if(parentPost == null) {
                 throw new InvalidParameterException("Missing parent post info in post parameter");
             }
-            post.setFloorNumber(parentPost.getChildCount() - 1);
+//            post.setFloorNumber(parentPost.getChildCount() - 1);
+            String template = localeStringService.getLocalizedString(
+            		ForumLocalStringCode.SCOPE,
+                    String.valueOf(ForumLocalStringCode.FORUM_COMMENT_DELETED),
+                    UserContext.current().getUser().getLocale(),
+                    "");
+           
+            post.setContent(template);
+            post.setStatus(PostStatus.ACTIVE.getCode());
         } else {
 //            userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
-            userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+            
         }
         
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
         dao.update(post);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
+        
+        
     }
 
     @Caching(evict={@CacheEvict(value="ForumPostById", key="#postId"),
@@ -841,4 +862,44 @@ public class ForumProviderImpl implements ForumProvider {
             forumProvider.deleteAssignedScope(scope);
         }
     }
+
+	@Override
+	@Scheduled(cron="0 0/2 *  * * ? ")
+	public void modifyHotPost() {
+		
+		while(true){
+			HotPost hotpost = hotPostService.pull();
+			if(hotpost != null){
+				long posttime = hotpost.getTimeStamp();
+				long current = Calendar.getInstance().getTimeInMillis();
+				long diff = (current-posttime)/60000;
+				
+				modifyHot(hotpost);
+				
+				if(diff<1){
+					break;
+				}
+			}
+			else{
+				break;
+			}
+		}
+	}
+	
+	private void modifyHot(HotPost hotpost){
+		Post post = this.findPostById(hotpost.getPostId());
+		if(post != null){
+			if(Byte.valueOf(HotPostModifyType.VIEW.getCode()).equals(hotpost.getModifyType())){
+				post.setViewCount(post.getViewCount().longValue() + 20);
+	            ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+	            self.updatePost(post);
+			}
+			
+			if(Byte.valueOf(HotPostModifyType.LIKE.getCode()).equals(hotpost.getModifyType())){
+				post.setLikeCount(post.getLikeCount().longValue() + 20);
+	            ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
+	            self.updatePost(post);
+			}
+		}
+	}
  }

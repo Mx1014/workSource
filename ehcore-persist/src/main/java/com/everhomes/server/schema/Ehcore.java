@@ -11,7 +11,9 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -1888330517;
+
+	private static final long serialVersionUID = -904187815;
+
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -60,6 +62,12 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES,
 			com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS,
 			com.everhomes.server.schema.tables.EhDevices.EH_DEVICES,
+			com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES,
+			com.everhomes.server.schema.tables.EhEnterpriseCommunityMap.EH_ENTERPRISE_COMMUNITY_MAP,
+			com.everhomes.server.schema.tables.EhEnterpriseContacts.EH_ENTERPRISE_CONTACTS,
+			com.everhomes.server.schema.tables.EhEnterpriseContactEntries.EH_ENTERPRISE_CONTACT_ENTRIES,
+			com.everhomes.server.schema.tables.EhEnterpriseContactGroups.EH_ENTERPRISE_CONTACT_GROUPS,
+			com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS,
 			com.everhomes.server.schema.tables.EhEvents.EH_EVENTS,
 			com.everhomes.server.schema.tables.EhEventProfiles.EH_EVENT_PROFILES,
 			com.everhomes.server.schema.tables.EhEventRoster.EH_EVENT_ROSTER,
@@ -111,6 +119,8 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS,
 			com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES,
 			com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY,
+			com.everhomes.server.schema.tables.EhPushMessages.EH_PUSH_MESSAGES,
+			com.everhomes.server.schema.tables.EhPushMessageResults.EH_PUSH_MESSAGE_RESULTS,
 			com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES,
 			com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO,
 			com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS,

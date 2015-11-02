@@ -1,12 +1,24 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,11 +28,15 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.AppConstants;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryConstants;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -29,6 +45,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.AttachmentDescriptor;
 import com.everhomes.forum.CancelLikeTopicCommand;
+import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.GetTopicCommand;
@@ -60,8 +77,11 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.region.RegionScope;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
@@ -72,12 +92,17 @@ import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.user.UserStatus;
 import com.everhomes.user.UserTokenCommand;
 import com.everhomes.user.UserTokenCommandResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.visibility.VisibleRegionType;
 
 @Component
 public class OrganizationServiceImpl implements OrganizationService {
@@ -85,6 +110,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private static final String ASSIGN_TASK_AUTO_COMMENT = "assign.task.auto.comment";
 	private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
 
+	
+	ExecutorService pool = Executors.newFixedThreadPool(3);
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -134,7 +161,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private RegionProvider regionProvider;
 
 	@Autowired
-	LocaleTemplateService localeTemplateService;
+	private LocaleTemplateService localeTemplateService;
+
+	@Autowired
+	private CategoryProvider categoryProvider;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -929,6 +959,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Map<String, Long> map = new HashMap<String, Long>();
 
 		List<Organization> list = this.organizationProvider.findOrganizationByCommunityId(communityId);
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getOrganizationRegionMap-orgs="+StringHelper.toJsonString(list));
+		
 		for(Organization organization : list) {
 			OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
 			if(type != null) {
@@ -950,6 +984,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			} else {
 				LOGGER.error("Organization type is null, userId=" + userId + ", communityId=" + communityId 
 						+ ", organizationId=" + organization.getId() + ", organizationType=" + organization.getOrganizationType());
+			}
+		}
+
+		// 为了兼容没有机构的情况，需要为其提供默认值
+		OrganizationType[] values = OrganizationType.values();
+		for(OrganizationType value : values) {
+			Long organizatioinId = map.get(value.getCode());
+			if(organizatioinId == null) {
+				if(value == OrganizationType.PM || value == OrganizationType.GARC) {
+					map.put(value.getCode(), communityId);
+				} else {
+					map.put(value.getCode(), 0L);
+				}
 			}
 		}
 
@@ -1010,6 +1057,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationDTO getOrganizationByComunityidAndOrgType(GetOrgDetailCommand cmd) {
 		List<OrganizationCommunityDTO> orgCommunitys = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("getOrganizationByComunityidAndOrgType-orgCommunitys="+StringHelper.toJsonString(orgCommunitys));
+		
 		if(orgCommunitys != null && !orgCommunitys.isEmpty()){
 			for(int i=0;i<orgCommunitys.size();i++){
 				OrganizationDTO org = this.organizationProvider.findOrganizationByIdAndOrgType(orgCommunitys.get(i).getOrganizationId(),cmd.getOrganizationType());
@@ -1239,10 +1289,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 				orgTaskList.remove(orgTaskList.size()-1);
 			}
 			for(OrganizationTask task : orgTaskList){
-				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-				OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
-				this.convertTaskToDto(task,taskDto);
-				list.add(taskDto);
+				try{
+					PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+					OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
+					this.convertTaskToDto(task,taskDto);
+					list.add(taskDto);
+				}
+				catch(Exception e){
+					LOGGER.error("could not found topic by task's applyEntityId.taskId="+task.getId()+",applyEntityId="+task.getApplyEntityId());
+				}
 			}
 		}
 
@@ -1375,7 +1430,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
 		}
 
-		if(template == null) template = "您有新的任务";
+		if(template == null || template.equals("")) template = "您有新的任务";
 
 		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
 	}
@@ -1722,6 +1777,706 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.organizationProvider.updateOrganization(org);
 			return s;
 		});
+	}
+
+	@Override
+	public void importOrganization(MultipartFile[] files) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		this.checkFilesIsNull(files,user.getId());
+		String rootPath = System.getProperty("user.dir");
+		String filePath = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		LOGGER.error("importOrganization-filePath="+filePath);
+		//将原文件暂存在服务器中
+		try {
+			this.storeFile(files[0],filePath);
+		} catch (Exception e) {
+			LOGGER.error("importOrganization-store file fail.message="+e.getMessage());
+		}
+		ImportOrganizationRunnable r = new ImportOrganizationRunnable(this, filePath, userId);
+		pool.execute(r);
+	}
+	
+	@Override
+	public void executeImportOrganization(String filePath, Long userId) {
+		long parseBeginTime = System.currentTimeMillis();
+		LOGGER.info("executeImportOrganization-parseBeginTime="+parseBeginTime);
+		ArrayList resultList = new ArrayList();
+		try {
+			File file = new File(filePath);
+			if(!file.exists())
+				LOGGER.error("executeImportOrganization-file is not exist.filePath="+filePath);
+			InputStream in = new FileInputStream(file);
+			resultList = PropMrgOwnerHandler.processorExcel(in);
+		} catch (IOException e) {
+			LOGGER.error("executeImportOrganization-parse file fail.message="+e.getMessage());
+		} /*finally {
+			File file = new File(filePath);
+			if(file.exists())
+				file.delete();
+		}*/
+
+		List<OrganizationDTO2> list = this.convertToOrganizations(resultList,userId);
+		if(list == null || list.isEmpty()){
+			LOGGER.error("organizations list is empty.userId="+userId);
+			return;
+		}
+
+		for(OrganizationDTO2 r:list){
+			this.checkCityNameIsNull(r.getCityName());
+			this.checkAreaNameIsNull(r.getAreaName());
+			Region city = this.checkCityName(r.getCityName());
+			r.setCityId(city.getId());
+			Region area = this.checkAreaName(r.getAreaName(),city.getId());
+			r.setAreaId(area.getId());
+			this.setTokenList(r,r.getTokens());
+			this.setCommunityIdsByCommunityName(r,r.getCommunityNames(),r.getCityId(),r.getAreaId());
+		}
+		long parseEndTime = System.currentTimeMillis();
+		LOGGER.info("executeImportOrganization-parseElapse="+(parseEndTime-parseBeginTime));
+
+		List<OrganizationVo> orgVos = new ArrayList<OrganizationVo>();
+		int orgCount = 0;
+		int orgCommCount = 0;
+		int orgContactCount = 0;
+		int addressCount = 0;
+		
+		long listBeginTime = System.currentTimeMillis();
+		LOGGER.info("executeImportOrganization-listBeginTime="+listBeginTime);
+		for(OrganizationDTO2 r:list){
+			OrganizationVo orgVo = new OrganizationVo();
+			//地址
+			Address address = addressProvider.findAddressByRegionAndAddress(r.getCityId(),r.getAreaId(),r.getAddressName());
+			if(LOGGER.isDebugEnabled())
+				LOGGER.info("address not found.cityId="+r.getCityId()+",areaId="+r.getAreaId());
+
+			if(address == null){
+				//创建地址
+				Region city = this.regionProvider.findRegionById(r.getCityId());
+				Region area = this.regionProvider.findRegionById(r.getAreaId());
+				address = new Address();
+				address.setAddress(r.getAddressName());
+				address.setCityId(city.getId());
+				address.setCityName(city.getName());
+				address.setAreaId(area.getId());
+				address.setAreaName(area.getName());
+				address.setLongitude(r.getLongitude());
+				address.setLatitude(r.getLatitude());
+				address.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				address.setCreatorUid(userId);
+				address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+				orgVo.setAddress(address);
+				addressCount++;
+				//this.addressProvider.createAddress(address);
+			}
+			else{
+				r.setAddressId(address.getId());
+			}
+			//机构
+			Organization org = this.convertOrgDTO2ToOrg(r);
+			orgVo.setOrg(org);
+			orgCount++;
+			//this.organizationProvider.createOrganization(org);
+			//机构小区
+			for(Long comId : r.getCommunityIds()){
+				OrganizationCommunity orgComm = new OrganizationCommunity();
+				orgComm.setCommunityId(comId);
+				if(orgVo.getOrgComms()==null || orgVo.getOrgComms().isEmpty())
+					orgVo.setOrgComms(new ArrayList<OrganizationCommunity>());
+				orgVo.getOrgComms().add(orgComm);
+				orgCommCount++;
+				//orgComm.setOrganizationId(org.getId());
+				//this.organizationProvider.createOrganizationCommunity(orgComm);
+			}
+			//机构电话
+			for(String token : r.getTokenList()){
+				CommunityPmContact orgContact = new CommunityPmContact();
+				orgContact.setContactName(null);
+				orgContact.setContactToken(token);
+				orgContact.setContactType(IdentifierType.MOBILE.getCode());
+				orgContact.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				orgContact.setCreatorUid(userId);
+				if(orgVo.getOrgContacts()==null)
+					orgVo.setOrgContacts(new ArrayList<CommunityPmContact>());
+				orgVo.getOrgContacts().add(orgContact);
+				orgContactCount++;
+				//				orgContact.setOrganizationId(org.getId());
+				//				this.propertyMgrProvider.createPropContact(orgContact);
+			}
+			orgVos.add(orgVo);
+		}
+		long listEndTime = System.currentTimeMillis();
+		LOGGER.info("executeImportOrganization-listElapse="+(listEndTime-listBeginTime));
+		LOGGER.info("executeImportOrganization:orgCount="+orgCount+",addressCount="+addressCount+",orgCommCount="+orgCommCount+",orgContactCount="+orgContactCount);
+
+		long beginTime = System.currentTimeMillis();
+		LOGGER.info("executeImportOrganization-executeBeginTime="+beginTime);
+		this.dbProvider.execute(s -> {
+			for(OrganizationVo r:orgVos){
+				if(r.getAddress()!=null){
+					this.addressProvider.createAddress(r.getAddress());
+					r.getOrg().setAddressId(r.getAddress().getId());
+				}
+				this.organizationProvider.createOrganization(r.getOrg());
+				if(r.getOrgComms() != null && !r.getOrgComms().isEmpty()){
+					for(OrganizationCommunity om : r.getOrgComms()){
+						om.setOrganizationId(r.getOrg().getId());
+						this.organizationProvider.createOrganizationCommunity(om);
+					}
+				}
+				if(r.getOrgContacts()!=null && !r.getOrgContacts().isEmpty()){
+					for(CommunityPmContact oc:r.getOrgContacts()){
+						oc.setOrganizationId(r.getOrg().getId());
+						this.propertyMgrProvider.createPropContact(oc);
+					}
+				}
+			}
+			return s;
+		});
+		
+		long endTime = System.currentTimeMillis();
+		LOGGER.info("executeImportOrganization-executeElapse="+(endTime-beginTime));
+	}
+
+	private void checkAreaNameIsNull(String areaName) {
+		if(areaName == null || areaName.trim().equals("")){
+			LOGGER.error("areaName is empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"areaName is empty.");
+		}
+	}
+
+	private void setAreaId(OrganizationDTO2 r, String areaName, Long cityId) {
+		Region area = this.checkAreaName(areaName,cityId);
+		r.setAreaId(area.getId());
+	}
+
+	private Region checkAreaName(String areaName, Long cityId) {
+		List<Region> areas = this.regionProvider.listRegionByName(cityId, RegionScope.AREA, null, null, areaName);
+		if(areas == null || areas.isEmpty()){
+			LOGGER.error("area is not found by areaName.areaName="+areaName+",cityId="+cityId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"area is not found by areaName.");
+		}
+		else if(areas.size() != 1){
+			LOGGER.error("area is not unique found by areaName.areaName="+areaName+",cityId="+cityId);
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city is not unique found by cityName.");*/
+		}
+		return areas.get(0);
+	}
+
+	private Organization convertOrgDTO2ToOrg(OrganizationDTO2 r) {
+		Organization org = new Organization();
+		org.setAddressId(r.getAddressId());
+		org.setLevel(1);
+		org.setName(r.getOrgName());
+		org.setOrganizationType(r.getOrgType());
+		org.setParentId(0L);
+		org.setPath("/"+r.getOrgName());
+		org.setStatus(OrganizationStatus.ACTIVE.getCode());
+		return org;
+	}
+
+	private void setCommunityIdsByCommunityName(OrganizationDTO2 r,String communityNames,Long cityId, Long areaId) {
+		String [] commNames = communityNames.split(",");
+		for(String communityName : commNames){
+			Community comm = this.findCommunityByCommName(communityName, cityId,areaId);
+			if(r.getCommunityIds() == null)
+				r.setCommunityIds(new ArrayList<Long>());
+			r.getCommunityIds().add(comm.getId());
+		}
+	}
+
+	private Community findCommunityByCommName(String communityName, Long cityId, Long areaId) {
+		List<Community> comms = this.communityProvider.findCommunitiesByNameCityIdAreaId(communityName, cityId,null);
+		if(comms == null || comms.isEmpty()){
+			LOGGER.error("community is not found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+null);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"community is not found by communityName.");
+		}
+		else if(comms.size() != 1){
+			LOGGER.error("community is not unique found by communityName.communityName="+communityName+",cityId="+cityId+",areaId="+null);
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"community is not unique found by communityName.");*/
+		}
+		return comms.get(0);
+	}
+
+	private void setAddressId(OrganizationDTO2 r, String addressName) {
+		Address address = this.checkAddressByAddressName(addressName);
+		r.setAddressId(address.getId());
+	}
+
+	private Address checkAddressByAddressName(String addressName) {
+		Address address = addressProvider.findAddressByAddress(addressName);
+		if(address == null){
+			LOGGER.error("address is not found by addressName.addressName="+addressName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"address is not found by addressName.");
+		}
+		return address;
+	}
+
+	private void setTokenList(OrganizationDTO2 r, String tokens) {
+		String [] strList = tokens.split(",");
+		for(String token : strList){
+			if(r.getTokenList() == null)
+				r.setTokenList(new ArrayList<String>());
+			r.getTokenList().add(token);
+		}
+	}
+
+	private void setCityId(OrganizationDTO2 r,String cityName) {
+		Region city = this.checkCityName(cityName);
+		r.setCityId(city.getId());
+	}
+
+	private Region checkCityName(String cityName) {
+		List<Region> citys = this.regionProvider.listRegionByName(null, RegionScope.CITY, null, null, cityName);
+		if(citys == null || citys.isEmpty()){
+			LOGGER.error("city is not found by cityName.cityName="+cityName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city is not found by cityName.");
+		}
+		else if(citys.size() != 1){
+			LOGGER.error("city is not unique found by cityName.cityName="+cityName);
+			/*throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"city is not unique found by cityName.");*/
+		}
+		return citys.get(0);
+	}
+
+	private void checkCityNameIsNull(String cityName) {
+		if(cityName == null || cityName.trim().equals("")){
+			LOGGER.error("cityName is empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cityName is empty.");
+		}
+	}
+
+	private List<OrganizationDTO2> convertToOrganizations(ArrayList list,Long userId) {
+		if(list == null || list.isEmpty()){
+			LOGGER.error("resultList is empty.userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"resultList is empty.");
+		}
+		List<OrganizationDTO2> result = new ArrayList<OrganizationDTO2>();
+		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+			RowResult r = (RowResult)list.get(rowIndex);
+			if(r.getA() == null || r.getA().trim().equals("")){
+				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
+				break;
+			}
+			OrganizationDTO2 dto = new OrganizationDTO2();
+			dto.setCityName(this.getCityName(r.getA()));
+			dto.setAreaName(this.setAreaName(r.getB()));
+			dto.setOrgName(this.getOrgName(r.getC()));
+			dto.setOrgType(this.getOrgType(r.getD()));
+			dto.setTokens(this.getTokens(r.getE()));
+			dto.setAddressName(this.getAddressName(r.getF()));
+			dto.setLongitude(this.getLongitude(r.getG()));
+			dto.setLatitude(this.getLatitude(r.getH()));
+			dto.setCommunityNames(this.getCommunityNames(r.getI()));
+			result.add(dto);
+		}
+		return result;
+	}
+
+	private String setAreaName(String areaName) {
+		return areaName==null?null:areaName.trim();
+	}
+
+	private String getCommunityNames(String comName) {
+		return comName==null?null:comName.trim();
+	}
+
+	private Double getLatitude(String latitude) {
+		return Double.valueOf(latitude ==null?null:latitude.trim());
+	}
+
+	private Double getLongitude(String longitude) {
+		return Double.valueOf(longitude == null?null:longitude.trim());
+	}
+
+	private String getAddressName(String addressName) {
+		return addressName == null?null:addressName.trim();
+	}
+
+	private String getTokens(String tokens) {
+		return tokens == null?null:tokens.trim();
+	}
+
+	private String getOrgType(String orgType) {
+		return orgType == null?null:orgType.trim();
+	}
+
+	private String getOrgName(String orgName) {
+		return orgName == null?null:orgName.trim();
+	}
+
+	private String getCityName(String cityName) {
+
+		return cityName == null?null:cityName.trim();
+	}
+
+	private void checkFilesIsNull(MultipartFile[] files,Long userId) {
+		if(files == null){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"files is null");
+		}
+	}
+	
+	private void storeFile(MultipartFile file, String filePath1)throws Exception{
+		OutputStream out = new FileOutputStream(new File(filePath1));
+		InputStream in = file.getInputStream();
+		byte [] buffer = new byte [1024];
+		while(in.read(buffer) != -1){ 
+			out.write(buffer);
+		}
+		out.close();
+		in.close();
+	}
+
+	@Override
+	public void importOrgPost(MultipartFile[] files) {
+		User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		this.checkFilesIsNull(files,manaUser.getId());
+		
+		String rootPath = System.getProperty("user.dir");
+		String filePath = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		LOGGER.error("importOrgPost-filePath="+filePath);
+		//将原文件暂存在服务器中
+		try {
+			this.storeFile(files[0],filePath);
+		} catch (Exception e) {
+			LOGGER.error("importOrgPost-store file fail.message="+e.getMessage());
+		}
+		ImportOrgPostRunnable r = new ImportOrgPostRunnable(this, filePath, userId);
+		pool.execute(r);
+	}
+	
+	@Override
+	public void executeImportOrgPost(String filePath, Long userId) {
+		String password = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
+		long parseBeginTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-parseBeginTime="+parseBeginTime);
+		
+		ArrayList resultList = new ArrayList();
+		try {
+			File file = new File(filePath);
+			if(!file.exists())
+				LOGGER.error("executeImportOrgPost-file is not exist.filePath="+filePath);
+			InputStream in = new FileInputStream(file);
+			resultList = PropMrgOwnerHandler.processorExcel(in);
+		} catch (IOException e) {
+			LOGGER.error("executeImportOrgPost-parse file fail.message="+e.getMessage());
+		} finally {
+			File file = new File(filePath);
+			if(file.exists())
+				file.delete();
+		}
+
+		List<OrganizationPostDTO> list = this.convertToOrgPostDto(resultList,userId);
+
+		if(list == null || list.isEmpty()){
+			LOGGER.error("orgPost list is empty.userId="+userId);
+			return;
+		}
+		long parseEndTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-parseElapse="+(parseEndTime-parseBeginTime));
+		
+		List<OrganizationPostVo> orgPostVos = new ArrayList<OrganizationPostVo>();
+		int postCount = 0;
+		int taskCount = 0;
+		int userCount = 0;
+		int userIdenCount = 0;
+
+		long listBeginTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-listBeginTime="+listBeginTime);
+		for(OrganizationPostDTO r:list){
+			OrganizationPostVo orgPostVo = new OrganizationPostVo();
+
+			SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy");
+			//createTime
+			Date createDate = null;
+			if(r.getCreateTime() != null){
+				try {
+					createDate = format.parse(r.getCreateTime());
+				}
+				catch (ParseException e) {
+					LOGGER.error("post create date not format to MM/dd/yy.createDateStr="+r.getCreateTime());
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"post create date not format to MM/dd/yy.");
+				}
+			}
+			else{
+				createDate = new Date();
+			}
+			
+			createDate = OrgDateUtils.getRadomTime(createDate);
+			Timestamp currentTime = new Timestamp(createDate.getTime());
+
+			//city
+			this.checkCityNameIsNull(r.getCityName());
+			Region city = this.checkCityName(r.getCityName());
+			r.setCityId(city.getId());
+			//org
+			List<Organization> orgs = this.checkOrganizationByName(r.getOrgName(),r.getOrgType());
+			Organization org = this.checkOrgAddressCity(orgs,r.getCityId());
+			//token
+			User tokenUser = null;
+			if(r.getToken() != null && !r.getToken().trim().equals("")){
+				tokenUser = this.userService.findUserByIndentifier(r.getToken());
+				if(tokenUser == null){
+					User user = new User();
+					user.setAccountName(r.getToken());
+					user.setNickName(r.getUserName());
+					user.setStatus(UserStatus.ACTIVE.getCode());
+					user.setPoints(0);
+					user.setLevel((byte)1);
+					user.setGender((byte)1);
+					//password
+					String salt = EncryptionUtils.createRandomSalt();
+					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", password,salt)));
+					user.setSalt(salt);
+					userCount++;
+					orgPostVo.setUser(user);
+					//this.userProvider.createUser(user);
+					UserIdentifier userIden = new UserIdentifier();
+					userIden.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+					userIden.setIdentifierToken(r.getToken());
+					userIden.setIdentifierType(IdentifierType.MOBILE.getCode());
+					/*userIden.setOwnerUid(user.getId());*/
+					userIdenCount++;
+					orgPostVo.setUserIden(userIden);
+					//this.userProvider.createIdentifier(userIden);
+				}
+				else{
+					orgPostVo.setUser(null);
+					orgPostVo.setUserIden(null);
+				}
+			}
+
+			//post
+			Post post = new Post();
+			post.setAppId(AppConstants.APPID_FORUM);
+			post.setForumId(ForumConstants.SYSTEM_FORUM);
+			post.setParentPostId(0L);
+			post.setSubject(r.getSubject());
+			post.setContent(r.getContent());
+			post.setContentType(PostContentType.TEXT.getCode());
+			post.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
+			post.setCreateTime(currentTime);
+			post.setUpdateTime(currentTime);
+			if(r.getToken() == null || r.getToken().trim().equals(""))//token is null then use the loginUser id
+				post.setCreatorUid(userId);
+			else if(tokenUser != null && tokenUser.getId() != null)//token not null and use is found by token
+				post.setCreatorUid(tokenUser.getId());
+
+			if(org.getOrganizationType().equals(OrganizationType.PM.getCode()) || org.getOrganizationType().equals(OrganizationType.GARC.getCode())){
+				OrganizationCommunity orgComm = this.checkOrgCommByOrgId(org.getId());
+				post.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+				post.setVisibleRegionId(orgComm.getCommunityId());
+			}
+			else{
+				post.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+				post.setVisibleRegionId(org.getId());
+			}
+
+			Category category = this.checkCategory(r.getPostType());
+			post.setCategoryId(category.getId());
+			post.setCategoryPath(category.getPath());
+
+			OrganizationTask task = null;
+			if(r.getPostType().longValue() == CategoryConstants.CATEGORY_ID_NOTICE){//公告
+				post.setCreatorTag(org.getOrganizationType());
+				post.setTargetTag(PostEntityTag.USER.getCode());
+				orgPostVo.setTask(null);
+			}
+			else{
+				post.setCreatorTag(PostEntityTag.USER.getCode());
+				post.setTargetTag(org.getOrganizationType());
+				task = new OrganizationTask();
+				task.setOrganizationId(org.getId());
+				task.setOrganizationType(org.getOrganizationType());
+				task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
+				task.setApplyEntityId(0L); // 还没有帖子ID
+				task.setTargetType(org.getOrganizationType());
+				task.setTargetId(org.getId());
+				if(r.getToken() == null || r.getToken().trim().equals(""))//token is null then use the loginUser id
+					task.setCreatorUid(userId);
+				if(tokenUser != null && tokenUser.getId() != null)//token not null and use is found by token
+					task.setCreatorUid(tokenUser.getId());
+
+				task.setCreateTime(currentTime);
+				task.setUnprocessedTime(currentTime);
+
+				OrganizationTaskType taskType = this.getOrganizationTaskType(r.getPostType());
+				if(taskType != null) {
+					task.setTaskType(taskType.getCode());
+				}
+
+				task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
+				task.setOperatorUid(0L);
+				taskCount++;
+				orgPostVo.setTask(task);
+				//this.organizationProvider.createOrganizationTask(task);
+				/*post.setEmbeddedAppId(27L);
+				post.setEmbeddedId(task.getId());*/
+			}
+
+			postCount++;
+			orgPostVo.setPost(post);
+			orgPostVos.add(orgPostVo);
+			//this.forumProvider.createPost(post);
+			/*if(task != null){
+				task.setApplyEntityId(post.getId());
+				this.organizationProvider.updateOrganizationTask(task);
+			}*/
+		}
+		long listEndTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-listElapse="+(listEndTime-listBeginTime));
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-count:userCount="+userCount+";userIdenCount="+userIdenCount+";taskCount="+taskCount+";postCount="+postCount);
+
+		if(orgPostVos == null ||orgPostVos.isEmpty())
+			return;
+
+		long beginTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-executeBeginTime="+beginTime);	
+		this.dbProvider.execute(s -> {
+			for(OrganizationPostVo r:orgPostVos){
+				if(r.getUser() != null&&r.getUserIden() != null){
+					this.userProvider.createUser(r.getUser());
+					r.getUserIden().setOwnerUid(r.getUser().getId());//use the create user id
+					this.userProvider.createIdentifier(r.getUserIden());
+				}
+				if(r.getTask() != null && r.getPost() != null){
+					if(r.getUser() !=null){//use the create user id
+						r.getTask().setCreatorUid(r.getUser().getId());
+						r.getPost().setCreatorUid(r.getUser().getId());
+					}
+					this.organizationProvider.createOrganizationTask(r.getTask());
+					r.getPost().setEmbeddedAppId(27L);
+					r.getPost().setEmbeddedId(r.getTask().getId());
+					this.forumProvider.createPost(r.getPost());
+					r.getTask().setApplyEntityId(r.getPost().getId());
+					this.organizationProvider.updateOrganizationTask(r.getTask());
+				}
+				else{
+					if(r.getUser() !=null)//use the create user id
+						r.getPost().setCreatorUid(r.getUser().getId());
+					this.forumProvider.createPost(r.getPost());
+				}
+			}
+			return s;
+		});
+		long endTime = System.currentTimeMillis();
+		LOGGER.info(parseBeginTime+"executeImportOrgPost-executeElapse="+(endTime-beginTime));
+	}
+
+	private Category checkCategory(Long postType) {
+		Category category = this.categoryProvider.findCategoryById(postType);
+		if(category == null){
+			LOGGER.error("category not found.categoryId="+postType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"category not found.");
+		}
+		return category;
+	}
+
+	private OrganizationCommunity checkOrgCommByOrgId(Long orgId) {
+		List<OrganizationCommunity> orgComms = this.organizationProvider.listOrganizationCommunities(orgId);
+		if(orgComms == null || orgComms.isEmpty()){
+			LOGGER.error("organization community not found.orgId="+orgId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"organization community not found.");
+		}
+		if(orgComms.size() != 1)
+			LOGGER.error("organization community not unique found.orgId="+orgId);
+
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("checkOrgCommByOrgId-orgComms="+StringHelper.toJsonString(orgComms));
+
+		return orgComms.get(0);
+	}
+
+	private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
+		if(contentCategoryId != null) {
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
+				return OrganizationTaskType.NOTICE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_REPAIRS) {
+				return OrganizationTaskType.REPAIRS;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
+				return OrganizationTaskType.CONSULT_APPEAL;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
+				return OrganizationTaskType.COMPLAINT_ADVICE;
+			}
+		}
+		LOGGER.error("Content category is not matched in organization type.contentCategoryId=" + contentCategoryId);
+		return null;
+	}
+
+	private Organization checkOrgAddressCity(List<Organization> orgs, Long cityId) {
+		if(orgs == null || orgs.isEmpty())
+			return null;
+		for(Organization r:orgs){
+			Address address = this.addressProvider.findAddressById(r.getAddressId());
+			if(address == null || address.getCityId().longValue() != cityId.longValue())
+				continue;
+			return r;
+		}
+		LOGGER.error("address cityId not equal to city id.orgs="+StringHelper.toJsonString(orgs)+",cityId="+cityId.longValue());
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				"address cityId not equal to city id.");
+	}
+
+	private List<Organization> checkOrganizationByName(String orgName, String orgType) {
+		List<Organization> orgs = this.organizationProvider.listOrganizationByName(orgName,orgType);
+
+		if(orgs == null || orgs.isEmpty()){
+			LOGGER.error("organization not found by orgName.orgName="+orgName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"organization not found by orgName.");
+		}
+
+		/*if(LOGGER.isDebugEnabled())
+			LOGGER.error("checkOrganizationByName-orgs="+StringHelper.toJsonString(orgs));*/
+
+		return orgs;
+	}
+
+	private List<OrganizationPostDTO> convertToOrgPostDto(ArrayList list,Long userId) {
+		if(list == null || list.isEmpty()){
+			LOGGER.error("resultList is empty.userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"resultList is empty.");
+		}
+		List<OrganizationPostDTO> result = new ArrayList<OrganizationPostDTO>();
+		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+			RowResult r = (RowResult)list.get(rowIndex);
+			if(r.getA() == null || r.getA().trim().equals("")){
+				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
+				break;
+			}
+			OrganizationPostDTO dto = new OrganizationPostDTO();
+			dto.setCityName(r.getA());
+			dto.setOrgName(r.getB());
+			dto.setOrgType(r.getC());
+			dto.setPostType(Long.valueOf(r.getD()));
+			dto.setSubject(r.getE());
+			dto.setContent(r.getF());
+			dto.setUserName(r.getG());
+			dto.setToken(r.getH());
+			dto.setCreateTime(r.getI());
+			result.add(dto);
+		}
+		return result;
 	}
 
 }

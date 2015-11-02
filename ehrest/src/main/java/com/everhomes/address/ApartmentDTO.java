@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.address;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -51,7 +54,19 @@ public class ApartmentDTO {
     public void setFamilyId(Long familyId) {
         this.familyId = familyId;
     }
-
+    
+    @Override
+    public boolean equals(Object obj){
+        if (! (obj instanceof ApartmentDTO)) {
+            return false;
+        }
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+    
+    @Override
+    public int hashCode(){
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

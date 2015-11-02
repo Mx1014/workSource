@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord> {
 
-	private static final long serialVersionUID = -1532743767;
+	private static final long serialVersionUID = -1972048855;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_tasks</code>
@@ -87,6 +87,16 @@ public class EhOrganizationTasks extends org.jooq.impl.TableImpl<com.everhomes.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
+	 * The column <code>ehcore.eh_organization_tasks.creator_uid</code>. uid of the user who create the task
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "uid of the user who create the task");
+
+	/**
+	 * The column <code>ehcore.eh_organization_tasks.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
 	 * The column <code>ehcore.eh_organization_tasks.unprocessed_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.sql.Timestamp> UNPROCESSED_TIME = createField("unprocessed_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
@@ -100,16 +110,6 @@ public class EhOrganizationTasks extends org.jooq.impl.TableImpl<com.everhomes.s
 	 * The column <code>ehcore.eh_organization_tasks.processed_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.sql.Timestamp> PROCESSED_TIME = createField("processed_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_organization_tasks.creator_uid</code>. uid of the user who create the task
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "uid of the user who create the task");
-
-	/**
-	 * The column <code>ehcore.eh_organization_tasks.create_time</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_tasks</code> table reference

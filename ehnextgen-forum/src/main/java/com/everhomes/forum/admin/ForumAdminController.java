@@ -50,8 +50,7 @@ public class ForumAdminController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-        //TODO fix use POST
-        searchSyncManager.SyncDb(SearchSyncType.ALL);
+        searchSyncManager.SyncDb(SearchSyncType.POST);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -153,6 +152,26 @@ public class ForumAdminController extends ControllerBase {
         List<AssignedScopeDTO> scopes = forumService.listTopicAssignedScope(cmd);
         
         RestResponse response = new RestResponse(scopes);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/forum/searchComments</b>
+     * <p>管理员搜索评论</p>
+     * @param cmd 参数命令 
+     * @return 搜索结果
+     */
+    @RequestMapping("searchComments")
+    @RestReturn(value=SearchTopicAdminCommandResponse.class)
+    public RestResponse searchComments(SearchTopicAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        SearchTopicAdminCommandResponse cmdResponse = forumService.searchComment(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

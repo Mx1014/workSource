@@ -643,8 +643,16 @@ DROP TABLE IF EXISTS `eh_user_service_addresses`;
 CREATE TABLE `eh_user_service_addresses` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
-    `address_id` BIGINT NOT NULL DEFAULT 0,
+    `address_id` BIGINT NOT NULL DEFAULT 0,	
+	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+	`contact_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'phone number or email address',
+	`contact_name` VARCHAR(64),
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+    `creator_uid` BIGINT NOT NULL,
     `create_time` DATETIME,
+	`update_time` datetime DEFAULT NULL,
+	`deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
+    `delete_time` DATETIME COMMENT '',
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_usr_service_address_id`(`owner_uid`, `address_id`)
@@ -1052,7 +1060,7 @@ CREATE TABLE `eh_communities`(
     `apt_seg1_sample` VARCHAR(64),
     `apt_seg2_sample` VARCHAR(64),
     `apt_seg3_sample` VARCHAR(64),
-    `apt_count` INTEGER,
+    `apt_count` INTEGER NOT NULL DEFAULT 0,
     `creator_uid` BIGINT COMMENT 'user who suggested the creation',
     `operator_uid` BIGINT COMMENT 'operator uid of last operation',
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
@@ -2497,6 +2505,35 @@ CREATE TABLE `eh_thirdpart_users` (
     `unit_name` VARCHAR(64),
     `apartment_name` VARCHAR(64),
     `create_time` DATETIME,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_push_messages`;
+CREATE TABLE `eh_push_messages` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `message_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'NORMAL_MESSAGE, UPGRADE_MESSAGE, NOTIFY_MESSAGE',
+    `title` VARCHAR(128) COMMENT 'title of message',
+    `content` VARCHAR(4096) COMMENT 'content for message',
+    `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'CITY, COMMUNITY, FAMILY, USER',
+    `target_id` BIGINT NOT NULL DEFAULT 0,
+    `status` INT NOT NULL DEFAULT 0 COMMENT 'WAITING, RUNNING, FINISHED',
+    `create_time` DATETIME DEFAULT NULL,
+    `start_time` DATETIME DEFAULT NULL,
+    `finish_time` DATETIME DEFAULT NULL,
+    `device_type` VARCHAR(64),
+    `device_tag` VARCHAR(64),
+    `app_version` VARCHAR(64),
+    `push_count` BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_push_message_results`;
+CREATE TABLE `eh_push_message_results` (
+    `id` BIGINT NOT NULL COMMENT 'id of the push message result, not auto increment',
+    `message_id` BIGINT NOT NULL DEFAULT 0,
+    `user_id` BIGINT NOT NULL DEFAULT 0,
+    `identifier_token` VARCHAR(128) COMMENT 'The mobile phone of user',
+    `send_time` DATETIME DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 

@@ -38,6 +38,7 @@ public interface AppConstants {
     public static final long APPID_USED_AND_RENTAL = 28;  // 二手和租售
     public static final long APPID_FREE_STUFF = 29;       // 免费物品
     public static final long APPID_LOST_AND_FOUND = 30;   // 失物招领
+    public static final long APPID_ENTERPRISE = 31;
     
     public static final int PAGINATION_DEFAULT_SIZE = 20;
     public static final int PAGINATION_MAX_SIZE = 2000;

@@ -57,6 +57,8 @@ public class GroupDTO {
     private Byte phonePrivateFlag;
     private Byte muteNotificationFlag;
     private Byte postFlag;
+    private String creatorName;
+    private String creatorFamilyName;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -66,7 +68,23 @@ public class GroupDTO {
     
     private Timestamp updateTime;
     
-    public GroupDTO() {
+    public String getCreatorName() {
+		return creatorName;
+	}
+
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
+
+	public String getCreatorFamilyName() {
+		return creatorFamilyName;
+	}
+
+	public void setCreatorFamilyName(String creatorFamilyName) {
+		this.creatorFamilyName = creatorFamilyName;
+	}
+
+	public GroupDTO() {
     }
 
     public Long getId() {

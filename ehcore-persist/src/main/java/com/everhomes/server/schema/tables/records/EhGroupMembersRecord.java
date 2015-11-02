@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = -1716828523;
+	private static final long serialVersionUID = 747690677;
 
 	/**
 	 * Setter for <code>ehcore.eh_group_members.id</code>. id of the record
@@ -112,14 +112,14 @@ public class EhGroupMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_group_members.member_nick_name</code>. member nick name within the group
+	 * Setter for <code>ehcore.eh_group_members.member_nick_name</code>.
 	 */
 	public void setMemberNickName(java.lang.String value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_group_members.member_nick_name</code>. member nick name within the group
+	 * Getter for <code>ehcore.eh_group_members.member_nick_name</code>.
 	 */
 	public java.lang.String getMemberNickName() {
 		return (java.lang.String) getValue(7);

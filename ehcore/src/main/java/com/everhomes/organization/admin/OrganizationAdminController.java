@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
@@ -14,7 +17,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.AddOrgAddressCommand;
 import com.everhomes.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.organization.CreateOrganizationCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.organization.CreateOrganizationContactCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
@@ -214,6 +216,34 @@ public class OrganizationAdminController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+    }
+    
+    /**
+     * <b>URL: /org/importOrganization</b>
+     * <p>导入机构信息</p>
+     */
+    @RequestMapping("importOrganization")
+    @RestReturn(value=String.class)
+    public RestResponse importOrganization(@RequestParam(value = "attachment") MultipartFile[] files){
+        this.organizationService.importOrganization(files);
+        RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/importOrgPost</b>
+     * <p>导入机构公告，报修等帖</p>
+     */
+    @RequestMapping("importOrgPost")
+    @RestReturn(value=String.class)
+    public RestResponse importOrgPost(@RequestParam(value = "attachment") MultipartFile[] files){
+        this.organizationService.importOrgPost(files);
+        RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
 }

@@ -11,7 +11,7 @@ INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('mw.host
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('etag.timeout', '300', 'the timeout for etag');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('home.url', 'http://10.1.1.91:8080', 'the home url');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.score.url', '/app/static/score/score.html', 'the relative path for user score');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/app/static/share_post/share_post.html#', 'the relative path for sharing topic');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('post.share.url', '/mobile/static/share_post/share_post.html#', 'the relative path for sharing topic');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.vcode.templateid', '9547', 'vcode sms template id');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.account.sid', 'b0b423e8f630d920aaba8aafe8f37701', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.token', '1527ed4b1bb855fab12a5683bb3c7ead', NULL);
@@ -20,13 +20,23 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.ve
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('yzx.server', 'api.ucpaas.com', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('mw.vcode.template.content', '您的验证码为${vcode}，10分钟内有效，感谢您的使用。', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('marketdata.item.version', '2015080311', 'the version of all luanchpad items');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.order.url', '/app/static/indent/indent.html', 'the relative path for user order');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('app.agreements.url', '/app/static/app_agreements/app_agreements.html', 'the relative path for app agreements');
+
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('apply.shop.url', '/app/static/apply_store/apply_store.html', 'the relative path for user shop apply');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('manage.shop.url', '/app/static/my_store/my_store.html', 'the relative path for user shop manage');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.order.url', '/app/static/indent/indent.html', 'the relative path for user order');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('user.coupon.url', '/app/static/coupon/coupon.html', 'the relative path for user coupon');
-INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('app.agreements.url', '/app/static/app_agreements/app_agreements.html', 'the relative path for app agreements');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.detail.url', '/web/app/user/index.html#/store/details/', 'business details');
 INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('business.image.url', 'http://121.199.69.107:8081/imageService/', 'business image url');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`) VALUES ('biz.back.url', 'http://biz.zuolin.com/Zl-MallMgt/bizmgt/main/tokenlogin.ihtml', 'biz.back.url');
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('prefix.url', 'http://biz.zuolin.com/zl-ec?hideNavigationBar=0&sourceUrl=http://biz.zuolin.com', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('common.pay.url', 'http://pay.zuolin.com/EDS_PAY/', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('apply.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('manage.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.order.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('user.coupon.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.image.url', 'http://bizimg.zuolin.com/imageService/', 'image url');
+-- INSERT INTO `eh_configurations` (`name`,`value`,`description`) VALUES ('business.detail.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', 'detail url');
 
 
 
@@ -61,10 +71,10 @@ ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 #
 # populate default system user root/password
 #
-INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (1, UUID(), 'root', 'system user', 1, 
-    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');
-INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`) VALUES (2, UUID(), 'system assistant', '系统小助手', 1, 
-    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b');	
+INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (1, UUID(), 'root', 'system user', 1, 
+    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');
+INSERT INTO `eh_users`(`id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (2, UUID(), 'system assistant', '系统小助手', 1, 
+    NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');	
 
 #
 # Reserve IDs

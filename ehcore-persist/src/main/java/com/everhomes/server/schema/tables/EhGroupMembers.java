@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupMembersRecord> {
 
-	private static final long serialVersionUID = -2107144187;
+	private static final long serialVersionUID = -1319832543;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_group_members</code>
@@ -62,9 +62,9 @@ public class EhGroupMembers extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_AVATAR = createField("member_avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "avatar image identifier in storage sub-system");
 
 	/**
-	 * The column <code>ehcore.eh_group_members.member_nick_name</code>. member nick name within the group
+	 * The column <code>ehcore.eh_group_members.member_nick_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_NICK_NAME = createField("member_nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "member nick name within the group");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupMembersRecord, java.lang.String> MEMBER_NICK_NAME = createField("member_nick_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_group_members.member_status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active

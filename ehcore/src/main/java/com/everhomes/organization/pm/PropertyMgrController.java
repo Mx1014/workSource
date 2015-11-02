@@ -24,6 +24,7 @@ import com.everhomes.family.FamilyBillingTransactionDTO;
 import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.SetCurrentCommunityCommand;
 import com.everhomes.user.UserTokenCommand;
@@ -41,6 +42,10 @@ public class PropertyMgrController extends ControllerBase {
 
 	@Autowired
 	PropertyMgrProvider propertyMgrProvider;
+	
+	@Autowired
+	OrganizationService organizationService;
+	
 
 	/**
 	 * <b>URL: /pm/findPropertyOrganization</b>
@@ -935,8 +940,8 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 
-	} 
-
+	}
+	
 	/**
 	 * <b>URL: /pm/listPmBillsByConditions
 	 * <p>根据条件查询物业缴费单
@@ -1297,7 +1302,6 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-        
     }
-
+	
 }
