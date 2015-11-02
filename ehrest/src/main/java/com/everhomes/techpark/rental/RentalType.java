@@ -5,11 +5,13 @@ import com.everhomes.techpark.punch.PunchStatus;
  * <ul>预定时间类型
  * <li>HOUR(0): 按小时</li>
  * <li>DAY(1): 按天</li>
+ * <li>HALFDAY(2): 按半天</li>
+ * 
  * </ul>
  */
 public enum RentalType {
    
-    HOUR((byte)0),DAY((byte)1);
+    HOUR((byte)0),DAY((byte)1),HALFDAY((byte)2);
     
     private byte code;
     private RentalType(byte code) {

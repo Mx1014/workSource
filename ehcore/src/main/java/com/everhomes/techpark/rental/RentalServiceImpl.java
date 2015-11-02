@@ -248,16 +248,17 @@ public class RentalServiceImpl implements RentalService {
 					if (dto.getCounts() == 0) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
-					if (reserveTime.before(new java.util.Date(rsr.getBeginTime().getTime()
+					if (reserveTime.before(new java.util.Date(rsr
+							.getBeginTime().getTime()
 							- rentalRule.getRentalStartTime()))) {
 						dto.setStatus(SiteRuleStatus.LATE.getCode());
 					}
-					if (reserveTime.after(new java.util.Date(rsr.getBeginTime().getTime()
-							- rentalRule.getRentalEndTime()))) {
+					if (reserveTime.after(new java.util.Date(rsr.getBeginTime()
+							.getTime() - rentalRule.getRentalEndTime()))) {
 						dto.setStatus(SiteRuleStatus.EARLY.getCode());
 					}
 					rsDTO.getSiteRules().add(dto);
-					
+
 				}
 			}
 			response.getSites().add(rsDTO);
@@ -457,7 +458,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setRentalCount(cmd.getRentalCount());
 		Double siteTotalMoney = 0.0;
 		for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
-			if(null == siteRuleId)
+			if (null == siteRuleId)
 				continue;
 			RentalSiteRule rentalSiteRule = rentalProvider
 					.findRentalSiteRuleById(siteRuleId);
@@ -538,7 +539,7 @@ public class RentalServiceImpl implements RentalService {
 	private void valiRentalBill(Double rentalcount, List<Long> rentalSiteRuleIds) {
 		// 如果有一个规则，剩余的数量少于预定的数量
 		for (Long siteRuleId : rentalSiteRuleIds) {
-			if(siteRuleId == null )
+			if (siteRuleId == null)
 				continue;
 			Double totalCount = Double.valueOf(this.rentalProvider
 					.findRentalSiteRuleById(siteRuleId).getCounts());
@@ -662,6 +663,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
 		Integer billCount = rentalProvider.countRentalSiteBills(
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		if (billCount > 0) {
@@ -685,45 +687,62 @@ public class RentalServiceImpl implements RentalService {
 		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
 		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
 		Gson gson = new Gson();
-		// TODO: 按日预定
 		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
 				new TypeToken<List<Integer>>() {
 				}.getType());
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (choosenInts.contains(weekday)) {
-				for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
-					rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
-							.getTime())
-							+ " "
-							+ String.valueOf((int) i / 1)
-							+ ":"
-							+ String.valueOf((int) ((i % 1) * 60))
-							+ ":00"));
+				
+				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
+					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
+						rsr.setEnterpriseCommunityId(cmd
+								.getEnterpriseCommunityId());
+						rsr.setSiteType(cmd.getSiteType());
+						rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
+								.getTime())
+								+ " "
+								+ String.valueOf((int) i / 1)
+								+ ":"
+								+ String.valueOf((int) ((i % 1) * 60))
+								+ ":00"));
 
-					i = i + cmd.getTimeStep();
-					rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
-							.getTime())
-							+ " "
-							+ String.valueOf((int) i / 1)
-							+ ":"
-							+ String.valueOf((int) ((i % 1) * 60))
-							+ ":00"));
-					rsr.setRentalSiteId(cmd.getRentalSiteId());
-					rsr.setRentalType(cmd.getRentalType());
-					rsr.setCounts(cmd.getCounts());
-					rsr.setUnit(cmd.getUnit());
-					if (weekday == 1 || weekday == 7) {
-						rsr.setPrice(cmd.getWeekendPrice());
-					} else {
-						rsr.setPrice(cmd.getWorkdayPrice());
+						i = i + cmd.getTimeStep();
+						rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
+								.getTime())
+								+ " "
+								+ String.valueOf((int) i / 1)
+								+ ":"
+								+ String.valueOf((int) ((i % 1) * 60))
+								+ ":00"));
+						rsr.setRentalSiteId(cmd.getRentalSiteId());
+						rsr.setRentalType(cmd.getRentalType());
+						rsr.setCounts(cmd.getCounts());
+						rsr.setUnit(cmd.getUnit());
+						if (weekday == 1 || weekday == 7) {
+							rsr.setPrice(cmd.getWeekendPrice());
+						} else {
+							rsr.setPrice(cmd.getWorkdayPrice());
+						}
+						rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
+								.getTime())));
+						rsr.setStatus(cmd.getStatus());
+						rsr.setCreateTime(new Timestamp(DateHelper
+								.currentGMTTime().getTime()));
+						rsr.setCreatorUid(userId);
+						rentalProvider.createRentalSiteRule(rsr);
+
 					}
-					rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
-							.getTime())));
-					rsr.setStatus(cmd.getStatus());
-					rentalProvider.createRentalSiteRule(rsr);
-
 				}
+				// TODO: 按半日预定
+				else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode())){
+					
+				}
+				// TODO: 按日预定
+				else if (cmd.getRentalType().equals(RentalType.DAY.getCode())){
+					
+				}
+				
 			}
 			start.add(Calendar.DAY_OF_MONTH, 1);
 		}
@@ -833,7 +852,7 @@ public class RentalServiceImpl implements RentalService {
 	public AddRentalBillItemCommandResponse addRentalItemBill(
 			AddRentalBillItemCommand cmd) {
 
-		//循环存物品订单
+		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		Long userId = UserContext.current().getUser().getId();
 		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
@@ -869,8 +888,8 @@ public class RentalServiceImpl implements RentalService {
 			if (bill.getStatus() == 3) {
 				response.setAmount(bill.getPayTotalMoney()
 						- bill.getPaidMoney());
-			} 
-			//TODO: 生成订单
+			}
+			// TODO: 生成订单
 		}
 		return response;
 	}
@@ -883,7 +902,7 @@ public class RentalServiceImpl implements RentalService {
 		int totalCount = rentalProvider.countRentalBills(
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
 				cmd.getRentalSiteId(), cmd.getBillStatus(), cmd.getStartTime(),
-				cmd.getEndTime(),cmd.getInvoiceFlag());
+				cmd.getEndTime(), cmd.getInvoiceFlag());
 		if (totalCount == 0)
 			return response;
 
@@ -895,7 +914,7 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getEnterpriseCommunityId(), cmd.getSiteType(),
 				cmd.getRentalSiteId(), cmd.getBillStatus(),
 				cmd.getPageOffset(), pageSize, cmd.getStartTime(),
-				cmd.getEndTime(),cmd.getInvoiceFlag());
+				cmd.getEndTime(), cmd.getInvoiceFlag());
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
@@ -922,7 +941,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void deleteRentalBill(DeleteRentalBillCommand cmd) {
-	
+
 		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
 
 	}

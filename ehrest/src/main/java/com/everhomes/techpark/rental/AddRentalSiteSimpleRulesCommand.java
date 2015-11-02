@@ -16,6 +16,9 @@ import com.everhomes.util.StringHelper;
  * <li>endTime：结束时间(hour)</li>
  * <li>counts：场所数量</li> 
  * <li>unit：场所单位:1or0.5</li> 
+ * <li>workdayPrice：场所数量</li> 
+ * <li>weekendPrice：场所数量</li> 
+ * <li>price：场所数量</li> 
  * <li>price：场所数量</li> 
  * <li>ruleDate：规则日期</li> 
  * <li>loopType：循环方式 参考{@link com.everhomes.techpark.rental.LoopType} </li> 
@@ -44,10 +47,12 @@ public class AddRentalSiteSimpleRulesCommand {
 	private Double counts;
 	@NotNull
 	private Double unit;
-	@NotNull
 	private Double workdayPrice;
-	@NotNull
 	private Double weekendPrice;
+	private Double workdayAMPrice;
+	private Double weekendAMPrice;
+	private Double workdayPMPrice;
+	private Double weekendPMPrice;
 	@NotNull
 	private Byte loopType;
 	@NotNull
@@ -256,6 +261,54 @@ public class AddRentalSiteSimpleRulesCommand {
 
 	public void setWeekendPrice(Double weekendPrice) {
 		this.weekendPrice = weekendPrice;
+	}
+
+
+
+	public Double getWorkdayAMPrice() {
+		return workdayAMPrice;
+	}
+
+
+
+	public void setWorkdayAMPrice(Double workdayAMPrice) {
+		this.workdayAMPrice = workdayAMPrice;
+	}
+
+
+
+	public Double getWeekendAMPrice() {
+		return weekendAMPrice;
+	}
+
+
+
+	public void setWeekendAMPrice(Double weekendAMPrice) {
+		this.weekendAMPrice = weekendAMPrice;
+	}
+
+
+
+	public Double getWorkdayPMPrice() {
+		return workdayPMPrice;
+	}
+
+
+
+	public void setWorkdayPMPrice(Double workdayPMPrice) {
+		this.workdayPMPrice = workdayPMPrice;
+	}
+
+
+
+	public Double getWeekendPMPrice() {
+		return weekendPMPrice;
+	}
+
+
+
+	public void setWeekendPMPrice(Double weekendPMPrice) {
+		this.weekendPMPrice = weekendPMPrice;
 	}
 
  
