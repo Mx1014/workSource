@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>id：</li>
  * <li>userId：申请人id</li>
  * <li>userName：申请人名称</li>
- * <li>token：申请人联系电话</li>
+ * <li>userPhoneNumber：申请人联系电话</li>
  * <li>companyId：公司id</li>
  * <li>punchDate: 申请时间</li>
  * <li>requestType：申请类型申请或审批{@link com.everhomes.techpark.punch.PunchRquestType}</li>
@@ -34,7 +34,7 @@ public class PunchExceptionRequestDTO{
 	private Long     id;
 	private Long     userId;
 	private String     userName;
-	private String     token;
+	private String     userPhoneNumber;
 	private Long     companyId;
 	private Date     punchDate;
 	private Byte     requestType;
@@ -191,15 +191,7 @@ public class PunchExceptionRequestDTO{
 		this.operateTime = operateTime;
 	}
 
-
-	public String getToken() {
-		return token;
-	}
-
-
-	public void setToken(String token) {
-		this.token = token;
-	}
+ 
 
 
 	@Override
@@ -255,6 +247,16 @@ public class PunchExceptionRequestDTO{
 
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
+	}
+
+
+	public String getUserPhoneNumber() {
+		return userPhoneNumber;
+	}
+
+
+	public void setUserPhoneNumber(String userPhoneNumber) {
+		this.userPhoneNumber = userPhoneNumber;
 	}
 
  

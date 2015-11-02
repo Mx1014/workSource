@@ -1016,7 +1016,7 @@ public class PunchServiceImpl implements PunchService {
 					GroupContact groupContact = groupContactProvider
 							.findGroupContactByUserId(dto.getUserId());
 					dto.setUserName(groupContact.getContactName());
-					dto.setToken(groupContact.getContactToken());
+					dto.setUserPhoneNumber(groupContact.getContactToken());
 					if(null != dto.getOperatorUid() && 0 != dto.getOperatorUid()){
 						GroupContact groupContactOperator = groupContactProvider
 								.findGroupContactByUserId(dto.getOperatorUid());
@@ -1075,7 +1075,7 @@ public class PunchServiceImpl implements PunchService {
 					GroupContact groupContact = groupContactProvider
 							.findGroupContactByUserId(dto.getUserId());
 					dto.setUserName(groupContact.getContactName());
-					dto.setToken(groupContact.getContactToken());
+					dto.setUserPhoneNumber(groupContact.getContactToken());
 					return dto;
 				}).collect(Collectors.toList()));
 
