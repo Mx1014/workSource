@@ -41,15 +41,15 @@ public class PunchController extends ControllerBase {
 	
 	
 	/**
-	 * <b>URL: /techpark/punch/punchExceptionRequest</b>
+	 * <b>URL: /techpark/punch/addPunchExceptionRequest</b>
 	 * <p>
 	 * 增加打卡异常申报
 	 * </p>
 	 */
-	@RequestMapping("punchExceptionRequest")
+	@RequestMapping("addPunchExceptionRequest")
 	@RestReturn(value = String.class)
-	public RestResponse punchExceptionRequest(
-			@Valid PunchExceptionRequestCommand cmd) {
+	public RestResponse addPunchExceptionRequest(
+			@Valid AddPunchExceptionRequestCommand cmd) {
 		punchService.createPunchExceptionRequest(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -83,10 +83,10 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getPunchNewException")
-	@RestReturn(value = getPunchNewExceptionResponse.class)
+	@RestReturn(value = GetPunchNewExceptionCommandResponse.class)
 	public RestResponse getPunchNewException(@Valid getPunchNewExceptionCommand cmd) {
 		// 打卡返回打卡时间
-		getPunchNewExceptionResponse res = punchService.getPunchNewException(cmd);
+		GetPunchNewExceptionCommandResponse res = punchService.getPunchNewException(cmd);
 		RestResponse response = new RestResponse(res); 
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -101,11 +101,11 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("listYearPunchLogs")
-	@RestReturn(value = PunchLogsYearListResponse.class, collection = true)
-	public RestResponse listPunchLogs(@Valid ListPunchLogsCommand cmd) {
+	@RestReturn(value = ListYearPunchLogsCommandResponse.class, collection = true)
+	public RestResponse listYearPunchLogs(@Valid ListYearPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();
-		PunchLogsYearListResponse punchLogsYearListResponse = punchService
+		ListYearPunchLogsCommandResponse punchLogsYearListResponse = punchService
 				.getlistPunchLogs(cmd);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
@@ -120,7 +120,7 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("getDayPunchLogs")
 	@RestReturn(value = PunchLogsDayList.class, collection = true)
-	public RestResponse getDayPunchLogs(@Valid getDayPunchLogsCommand cmd) {
+	public RestResponse getDayPunchLogs(@Valid GetDayPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();
 		PunchLogsDayList pdl = punchService.getDayPunchLogs(cmd);
@@ -139,7 +139,7 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("addPunchRule")
 	@RestReturn(value = String.class)
-	public RestResponse addPunchRule(@Valid CreatePunchRuleCommand cmd) {
+	public RestResponse addPunchRule(@Valid AddPunchRuleCommand cmd) {
 		punchService.createPunchRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -171,7 +171,7 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("deletePunchRule")
 	@RestReturn(value = String.class)
-	public RestResponse deletePunchRule(@Valid PunchCompanyIdCommand cmd) {
+	public RestResponse deletePunchRule(@Valid DeletePunchRuleCommand cmd) {
 		punchService.deletePunchRule(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -186,9 +186,9 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getPunchRule")
-	@RestReturn(value = PunchRuleResponse.class)
-	public RestResponse getPunchRule(@Valid PunchCompanyIdCommand cmd) {
-		PunchRuleResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
+	@RestReturn(value = GetPunchRuleCommandResponse.class)
+	public RestResponse getPunchRule(@Valid GetPunchRuleCommand cmd) {
+		GetPunchRuleCommandResponse commandResponse = punchService.getPunchRuleByCompanyId(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -232,9 +232,9 @@ public class PunchController extends ControllerBase {
 	 *审批异常申报
 	 * </p>
 	 */
-	@RequestMapping("PunchExceptionApproval")
+	@RequestMapping("approvalPunchException")
 	@RestReturn(value = String.class)
-	public RestResponse PunchExceptionApproval(@Valid PunchExceptionApprovalCommand cmd) {
+	public RestResponse approvalPunchException(@Valid ApprovalPunchExceptionCommand cmd) {
 		punchService.punchExceptionApproval(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -2,17 +2,16 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.util.StringHelper;
 
-
-/**
-* <ul>  
-* <li>companyId：企业Id</li>
-* </ul>
-*/
-public class PunchCompanyIdCommand {
+ /**
+ * <ul>  
+ * <li>companyId：企业Id</li>
+ * <li>queryDate：查询日期</li>
+ * </ul>
+ */
+public class GetDayPunchLogsCommand {
  
-     private Long companyId;
-    
-    
+    private Long companyId; 
+    private String queryDate;
      public Long getCompanyId() {
          return companyId;
      }
@@ -25,5 +24,15 @@ public class PunchCompanyIdCommand {
      public String toString() {
          return StringHelper.toJsonString(this);
      }
+ 
+
+	public String getQueryDate() {
+		return queryDate;
+	}
+
+	public void setQueryDate(String queryDate) {
+		this.queryDate = queryDate;
+	}
+ 
 
  }

@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>operateTime：审核时间</li>
  * </ul>
  */
-public class PunchExceptionApprovalCommand{
+public class ApprovalPunchExceptionCommand{
 	private Long     userId;
 	private Long     companyId;
 	private String     punchDate;

@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 * <li>code：</li>
 * </ul>
 */
-public class getPunchNewExceptionResponse {
+public class GetPunchNewExceptionCommandResponse {
 	private byte exceptionCode ; 
 	
 	

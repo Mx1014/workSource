@@ -29,7 +29,7 @@ public class PunchStatisticsDTO{
 	private Long     userId;
 	private String     userName;
 	private String userDepartment;
-	private String     token;
+	private String     userPhoneNumber;
 	private Long     companyId;
 	private Date     punchDate;
 	private String      arriveTime;
@@ -90,16 +90,7 @@ public class PunchStatisticsDTO{
 	}
 
 
-	
-	public String getToken() {
-		return token;
-	}
-
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-
+	 
 
 	public String getArriveTime() {
 		return arriveTime;
@@ -194,6 +185,16 @@ public class PunchStatisticsDTO{
 
 	public void setUserDepartment(String userDepartment) {
 		this.userDepartment = userDepartment;
+	}
+
+
+	public String getUserPhoneNumber() {
+		return userPhoneNumber;
+	}
+
+
+	public void setUserPhoneNumber(String userPhoneNumber) {
+		this.userPhoneNumber = userPhoneNumber;
 	}
 
 

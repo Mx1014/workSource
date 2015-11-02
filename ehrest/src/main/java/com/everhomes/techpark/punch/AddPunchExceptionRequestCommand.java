@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>description：申请说明</li>
  * </ul>
  */
-public class PunchExceptionRequestCommand {
+public class AddPunchExceptionRequestCommand {
 
     private Long companyId;
     private String punchDate;

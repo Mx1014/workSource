@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>locations：打卡地点的json数组</li>
  * </ul>
  */
-public class CreatePunchRuleCommand {
+public class AddPunchRuleCommand {
 	
 	@NotNull
 	private Long     companyId;
@@ -31,9 +31,7 @@ public class CreatePunchRuleCommand {
 	private String      endEarlyTime;
 	@NotNull
 	private String      locations;
-
-	public CreatePunchRuleCommand() {
-	}
+ 
 	public Long getCompanyId() {
 		return companyId;
 	}

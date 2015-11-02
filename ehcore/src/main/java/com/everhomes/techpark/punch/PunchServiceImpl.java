@@ -68,7 +68,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public PunchLogsYearListResponse getlistPunchLogs(ListPunchLogsCommand cmd) {
+	public ListYearPunchLogsCommandResponse getlistPunchLogs(ListYearPunchLogsCommand cmd) {
 
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getQueryYear() == null || cmd.getQueryYear().isEmpty())
@@ -76,7 +76,7 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryYear parameter in the command");
 
-		PunchLogsYearListResponse pyl = new PunchLogsYearListResponse();
+		ListYearPunchLogsCommandResponse pyl = new ListYearPunchLogsCommandResponse();
 		pyl.setPunchYear(cmd.getQueryYear());
 		pyl.setPunchLogsMonthList(new ArrayList<PunchLogsMonthList>()); 
 		Calendar start = Calendar.getInstance();
@@ -112,8 +112,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public PunchLogsYearListResponse getlistPunchLogsBetweenTwoCalendar(
-			PunchLogsYearListResponse pyl, long CompanyId, Calendar start,
+	public ListYearPunchLogsCommandResponse getlistPunchLogsBetweenTwoCalendar(
+			ListYearPunchLogsCommandResponse pyl, long CompanyId, Calendar start,
 			Calendar end) {
 		Long userId = UserContext.current().getUser().getId();
 		PunchLogsMonthList pml = null;
@@ -662,7 +662,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public void createPunchRule(CreatePunchRuleCommand cmd) {
+	public void createPunchRule(AddPunchRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
@@ -762,8 +762,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public PunchRuleResponse getPunchRuleByCompanyId(PunchCompanyIdCommand cmd) {
-		PunchRuleResponse response = new PunchRuleResponse();
+	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(GetPunchRuleCommand cmd) {
+		GetPunchRuleCommandResponse response = new GetPunchRuleCommandResponse();
 		PunchRuleDTO dto = null;
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
@@ -805,7 +805,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public void deletePunchRule(PunchCompanyIdCommand cmd) {
+	public void deletePunchRule(DeletePunchRuleCommand cmd) {
 		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
 				.getCompanyId());
 		if (punchRule != null) {
@@ -921,7 +921,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public void createPunchExceptionRequest(PunchExceptionRequestCommand cmd) {
+	public void createPunchExceptionRequest(AddPunchExceptionRequestCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		if (cmd.getRequestDescription() == null || cmd.getRequestDescription().equals(0))
@@ -1085,7 +1085,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public void punchExceptionApproval(PunchExceptionApprovalCommand cmd) {
+	public void punchExceptionApproval(ApprovalPunchExceptionCommand cmd) {
 		if (null == cmd.getUserId() || cmd.getUserId().equals(0L)) {
 			LOGGER.error("Invalid user Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1206,7 +1206,7 @@ public class PunchServiceImpl implements PunchService {
 						GroupContact groupContact = groupContactProvider
 								.findGroupContactByUserId(dto.getUserId());
 						dto.setUserName(groupContact.getContactName());
-						dto.setToken(groupContact.getContactToken());
+						dto.setUserPhoneNumber(groupContact.getContactToken());
 						dto.setUserDepartment(groupContact.getStringTag1());
 						PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(), dto.getCompanyId(), dto.getPunchDate());
  						if(approval != null){
@@ -1235,10 +1235,10 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public getPunchNewExceptionResponse getPunchNewException(getPunchNewExceptionCommand cmd) {
+	public GetPunchNewExceptionCommandResponse getPunchNewException(getPunchNewExceptionCommand cmd) {
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		Long userId = UserContext.current().getUser().getId();
-		getPunchNewExceptionResponse response = new getPunchNewExceptionResponse();
+		GetPunchNewExceptionCommandResponse response = new GetPunchNewExceptionCommandResponse();
 		response.setExceptionCode(ExceptionStatus.NORMAL.getCode());
 		//TODO：从本月初，或者第一次打卡开始
 		Calendar start = Calendar.getInstance();
@@ -1261,7 +1261,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public PunchLogsDayList getDayPunchLogs(getDayPunchLogsCommand cmd) { 
+	public PunchLogsDayList getDayPunchLogs(GetDayPunchLogsCommand cmd) { 
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		Calendar logDay = Calendar.getInstance();

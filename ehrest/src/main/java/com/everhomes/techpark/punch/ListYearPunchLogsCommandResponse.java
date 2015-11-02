@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchYear：每一年的punchlist</li>
  * </ul>
  */
-public class PunchLogsYearListResponse{
+public class ListYearPunchLogsCommandResponse{
  
 
     private String punchYear; 

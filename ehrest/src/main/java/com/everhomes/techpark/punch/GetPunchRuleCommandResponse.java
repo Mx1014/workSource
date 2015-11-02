@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>punchRuleDTO：公司打卡规则dto</li>
  * </ul>
  */
-public class PunchRuleResponse{
+public class GetPunchRuleCommandResponse{
  
 
     private PunchRuleDTO punchRuleDTO; 
