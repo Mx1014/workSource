@@ -69,6 +69,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhBorders EH_BORDERS = com.everhomes.server.schema.tables.EhBorders.EH_BORDERS;
 
 	/**
+	 * The table ehcore.eh_buildings
+	 */
+	public static final com.everhomes.server.schema.tables.EhBuildings EH_BUILDINGS = com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS;
+
+	/**
+	 * The table ehcore.eh_building_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhBuildingAttachments EH_BUILDING_ATTACHMENTS = com.everhomes.server.schema.tables.EhBuildingAttachments.EH_BUILDING_ATTACHMENTS;
+
+	/**
 	 * The table ehcore.eh_businesses
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinesses EH_BUSINESSES = com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES;
@@ -249,6 +259,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhGroups EH_GROUPS = com.everhomes.server.schema.tables.EhGroups.EH_GROUPS;
 
 	/**
+	 * The table ehcore.eh_group_contacts
+	 */
+	public static final com.everhomes.server.schema.tables.EhGroupContacts EH_GROUP_CONTACTS = com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS;
+
+	/**
 	 * The table ehcore.eh_group_members
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroupMembers EH_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS;
@@ -364,6 +379,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+	 * The table ehcore.eh_park_apply_card
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkApplyCard EH_PARK_APPLY_CARD = com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD;
+
+	/**
 	 * The table ehcore.eh_park_charge
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkCharge EH_PARK_CHARGE = com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE;
@@ -404,6 +424,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPunchGeopoints EH_PUNCH_GEOPOINTS = com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS;
 
 	/**
+	 * The table ehcore.eh_punch_logs
+	 */
+	public static final com.everhomes.server.schema.tables.EhPunchLogs EH_PUNCH_LOGS = com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS;
+
+	/**
 	 * The table ehcore.eh_punch_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchRules EH_PUNCH_RULES = com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES;
@@ -412,7 +437,6 @@ public class Tables {
 	 * The table ehcore.eh_punch_workday
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchWorkday EH_PUNCH_WORKDAY = com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY;
- 
 
 	/**
 	 * The table ehcore.eh_push_messages
@@ -425,7 +449,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPushMessageResults EH_PUSH_MESSAGE_RESULTS = com.everhomes.server.schema.tables.EhPushMessageResults.EH_PUSH_MESSAGE_RESULTS;
 
 	/**
- 
 	 * The table ehcore.eh_qrcodes
 	 */
 	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;
@@ -474,6 +497,11 @@ public class Tables {
 	 * The table ehcore.eh_rental_sites
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalSites EH_RENTAL_SITES = com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES;
+
+	/**
+	 * The table ehcore.eh_rental_sites_bills
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSitesBills EH_RENTAL_SITES_BILLS = com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS;
 
 	/**
 	 * The table ehcore.eh_rental_site_items
