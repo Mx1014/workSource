@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBusinesses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1333093957;
+	private static final long serialVersionUID = 1233220053;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     targetType;
@@ -31,7 +31,6 @@ public class EhBusinesses implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
-	private java.lang.Double   visibleDistance;
 
 	public EhBusinesses() {}
 
@@ -53,8 +52,7 @@ public class EhBusinesses implements java.io.Serializable {
 		java.lang.String   description,
 		java.sql.Timestamp updateTime,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.lang.Double   visibleDistance
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.targetType = targetType;
@@ -74,7 +72,6 @@ public class EhBusinesses implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
-		this.visibleDistance = visibleDistance;
 	}
 
 	public java.lang.Long getId() {
@@ -219,13 +216,5 @@ public class EhBusinesses implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.lang.Double getVisibleDistance() {
-		return this.visibleDistance;
-	}
-
-	public void setVisibleDistance(java.lang.Double visibleDistance) {
-		this.visibleDistance = visibleDistance;
 	}
 }

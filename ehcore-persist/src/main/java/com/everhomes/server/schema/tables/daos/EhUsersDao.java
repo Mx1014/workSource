@@ -237,31 +237,10 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
-	 * Fetch records that have <code>salt IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySalt(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SALT, values);
-	}
-
-	/**
-	 * Fetch records that have <code>password_hash IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPasswordHash(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.PASSWORD_HASH, values);
-	}
-
-	/**
 	 * Fetch records that have <code>reg_ip IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByRegIp(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.REG_IP, values);
-	}
-
-	/**
-	 * Fetch records that have <code>original_avatar IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByOriginalAvatar(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.ORIGINAL_AVATAR, values);
 	}
 
 	/**
@@ -276,5 +255,26 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByRegChannelId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.REG_CHANNEL_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>original_avatar IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByOriginalAvatar(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.ORIGINAL_AVATAR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>salt IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySalt(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SALT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>password_hash IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPasswordHash(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.PASSWORD_HASH, values);
 	}
 }

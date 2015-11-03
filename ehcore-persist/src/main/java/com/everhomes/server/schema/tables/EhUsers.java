@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = 1311936213;
+	private static final long serialVersionUID = -250349582;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -154,7 +154,27 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	/**
 	 * The column <code>ehcore.eh_users.last_login_ip</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> LAST_LOGIN_IP = createField("last_login_ip", org.jooq.impl.SQLDataType.VARCHAR.length(16), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> LAST_LOGIN_IP = createField("last_login_ip", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_users.reg_ip</code>. the channel at the time of register
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> REG_IP = createField("reg_ip", org.jooq.impl.SQLDataType.VARCHAR.length(64).defaulted(true), this, "the channel at the time of register");
+
+	/**
+	 * The column <code>ehcore.eh_users.reg_city_id</code>. the city at the time of register
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> REG_CITY_ID = createField("reg_city_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "the city at the time of register");
+
+	/**
+	 * The column <code>ehcore.eh_users.reg_channel_id</code>. the channel at the time of register
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> REG_CHANNEL_ID = createField("reg_channel_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "the channel at the time of register");
+
+	/**
+	 * The column <code>ehcore.eh_users.original_avatar</code>. the path of avatar in 2.8 version, keep it for migration
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> ORIGINAL_AVATAR = createField("original_avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "the path of avatar in 2.8 version, keep it for migration");
 
 	/**
 	 * The column <code>ehcore.eh_users.salt</code>.
@@ -165,26 +185,6 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> PASSWORD_HASH = createField("password_hash", org.jooq.impl.SQLDataType.VARCHAR.length(128).defaulted(true), this, "Note, password is stored as salted hash, salt is appended by hash together");
-
-	/**
-	 * The column <code>ehcore.eh_users.reg_ip</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> REG_IP = createField("reg_ip", org.jooq.impl.SQLDataType.VARCHAR.length(64).defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_users.original_avatar</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> ORIGINAL_AVATAR = createField("original_avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_users.reg_city_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> REG_CITY_ID = createField("reg_city_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_users.reg_channel_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.Long> REG_CHANNEL_ID = createField("reg_channel_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_users</code> table reference

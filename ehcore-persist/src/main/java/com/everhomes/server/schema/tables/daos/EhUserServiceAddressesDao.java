@@ -62,17 +62,24 @@ public class EhUserServiceAddressesDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
-	 * Fetch records that have <code>create_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByCreateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CREATE_TIME, values);
-	}
-
-	/**
 	 * Fetch records that have <code>contact_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByContactType(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CONTACT_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByContactToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CONTACT_TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByContactName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CONTACT_NAME, values);
 	}
 
 	/**
@@ -87,6 +94,13 @@ public class EhUserServiceAddressesDao extends org.jooq.impl.DAOImpl<com.everhom
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByCreatorUid(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CREATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CREATE_TIME, values);
 	}
 
 	/**
@@ -108,19 +122,5 @@ public class EhUserServiceAddressesDao extends org.jooq.impl.DAOImpl<com.everhom
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.DELETE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>contact_token IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByContactToken(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CONTACT_TOKEN, values);
-	}
-
-	/**
-	 * Fetch records that have <code>contact_name IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses> fetchByContactName(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserServiceAddresses.EH_USER_SERVICE_ADDRESSES.CONTACT_NAME, values);
 	}
 }

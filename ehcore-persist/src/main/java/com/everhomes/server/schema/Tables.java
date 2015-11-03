@@ -412,8 +412,20 @@ public class Tables {
 	 * The table ehcore.eh_punch_workday
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchWorkday EH_PUNCH_WORKDAY = com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY;
+ 
 
 	/**
+	 * The table ehcore.eh_push_messages
+	 */
+	public static final com.everhomes.server.schema.tables.EhPushMessages EH_PUSH_MESSAGES = com.everhomes.server.schema.tables.EhPushMessages.EH_PUSH_MESSAGES;
+
+	/**
+	 * The table ehcore.eh_push_message_results
+	 */
+	public static final com.everhomes.server.schema.tables.EhPushMessageResults EH_PUSH_MESSAGE_RESULTS = com.everhomes.server.schema.tables.EhPushMessageResults.EH_PUSH_MESSAGE_RESULTS;
+
+	/**
+ 
 	 * The table ehcore.eh_qrcodes
 	 */
 	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;

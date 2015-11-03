@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = 1692912129;
+	private static final long serialVersionUID = -1328950655;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bills</code>
@@ -117,14 +117,14 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> PAID_MONEY = createField("paid_money", org.jooq.impl.SQLDataType.DOUBLE, this, "already paid money ");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> VISIBLE_FLAG = createField("visible_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0:visible 1:unvisible");
-
-	/**
 	 * The column <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail");
+
+	/**
+	 * The column <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Byte> VISIBLE_FLAG = createField("visible_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0:visible 1:unvisible");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
