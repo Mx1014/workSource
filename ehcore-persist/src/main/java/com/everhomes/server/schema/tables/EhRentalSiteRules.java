@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = 30619477;
+	private static final long serialVersionUID = -179780471;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -32,9 +32,9 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.  enterprise  community id
+	 * The column <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, " enterprise  community id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.site_type</code>.
@@ -47,9 +47,14 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "rental_site id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min  1-as day
+	 * The column <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min  1-as day");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min  1-as half day 2-as day");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am  1:pm
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> AMORPM = createField("amorpm", org.jooq.impl.SQLDataType.TINYINT, this, "0:am  1:pm");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.begin_time</code>.

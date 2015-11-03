@@ -16,10 +16,12 @@ import com.everhomes.util.StringHelper;
  * <li>endTime：结束时间(hour)</li>
  * <li>counts：场所数量</li> 
  * <li>unit：场所单位:1or0.5</li> 
- * <li>workdayPrice：场所数量</li> 
- * <li>weekendPrice：场所数量</li> 
- * <li>price：场所数量</li> 
- * <li>price：场所数量</li> 
+ * <li>workdayPrice：平日价格</li> 
+ * <li>weekendPrice：周末价格</li> 
+ * <li>workdayAMPrice：平日早上价格</li> 
+ * <li>weekendAMPrice：周末早上价格</li> 
+ * <li>workdayPMPrice：平日下午价格</li> 
+ * <li>weekendPMPrice：周末下午价格</li>  
  * <li>ruleDate：规则日期</li> 
  * <li>loopType：循环方式 参考{@link com.everhomes.techpark.rental.LoopType} </li> 
  * <li>Status：状态 参考{@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 

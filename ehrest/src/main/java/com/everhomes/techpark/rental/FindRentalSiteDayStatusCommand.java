@@ -5,12 +5,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>某日某场所预定状态
  * <li>rentalSiteId：场所id</li>
+ * <li>rentalType： time(0),halfday(1){@link com.everhomes.techpark.rental.RentalType} </li> 
  * <li>ruleDate：日期</li> 
  * </ul>
  */
 public class FindRentalSiteDayStatusCommand {
 	private Long enterpriseCommunityId;
-	private String siteType; 
+	private String siteType;
+	private Byte rentalType;
 	private Long ruleDate;
 	
 	@Override
@@ -48,5 +50,17 @@ public class FindRentalSiteDayStatusCommand {
 
 	public void setRuleDate(Long ruleDate) {
 		this.ruleDate = ruleDate;
+	}
+
+
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
 	}
 }

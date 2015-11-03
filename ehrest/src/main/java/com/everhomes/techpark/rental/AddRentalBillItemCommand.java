@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
  * <li>invoiceFlag：要不要发票，0 要 1 不要 参考
  * {@link com.everhomes.techpark.rental.InvoiceFlag}</li>
  * <li>rentalcount：预定场所数量</li>
- * <li>rentalItems：预定商品的json字符串</li>
+ * <li>rentalItems：预定商品</li>
+ * <li>rentalAttanchments：预定附件，如车牌号，文字信息等</li>
  * </ul>
  */
 public class AddRentalBillItemCommand {
@@ -36,6 +37,9 @@ public class AddRentalBillItemCommand {
 	private Long rentalBillId; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
+	@ItemType(String.class)
+	private List<String> rentalAttachments;
+	private Byte attachmentType;
 
 	@Override
 	public String toString() {
@@ -92,7 +96,22 @@ public class AddRentalBillItemCommand {
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
 	}
- 
+
+	public List<String> getRentalAttachments() {
+		return rentalAttachments;
+	}
+
+	public void setRentalAttachments(List<String> rentalAttachments) {
+		this.rentalAttachments = rentalAttachments;
+	}
+
+	public Byte getAttachmentType() {
+		return attachmentType;
+	}
+
+	public void setAttachmentType(Byte attachmentType) {
+		this.attachmentType = attachmentType;
+	} 
  
  
  

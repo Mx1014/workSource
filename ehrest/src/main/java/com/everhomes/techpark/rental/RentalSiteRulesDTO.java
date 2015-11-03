@@ -5,6 +5,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：id</li>
  * <li>rentalSiteId：场所id</li> 
+ * <li>rentalType： time(0),halfday(1){@link com.everhomes.techpark.rental.RentalType} </li> 
+ * <li>amorpm： am(0),pm(1){@link com.everhomes.techpark.rental.AmorpmFlag} </li> 
  * <li>beginTime：开始时间(MM:SS)</li>
  * <li>endTime：结束时间(MM:SS)</li>
  * <li>counts：场所数量</li> 
@@ -17,6 +19,8 @@ import com.everhomes.util.StringHelper;
 public class RentalSiteRulesDTO {
 	private Long id;
 	private Long rentalSiteId; 
+	private Byte rentalType;
+	private Byte amorpm;
 	private Long beginTime;
 	private Long endTime;
 	private Double counts;
@@ -140,5 +144,29 @@ public class RentalSiteRulesDTO {
 
 	public void setPrice(Double price) {
 		this.price = price;
+	}
+
+
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
+
+
+	public Byte getAmorpm() {
+		return amorpm;
+	}
+
+
+
+	public void setAmorpm(Byte amorpm) {
+		this.amorpm = amorpm;
 	}
 }

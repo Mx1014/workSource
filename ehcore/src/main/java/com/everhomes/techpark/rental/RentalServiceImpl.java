@@ -223,15 +223,21 @@ public class RentalServiceImpl implements RentalService {
 			List<RentalSiteRule> rentalSiteRules = rentalProvider
 					.findRentalSiteRules(rsDTO.getRentalSiteId(), dateSF
 							.format(new java.util.Date(cmd.getRuleDate())),
-							beginTime);
+							beginTime, cmd.getRentalType());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalSiteRule rsr : rentalSiteRules) {
 					RentalSiteRulesDTO dto = new RentalSiteRulesDTO();
 					dto.setId(rsr.getId());
 					dto.setRentalSiteId(rsr.getRentalSiteId());
-					dto.setBeginTime(rsr.getBeginTime().getTime());
-					dto.setEndTime(rsr.getEndTime().getTime());
+					dto.setRentalType(rsr.getRentalType());
+					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+						dto.setBeginTime(rsr.getBeginTime().getTime());
+						dto.setEndTime(rsr.getEndTime().getTime());
+					} else if (dto.getRentalType().equals(
+							RentalType.HALFDAY.getCode())) {
+						dto.setAmorpm(rsr.getAmorpm());
+					}
 					dto.setUnit(rsr.getUnit());
 					dto.setPrice(rsr.getPrice());
 					dto.setRuleDate(rsr.getSiteRentalDate().getTime());
@@ -373,7 +379,7 @@ public class RentalServiceImpl implements RentalService {
 		FindRentalSiteRulesCommandResponse response = new FindRentalSiteRulesCommandResponse();
 		response.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
 		List<RentalSiteRule> rsrs = rentalProvider.findRentalSiteRules(
-				cmd.getRentalSiteId(), cmd.getRuleDate(), null);
+				cmd.getRentalSiteId(), cmd.getRuleDate(), null, null);
 		// for (RentalSiteRule rsr : rsrs) {
 		// RentalSiteRulesDTO dto = new RentalSiteRulesDTO();
 		// dto.setId(rsr.getId());
@@ -693,7 +699,7 @@ public class RentalServiceImpl implements RentalService {
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (choosenInts.contains(weekday)) {
-				
+
 				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
 						rsr.setEnterpriseCommunityId(cmd
@@ -734,15 +740,60 @@ public class RentalServiceImpl implements RentalService {
 
 					}
 				}
-				// TODO: 按半日预定
-				else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode())){
-					
+				// 按半日预定
+				else if (cmd.getRentalType().equals(
+						RentalType.HALFDAY.getCode())) {
+					rsr.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+					rsr.setSiteType(cmd.getSiteType());
+					rsr.setRentalSiteId(cmd.getRentalSiteId());
+					rsr.setRentalType(cmd.getRentalType());
+					rsr.setCounts(cmd.getCounts());
+					rsr.setUnit(cmd.getUnit());
+					rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
+							.getTime())));
+					rsr.setStatus(cmd.getStatus());
+					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+							.getTime()));
+					rsr.setCreatorUid(userId);
+
+					if (weekday == 1 || weekday == 7) {
+						rsr.setPrice(cmd.getWeekendAMPrice());
+						rsr.setAmorpm(AmorpmFlag.AM.getCode());
+						rentalProvider.createRentalSiteRule(rsr);
+						rsr.setPrice(cmd.getWeekendPMPrice());
+						rsr.setAmorpm(AmorpmFlag.PM.getCode());
+						rentalProvider.createRentalSiteRule(rsr);
+					} else {
+						rsr.setPrice(cmd.getWorkdayAMPrice());
+						rsr.setAmorpm(AmorpmFlag.AM.getCode());
+						rentalProvider.createRentalSiteRule(rsr);
+						rsr.setPrice(cmd.getWorkdayPMPrice());
+						rsr.setAmorpm(AmorpmFlag.PM.getCode());
+						rentalProvider.createRentalSiteRule(rsr);
+					}
 				}
-				// TODO: 按日预定
-				else if (cmd.getRentalType().equals(RentalType.DAY.getCode())){
-					
+				// 按日预定
+				else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
+					rsr.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+					rsr.setSiteType(cmd.getSiteType());
+					rsr.setRentalSiteId(cmd.getRentalSiteId());
+					rsr.setRentalType(cmd.getRentalType());
+					rsr.setCounts(cmd.getCounts());
+					rsr.setUnit(cmd.getUnit());
+					if (weekday == 1 || weekday == 7) {
+						rsr.setPrice(cmd.getWeekendPrice());
+					} else {
+						rsr.setPrice(cmd.getWorkdayPrice());
+					}
+					rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
+							.getTime())));
+					rsr.setStatus(cmd.getStatus());
+					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+							.getTime()));
+					rsr.setCreatorUid(userId);
+					rentalProvider.createRentalSiteRule(rsr);
 				}
-				
+
 			}
 			start.add(Calendar.DAY_OF_MONTH, 1);
 		}
@@ -863,7 +914,6 @@ public class RentalServiceImpl implements RentalService {
 			for (SiteItemDTO siDto : cmd.getRentalItems()) {
 				RentalItemsBill rib = new RentalItemsBill();
 				rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
-
 				rib.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
 				rib.setSiteType(cmd.getSiteType());
 				rib.setRentalSiteItemId(siDto.getId());
@@ -889,8 +939,33 @@ public class RentalServiceImpl implements RentalService {
 				response.setAmount(bill.getPayTotalMoney()
 						- bill.getPaidMoney());
 			}
-			// TODO: 生成订单
+
 		}
+		if (null != cmd.getAttachmentType()) {
+			RentalBillAttachment rba = new RentalBillAttachment();
+			rba.setRentalBillId(cmd.getRentalBillId());
+			rba.setEnterpriseCommunityId(cmd.getEnterpriseCommunityId());
+			rba.setSiteType(cmd.getSiteType());
+
+			rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			rba.setCreatorUid(userId);
+			rba.setAttachmentType(cmd.getAttachmentType());
+			if (cmd.getAttachmentType().equals(AttachmentType.STRING.getCode())) {
+				if (null != cmd.getRentalAttachments()
+						&& cmd.getRentalAttachments().size() > 0) {
+					for (String attachment : cmd.getRentalAttachments()) {
+
+						rba.setContent(attachment);
+						rentalProvider.createRentalBillAttachment(rba);
+					}
+				}
+			} else if (cmd.getAttachmentType().equals(
+					AttachmentType.EMAIL.getCode())) {
+			} else {
+			}
+		}
+		// TODO: 生成订单
 		return response;
 	}
 

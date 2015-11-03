@@ -76,6 +76,13 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>amorpm IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByAmorpm(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.AMORPM, values);
+	}
+
+	/**
 	 * Fetch records that have <code>begin_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByBeginTime(java.sql.Timestamp... values) {
