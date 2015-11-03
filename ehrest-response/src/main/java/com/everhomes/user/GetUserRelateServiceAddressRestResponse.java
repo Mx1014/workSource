@@ -1,24 +1,24 @@
 // @formatter:off
-// generated at 2015-10-30 14:21:35
+// generated at 2015-11-03 16:20:54
 package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.openapi.UserServiceAddressDTO;
+import com.everhomes.address.AddressDTO;
 
 public class GetUserRelateServiceAddressRestResponse extends RestResponseBase {
 
-    private List<UserServiceAddressDTO> response;
+    private List<AddressDTO> response;
 
     public GetUserRelateServiceAddressRestResponse () {
     }
 
-    public List<UserServiceAddressDTO> getResponse() {
+    public List<AddressDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(List<UserServiceAddressDTO> response) {
+    public void setResponse(List<AddressDTO> response) {
         this.response = response;
     }
 }

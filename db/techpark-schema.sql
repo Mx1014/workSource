@@ -256,7 +256,8 @@ CREATE TABLE `eh_rental_site_rules`(
   `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
-  `rental_type` TINYINT(4) COMMENT '0: as hour:min  1-as day',
+  `rental_type` tinyint(4) COMMENT '0: as hour:min  1-as half day 2-as day',
+  `amorpm` tinyint(4)  COMMENT '0:am  1:pm',
   `begin_time` DATETIME,
   `end_time` DATETIME,
   `counts` DOUBLE  COMMENT 'site count',
@@ -303,6 +304,25 @@ CREATE TABLE `eh_rental_bills`(
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS  `eh_rental_bill_attachments`;
+
+CREATE TABLE `eh_rental_bill_attachments`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type`  VARCHAR(128) ,
+  `rental_bill_id` BIGINT ,
+  `attachment_type` TINYINT COMMENT '0:String 1:email 2:attachment file',  
+  `content`  VARCHAR(500) ,
+  `file_path` VARCHAR(500),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
+
 
 DROP TABLE IF EXISTS  `eh_rental_sites_bills`;
 
