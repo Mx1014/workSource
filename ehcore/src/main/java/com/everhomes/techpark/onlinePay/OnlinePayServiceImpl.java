@@ -31,18 +31,18 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		
 		//fail
 		if(cmd.getPayStatus().toLowerCase().equals("fail"))
-			this.onlinePayPmBillFail(cmd);
+			this.onlinePayBillFail(cmd);
 		//success
 		if(cmd.getPayStatus().toLowerCase().equals("success"))
-			this.onlinePayPmBillSuccess(cmd);
+			this.onlinePayBillSuccess(cmd);
 
 		return null;
 	}
 	
-	private RechargeInfo onlinePayPmBillFail(OnlinePayBillCommand cmd) {
+	private RechargeInfo onlinePayBillFail(OnlinePayBillCommand cmd) {
 		
 		if(LOGGER.isDebugEnabled())
-			LOGGER.error("onlinePayPmBillFail");
+			LOGGER.error("onlinePayBillFail");
 		this.checkOrderNoIsNull(cmd.getOrderNo());
 		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
 		
@@ -55,10 +55,10 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		return order;
 	}
 	
-	private RechargeInfo onlinePayPmBillSuccess(OnlinePayBillCommand cmd) {
+	private RechargeInfo onlinePayBillSuccess(OnlinePayBillCommand cmd) {
 		
 		if(LOGGER.isDebugEnabled())
-			LOGGER.error("onlinePayPmBillSuccess");
+			LOGGER.error("onlinePayBillSuccess");
 		this.checkOrderNoIsNull(cmd.getOrderNo());
 		this.checkVendorTypeIsNull(cmd.getVendorType());
 		this.checkPayAmountIsNull(cmd.getPayAmount());

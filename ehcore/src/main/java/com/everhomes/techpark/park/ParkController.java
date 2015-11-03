@@ -49,7 +49,7 @@ public class ParkController extends ControllerBase{
 	@RestReturn(value = RechargeSuccessResponse.class)
 	public RestResponse rechargeResult(RechargeResultSearchCommand cmd) {
 		
-		RechargeSuccessResponse result = parkService.getRechargeStatus(cmd);
+		RechargeSuccessResponse result = parkService.getRechargeStatus(cmd.getBillId());
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -62,7 +62,7 @@ public class ParkController extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("listRechargeRecord")
-	@RestReturn(value = RechargeRecordList.class, collection = true)
+	@RestReturn(value = RechargeRecordList.class)
 	public RestResponse listRechargeRecord(RechargeRecordListCommand cmd){
 		
 		RechargeRecordList result = parkService.listRechargeRecord(cmd);
@@ -112,10 +112,10 @@ public class ParkController extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("refreshParkingSystem")
-	@RestReturn(value = RefreshParkingSystemResponse.class)
+	@RestReturn(value = RechargeSuccessResponse.class)
 	public RestResponse refreshParkingSystem(OnlinePayBillCommand cmd) {
 		
-		RefreshParkingSystemResponse refresh = parkService.refreshParkingSystem(cmd);
+		RechargeSuccessResponse refresh = parkService.refreshParkingSystem(cmd);
 		RestResponse response = new RestResponse(refresh);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -131,7 +131,7 @@ public class ParkController extends ControllerBase{
 	@RestReturn(value = String.class)
 	public RestResponse updateRechargeOrder(RechargeResultSearchCommand cmd) {
 		
-		parkService.updateRechargeOrder(cmd);
+		parkService.updateRechargeOrder(cmd.getBillId());
 		
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -149,6 +149,22 @@ public class ParkController extends ControllerBase{
 		
 		Set<String> plates = parkService.getRechargedPlate();
 		RestResponse response = new RestResponse(plates);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
+	/**
+	 * <b>URL: /techpark/verifyRechargedPlate</b>
+	 * @return
+	 */
+	@RequestMapping("verifyRechargedPlate")
+	@RestReturn(value = String.class)
+	public RestResponse verifyRechargedPlate(PlateNumberCommand cmd) {
+		
+		PlateInfo info = parkService.verifyRechargedPlate(cmd);
+		RestResponse response = new RestResponse(info);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

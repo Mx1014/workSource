@@ -9,6 +9,16 @@ public class PlateInfo {
 	private String ownerName;
 	
 	private Timestamp validityPeriod;
+	
+	private String isValid;
+
+	public String getIsValid() {
+		return isValid;
+	}
+
+	public void setIsValid(String isValid) {
+		this.isValid = isValid;
+	}
 
 	public String getPlateNumber() {
 		return plateNumber;

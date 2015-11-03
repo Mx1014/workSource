@@ -22,6 +22,19 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -32,6 +45,10 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.pm.pay.BaseVo;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.organization.pm.pay.RestUtil;
+import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.techpark.onlinePay.OnlinePayProvider;
@@ -213,9 +230,9 @@ public class ParkServiceImpl implements ParkService {
 	}
 
 	@Override
-	public RechargeSuccessResponse getRechargeStatus(RechargeResultSearchCommand cmd) {
+	public RechargeSuccessResponse getRechargeStatus(Long billId) {
 		
-		RechargeInfo rechargeInfo = onlinePayProvider.findRechargeInfoByOrderId(cmd.getBillId());
+		RechargeInfo rechargeInfo = onlinePayProvider.findRechargeInfoByOrderId(billId);
 		
 		if(rechargeInfo == null) {
 			LOGGER.error("the bill id is not in list.");
@@ -271,13 +288,16 @@ public class ParkServiceImpl implements ParkService {
 
 	@Override
 	public String applyParkingCard(PlateNumberCommand cmd) {
+		
+		
 		if(cmd.getPlateNumber() == null || cmd.getPlateNumber().length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the length of plateNumber is wrong.");
 		}
+		PlateInfo info = verifyRechargedPlate(cmd);
 		
-		if("true".equals(cmd.getIsvalid())) {
+		if(info != null && "true".equals(info.getIsValid())){
 			LOGGER.error("the plateNumber is already have a card.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the plateNumber is already have a card.");
@@ -477,8 +497,8 @@ public class ParkServiceImpl implements ParkService {
 	}
 
 	@Override
-	public void updateRechargeOrder(RechargeResultSearchCommand cmd) {
-		RechargeInfo order = onlinePayProvider.findRechargeInfoByOrderId(cmd.getBillId());
+	public void updateRechargeOrder(Long billId) {
+		RechargeInfo order = onlinePayProvider.findRechargeInfoByOrderId(billId);
 		order.setRechargeStatus(RechargeStatus.SUCCESS.getCode());
 		onlinePayProvider.updateRehargeInfo(order);
 	}
@@ -489,21 +509,56 @@ public class ParkServiceImpl implements ParkService {
 		String str = sdf.format(time);
 		return str;
 	}
+	@SuppressWarnings("finally")
 	@Override
-	public RefreshParkingSystemResponse refreshParkingSystem(
+	public RechargeSuccessResponse refreshParkingSystem(
 			OnlinePayBillCommand cmd) {
 
 		RechargeInfo info = onlinePayService.onlinePayBill(cmd);
-		RefreshParkingSystemResponse response = new RefreshParkingSystemResponse();
-		response.setCarNumber(info.getPlateNumber());
-		response.setCost(info.getRechargeAmount()+"00");
-		response.setFlag("2"); //停车场系统接口的传入参数，2表示是车牌号
-		response.setPayTime(info.getRechargeTime().toString());
+//		RefreshParkingSystemResponse response = new RefreshParkingSystemResponse();
+		String carNumber = info.getPlateNumber();
+		String cost = info.getRechargeAmount()+"00";
+		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
+		String payTime = info.getRechargeTime().toString();
 //		response.setSign(sign);
-		response.setValidEnd(timestampToStr(info.getOldValidityperiod()));
-		response.setValidStart(timestampToStr(info.getNewValidityperiod()));
+		String validEnd = timestampToStr(info.getOldValidityperiod());
+		String validStart = timestampToStr(info.getNewValidityperiod());
 		
-		return response;
+		String restUrl = this.configurationProvider.getValue("parking.system.url", "http://58.60.175.77:8066/zl_web/Service1.asmx/");
+		restUrl = restUrl + "CardPayMoney";
+
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("refreshParkingSystem-restUrl"+restUrl);
+		
+		try {
+			BaseVo<Map> bvo=new BaseVo<Map>();
+			Map<String,String> map=new HashMap<String,String>();
+			map.put("carNumber", carNumber);
+			map.put("flag", flag);
+			map.put("cost", cost);
+			map.put("validStart", validStart);
+			map.put("validEnd", validEnd);
+			map.put("payTime", payTime);
+			bvo.setBody(map);
+			String json=RestUtil.restWan(GsonUtil.toJson(bvo), restUrl);
+			
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("refreshParkingSystem,json="+json);
+			
+			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+			this.checkResultHolderIsNull(resultHolder,carNumber);
+			
+			if(resultHolder.isSuccess()){
+				updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+			}
+		} catch (Exception e) {
+			LOGGER.error("refreshParkingSystem-error.orderNo="+cmd.getOrderNo()+".exception message="+e.getMessage());
+		}
+		finally{
+			RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
+			return rechargeResponse;
+		}
+		
 	}
 
 	@Override
@@ -511,5 +566,83 @@ public class ParkServiceImpl implements ParkService {
 		User user = UserContext.current().getUser();
 		Set<String> plateNumber = parkProvider.getRechargedPlate(user.getId());
 		return plateNumber;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes"})
+	@Override
+	public PlateInfo verifyRechargedPlate(PlateNumberCommand cmd) {
+		String restUrl = this.configurationProvider.getValue("parking.system.url", "http://58.60.175.77:8066/zl_web/Service1.asmx/");
+		restUrl = restUrl + "GetCardInfo";
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.info("verifyRechargedPlate-restUrl"+restUrl);
+		
+		try {
+			BaseVo<Map> bvo=new BaseVo<Map>();
+			Map<String,String> map=new HashMap<String,String>();
+			map.put("carNumber", cmd.getPlateNumber());
+			map.put("flag", "2");
+			bvo.setBody(map);
+			String json=RestUtil.restWan("carNumber=" + cmd.getPlateNumber() + "&flag=2", restUrl);
+
+			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+			this.checkResultHolderIsNull(resultHolder,cmd.getPlateNumber());
+
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("resultHolder="+resultHolder.isSuccess());
+
+			if(resultHolder.isSuccess()){
+				Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+				String validStatus = (String) data.get("valid");
+				this.checkValidStatusIsNull(validStatus,cmd.getPlateNumber());
+
+				if(LOGGER.isDebugEnabled())
+					LOGGER.error("validStatus="+validStatus);
+
+				if(validStatus.equals("false")){
+					PlateInfo command = new PlateInfo();
+					command.setIsValid(validStatus);
+					
+					return command;
+				}
+				else if(validStatus.equals("true")){
+					String ownerName = (String) data.get("userName");
+					String plateNumber = (String) data.get("carNumber");
+					
+					String validEnd = (String) data.get("validEnd");
+					Timestamp validityPeriod = strToTimestamp(validEnd);
+
+					PlateInfo command = new PlateInfo();
+					command.setOwnerName(ownerName);
+					command.setPlateNumber(plateNumber);
+					command.setValidityPeriod(validityPeriod);
+					command.setIsValid(validStatus);
+
+					if(LOGGER.isDebugEnabled())
+						LOGGER.error("successcommand="+command.toString());
+
+					return command;
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("verifyRechargedPlate-error.plateNo="+cmd.getPlateNumber()+".exception message="+e.getMessage());
+		}
+		return null;
+	}
+	
+	private void checkResultHolderIsNull(ResultHolder resultHolder,String plateNo) {
+		if(resultHolder == null){
+			LOGGER.error("remote search pay order return null.plateNo="+plateNo);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"remote search pay order return null.");
+		}
+	}
+	
+	private void checkValidStatusIsNull(String validStatus,String plateNo) {
+		if(validStatus == null){
+			LOGGER.error("validStatus is null.plateNo="+plateNo);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"validStatus is null.");
+		}
 	}
 }

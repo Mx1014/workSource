@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -13,7 +14,7 @@ import com.everhomes.techpark.park.RechargeInfo;
 @RestDoc(value = "OnlinePay controller", site = "ehcore")
 @RestController
 @RequestMapping("/techpark/onlinePay")
-public class OnlinePayController {
+public class OnlinePayController  extends ControllerBase{
 
 	@Autowired
 	private OnlinePayService onlinePay;
