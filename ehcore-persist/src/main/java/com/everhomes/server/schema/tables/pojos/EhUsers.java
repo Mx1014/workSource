@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1397618595;
+	private static final long serialVersionUID = 1833071881;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;

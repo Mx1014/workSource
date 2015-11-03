@@ -542,16 +542,16 @@ public class PunchServiceImpl implements PunchService {
 		Calendar logCalendar = Calendar.getInstance();
 		Calendar maxCalendar = Calendar.getInstance();
 		Calendar minCalendar = Calendar.getInstance();
-		maxCalendar.setTime(punchLogs.get(0).getPunchTime());
-		minCalendar.setTime(punchLogs.get(0).getPunchTime());
+		maxCalendar.setTime((Date) punchLogs.get(0).getPunchTime().clone());
+		minCalendar.setTime((Date) punchLogs.get(0).getPunchTime().clone());
 		if (punchLogs.size() != 1) {
 
 			for (PunchLog punchlog : punchLogs) {
-				logCalendar.setTime(punchlog.getPunchTime());
+				logCalendar.setTime((Date) punchlog.getPunchTime().clone());
 				if (logCalendar.before(minCalendar))
-					minCalendar = logCalendar;
+					minCalendar.setTime( logCalendar.getTime())  ;
 				if (logCalendar.after(maxCalendar))
-					maxCalendar = logCalendar;
+					maxCalendar.setTime( logCalendar.getTime())  ;
 
 			}
 		}
