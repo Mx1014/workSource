@@ -102,11 +102,4 @@ public class EhCategoriesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCategories> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.DELETE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>logo_uri IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCategories> fetchByLogoUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.LOGO_URI, values);
-	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1988343387;
+	private static final long serialVersionUID = 533099869;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -266,30 +266,30 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
-	 */
-	public void setVisibleFlag(java.lang.Byte value) {
-		setValue(18, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
-	 */
-	public java.lang.Byte getVisibleFlag() {
-		return (java.lang.Byte) getValue(18);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(19, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
 	 */
 	public java.lang.Byte getStatus() {
+		return (java.lang.Byte) getValue(18);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
+	 */
+	public void setVisibleFlag(java.lang.Byte value) {
+		setValue(19, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
+	 */
+	public java.lang.Byte getVisibleFlag() {
 		return (java.lang.Byte) getValue(19);
 	}
 
@@ -389,7 +389,7 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalBillsRecord
 	 */
-	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Double payTotalMoney, java.lang.Double siteTotalMoney, java.lang.Double reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Double paidMoney, java.lang.Byte visibleFlag, java.lang.Byte status, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Double payTotalMoney, java.lang.Double siteTotalMoney, java.lang.Double reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Double paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS);
 
 		setValue(0, id);
@@ -410,8 +410,8 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(15, payTime);
 		setValue(16, cancelTime);
 		setValue(17, paidMoney);
-		setValue(18, visibleFlag);
-		setValue(19, status);
+		setValue(18, status);
+		setValue(19, visibleFlag);
 		setValue(20, invoiceFlag);
 		setValue(21, creatorUid);
 		setValue(22, createTime);

@@ -175,6 +175,59 @@ CREATE TABLE `eh_enterprise_community_map` (
 # reuse eh_communities for eh_enterprise_communities
 ALTER TABLE `ehcore`.`eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0;
 
+#
+# member of eh_communities partition
+#
+DROP TABLE IF EXISTS `eh_buildings`;
+CREATE TABLE `eh_buildings` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refering to eh_communities',
+    `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'building name',
+	`alias_name` VARCHAR(128),
+	`manager_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the manager of the building',
+	`contact` VARCHAR(128) COMMENT 'the phone number',
+    `address` VARCHAR(1024),
+    `area_size` DOUBLE,
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(32),
+    `description` TEXT,
+    `poster_uri` VARCHAR(128),
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: confirming, 2: active',
+	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'uid of the user who process the address',
+    `operate_time` DATETIME,
+    `creator_uid` BIGINT COMMENT 'uid of the user who has suggested address, NULL if it is system created',
+    `create_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    
+	UNIQUE `u_eh_community_id_name`(`community_id`, `name`),
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of forum post sharding group
+#
+DROP TABLE IF EXISTS `eh_building_attachments`;
+CREATE TABLE `eh_building_attachments` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `building_id` BIGINT NOT NULL DEFAULT 0,
+    `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+    `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+    `creator_uid` BIGINT NOT NULL,
+    `create_time` DATETIME NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 # TODO move to somewhare?
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> implements org.jooq.Record16<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Byte, java.sql.Timestamp, java.sql.Timestamp, java.lang.Double, java.lang.Double, java.lang.Double, java.sql.Date, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1551702730;
+	private static final long serialVersionUID = -1344515626;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.id</code>. id
@@ -28,14 +28,14 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.
+	 * Setter for <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.  enterprise  community id
 	 */
 	public void setEnterpriseCommunityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.
+	 * Getter for <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.  enterprise  community id
 	 */
 	public java.lang.Long getEnterpriseCommunityId() {
 		return (java.lang.Long) getValue(1);

@@ -11,9 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-
-	private static final long serialVersionUID = -904187815;
-
+	private static final long serialVersionUID = -1514734023;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -83,7 +81,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS,
 			com.everhomes.server.schema.tables.EhForumVisibleScopes.EH_FORUM_VISIBLE_SCOPES,
 			com.everhomes.server.schema.tables.EhGroups.EH_GROUPS,
-			com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS,
 			com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS,
 			com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS,
 			com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES,
@@ -107,7 +104,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhOrganizationOrders.EH_ORGANIZATION_ORDERS,
 			com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS,
 			com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS,
-			com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD,
 			com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
 			com.everhomes.server.schema.tables.EhPollItems.EH_POLL_ITEMS,
@@ -116,7 +112,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS,
 			com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS,
 			com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS,
-			com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS,
 			com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES,
 			com.everhomes.server.schema.tables.EhPunchWorkday.EH_PUNCH_WORKDAY,
 			com.everhomes.server.schema.tables.EhPushMessages.EH_PUSH_MESSAGES,
@@ -130,7 +125,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS,
 			com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES,
 			com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES,
-			com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS,
 			com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS,
 			com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES,
 			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,
