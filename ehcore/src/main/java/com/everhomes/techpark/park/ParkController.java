@@ -74,7 +74,7 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/listParkingCharge</b>
+	 * <b>URL: /techpark/park/listParkingCharge</b>
 	 * list all parking charge rule
 	 * @return
 	 */
@@ -90,7 +90,7 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/applyParkingCard</b>
+	 * <b>URL: /techpark/park/applyParkingCard</b>
 	 * apply for parking card
 	 * @return
 	 */
@@ -107,7 +107,7 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/refreshParkingSystem</b>
+	 * <b>URL: /techpark/park/refreshParkingSystem</b>
 	 * pay order and return parameters the parking system need
 	 * @return
 	 */
@@ -123,7 +123,7 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/updateRechargeOrder</b>
+	 * <b>URL: /techpark/park/updateRechargeOrder</b>
 	 * update recharge info while refresh parking system success
 	 * @return
 	 */
@@ -140,7 +140,7 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/getRechargedPlate</b>
+	 * <b>URL: /techpark/park/getRechargedPlate</b>
 	 * @return
 	 */
 	@RequestMapping("getRechargedPlate")
@@ -156,7 +156,7 @@ public class ParkController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/verifyRechargedPlate</b>
+	 * <b>URL: /techpark/park/verifyRechargedPlate</b>
 	 * @return
 	 */
 	@RequestMapping("verifyRechargedPlate")

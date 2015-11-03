@@ -1,5 +1,6 @@
 package com.everhomes.techpark.park;
 
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.jws.soap.SOAPBinding;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -35,6 +40,22 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+import com.bosigao.cxf.GetCardInfo;
+import com.bosigao.cxf.Service1;
+import com.bosigao.cxf.Service1HttpPost;
+import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -94,6 +115,8 @@ public class ParkServiceImpl implements ParkService {
 	
 	@Autowired
 	private OnlinePayService onlinePayService;
+	
+	private static final QName SERVICE_NAME = new QName("http://tempuri.org/", "Service1");
 	
 	
 	@Override
@@ -292,20 +315,20 @@ public class ParkServiceImpl implements ParkService {
 		
 		if(cmd.getPlateNumber() == null || cmd.getPlateNumber().length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_LENGTH,
 					"the length of plateNumber is wrong.");
 		}
 		PlateInfo info = verifyRechargedPlate(cmd);
 		
 		if(info != null && "true".equals(info.getIsValid())){
 			LOGGER.error("the plateNumber is already have a card.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_EXIST,
 					"the plateNumber is already have a card.");
 		}
 		
 		if(parkProvider.isApplied(cmd.getPlateNumber())) {
 			LOGGER.error("the plateNumber is already applied.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_APPLIED,
 					"the plateNumber is already applied.");
 		}
 			
@@ -515,49 +538,31 @@ public class ParkServiceImpl implements ParkService {
 			OnlinePayBillCommand cmd) {
 
 		RechargeInfo info = onlinePayService.onlinePayBill(cmd);
-//		RefreshParkingSystemResponse response = new RefreshParkingSystemResponse();
 		String carNumber = info.getPlateNumber();
 		String cost = info.getRechargeAmount()+"00";
 		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 		String payTime = info.getRechargeTime().toString();
 //		response.setSign(sign);
-		String validEnd = timestampToStr(info.getOldValidityperiod());
-		String validStart = timestampToStr(info.getNewValidityperiod());
+		String validStart = timestampToStr(info.getOldValidityperiod());
+		String validEnd = timestampToStr(info.getNewValidityperiod());
 		
-		String restUrl = this.configurationProvider.getValue("parking.system.url", "http://58.60.175.77:8066/zl_web/Service1.asmx/");
-		restUrl = restUrl + "CardPayMoney";
-
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("refreshParkingSystem-restUrl"+restUrl);
+		URL wsdlURL = Service1.WSDL_LOCATION;
 		
-		try {
-			BaseVo<Map> bvo=new BaseVo<Map>();
-			Map<String,String> map=new HashMap<String,String>();
-			map.put("carNumber", carNumber);
-			map.put("flag", flag);
-			map.put("cost", cost);
-			map.put("validStart", validStart);
-			map.put("validEnd", validEnd);
-			map.put("payTime", payTime);
-			bvo.setBody(map);
-			String json=RestUtil.restWan(GsonUtil.toJson(bvo), restUrl);
-			
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("refreshParkingSystem,json="+json);
-			
-			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-			this.checkResultHolderIsNull(resultHolder,carNumber);
-			
-			if(resultHolder.isSuccess()){
-				updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
-			}
-		} catch (Exception e) {
-			LOGGER.error("refreshParkingSystem-error.orderNo="+cmd.getOrderNo()+".exception message="+e.getMessage());
+		Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+        Service1Soap port = ss.getService1Soap12();
+        LOGGER.info("refreshParkingSystem");
+        
+        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "");
+		
+		ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+		this.checkResultHolderIsNull(resultHolder,carNumber);
+		
+		if(resultHolder.isSuccess()){
+			updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
 		}
-		finally{
-			RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
-			return rechargeResponse;
-		}
+	
+		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
+		return rechargeResponse;
 		
 	}
 
@@ -571,61 +576,53 @@ public class ParkServiceImpl implements ParkService {
 	@SuppressWarnings({ "unchecked", "rawtypes"})
 	@Override
 	public PlateInfo verifyRechargedPlate(PlateNumberCommand cmd) {
-		String restUrl = this.configurationProvider.getValue("parking.system.url", "http://58.60.175.77:8066/zl_web/Service1.asmx/");
-		restUrl = restUrl + "GetCardInfo";
 		
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("verifyRechargedPlate-restUrl"+restUrl);
+		URL wsdlURL = Service1.WSDL_LOCATION;
 		
-		try {
-			BaseVo<Map> bvo=new BaseVo<Map>();
-			Map<String,String> map=new HashMap<String,String>();
-			map.put("carNumber", cmd.getPlateNumber());
-			map.put("flag", "2");
-			bvo.setBody(map);
-			String json=RestUtil.restWan("carNumber=" + cmd.getPlateNumber() + "&flag=2", restUrl);
+		Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+        Service1Soap port = ss.getService1Soap12();
+        LOGGER.info("verifyRechargedPlate");
+        String json = port.getCardInfo("", cmd.getPlateNumber(), "2", "");
+        
+        ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+        this.checkResultHolderIsNull(resultHolder,cmd.getPlateNumber());
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.error("resultHolder="+resultHolder.isSuccess());
 
-			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-			this.checkResultHolderIsNull(resultHolder,cmd.getPlateNumber());
+		if(resultHolder.isSuccess()){
+			Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+			Map<String,Object> card = (Map<String, Object>) data.get("card");
+			Boolean validStatus =  (Boolean) card.get("valid");
+			this.checkValidStatusIsNull(validStatus,cmd.getPlateNumber());
 
 			if(LOGGER.isDebugEnabled())
-				LOGGER.error("resultHolder="+resultHolder.isSuccess());
+				LOGGER.error("validStatus="+validStatus);
 
-			if(resultHolder.isSuccess()){
-				Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
-				String validStatus = (String) data.get("valid");
-				this.checkValidStatusIsNull(validStatus,cmd.getPlateNumber());
+			if(!validStatus){
+				PlateInfo command = new PlateInfo();
+				command.setIsValid("false");
+				
+				return command;
+			}
+			else if(validStatus){
+				String ownerName = (String) card.get("userName");
+				String plateNumber = (String) card.get("carNumber");
+				
+				String validEnd = (String) card.get("validEnd");
+				Timestamp validityPeriod = strToTimestamp(validEnd);
+
+				PlateInfo command = new PlateInfo();
+				command.setOwnerName(ownerName);
+				command.setPlateNumber(plateNumber);
+				command.setValidityPeriod(validityPeriod);
+				command.setIsValid("true");
 
 				if(LOGGER.isDebugEnabled())
-					LOGGER.error("validStatus="+validStatus);
+					LOGGER.error("successcommand="+command.toString());
 
-				if(validStatus.equals("false")){
-					PlateInfo command = new PlateInfo();
-					command.setIsValid(validStatus);
-					
-					return command;
-				}
-				else if(validStatus.equals("true")){
-					String ownerName = (String) data.get("userName");
-					String plateNumber = (String) data.get("carNumber");
-					
-					String validEnd = (String) data.get("validEnd");
-					Timestamp validityPeriod = strToTimestamp(validEnd);
-
-					PlateInfo command = new PlateInfo();
-					command.setOwnerName(ownerName);
-					command.setPlateNumber(plateNumber);
-					command.setValidityPeriod(validityPeriod);
-					command.setIsValid(validStatus);
-
-					if(LOGGER.isDebugEnabled())
-						LOGGER.error("successcommand="+command.toString());
-
-					return command;
-				}
+				return command;
 			}
-		} catch (Exception e) {
-			LOGGER.error("verifyRechargedPlate-error.plateNo="+cmd.getPlateNumber()+".exception message="+e.getMessage());
 		}
 		return null;
 	}
@@ -638,7 +635,7 @@ public class ParkServiceImpl implements ParkService {
 		}
 	}
 	
-	private void checkValidStatusIsNull(String validStatus,String plateNo) {
+	private void checkValidStatusIsNull(Boolean validStatus,String plateNo) {
 		if(validStatus == null){
 			LOGGER.error("validStatus is null.plateNo="+plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

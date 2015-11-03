@@ -29,14 +29,15 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 	@Override
 	public RechargeInfo onlinePayBill(OnlinePayBillCommand cmd) {
 		
+		RechargeInfo order = new RechargeInfo();
 		//fail
 		if(cmd.getPayStatus().toLowerCase().equals("fail"))
-			this.onlinePayBillFail(cmd);
+			order = this.onlinePayBillFail(cmd);
 		//success
 		if(cmd.getPayStatus().toLowerCase().equals("success"))
-			this.onlinePayBillSuccess(cmd);
+			order = this.onlinePayBillSuccess(cmd);
 
-		return null;
+		return order;
 	}
 	
 	private RechargeInfo onlinePayBillFail(OnlinePayBillCommand cmd) {
