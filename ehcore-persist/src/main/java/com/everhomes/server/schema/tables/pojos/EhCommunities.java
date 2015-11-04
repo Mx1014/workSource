@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -953778854;
+	private static final long serialVersionUID = 374198422;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -48,6 +48,8 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
 	private java.lang.Byte     communityType;
+	private java.lang.Long     defaultForumId;
+	private java.lang.Long     feedbackForumId;
 
 	public EhCommunities() {}
 
@@ -86,7 +88,9 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Byte     communityType
+		java.lang.Byte     communityType,
+		java.lang.Long     defaultForumId,
+		java.lang.Long     feedbackForumId
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -123,6 +127,8 @@ public class EhCommunities implements java.io.Serializable {
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
 		this.communityType = communityType;
+		this.defaultForumId = defaultForumId;
+		this.feedbackForumId = feedbackForumId;
 	}
 
 	public java.lang.Long getId() {
@@ -403,5 +409,21 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setCommunityType(java.lang.Byte communityType) {
 		this.communityType = communityType;
+	}
+
+	public java.lang.Long getDefaultForumId() {
+		return this.defaultForumId;
+	}
+
+	public void setDefaultForumId(java.lang.Long defaultForumId) {
+		this.defaultForumId = defaultForumId;
+	}
+
+	public java.lang.Long getFeedbackForumId() {
+		return this.feedbackForumId;
+	}
+
+	public void setFeedbackForumId(java.lang.Long feedbackForumId) {
+		this.feedbackForumId = feedbackForumId;
 	}
 }

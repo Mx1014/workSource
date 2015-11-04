@@ -173,7 +173,9 @@ CREATE TABLE `eh_enterprise_community_map` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 # reuse eh_communities for eh_enterprise_communities
-ALTER TABLE `ehcore`.`eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: residential, 1: commercial';
+ALTER TABLE `eh_communities` ADD COLUMN `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum';
+ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum';
 
 #
 # member of eh_communities partition

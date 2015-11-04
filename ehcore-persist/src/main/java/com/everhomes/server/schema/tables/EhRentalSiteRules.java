@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -179780471;
+	private static final long serialVersionUID = -271889638;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -32,9 +32,9 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.
+	 * The column <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.  enterprise  community id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, " enterprise  community id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.site_type</code>.

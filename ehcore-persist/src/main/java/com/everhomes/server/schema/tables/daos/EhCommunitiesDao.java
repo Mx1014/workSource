@@ -291,4 +291,18 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCommunityType(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.COMMUNITY_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>default_forum_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByDefaultForumId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.DEFAULT_FORUM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>feedback_forum_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByFeedbackForumId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.FEEDBACK_FORUM_ID, values);
+	}
 }
