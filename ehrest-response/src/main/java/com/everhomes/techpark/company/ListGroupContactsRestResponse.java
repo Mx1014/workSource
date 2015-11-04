@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-03 16:20:53
+// generated file: DO NOT EDIT
 package com.everhomes.techpark.company;
 
 import com.everhomes.rest.RestResponseBase;

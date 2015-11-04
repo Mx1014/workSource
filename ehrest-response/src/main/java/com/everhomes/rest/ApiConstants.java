@@ -1,9 +1,5 @@
 // @formatter:off
-// generated at 2015-11-03 16:20:54
-// generated at 2015-10-21 17:44:18
-// generated at 2015-10-26 15:50:45
-// generated at 2015-10-27 13:49:25
-// generated at 2015-10-27 15:48:23
+// generated at 2015-11-04 15:53:52
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -135,6 +131,7 @@ public interface ApiConstants {
     public static final String ADMIN_TECHPARK_PARK_ADDPARKINGCHARGE_URL = "/admin/techpark/park/addParkingCharge";
     public static final String ADMIN_TECHPARK_PARK_DELETEPARKINGCHARGE_URL = "/admin/techpark/park/deleteParkingCharge";
     public static final String ADMIN_TECHPARK_PARK_FETCHCARD_URL = "/admin/techpark/park/fetchCard";
+    public static final String ADMIN_TECHPARK_PARK_GETWAITINGDAYS_URL = "/admin/techpark/park/getWaitingDays";
     public static final String ADMIN_TECHPARK_PARK_OFFERCARD_URL = "/admin/techpark/park/offerCard";
     public static final String ADMIN_TECHPARK_PARK_SEARCHAPPLYCARDLIST_URL = "/admin/techpark/park/searchApplyCardList";
     public static final String ADMIN_TECHPARK_PARK_SEARCHRECHARGERECORDLIST_URL = "/admin/techpark/park/searchRechargeRecordList";
@@ -144,10 +141,14 @@ public interface ApiConstants {
     public static final String ADMIN_UPDATENAMESPACE_URL = "/admin/updateNamespace";
     public static final String ADMIN_UPDATEPERSISTSERVER_URL = "/admin/updatePersistServer";
     public static final String ADMIN_USER_GETUSERBYIDENTIFIER_URL = "/admin/user/getUserByIdentifier";
+    public static final String ADMIN_USER_IMPORTUSERDATA_URL = "/admin/user/importUserData";
+    public static final String ADMIN_USER_LISTINVITATEDUSER_URL = "/admin/user/listInvitatedUser";
     public static final String ADMIN_USER_LISTREGISTERUSERS_URL = "/admin/user/listRegisterUsers";
     public static final String ADMIN_USER_LISTUSERSWITHADDR_URL = "/admin/user/listUsersWithAddr";
     public static final String ADMIN_USER_LISTVERIFYCODE_URL = "/admin/user/listVerifyCode";
     public static final String ADMIN_USER_LISTVEST_URL = "/admin/user/listVest";
+    public static final String ADMIN_USER_SEARCHINVITATEDUSER_URL = "/admin/user/searchInvitatedUser";
+    public static final String ADMIN_USER_SEARCHUSERSWITHADDR_URL = "/admin/user/searchUsersWithAddr";
     public static final String APPKEY_ISTRUSTEDAPP_URL = "/appkey/isTrustedApp";
     public static final String APPKEY_ISVALIDAPPURLBINDING_URL = "/appkey/isValidAppUrlBinding";
     public static final String BANNER_CLICKBANNER_URL = "/banner/clickBanner";
@@ -160,7 +161,9 @@ public interface ApiConstants {
     public static final String BUSINESS_DELETEBUSINESS_URL = "/business/deleteBusiness";
     public static final String BUSINESS_FAVORITEBUSINESS_URL = "/business/favoriteBusiness";
     public static final String BUSINESS_FAVORITEBUSINESSES_URL = "/business/favoriteBusinesses";
+    public static final String BUSINESS_FINDBUSINESSBYID_URL = "/business/findBusinessById";
     public static final String BUSINESS_GETBUSINESSESBYCATEGORY_URL = "/business/getBusinessesByCategory";
+    public static final String BUSINESS_LISTBUSINESSBYKEYWORD_URL = "/business/listBusinessByKeyword";
     public static final String BUSINESS_UPDATEBUSINESS_URL = "/business/updateBusiness";
     public static final String BUSINESS_UPDATEBUSINESSDISTANCE_URL = "/business/updateBusinessDistance";
     public static final String CATEGORY_LISTACTIONCATEGORIES_URL = "/category/listActionCategories";
@@ -173,6 +176,7 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTINTERESTCATEGORIES_URL = "/category/listInterestCategories";
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
     public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
+    public static final String COMMUNITY_GET_URL = "/community/get";
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
@@ -369,7 +373,7 @@ public interface ApiConstants {
     public static final String PM_GETWEBTOKEN_URL = "/pm/getWebToken";
     public static final String PM_IMPORTPMADDRESSMAPPING_URL = "/pm/importPMAddressMapping";
     public static final String PM_IMPORTPMPROPERTYOWNERINFO_URL = "/pm/importPMPropertyOwnerInfo";
-    public static final String PM_IMPORTPMBILLS123_URL = "/pm/importPmBills123";
+    public static final String PM_IMPORTPMBILLS_URL = "/pm/importPmBills";
     public static final String PM_INSERTPMBILL_URL = "/pm/insertPmBill";
     public static final String PM_INSERTPMBILLS_URL = "/pm/insertPmBills";
     public static final String PM_LISTBILLTXBYADDRESSID_URL = "/pm/listBillTxByAddressId";
@@ -463,6 +467,7 @@ public interface ApiConstants {
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
     public static final String USER_APPAGREEMENTS_URL = "/user/appAgreements";
     public static final String USER_APPIDSTATUS_URL = "/user/appIdStatus";
+    public static final String USER_APPSERVICEACCESS_URL = "/user/appServiceAccess";
     public static final String USER_APPVERSION_URL = "/user/appversion";
     public static final String USER_ASSUMEPORTALROLE_URL = "/user/assumePortalRole";
     public static final String USER_CANCELFAVORITE_URL = "/user/cancelFavorite";
