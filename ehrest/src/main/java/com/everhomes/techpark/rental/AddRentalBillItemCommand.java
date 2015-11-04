@@ -30,7 +30,7 @@ public class AddRentalBillItemCommand {
 	@NotNull
 	private Long rentalSiteId;
 	@NotNull
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	@NotNull
 	private Byte invoiceFlag;
 	@NotNull
@@ -66,15 +66,7 @@ public class AddRentalBillItemCommand {
 		this.siteType = siteType;
 	}
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
- 
-
+	 
 	public Long getRentalBillId() {
 		return rentalBillId;
 	}
@@ -113,6 +105,14 @@ public class AddRentalBillItemCommand {
 
 	public void setAttachmentType(Byte attachmentType) {
 		this.attachmentType = attachmentType;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	} 
  
  

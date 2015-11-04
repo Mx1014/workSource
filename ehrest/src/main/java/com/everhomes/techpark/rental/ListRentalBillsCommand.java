@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListRentalBillsCommand {
 	@NotNull
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	private String siteType;  
 	private Long rentalSiteId ;
 	
@@ -35,14 +35,7 @@ public class ListRentalBillsCommand {
     } 
 
 	 
-
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
+ 
 
 	public String getSiteType() {
 		return siteType;
@@ -135,6 +128,20 @@ public class ListRentalBillsCommand {
 
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
+	}
+
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 

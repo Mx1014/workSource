@@ -16,7 +16,7 @@ public class RentalSitesBillRecordMapper implements
 	public EhRentalSitesBillsRecord map(Record r) {
 		EhRentalSitesBillsRecord o = new EhRentalSitesBillsRecord();
 		o.setId(r.getValue((Field<Long>) r.field("id")));
-		o.setEnterpriseCommunityId(r.getValue((Field<Long>) r
+		o.setCommunityId(r.getValue((Field<Long>) r
 				.field("enterprise_community_id")));
 		o.setSiteType(r.getValue((Field<String>) r.field("site_type")));
 		o.setRentalBillId(r.getValue((Field<Long>) r.field("rental_bill_id")));

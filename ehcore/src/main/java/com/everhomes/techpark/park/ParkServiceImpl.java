@@ -122,7 +122,7 @@ public class ParkServiceImpl implements ParkService {
 		ParkCharge parkCharge = new ParkCharge();
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setEnterpriseCommunityId(233L);
+		parkCharge.setCommunityId(233L);
 		
 		parkProvider.addCharge(parkCharge);
 		
@@ -138,7 +138,7 @@ public class ParkServiceImpl implements ParkService {
 		parkCharge.setId(cmd.getId());
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setEnterpriseCommunityId(233L);
+		parkCharge.setCommunityId(233L);
 		
 		parkProvider.deleteCharge(parkCharge);
 	}
@@ -199,7 +199,7 @@ public class ParkServiceImpl implements ParkService {
 		order.setBillId(bill);
 		order.setPaymentStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setRechargeStatus(RechargeStatus.HANDING.getCode());
-		order.setEnterpriseCommunityId(233L);
+		order.setCommunityId(233L);
 		order.setOldValidityperiod(addDays(cmd.getValidityPeriod(), 1));
 		order.setNewValidityperiod(addMonth(cmd.getValidityPeriod(), cmd.getMonths()));;
 		

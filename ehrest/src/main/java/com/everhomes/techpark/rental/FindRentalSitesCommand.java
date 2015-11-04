@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSitesCommand {
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	private String siteType;
 	private String keyword;
 	private Integer pageOffset;
@@ -20,13 +20,7 @@ public class FindRentalSitesCommand {
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
+    } 
 	public String getSiteType() {
 		return siteType;
 	}
@@ -50,5 +44,11 @@ public class FindRentalSitesCommand {
 	}
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 }

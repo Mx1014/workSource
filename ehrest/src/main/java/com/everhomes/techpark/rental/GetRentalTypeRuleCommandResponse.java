@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetRentalTypeRuleCommandResponse {
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	private String siteType ;
 	private Long rentalStartTime;
 	private Long rentalEndTime;
@@ -28,13 +28,7 @@ public class GetRentalTypeRuleCommandResponse {
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
+    } 
 	public String getSiteType() {
 		return siteType;
 	}
@@ -83,5 +77,11 @@ public class GetRentalTypeRuleCommandResponse {
 	}
 	public void setPayEndTime(Long payEndTime) {
 		this.payEndTime = payEndTime;
+	}
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 }

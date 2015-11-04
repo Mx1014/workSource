@@ -78,7 +78,7 @@ public class ParkProviderImpl implements ParkProvider {
 			Long communityId, int offset, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhParkChargeRecord> query = context.selectQuery(Tables.EH_PARK_CHARGE);
-		query.addConditions(Tables.EH_PARK_CHARGE.ENTERPRISE_COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_PARK_CHARGE.COMMUNITY_ID.eq(communityId));
 		query.addLimit(offset, pageSize);
 		
 		List<ParkCharge> result = new ArrayList<ParkCharge>();
@@ -117,7 +117,7 @@ public class ParkProviderImpl implements ParkProvider {
         }
 		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
 			SelectQuery<EhRechargeInfoRecord> query = context.selectQuery(Tables.EH_RECHARGE_INFO);
-			query.addConditions(Tables.EH_RECHARGE_INFO.ENTERPRISE_COMMUNITY_ID.eq(communityId));
+			query.addConditions(Tables.EH_RECHARGE_INFO.COMMUNITY_ID.eq(communityId));
 			if (locator.getAnchor() != null && locator.getAnchor() != 0)
 				query.addConditions(Tables.EH_RECHARGE_INFO.ID.lt(locator.getAnchor()));
 			
@@ -264,7 +264,7 @@ public class ParkProviderImpl implements ParkProvider {
         }
 		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
 			SelectQuery<EhRechargeInfoRecord> query = context.selectQuery(Tables.EH_RECHARGE_INFO);
-			query.addConditions(Tables.EH_RECHARGE_INFO.ENTERPRISE_COMMUNITY_ID.eq(communityId));
+			query.addConditions(Tables.EH_RECHARGE_INFO.COMMUNITY_ID.eq(communityId));
 			if (locator.getAnchor() != null && locator.getAnchor() != 0)
 				query.addConditions(Tables.EH_RECHARGE_INFO.ID.lt(locator.getAnchor()));
 			

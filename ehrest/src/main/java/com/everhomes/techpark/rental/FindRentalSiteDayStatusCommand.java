@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSiteDayStatusCommand {
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	private String siteType;
 	private Byte rentalType;
 	private Long ruleDate;
@@ -22,16 +22,7 @@ public class FindRentalSiteDayStatusCommand {
         return StringHelper.toJsonString(this);
     } 
 
-	 
-
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
-
+	  
 	public String getSiteType() {
 		return siteType;
 	}
@@ -62,5 +53,15 @@ public class FindRentalSiteDayStatusCommand {
 
 	public void setRentalType(Byte rentalType) {
 		this.rentalType = rentalType;
+	}
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 }

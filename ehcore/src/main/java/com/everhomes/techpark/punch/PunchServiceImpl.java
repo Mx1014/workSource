@@ -953,7 +953,12 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int totalCount = punchProvider.countExceptionRequests(cmd.getKeyword(),
+		List<EnterpriseContact>  enterpriseContacts = enterpriseContactProvider.queryEnterpriseContactByKeyword(cmd.getKeyword());
+		List<Long> userIds = new ArrayList<Long>();
+		for(EnterpriseContact enterpriseContact : enterpriseContacts){
+			userIds.add(enterpriseContact.getUserId());
+		}
+		int totalCount = punchProvider.countExceptionRequests(userIds,
 				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getExceptionStatus(), cmd.getProcessCode(),
 				PunchRquestType.REQUEST.getCode());
@@ -965,7 +970,7 @@ public class PunchServiceImpl implements PunchService {
 		int pageCount = getPageCount(totalCount, pageSize);
 
 		List<PunchExceptionRequest> result = punchProvider
-				.listExceptionRequests(cmd.getKeyword(), cmd.getCompanyId(),
+				.listExceptionRequests(userIds, cmd.getCompanyId(),
 						cmd.getStartDay(), cmd.getEndDay(),
 						cmd.getExceptionStatus(), cmd.getProcessCode(),
 						cmd.getPageOffset(), pageSize,
@@ -1180,7 +1185,13 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int totalCount = punchProvider.countPunchDayLogs(cmd.getKeyword(),
+		List<EnterpriseContact>  enterpriseContacts = enterpriseContactProvider.queryEnterpriseContactByKeyword(cmd.getKeyword());
+		List<Long> userIds = new ArrayList<Long>();
+		for(EnterpriseContact enterpriseContact : enterpriseContacts){
+			userIds.add(enterpriseContact.getUserId());
+		}
+		
+		int totalCount = punchProvider.countPunchDayLogs(userIds,
 				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getArriveTimeCompareFlag(),
 				cmd.getArriveTime(),cmd.getLeaveTimeCompareFlag(),cmd.getLeaveTime(),cmd.getWorkTimeCompareFlag(),
 				cmd.getWorkTime(),cmd.getStatus());
@@ -1193,7 +1204,7 @@ public class PunchServiceImpl implements PunchService {
 		
 
 		List<PunchDayLog> result = punchProvider
-				.listPunchDayLogs(cmd.getKeyword(),
+				.listPunchDayLogs(userIds,
 						cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),cmd.getStatus(),cmd.getArriveTimeCompareFlag(),
 						cmd.getArriveTime(),cmd.getLeaveTimeCompareFlag(),cmd.getLeaveTime(),cmd.getWorkTimeCompareFlag(),
 						cmd.getWorkTime(), cmd.getPageOffset(),

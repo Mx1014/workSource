@@ -233,6 +233,36 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
         return contacts;
     }
+
+    @Override
+    public List<EnterpriseContact> queryEnterpriseContactByKeyword(String keyword) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        
+        final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+            query.addJoin(Tables.EH_ENTERPRISE_CONTACT_ENTRIES
+                    , Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(Tables.EH_ENTERPRISE_CONTACTS.ID));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(EnterpriseContactEntryType.Mobile.getCode()));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.like("%"+keyword+"%"));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.NAME.like("%"+keyword+"%"));
+            List<EhEnterpriseContactsRecord> records = query.fetch().map(new EnterpriseContactRecordMapper());
+            records.stream().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
+                return null;
+            }).collect(Collectors.toList());
+            return AfterAction.next;
+        });
+        return contacts;
+    }
+    
     
     @Override
     public void createContactEntry(EnterpriseContactEntry entry) {
@@ -287,6 +317,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         
         return result[0];
     }
+     
     
     @Override
     public List<EnterpriseContactEntry> queryContactEntryByEnterpriseId(ListingLocator locator, Long enterpriseId
@@ -352,8 +383,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                 return query;
             }
         });
-    }
-    
+    } 
+
     @Override
     public List<EnterpriseContactEntry> queryContactEntries(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {

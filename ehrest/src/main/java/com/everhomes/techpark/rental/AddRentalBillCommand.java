@@ -27,7 +27,7 @@ public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;
 	@NotNull
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	@NotNull
 	private String siteType; 
 	private Long rentalDate;
@@ -87,16 +87,6 @@ public class AddRentalBillCommand {
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
 	}
-
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
-
-	 
  
 
 	public List<Long> getRentalSiteRuleIds() {
@@ -113,6 +103,14 @@ public class AddRentalBillCommand {
 
 	public void setRentalCount(Double rentalCount) {
 		this.rentalCount = rentalCount;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 //	public List<SiteItemDTO> getRentalItems() {

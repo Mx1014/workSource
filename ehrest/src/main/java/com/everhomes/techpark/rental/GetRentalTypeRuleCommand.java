@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>siteType：场所类型</li>  * </ul>
  */
 public class GetRentalTypeRuleCommand {
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	private String siteType;
 	@Override
     public String toString() {
@@ -20,12 +20,12 @@ public class GetRentalTypeRuleCommand {
 	}
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
+	} 
+	public Long getCommunityId() {
+		return communityId;
 	}
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 }

@@ -391,21 +391,19 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public Integer countExceptionRequests(Long userId,String keyword, Long companyId, String startDay, String endDay, Byte status,
+	public Integer countExceptionRequests(Long userId,List<Long> userIds, Long companyId, String startDay, String endDay, Byte status,
 			Byte processCode,Byte requestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
-		if(keyword != null)
-			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
-					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
-
+		if(userIds != null)
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -422,20 +420,19 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public List<PunchExceptionRequest> listExceptionRequests(Long userId,String keyword, Long companyId, String startDay,String endDay,
+	public List<PunchExceptionRequest> listExceptionRequests(Long userId,List<Long> userIds, Long companyId, String startDay,String endDay,
 			Byte status, Byte processCode,Integer pageOffset,Integer pageSize,Byte requestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
-		if(keyword != null)
-			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
-					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
 
+		if(userIds != null)
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -462,22 +459,21 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 
 	@Override
-	public int countExceptionRequests(String keyword, Long companyId,
+	public int countExceptionRequests(List<Long> userIds, Long companyId,
 			String startDay, String endDay, Byte status,
 			Byte processCode, Byte requestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
-		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
-		if(keyword != null)
-			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
-					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
-
+		if(null!=userIds){
+		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));}
+	 
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -504,21 +500,20 @@ public class PunchProviderImpl implements PunchProvider {
 				punchExceptionRequest.getId());
 	}
 	@Override
-	public List<PunchExceptionRequest> listExceptionRequests(String keyword,
+	public List<PunchExceptionRequest> listExceptionRequests(List<Long> userIds,
 			Long companyId, String startDay, String endDay, Byte status,
 			Byte processCode, Integer pageOffset, int pageSize, Byte requestType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
-		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
-		if(keyword != null)
-			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
-					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
 
+		if(userIds != null)
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -653,7 +648,7 @@ public class PunchProviderImpl implements PunchProvider {
 	
 	
 	@Override
-	public int countPunchDayLogs(String keyword, Long companyId,
+	public int countPunchDayLogs(List<Long> userIds, Long companyId,
 			String startDay, String endDay, Byte startTimeCompareFlag,
 			String startTime, Byte endTimeCompareFlag, String endTime,
 			Byte workTimeCompareFlag, String workTime, Byte status) {
@@ -661,14 +656,12 @@ public class PunchProviderImpl implements PunchProvider {
 
 		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 	 
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
-		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
-		if(!StringUtils.isEmpty(keyword))
-			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
-					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
-
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		if(userIds != null)
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -705,7 +698,7 @@ public class PunchProviderImpl implements PunchProvider {
 	}
 	
 	@Override
-	public List<PunchDayLog> listPunchDayLogs(String keyword, Long companyId,
+	public List<PunchDayLog> listPunchDayLogs(List<Long> userIds, Long companyId,
 			String startDay, String endDay, Byte status,
 			Byte arriveTimeCompareFlag, String arriveTime,
 			Byte leaveTimeCompareFlag, String leaveTime,
@@ -714,14 +707,12 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 	 
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
-		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
-		if(!StringUtils.isEmpty(keyword))
-			condition = condition.and(Tables.EH_GROUP_CONTACTS.CONTACT_NAME.like("%"+keyword+"%").
-					or(Tables.EH_GROUP_CONTACTS.CONTACT_TOKEN.like("%"+keyword+"%").or(Tables.EH_GROUP_CONTACTS.STRING_TAG1.like("%"+keyword+"%"))));
-
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+		if(userIds != null)
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -772,11 +763,11 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
-	 
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
+//	 
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
 		condition= condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
-		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
+//		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		 
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
@@ -804,7 +795,7 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
+//		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(PunchRquestType.APPROVAL.getCode()));

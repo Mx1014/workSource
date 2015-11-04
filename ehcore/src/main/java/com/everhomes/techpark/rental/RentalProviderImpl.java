@@ -74,7 +74,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_RULES);
-		Condition condition = Tables.EH_RENTAL_RULES.ENTERPRISE_COMMUNITY_ID
+		Condition condition = Tables.EH_RENTAL_RULES.COMMUNITY_ID
 				.equal(enterpriseCommunityId);
 		condition = condition.and(Tables.EH_RENTAL_RULES.SITE_TYPE
 				.equal(siteType));
@@ -354,7 +354,7 @@ public class RentalProviderImpl implements RentalProvider {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
 		condition = condition
-				.and(Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
+				.and(Tables.EH_RENTAL_BILLS.COMMUNITY_ID
 						.eq(enterpriseCommunityId));
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
@@ -575,7 +575,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID
+		Condition condition = Tables.EH_RENTAL_SITES.COMMUNITY_ID
 				.equal(enterpriseCommunityId);
 		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
 				.equal(siteType));
@@ -646,7 +646,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
+		Condition condition = Tables.EH_RENTAL_BILLS.COMMUNITY_ID
 				.equal(enterpriseCommunityId);
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
@@ -678,7 +678,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.ENTERPRISE_COMMUNITY_ID
+		Condition condition = Tables.EH_RENTAL_BILLS.COMMUNITY_ID
 				.equal(enterpriseCommunityId);
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
@@ -717,7 +717,7 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID
+		Condition condition = Tables.EH_RENTAL_SITES.COMMUNITY_ID
 				.equal(enterpriseCommunityId);
 		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
 				.equal(siteType));
