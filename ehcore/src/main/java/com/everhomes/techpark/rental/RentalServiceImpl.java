@@ -498,6 +498,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
 				- rentalRule.getPayEndTime()));
 		rentalBill.setPaidMoney(0.0);
+ 
 		if (reserveTime.before(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getPayStartTime()))) {
 			// 在支付时间之前 为锁定待支付
@@ -935,15 +936,26 @@ public class RentalServiceImpl implements RentalService {
 				bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
 				bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
 			}
+			if(bill.getPayTotalMoney().equals(0.0)){
+				//总金额为0，直接预订成功状态
+				bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+			}
+			else if(bill.getReserveMoney().equals(0.0)&&bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
+				 //预付金额为0，且状态为locked，直接进入支付定金成功状态
+				bill.setStatus(SiteBillStatus.RESERVED.getCode());
+				 
+			}
 			rentalProvider.updateRentalBill(bill);
-			if (bill.getStatus() == 0) {
+			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 				response.setAmount(bill.getReserveMoney());
 			}
-			if (bill.getStatus() == 3) {
+			else if   (bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 				response.setAmount(bill.getPayTotalMoney()
 						- bill.getPaidMoney());
 			}
-
+			else{
+				response.setAmount(0.0);
+			}
 		}
 		if (null != cmd.getAttachmentType()) {
 			RentalBillAttachment rba = new RentalBillAttachment();
