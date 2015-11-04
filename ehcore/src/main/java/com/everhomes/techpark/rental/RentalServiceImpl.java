@@ -990,6 +990,15 @@ public class RentalServiceImpl implements RentalService {
 				response.setAmount(0.0);
 			}
 			//save bill and online pay bill
+			RentalBillPaybillMap billmap= new RentalBillPaybillMap();
+			billmap.setCommunityId(cmd.getCommunityId());
+			billmap.setSiteType(cmd.getSiteType());
+			billmap.setRentalBillId(cmd.getRentalBillId());
+			billmap.setOnlinePayBillId(olpbillId);
+			billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			billmap.setCreatorUid(userId);
+			rentalProvider.createRentalBillPaybillMap(billmap);
 		}
 		if (null != cmd.getAttachmentType()) {
 			RentalBillAttachment rba = new RentalBillAttachment();
@@ -1015,7 +1024,7 @@ public class RentalServiceImpl implements RentalService {
 			} else {
 			}
 		}
-		// TODO: 生成订单
+		// 客户端生成订单
 		return response;
 	}
 

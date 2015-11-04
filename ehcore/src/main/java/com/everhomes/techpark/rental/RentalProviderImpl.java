@@ -34,6 +34,7 @@ import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSitesDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
@@ -42,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
 import com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
@@ -791,6 +793,22 @@ public class RentalProviderImpl implements RentalProvider {
 		query.setRecord(record);
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalBillAttachments.class, null);
+		return id;
+	}
+
+	@Override
+	public Long createRentalBillPaybillMap(RentalBillPaybillMap billmap) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalBillPaybillMap.class));
+		billmap.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalBillPaybillMapRecord record = ConvertHelper.convert(billmap,
+				EhRentalBillPaybillMapRecord.class);
+		InsertQuery<EhRentalBillPaybillMapRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_BILL_PAYBILL_MAP);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalBillPaybillMap.class, null);
 		return id;
 	}
 }
