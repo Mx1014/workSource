@@ -305,4 +305,11 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByFeedbackForumId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.FEEDBACK_FORUM_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.UPDATE_TIME, values);
+	}
 }

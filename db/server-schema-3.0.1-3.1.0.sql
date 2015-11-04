@@ -176,6 +176,7 @@ CREATE TABLE `eh_enterprise_community_map` (
 ALTER TABLE `eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: residential, 1: commercial';
 ALTER TABLE `eh_communities` ADD COLUMN `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum';
 ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum';
+ALTER TABLE `eh_communities` ADD COLUMN `update_time` DATETIME;
 
 #
 # member of eh_communities partition
