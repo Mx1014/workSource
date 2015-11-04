@@ -51,9 +51,7 @@ import org.springframework.stereotype.Component;
 
 
 
-import com.bosigao.cxf.GetCardInfo;
 import com.bosigao.cxf.Service1;
-import com.bosigao.cxf.Service1HttpPost;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -65,9 +63,7 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.pm.pay.BaseVo;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.organization.pm.pay.RestUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
@@ -537,7 +533,7 @@ public class ParkServiceImpl implements ParkService {
 
 		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
 		String carNumber = info.getPlateNumber();
-		String cost = info.getRechargeAmount()+"00";
+		String cost = (int)(info.getRechargeAmount()*100) +"";
 		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 		String payTime = info.getRechargeTime().toString();
 //		response.setSign(sign);

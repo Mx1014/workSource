@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 public class CreateRechargeOrderCommand {
 	
 	@NotNull
-	private Integer amount;
+	private Double amount;
 	@NotNull
 	private Byte months;
 	@NotNull
@@ -34,11 +34,11 @@ public class CreateRechargeOrderCommand {
 		this.validityPeriod = validityPeriod;
 	}
 
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 

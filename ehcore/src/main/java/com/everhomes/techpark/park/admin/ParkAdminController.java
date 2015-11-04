@@ -125,7 +125,7 @@ public class ParkAdminController extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("searchRechargeRecordList")
-	@RestReturn(value = RechargeRecordList.class, collection = true)
+	@RestReturn(value = RechargeRecordList.class)
 	public RestResponse searchRechargeRecordList(SearchRechargeRecordCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);

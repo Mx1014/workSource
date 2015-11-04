@@ -6,7 +6,7 @@ public class ParkingChargeDTO {
 	
 	private Byte months;
 	
-	private Integer amount;
+	private Double amount;
 	
 	private Long enterpriseCommunityId;
 
@@ -26,11 +26,11 @@ public class ParkingChargeDTO {
 		this.months = months;
 	}
 
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 

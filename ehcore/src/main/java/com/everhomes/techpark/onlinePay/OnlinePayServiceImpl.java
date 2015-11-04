@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.organization.VendorType;
 import com.everhomes.techpark.park.RechargeInfo;
@@ -70,7 +69,7 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
 		RechargeInfo order = this.checkOrder(orderId);
 		
-		Integer payAmount = new Integer(cmd.getPayAmount());
+		double payAmount = new Double(cmd.getPayAmount());
 		
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);

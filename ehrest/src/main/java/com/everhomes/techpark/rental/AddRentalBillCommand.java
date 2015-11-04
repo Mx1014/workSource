@@ -29,8 +29,7 @@ public class AddRentalBillCommand {
 	@NotNull
 	private Long enterpriseCommunityId;
 	@NotNull
-	private String siteType;
-	@NotNull
+	private String siteType; 
 	private Long rentalDate;
 	@NotNull
 	private Long startTime;

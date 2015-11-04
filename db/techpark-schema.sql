@@ -258,6 +258,7 @@ CREATE TABLE `eh_rental_site_rules`(
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `rental_type` tinyint(4) COMMENT '0: as hour:min  1-as half day 2-as day',
   `amorpm` tinyint(4)  COMMENT '0:am  1:pm',
+  `rentalStep` int(11) DEFAULT 1 COMMENT 'how much every order',
   `begin_time` DATETIME,
   `end_time` DATETIME,
   `counts` DOUBLE  COMMENT 'site count',
@@ -365,7 +366,7 @@ DROP TABLE IF EXISTS `eh_park_charge`;
 CREATE TABLE `eh_park_charge`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `months` TINYINT,
-  `amount` INT,
+  `amount` DOUBLE,
   `enterprise_community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -382,7 +383,7 @@ CREATE TABLE `eh_recharge_info`(
   `recharge_phone` VARCHAR(20) ,
   `recharge_time` DATETIME,
   `recharge_month` TINYINT,
-  `recharge_amount` INT,
+  `recharge_amount` DOUBLE,
   `old_validityperiod` DATETIME,
   `new_validityperiod` DATETIME,
   `payment_status` TINYINT COMMENT '3rd plat :0-fail 1-unpay 2-success',
@@ -390,6 +391,8 @@ CREATE TABLE `eh_recharge_info`(
   `enterprise_community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `eh_park_apply_card`;
 
 CREATE TABLE `eh_park_apply_card` (
