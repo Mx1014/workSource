@@ -537,7 +537,7 @@ public class ParkServiceImpl implements ParkService {
 
 		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
 		String carNumber = info.getPlateNumber();
-		String cost = info.getRechargeAmount()+"00";
+		String cost = (int)(info.getRechargeAmount()*100) +"";
 		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 		String payTime = info.getRechargeTime().toString();
 //		response.setSign(sign);

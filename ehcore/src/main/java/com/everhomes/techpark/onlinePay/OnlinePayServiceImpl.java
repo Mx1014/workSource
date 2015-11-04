@@ -70,7 +70,7 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
 		RechargeInfo order = this.checkOrder(orderId);
 		
-		Integer payAmount = new Integer(cmd.getPayAmount());
+		double payAmount = new Double(cmd.getPayAmount());
 		
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);

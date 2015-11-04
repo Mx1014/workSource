@@ -366,7 +366,7 @@ DROP TABLE IF EXISTS `eh_park_charge`;
 CREATE TABLE `eh_park_charge`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `months` TINYINT,
-  `amount` INT,
+  `amount` DOUBLE,
   `enterprise_community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -383,7 +383,7 @@ CREATE TABLE `eh_recharge_info`(
   `recharge_phone` VARCHAR(20) ,
   `recharge_time` DATETIME,
   `recharge_month` TINYINT,
-  `recharge_amount` INT,
+  `recharge_amount` DOUBLE,
   `old_validityperiod` DATETIME,
   `new_validityperiod` DATETIME,
   `payment_status` TINYINT COMMENT '3rd plat :0-fail 1-unpay 2-success',

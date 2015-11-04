@@ -44,7 +44,7 @@ public class RechargeInfoDTO {
 	
 	private Byte rechargeMonth;
 	
-	private Integer rechargeAmount;
+	private Double rechargeAmount;
 	
 	private Timestamp oldValidityperiod;
 	
@@ -136,11 +136,11 @@ public class RechargeInfoDTO {
 		this.rechargeMonth = rechargeMonth;
 	}
 
-	public Integer getRechargeAmount() {
+	public Double getRechargeAmount() {
 		return rechargeAmount;
 	}
 
-	public void setRechargeAmount(Integer rechargeAmount) {
+	public void setRechargeAmount(Double rechargeAmount) {
 		this.rechargeAmount = rechargeAmount;
 	}
 
