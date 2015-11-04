@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import net.greghaines.jesque.Job;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -22,7 +24,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleStringService; 
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -40,6 +43,9 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private String queueName = "rentalService";
+    @Autowired
+    JesqueClientFactory jesqueClientFactory;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	@Autowired
@@ -524,6 +530,11 @@ public class RentalServiceImpl implements RentalService {
 				});
 		Long rentalBillId = tuple.first();
 
+		 final Job job = new Job(CancelRentalBillAction.class.getName(),
+	                new Object[]{String.valueOf(rentalBillId) });
+	        
+		//20min cancel order if status still is locked or paying
+		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, 20*60*1000);
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
@@ -683,10 +694,10 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 				+ "  from rental site rules  ");
-		if (null == cmd.getWeekendPrice() || null == cmd.getWorkdayPrice())
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid price   parameter in the command");
+//		if (null == cmd.getWeekendPrice() || null == cmd.getWorkdayPrice())
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//					ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid price   parameter in the command");
 		RentalSiteRule rsr = new RentalSiteRule();
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
@@ -911,6 +922,18 @@ public class RentalServiceImpl implements RentalService {
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		Long userId = UserContext.current().getUser().getId();
+
+		RentalBill bill = rentalProvider.findRentalBillById(cmd
+				.getRentalBillId());
+		if (bill.getStatus().equals(SiteBillStatus.FAIL.getCode())){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_BILL_OVERTIME,
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_BILL_OVERTIME),
+							UserContext.current().getUser().getLocale(),
+							"BILL OVERTIME"));
+		}
 		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
 					cmd.getInvoiceFlag());
@@ -930,8 +953,6 @@ public class RentalServiceImpl implements RentalService {
 				itemMoney += rib.getTotalMoney();
 				rentalProvider.createRentalItemBill(rib);
 			}
-			RentalBill bill = rentalProvider.findRentalBillById(cmd
-					.getRentalBillId());
 			if (itemMoney > 0) {
 				bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
 				bill.setReserveMoney(bill.getReserveMoney() + itemMoney);

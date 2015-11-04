@@ -40,8 +40,23 @@ import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
 import com.everhomes.server.schema.tables.pojos.EhPollItems;
 import com.everhomes.server.schema.tables.pojos.EhPollVotes;
 import com.everhomes.server.schema.tables.pojos.EhPolls;
+import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
+import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
 import com.everhomes.server.schema.tables.pojos.EhPushMessageResults;
 import com.everhomes.server.schema.tables.pojos.EhQrcodes;
+import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRentalBills;
+import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
+import com.everhomes.server.schema.tables.pojos.EhRentalRules;
+import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
+import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
+import com.everhomes.server.schema.tables.pojos.EhRentalSites;
+import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserGroups;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -262,6 +277,71 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(EhGroups.class, EhEnterpriseContacts.class, Tables.EH_ENTERPRISE_CONTACTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ENTERPRISE_CONTACTS.ID.max()).from(Tables.EH_ENTERPRISE_CONTACTS).fetchOne().value1(); 
         });
+        
+        syncTableSequence(EhGroups.class, EhPunchDayLogs.class, Tables.EH_PUNCH_DAY_LOGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_DAY_LOGS.ID.max()).from(Tables.EH_PUNCH_DAY_LOGS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhPunchExceptionApprovals.class, Tables.EH_PUNCH_EXCEPTION_APPROVALS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ID.max()).from(Tables.EH_PUNCH_EXCEPTION_APPROVALS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhPunchExceptionRequests.class, Tables.EH_PUNCH_EXCEPTION_REQUESTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ID.max()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS).fetchOne().value1(); 
+        });
+        
+
+        syncTableSequence(EhGroups.class, EhPunchGeopoints.class, Tables.EH_PUNCH_GEOPOINTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_GEOPOINTS.ID.max()).from(Tables.EH_PUNCH_GEOPOINTS).fetchOne().value1(); 
+        });
+
+
+        syncTableSequence(EhGroups.class, EhPunchLogs.class, Tables.EH_PUNCH_LOGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_LOGS.ID.max()).from(Tables.EH_PUNCH_LOGS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhPunchRules.class, Tables.EH_PUNCH_RULES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_RULES.ID.max()).from(Tables.EH_PUNCH_RULES).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhPunchWorkday.class, Tables.EH_PUNCH_WORKDAY.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PUNCH_WORKDAY.ID.max()).from(Tables.EH_PUNCH_WORKDAY).fetchOne().value1(); 
+        });
+
+
+        syncTableSequence(EhGroups.class, EhRentalBillAttachments.class, Tables.EH_RENTAL_BILL_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_BILL_ATTACHMENTS.ID.max()).from(Tables.EH_RENTAL_BILL_ATTACHMENTS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalBills.class, Tables.EH_RENTAL_BILLS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_BILLS.ID.max()).from(Tables.EH_RENTAL_BILLS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalItemsBills.class, Tables.EH_RENTAL_ITEMS_BILLS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_ITEMS_BILLS.ID.max()).from(Tables.EH_RENTAL_ITEMS_BILLS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalRules.class, Tables.EH_RENTAL_RULES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_RULES.ID.max()).from(Tables.EH_RENTAL_RULES).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalSiteItems.class, Tables.EH_RENTAL_SITE_ITEMS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_SITE_ITEMS.ID.max()).from(Tables.EH_RENTAL_SITE_ITEMS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalSiteRules.class, Tables.EH_RENTAL_SITE_RULES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_SITE_RULES.ID.max()).from(Tables.EH_RENTAL_SITE_RULES).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalSites.class, Tables.EH_RENTAL_SITES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_SITES.ID.max()).from(Tables.EH_RENTAL_SITES).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhGroups.class, EhRentalSitesBills.class, Tables.EH_RENTAL_SITES_BILLS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_SITES_BILLS.ID.max()).from(Tables.EH_RENTAL_SITES_BILLS).fetchOne().value1(); 
+        });
+ 
+        
     }
     
     @SuppressWarnings("rawtypes")

@@ -7,12 +7,13 @@ package com.everhomes.techpark.rental;
  * <li>SUCCESS(2): 全部支付预定成功</li>
  * <li>PAYINGFINAL(3): 待支付全款</li>
  * <li>FAIL(4): 失败，解锁</li>
- * <li>DELETED(5): 用户删除，不展示</li>
+ * <li>TOPAYRES(5):进入支付定金</li>
+ * <li>TOPAYFINAL(6): 进入支付全款</li>
  * </ul>
  */
 public enum SiteBillStatus {
    
-    LOCKED((byte)0),RESERVED((byte)1),SUCCESS((byte)2),PAYINGFINAL((byte)3),FAIL((byte)4);
+    LOCKED((byte)0),RESERVED((byte)1),SUCCESS((byte)2),PAYINGFINAL((byte)3),FAIL((byte)4),TOPAYRES((byte)5),TOPAYFINAL((byte)6);
     
     private byte code;
     private SiteBillStatus(byte code) {
