@@ -12,9 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -532,12 +531,11 @@ public class ParkServiceImpl implements ParkService {
 		String str = sdf.format(time);
 		return str;
 	}
-	@SuppressWarnings("finally")
 	@Override
 	public RechargeSuccessResponse refreshParkingSystem(
 			OnlinePayBillCommand cmd) {
 
-		RechargeInfo info = onlinePayService.onlinePayBill(cmd);
+		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
 		String carNumber = info.getPlateNumber();
 		String cost = info.getRechargeAmount()+"00";
 		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
@@ -573,7 +571,7 @@ public class ParkServiceImpl implements ParkService {
 		return plateNumber;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes"})
+	@SuppressWarnings("unchecked")
 	@Override
 	public PlateInfo verifyRechargedPlate(PlateNumberCommand cmd) {
 		

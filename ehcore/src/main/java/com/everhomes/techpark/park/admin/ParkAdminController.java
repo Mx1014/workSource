@@ -99,6 +99,27 @@ public class ParkAdminController extends ControllerBase{
 	}
 	
 	/**
+	 * <b>URL: /admin/techpark/park/getWaitingDays</b>
+	 * admin set parking card valid days to pick up after offering
+	 * @return
+	 */
+	@RequestMapping("getWaitingDays")
+	@RestReturn(value = WaitingDaysResponse.class)
+	public RestResponse getWaitingDays() {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        WaitingDaysResponse waitingDays = new WaitingDaysResponse();
+        waitingDays.setWaitingDays(configurationProvider.getValue(ConfigConstants.PARKING_CARD_VALID_DAYS, ""));
+        
+		RestResponse response = new RestResponse(waitingDays);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
+	/**
 	 * <b>URL: /admin/techpark/park/searchRechargeRecordList</b>
 	 * 
 	 * @return

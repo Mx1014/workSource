@@ -13,6 +13,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.organization.VendorType;
 import com.everhomes.techpark.park.RechargeInfo;
+import com.everhomes.techpark.park.RechargeInfoDTO;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -27,7 +29,7 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 	private CoordinationProvider coordinationProvider;
 	
 	@Override
-	public RechargeInfo onlinePayBill(OnlinePayBillCommand cmd) {
+	public RechargeInfoDTO onlinePayBill(OnlinePayBillCommand cmd) {
 		
 		RechargeInfo order = new RechargeInfo();
 		//fail
@@ -37,7 +39,8 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		if(cmd.getPayStatus().toLowerCase().equals("success"))
 			order = this.onlinePayBillSuccess(cmd);
 
-		return order;
+		RechargeInfoDTO info = ConvertHelper.convert(order, RechargeInfoDTO.class);
+		return info;
 	}
 	
 	private RechargeInfo onlinePayBillFail(OnlinePayBillCommand cmd) {

@@ -9,7 +9,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.techpark.park.RechargeInfo;
+import com.everhomes.techpark.park.RechargeInfoDTO;
 
 @RestDoc(value = "OnlinePay controller", site = "ehcore")
 @RestController
@@ -23,10 +23,10 @@ public class OnlinePayController  extends ControllerBase{
 	 * <p>线上支付
 	 */
 	@RequestMapping("onlinePayBill")
-	@RestReturn(value=RechargeInfo.class)
+	@RestReturn(value=RechargeInfoDTO.class)
 	public RestResponse onlinePayBill(OnlinePayBillCommand cmd){
 		
-		RechargeInfo order = onlinePay.onlinePayBill(cmd);
+		RechargeInfoDTO order = onlinePay.onlinePayBill(cmd);
 		RestResponse response = new RestResponse(order);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

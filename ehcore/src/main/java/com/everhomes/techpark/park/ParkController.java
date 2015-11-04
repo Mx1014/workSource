@@ -160,7 +160,7 @@ public class ParkController extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("verifyRechargedPlate")
-	@RestReturn(value = String.class)
+	@RestReturn(value = PlateInfo.class)
 	public RestResponse verifyRechargedPlate(PlateNumberCommand cmd) {
 		
 		PlateInfo info = parkService.verifyRechargedPlate(cmd);
