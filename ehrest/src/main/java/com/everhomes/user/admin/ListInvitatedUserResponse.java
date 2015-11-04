@@ -2,8 +2,10 @@ package com.everhomes.user.admin;
 
 import java.util.List;
 
-public class ListInvitatedUserResponse {
+import com.everhomes.discover.ItemType;
 
+public class ListInvitatedUserResponse {
+    @ItemType(InvitatedUsers.class)
 	private List<InvitatedUsers> invitatedUsers;
 	
 	private Long nextPageAnchor;

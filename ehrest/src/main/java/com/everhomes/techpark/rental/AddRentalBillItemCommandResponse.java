@@ -6,7 +6,7 @@ public class AddRentalBillItemCommandResponse {
 	private String orderNo;
 	private Double amount;
 	private String name;
-	private String des1cription;
+	private String description;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -29,10 +29,10 @@ public class AddRentalBillItemCommandResponse {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getDes1cription() {
-		return des1cription;
+	public String getDescription() {
+		return description;
 	}
-	public void setDes1cription(String des1cription) {
-		this.des1cription = des1cription;
-	}
+	public void setDescription(String description) {
+		this.description = description;
+	} 
 }

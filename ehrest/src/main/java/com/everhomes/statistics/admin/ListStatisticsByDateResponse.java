@@ -2,6 +2,7 @@ package com.everhomes.statistics.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -15,7 +16,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ListStatisticsByDateResponse {
-	
+	@ItemType(ListStatisticsByDateDTO.class)
 	private List<ListStatisticsByDateDTO> values;
 	    
 	 private Long nextPageAnchor;

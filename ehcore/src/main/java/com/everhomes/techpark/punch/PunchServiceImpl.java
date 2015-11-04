@@ -7,9 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +27,13 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.enterprise.EnterpriseContact;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterprise.EnterpriseContactService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.company.ContactType;
 import com.everhomes.techpark.company.GroupContact;
-import com.everhomes.techpark.company.GroupContactProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -52,8 +53,11 @@ public class PunchServiceImpl implements PunchService {
 	@Autowired
 	PunchProvider punchProvider;
 	@Autowired
-	GroupContactProvider groupContactProvider;
+	EnterpriseContactService enterpriseContactService;
 
+    @Autowired
+    private EnterpriseContactProvider enterpriseContactProvider;
+    
 	@Autowired
 	ConfigurationProvider configurationProvider;
 
@@ -225,27 +229,25 @@ public class PunchServiceImpl implements PunchService {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(exceptionRequest
-									.getUserId());
-					if (null == groupContact) {
+					EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(companyId, exceptionRequest
+							.getUserId());
+					 
+					if (null == enterpriseContact) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO
-								.setName(groupContact.getContactName());
+						punchExceptionDTO.setName(enterpriseContact.getName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(exceptionRequest
-									.getOperatorUid());
-					if (null == groupContact) {
+					EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(companyId, exceptionRequest
+							.getOperatorUid()); 
+					if (null == enterpriseContact) {
 						punchExceptionDTO.setName("无此人");
 					} else {
 						punchExceptionDTO
-								.setName(groupContact.getContactName());
+								.setName(enterpriseContact.getName());
 					}
 					punchExceptionDTO.setProcessCode(exceptionRequest
 							.getProcessCode());
@@ -1013,14 +1015,15 @@ public class PunchServiceImpl implements PunchService {
 						dto.setLeaveTime(timeSF.format(new Date(leaveTime)));
 						dto.setWorkTime(getGMTtimeString("HH:mm:ss", workTime));
 					}
-					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(dto.getUserId());
-					dto.setUserName(groupContact.getContactName());
-					dto.setUserPhoneNumber(groupContact.getContactToken());
+					EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getUserId()); 
+					 
+					dto.setUserName(enterpriseContact.getName());
+					
+					dto.setUserPhoneNumber(enterpriseContactProvider.queryContactEntryByContactId(enterpriseContact,ContactType.MOBILE.getCode()).get(0).getEntryValue());
 					if(null != dto.getOperatorUid() && 0 != dto.getOperatorUid()){
-						GroupContact groupContactOperator = groupContactProvider
-								.findGroupContactByUserId(dto.getOperatorUid());
-						dto.setOperatorName(groupContactOperator.getContactName());
+						enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getOperatorUid()); 
+						  
+						dto.setOperatorName(enterpriseContact.getName());
 					}
 					return dto;
 				}).collect(Collectors.toList()));
@@ -1071,11 +1074,10 @@ public class PunchServiceImpl implements PunchService {
 				.map(r -> {
 					PunchExceptionRequestDTO dto = ConvertHelper.convert(r,
 							PunchExceptionRequestDTO.class);
-
-					GroupContact groupContact = groupContactProvider
-							.findGroupContactByUserId(dto.getUserId());
-					dto.setUserName(groupContact.getContactName());
-					dto.setUserPhoneNumber(groupContact.getContactToken());
+					EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getUserId()); 
+					  
+					dto.setUserName(enterpriseContact.getName());
+					dto.setUserPhoneNumber(enterpriseContactProvider.queryContactEntryByContactId(enterpriseContact,ContactType.MOBILE.getCode()).get(0).getEntryValue());
 					return dto;
 				}).collect(Collectors.toList()));
 
@@ -1203,17 +1205,17 @@ public class PunchServiceImpl implements PunchService {
 							PunchStatisticsDTO.class);
 					processPunchStatisticsDTOTime(dto,r);
 					if(dto != null){
-						GroupContact groupContact = groupContactProvider
-								.findGroupContactByUserId(dto.getUserId());
-						dto.setUserName(groupContact.getContactName());
-						dto.setUserPhoneNumber(groupContact.getContactToken());
-						dto.setUserDepartment(groupContact.getStringTag1());
+						EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getUserId()); 
+						dto.setUserName(enterpriseContact.getName());
+						dto.setUserPhoneNumber(enterpriseContactProvider.queryContactEntryByContactId(enterpriseContact,ContactType.MOBILE.getCode()).get(0).getEntryValue());
+//						dto.setUserDepartment(enterpriseContact.get);
 						PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(), dto.getCompanyId(), dto.getPunchDate());
  						if(approval != null){
 							dto.setApprovalStatus(approval.getApprovalStatus());
-							GroupContact groupContactOperator = groupContactProvider
-									.findGroupContactByUserId(approval.getOperatorUid());
-							dto.setOperatorName(groupContactOperator.getContactName());
+						 enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),approval.getOperatorUid()); 
+							 
+						 
+							dto.setOperatorName(enterpriseContact.getName());
 						}
 						else{
 							dto.setApprovalStatus((byte) 0);
@@ -1296,10 +1298,9 @@ public class PunchServiceImpl implements PunchService {
     	for (Long userId : userIds) {
     		PunchCountDTO dto = new PunchCountDTO();
     		dto.setUserId(userId);
-    		GroupContact groupContact = groupContactProvider
-					.findGroupContactByUserId(dto.getUserId());
-			dto.setUserName(groupContact.getContactName());
-			dto.setToken(groupContact.getContactToken());
+    		EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getUserId()); 
+			dto.setUserName(enterpriseContact.getName());
+			dto.setToken(enterpriseContactProvider.queryContactEntryByContactId(enterpriseContact,ContactType.MOBILE.getCode()).get(0).getEntryValue());
     		List<PunchDayLogDTO> list = map.get(userId);
     		dto.setAbsenceCount(processListCount(list,ApprovalStatus.ABSENCE.getCode()));
     		dto.setBelateCount(processListCount(list,ApprovalStatus.BELATE.getCode()));

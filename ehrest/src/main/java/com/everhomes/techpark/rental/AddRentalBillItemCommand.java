@@ -22,6 +22,8 @@ import com.everhomes.util.StringHelper;
  * <li>rentalcount：预定场所数量</li>
  * <li>rentalItems：预定商品</li>
  * <li>rentalAttanchments：预定附件，如车牌号，文字信息等</li>
+ * <li>attachmentType：附件类型 0：字符串 1：邮件 2：文件
+ * {@link com.everhomes.techpark.rental.AttachmentType}</li>
  * </ul>
  */
 public class AddRentalBillItemCommand {

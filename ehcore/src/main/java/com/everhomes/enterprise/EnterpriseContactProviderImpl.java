@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Table;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -307,6 +309,21 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     @Override
+    public List<EnterpriseContactEntry> queryContactEntryByContactId(ListingLocator locator , Integer count,  EnterpriseContact contact) {
+    	return this.queryContactEntryByEnterpriseId(locator, contact.getEnterpriseId(), count, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(contact.getEnterpriseId()));
+				query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(contact.getId()));
+				return query;
+			}
+    		
+    	});
+    }
+    
+    @Override
     public List<EnterpriseContactEntry> queryContactEntryByContactId(EnterpriseContact contact) {
         ListingLocator locator = new ListingLocator();
         return this.queryContactEntryByEnterpriseId(locator, contact.getEnterpriseId(), 100, new ListingQueryBuilderCallback() {
@@ -314,6 +331,22 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(contact.getEnterpriseId()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(contact.getId()));
+                return query;
+            }
+        });
+    }
+
+    @Override
+    public List<EnterpriseContactEntry> queryContactEntryByContactId(EnterpriseContact contact,Byte contactType ) {
+        ListingLocator locator = new ListingLocator();
+        return this.queryContactEntryByEnterpriseId(locator, contact.getEnterpriseId(), 100, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+            	 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(contactType));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(contact.getEnterpriseId()));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(contact.getId()));
                 return query;
