@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> implements org.jooq.Record16<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Byte, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.sql.Timestamp, java.lang.Byte, java.lang.Double, java.sql.Timestamp, java.sql.Timestamp, java.lang.Byte, java.lang.Byte, java.lang.Long> {
 
-	private static final long serialVersionUID = -1684406852;
+	private static final long serialVersionUID = 1119568432;
 
 	/**
 	 * Setter for <code>ehcore.eh_recharge_info.id</code>. id
@@ -224,16 +224,16 @@ public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_recharge_info.enterprise_community_id</code>.
+	 * Setter for <code>ehcore.eh_recharge_info.community_id</code>.
 	 */
-	public void setEnterpriseCommunityId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(15, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_recharge_info.enterprise_community_id</code>.
+	 * Getter for <code>ehcore.eh_recharge_info.community_id</code>.
 	 */
-	public java.lang.Long getEnterpriseCommunityId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(15);
 	}
 
@@ -394,7 +394,7 @@ public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field16() {
-		return com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.ENTERPRISE_COMMUNITY_ID;
+		return com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.COMMUNITY_ID;
 	}
 
 	/**
@@ -522,7 +522,7 @@ public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	 */
 	@Override
 	public java.lang.Long value16() {
-		return getEnterpriseCommunityId();
+		return getCommunityId();
 	}
 
 	/**
@@ -665,7 +665,7 @@ public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	 */
 	@Override
 	public EhRechargeInfoRecord value16(java.lang.Long value) {
-		setEnterpriseCommunityId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -691,7 +691,7 @@ public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	/**
 	 * Create a detached, initialised EhRechargeInfoRecord
 	 */
-	public EhRechargeInfoRecord(java.lang.Long id, java.lang.Long billId, java.lang.String plateNumber, java.lang.Byte numberType, java.lang.String ownerName, java.lang.Long rechargeUserid, java.lang.String rechargeUsername, java.lang.String rechargePhone, java.sql.Timestamp rechargeTime, java.lang.Byte rechargeMonth, java.lang.Double rechargeAmount, java.sql.Timestamp oldValidityperiod, java.sql.Timestamp newValidityperiod, java.lang.Byte paymentStatus, java.lang.Byte rechargeStatus, java.lang.Long enterpriseCommunityId) {
+	public EhRechargeInfoRecord(java.lang.Long id, java.lang.Long billId, java.lang.String plateNumber, java.lang.Byte numberType, java.lang.String ownerName, java.lang.Long rechargeUserid, java.lang.String rechargeUsername, java.lang.String rechargePhone, java.sql.Timestamp rechargeTime, java.lang.Byte rechargeMonth, java.lang.Double rechargeAmount, java.sql.Timestamp oldValidityperiod, java.sql.Timestamp newValidityperiod, java.lang.Byte paymentStatus, java.lang.Byte rechargeStatus, java.lang.Long communityId) {
 		super(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO);
 
 		setValue(0, id);
@@ -709,6 +709,6 @@ public class EhRechargeInfoRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 		setValue(12, newValidityperiod);
 		setValue(13, paymentStatus);
 		setValue(14, rechargeStatus);
-		setValue(15, enterpriseCommunityId);
+		setValue(15, communityId);
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord> implements org.jooq.Record11<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Byte, java.lang.String, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -936384901;
+	private static final long serialVersionUID = -376111247;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bill_attachments.id</code>. id
@@ -28,16 +28,16 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bill_attachments.enterprise_community_id</code>.  enterprise  community id
+	 * Setter for <code>ehcore.eh_rental_bill_attachments.community_id</code>.  enterprise  community id
 	 */
-	public void setEnterpriseCommunityId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bill_attachments.enterprise_community_id</code>.  enterprise  community id
+	 * Getter for <code>ehcore.eh_rental_bill_attachments.community_id</code>.  enterprise  community id
 	 */
-	public java.lang.Long getEnterpriseCommunityId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -212,7 +212,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field2() {
-		return com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.ENTERPRISE_COMMUNITY_ID;
+		return com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.COMMUNITY_ID;
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	 */
 	@Override
 	public java.lang.Long value2() {
-		return getEnterpriseCommunityId();
+		return getCommunityId();
 	}
 
 	/**
@@ -389,7 +389,7 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	 */
 	@Override
 	public EhRentalBillAttachmentsRecord value2(java.lang.Long value) {
-		setEnterpriseCommunityId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -496,11 +496,11 @@ public class EhRentalBillAttachmentsRecord extends org.jooq.impl.UpdatableRecord
 	/**
 	 * Create a detached, initialised EhRentalBillAttachmentsRecord
 	 */
-	public EhRentalBillAttachmentsRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalBillId, java.lang.Byte attachmentType, java.lang.String content, java.lang.String filePath, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalBillAttachmentsRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String siteType, java.lang.Long rentalBillId, java.lang.Byte attachmentType, java.lang.String content, java.lang.String filePath, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS);
 
 		setValue(0, id);
-		setValue(1, enterpriseCommunityId);
+		setValue(1, communityId);
 		setValue(2, siteType);
 		setValue(3, rentalBillId);
 		setValue(4, attachmentType);

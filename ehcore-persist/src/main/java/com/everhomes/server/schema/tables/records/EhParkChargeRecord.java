@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkChargeRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhParkChargeRecord> implements org.jooq.Record4<java.lang.Long, java.lang.Byte, java.lang.Double, java.lang.Long> {
 
-	private static final long serialVersionUID = 1868109485;
+	private static final long serialVersionUID = -1208638661;
 
 	/**
 	 * Setter for <code>ehcore.eh_park_charge.id</code>. id
@@ -56,16 +56,16 @@ public class EhParkChargeRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_park_charge.enterprise_community_id</code>.
+	 * Setter for <code>ehcore.eh_park_charge.community_id</code>.
 	 */
-	public void setEnterpriseCommunityId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_park_charge.enterprise_community_id</code>.
+	 * Getter for <code>ehcore.eh_park_charge.community_id</code>.
 	 */
-	public java.lang.Long getEnterpriseCommunityId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(3);
 	}
 
@@ -130,7 +130,7 @@ public class EhParkChargeRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field4() {
-		return com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE.ENTERPRISE_COMMUNITY_ID;
+		return com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE.COMMUNITY_ID;
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class EhParkChargeRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	 */
 	@Override
 	public java.lang.Long value4() {
-		return getEnterpriseCommunityId();
+		return getCommunityId();
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class EhParkChargeRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	 */
 	@Override
 	public EhParkChargeRecord value4(java.lang.Long value) {
-		setEnterpriseCommunityId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -223,12 +223,12 @@ public class EhParkChargeRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhParkChargeRecord
 	 */
-	public EhParkChargeRecord(java.lang.Long id, java.lang.Byte months, java.lang.Double amount, java.lang.Long enterpriseCommunityId) {
+	public EhParkChargeRecord(java.lang.Long id, java.lang.Byte months, java.lang.Double amount, java.lang.Long communityId) {
 		super(com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE);
 
 		setValue(0, id);
 		setValue(1, months);
 		setValue(2, amount);
-		setValue(3, enterpriseCommunityId);
+		setValue(3, communityId);
 	}
 }

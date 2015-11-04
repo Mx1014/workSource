@@ -167,7 +167,7 @@ DROP TABLE IF EXISTS `eh_rental_rules`;
 
 CREATE TABLE `eh_rental_rules` (
   `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type` VARCHAR(20) COMMENT 'rule for what function ',
   `rental_start_time` BIGINT,
   `rental_end_time` BIGINT,
@@ -208,7 +208,7 @@ DROP TABLE IF EXISTS `eh_rental_sites`;
 CREATE TABLE `eh_rental_sites`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `parent_id` BIGINT ,
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `site_name` VARCHAR(127),
   `site_type2` TINYINT(4),
@@ -253,7 +253,7 @@ DROP TABLE IF EXISTS `eh_rental_site_rules`;
 
 CREATE TABLE `eh_rental_site_rules`(
   `id` BIGINT  NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `rental_type` tinyint(4) COMMENT '0: as hour:min  1-as half day 2-as day',
@@ -279,7 +279,7 @@ DROP TABLE IF EXISTS `eh_rental_bills`;
 
 CREATE TABLE `eh_rental_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'id',
   `rental_uid` BIGINT COMMENT 'rental user id',
@@ -311,7 +311,7 @@ DROP TABLE IF EXISTS  `eh_rental_bill_attachments`;
 
 CREATE TABLE `eh_rental_bill_attachments`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `attachment_type` TINYINT COMMENT '0:String 1:email 2:attachment file',  
@@ -329,7 +329,7 @@ DROP TABLE IF EXISTS  `eh_rental_sites_bills`;
 
 CREATE TABLE `eh_rental_sites_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `rental_site_rule_id` BIGINT ,  
@@ -345,7 +345,7 @@ DROP TABLE IF EXISTS  `eh_rental_items_bills`;
 
 CREATE TABLE `eh_rental_items_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `rental_site_item_id` BIGINT ,  
@@ -359,11 +359,10 @@ CREATE TABLE `eh_rental_items_bills`(
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
-DROP TABLE IF EXISTS  `eh_rental_bill_paybill_relation`;
-
-CREATE TABLE `eh_rental_bill_paybill_relation`(
+DROP TABLE IF EXISTS  `eh_rental_bill_paybill_map`;
+CREATE TABLE `eh_rental_bill_paybill_map`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `online_pay_bill_id` BIGINT ,
@@ -380,7 +379,7 @@ CREATE TABLE `eh_park_charge`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `months` TINYINT,
   `amount` DOUBLE,
-  `enterprise_community_id` BIGINT,
+  `community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 DROP TABLE IF EXISTS `eh_recharge_info`;
@@ -401,7 +400,7 @@ CREATE TABLE `eh_recharge_info`(
   `new_validityperiod` DATETIME,
   `payment_status` TINYINT COMMENT '3rd plat :0-fail 1-unpay 2-success',
   `recharge_status` TINYINT COMMENT '0-fail 1-waiting paying 2-refreshing data 3-success',
-  `enterprise_community_id` BIGINT,
+  `community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 

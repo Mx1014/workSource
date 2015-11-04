@@ -55,10 +55,10 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>enterprise_community_id IN (values)</code>
+	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByEnterpriseCommunityId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.COMMUNITY_ID, values);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> implements org.jooq.Record18<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Byte, java.lang.Byte, java.lang.Integer, java.sql.Timestamp, java.sql.Timestamp, java.lang.Double, java.lang.Double, java.lang.Double, java.sql.Date, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1653284475;
+	private static final long serialVersionUID = 1278029857;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.id</code>. id
@@ -28,16 +28,16 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.  enterprise  community id
+	 * Setter for <code>ehcore.eh_rental_site_rules.community_id</code>.  enterprise  community id
 	 */
-	public void setEnterpriseCommunityId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.enterprise_community_id</code>.  enterprise  community id
+	 * Getter for <code>ehcore.eh_rental_site_rules.community_id</code>.  enterprise  community id
 	 */
-	public java.lang.Long getEnterpriseCommunityId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -310,7 +310,7 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field2() {
-		return com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.ENTERPRISE_COMMUNITY_ID;
+		return com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.COMMUNITY_ID;
 	}
 
 	/**
@@ -454,7 +454,7 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public java.lang.Long value2() {
-		return getEnterpriseCommunityId();
+		return getCommunityId();
 	}
 
 	/**
@@ -599,7 +599,7 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public EhRentalSiteRulesRecord value2(java.lang.Long value) {
-		setEnterpriseCommunityId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -769,11 +769,11 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	/**
 	 * Create a detached, initialised EhRentalSiteRulesRecord
 	 */
-	public EhRentalSiteRulesRecord(java.lang.Long id, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Byte rentalType, java.lang.Byte amorpm, java.lang.Integer rentalstep, java.sql.Timestamp beginTime, java.sql.Timestamp endTime, java.lang.Double counts, java.lang.Double unit, java.lang.Double price, java.sql.Date siteRentalDate, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalSiteRulesRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Byte rentalType, java.lang.Byte amorpm, java.lang.Integer rentalstep, java.sql.Timestamp beginTime, java.sql.Timestamp endTime, java.lang.Double counts, java.lang.Double unit, java.lang.Double price, java.sql.Date siteRentalDate, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES);
 
 		setValue(0, id);
-		setValue(1, enterpriseCommunityId);
+		setValue(1, communityId);
 		setValue(2, siteType);
 		setValue(3, rentalSiteId);
 		setValue(4, rentalType);

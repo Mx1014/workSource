@@ -279,9 +279,9 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	}
 
 	/**
-	 * Fetch records that have <code>creator_community_id IN (values)</code>
+	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCreatorCommunityId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CREATOR_COMMUNITY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.COMMUNITY_ID, values);
 	}
 }

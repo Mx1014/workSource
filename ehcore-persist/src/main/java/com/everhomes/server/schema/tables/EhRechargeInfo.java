@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> {
 
-	private static final long serialVersionUID = 644955744;
+	private static final long serialVersionUID = 1692752518;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recharge_info</code>
@@ -102,9 +102,9 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Byte> RECHARGE_STATUS = createField("recharge_status", org.jooq.impl.SQLDataType.TINYINT, this, "0-fail 1-waiting paying 2-refreshing data 3-success");
 
 	/**
-	 * The column <code>ehcore.eh_recharge_info.enterprise_community_id</code>.
+	 * The column <code>ehcore.eh_recharge_info.community_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_recharge_info</code> table reference

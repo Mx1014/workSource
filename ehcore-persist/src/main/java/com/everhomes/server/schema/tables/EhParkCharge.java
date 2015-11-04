@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkCharge extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkChargeRecord> {
 
-	private static final long serialVersionUID = 505755973;
+	private static final long serialVersionUID = 1158540367;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_park_charge</code>
@@ -42,9 +42,9 @@ public class EhParkCharge extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkChargeRecord, java.lang.Double> AMOUNT = createField("amount", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_park_charge.enterprise_community_id</code>.
+	 * The column <code>ehcore.eh_park_charge.community_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkChargeRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkChargeRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_park_charge</code> table reference

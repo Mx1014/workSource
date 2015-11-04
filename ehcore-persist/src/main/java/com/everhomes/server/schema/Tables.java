@@ -259,11 +259,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhGroups EH_GROUPS = com.everhomes.server.schema.tables.EhGroups.EH_GROUPS;
 
 	/**
-	 * The table ehcore.eh_group_contacts
-	 */
-	public static final com.everhomes.server.schema.tables.EhGroupContacts EH_GROUP_CONTACTS = com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS;
-
-	/**
 	 * The table ehcore.eh_group_members
 	 */
 	public static final com.everhomes.server.schema.tables.EhGroupMembers EH_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS;
@@ -487,6 +482,11 @@ public class Tables {
 	 * The table ehcore.eh_rental_bill_attachments
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalBillAttachments EH_RENTAL_BILL_ATTACHMENTS = com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS;
+
+	/**
+	 * The table ehcore.eh_rental_bill_paybill_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalBillPaybillMap EH_RENTAL_BILL_PAYBILL_MAP = com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP;
 
 	/**
 	 * The table ehcore.eh_rental_items_bills

@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1794606552;
+	private static final long serialVersionUID = 1366926570;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -83,7 +83,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS,
 			com.everhomes.server.schema.tables.EhForumVisibleScopes.EH_FORUM_VISIBLE_SCOPES,
 			com.everhomes.server.schema.tables.EhGroups.EH_GROUPS,
-			com.everhomes.server.schema.tables.EhGroupContacts.EH_GROUP_CONTACTS,
 			com.everhomes.server.schema.tables.EhGroupMembers.EH_GROUP_MEMBERS,
 			com.everhomes.server.schema.tables.EhGroupOpRequests.EH_GROUP_OP_REQUESTS,
 			com.everhomes.server.schema.tables.EhGroupProfiles.EH_GROUP_PROFILES,
@@ -129,6 +128,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRegions.EH_REGIONS,
 			com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS,
 			com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS,
+			com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP,
 			com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS,
 			com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES,
 			com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES,

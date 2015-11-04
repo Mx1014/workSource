@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkCharge implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1739428201;
+	private static final long serialVersionUID = 1291265553;
 
 	private java.lang.Long   id;
 	private java.lang.Byte   months;
 	private java.lang.Double amount;
-	private java.lang.Long   enterpriseCommunityId;
+	private java.lang.Long   communityId;
 
 	public EhParkCharge() {}
 
@@ -24,12 +24,12 @@ public class EhParkCharge implements java.io.Serializable {
 		java.lang.Long   id,
 		java.lang.Byte   months,
 		java.lang.Double amount,
-		java.lang.Long   enterpriseCommunityId
+		java.lang.Long   communityId
 	) {
 		this.id = id;
 		this.months = months;
 		this.amount = amount;
-		this.enterpriseCommunityId = enterpriseCommunityId;
+		this.communityId = communityId;
 	}
 
 	public java.lang.Long getId() {
@@ -56,11 +56,11 @@ public class EhParkCharge implements java.io.Serializable {
 		this.amount = amount;
 	}
 
-	public java.lang.Long getEnterpriseCommunityId() {
-		return this.enterpriseCommunityId;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setEnterpriseCommunityId(java.lang.Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 }

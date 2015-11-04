@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = -802834126;
+	private static final long serialVersionUID = 284314698;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
@@ -28,7 +28,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 	private java.sql.Timestamp newValidityperiod;
 	private java.lang.Byte     paymentStatus;
 	private java.lang.Byte     rechargeStatus;
-	private java.lang.Long     enterpriseCommunityId;
+	private java.lang.Long     communityId;
 
 	public EhRechargeInfo() {}
 
@@ -48,7 +48,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.sql.Timestamp newValidityperiod,
 		java.lang.Byte     paymentStatus,
 		java.lang.Byte     rechargeStatus,
-		java.lang.Long     enterpriseCommunityId
+		java.lang.Long     communityId
 	) {
 		this.id = id;
 		this.billId = billId;
@@ -65,7 +65,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.newValidityperiod = newValidityperiod;
 		this.paymentStatus = paymentStatus;
 		this.rechargeStatus = rechargeStatus;
-		this.enterpriseCommunityId = enterpriseCommunityId;
+		this.communityId = communityId;
 	}
 
 	public java.lang.Long getId() {
@@ -188,11 +188,11 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.rechargeStatus = rechargeStatus;
 	}
 
-	public java.lang.Long getEnterpriseCommunityId() {
-		return this.enterpriseCommunityId;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setEnterpriseCommunityId(java.lang.Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 }

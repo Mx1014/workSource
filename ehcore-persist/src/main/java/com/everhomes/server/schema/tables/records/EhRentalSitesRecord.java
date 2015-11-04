@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> implements org.jooq.Record21<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.lang.String, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 253351792;
+	private static final long serialVersionUID = -975653692;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.id</code>. id
@@ -42,16 +42,16 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_sites.enterprise_community_id</code>.  enterprise  community id
+	 * Setter for <code>ehcore.eh_rental_sites.community_id</code>.  enterprise  community id
 	 */
-	public void setEnterpriseCommunityId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_sites.enterprise_community_id</code>.  enterprise  community id
+	 * Getter for <code>ehcore.eh_rental_sites.community_id</code>.  enterprise  community id
 	 */
-	public java.lang.Long getEnterpriseCommunityId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(2);
 	}
 
@@ -360,7 +360,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field3() {
-		return com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.ENTERPRISE_COMMUNITY_ID;
+		return com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.COMMUNITY_ID;
 	}
 
 	/**
@@ -528,7 +528,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	 */
 	@Override
 	public java.lang.Long value3() {
-		return getEnterpriseCommunityId();
+		return getCommunityId();
 	}
 
 	/**
@@ -698,7 +698,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	 */
 	@Override
 	public EhRentalSitesRecord value3(java.lang.Long value) {
-		setEnterpriseCommunityId(value);
+		setCommunityId(value);
 		return this;
 	}
 
@@ -886,12 +886,12 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalSitesRecord
 	 */
-	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.Long enterpriseCommunityId, java.lang.String siteType, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.Long communityId, java.lang.String siteType, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES);
 
 		setValue(0, id);
 		setValue(1, parentId);
-		setValue(2, enterpriseCommunityId);
+		setValue(2, communityId);
 		setValue(3, siteType);
 		setValue(4, siteName);
 		setValue(5, siteType2);

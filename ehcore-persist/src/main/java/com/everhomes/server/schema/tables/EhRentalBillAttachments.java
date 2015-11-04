@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord> {
 
-	private static final long serialVersionUID = -1436685589;
+	private static final long serialVersionUID = -1254275717;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bill_attachments</code>
@@ -32,9 +32,9 @@ public class EhRentalBillAttachments extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_bill_attachments.enterprise_community_id</code>.  enterprise  community id
+	 * The column <code>ehcore.eh_rental_bill_attachments.community_id</code>.  enterprise  community id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> ENTERPRISE_COMMUNITY_ID = createField("enterprise_community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, " enterprise  community id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, " enterprise  community id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bill_attachments.site_type</code>.

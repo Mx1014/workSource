@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1663862641;
+	private static final long serialVersionUID = 795939831;
 
 	private java.lang.Long     id;
-	private java.lang.Long     enterpriseCommunityId;
+	private java.lang.Long     communityId;
 	private java.lang.String   siteType;
 	private java.lang.Long     rentalBillId;
 	private java.lang.Long     rentalSiteItemId;
@@ -29,7 +29,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 
 	public EhRentalItemsBills(
 		java.lang.Long     id,
-		java.lang.Long     enterpriseCommunityId,
+		java.lang.Long     communityId,
 		java.lang.String   siteType,
 		java.lang.Long     rentalBillId,
 		java.lang.Long     rentalSiteItemId,
@@ -41,7 +41,7 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
-		this.enterpriseCommunityId = enterpriseCommunityId;
+		this.communityId = communityId;
 		this.siteType = siteType;
 		this.rentalBillId = rentalBillId;
 		this.rentalSiteItemId = rentalSiteItemId;
@@ -61,12 +61,12 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getEnterpriseCommunityId() {
-		return this.enterpriseCommunityId;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setEnterpriseCommunityId(java.lang.Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public java.lang.String getSiteType() {

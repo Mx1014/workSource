@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = -1657082158;
+	private static final long serialVersionUID = 1622921992;
 
 	/**
 	 * Setter for <code>ehcore.eh_groups.id</code>. id of the record
@@ -476,16 +476,16 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_groups.creator_community_id</code>. the id of community where the creator located when the group is created
+	 * Setter for <code>ehcore.eh_groups.community_id</code>. the id of community where the creator located when the group is created
 	 */
-	public void setCreatorCommunityId(java.lang.Long value) {
+	public void setCommunityId(java.lang.Long value) {
 		setValue(33, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_groups.creator_community_id</code>. the id of community where the creator located when the group is created
+	 * Getter for <code>ehcore.eh_groups.community_id</code>. the id of community where the creator located when the group is created
 	 */
-	public java.lang.Long getCreatorCommunityId() {
+	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(33);
 	}
 
@@ -515,7 +515,7 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 	/**
 	 * Create a detached, initialised EhGroupsRecord
 	 */
-	public EhGroupsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long shareCount, java.lang.Byte postFlag, java.lang.String tag, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long creatorCommunityId) {
+	public EhGroupsRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String name, java.lang.String displayName, java.lang.String avatar, java.lang.String description, java.lang.Long creatorUid, java.lang.Byte privateFlag, java.lang.Integer joinPolicy, java.lang.String discriminator, java.lang.Byte visibilityScope, java.lang.Long visibilityScopeId, java.lang.Long categoryId, java.lang.String categoryPath, java.lang.Byte status, java.lang.Long memberCount, java.lang.Long shareCount, java.lang.Byte postFlag, java.lang.String tag, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long communityId) {
 		super(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS);
 
 		setValue(0, id);
@@ -551,6 +551,6 @@ public class EhGroupsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everho
 		setValue(30, updateTime);
 		setValue(31, createTime);
 		setValue(32, deleteTime);
-		setValue(33, creatorCommunityId);
+		setValue(33, communityId);
 	}
 }
