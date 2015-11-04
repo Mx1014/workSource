@@ -2,6 +2,7 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -58,6 +59,7 @@ public class RentalBillDTO {
 	private Double unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
+	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 	
 	

@@ -2,10 +2,13 @@ package com.everhomes.user.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 public class UsersWithAddrResponse {
 	
 	private Integer nextPageOffset;
 	
+	@ItemType(ListUsersWithAddrResponse.class)
 	private List<ListUsersWithAddrResponse> users;
 
 	public Integer getNextPageOffset() {

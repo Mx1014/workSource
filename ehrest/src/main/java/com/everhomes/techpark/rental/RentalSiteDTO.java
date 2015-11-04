@@ -2,6 +2,7 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -30,7 +31,9 @@ public class RentalSiteDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
+	@ItemType(RentalSiteRulesDTO.class)
 	private List<RentalSiteRulesDTO> siteRules;
 	
 	@Override
