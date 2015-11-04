@@ -34,7 +34,10 @@ import com.everhomes.util.StringHelper;
  *         <li>regionId:城市ID</li>
  *         <li>regionName:城市名</li>
  *         <li>regionPath:城市路径</li>
- *         <li>uuid:用户唯一的标识</li>
+ *         <li>uuid:用户唯一的标识</li> 
+ *         <li>communityType: 园区类型，参考{@link com.everhomes.community.CommunityType}</li>
+ *         <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
+ *         <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  *         </ul>
  **/
 public class UserInfo {
@@ -67,6 +70,10 @@ public class UserInfo {
 
     @ItemType(String.class)
     private List<String> emails;
+    
+    private Byte communityType;
+    private Long defaultForumId;
+    private Long feedbackForumId;
 
     public UserInfo() {
     }
@@ -253,6 +260,30 @@ public class UserInfo {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
+    }
+
+    public Long getDefaultForumId() {
+        return defaultForumId;
+    }
+
+    public void setDefaultForumId(Long defaultForumId) {
+        this.defaultForumId = defaultForumId;
+    }
+
+    public Long getFeedbackForumId() {
+        return feedbackForumId;
+    }
+
+    public void setFeedbackForumId(Long feedbackForumId) {
+        this.feedbackForumId = feedbackForumId;
     }
 
     @Override

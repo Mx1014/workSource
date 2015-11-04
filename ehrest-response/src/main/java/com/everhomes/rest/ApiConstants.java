@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-04 15:53:52
+// generated at 2015-11-04 16:47:27
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -242,11 +242,6 @@ public interface ApiConstants {
     public static final String FORUM_UPDATEFREESTUFF_URL = "/forum/updateFreeStuff";
     public static final String FORUM_UPDATELOSTANDFOUND_URL = "/forum/updateLostAndFound";
     public static final String FORUM_UPDATEUSEDANDRENTAL_URL = "/forum/updateUsedAndRental";
-    public static final String GCONTACT_CREATEGROUPCONTACT_URL = "/gcontact/createGroupContact";
-    public static final String GCONTACT_DELETEGROUPCONTACT_URL = "/gcontact/deleteGroupContact";
-    public static final String GCONTACT_IMPORTGROUPCONTACTS_URL = "/gcontact/importGroupContacts";
-    public static final String GCONTACT_LISTGROUPCONTACTS_URL = "/gcontact/listGroupContacts";
-    public static final String GCONTACT_UPDATEGROUPCONTACT_URL = "/gcontact/updateGroupContact";
     public static final String GROUP_ACCEPTJOININVITATION_URL = "/group/acceptJoinInvitation";
     public static final String GROUP_APPROVEADMINROLE_URL = "/group/approveAdminRole";
     public static final String GROUP_APPROVEJOINREQUEST_URL = "/group/approveJoinRequest";
