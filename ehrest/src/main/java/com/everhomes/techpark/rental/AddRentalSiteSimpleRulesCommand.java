@@ -4,14 +4,15 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
- * <li>rentalType：按日还是按小时预定 参考{@link com.everhomes.techpark.rental.RentalType} </li> 
+ * <li>rentalType：0按时间 1按半天 2按全天 参考{@link com.everhomes.techpark.rental.RentalType} </li> 
  * <li>beginDate：开始日期(Long)</li>
  * <li>endDate：结束日期(Long)</li>
- * <li>timeStep：最小预定时间(hour)</li>
+ * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li> 
  * <li>beginTime：开始时间(hour)</li>
  * <li>endTime：结束时间(hour)</li>
  * <li>counts：场所数量</li> 
@@ -40,9 +41,10 @@ public class AddRentalSiteSimpleRulesCommand {
 	@NotNull
 	private Long beginDate;
 	@NotNull
-	private Long endDate;
-	@NotNull
+	private Long endDate; 
 	private Double timeStep; 
+	@NotNull
+	private Integer rentalStep;
 	private Double beginTime; 
 	private Double endTime;
 	@NotNull
@@ -60,7 +62,8 @@ public class AddRentalSiteSimpleRulesCommand {
 	@NotNull
 	private Byte status;
 	@NotNull
-	private String choosen;
+	@ItemType(Integer.class)
+	private List<Integer> choosen;
 	
 	
 	@Override
@@ -166,19 +169,7 @@ public class AddRentalSiteSimpleRulesCommand {
 		this.endTime = endTime;
 	}
 
-
-
-	public String getChoosen() {
-		return choosen;
-	}
-
-
-
-	public void setChoosen(String choosen) {
-		this.choosen = choosen;
-	}
-
-
+ 
 
 	public Long getEnterpriseCommunityId() {
 		return enterpriseCommunityId;
@@ -311,6 +302,30 @@ public class AddRentalSiteSimpleRulesCommand {
 
 	public void setWeekendPMPrice(Double weekendPMPrice) {
 		this.weekendPMPrice = weekendPMPrice;
+	}
+
+
+
+	public List<Integer> getChoosen() {
+		return choosen;
+	}
+
+
+
+	public void setChoosen(List<Integer> choosen) {
+		this.choosen = choosen;
+	}
+
+
+
+	public Integer getRentalStep() {
+		return rentalStep;
+	}
+
+
+
+	public void setRentalStep(Integer rentalStep) {
+		this.rentalStep = rentalStep;
 	}
 
  

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 420480273;
+	private static final long serialVersionUID = 408283045;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseCommunityId;
@@ -19,6 +19,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.lang.Long     rentalSiteId;
 	private java.lang.Byte     rentalType;
 	private java.lang.Byte     amorpm;
+	private java.lang.Integer  rentalstep;
 	private java.sql.Timestamp beginTime;
 	private java.sql.Timestamp endTime;
 	private java.lang.Double   counts;
@@ -40,6 +41,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Long     rentalSiteId,
 		java.lang.Byte     rentalType,
 		java.lang.Byte     amorpm,
+		java.lang.Integer  rentalstep,
 		java.sql.Timestamp beginTime,
 		java.sql.Timestamp endTime,
 		java.lang.Double   counts,
@@ -58,6 +60,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
 		this.amorpm = amorpm;
+		this.rentalstep = rentalstep;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		this.counts = counts;
@@ -117,6 +120,14 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setAmorpm(java.lang.Byte amorpm) {
 		this.amorpm = amorpm;
+	}
+
+	public java.lang.Integer getRentalstep() {
+		return this.rentalstep;
+	}
+
+	public void setRentalstep(java.lang.Integer rentalstep) {
+		this.rentalstep = rentalstep;
 	}
 
 	public java.sql.Timestamp getBeginTime() {

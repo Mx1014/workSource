@@ -231,6 +231,7 @@ public class RentalServiceImpl implements RentalService {
 					dto.setId(rsr.getId());
 					dto.setRentalSiteId(rsr.getRentalSiteId());
 					dto.setRentalType(rsr.getRentalType());
+					dto.setRentalStep(rsr.getRentalstep());
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						dto.setBeginTime(rsr.getBeginTime().getTime());
 						dto.setEndTime(rsr.getEndTime().getTime());
@@ -690,16 +691,15 @@ public class RentalServiceImpl implements RentalService {
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getBeginDate()));
 		end.setTime(new Date(cmd.getEndDate()));
-		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
-		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
-		Gson gson = new Gson();
-		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
-				new TypeToken<List<Integer>>() {
-				}.getType());
+//		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
+//		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
+//		Gson gson = new Gson();
+//		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
+//				new TypeToken<List<Integer>>() {
+//				}.getType());
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
-			if (choosenInts.contains(weekday)) {
-
+			if (cmd.getChoosen().contains(weekday)) {
 				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
 						rsr.setEnterpriseCommunityId(cmd
@@ -713,7 +713,10 @@ public class RentalServiceImpl implements RentalService {
 								+ String.valueOf((int) ((i % 1) * 60))
 								+ ":00"));
 
-						i = i + cmd.getTimeStep();
+//						i = i + cmd.getTimeStep();
+						rsr.setRentalstep(cmd.getRentalStep());
+						i = i+0.5;
+						
 						rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
 								.getTime())
 								+ " "
@@ -755,7 +758,7 @@ public class RentalServiceImpl implements RentalService {
 					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 							.getTime()));
 					rsr.setCreatorUid(userId);
-
+					rsr.setRentalstep(cmd.getRentalStep());
 					if (weekday == 1 || weekday == 7) {
 						rsr.setPrice(cmd.getWeekendAMPrice());
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
@@ -779,6 +782,7 @@ public class RentalServiceImpl implements RentalService {
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts());
+					rsr.setRentalstep(cmd.getRentalStep());
 					rsr.setUnit(cmd.getUnit());
 					if (weekday == 1 || weekday == 7) {
 						rsr.setPrice(cmd.getWeekendPrice());

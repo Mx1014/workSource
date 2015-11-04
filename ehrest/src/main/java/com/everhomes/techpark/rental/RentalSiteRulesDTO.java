@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>endTime：结束时间(MM:SS)</li>
  * <li>counts：场所数量</li> 
  * <li>unit：场所单位:1or0.5</li> 
+ * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li> 
  * <li>price：场所数量</li> 
  * <li>ruleDate：规则日期</li>  
  * <li>Status： OPEN(0),CLOSE(1){@link com.everhomes.techpark.rental.SiteRuleStatus} </li> 
@@ -26,6 +27,7 @@ public class RentalSiteRulesDTO {
 	private Double counts;
 	private Double unit;
 	private Double price;
+	private Integer rentalStep;
 	private Long ruleDate; 
 	private Byte status;
 	
@@ -168,5 +170,17 @@ public class RentalSiteRulesDTO {
 
 	public void setAmorpm(Byte amorpm) {
 		this.amorpm = amorpm;
+	}
+
+
+
+	public Integer getRentalStep() {
+		return rentalStep;
+	}
+
+
+
+	public void setRentalStep(Integer rentalStep) {
+		this.rentalStep = rentalStep;
 	}
 }

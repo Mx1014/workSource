@@ -258,6 +258,7 @@ CREATE TABLE `eh_rental_site_rules`(
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `rental_type` tinyint(4) COMMENT '0: as hour:min  1-as half day 2-as day',
   `amorpm` tinyint(4)  COMMENT '0:am  1:pm',
+  `rentalStep` int(11) DEFAULT 1 COMMENT 'how much every order',
   `begin_time` DATETIME,
   `end_time` DATETIME,
   `counts` DOUBLE  COMMENT 'site count',
