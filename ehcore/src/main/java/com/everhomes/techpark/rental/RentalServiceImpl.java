@@ -27,6 +27,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService; 
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -44,6 +45,10 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private String queueName = "rentalService";
+
+	@Autowired
+	private OnlinePayService onlinePayService;
+	
     @Autowired
     JesqueClientFactory jesqueClientFactory;
 	@Autowired
@@ -968,9 +973,10 @@ public class RentalServiceImpl implements RentalService {
 			}
 			rentalProvider.updateRentalBill(bill);
 			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+				equals(obj)
 				response.setAmount(bill.getReserveMoney());
 			}
-			else if   (bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+			else if (bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 				response.setAmount(bill.getPayTotalMoney()
 						- bill.getPaidMoney());
 			}
