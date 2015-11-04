@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = -310235792;
+	private static final long serialVersionUID = -802834126;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
@@ -23,7 +23,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 	private java.lang.String   rechargePhone;
 	private java.sql.Timestamp rechargeTime;
 	private java.lang.Byte     rechargeMonth;
-	private java.lang.Integer  rechargeAmount;
+	private java.lang.Double   rechargeAmount;
 	private java.sql.Timestamp oldValidityperiod;
 	private java.sql.Timestamp newValidityperiod;
 	private java.lang.Byte     paymentStatus;
@@ -43,7 +43,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.lang.String   rechargePhone,
 		java.sql.Timestamp rechargeTime,
 		java.lang.Byte     rechargeMonth,
-		java.lang.Integer  rechargeAmount,
+		java.lang.Double   rechargeAmount,
 		java.sql.Timestamp oldValidityperiod,
 		java.sql.Timestamp newValidityperiod,
 		java.lang.Byte     paymentStatus,
@@ -148,11 +148,11 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.rechargeMonth = rechargeMonth;
 	}
 
-	public java.lang.Integer getRechargeAmount() {
+	public java.lang.Double getRechargeAmount() {
 		return this.rechargeAmount;
 	}
 
-	public void setRechargeAmount(java.lang.Integer rechargeAmount) {
+	public void setRechargeAmount(java.lang.Double rechargeAmount) {
 		this.rechargeAmount = rechargeAmount;
 	}
 

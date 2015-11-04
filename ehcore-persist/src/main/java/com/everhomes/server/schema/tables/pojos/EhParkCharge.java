@@ -11,20 +11,20 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkCharge implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1021704685;
+	private static final long serialVersionUID = -1739428201;
 
-	private java.lang.Long    id;
-	private java.lang.Byte    months;
-	private java.lang.Integer amount;
-	private java.lang.Long    enterpriseCommunityId;
+	private java.lang.Long   id;
+	private java.lang.Byte   months;
+	private java.lang.Double amount;
+	private java.lang.Long   enterpriseCommunityId;
 
 	public EhParkCharge() {}
 
 	public EhParkCharge(
-		java.lang.Long    id,
-		java.lang.Byte    months,
-		java.lang.Integer amount,
-		java.lang.Long    enterpriseCommunityId
+		java.lang.Long   id,
+		java.lang.Byte   months,
+		java.lang.Double amount,
+		java.lang.Long   enterpriseCommunityId
 	) {
 		this.id = id;
 		this.months = months;
@@ -48,11 +48,11 @@ public class EhParkCharge implements java.io.Serializable {
 		this.months = months;
 	}
 
-	public java.lang.Integer getAmount() {
+	public java.lang.Double getAmount() {
 		return this.amount;
 	}
 
-	public void setAmount(java.lang.Integer amount) {
+	public void setAmount(java.lang.Double amount) {
 		this.amount = amount;
 	}
 

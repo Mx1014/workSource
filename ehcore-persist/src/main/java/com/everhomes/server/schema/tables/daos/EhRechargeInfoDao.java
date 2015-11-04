@@ -113,7 +113,7 @@ public class EhRechargeInfoDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	/**
 	 * Fetch records that have <code>recharge_amount IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByRechargeAmount(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRechargeInfo> fetchByRechargeAmount(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO.RECHARGE_AMOUNT, values);
 	}
 

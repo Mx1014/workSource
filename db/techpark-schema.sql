@@ -391,6 +391,8 @@ CREATE TABLE `eh_recharge_info`(
   `enterprise_community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `eh_park_apply_card`;
 
 CREATE TABLE `eh_park_apply_card` (

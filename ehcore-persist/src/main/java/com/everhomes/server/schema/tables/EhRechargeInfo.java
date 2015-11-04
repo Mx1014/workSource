@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord> {
 
-	private static final long serialVersionUID = -958932496;
+	private static final long serialVersionUID = 644955744;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_recharge_info</code>
@@ -79,7 +79,7 @@ public class EhRechargeInfo extends org.jooq.impl.TableImpl<com.everhomes.server
 	/**
 	 * The column <code>ehcore.eh_recharge_info.recharge_amount</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Integer> RECHARGE_AMOUNT = createField("recharge_amount", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRechargeInfoRecord, java.lang.Double> RECHARGE_AMOUNT = createField("recharge_amount", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_recharge_info.old_validityperiod</code>.
