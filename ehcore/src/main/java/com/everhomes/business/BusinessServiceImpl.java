@@ -6,8 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +25,7 @@ import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.business.admin.BusinessAdminDTO;
@@ -267,6 +270,10 @@ public class BusinessServiceImpl implements BusinessService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		long startTime = System.currentTimeMillis();
+		int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+		int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+		int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
 
 		GetBusinessesByCategoryCommandResponse response = new GetBusinessesByCategoryCommandResponse();
 		//只作校验用

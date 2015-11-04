@@ -95,6 +95,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     public List<Enterprise> queryEnterpriseByPhone(String phone) {
         return this.enterpriseService.listEnterpriseByPhone(phone);
     }
+    
+    @Override
+    public EnterpriseContact queryContactByUserId(Long enterpriseId, Long userId) {
+        return this.enterpriseContactProvider.queryContactByUserId(enterpriseId, userId);
+    }
 
     @Override
     public void processUserForContact(UserIdentifier identifier) {
@@ -105,7 +110,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         for(Enterprise en : enterprises) {
             //Try to create a contact for this enterprise
             //TODO change to queryContactByPhone
-            EnterpriseContact contact = this.enterpriseContactProvider.queryContactByUserId(en.getId(), identifier.getOwnerUid());
+            //EnterpriseContact contact = this.enterpriseContactProvider.queryContactByUserId(en.getId(), identifier.getOwnerUid());
+            EnterpriseContact contact = this.getContactByPhone(en.getId(), identifier.getIdentifierToken());
             if(null == contact) {
                 //create new contact for it
                 contact = new EnterpriseContact();
@@ -129,6 +135,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 this.enterpriseContactProvider.createContactEntry(entry);
                 
                 sendMessageForContactApproved(ctx, contact);
+         } else {
+             //auto approved
+             contact.setUserId(user.getId());
+             contact.setStatus(EnterpriseContactStatus.Approved.getCode());
+             this.enterpriseContactProvider.createContact(contact);
+             sendMessageForContactApproved(ctx, contact);
             }
         }
         
@@ -214,8 +226,15 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     /**
      * 批准用户加入企业
      */
+    @Override
     public void approveContact(EnterpriseContact contact) {
         //assert contact is from db and status is approve
+        
+        //TODO generate a error code
+        if(contact.getStatus().equals(EnterpriseContactStatus.Approved.getCode())) {
+            return;
+        }
+        
         contact.setStatus(EnterpriseContactStatus.Approved.getCode());
         this.enterpriseContactProvider.updateContact(contact);
         
@@ -225,11 +244,20 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         String applyGroup = contact.getApplyGroup();
         if(applyGroup != null && !applyGroup.isEmpty()) {
             EnterpriseContactGroup group = this.enterpriseContactProvider.getContactGroupByName(contact.getEnterpriseId(), applyGroup);
-            approveContactToGroup(contact, group);
+            if(null != group) {
+                approveContactToGroup(contact, group);    
+                }
+            
         }
         
         //sendMessageForContactApproved(contact);
         sendMessageForContactApproved(null, contact);
+    }
+    
+    @Override 
+    public void approveByContactId(Long contactId) {
+        EnterpriseContact contact = this.enterpriseContactProvider.getContactById(contactId);
+        this.approveContact(contact);
     }
     
     /**
@@ -372,7 +400,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     @Override
     public List<GroupMember> listMessageGroupMembers(Group group, int pageSize) {
         List<GroupMember> members = new ArrayList<GroupMember>(); 
-        if (group.getDiscriminator() == GroupDiscriminator.Enterprise.getCode()) {
+        if (group.getDiscriminator().equals(GroupDiscriminator.Enterprise.getCode())) {
                 ListingLocator locator = new ListingLocator();
                 //List approved members
                 List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactByEnterpriseId(locator, group.getId(), pageSize);
@@ -393,7 +421,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         }
         
         if(check == null) {
-            ctx.put(contact.getEnterpriseId(), 1l);
+            if(ctx != null) {
+                ctx.put(contact.getEnterpriseId(), 1l);    
+            }
+            
             Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
             User user = userProvider.findUserById(contact.getUserId());
             

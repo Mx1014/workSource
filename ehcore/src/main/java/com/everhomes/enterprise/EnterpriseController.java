@@ -151,6 +151,7 @@ public class EnterpriseController extends ControllerBase {
       }
       resp.setEnterprises(dtos);
       RestResponse res = new RestResponse();
+      res.setResponseObject(resp);
       res.setErrorCode(ErrorCodes.SUCCESS);
       res.setErrorDescription("OK");
       

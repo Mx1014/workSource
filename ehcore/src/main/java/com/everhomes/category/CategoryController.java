@@ -17,7 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryAdminStatus;
+import com.everhomes.category.CategoryDTO;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.category.ListCategoryCommand;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
@@ -106,7 +112,6 @@ public class CategoryController extends ControllerBase {
 		}
 		return new RestResponse();
 	}
-
 	@SuppressWarnings("rawtypes")
 	private Tuple[] defaultSort(){
 		Tuple[] tuples = new Tuple[1]; 
@@ -114,6 +119,7 @@ public class CategoryController extends ControllerBase {
 		//tuples[1] = new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC);
 		return tuples;
 	}
+
 
 	/**
 	 * <b>URL: /category/listDescendants</b> 列出指定类型下的所有孩子类型
@@ -144,6 +150,9 @@ public class CategoryController extends ControllerBase {
 		}
 		return new RestResponse();
 	}
+
+
+
 
 	/**
 	 * <b>URL: /category/listRoot</b> 列出所有的大类
