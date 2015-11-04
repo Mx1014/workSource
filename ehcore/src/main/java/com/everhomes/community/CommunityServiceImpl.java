@@ -25,7 +25,10 @@ import com.everhomes.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.community.admin.UpdateCommunityAdminCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -71,6 +74,9 @@ public class CommunityServiceImpl implements CommunityService {
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
 	private CommunitySearcher communitySearcher;
+	
+	@Autowired
+	private ContentServerService contentServerService;
 
 
 	@Override
@@ -480,5 +486,202 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return response;
 	}
+
+
+	@Override
+	public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
+		
+		Long communityId = cmd.getCommunityId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId);
+		
+		this.communityProvider.populateBuildingAttachments(buildings);
+        
+        Long nextPageAnchor = null;
+        if(buildings.size() > pageSize) {
+        	buildings.remove(buildings.size() - 1);
+            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+        }
+        
+        populateBuildings(buildings);
+        
+        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
+          return ConvertHelper.convert(r, BuildingDTO.class);  
+        }).collect(Collectors.toList());
+        
+        
+        return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
+	}
+
+	@Override
+	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
+		
+		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
+		if(building != null) {
+            if(BuildingStatus.ACTIVE != BuildingStatus.fromCode(building.getStatus())) {
+            	
+        		LOGGER.error("Building already deleted");
+        		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
+        				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
+            }
+			this.communityProvider.populateBuildingAttachments(building);
+	        populateBuilding(building);
+	        return ConvertHelper.convert(building, BuildingDTO.class);
+		}else {
+            LOGGER.error("Building not found");
+            throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
+            		BuildingServiceErrorCode.ERROR_BUILDING_NOT_FOUND, "Building not found");
+        }
+	}
+	
+	private void populateBuildings(List<Building> buildingList) {
+        if(buildingList == null || buildingList.size() == 0) {
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("The building list is empty");
+            }
+            return;
+        } else {
+            for(Building building : buildingList) {
+            	populateBuilding(building);
+            }
+        }
+    }
+
+	/**
+	 * 填充楼栋信息
+	 */
+	 private void populateBuilding(Building building) {
+		 
+		 if(building == null) {
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("The building is null");
+            }
+		 } else {
+			 populateBuildingCreatorInfo(building);
+			 populateBuildingManagerInfo(building);
+			 populateBuildingOperatorInfo(building);
+             
+			 populateBuildingAttachements(building, building.getAttachments());
+	        
+		 }
+	 }
+	 
+	 
+	 private void populateBuildingCreatorInfo(Building building) {
+		 
+		 String creatorNickName = building.getCreatorNickName();
+         String creatorAvatar = building.getCreatorAvatar();
+         
+         User creator = userProvider.findUserById(building.getCreatorUid());
+         if(creator != null) {
+             if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+            	 building.setCreatorNickName(creator.getNickName());
+             }
+             if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+            	 building.setCreatorAvatar(creator.getAvatar());
+             }
+         }
+         creatorAvatar = building.getCreatorAvatar();
+         if(creatorAvatar != null && creatorAvatar.length() > 0) {
+             String avatarUrl = contentServerService.parserUri(creatorAvatar, EntityType.USER.getCode(), building.getCreatorUid());
+             building.setCreatorAvatarUrl(avatarUrl);
+         }
+		 
+	 }
+	 
+	 private void populateBuildingManagerInfo(Building building) {
+		 
+		 String managerNickName = building.getManagerNickName();
+         String managerAvatar = building.getManagerAvatar();
+         
+         User manager = userProvider.findUserById(building.getManagerUid());
+         if(manager != null) {
+             if(managerNickName == null || managerNickName.trim().length() == 0) {
+            	 building.setManagerNickName(manager.getNickName());
+             }
+             if(managerAvatar == null || managerAvatar.trim().length() == 0) {
+            	 building.setManagerAvatar(manager.getAvatar());
+             }
+         }
+         managerAvatar = building.getManagerAvatar();
+         if(managerAvatar != null && managerAvatar.length() > 0) {
+             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), building.getManagerUid());
+             building.setManagerAvatarUrl(avatarUrl);
+         }
+	 }
+
+	 private void populateBuildingOperatorInfo(Building building) {
+	 
+		 String operatorNickName = building.getOperateNickName();
+         String operatorAvatar = building.getOperateAvatar();
+         
+         User operator = userProvider.findUserById(building.getOperatorUid());
+         if(operator != null) {
+             if(operatorNickName == null || operatorNickName.trim().length() == 0) {
+            	 building.setOperateNickName(operator.getNickName());
+             }
+             if(operatorAvatar == null || operatorAvatar.trim().length() == 0) {
+            	 building.setOperateAvatar(operator.getAvatar());
+             }
+         }
+         operatorAvatar = building.getOperateAvatar();
+         if(operatorAvatar != null && operatorAvatar.length() > 0) {
+             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
+             building.setOperateAvatarUrl(avatarUrl);
+         }
+	 }
+	 
+	 private void populateBuildingAttachements(Building building, List<BuildingAttachment> attachmentList) {
+	 
+		 if(attachmentList == null || attachmentList.size() == 0) {
+	            if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("The building attachment list is empty, buildingId=" + building.getId());
+	            }
+		 } else {
+	            for(BuildingAttachment attachment : attachmentList) {
+	                populateBuildingAttachement(building, attachment);
+	            }
+		 }
+	 }
+	 
+	 private void populateBuildingAttachement(Building building, BuildingAttachment attachment) {
+        
+		 if(attachment == null) {
+			 if(LOGGER.isInfoEnabled()) {
+				 LOGGER.info("The building attachment is null, buildingId=" + building.getId());
+			 }
+		 } else {
+			 
+			 String contentUri = attachment.getContentUri();
+			 if(contentUri != null && contentUri.length() > 0) {
+				 try{
+                  
+					 String url = contentServerService.parserUri(contentUri, EntityType.BUILDING.getCode(), building.getId());
+                    
+					 attachment.setContentUrl(url);
+					 ContentServerResource resource = contentServerService.findResourceByUri(contentUri);
+                    
+                
+				 }catch(Exception e){
+                    
+					 LOGGER.error("Failed to parse attachment uri, buildingId=" + building.getId() + ", attachmentId=" + attachment.getId(), e);
+                
+				 }
+            
+			 } else {
+             
+				 if(LOGGER.isWarnEnabled()) {
+                 
+					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
+                
+				 }
+            
+			 }
+        
+		 }
+    
+	 }
 
 }

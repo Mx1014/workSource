@@ -122,5 +122,35 @@ public class CommunityController extends ControllerBase {
         return response;
     }
 
+    /**
+	 * <b>URL: /community/listBuildings</b>
+	 * <p>根据园区号查询楼栋列表</p>
+	 */
+	@RequestMapping("listBuildings")
+    @RestReturn(value=ListBuildingCommandResponse.class)
+	public RestResponse listBuildings(ListBuildingCommand cmd) {
+		
+		ListBuildingCommandResponse buildings = communityService.listBuildings(cmd);
+		RestResponse response =  new RestResponse(buildings);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+	/**
+	 * <b>URL: /community/getBuilding</b>
+	 * <p>查询指定园区内指定楼栋详情</p>
+	 */
+	@RequestMapping("getBuilding")
+    @RestReturn(value=BuildingDTO.class, collection=true)
+	public RestResponse getBuilding(GetBuildingCommand cmd) {
+		BuildingDTO dto = communityService.getBuilding(cmd);
+		RestResponse response =  new RestResponse(dto);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
 
 }

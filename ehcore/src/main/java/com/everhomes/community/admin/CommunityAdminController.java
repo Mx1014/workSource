@@ -214,6 +214,30 @@ public class CommunityAdminController extends ControllerBase {
         return response;
     	
     }
+    
+    public RestResponse addBuilding() {
+		RestResponse response =  new RestResponse();
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+	public RestResponse deleteBuilding() {
+		RestResponse response =  new RestResponse();
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+	public RestResponse updateBuilding() {
+		RestResponse response =  new RestResponse();
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
 
 
 }
