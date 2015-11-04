@@ -4,8 +4,8 @@ package com.everhomes.visibility;
 /**
  * <p>区域范围：</p>
  * <ul>
- * <li>COMMUNITY: 小区</li>
- * <li>REGION: 片区</li>
+ * <li>COMMUNITY: 园区（含小区）</li>
+ * <li>REGION: 片区（机构）</li>
  * </ul>
  *
  */

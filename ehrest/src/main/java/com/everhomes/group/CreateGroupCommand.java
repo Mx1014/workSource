@@ -17,7 +17,8 @@ import com.everhomes.util.StringHelper;
  * <li>tag：标签，用于搜索</li>
  * <li>postFlag：是否只有管理员可以发帖，参考{@link com.everhomes.group.GroupPostFlag}</li>
  * <li>explicitRegionDescriptorsJson：暂不使用</li>
- * <li>communityId：用户创建圈时所在的园区（含小区）</li>
+ * <li>visibleRegionType：用户创建圈时所在的范围类型，{@link com.everhomes.visibility.VisibleRegionType}，添加于3.1.0版本 20151104</li>
+ * <li>visibleRegionId：用户创建圈时所在的范围ID，如园区/小区ID、片区ID（即机构ID），添加于3.1.0版本 20151104</li>
  * </ul>
  */
 public class CreateGroupCommand {
@@ -31,7 +32,8 @@ public class CreateGroupCommand {
     private Long categoryId;
     private String tag;
     private Byte postFlag;
-    private Long communityId;
+    private Byte visibleRegionType;
+    private Long visibleRegionId;
 
     // json of List<RegionDescriptor>
     private String explicitRegionDescriptorsJson;
@@ -119,12 +121,20 @@ public class CreateGroupCommand {
         this.explicitRegionDescriptorsJson = explicitRegionDescriptorsJson;
     }
 
-    public Long getCommunityId() {
-        return communityId;
+    public Byte getVisibleRegionType() {
+        return visibleRegionType;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setVisibleRegionType(Byte visibleRegionType) {
+        this.visibleRegionType = visibleRegionType;
+    }
+
+    public Long getVisibleRegionId() {
+        return visibleRegionId;
+    }
+
+    public void setVisibleRegionId(Long visibleRegionId) {
+        this.visibleRegionId = visibleRegionId;
     }
 
     @Override
