@@ -9,7 +9,7 @@ public class CreateParkingChargeCommand {
 	private Byte months;
 	
 	@NotNull
-	private Integer amount;
+	private Double amount;
 
 	public Byte getMonths() {
 		return months;
@@ -19,11 +19,11 @@ public class CreateParkingChargeCommand {
 		this.months = months;
 	}
 
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 	

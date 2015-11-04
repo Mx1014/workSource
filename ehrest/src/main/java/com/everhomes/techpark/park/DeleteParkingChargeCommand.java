@@ -11,7 +11,7 @@ public class DeleteParkingChargeCommand {
 	private Byte months;
 	
 	@NotNull
-	private Integer amount;
+	private Double amount;
 
 	public Long getId() {
 		return id;
@@ -29,11 +29,11 @@ public class DeleteParkingChargeCommand {
 		this.months = months;
 	}
 
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 	

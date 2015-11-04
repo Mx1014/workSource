@@ -14,7 +14,7 @@ public class RechargeRecordDTO {
 	
 	private Byte rechargeMonth;
 	
-	private Integer rechargeAmount;
+	private Double rechargeAmount;
 	
 	private Byte paymentStatus;
 	
@@ -70,11 +70,11 @@ public class RechargeRecordDTO {
 		this.rechargeMonth = rechargeMonth;
 	}
 
-	public Integer getRechargeAmount() {
+	public Double getRechargeAmount() {
 		return rechargeAmount;
 	}
 
-	public void setRechargeAmount(Integer rechargeAmount) {
+	public void setRechargeAmount(Double rechargeAmount) {
 		this.rechargeAmount = rechargeAmount;
 	}
 

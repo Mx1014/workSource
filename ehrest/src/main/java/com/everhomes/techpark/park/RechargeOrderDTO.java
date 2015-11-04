@@ -10,7 +10,7 @@ public class RechargeOrderDTO {
 	
 	private Long billId;
 	
-	private Integer amount;
+	private Double amount;
 	
 	public Long getBillId() {
 		return billId;
@@ -20,11 +20,11 @@ public class RechargeOrderDTO {
 		this.billId = billId;
 	}
 
-	public Integer getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Integer amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 

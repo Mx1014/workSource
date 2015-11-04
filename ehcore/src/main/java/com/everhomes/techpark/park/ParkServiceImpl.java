@@ -51,9 +51,7 @@ import org.springframework.stereotype.Component;
 
 
 
-import com.bosigao.cxf.GetCardInfo;
 import com.bosigao.cxf.Service1;
-import com.bosigao.cxf.Service1HttpPost;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -65,9 +63,7 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.pm.pay.BaseVo;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.organization.pm.pay.RestUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
