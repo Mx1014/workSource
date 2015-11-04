@@ -277,4 +277,11 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>creator_community_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByCreatorCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.CREATOR_COMMUNITY_ID, values);
+	}
 }

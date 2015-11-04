@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -988933983;
+	private static final long serialVersionUID = -575537311;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -46,6 +46,7 @@ public class EhGroups implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.Long     creatorCommunityId;
 
 	public EhGroups() {}
 
@@ -82,7 +83,8 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.String   stringTag5,
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.Long     creatorCommunityId
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -117,6 +119,7 @@ public class EhGroups implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
+		this.creatorCommunityId = creatorCommunityId;
 	}
 
 	public java.lang.Long getId() {
@@ -381,5 +384,13 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.Long getCreatorCommunityId() {
+		return this.creatorCommunityId;
+	}
+
+	public void setCreatorCommunityId(java.lang.Long creatorCommunityId) {
+		this.creatorCommunityId = creatorCommunityId;
 	}
 }

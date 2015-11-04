@@ -177,6 +177,7 @@ ALTER TABLE `eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAUL
 ALTER TABLE `eh_communities` ADD COLUMN `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum';
 ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum';
 ALTER TABLE `eh_communities` ADD COLUMN `update_time` DATETIME;
+ALTER TABLE `eh_groups` ADD COLUMN `creator_community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of community where the creator located when the group is created';
 
 #
 # member of eh_communities partition

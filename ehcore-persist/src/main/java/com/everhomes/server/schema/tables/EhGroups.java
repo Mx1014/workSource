@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 1737124362;
+	private static final long serialVersionUID = -851596825;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -190,6 +190,11 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, multi-purpose base entity");
+
+	/**
+	 * The column <code>ehcore.eh_groups.creator_community_id</code>. the id of community where the creator located when the group is created
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> CREATOR_COMMUNITY_ID = createField("creator_community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the id of community where the creator located when the group is created");
 
 	/**
 	 * Create a <code>ehcore.eh_groups</code> table reference
