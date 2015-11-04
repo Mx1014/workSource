@@ -359,7 +359,20 @@ CREATE TABLE `eh_rental_items_bills`(
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS  `eh_rental_bill_paybill_relation`;
 
+CREATE TABLE `eh_rental_bill_paybill_relation`(
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `site_type`  VARCHAR(128) ,
+  `rental_bill_id` BIGINT ,
+  `online_pay_bill_id` BIGINT ,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
 
 DROP TABLE IF EXISTS `eh_park_charge`;
 
