@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.community.CommunityGeoPointDTO;
@@ -28,231 +29,262 @@ import com.everhomes.util.StringHelper;
  * <li>deleteTime: 删除时间</li>
  * <li>requestStatus: 小区收集状态，参考{@link com.everhomes.community.RequestStatus}</li>
  * <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.community.CommunityGeoPointDTO}</li>
+ * <li>communityType: 园区类型，参考{@link com.everhomes.community.CommunityType}</li>
+ * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
+ * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
+ * <li>updateTime: 更新时间</li>
  * </ul>
  */
 public class CommunityDTO {
-    private java.lang.Long     id;
-    private java.lang.String   uuid;
-    private java.lang.Long     cityId;
-    private java.lang.String   cityName;
-    private java.lang.Long     areaId;
-    private java.lang.String   areaName;
-    private java.lang.String   name;
-    private java.lang.String   aliasName;
-    private java.lang.String   address;
-    private java.lang.String   zipcode;
-    private java.lang.String   description;
-    private java.lang.String   detailDescription;
-    private java.lang.String   aptSegment1;
-    private java.lang.String   aptSegment2;
-    private java.lang.String   aptSegment3;
-    private java.lang.String   aptSeg1Sample;
-    private java.lang.String   aptSeg2Sample;
-    private java.lang.String   aptSeg3Sample;
-    private java.lang.Integer  aptCount;
-    private java.lang.Long     creatorUid;
-    private java.lang.Byte     status;
-    private java.sql.Timestamp createTime;
-    private java.sql.Timestamp deleteTime;
-    private java.lang.Long     requestStatus;
-    private java.lang.Byte     communityType;
+    private Long id;
+    private String uuid;
+    private Long cityId;
+    private String cityName;
+    private Long areaId;
+    private String areaName;
+    private String name;
+    private String aliasName;
+    private String address;
+    private String zipcode;
+    private String description;
+    private String detailDescription;
+    private String aptSegment1;
+    private String aptSegment2;
+    private String aptSegment3;
+    private String aptSeg1Sample;
+    private String aptSeg2Sample;
+    private String aptSeg3Sample;
+    private Integer aptCount;
+    private Long creatorUid;
+    private Byte status;
+    private Timestamp createTime;
+    private Timestamp deleteTime;
+    private Long requestStatus;
+    private Byte communityType;
+    private Long defaultForumId;
+    private Long feedbackForumId;
+    private Timestamp updateTime;
     
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
 
     public CommunityDTO() {
     }
-    
-    public java.lang.Long getId() {
+
+    public Long getId() {
         return id;
     }
- 
-    public void setId(java.lang.Long id) {
+
+    public void setId(Long id) {
         this.id = id;
     }
-    
-    public java.lang.String getUuid() {
+
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(java.lang.String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
-    public java.lang.Long getCityId() {
+    public Long getCityId() {
         return cityId;
     }
-    
-    public void setCityId(java.lang.Long cityId) {
+
+    public void setCityId(Long cityId) {
         this.cityId = cityId;
     }
-    
-    public java.lang.String getCityName() {
+
+    public String getCityName() {
         return cityName;
     }
-    
-    public void setCityName(java.lang.String cityName) {
+
+    public void setCityName(String cityName) {
         this.cityName = cityName;
     }
-    
-    public java.lang.Long getAreaId() {
+
+    public Long getAreaId() {
         return areaId;
     }
-    
-    public void setAreaId(java.lang.Long areaId) {
+
+    public void setAreaId(Long areaId) {
         this.areaId = areaId;
     }
-    
-    public java.lang.String getAreaName() {
+
+    public String getAreaName() {
         return areaName;
     }
-    
-    public void setAreaName(java.lang.String areaName) {
+
+    public void setAreaName(String areaName) {
         this.areaName = areaName;
     }
-    
-    public java.lang.String getName() {
+
+    public String getName() {
         return name;
     }
-    
-    public void setName(java.lang.String name) {
+
+    public void setName(String name) {
         this.name = name;
     }
-    
-    public java.lang.String getAliasName() {
+
+    public String getAliasName() {
         return aliasName;
     }
-    
-    public void setAliasName(java.lang.String aliasName) {
+
+    public void setAliasName(String aliasName) {
         this.aliasName = aliasName;
     }
-    
-    public java.lang.String getAddress() {
+
+    public String getAddress() {
         return address;
     }
-    
-    public void setAddress(java.lang.String address) {
+
+    public void setAddress(String address) {
         this.address = address;
     }
-    
-    public java.lang.String getZipcode() {
+
+    public String getZipcode() {
         return zipcode;
     }
-    
-    public void setZipcode(java.lang.String zipcode) {
+
+    public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
     }
-    
-    public java.lang.String getDescription() {
+
+    public String getDescription() {
         return description;
     }
-    
-    public void setDescription(java.lang.String description) {
+
+    public void setDescription(String description) {
         this.description = description;
     }
-    
-    public java.lang.String getDetailDescription() {
+
+    public String getDetailDescription() {
         return detailDescription;
     }
-    
-    public void setDetailDescription(java.lang.String detailDescription) {
+
+    public void setDetailDescription(String detailDescription) {
         this.detailDescription = detailDescription;
     }
-    
-    public java.lang.String getAptSegment1() {
+
+    public String getAptSegment1() {
         return aptSegment1;
     }
-    
-    public void setAptSegment1(java.lang.String aptSegment1) {
+
+    public void setAptSegment1(String aptSegment1) {
         this.aptSegment1 = aptSegment1;
     }
-    
-    public java.lang.String getAptSegment2() {
+
+    public String getAptSegment2() {
         return aptSegment2;
     }
-    
-    public void setAptSegment2(java.lang.String aptSegment2) {
+
+    public void setAptSegment2(String aptSegment2) {
         this.aptSegment2 = aptSegment2;
     }
-    
-    public java.lang.String getAptSegment3() {
+
+    public String getAptSegment3() {
         return aptSegment3;
     }
-    
-    public void setAptSegment3(java.lang.String aptSegment3) {
+
+    public void setAptSegment3(String aptSegment3) {
         this.aptSegment3 = aptSegment3;
     }
-    
-    public java.lang.String getAptSeg1Sample() {
+
+    public String getAptSeg1Sample() {
         return aptSeg1Sample;
     }
-    
-    public void setAptSeg1Sample(java.lang.String aptSeg1Sample) {
+
+    public void setAptSeg1Sample(String aptSeg1Sample) {
         this.aptSeg1Sample = aptSeg1Sample;
     }
-    
-    public java.lang.String getAptSeg2Sample() {
+
+    public String getAptSeg2Sample() {
         return aptSeg2Sample;
     }
-    
-    public void setAptSeg2Sample(java.lang.String aptSeg2Sample) {
+
+    public void setAptSeg2Sample(String aptSeg2Sample) {
         this.aptSeg2Sample = aptSeg2Sample;
     }
-    
-    public java.lang.String getAptSeg3Sample() {
+
+    public String getAptSeg3Sample() {
         return aptSeg3Sample;
     }
-    
-    public void setAptSeg3Sample(java.lang.String aptSeg3Sample) {
+
+    public void setAptSeg3Sample(String aptSeg3Sample) {
         this.aptSeg3Sample = aptSeg3Sample;
     }
-    
-    public java.lang.Integer getAptCount() {
+
+    public Integer getAptCount() {
         return aptCount;
     }
-    
-    public void setAptCount(java.lang.Integer aptCount) {
+
+    public void setAptCount(Integer aptCount) {
         this.aptCount = aptCount;
     }
-    
-    public java.lang.Long getCreatorUid() {
+
+    public Long getCreatorUid() {
         return creatorUid;
     }
-    
-    public void setCreatorUid(java.lang.Long creatorUid) {
+
+    public void setCreatorUid(Long creatorUid) {
         this.creatorUid = creatorUid;
     }
-    
-    public java.lang.Byte getStatus() {
+
+    public Byte getStatus() {
         return status;
     }
-    
-    public void setStatus(java.lang.Byte status) {
+
+    public void setStatus(Byte status) {
         this.status = status;
     }
-    
-    public java.sql.Timestamp getCreateTime() {
+
+    public Timestamp getCreateTime() {
         return createTime;
     }
-    
-    public void setCreateTime(java.sql.Timestamp createTime) {
+
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
-    
-    public java.sql.Timestamp getDeleteTime() {
+
+    public Timestamp getDeleteTime() {
         return deleteTime;
     }
-    
-    public void setDeleteTime(java.sql.Timestamp deleteTime) {
+
+    public void setDeleteTime(Timestamp deleteTime) {
         this.deleteTime = deleteTime;
     }
-    
-    public java.lang.Long getRequestStatus() {
+
+    public Long getRequestStatus() {
         return requestStatus;
     }
 
-    public void setRequestStatus(java.lang.Long requestStatus) {
+    public void setRequestStatus(Long requestStatus) {
         this.requestStatus = requestStatus;
+    }
+
+    public Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
+    }
+
+    public Long getDefaultForumId() {
+        return defaultForumId;
+    }
+
+    public void setDefaultForumId(Long defaultForumId) {
+        this.defaultForumId = defaultForumId;
+    }
+
+    public Long getFeedbackForumId() {
+        return feedbackForumId;
+    }
+
+    public void setFeedbackForumId(Long feedbackForumId) {
+        this.feedbackForumId = feedbackForumId;
     }
 
     public List<CommunityGeoPointDTO> getGeoPointList() {
@@ -263,12 +295,12 @@ public class CommunityDTO {
         this.geoPointList = geoPointList;
     }
 
-    public java.lang.Byte getCommunityType() {
-        return communityType;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public void setCommunityType(java.lang.Byte communityType) {
-        this.communityType = communityType;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     @Override
