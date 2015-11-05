@@ -33,7 +33,8 @@ import com.everhomes.util.StringHelper;
  * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.techpark.rental.SiteBillStatus}</li>  
  * <li>rentalCount：场所预定数量</li> 
  * <li>siteItems：场所商品</li> 
- * <li>rentalSiteRules：场所时间</li>
+ * <li>rentalSiteRules：场所时间段</li>
+ * <li>billAttachments：订单附加信息</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -67,6 +68,9 @@ public class RentalBillDTO {
 
 	@ItemType(RentalSiteRulesDTO.class)
 	private List<RentalSiteRulesDTO> rentalSiteRules; 
+	
+	@ItemType(BillAttachmentDTO.class)
+	private List<BillAttachmentDTO> billAttachments; 
 	
 	
 	
@@ -290,6 +294,14 @@ public class RentalBillDTO {
 
 	public void setRentalSiteRules(List<RentalSiteRulesDTO> rentalSiteRules) {
 		this.rentalSiteRules = rentalSiteRules;
+	}
+
+	public List<BillAttachmentDTO> getBillAttachments() {
+		return billAttachments;
+	}
+
+	public void setBillAttachments(List<BillAttachmentDTO> billAttachments) {
+		this.billAttachments = billAttachments;
 	}
  
 }

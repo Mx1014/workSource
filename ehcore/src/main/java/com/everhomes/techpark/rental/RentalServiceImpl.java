@@ -45,7 +45,8 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String queueName = "rentalService";
-
+	//N分钟后取消
+	private Long cancelTime = 5 * 60 * 1000L;
 	@Autowired
 	private OnlinePayService onlinePayService;
 
@@ -402,43 +403,46 @@ public class RentalServiceImpl implements RentalService {
 			FindRentalSiteRulesCommand cmd) {
 		FindRentalSiteRulesCommandResponse response = new FindRentalSiteRulesCommandResponse();
 		response.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
-		List<RentalSiteRule> rsrs = rentalProvider.findRentalSiteRules(
-				cmd.getRentalSiteId(), cmd.getRuleDate(), null, null);
-		// for (RentalSiteRule rsr : rsrs) {
-		// RentalSiteRulesDTO dto = new RentalSiteRulesDTO();
-		// dto.setId(rsr.getId());
-		// dto.setRentalSiteId(rsr.getRentalSiteId());
-		// dto.setRentalType(rsr.getRentalType());
-		// if (rsr.getRentalType().equals(RentalType.DAY.getCode()))
-		// dto.setStepLength(String.valueOf(rsr.getStepLengthDay()));
-		// if (rsr.getRentalType().equals(RentalType.DAY.getCode()))
-		// dto.setStepLength(timeSF.format(rsr.getStepLengthTime()
-		// .getTime()));
-		// dto.setBeginTime(timeSF.format(rsr.getBeginTime().getTime()));
-		// dto.setEndTime(timeSF.format(rsr.getEndTime().getTime()));
-		// dto.setCounts(rsr.getCounts());
-		// dto.setUnit(rsr.getUnit());
-		// dto.setPrice(rsr.getPrice());
-		// if (rsr.getLoopType().equals(LoopType.EVERYDAY.getCode())) {
-		//
-		// dto.setRuleDate(dateSF.format(rsr.getRuleDate()));
-		// } else if (rsr.getLoopType().equals(LoopType.EVERYMONTH.getCode())) {
-		//
-		// dto.setRuleDate(dateSF.format(rsr.getRuleDate()));
-		// } else if (rsr.getLoopType().equals(LoopType.EVERYWEEK.getCode())) {
-		// Calendar calendar = Calendar.getInstance();
-		// calendar.setTime(rsr.getRuleDate());
-		// dto.setRuleDate(String.valueOf(calendar
-		// .get(Calendar.DAY_OF_WEEK)));
-		// } else if (rsr.getLoopType().equals(LoopType.EVERYYEAR.getCode())) {
-		// dto.setRuleDate(dateSF.format(rsr.getRuleDate()));
-		// } else if (rsr.getLoopType().equals(LoopType.ONLYTHEDAY.getCode())) {
-		// dto.setRuleDate(dateSF.format(rsr.getRuleDate()));
-		// }
-		// dto.setLoopType(rsr.getLoopType());
-		// dto.setStatus(rsr.getStatus());
-		// response.getRentalSiteRules().add(dto);
-		// }
+		 
+		List<RentalSiteRule> rentalSiteRules = rentalProvider
+				.findRentalSiteRules(cmd.getRentalSiteId(), null,
+						null, cmd.getRentalType());
+		// 查sitebills
+		if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
+			for (RentalSiteRule rsr : rentalSiteRules) {
+				RentalSiteRulesDTO dto = new RentalSiteRulesDTO();
+				dto.setId(rsr.getId());
+				dto.setRentalSiteId(rsr.getRentalSiteId());
+				dto.setRentalType(rsr.getRentalType());
+				dto.setRentalStep(rsr.getRentalstep());
+				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+					dto.setBeginTime(rsr.getBeginTime().getTime());
+					dto.setEndTime(rsr.getEndTime().getTime());
+				} else if (dto.getRentalType().equals(
+						RentalType.HALFDAY.getCode())) {
+					dto.setAmorpm(rsr.getAmorpm());
+				}
+				dto.setUnit(rsr.getUnit());
+				dto.setPrice(rsr.getPrice());
+				dto.setRuleDate(rsr.getSiteRentalDate().getTime());
+				List<RentalSitesBill> rsbs = rentalProvider
+						.findRentalSiteBillBySiteRuleId(rsr.getId());
+				dto.setStatus(SiteRuleStatus.OPEN.getCode());
+				dto.setCounts((double) rsr.getCounts());
+				if (null != rsbs && rsbs.size() > 0) {
+					for (RentalSitesBill rsb : rsbs) {
+						dto.setCounts(dto.getCounts()
+								- rsb.getRentalCount());
+					}
+				}
+				if (dto.getCounts() == 0) {
+					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+				}
+			 
+				response.getRentalSiteRules().add(dto);
+
+			}
+		}
 
 		return response;
 	}
@@ -493,23 +497,32 @@ public class RentalServiceImpl implements RentalService {
 			RentalSiteRule rentalSiteRule = rentalProvider
 					.findRentalSiteRuleById(siteRuleId);
 			rentalSiteRules.add(rentalSiteRule);
-			if (null == rentalBill.getStartTime()
-					|| rentalBill.getStartTime().after(
-							rentalSiteRule.getBeginTime())) {
-				if (null == rentalSiteRule.getBeginTime()) {
+			if (null == rentalSiteRule.getBeginTime()) {
+				if (null == rentalBill.getStartTime()
+						|| rentalBill.getStartTime().after(
+								rentalSiteRule.getSiteRentalDate()))
 					rentalBill.setStartTime(new Timestamp(rentalSiteRule
 							.getSiteRentalDate().getTime()));
-				} else {
+			} else {
+				if (null == rentalBill.getStartTime()
+						|| rentalBill.getStartTime().after(
+								rentalSiteRule.getBeginTime())) {
+
 					rentalBill.setStartTime(rentalSiteRule.getBeginTime());
 				}
 			}
-			if (null == rentalBill.getEndTime()
-					|| rentalBill.getEndTime().before(
-							rentalSiteRule.getEndTime())) {
-				if (null == rentalSiteRule.getEndTime()) {
-					rentalBill.setStartTime(new Timestamp(rentalSiteRule
+
+			if (null == rentalSiteRule.getEndTime()) {
+				if (null == rentalBill.getEndTime()
+						|| rentalBill.getEndTime().before(
+								rentalSiteRule.getSiteRentalDate()))
+					rentalBill.setEndTime(new Timestamp(rentalSiteRule
 							.getSiteRentalDate().getTime()));
-				} else {
+			} else {
+				if (null == rentalBill.getEndTime()
+						|| rentalBill.getEndTime().before(
+								rentalSiteRule.getEndTime())) {
+
 					rentalBill.setEndTime(rentalSiteRule.getEndTime());
 				}
 			}
@@ -564,7 +577,7 @@ public class RentalServiceImpl implements RentalService {
 					CancelLockedRentalBillAction.class.getName(),
 					new Object[] { String.valueOf(rentalBillId) });
 			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-					System.currentTimeMillis() + 20 * 60 * 1000);
+					System.currentTimeMillis() + cancelTime);
 			// 在支付时间开始时，把订单状态更新为待支付全款
 			final Job job2 = new Job(
 					UpdateRentalBillStatusToPayingFinalAction.class.getName(),
@@ -580,7 +593,7 @@ public class RentalServiceImpl implements RentalService {
 					new Object[] { String.valueOf(rentalBill.getId()) });
 
 			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-					System.currentTimeMillis() + 20 * 60 * 1000);
+					System.currentTimeMillis() + cancelTime);
 
 		}
 		// 在支付时间截止时，取消未成功的订单
@@ -724,6 +737,7 @@ public class RentalServiceImpl implements RentalService {
 		dto.setInvoiceFlag(bill.getInvoiceFlag());
 		dto.setStatus(bill.getStatus());
 		dto.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
+		//订单的rules
 		List<RentalSitesBill> rsbs = rentalProvider
 				.findRentalSitesBillByBillId(bill.getId());
 		List<Long> siteRuleIds = new ArrayList<Long>();
@@ -732,7 +746,7 @@ public class RentalServiceImpl implements RentalService {
 		}
 		List<RentalSiteRule> rsrs = rentalProvider
 				.findRentalSiteRulesByRuleIds(siteRuleIds);
-		
+
 		for (RentalSiteRule rsr : rsrs) {
 			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
 			ruleDto.setId(rsr.getId());
@@ -750,6 +764,17 @@ public class RentalServiceImpl implements RentalService {
 			ruleDto.setPrice(rsr.getPrice());
 			ruleDto.setRuleDate(rsr.getSiteRentalDate().getTime());
 			dto.getRentalSiteRules().add(ruleDto);
+		}
+		//订单的附件attachments
+		dto.setBillAttachments(new ArrayList<BillAttachmentDTO>());
+		List<RentalBillAttachment> attachments = rentalProvider.findRentalBillAttachmentByBillId(dto.getRentalBillId());
+		for (RentalBillAttachment attachment :attachments){
+			BillAttachmentDTO attachmentDTO = new BillAttachmentDTO();
+			attachmentDTO.setAttachmentType(attachment.getAttachmentType());
+			attachmentDTO.setBillId(attachment.getRentalBillId());
+			attachmentDTO.setContent(attachment.getContent());
+			attachmentDTO.setId(attachment.getId());
+			dto.getBillAttachments().add(attachmentDTO);
 		}
 	}
 
@@ -1034,6 +1059,8 @@ public class RentalServiceImpl implements RentalService {
 		if (cmd.getRentalItems().get(0).getItemPrice() != null) {
 			double itemMoney = 0.0;
 			for (SiteItemDTO siDto : cmd.getRentalItems()) {
+				if (cmd.getRentalItems().get(0).getItemPrice()== null)
+					continue;
 				RentalItemsBill rib = new RentalItemsBill();
 				rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
 				rib.setCommunityId(cmd.getCommunityId());
@@ -1111,6 +1138,7 @@ public class RentalServiceImpl implements RentalService {
 				}
 			} else if (cmd.getAttachmentType().equals(
 					AttachmentType.EMAIL.getCode())) {
+				rentalProvider.createRentalBillAttachment(rba);
 			} else {
 			}
 		}

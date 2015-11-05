@@ -178,24 +178,32 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_RULES);
-		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_TYPE.eq(rentalType);
-		if (rentalType.equals(RentalType.HOUR.getCode())) {
-			condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
-					.equal(Date.valueOf(ruleDate));
-		}
-		else{
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(Date.valueOf(ruleDate));
-			//month begin 
-			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-			 condition = condition
-					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.greaterOrEqual(new java.sql.Date(calendar.getTime().getTime())));
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_TYPE
+				.eq(rentalType);
+		if (null != ruleDate) {
+			if (rentalType.equals(RentalType.HOUR.getCode())) {
+				condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+						.equal(Date.valueOf(ruleDate));
+			} else {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(Date.valueOf(ruleDate));
+				// month begin
+				calendar.set(Calendar.DAY_OF_MONTH,
+						calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+				condition = condition
+						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+								.greaterOrEqual(new java.sql.Date(calendar
+										.getTime().getTime())));
 
-			//month end 
-			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-			condition = condition
-					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.lessOrEqual(new java.sql.Date(calendar.getTime().getTime())));
+				// month end
+				calendar.set(Calendar.DAY_OF_MONTH,
+						calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+				condition = condition
+						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+								.lessOrEqual(new java.sql.Date(calendar
+										.getTime().getTime())));
 
+			}
 		}
 		if (null != rentalSiteId) {
 			condition = condition
@@ -204,10 +212,9 @@ public class RentalProviderImpl implements RentalProvider {
 		}
 
 		if (null != beginDate && rentalType.equals(RentalType.HOUR.getCode())) {
-			condition = condition
-					.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME
-							.lessOrEqual(beginDate)); 
-			
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME
+					.lessOrEqual(beginDate));
+
 		}
 		step.where(condition);
 		List<RentalSiteRule> result = step
@@ -356,9 +363,8 @@ public class RentalProviderImpl implements RentalProvider {
 			ListingLocator locator, int count, Byte status) {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
-		condition = condition
-				.and(Tables.EH_RENTAL_BILLS.COMMUNITY_ID
-						.eq(enterpriseCommunityId));
+		condition = condition.and(Tables.EH_RENTAL_BILLS.COMMUNITY_ID
+				.eq(enterpriseCommunityId));
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
 					.eq(siteType));
@@ -782,7 +788,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public Long createRentalBillAttachment(RentalBillAttachment rba) { 
+	public Long createRentalBillAttachment(RentalBillAttachment rba) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalBillAttachments.class));
 		rba.setId(id);
@@ -793,7 +799,8 @@ public class RentalProviderImpl implements RentalProvider {
 				.insertQuery(Tables.EH_RENTAL_BILL_ATTACHMENTS);
 		query.setRecord(record);
 		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalBillAttachments.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE,
+				EhRentalBillAttachments.class, null);
 		return id;
 	}
 
@@ -809,7 +816,8 @@ public class RentalProviderImpl implements RentalProvider {
 				.insertQuery(Tables.EH_RENTAL_BILL_PAYBILL_MAP);
 		query.setRecord(record);
 		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalBillPaybillMap.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE,
+				EhRentalBillPaybillMap.class, null);
 		return id;
 	}
 
@@ -846,12 +854,33 @@ public class RentalProviderImpl implements RentalProvider {
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_RULES);
 		Condition condition = Tables.EH_RENTAL_SITE_RULES.ID.in(siteRuleIds);
-	 
+
 		step.where(condition);
 		List<RentalSiteRule> result = step
 				.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalSiteRule.class);
+				});
+
+		return result;
+	}
+
+	@Override
+	public List<RentalBillAttachment> findRentalBillAttachmentByBillId(
+			Long rentalBillId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_BILL_ATTACHMENTS);
+		Condition condition = Tables.EH_RENTAL_BILL_ATTACHMENTS.RENTAL_BILL_ID
+				.eq(rentalBillId);
+
+		step.where(condition);
+		List<RentalBillAttachment> result = step
+				.orderBy(Tables.EH_RENTAL_BILL_ATTACHMENTS.ID.desc())
+				.fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalBillAttachment.class);
 				});
 
 		return result;

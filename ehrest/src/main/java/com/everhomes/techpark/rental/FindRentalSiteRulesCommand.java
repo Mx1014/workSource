@@ -1,19 +1,26 @@
 package com.everhomes.techpark.rental;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
  * <li>ruleDate：日期</li> 
+ * <li>rentalSiteId：场所id</li> 
+ * <li>rentalType： time(0),halfday(1){@link com.everhomes.techpark.rental.RentalType} </li> 
  * </ul>
  */
 
 public class FindRentalSiteRulesCommand {
+	@NotNull
 	private Long enterpriseCommunityId;
+	@NotNull
 	private String siteType;
-
+	@NotNull
 	private Long rentalSiteId;
-	private String ruleDate;
+	@NotNull
+	private Byte rentalType;
 
 	@Override
     public String toString() {
@@ -27,14 +34,7 @@ public class FindRentalSiteRulesCommand {
 	public void setRentalSiteId(Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
 	}
-
-	public String getRuleDate() {
-		return ruleDate;
-	}
-
-	public void setRuleDate(String ruleDate) {
-		this.ruleDate = ruleDate;
-	}
+ 
 
 	public Long getEnterpriseCommunityId() {
 		return enterpriseCommunityId;
@@ -50,5 +50,13 @@ public class FindRentalSiteRulesCommand {
 
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
+	}
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
 	}
 }
