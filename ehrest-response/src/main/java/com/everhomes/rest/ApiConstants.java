@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-05 09:39:24
+// generated at 2015-11-05 18:58:57
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -452,9 +452,10 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_DELETERENTALSITEITEM_URL = "/techpark/rental/deleteRentalSiteItem";
     public static final String TECHPARK_RENTAL_DELETERENTALSITERULES_URL = "/techpark/rental/deleteRentalSiteRules";
     public static final String TECHPARK_RENTAL_FINDRENTALBILLS_URL = "/techpark/rental/findRentalBills";
-    public static final String TECHPARK_RENTAL_FINDRENTALSITEDAYSTATUS_URL = "/techpark/rental/findRentalSiteDayStatus";
     public static final String TECHPARK_RENTAL_FINDRENTALSITEITEMS_URL = "/techpark/rental/findRentalSiteItems";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITERULES_URL = "/techpark/rental/findRentalSiteRules";
     public static final String TECHPARK_RENTAL_FINDRENTALSITES_URL = "/techpark/rental/findRentalSites";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITESSTATUS_URL = "/techpark/rental/findRentalSitesStatus";
     public static final String TECHPARK_RENTAL_GETRENTALSITETYPE_URL = "/techpark/rental/getRentalSiteType";
     public static final String TECHPARK_RENTAL_GETRENTALTYPERULE_URL = "/techpark/rental/getRentalTypeRule";
     public static final String TECHPARK_RENTAL_LISTRENTALBILLS_URL = "/techpark/rental/listRentalBills";
