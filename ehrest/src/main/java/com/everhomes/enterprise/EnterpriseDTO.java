@@ -1,16 +1,33 @@
 package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 公司信息
- * <li>id: Enterprise Id</li>
- * <li>name: Enterprise Name</li>
- * <li>displayName: Enterprise display name</li>
- * <li>avatarUri: the Id from content server for Enterprise image</li>
- * <li>avatarUri: enterprise url</li>
- * <li>description: enterprise description</li>
- * <li>memberCount: members' count</li>
+ * <li>id: 公司ID</li>
+ * <li>name: 公司名称</li>
+ * <li>displayName: 公司显示名称</li>
+ * <li>avatarUri: 公司LOGO URI</li>
+ * <li>avatarUrl: 公司LOGO URL</li>
+ * <li>description: 公司详细描述</li>
+ * <li>contactCount: 通讯录人数</li>
+ * <li>contactCount: 通讯录人数</li>
+ * <li>userId: 公司通讯录成员对应的用户ID，要在公司认证过的用户才有</li>
+ * <li>tag: 标签</li>
+ * <li>contactOf: 是否是公司通讯录成员，1-是(成员状态为待认证时也置为1，也就是服务器有记录则为1，还需要根据<code>contactStatus</code>来判断是否是认证成员)、0-否</li>
+ * <li>contactStatus: 公司通讯录成员状态，{@link com.everhomes.enterprise.EnterpriseContactStatus}</li>
+ * <li>contactNickName: 公司通讯录成员在公司内的昵称，是公司通讯录成员时字段才有效</li>
+ * <li>contactRole: 公司通讯录成员角色，用于判断是否为管理员，参考{@link com.everhomes.acl.RoleConstants}</li>
+ * <li>creatorUid: 公司实体创建者ID</li>
+ * <li>creatorName: 公司实体创建者名称</li>
+ * <li>contactGroupPrivileges: 公司通讯录成员的权限列表，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
+ * <li>contactForumPrivileges: 公司通讯录成员的论坛权限列表，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
+ * <li>updateTime: 公司实体更新时间</li>
+ * <li>createTime: 公司实体创建时间</li>
  * @author janson
  *
  */
@@ -21,9 +38,25 @@ public class EnterpriseDTO {
     private String avatarUri;
     private String avatarUrl;
     private String description;
-    private Long memberCount;
-    private Timestamp createTime;
+    private Long contactCount;
+    private Long userId;
+    private Long owningGroupId;
+    private String tag;
+    private Byte contactOf;
+    private Byte contactStatus;
+    private String contactNickName;
+    private Long contactRole;
+    private Long creatorUid;
+    private String creatorName;
     
+    @ItemType(Long.class)
+    private List<Long> contactGroupPrivileges;
+    
+    @ItemType(Long.class)
+    private List<Long> contactForumPrivileges;
+    
+    private Timestamp updateTime;
+    private Timestamp createTime;
     
     //TODO address info ?
     //List<AddressDTO>
@@ -64,11 +97,83 @@ public class EnterpriseDTO {
     public void setDescription(String description) {
         this.description = description;
     }
-    public Long getMemberCount() {
-        return memberCount;
+    public Long getContactCount() {
+        return contactCount;
     }
-    public void setMemberCount(Long memberCount) {
-        this.memberCount = memberCount;
+    public void setContactCount(Long contactCount) {
+        this.contactCount = contactCount;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+    public Long getOwningGroupId() {
+        return owningGroupId;
+    }
+    public void setOwningGroupId(Long owningGroupId) {
+        this.owningGroupId = owningGroupId;
+    }
+    public String getTag() {
+        return tag;
+    }
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+    public Byte getContactOf() {
+        return contactOf;
+    }
+    public void setContactOf(Byte contactOf) {
+        this.contactOf = contactOf;
+    }
+    public Byte getContactStatus() {
+        return contactStatus;
+    }
+    public void setContactStatus(Byte contactStatus) {
+        this.contactStatus = contactStatus;
+    }
+    public String getContactNickName() {
+        return contactNickName;
+    }
+    public void setContactNickName(String contactNickName) {
+        this.contactNickName = contactNickName;
+    }
+    public Long getContactRole() {
+        return contactRole;
+    }
+    public void setContactRole(Long contactRole) {
+        this.contactRole = contactRole;
+    }
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
+    public String getCreatorName() {
+        return creatorName;
+    }
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
+    public List<Long> getContactGroupPrivileges() {
+        return contactGroupPrivileges;
+    }
+    public void setContactGroupPrivileges(List<Long> contactGroupPrivileges) {
+        this.contactGroupPrivileges = contactGroupPrivileges;
+    }
+    public List<Long> getContactForumPrivileges() {
+        return contactForumPrivileges;
+    }
+    public void setContactForumPrivileges(List<Long> contactForumPrivileges) {
+        this.contactForumPrivileges = contactForumPrivileges;
+    }
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
     public Timestamp getCreateTime() {
         return createTime;
@@ -77,4 +182,8 @@ public class EnterpriseDTO {
         this.createTime = createTime;
     }
 
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

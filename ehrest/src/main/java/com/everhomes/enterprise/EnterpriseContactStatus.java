@@ -1,7 +1,14 @@
 package com.everhomes.enterprise;
 
+/**
+ * <ul>
+ * <li>INACTIVE(0): 已无效</li>
+ * <li>WAITING_AUTH: 待认证</li>
+ * <li>AUTHENTICATED: 已认证</li>
+ * </ul>
+ */
 public enum EnterpriseContactStatus {
-    Approving((byte)2), Approved((byte)1), Inactive((byte)0);
+    INACTIVE((byte)0), WAITING_AUTH((byte)1), AUTHENTICATED((byte)2);
     
     private byte code;
     private EnterpriseContactStatus(byte code) {

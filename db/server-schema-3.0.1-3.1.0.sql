@@ -40,7 +40,7 @@ CREATE TABLE `eh_enterprise_contacts` (
     `avatar` VARCHAR(128) COMMENT 'avatar uri',
     `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'user id reference to eh_users, it determine the contact authenticated or not',
     `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waiting_auth, 2: authenticated',
     `creator_uid` BIGINT COMMENT 'record creator user id',
     `create_time` DATETIME,
     `integral_tag1` BIGINT,

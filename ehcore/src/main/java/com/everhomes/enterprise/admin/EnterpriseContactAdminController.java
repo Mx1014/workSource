@@ -74,7 +74,7 @@ public class EnterpriseContactAdminController extends ControllerBase {
     public RestResponse listAprovingContacts(@Valid ListContactCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByStatus(locator, EnterpriseContactStatus.Approving, cmd.getPageSize());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByStatus(locator, EnterpriseContactStatus.WAITING_AUTH, cmd.getPageSize());
         ListEnterpriseContactResponse o = new ListEnterpriseContactResponse();
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
         for(EnterpriseContactDetail detail : details) {

@@ -66,7 +66,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         contact.setId(id);
         //Default approving state
         if(contact.getStatus() == null) {
-            contact.setStatus(EnterpriseContactStatus.Approving.getCode());    
+            contact.setStatus(EnterpriseContactStatus.WAITING_AUTH.getCode());    
         }
         
         contact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -122,7 +122,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.Inactive.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.INACTIVE.getCode()));
                 return query;
             }
             
@@ -161,7 +161,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.Approved.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.AUTHENTICATED.getCode()));
                 return query;
             }
             
@@ -655,7 +655,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ENTERPRISE_ID.eq(enterpriseId));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_ID.eq(contactId));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_GROUP_ID.eq(groupId));
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.Inactive.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.INACTIVE.getCode()));
                 return query;
             }
             
@@ -679,7 +679,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ENTERPRISE_ID.eq(enterpriseId));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_ID.eq(contactId));
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.Inactive.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.INACTIVE.getCode()));
                 return query;
             }
             

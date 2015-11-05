@@ -163,7 +163,7 @@ public class EnterpriseTest extends LoginAuthTestCase {
         member.setContactGroupId(group.getId());
         member.setContactId(contact.getId());
         member.setEnterpriseId(enterpriseId);
-        member.setContactStatus(EnterpriseGroupMemberStatus.Approving.getCode());
+        member.setContactStatus(EnterpriseGroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
         this.enterpriseContactProvider.createContactGroupMember(member);
         //member.setIntegralTag1(integralTag1);TODO Member type
         Assert.assertTrue(member.getId() > 0);

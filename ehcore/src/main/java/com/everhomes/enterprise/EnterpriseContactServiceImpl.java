@@ -122,7 +122,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 contact.setUserId(user.getId());
                 
                 //auto approved
-                contact.setStatus(EnterpriseContactStatus.Approved.getCode());
+                contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
                 this.enterpriseContactProvider.createContact(contact);
                 
                 //create a entry for it, but not for all  user identifier
@@ -138,7 +138,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
          } else {
              //auto approved
              contact.setUserId(user.getId());
-             contact.setStatus(EnterpriseContactStatus.Approved.getCode());
+             contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
              this.enterpriseContactProvider.createContact(contact);
              sendMessageForContactApproved(ctx, contact);
             }
@@ -161,7 +161,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     @Override
     public void rejectUserFromContact(EnterpriseContact contact) {
         //设置为删除
-        contact.setStatus(EnterpriseContactStatus.Inactive.getCode());
+        contact.setStatus(EnterpriseContactStatus.INACTIVE.getCode());
         this.enterpriseContactProvider.updateContact(contact);
         
         //发消息
@@ -197,7 +197,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         }
         
         //Create it
-        contact.setStatus(EnterpriseContactStatus.Approving.getCode());
+        contact.setStatus(EnterpriseContactStatus.WAITING_AUTH.getCode());
         this.enterpriseContactProvider.createContact(contact);
         
         //Create contact entry from userinfo
@@ -231,11 +231,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         //assert contact is from db and status is approve
         
         //TODO generate a error code
-        if(contact.getStatus().equals(EnterpriseContactStatus.Approved.getCode())) {
+        if(contact.getStatus().equals(EnterpriseContactStatus.AUTHENTICATED.getCode())) {
             return;
         }
         
-        contact.setStatus(EnterpriseContactStatus.Approved.getCode());
+        contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
         this.enterpriseContactProvider.updateContact(contact);
         
         //TODO create group member for this user???
@@ -274,14 +274,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             member.setContactId(contact.getId());
             member.setEnterpriseId(contact.getEnterpriseId());
             //Default, set for approved
-            member.setContactStatus(EnterpriseGroupMemberStatus.Approved.getCode());
+            member.setContactStatus(EnterpriseGroupMemberStatus.ACTIVE.getCode());
             this.enterpriseContactProvider.createContactGroupMember(member);
             
             return;
         }
         
-        if(member.getContactStatus() == EnterpriseGroupMemberStatus.Approving.getCode()) {
-            member.setContactStatus(EnterpriseGroupMemberStatus.Approved.getCode());
+        if(member.getContactStatus() == EnterpriseGroupMemberStatus.WAITING_FOR_APPROVAL.getCode()) {
+            member.setContactStatus(EnterpriseGroupMemberStatus.ACTIVE.getCode());
             this.enterpriseContactProvider.updateContactGroupMember(member);
         }
         
