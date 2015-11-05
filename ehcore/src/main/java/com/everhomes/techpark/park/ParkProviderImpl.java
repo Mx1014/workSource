@@ -124,6 +124,7 @@ public class ParkProviderImpl implements ParkProvider {
 			if(rechargeUid != null)
 				query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_USERID.eq(rechargeUid));
 			
+			query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.in(RechargeStatus.UPDATING.getCode(), RechargeStatus.SUCCESS.getCode()));
 			query.addOrderBy(Tables.EH_RECHARGE_INFO.ID.desc());
 			query.addLimit(count);
 
