@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.ApproveCommunityCommand;
+import com.everhomes.community.BuildingDTO;
 import com.everhomes.community.CommunityService;
 import com.everhomes.community.GetCommunityByIdCommand;
 import com.everhomes.community.GetCommunityByUuidCommand;
@@ -215,29 +216,92 @@ public class CommunityAdminController extends ControllerBase {
     	
     }
     
-    public RestResponse addBuilding() {
-		RestResponse response =  new RestResponse();
+    /**
+     * <b>URL: /admin/community/deleteBuilding</b>
+     */
+    @RequestMapping("deleteBuilding")
+    @RestReturn(value = String.class)
+	public RestResponse deleteBuilding(DeleteBuildingAdminCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
+        this.communityService.deleteBuilding(cmd);
+
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
 	}
 	
-	public RestResponse deleteBuilding() {
-		RestResponse response =  new RestResponse();
+    /**
+     * <b>URL: /admin/community/updateBuilding</b>
+     */
+	@RequestMapping("updateBuilding")
+	@RestReturn(value = BuildingDTO.class)
+	public RestResponse updateBuilding(UpdateBuildingAdminCommand cmd) {
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
+        BuildingDTO dto = this.communityService.updateBuilding(cmd);
+
+        RestResponse response =  new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	 /**
+     * <b>URL: /admin/community/verifyBuildingName</b>
+     */
+	@RequestMapping("verifyBuildingName")
+	@RestReturn(value = String.class)
+	public RestResponse verifyBuildingName(VerifyBuildingNameAdminCommand cmd) {
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        Boolean verify = this.communityService.verifyBuildingName(cmd);
+
+        RestResponse response =  new RestResponse(verify);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
 	}
 	
-	public RestResponse updateBuilding() {
-		RestResponse response =  new RestResponse();
-
+	/**
+     * <b>URL: /admin/community/getCommunityManagers</b>
+     */
+	@RequestMapping("getCommunityManagers")
+	@RestReturn(value = CommunityManagerDTO.class, collection = true)
+	public RestResponse getCommunityManagers(ListCommunityManagersAdminCommand cmd) {
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        List<CommunityManagerDTO> manager = this.communityService.getCommunityManagers(cmd);
+		RestResponse response =  new RestResponse(manager);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
 	}
-
+	
+	/**
+     * <b>URL: /admin/community/getUserCommunities</b>
+     */
+	@RequestMapping("getUserCommunities")
+	@RestReturn(value = UserCommunityDTO.class, collection = true)
+	public RestResponse getUserCommunities(ListUserCommunitiesCommand cmd) {
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        List<UserCommunityDTO> communities = this.communityService.getUserCommunities(cmd);
+		RestResponse response =  new RestResponse(communities);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
 
 }
