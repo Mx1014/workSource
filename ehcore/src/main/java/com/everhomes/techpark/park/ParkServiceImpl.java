@@ -227,19 +227,19 @@ public class ParkServiceImpl implements ParkService {
 		return ts;
 	}
 	
-	private Timestamp addDays(Timestamp oldPeriod, int days) {
+	private Timestamp addDays(String oldPeriod, int days) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(oldPeriod);
+		calendar.setTime(strToTimestamp(oldPeriod));
 		calendar.add(Calendar.DATE, days);
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
 	}
 	
-	private Timestamp addMonth(Timestamp oldPeriod, int month) {
+	private Timestamp addMonth(String oldPeriod, int month) {
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(oldPeriod);
+		calendar.setTime(strToTimestamp(oldPeriod));
 		calendar.add(Calendar.DATE, 1);
 		calendar.add(Calendar.MONTH, month);
 		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
@@ -359,7 +359,7 @@ public class ParkServiceImpl implements ParkService {
 		}
 		if(!StringUtils.isEmpty(cmd.getEndDay())) {
 			Timestamp time = strToTimestamp(cmd.getEndDay());
-			end = addDays(time, 1);
+			end = addDays(cmd.getEndDay(), 1);
 		}
  		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);
 		List<ApplyParkCardDTO> applyDto = new ArrayList<ApplyParkCardDTO>();

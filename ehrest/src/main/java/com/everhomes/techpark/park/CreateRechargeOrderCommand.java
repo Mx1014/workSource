@@ -26,13 +26,13 @@ public class CreateRechargeOrderCommand {
 	@NotNull
 	private String ownerName;
 	@NotNull
-	private Timestamp validityPeriod;
+	private String validityPeriod;
 
-	public Timestamp getValidityPeriod() {
+	public String getValidityPeriod() {
 		return validityPeriod;
 	}
 
-	public void setValidityPeriod(Timestamp validityPeriod) {
+	public void setValidityPeriod(String validityPeriod) {
 		this.validityPeriod = validityPeriod;
 	}
 
