@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-04 16:47:27
+// generated at 2015-11-05 09:39:24
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -177,8 +177,10 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
     public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
     public static final String COMMUNITY_GET_URL = "/community/get";
+    public static final String COMMUNITY_GETBUILDING_URL = "/community/getBuilding";
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
+    public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
     public static final String CONTACT_CREATECONTACTBYPHONECOMMAND_URL = "/contact/createContactByPhoneCommand";
     public static final String CONTACT_CREATECONTACTBYUSERIDCOMMAND_URL = "/contact/createContactByUserIdCommand";
