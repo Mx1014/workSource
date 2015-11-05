@@ -1,5 +1,7 @@
 package com.everhomes.techpark.park;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.NotNull;
 
 
@@ -24,13 +26,13 @@ public class CreateRechargeOrderCommand {
 	@NotNull
 	private String ownerName;
 	@NotNull
-	private String validityPeriod;
+	private Timestamp validityPeriod;
 
-	public String getValidityPeriod() {
+	public Timestamp getValidityPeriod() {
 		return validityPeriod;
 	}
 
-	public void setValidityPeriod(String validityPeriod) {
+	public void setValidityPeriod(Timestamp validityPeriod) {
 		this.validityPeriod = validityPeriod;
 	}
 
