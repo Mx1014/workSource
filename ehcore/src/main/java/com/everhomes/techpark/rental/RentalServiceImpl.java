@@ -24,7 +24,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleStringService; 
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
@@ -44,13 +44,13 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    private String queueName = "rentalService";
+	private String queueName = "rentalService";
 
 	@Autowired
 	private OnlinePayService onlinePayService;
-	
-    @Autowired
-    JesqueClientFactory jesqueClientFactory;
+
+	@Autowired
+	JesqueClientFactory jesqueClientFactory;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	@Autowired
@@ -210,8 +210,7 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getCommunityId(), cmd.getSiteType());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getCommunityId(), cmd.getSiteType(), null, null,
-				null);
+				cmd.getCommunityId(), cmd.getSiteType(), null, null, null);
 		for (RentalSite rs : rentalSites) {
 			RentalSiteDTO rsDTO = new RentalSiteDTO();
 			rsDTO.setBuildingName(rs.getBuildingName());
@@ -338,9 +337,8 @@ public class RentalServiceImpl implements RentalService {
 			FindRentalSitesCommand cmd) {
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int totalCount = rentalProvider.countRentalSites(
-				cmd.getCommunityId(), cmd.getSiteType(),
-				cmd.getKeyword());
+		int totalCount = rentalProvider.countRentalSites(cmd.getCommunityId(),
+				cmd.getSiteType(), cmd.getKeyword());
 		if (totalCount == 0)
 			return response;
 
@@ -350,8 +348,8 @@ public class RentalServiceImpl implements RentalService {
 
 		checkEnterpriseCommunityIdIsNull(cmd.getCommunityId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getCommunityId(), cmd.getSiteType(),
-				cmd.getKeyword(), cmd.getPageOffset(), pageSize);
+				cmd.getCommunityId(), cmd.getSiteType(), cmd.getKeyword(),
+				cmd.getPageOffset(), pageSize);
 
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
@@ -509,15 +507,17 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
 				- rentalRule.getPayEndTime()));
 		rentalBill.setPaidMoney(0.0);
- 
+
 		if (reserveTime.before(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getPayStartTime()))) {
 			// 在支付时间之前 为锁定待支付
 			rentalBill.setStatus(SiteBillStatus.LOCKED.getCode());
+
 		} else {
 			// 在支付时间之后 为待支付全款
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 		}
+
 		rentalBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
 		rentalBill.setCreatorUid(userId);
@@ -534,12 +534,38 @@ public class RentalServiceImpl implements RentalService {
 					return this.rentalProvider.createRentalBill(rentalBill);
 				});
 		Long rentalBillId = tuple.first();
+		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+			// 20分钟后，取消状态为锁定的订单
+			final Job job1 = new Job(
+					CancelLockedRentalBillAction.class.getName(),
+					new Object[] { String.valueOf(rentalBillId) });
+			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+					System.currentTimeMillis() + 20 * 60 * 1000);
+			// 在支付时间开始时，把订单状态更新为待支付全款
+			final Job job2 = new Job(
+					UpdateRentalBillStatusToPayingFinalAction.class.getName(),
+					new Object[] { String.valueOf(rentalBill.getId()) });
+			// 20min cancel order if status still is locked or paying
+			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
+					cmd.getStartTime() - rentalRule.getPayStartTime());
+		} else if (rentalBill.getStatus().equals(
+				SiteBillStatus.PAYINGFINAL.getCode())) {
+			// 20分钟后，取消未成功的订单
+			final Job job1 = new Job(
+					CancelUnsuccessRentalBillAction.class.getName(),
+					new Object[] { String.valueOf(rentalBill.getId()) });
 
-		 final Job job = new Job(CancelRentalBillAction.class.getName(),
-	                new Object[]{String.valueOf(rentalBillId) });
-	        
-		//20min cancel order if status still is locked or paying
-		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, 20*60*1000);
+			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+					System.currentTimeMillis() + 20 * 60 * 1000);
+
+		}
+		// 在支付时间截止时，取消未成功的订单
+		final Job job2 = new Job(
+				CancelUnsuccessRentalBillAction.class.getName(),
+				new Object[] { String.valueOf(rentalBill.getId()) });
+		// 20min cancel order if status still is locked or paying
+		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
+				cmd.getStartTime() - rentalRule.getPayEndTime());
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
@@ -600,8 +626,8 @@ public class RentalServiceImpl implements RentalService {
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalBill> billList = this.rentalProvider.listRentalBills(userId,
-				cmd.getCommunityId(), cmd.getSiteType(), locator,
-				pageSize + 1, cmd.getBillStatus());
+				cmd.getCommunityId(), cmd.getSiteType(), locator, pageSize + 1,
+				cmd.getBillStatus());
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalBill bill : billList) {
@@ -699,28 +725,28 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 				+ "  from rental site rules  ");
-//		if (null == cmd.getWeekendPrice() || null == cmd.getWorkdayPrice())
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-//					ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"Invalid price   parameter in the command");
+		// if (null == cmd.getWeekendPrice() || null == cmd.getWorkdayPrice())
+		// throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		// ErrorCodes.ERROR_INVALID_PARAMETER,
+		// "Invalid price   parameter in the command");
 		RentalSiteRule rsr = new RentalSiteRule();
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getBeginDate()));
 		end.setTime(new Date(cmd.getEndDate()));
-//		JSONObject jsonObject = (JSONObject) JSONValue.parse(cmd.getChoosen());
-//		JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
-//		Gson gson = new Gson();
-//		List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
-//				new TypeToken<List<Integer>>() {
-//				}.getType());
+		// JSONObject jsonObject = (JSONObject)
+		// JSONValue.parse(cmd.getChoosen());
+		// JSONArray choosenValue = (JSONArray) jsonObject.get("choosen");
+		// Gson gson = new Gson();
+		// List<Integer> choosenInts = gson.fromJson(choosenValue.toString(),
+		// new TypeToken<List<Integer>>() {
+		// }.getType());
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
 			if (cmd.getChoosen().contains(weekday)) {
 				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
-						rsr.setCommunityId(cmd
-								.getCommunityId());
+						rsr.setCommunityId(cmd.getCommunityId());
 						rsr.setSiteType(cmd.getSiteType());
 						rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
 								.getTime())
@@ -730,10 +756,10 @@ public class RentalServiceImpl implements RentalService {
 								+ String.valueOf((int) ((i % 1) * 60))
 								+ ":00"));
 
-//						i = i + cmd.getTimeStep();
+						// i = i + cmd.getTimeStep();
 						rsr.setRentalstep(cmd.getRentalStep());
-						i = i+0.5;
-						
+						i = i + 0.5;
+
 						rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
 								.getTime())
 								+ " "
@@ -930,14 +956,16 @@ public class RentalServiceImpl implements RentalService {
 
 		RentalBill bill = rentalProvider.findRentalBillById(cmd
 				.getRentalBillId());
-		if (bill.getStatus().equals(SiteBillStatus.FAIL.getCode())){
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_BILL_OVERTIME,
-					localeStringService.getLocalizedString(String
-							.valueOf(RentalServiceErrorCode.SCOPE), String
-							.valueOf(RentalServiceErrorCode.ERROR_BILL_OVERTIME),
-							UserContext.current().getUser().getLocale(),
-							"BILL OVERTIME"));
+		if (bill.getStatus().equals(SiteBillStatus.FAIL.getCode())) {
+			throw RuntimeErrorException
+					.errorWith(
+							RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_BILL_OVERTIME,
+							localeStringService.getLocalizedString(
+									String.valueOf(RentalServiceErrorCode.SCOPE),
+									String.valueOf(RentalServiceErrorCode.ERROR_BILL_OVERTIME),
+									UserContext.current().getUser().getLocale(),
+									"BILL OVERTIME"));
 		}
 		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
@@ -962,35 +990,34 @@ public class RentalServiceImpl implements RentalService {
 				bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
 				bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
 			}
-			if(bill.getPayTotalMoney().equals(0.0)){
-				//总金额为0，直接预订成功状态
+			if (bill.getPayTotalMoney().equals(0.0)) {
+				// 总金额为0，直接预订成功状态
 				bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-			}
-			else if(bill.getReserveMoney().equals(0.0)&&bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
-				 //预付金额为0，且状态为locked，直接进入支付定金成功状态
+			} else if (bill.getReserveMoney().equals(0.0)
+					&& bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+				// 预付金额为0，且状态为locked，直接进入支付定金成功状态
 				bill.setStatus(SiteBillStatus.RESERVED.getCode());
-				 
+
 			}
 			rentalProvider.updateRentalBill(bill);
-			Long olpbillId=null;
+			Long olpbillId = null;
 			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-				olpbillId = onlinePayService.createBillId(DateHelper.currentGMTTime()
-						.getTime()) ;
+				olpbillId = onlinePayService.createBillId(DateHelper
+						.currentGMTTime().getTime());
 				response.setAmount(bill.getReserveMoney());
 				response.setOrderNo(String.valueOf(olpbillId));
-			}
-			else if (bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
-				olpbillId = onlinePayService.createBillId(DateHelper.currentGMTTime()
-						.getTime()) ;
+			} else if (bill.getStatus().equals(
+					SiteBillStatus.PAYINGFINAL.getCode())) {
+				olpbillId = onlinePayService.createBillId(DateHelper
+						.currentGMTTime().getTime());
 				response.setAmount(bill.getPayTotalMoney()
 						- bill.getPaidMoney());
 				response.setOrderNo(String.valueOf(olpbillId));
-			}
-			else{
+			} else {
 				response.setAmount(0.0);
 			}
-			//save bill and online pay bill
-			RentalBillPaybillMap billmap= new RentalBillPaybillMap();
+			// save bill and online pay bill
+			RentalBillPaybillMap billmap = new RentalBillPaybillMap();
 			billmap.setCommunityId(cmd.getCommunityId());
 			billmap.setSiteType(cmd.getSiteType());
 			billmap.setRentalBillId(cmd.getRentalBillId());
@@ -1033,10 +1060,9 @@ public class RentalServiceImpl implements RentalService {
 			ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		int totalCount = rentalProvider.countRentalBills(
-				cmd.getCommunityId(), cmd.getSiteType(),
-				cmd.getRentalSiteId(), cmd.getBillStatus(), cmd.getStartTime(),
-				cmd.getEndTime(), cmd.getInvoiceFlag());
+		int totalCount = rentalProvider.countRentalBills(cmd.getCommunityId(),
+				cmd.getSiteType(), cmd.getRentalSiteId(), cmd.getBillStatus(),
+				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag());
 		if (totalCount == 0)
 			return response;
 
@@ -1045,10 +1071,9 @@ public class RentalServiceImpl implements RentalService {
 		int pageCount = getPageCount(totalCount, pageSize);
 		checkEnterpriseCommunityIdIsNull(cmd.getCommunityId());
 		List<RentalBill> bills = rentalProvider.listRentalBills(
-				cmd.getCommunityId(), cmd.getSiteType(),
-				cmd.getRentalSiteId(), cmd.getBillStatus(),
-				cmd.getPageOffset(), pageSize, cmd.getStartTime(),
-				cmd.getEndTime(), cmd.getInvoiceFlag());
+				cmd.getCommunityId(), cmd.getSiteType(), cmd.getRentalSiteId(),
+				cmd.getBillStatus(), cmd.getPageOffset(), pageSize,
+				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag());
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
