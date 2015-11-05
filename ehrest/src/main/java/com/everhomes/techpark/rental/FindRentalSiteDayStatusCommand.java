@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -10,9 +12,13 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSiteDayStatusCommand {
+	@NotNull
 	private Long communityId;
+	@NotNull
 	private String siteType;
+	@NotNull
 	private Byte rentalType;
+	@NotNull
 	private Long ruleDate;
 	
 	@Override

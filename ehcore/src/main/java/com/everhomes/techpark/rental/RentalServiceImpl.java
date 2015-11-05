@@ -265,14 +265,28 @@ public class RentalServiceImpl implements RentalService {
 					if (dto.getCounts() == 0) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
-					if (reserveTime.before(new java.util.Date(rsr
-							.getBeginTime().getTime()
-							- rentalRule.getRentalStartTime()))) {
-						dto.setStatus(SiteRuleStatus.LATE.getCode());
-					}
-					if (reserveTime.after(new java.util.Date(rsr.getBeginTime()
-							.getTime() - rentalRule.getRentalEndTime()))) {
-						dto.setStatus(SiteRuleStatus.EARLY.getCode());
+					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+						if (reserveTime.before(new java.util.Date(rsr
+								.getBeginTime().getTime()
+								- rentalRule.getRentalStartTime()))) {
+							dto.setStatus(SiteRuleStatus.EARLY.getCode());
+						}
+						if (reserveTime.after(new java.util.Date(rsr
+								.getBeginTime().getTime()
+								- rentalRule.getRentalEndTime()))) {
+							dto.setStatus(SiteRuleStatus.LATE.getCode());
+						}
+					} else {
+						if (reserveTime.before(new java.util.Date(rsr
+								.getSiteRentalDate().getTime()
+								- rentalRule.getRentalStartTime()))) {
+							dto.setStatus(SiteRuleStatus.EARLY.getCode());
+						}
+						if (reserveTime.after(new java.util.Date(rsr
+								.getSiteRentalDate().getTime()
+								- rentalRule.getRentalEndTime()))) {
+							dto.setStatus(SiteRuleStatus.LATE.getCode());
+						}
 					}
 					rsDTO.getSiteRules().add(dto);
 
@@ -482,12 +496,22 @@ public class RentalServiceImpl implements RentalService {
 			if (null == rentalBill.getStartTime()
 					|| rentalBill.getStartTime().after(
 							rentalSiteRule.getBeginTime())) {
-				rentalBill.setStartTime(rentalSiteRule.getBeginTime());
+				if (null == rentalSiteRule.getBeginTime()) {
+					rentalBill.setStartTime(new Timestamp(rentalSiteRule
+							.getSiteRentalDate().getTime()));
+				} else {
+					rentalBill.setStartTime(rentalSiteRule.getBeginTime());
+				}
 			}
 			if (null == rentalBill.getEndTime()
 					|| rentalBill.getEndTime().before(
 							rentalSiteRule.getEndTime())) {
-				rentalBill.setEndTime(rentalSiteRule.getEndTime());
+				if (null == rentalSiteRule.getEndTime()) {
+					rentalBill.setStartTime(new Timestamp(rentalSiteRule
+							.getSiteRentalDate().getTime()));
+				} else {
+					rentalBill.setEndTime(rentalSiteRule.getEndTime());
+				}
 			}
 			siteTotalMoney += rentalSiteRule.getPrice()
 					* (cmd.getRentalCount() / rentalSiteRule.getUnit());
@@ -665,8 +689,17 @@ public class RentalServiceImpl implements RentalService {
 		dto.setRentalBillId(bill.getId());
 		dto.setCommunityId(bill.getCommunityId());
 		dto.setSiteType(bill.getSiteType());
-		dto.setStartTime(bill.getStartTime().getTime());
-		dto.setEndTime(bill.getEndTime().getTime());
+		dto.setRentalCount(bill.getRentalCount());
+		if (null == bill.getStartTime()) {
+
+		} else {
+			dto.setStartTime(bill.getStartTime().getTime());
+		}
+		if (null == bill.getEndTime()) {
+
+		} else {
+			dto.setEndTime(bill.getEndTime().getTime());
+		}
 		dto.setReserveTime(bill.getReserveTime().getTime());
 		if (null != bill.getPayStartTime()) {
 			dto.setPayStartTime(bill.getPayStartTime().getTime());
@@ -690,6 +723,33 @@ public class RentalServiceImpl implements RentalService {
 		dto.setUnPayPrice(bill.getPayTotalMoney() - bill.getPaidMoney());
 		dto.setInvoiceFlag(bill.getInvoiceFlag());
 		dto.setStatus(bill.getStatus());
+		dto.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
+		List<RentalSitesBill> rsbs = rentalProvider
+				.findRentalSitesBillByBillId(bill.getId());
+		List<Long> siteRuleIds = new ArrayList<Long>();
+		for (RentalSitesBill rsb : rsbs) {
+			siteRuleIds.add(rsb.getRentalSiteRuleId());
+		}
+		List<RentalSiteRule> rsrs = rentalProvider
+				.findRentalSiteRulesByRuleIds(siteRuleIds);
+		RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
+		for (RentalSiteRule rsr : rsrs) {
+			ruleDto.setId(rsr.getId());
+			ruleDto.setRentalSiteId(rsr.getRentalSiteId());
+			ruleDto.setRentalType(rsr.getRentalType());
+			ruleDto.setRentalStep(rsr.getRentalstep());
+			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) {
+				ruleDto.setBeginTime(rsr.getBeginTime().getTime());
+				ruleDto.setEndTime(rsr.getEndTime().getTime());
+			} else if (ruleDto.getRentalType().equals(
+					RentalType.HALFDAY.getCode())) {
+				ruleDto.setAmorpm(rsr.getAmorpm());
+			}
+			ruleDto.setUnit(rsr.getUnit());
+			ruleDto.setPrice(rsr.getPrice());
+			ruleDto.setRuleDate(rsr.getSiteRentalDate().getTime());
+			dto.getRentalSiteRules().add(ruleDto);
+		}
 	}
 
 	@Override
@@ -970,7 +1030,7 @@ public class RentalServiceImpl implements RentalService {
 		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
 					cmd.getInvoiceFlag());
-		if (cmd.getRentalItems() != null) {
+		if (cmd.getRentalItems().get(0).getItemPrice() != null) {
 			double itemMoney = 0.0;
 			for (SiteItemDTO siDto : cmd.getRentalItems()) {
 				RentalItemsBill rib = new RentalItemsBill();
@@ -1000,33 +1060,35 @@ public class RentalServiceImpl implements RentalService {
 
 			}
 			rentalProvider.updateRentalBill(bill);
-			Long olpbillId = null;
-			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-				olpbillId = onlinePayService.createBillId(DateHelper
-						.currentGMTTime().getTime());
-				response.setAmount(bill.getReserveMoney());
-				response.setOrderNo(String.valueOf(olpbillId));
-			} else if (bill.getStatus().equals(
-					SiteBillStatus.PAYINGFINAL.getCode())) {
-				olpbillId = onlinePayService.createBillId(DateHelper
-						.currentGMTTime().getTime());
-				response.setAmount(bill.getPayTotalMoney()
-						- bill.getPaidMoney());
-				response.setOrderNo(String.valueOf(olpbillId));
-			} else {
-				response.setAmount(0.0);
-			}
-			// save bill and online pay bill
-			RentalBillPaybillMap billmap = new RentalBillPaybillMap();
-			billmap.setCommunityId(cmd.getCommunityId());
-			billmap.setSiteType(cmd.getSiteType());
-			billmap.setRentalBillId(cmd.getRentalBillId());
-			billmap.setOnlinePayBillId(olpbillId);
-			billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			billmap.setCreatorUid(userId);
-			rentalProvider.createRentalBillPaybillMap(billmap);
+
 		}
+
+		Long olpbillId = null;
+		if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
+			olpbillId = onlinePayService.createBillId(DateHelper
+					.currentGMTTime().getTime());
+			response.setAmount(bill.getReserveMoney());
+			response.setOrderNo(String.valueOf(olpbillId));
+		} else if (bill.getStatus()
+				.equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+			olpbillId = onlinePayService.createBillId(DateHelper
+					.currentGMTTime().getTime());
+			response.setAmount(bill.getPayTotalMoney() - bill.getPaidMoney());
+			response.setOrderNo(String.valueOf(olpbillId));
+		} else {
+			response.setAmount(0.0);
+		}
+		// save bill and online pay bill
+		RentalBillPaybillMap billmap = new RentalBillPaybillMap();
+		billmap.setCommunityId(cmd.getCommunityId());
+		billmap.setSiteType(cmd.getSiteType());
+		billmap.setRentalBillId(cmd.getRentalBillId());
+		billmap.setOnlinePayBillId(olpbillId);
+		billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		billmap.setCreatorUid(userId);
+		rentalProvider.createRentalBillPaybillMap(billmap);
+
 		if (null != cmd.getAttachmentType()) {
 			RentalBillAttachment rba = new RentalBillAttachment();
 			rba.setRentalBillId(cmd.getRentalBillId());

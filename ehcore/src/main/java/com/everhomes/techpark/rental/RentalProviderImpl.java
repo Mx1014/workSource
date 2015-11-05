@@ -178,35 +178,36 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_RULES);
-		Condition condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
-				.equal(Date.valueOf(ruleDate));
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_TYPE.eq(rentalType);
+		if (rentalType.equals(RentalType.HOUR.getCode())) {
+			condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+					.equal(Date.valueOf(ruleDate));
+		}
+		else{
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(Date.valueOf(ruleDate));
+			//month begin 
+			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+			 condition = condition
+					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.greaterOrEqual(new java.sql.Date(calendar.getTime().getTime())));
+
+			//month end 
+			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+			condition = condition
+					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.lessOrEqual(new java.sql.Date(calendar.getTime().getTime())));
+
+		}
 		if (null != rentalSiteId) {
 			condition = condition
 					.and(Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID
 							.equal(rentalSiteId));
 		}
 
-		if (null != beginDate) {
-			if (rentalType.equals(RentalType.HOUR.getCode())) {
-				condition = condition
-						.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME
-								.lessOrEqual(beginDate));
-			}
-			else{
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(beginDate);
-				//month begin 
-				calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-				condition = condition
-						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.greaterOrEqual(new java.sql.Date(calendar.getTime().getTime())));
-
-				//month end 
-				calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-				condition = condition
-						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.lessOrEqual(new java.sql.Date(calendar.getTime().getTime())));
-				
+		if (null != beginDate && rentalType.equals(RentalType.HOUR.getCode())) {
+			condition = condition
+					.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME
+							.lessOrEqual(beginDate)); 
 			
-			}
 		}
 		step.where(condition);
 		List<RentalSiteRule> result = step
@@ -810,5 +811,49 @@ public class RentalProviderImpl implements RentalProvider {
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalBillPaybillMap.class, null);
 		return id;
+	}
+
+	@Override
+	public List<RentalSitesBill> findRentalSitesBillByBillId(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context
+				.select()
+				.from(Tables.EH_RENTAL_SITES_BILLS)
+				.join(Tables.EH_RENTAL_BILLS)
+				.on(Tables.EH_RENTAL_BILLS.ID
+						.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
+
+		Condition condition = Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID
+				.equal(id);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+				.ne(SiteBillStatus.FAIL.getCode()));
+		step.where(condition);
+		List<EhRentalSitesBillsRecord> resultRecord = step
+				.orderBy(Tables.EH_RENTAL_SITES_BILLS.ID.desc()).fetch()
+				.map(new RentalSitesBillRecordMapper());
+
+		List<RentalSitesBill> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, RentalSitesBill.class);
+		}).collect(Collectors.toList());
+
+		return result;
+	}
+
+	@Override
+	public List<RentalSiteRule> findRentalSiteRulesByRuleIds(
+			List<Long> siteRuleIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_RULES);
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.ID.in(siteRuleIds);
+	 
+		step.where(condition);
+		List<RentalSiteRule> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteRule.class);
+				});
+
+		return result;
 	}
 }

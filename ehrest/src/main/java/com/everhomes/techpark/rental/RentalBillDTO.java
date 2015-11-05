@@ -31,7 +31,9 @@ import com.everhomes.util.StringHelper;
  * <li>unPayPrice：未付金额</li>
  * <li>invoiceFlag：要不要发票，0 要 1 不要 参考{@link com.everhomes.techpark.rental.InvoiceFlag}</li>  
  * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.techpark.rental.SiteBillStatus}</li>  
- * <li>siteItems：场所商品</li>
+ * <li>rentalCount：场所预定数量</li> 
+ * <li>siteItems：场所商品</li> 
+ * <li>rentalSiteRules：场所时间</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -59,8 +61,13 @@ public class RentalBillDTO {
 	private Double unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
+	private Double rentalCount;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
+
+	@ItemType(RentalSiteRulesDTO.class)
+	private List<RentalSiteRulesDTO> rentalSiteRules; 
+	
 	
 	
 	@Override
@@ -268,4 +275,21 @@ public class RentalBillDTO {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
+
+	public Double getRentalCount() {
+		return rentalCount;
+	}
+
+	public void setRentalCount(Double rentalCount) {
+		this.rentalCount = rentalCount;
+	}
+
+	public List<RentalSiteRulesDTO> getRentalSiteRules() {
+		return rentalSiteRules;
+	}
+
+	public void setRentalSiteRules(List<RentalSiteRulesDTO> rentalSiteRules) {
+		this.rentalSiteRules = rentalSiteRules;
+	}
+ 
 }
