@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ruleDate：日期</li> 
  * </ul>
  */
-public class FindRentalSiteDayStatusCommand {
+public class FindRentalSitesStatusCommand {
 	@NotNull
 	private Long communityId;
 	@NotNull

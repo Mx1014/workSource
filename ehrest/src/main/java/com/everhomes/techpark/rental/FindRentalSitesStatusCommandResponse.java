@@ -5,7 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class FindRentalSiteDayStatusCommandResponse {
+public class FindRentalSitesStatusCommandResponse {
     @ItemType(RentalSiteDTO.class)
 	private List<RentalSiteDTO> sites;
 	

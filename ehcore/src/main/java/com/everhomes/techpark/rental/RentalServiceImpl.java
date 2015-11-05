@@ -200,11 +200,11 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public FindRentalSiteDayStatusCommandResponse findRentalSiteDayStatus(
-			FindRentalSiteDayStatusCommand cmd) {
+	public FindRentalSitesStatusCommandResponse findRentalSiteDayStatus(
+			FindRentalSitesStatusCommand cmd) {
 
 		java.util.Date reserveTime = new java.util.Date();
-		FindRentalSiteDayStatusCommandResponse response = new FindRentalSiteDayStatusCommandResponse();
+		FindRentalSitesStatusCommandResponse response = new FindRentalSitesStatusCommandResponse();
 		response.setSites(new ArrayList<RentalSiteDTO>());
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getCommunityId(), cmd.getSiteType());
@@ -732,8 +732,9 @@ public class RentalServiceImpl implements RentalService {
 		}
 		List<RentalSiteRule> rsrs = rentalProvider
 				.findRentalSiteRulesByRuleIds(siteRuleIds);
-		RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
+		
 		for (RentalSiteRule rsr : rsrs) {
+			RentalSiteRulesDTO ruleDto = new RentalSiteRulesDTO();
 			ruleDto.setId(rsr.getId());
 			ruleDto.setRentalSiteId(rsr.getRentalSiteId());
 			ruleDto.setRentalType(rsr.getRentalType());

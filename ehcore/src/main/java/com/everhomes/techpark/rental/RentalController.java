@@ -369,16 +369,16 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /techpark/rental/findRentalSiteDayStatus</b>
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
 	 * <p>
 	 * 查询某日某场所的状态
 	 * </p>
 	 */
 
-	@RequestMapping("findRentalSiteDayStatus")
-	@RestReturn(value = FindRentalSiteDayStatusCommandResponse.class)
-	public RestResponse findRentalSiteDayStatus(@Valid FindRentalSiteDayStatusCommand cmd) {
-		FindRentalSiteDayStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
+	@RequestMapping("findRentalSitesStatus")
+	@RestReturn(value = FindRentalSitesStatusCommandResponse.class)
+	public RestResponse findRentalSitesStatus(@Valid FindRentalSitesStatusCommand cmd) {
+		FindRentalSitesStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findRentalSiteDayStatus(cmd);
 		RestResponse response = new RestResponse(
 				findRentalSiteDayStatusCommandResponse);
