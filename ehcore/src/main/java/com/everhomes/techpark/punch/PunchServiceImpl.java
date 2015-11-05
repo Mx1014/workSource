@@ -33,7 +33,6 @@ import com.everhomes.enterprise.EnterpriseContactService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.company.ContactType;
-import com.everhomes.techpark.company.GroupContact;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
