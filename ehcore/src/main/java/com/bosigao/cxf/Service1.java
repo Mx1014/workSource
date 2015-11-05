@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "Service1", 
-                  wsdlLocation = "http://58.60.175.77:8066/zl_web/Service1.asmx?wsdl",
+                  wsdlLocation = "http://58.60.172.247:8066/zl_web/Service1.asmx?wsdl",
                   targetNamespace = "http://tempuri.org/") 
 public class Service1 extends Service {
 
@@ -29,7 +29,7 @@ public class Service1 extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("http://58.60.175.77:8066/zl_web/Service1.asmx?wsdl");
+            url = new URL("http://58.60.172.247:8066/zl_web/Service1.asmx?wsdl");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(Service1.class.getName())
                 .log(java.util.logging.Level.INFO, 
