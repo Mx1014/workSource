@@ -735,6 +735,9 @@ public class CommunityServiceImpl implements CommunityService {
 		} else {
 			LOGGER.info("update building");
 			building.setId(cmd.getId());
+			Building b = this.communityProvider.findBuildingById(cmd.getId());
+			building.setCreatorUid(b.getCreatorUid());
+			building.setCreateTime(b.getCreateTime());
 			this.communityProvider.updateBuilding(building);
 		}
 		
