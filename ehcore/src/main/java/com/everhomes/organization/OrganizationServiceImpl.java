@@ -1002,6 +1002,54 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		return map;
 	}
+	
+	/**
+	 * 根据小区ID获取机构及该机构在树型结构的组织架构上的所有上层机构。
+	 * @param communityId 小区ID
+	 */
+	public List<Organization> getOrganizationTreeUpToRoot(Long communityId) {
+	    long startTime = System.currentTimeMillis();
+	    List<Organization> orgResultist = new ArrayList<Organization>();
+	    
+	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
+	    String rootPath = null;
+	    for(Organization org : orgDbist) {
+	        orgResultist.add(org);
+	        rootPath = getOrganizationRootPath(org.getPath());
+	        if(rootPath != null && rootPath.length() > 0) {
+	            List<Organization> tempDbist = this.organizationProvider.findOrganizationByPath(rootPath);
+	            if(tempDbist != null && tempDbist.size() > 0) {
+	                orgResultist.addAll(tempDbist);
+	            }
+	        }
+	    }
+	    long endTime = System.currentTimeMillis();
+	    if(LOGGER.isDebugEnabled()) {
+	        LOGGER.info("List all the organization from bottom to the top in the tree, communityId=" + communityId 
+	            + ", size=" + orgResultist.size() + ", elapse=" + (endTime - startTime));
+	    }
+	    
+	    return orgResultist;
+	}
+	
+	/**
+	 * 根据路径<code>path</code>取得其对应的根路径
+	 * @param path 路径
+	 * @return 根据
+	 */
+	private String getOrganizationRootPath(String path) {
+	    // 路径的格式为：/第一层机构ID/第二层机构ID/.../第N层机构ID
+	    // 从最后一层机构ID往前一层一层剥除直到最后一层
+	    if(path != null && path.length() > 0) {
+	        int index = path.lastIndexOf('/');
+	        while(index > 0) {
+	            path = path.substring(0, index);
+	            index = path.lastIndexOf('/');
+	        }
+	    }
+	    
+	    return path;
+	}
 
 	@Override
 	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {

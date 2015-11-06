@@ -24,6 +24,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.activity.ActivityRoster;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -141,6 +142,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return organizations;
 	}
+	
+    @Override
+    public List<Organization> findOrganizationByPath(String path) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<Organization> result  = new ArrayList<Organization>();
+        context.select().from(Tables.EH_ORGANIZATIONS)
+            .where(Tables.EH_ORGANIZATIONS.PATH.eq(path))
+            .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, Organization.class));
+                return null;
+            });
+        
+        return result;
+    }	
 
 	@Override
 	public List<Organization> listOrganizations(String organizationType,String name,Integer pageOffset,Integer pageSize) {

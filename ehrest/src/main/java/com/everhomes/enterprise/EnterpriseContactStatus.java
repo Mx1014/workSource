@@ -3,8 +3,8 @@ package com.everhomes.enterprise;
 /**
  * <ul>
  * <li>INACTIVE(0): 已无效</li>
- * <li>WAITING_AUTH: 待认证</li>
- * <li>AUTHENTICATED: 已认证</li>
+ * <li>WAITING_AUTH(1): 待认证</li>
+ * <li>AUTHENTICATED(2): 已认证</li>
  * </ul>
  */
 public enum EnterpriseContactStatus {
@@ -19,10 +19,12 @@ public enum EnterpriseContactStatus {
         return this.code;
     }
     
-    public static EnterpriseContactStatus fromCode(byte code) {
-        for(EnterpriseContactStatus t : EnterpriseContactStatus.values()) {
-            if (t.code == code) {
-                return t;
+    public static EnterpriseContactStatus fromCode(Byte code) {
+        if(code != null) {
+            for(EnterpriseContactStatus value : EnterpriseContactStatus.values()) {
+                if (value.code == code.byteValue()) {
+                    return value;
+                }
             }
         }
         
