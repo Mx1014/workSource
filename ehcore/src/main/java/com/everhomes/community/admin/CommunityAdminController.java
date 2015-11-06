@@ -304,4 +304,60 @@ public class CommunityAdminController extends ControllerBase {
         return response;
 	}
 
+    /**
+     * <b>URL: /admin/community/listBuildingsByStatus</b>
+     * <p>查询待审核楼栋列表</p>
+     */
+    @RequestMapping("listBuildingsByStatus")
+    @RestReturn(value=ListBuildingsByStatusCommandResponse.class)
+    public RestResponse listBuildingsByStatus(@Valid listBuildingsByStatusCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        ListBuildingsByStatusCommandResponse cmdResponse = this.communityService.listBuildingsByStatus(cmd);
+        
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/approveBuilding</b>
+     * <p>审核楼栋</p>
+     */
+    @RequestMapping("approveBuilding")
+    @RestReturn(value=String.class)
+    public RestResponse approveBuilding(@Valid VerifyBuildingAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        this.communityService.approveBuilding(cmd);
+        
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/rejectBuilding</b>
+     * <p>拒绝用户添加的楼栋</p>
+     */
+    @RequestMapping("rejectBuilding")
+    @RestReturn(value=String.class)
+    public RestResponse rejectBuilding(@Valid VerifyBuildingAdminCommand cmd) {
+        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        this.communityService.rejectBuilding(cmd);
+        
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

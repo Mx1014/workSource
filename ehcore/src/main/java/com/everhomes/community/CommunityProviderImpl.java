@@ -794,4 +794,33 @@ public class CommunityProviderImpl implements CommunityProvider {
         
 		return true;
 	}
+
+	@Override
+	public List<Building> listBuildingsByStatus(ListingLocator locator,
+			int count, ListingQueryBuilderCallback queryBuilderCallback) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+        
+        final List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+            
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_BUILDINGS.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_BUILDINGS.ID.asc());
+        query.addLimit(count);
+        
+        query.fetch().map((r) -> {
+        	buildings.add(ConvertHelper.convert(r, Building.class));
+            return null;
+        });
+        
+        if(buildings.size() > 0) {
+            locator.setAnchor(buildings.get(buildings.size() -1).getId());
+        }
+        
+        return buildings;
+	}
 }

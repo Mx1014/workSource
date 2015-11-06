@@ -24,6 +24,7 @@ import com.everhomes.app.AppConstants;
 import com.everhomes.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.community.admin.CommunityManagerDTO;
 import com.everhomes.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.community.admin.ListUserCommunitiesCommand;
@@ -31,7 +32,9 @@ import com.everhomes.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.community.admin.UpdateCommunityAdminCommand;
 import com.everhomes.community.admin.UserCommunityDTO;
+import com.everhomes.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.community.admin.VerifyBuildingNameAdminCommand;
+import com.everhomes.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -829,6 +832,95 @@ public class CommunityServiceImpl implements CommunityService {
 		}).collect(Collectors.toList());
 		
 		return usercommunities;
+	}
+
+
+	@Override
+	public void approveBuilding(VerifyBuildingAdminCommand cmd) {
+		if(cmd.getBuildingId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid buildingId parameter");
+		}
+
+		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
+		if(building == null){
+			LOGGER.error("Building is not found.buildingId=" + cmd.getBuildingId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST, 
+					"Building is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		
+		if(building.getCommunityId() == null || building.getCommunityId().longValue() == 0){
+		    LOGGER.error("Building missing infomation,communityId is null.buildingId=" + cmd.getBuildingId());
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_COMMUNITY_NOT_EXIST, 
+                    "Building missing infomation,communityId is null.");
+		}
+		
+		
+		building.setOperatorUid(userId);
+		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		this.communityProvider.updateBuilding(building);
+	}
+
+
+	@Override
+	public void rejectBuilding(VerifyBuildingAdminCommand cmd) {
+		
+		if(cmd.getBuildingId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid buildingId parameter");
+		}
+
+		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
+		if(building == null){
+			LOGGER.error("Building is not found.buildingId=" + cmd.getBuildingId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST, 
+					"Building is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+
+		building.setOperatorUid(userId);
+		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		building.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		this.communityProvider.updateBuilding(building);
+	}
+
+
+	@Override
+	public ListBuildingsByStatusCommandResponse listBuildingsByStatus(
+			listBuildingsByStatusCommand cmd) {
+
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(0L);
+		if(cmd.getStatus() == null)
+			cmd.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Building> buildings = this.communityProvider.listBuildingsByStatus(locator, pageSize + 1,
+				(loc, query) -> {
+					Condition c = Tables.EH_BUILDINGS.STATUS.eq(cmd.getStatus());
+					query.addConditions(c);
+					return query;
+				});
+
+		Long nextPageAnchor = null;
+		if(buildings != null && buildings.size() > pageSize) {
+			buildings.remove(buildings.size() - 1);
+			nextPageAnchor = buildings.get(buildings.size() -1).getId();
+		}
+		ListBuildingsByStatusCommandResponse response = new ListBuildingsByStatusCommandResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+
+		List<BuildingDTO> buildingDTOs = buildings.stream().map((c) ->{
+			BuildingDTO dto = ConvertHelper.convert(c, BuildingDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		response.setBuildings(buildingDTOs);
+		return response;
 	}
 
 }

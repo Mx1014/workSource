@@ -40,6 +40,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
@@ -54,6 +55,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 @Component
@@ -62,17 +64,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+    private ShardingProvider shardingProvider;
 
 	@Override
 	public void createOrganization(Organization department) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationsRecord record = ConvertHelper.convert(department, EhOrganizationsRecord.class);
-		InsertQuery<EhOrganizationsRecord> query = context.insertQuery(Tables.EH_ORGANIZATIONS);
-		query.setRecord(record);
-		query.setReturning(Tables.EH_ORGANIZATIONS.ID);
-		query.execute();
-
-		department.setId(query.getReturnedRecord().getId());
+		
+		long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
+		department.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
+		dao.insert(department);
+		
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null); 
 
 	}
