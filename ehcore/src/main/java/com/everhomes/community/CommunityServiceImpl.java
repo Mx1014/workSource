@@ -634,20 +634,22 @@ public class CommunityServiceImpl implements CommunityService {
 	 
 		 String operatorNickName = building.getOperateNickName();
          String operatorAvatar = building.getOperateAvatar();
-         
-         User operator = userProvider.findUserById(building.getOperatorUid());
-         if(operator != null) {
-             if(operatorNickName == null || operatorNickName.trim().length() == 0) {
-            	 building.setOperateNickName(operator.getNickName());
-             }
-             if(operatorAvatar == null || operatorAvatar.trim().length() == 0) {
-            	 building.setOperateAvatar(operator.getAvatar());
-             }
-         }
-         operatorAvatar = building.getOperateAvatar();
-         if(operatorAvatar != null && operatorAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
-             building.setOperateAvatarUrl(avatarUrl);
+         if(building.getOperatorUid() != null) {
+        	 
+	         User operator = userProvider.findUserById(building.getOperatorUid());
+	         if(operator != null) {
+	             if(operatorNickName == null || operatorNickName.trim().length() == 0) {
+	            	 building.setOperateNickName(operator.getNickName());
+	             }
+	             if(operatorAvatar == null || operatorAvatar.trim().length() == 0) {
+	            	 building.setOperateAvatar(operator.getAvatar());
+	             }
+	         }
+	         operatorAvatar = building.getOperateAvatar();
+	         if(operatorAvatar != null && operatorAvatar.length() > 0) {
+	             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
+	             building.setOperateAvatarUrl(avatarUrl);
+	         }
          }
 	 }
 	 
