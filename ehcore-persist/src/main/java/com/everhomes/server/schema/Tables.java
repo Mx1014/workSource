@@ -159,6 +159,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhEnterpriseAddresses EH_ENTERPRISE_ADDRESSES = com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES;
 
 	/**
+	 * The table ehcore.eh_enterprise_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseAttachments EH_ENTERPRISE_ATTACHMENTS = com.everhomes.server.schema.tables.EhEnterpriseAttachments.EH_ENTERPRISE_ATTACHMENTS;
+
+	/**
 	 * The table ehcore.eh_enterprise_community_map
 	 */
 	public static final com.everhomes.server.schema.tables.EhEnterpriseCommunityMap EH_ENTERPRISE_COMMUNITY_MAP = com.everhomes.server.schema.tables.EhEnterpriseCommunityMap.EH_ENTERPRISE_COMMUNITY_MAP;
@@ -327,6 +332,11 @@ public class Tables {
 	 * The table ehcore.eh_organization_address_mappings
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationAddressMappings EH_ORGANIZATION_ADDRESS_MAPPINGS = com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS;
+
+	/**
+	 * The table ehcore.eh_organization_assigned_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationAssignedScopes EH_ORGANIZATION_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhOrganizationAssignedScopes.EH_ORGANIZATION_ASSIGNED_SCOPES;
 
 	/**
 	 * The table ehcore.eh_organization_billing_accounts
