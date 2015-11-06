@@ -32,6 +32,7 @@ import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityType;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -579,9 +580,10 @@ public class ForumServiceImpl implements ForumService {
         Community community = checkCommunityParameter(operatorId, communityId, "listUserRelatedTopics");
         
         // 各区域ID，说明见com.everhomes.forum.PostEntityTag
-        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
+        // Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
         
-        Condition condition = buildPostQryConditionByUserRelated(operator, community, gaRegionIdMap);
+        // Condition condition = buildPostQryConditionByUserRelated(operator, community, gaRegionIdMap);
+        Condition condition = buildPostQryConditionByUserRelated(operator, community);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -1342,22 +1344,73 @@ public class ForumServiceImpl implements ForumService {
         return organization;
     }
     
+//    private ListPostCommandResponse listSystemForumTopicsByUser(Forum forum, ListTopicCommand cmd) {
+//        User user = UserContext.current().getUser();
+//        long userId = user.getId();
+//        Long communityId = cmd.getCommunityId();
+//        
+//        Community community = checkCommunityParameter(userId, communityId, "listSystemForumTopicsByUser");
+//        
+//        // 各区域ID，说明见com.everhomes.forum.PostEntityTag
+//        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
+//
+//        // 根据查帖指定的可见性创建查询条件
+//        VisibilityScope scope = VisibilityScope.fromCode(cmd.getVisibilityScope());
+//        if(scope == null) {
+//            scope = VisibilityScope.NEARBY_COMMUNITIES;
+//        }
+//        Condition visibilityCondition = buildPostVisibilityQryCondition(user, community, gaRegionIdMap, scope);
+//        
+//        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//        CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
+//        locator.setAnchor(cmd.getPageAnchor());
+//        List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
+//            query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
+//                Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+//            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
+//            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+//            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            if(visibilityCondition != null) {
+//                query.addConditions(visibilityCondition);
+//            }
+//            
+//            return query;
+//        });
+//        this.forumProvider.populatePostAttachments(posts);
+//        
+//        Long nextPageAnchor = null;
+//        if(posts.size() > pageSize) {
+//            posts.remove(posts.size() - 1);
+//            nextPageAnchor = posts.get(posts.size() - 1).getId();
+//        }
+//        
+//        populatePosts(userId, posts, communityId, false);
+//        
+//        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+//          return ConvertHelper.convert(r, PostDTO.class);  
+//        }).collect(Collectors.toList());
+//        
+//        
+//        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+//    }
+    
+    /**
+     * 查询住宅小区的社区论坛或商业园区的默认论坛里的帖。
+     * 为了兼容新增的商业园区，把条件重新调整编写一遍，上面注释掉的为原住宅小区查询逻辑。by lqs 20151105
+     * @param forum
+     * @param cmd
+     * @return
+     */
     private ListPostCommandResponse listSystemForumTopicsByUser(Forum forum, ListTopicCommand cmd) {
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        Long userId = user.getId();
         Long communityId = cmd.getCommunityId();
         
         Community community = checkCommunityParameter(userId, communityId, "listSystemForumTopicsByUser");
-        
-        // 各区域ID，说明见com.everhomes.forum.PostEntityTag
-        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
 
         // 根据查帖指定的可见性创建查询条件
         VisibilityScope scope = VisibilityScope.fromCode(cmd.getVisibilityScope());
-        if(scope == null) {
-            scope = VisibilityScope.NEARBY_COMMUNITIES;
-        }
-        Condition visibilityCondition = buildPostVisibilityQryCondition(user, community, gaRegionIdMap, scope);
+        Condition visibilityCondition = buildPostQryConditionByCommunity(user, community, scope);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
@@ -1390,6 +1443,73 @@ public class ForumServiceImpl implements ForumService {
         
         
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }
+    
+    /**
+     * 对于小区/园区在默认论坛里的帖，不管creatorTag和targetTag是谁，其可见范围由visibleRegionType和VisibleRegionId决定；
+     * 条件一：帖子必须是公开的。
+     * 条件二：如果类型是小区/园区，由于住宅小区含周边社区概念，故对于住宅小区需要增加周边小区范围，而商业园区则只限于本园区；
+     * 条件三：如果类型是片区，则需要找覆盖当前小区的所有机构（含各级上级机构），不管是发给这些机构的帖还是这些机构发的帖都满足要求。
+     * 条件四：自己发的帖自己永远能看。
+     * 三个条件关系：(条件一 and (条件二 or 条件三)) or 条件四
+     * @param user 当前用户信息
+     * @param community 小区信息
+     * @param scope 范围（住宅小区才使用，里面指定是否需要扩展到周边小区）
+     * @return 条件
+     */
+    private Condition buildPostQryConditionByCommunity(User user, Community community, VisibilityScope scope) {
+        Long userId = -1L;
+        if(user != null) {
+            userId = user.getId();
+        }
+        
+        Condition condition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(userId);
+        if(community == null) {
+            LOGGER.error("Community not found, userId=" + userId);
+            return condition;
+        }
+        
+        // 只有公开的帖子才能查到
+        Condition c1 = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+        
+        Long communityId = community.getId();
+        CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
+        if(communityType == null) {
+            LOGGER.error("Community type not found, userId=" + userId + ", communityId=" + community.getId() 
+                + ", communityType=" + communityType + ", scope=" + scope);
+            communityType = CommunityType.RESIDENTIAL;
+        }
+        
+        // 不管是商业园区还是住宅小区都需要包含本小区ID
+        List<Long> cmntyIdList = new ArrayList<Long>();
+        cmntyIdList.add(communityId);
+        // 对于住宅小区还存在周边社区的概述（商业园区没有此概念），此时如果不指明是“本小区”则添加上周边各小区
+        if(communityType == CommunityType.RESIDENTIAL && scope != VisibilityScope.COMMUNITY) {
+            List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(communityId);
+            for(Community c : nearbyCmntyList) {
+                cmntyIdList.add(c.getId());
+            }
+        }
+        Condition c2 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        c2 = c2.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(cmntyIdList));
+        
+        // 对于发给机构的帖或者是机构发的帖，凡是覆盖该小区的所有机构都满足要求
+        List<Organization> organizationList = this.organizationService.getOrganizationTreeUpToRoot(communityId);
+        List<Long> organizationIdList = new ArrayList<Long>();
+        for(Organization organization : organizationList) {
+            organizationIdList.add(organization.getId());
+        }
+        Condition c3 = null;
+        if(organizationIdList.size() > 0) {
+            c3 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            c3 = c3.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(organizationIdList));
+        }
+        
+        if(c3 == null) {
+            return (c1.and(c2)).or(condition);
+        } else {
+            return (c1.and(c2.or(c3))).or(condition);
+        }
     }
     
     private ListPostCommandResponse listSimpleForumTopicsByUser(Forum forum, ListTopicCommand cmd) {
@@ -1709,10 +1829,53 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
-    private Condition buildPostQryConditionByUserRelated(User user, Community community, Map<String, Long> gaRegionIdMap) {
+//    private Condition buildPostQryConditionByUserRelated(User user, Community community, Map<String, Long> gaRegionIdMap) {
+//        VisibilityScope scope = VisibilityScope.NEARBY_COMMUNITIES;
+//        Condition systemForumCondition = buildPostVisibilityQryCondition(user, community, gaRegionIdMap, scope);
+//        systemForumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM).and(systemForumCondition);
+//        
+//        List<UserGroup> userGroupList = userProvider.listUserGroups(user.getId(), GroupDiscriminator.GROUP.getCode());
+//        List<Long> forumIdList = new ArrayList<Long>();
+//        for(UserGroup userGroup : userGroupList) {
+//            Group group = groupProvider.findGroupById(userGroup.getGroupId());
+//            // 不查私有圈对应的论坛帖
+//            if(group != null && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC 
+//                && group.getOwningForumId() != null) {
+//                forumIdList.add(group.getOwningForumId());
+//            }
+//        }
+//        
+//        Condition otherForumCondition = null;
+//        if(forumIdList.size() > 0) {
+//            otherForumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIdList);
+//        }
+//        
+//        if(systemForumCondition != null) {
+//            if(otherForumCondition == null) {
+//                return systemForumCondition;
+//            } else {
+//                return systemForumCondition.or(otherForumCondition);
+//            }
+//        } else {
+//            return otherForumCondition;
+//        }
+//    }
+    
+    private Condition buildPostQryConditionByUserRelated(User user, Community community) {
+        Long userId = -1L;
+        if(user != null) {
+            userId = user.getId();
+        }
+        
         VisibilityScope scope = VisibilityScope.NEARBY_COMMUNITIES;
-        Condition systemForumCondition = buildPostVisibilityQryCondition(user, community, gaRegionIdMap, scope);
-        systemForumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM).and(systemForumCondition);
+        Condition systemForumCondition = buildPostQryConditionByCommunity(user, community, scope);
+        Long forumId = community.getDefaultForumId();
+        if(forumId == null || forumId <= 0) {
+            LOGGER.error("No default forum is found for community, system forum will used, userId=" + userId 
+                + ", communityId=" + community.getId());
+            forumId = ForumConstants.SYSTEM_FORUM;
+        }
+        systemForumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.eq(forumId).and(systemForumCondition);
         
         List<UserGroup> userGroupList = userProvider.listUserGroups(user.getId(), GroupDiscriminator.GROUP.getCode());
         List<Long> forumIdList = new ArrayList<Long>();
@@ -1730,14 +1893,10 @@ public class ForumServiceImpl implements ForumService {
             otherForumCondition = Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIdList);
         }
         
-        if(systemForumCondition != null) {
-            if(otherForumCondition == null) {
-                return systemForumCondition;
-            } else {
-                return systemForumCondition.or(otherForumCondition);
-            }
+        if(otherForumCondition == null) {
+            return systemForumCondition;
         } else {
-            return otherForumCondition;
+            return systemForumCondition.or(otherForumCondition);
         }
     }
     

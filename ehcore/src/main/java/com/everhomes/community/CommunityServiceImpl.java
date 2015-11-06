@@ -3,12 +3,14 @@ package com.everhomes.community;
 
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.hibernate.mapping.Collection;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +22,26 @@ import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.community.admin.CommunityManagerDTO;
+import com.everhomes.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.community.admin.ListBuildingsByStatusCommandResponse;
+import com.everhomes.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.community.admin.RejectCommunityAdminCommand;
+import com.everhomes.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.community.admin.UserCommunityDTO;
+import com.everhomes.community.admin.VerifyBuildingAdminCommand;
+import com.everhomes.community.admin.VerifyBuildingNameAdminCommand;
+import com.everhomes.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.forum.AttachmentDescriptor;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -39,6 +52,9 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionServiceErrorCode;
@@ -78,6 +94,8 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private ContentServerService contentServerService;
 
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -395,7 +413,7 @@ public class CommunityServiceImpl implements CommunityService {
 		Community community = this.communityProvider.findCommunityById(cmd.getId());
 		if(community == null){
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
-					"Community is not found.");
+					"Community is not found."); 
 		}
 		List<CommunityDTO> result = this.communityProvider.findNearyByCommunityById(cmd.getId()).stream().map((r) ->{
 			return ConvertHelper.convert(r, CommunityDTO.class);
@@ -616,20 +634,22 @@ public class CommunityServiceImpl implements CommunityService {
 	 
 		 String operatorNickName = building.getOperateNickName();
          String operatorAvatar = building.getOperateAvatar();
-         
-         User operator = userProvider.findUserById(building.getOperatorUid());
-         if(operator != null) {
-             if(operatorNickName == null || operatorNickName.trim().length() == 0) {
-            	 building.setOperateNickName(operator.getNickName());
-             }
-             if(operatorAvatar == null || operatorAvatar.trim().length() == 0) {
-            	 building.setOperateAvatar(operator.getAvatar());
-             }
-         }
-         operatorAvatar = building.getOperateAvatar();
-         if(operatorAvatar != null && operatorAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
-             building.setOperateAvatarUrl(avatarUrl);
+         if(building.getOperatorUid() != null) {
+        	 
+	         User operator = userProvider.findUserById(building.getOperatorUid());
+	         if(operator != null) {
+	             if(operatorNickName == null || operatorNickName.trim().length() == 0) {
+	            	 building.setOperateNickName(operator.getNickName());
+	             }
+	             if(operatorAvatar == null || operatorAvatar.trim().length() == 0) {
+	            	 building.setOperateAvatar(operator.getAvatar());
+	             }
+	         }
+	         operatorAvatar = building.getOperateAvatar();
+	         if(operatorAvatar != null && operatorAvatar.length() > 0) {
+	             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
+	             building.setOperateAvatarUrl(avatarUrl);
+	         }
          }
 	 }
 	 
@@ -661,7 +681,6 @@ public class CommunityServiceImpl implements CommunityService {
 					 String url = contentServerService.parserUri(contentUri, EntityType.BUILDING.getCode(), building.getId());
                     
 					 attachment.setContentUrl(url);
-					 ContentServerResource resource = contentServerService.findResourceByUri(contentUri);
                     
                 
 				 }catch(Exception e){
@@ -683,5 +702,230 @@ public class CommunityServiceImpl implements CommunityService {
 		 }
     
 	 }
+
+
+	@Override
+	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
+		
+		String[] geoString = cmd.getGeoString().split(",");
+		double longitude = Double.valueOf(geoString[0]);
+		double latitude = Double.valueOf(geoString[1]);
+		Building building = new Building();
+		building.setAddress(cmd.getAddress());
+		building.setAliasName(cmd.getAliasName());
+		building.setAreaSize(cmd.getAreaSize());
+		building.setCommunityId(cmd.getCommunityId());
+		building.setContact(cmd.getContact());
+		building.setDescription(cmd.getDescription());
+		building.setLatitude(latitude);
+		building.setLongitude(longitude);
+		building.setManagerUid(cmd.getManagerUid());
+		building.setName(cmd.getName());
+		building.setPosterUri(cmd.getPosterUri());
+		building.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
+		String geohash = GeoHashUtils.encode(latitude, longitude);
+		building.setGeohash(geohash);
+		
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		if(cmd.getId() == null) {
+			
+			LOGGER.info("add building");
+			this.communityProvider.createBuilding(userId, building);
+		} else {
+			LOGGER.info("update building");
+			building.setId(cmd.getId());
+			Building b = this.communityProvider.findBuildingById(cmd.getId());
+			building.setCreatorUid(b.getCreatorUid());
+			building.setCreateTime(b.getCreateTime());
+			this.communityProvider.updateBuilding(building);
+		}
+		
+		processBuildingAttachments(userId, cmd.getAttachments(), building);
+		
+		populateBuilding(building);
+		
+		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
+		return dto;
+		
+	}
+
+
+	@Override
+	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
+		
+		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
+		
+		this.communityProvider.deleteBuilding(building);
+	}
+
+
+	@Override
+	public Boolean verifyBuildingName(VerifyBuildingNameAdminCommand cmd) {
+		Boolean isValid = this.communityProvider.verifyBuildingName(cmd.getCommunityId(), cmd.getBuildingName());
+		return isValid;
+	}
+	
+    private void processBuildingAttachments(long userId, List<AttachmentDescriptor> attachmentList, Building building) {
+        List<BuildingAttachment> results = null;
+        
+        if(attachmentList != null) {
+            results = new ArrayList<BuildingAttachment>();
+            
+            BuildingAttachment attachment = null;
+            for(AttachmentDescriptor descriptor : attachmentList) {
+                attachment = new BuildingAttachment();
+                attachment.setCreatorUid(userId);
+                attachment.setBuildingId(building.getId());
+                attachment.setContentType(descriptor.getContentType());
+                attachment.setContentUri(descriptor.getContentUri());
+                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                
+                // Make sure we can save as many attachments as possible even if any of them failed
+                try {
+                	this.communityProvider.createBuildingAttachment(attachment);
+                    results.add(attachment);
+                } catch(Exception e) {
+                    LOGGER.error("Failed to save the attachment, userId=" + userId 
+                        + ", attachment=" + attachment, e);
+                }
+            }
+            
+            building.setAttachments(results);
+        }
+    }
+
+
+	@Override
+	public List<CommunityManagerDTO> getCommunityManagers(
+			ListCommunityManagersAdminCommand cmd) {
+		
+		List<OrganizationMember> member = organizationProvider.listOrganizationMembersByOrgId(cmd.getOrganizationId());
+		
+		List<CommunityManagerDTO> managers = member.stream().map(r -> {
+			CommunityManagerDTO dto = new CommunityManagerDTO();
+			dto.setManagerId(r.getTargetId());
+			dto.setManagerName(r.getContactName());
+			dto.setManagerPhone(r.getContactToken());
+			return dto;
+		}).collect(Collectors.toList());
+		
+		return managers;
+	}
+
+
+	@Override
+	public List<UserCommunityDTO> getUserCommunities(
+			ListUserCommunitiesCommand cmd) {
+		
+		List<OrganizationCommunity> communities = new ArrayList<OrganizationCommunity>();
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(cmd.getUserId());
+		
+		for(OrganizationMember member : members) {
+			List<OrganizationCommunity> oc = organizationProvider.listOrganizationCommunities(member.getOrganizationId());
+			communities.addAll(oc);
+		}
+		
+		List<UserCommunityDTO> usercommunities = communities.stream().map(r -> {
+			UserCommunityDTO dto = new UserCommunityDTO();
+			dto.setCommunityId(r.getCommunityId());
+			dto.setOrganizationId(r.getOrganizationId());
+			
+			Community community = communityProvider.findCommunityById(r.getCommunityId());
+			dto.setCommunityName(community.getName());
+			return dto;
+		}).collect(Collectors.toList());
+		
+		return usercommunities;
+	}
+
+
+	@Override
+	public void approveBuilding(VerifyBuildingAdminCommand cmd) {
+		if(cmd.getBuildingId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid buildingId parameter");
+		}
+
+		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
+		if(building == null){
+			LOGGER.error("Building is not found.buildingId=" + cmd.getBuildingId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST, 
+					"Building is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		
+		if(building.getCommunityId() == null || building.getCommunityId().longValue() == 0){
+		    LOGGER.error("Building missing infomation,communityId is null.buildingId=" + cmd.getBuildingId());
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_COMMUNITY_NOT_EXIST, 
+                    "Building missing infomation,communityId is null.");
+		}
+		
+		
+		building.setOperatorUid(userId);
+		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		this.communityProvider.updateBuilding(building);
+	}
+
+
+	@Override
+	public void rejectBuilding(VerifyBuildingAdminCommand cmd) {
+		
+		if(cmd.getBuildingId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid buildingId parameter");
+		}
+
+		Building building = this.communityProvider.findBuildingById(cmd.getBuildingId());
+		if(building == null){
+			LOGGER.error("Building is not found.buildingId=" + cmd.getBuildingId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_BUILDING_NOT_EXIST, 
+					"Building is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+
+		building.setOperatorUid(userId);
+		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		building.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		this.communityProvider.updateBuilding(building);
+	}
+
+
+	@Override
+	public ListBuildingsByStatusCommandResponse listBuildingsByStatus(
+			listBuildingsByStatusCommand cmd) {
+
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(0L);
+		if(cmd.getStatus() == null)
+			cmd.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Building> buildings = this.communityProvider.listBuildingsByStatus(locator, pageSize + 1,
+				(loc, query) -> {
+					Condition c = Tables.EH_BUILDINGS.STATUS.eq(cmd.getStatus());
+					query.addConditions(c);
+					return query;
+				});
+
+		Long nextPageAnchor = null;
+		if(buildings != null && buildings.size() > pageSize) {
+			buildings.remove(buildings.size() - 1);
+			nextPageAnchor = buildings.get(buildings.size() -1).getId();
+		}
+		ListBuildingsByStatusCommandResponse response = new ListBuildingsByStatusCommandResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+
+		List<BuildingDTO> buildingDTOs = buildings.stream().map((c) ->{
+			BuildingDTO dto = ConvertHelper.convert(c, BuildingDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		response.setBuildings(buildingDTOs);
+		return response;
+	}
 
 }

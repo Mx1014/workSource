@@ -221,7 +221,7 @@ CREATE TABLE `eh_buildings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# member of forum post sharding group
+# member of eh_communities sharding group
 #
 DROP TABLE IF EXISTS `eh_building_attachments`;
 CREATE TABLE `eh_building_attachments` (
@@ -233,6 +233,30 @@ CREATE TABLE `eh_building_attachments` (
     `create_time` DATETIME NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups sharding group
+#
+DROP TABLE IF EXISTS `eh_enterprise_attachments`;
+CREATE TABLE `eh_enterprise_attachments` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `enterprise_id` bigint(20) NOT NULL DEFAULT '0',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `eh_organization_assigned_scopes` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `organization_id` bigint(20) NOT NULL,
+  `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: building',
+  `scope_id` BIGINT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4;
 
 # TODO move to somewhare?
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');

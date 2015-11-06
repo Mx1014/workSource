@@ -36,12 +36,16 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
+import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
+import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
@@ -714,4 +718,109 @@ public class CommunityProviderImpl implements CommunityProvider {
             return true;
         });
     }
+
+	@Override
+	public void createBuilding(Long creatorId, Building building) {
+
+		long id = shardingProvider.allocShardableContentId(EhBuildings.class).second();
+        
+		building.setId(id);
+		building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		building.setCreatorUid(creatorId);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, id));
+        EhBuildingsDao dao = new EhBuildingsDao(context.configuration());
+        dao.insert(building);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBuildings.class, null);
+	}
+
+	@Override
+	public void updateBuilding(Building building) {
+
+		assert(building.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, building.getId()));
+        EhBuildingsDao dao = new EhBuildingsDao(context.configuration());
+        dao.update(building);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBuildings.class, building.getId());
+	}
+
+	@Override
+	public void deleteBuilding(Building building) {
+
+		assert(building.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, building.getId()));
+        EhBuildingsDao dao = new EhBuildingsDao(context.configuration());
+        dao.deleteById(building.getId());
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBuildings.class, building.getId());
+	}
+
+	@Override
+	public void createBuildingAttachment(BuildingAttachment attachment) {
+
+		assert(attachment.getBuildingId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, attachment.getBuildingId()));
+        long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBuildingAttachments.class));
+        attachment.setId(id);
+        
+        EhBuildingAttachmentsDao dao = new EhBuildingAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBuildingAttachments.class, null);
+	}
+
+	@Override
+	public Boolean verifyBuildingName(Long communityId, String buildingName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+		List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+    
+        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
+       
+        
+        
+        query.fetch().map((EhBuildingsRecord record) -> {
+        	buildings.add(ConvertHelper.convert(record, Building.class));
+        	return null;
+        });
+        
+        if(buildings.size() > 0)
+        	return false;
+        
+		return true;
+	}
+
+	@Override
+	public List<Building> listBuildingsByStatus(ListingLocator locator,
+			int count, ListingQueryBuilderCallback queryBuilderCallback) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+        
+        final List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+            
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_BUILDINGS.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_BUILDINGS.ID.asc());
+        query.addLimit(count);
+        
+        query.fetch().map((r) -> {
+        	buildings.add(ConvertHelper.convert(r, Building.class));
+            return null;
+        });
+        
+        if(buildings.size() > 0) {
+            locator.setAnchor(buildings.get(buildings.size() -1).getId());
+        }
+        
+        return buildings;
+	}
 }

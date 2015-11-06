@@ -142,7 +142,19 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES(4010, 4002, 0, '运动', '活动/运动与音乐/运动', 0, 2, UTC_TIMESTAMP());
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(4011, 4002, 0, '音乐', '活动/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP());
-     
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4012, 4, 0, '科技', '活动/科技', 0, 2, UTC_TIMESTAMP());
+	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4013, 4, 0, '论坛', '活动/论坛', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4014, 4, 0, '创客', '活动/创客', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4015, 4, 0, '项目', '活动/项目', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4016, 4, 0, '联谊', '活动/联谊', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4017, 4, 0, '沙龙', '活动/沙龙', 0, 2, UTC_TIMESTAMP());     
   
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '1', 'zh_CN', '此帖已删除');	
