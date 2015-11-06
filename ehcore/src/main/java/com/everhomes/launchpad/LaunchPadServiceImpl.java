@@ -219,12 +219,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			LOGGER.error("Buiness authenticate prefix url is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			try {
+			businessDetailUrl = detailUrl.trim() + business.getTargetId();
+			/*try {
 				businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
 			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("unsported encoding.");
-			}
-			return authenticatePrefix.trim() + businessDetailUrl;
+			}*/
+			return businessDetailUrl;
 		}
 		return business.getUrl();
 	}
@@ -284,7 +285,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
 						JSONObject jsonObject = new JSONObject();
 						jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
-						jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
+						//jsonObject.put(LaunchPadConstants.COMMUNITY_ID, community.getId());
 						itemDTO.setActionData(jsonObject.toJSONString());
 						if(b.getCreatorUid().longValue() == userId)
 							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
