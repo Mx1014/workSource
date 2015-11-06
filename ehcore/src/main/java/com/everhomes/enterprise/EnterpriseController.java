@@ -9,13 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.address.SearchCommunityCommand;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
@@ -39,7 +39,9 @@ public class EnterpriseController extends ControllerBase {
 
     @Autowired
     EnterpriseService enterpriseService;
-    
+
+    @Autowired
+    EnterpriseSearcher enterpriseSearcher;
     /**
      * <b>URL: /enterprise/listEnterpriseByCommunityId</b>
      * <p>获取小区下的所有企业 TODO: 放管理后台？</p>
@@ -53,6 +55,24 @@ public class EnterpriseController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+    
+    /**
+     * <b>URL: /enterprise/syncFromDb</b>
+     * <p>搜索索引同步 TODO: 求敢哥优化</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncFromDb")
+    @RestReturn(value=String.class)
+    public RestResponse syncFromDb() {
+    	enterpriseSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    
+    
     
     /**
      * <b>URL: /enterprise/enterpriseCommunities</b>

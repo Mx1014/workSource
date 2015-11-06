@@ -7,6 +7,10 @@ package com.everhomes.launchpad;
  * <li>BIZ(1): 更多按钮</li>
  * <li>NAVIGATION(2): 跳下一层</li>
  * <li>OPEN_DOOR(21): 门禁</li>
+ * <li>PUNCH(21): 门禁</li>
+ * <li>MEETINGROOM(21): 门禁</li>
+ * <li>OPEN_DOOR(21): 门禁</li>
+ * <li>OPEN_DOOR(21): 门禁</li>
  * </ul>
  */
 public enum ActionType {
@@ -14,7 +18,8 @@ public enum ActionType {
       WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),POST_DETAILS((byte)9),
       CHECKIN_ACTIVITY((byte)10),OPEN_MSG_SESSION((byte)11),SEND_MSG((byte)12),OFFICIAL_URL((byte)13),
       THIRDPART_URL((byte)14),POST_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),LAUNCH_APP((byte)18),
-      POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22);
+      POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22),PUNCH((byte)23),MEETINGROOM((byte)24),VIPPARKING((byte)25),
+      ELECSCREEN((byte)26);
     
     private byte code;
     

@@ -45,7 +45,7 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String queueName = "rentalService";
-	//N分钟后取消
+	// N分钟后取消
 	private Long cancelTime = 5 * 60 * 1000L;
 	@Autowired
 	private OnlinePayService onlinePayService;
@@ -403,10 +403,10 @@ public class RentalServiceImpl implements RentalService {
 			FindRentalSiteRulesCommand cmd) {
 		FindRentalSiteRulesCommandResponse response = new FindRentalSiteRulesCommandResponse();
 		response.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
-		 
+
 		List<RentalSiteRule> rentalSiteRules = rentalProvider
-				.findRentalSiteRules(cmd.getRentalSiteId(), null,
-						null, cmd.getRentalType());
+				.findRentalSiteRules(cmd.getRentalSiteId(), null, null,
+						cmd.getRentalType());
 		// 查sitebills
 		if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 			for (RentalSiteRule rsr : rentalSiteRules) {
@@ -431,14 +431,13 @@ public class RentalServiceImpl implements RentalService {
 				dto.setCounts((double) rsr.getCounts());
 				if (null != rsbs && rsbs.size() > 0) {
 					for (RentalSitesBill rsb : rsbs) {
-						dto.setCounts(dto.getCounts()
-								- rsb.getRentalCount());
+						dto.setCounts(dto.getCounts() - rsb.getRentalCount());
 					}
 				}
 				if (dto.getCounts() == 0) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
-			 
+
 				response.getRentalSiteRules().add(dto);
 
 			}
@@ -737,7 +736,7 @@ public class RentalServiceImpl implements RentalService {
 		dto.setInvoiceFlag(bill.getInvoiceFlag());
 		dto.setStatus(bill.getStatus());
 		dto.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
-		//订单的rules
+		// 订单的rules
 		List<RentalSitesBill> rsbs = rentalProvider
 				.findRentalSitesBillByBillId(bill.getId());
 		List<Long> siteRuleIds = new ArrayList<Long>();
@@ -765,10 +764,11 @@ public class RentalServiceImpl implements RentalService {
 			ruleDto.setRuleDate(rsr.getSiteRentalDate().getTime());
 			dto.getRentalSiteRules().add(ruleDto);
 		}
-		//订单的附件attachments
+		// 订单的附件attachments
 		dto.setBillAttachments(new ArrayList<BillAttachmentDTO>());
-		List<RentalBillAttachment> attachments = rentalProvider.findRentalBillAttachmentByBillId(dto.getRentalBillId());
-		for (RentalBillAttachment attachment :attachments){
+		List<RentalBillAttachment> attachments = rentalProvider
+				.findRentalBillAttachmentByBillId(dto.getRentalBillId());
+		for (RentalBillAttachment attachment : attachments) {
 			BillAttachmentDTO attachmentDTO = new BillAttachmentDTO();
 			attachmentDTO.setAttachmentType(attachment.getAttachmentType());
 			attachmentDTO.setBillId(attachment.getRentalBillId());
@@ -1056,39 +1056,42 @@ public class RentalServiceImpl implements RentalService {
 		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
 					cmd.getInvoiceFlag());
-		if (cmd.getRentalItems().get(0).getItemPrice() != null) {
-			double itemMoney = 0.0;
-			for (SiteItemDTO siDto : cmd.getRentalItems()) {
-				if (cmd.getRentalItems().get(0).getItemPrice()== null)
-					continue;
-				RentalItemsBill rib = new RentalItemsBill();
-				rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
-				rib.setCommunityId(cmd.getCommunityId());
-				rib.setSiteType(cmd.getSiteType());
-				rib.setRentalSiteItemId(siDto.getId());
-				rib.setRentalCount(siDto.getCounts());
-				rib.setRentalBillId(cmd.getRentalBillId());
-				rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-						.getTime()));
-				rib.setCreatorUid(userId);
-				itemMoney += rib.getTotalMoney();
-				rentalProvider.createRentalItemBill(rib);
-			}
-			if (itemMoney > 0) {
-				bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
-				bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
-			}
-			if (bill.getPayTotalMoney().equals(0.0)) {
-				// 总金额为0，直接预订成功状态
-				bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-			} else if (bill.getReserveMoney().equals(0.0)
-					&& bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-				// 预付金额为0，且状态为locked，直接进入支付定金成功状态
-				bill.setStatus(SiteBillStatus.RESERVED.getCode());
+		if (null != cmd.getRentalItems()) {
+			if (cmd.getRentalItems().get(0).getItemPrice() != null) {
+				double itemMoney = 0.0;
+				for (SiteItemDTO siDto : cmd.getRentalItems()) {
+					if (cmd.getRentalItems().get(0).getItemPrice() == null)
+						continue;
+					RentalItemsBill rib = new RentalItemsBill();
+					rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
+					rib.setCommunityId(cmd.getCommunityId());
+					rib.setSiteType(cmd.getSiteType());
+					rib.setRentalSiteItemId(siDto.getId());
+					rib.setRentalCount(siDto.getCounts());
+					rib.setRentalBillId(cmd.getRentalBillId());
+					rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+							.getTime()));
+					rib.setCreatorUid(userId);
+					itemMoney += rib.getTotalMoney();
+					rentalProvider.createRentalItemBill(rib);
+				}
+				if (itemMoney > 0) {
+					bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
+					bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
+				}
+				if (bill.getPayTotalMoney().equals(0.0)) {
+					// 总金额为0，直接预订成功状态
+					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+				} else if (bill.getReserveMoney().equals(0.0)
+						&& bill.getStatus().equals(
+								SiteBillStatus.LOCKED.getCode())) {
+					// 预付金额为0，且状态为locked，直接进入支付定金成功状态
+					bill.setStatus(SiteBillStatus.RESERVED.getCode());
+
+				}
+				rentalProvider.updateRentalBill(bill);
 
 			}
-			rentalProvider.updateRentalBill(bill);
-
 		}
 
 		Long olpbillId = null;
