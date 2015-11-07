@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.address.SearchCommunityCommand;
 import com.everhomes.app.AppConstants;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.core.AppConfig;
@@ -27,6 +29,7 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.GroupQueryResult;
@@ -39,6 +42,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.visibility.VisibleRegionType;
 
 @Component
 public class EnterpriseServiceImpl implements EnterpriseService {
@@ -60,6 +64,15 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
     LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    CommunityProvider communityProvider;
+    
+    @Autowired
+    RegionProvider regionProvider;
+    
+    @Autowired 
+    EnterpriseContactProvider enterpriseContactProvider; 
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
@@ -136,14 +149,19 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Override
     public ListEnterpriseResponse searchEnterprise(SearchEnterpriseCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = (user == null) ? -1L : user.getId();
+        
         ListEnterpriseResponse resp = new ListEnterpriseResponse();
         GroupQueryResult rlt = this.enterpriseSearcher.query(cmd);
         resp.setNextPageAnchor(rlt.getPageAnchor());
         List<EnterpriseDTO> ents = new ArrayList<EnterpriseDTO>();
         for(Long id : rlt.getIds()) {
-            EnterpriseDTO en = ConvertHelper.convert(this.enterpriseProvider.getEnterpriseById(id), EnterpriseDTO.class);
-            if(en != null) {
-                ents.add(en);
+            Enterprise enterprise = this.enterpriseProvider.getEnterpriseById(id);
+            
+            EnterpriseDTO dto = toEnterpriseDto(userId, enterprise);
+            if(dto != null) {
+                ents.add(dto);
             }
         }
         
@@ -151,6 +169,60 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         return resp;
     }
     
+    private List<EnterpriseDTO> toEnterpriseDtos(Long userId, List<Enterprise> enterpriseList) {
+        List<EnterpriseDTO> result = new ArrayList<EnterpriseDTO>();
+        
+        EnterpriseDTO dto = null;
+        for(Enterprise enterprise : enterpriseList) {
+            dto = toEnterpriseDto(userId, enterprise);
+            if(dto != null) {
+                result.add(dto);
+            }
+        }
+        
+        return result;
+    }
+    
+    private EnterpriseDTO toEnterpriseDto(Long userId, Enterprise enterprise) {
+        if(enterprise == null) {
+            return null;
+        }
+        
+        EnterpriseDTO dto = ConvertHelper.convert(enterprise, EnterpriseDTO.class);
+        dto.setContactCount(enterprise.getMemberCount());
+        dto.setContactStatus(enterprise.getStatus());
+        
+        VisibleRegionType regionType = VisibleRegionType.fromCode(enterprise.getVisibleRegionType());
+        if(regionType == VisibleRegionType.COMMUNITY) {
+            Long communityId = enterprise.getVisibleRegionId();
+            if(communityId != null) {
+                Community community = communityProvider.findCommunityById(communityId);
+                if(community != null) {
+                    dto.setCommunityId(communityId);
+                    dto.setCommunityName(community.getName());
+                    dto.setAreaId(community.getAreaId());
+                    dto.setAreaName(community.getAreaName());
+                    dto.setCityId(community.getCityId());
+                    dto.setCityName(community.getCityName());
+                }
+            }
+        }
+        
+        EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(dto.getId(), userId);
+        if(contact != null) {
+            String contactNickName = contact.getNickName();
+            if(contactNickName == null) {
+                contactNickName = contact.getName();
+            }
+            dto.setContactNickName(contactNickName);
+            
+            dto.setContactOf((byte)1);
+            dto.setContactStatus(contact.getStatus());
+            dto.setContactRole(contact.getRole());
+        }
+        
+        return dto;
+    }
     
     @Override
     public List<EnterpriseCommunity> listEnterpriseEnrollCommunties(CrossShardListingLocator locator, Long enterpriseId, int pageSize) {
@@ -198,8 +270,28 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
     
     @Override
-    public List<Enterprise> listEnterpriseByPhone(String phone) {
-        return this.enterpriseProvider.queryEnterpriseByPhone(phone);
+    public List<EnterpriseDTO> listEnterpriseByPhone(String phone) {
+        User user = UserContext.current().getUser();
+        Long userId = (user == null) ? -1L : user.getId();
+        
+        byte entryType = EnterpriseContactEntryType.Mobile.getCode();
+        List<EnterpriseContactEntry> entryList = this.enterpriseContactProvider.queryEnterpriseContactEntries(entryType, phone);
+        
+        List<EnterpriseDTO> enterpriseList = new ArrayList<EnterpriseDTO>();
+        if(entryList != null) {
+            Enterprise enterprise = null;
+            EnterpriseDTO dto = null;
+            for(EnterpriseContactEntry entry : entryList) {
+                enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
+                dto = toEnterpriseDto(userId, enterprise);
+                if(dto != null) {
+                    enterpriseList.add(dto);
+                }
+            }
+        }
+        //List<Enterprise> enterpriseList = this.enterpriseProvider.queryEnterpriseByPhone(phone);
+        
+        return enterpriseList;
     }
 
     @Override

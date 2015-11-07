@@ -40,7 +40,7 @@ public class EnterpriseDTO {
     private String description;
     private Long contactCount;
     private Long userId;
-    private Long owningGroupId;
+    private Long owningForumId;
     private String tag;
     private Byte contactOf;
     private Byte contactStatus;
@@ -48,6 +48,13 @@ public class EnterpriseDTO {
     private Long contactRole;
     private Long creatorUid;
     private String creatorName;
+    
+    private Long communityId;
+    private String communityName;
+    private Long cityId;
+    private String cityName;
+    private Long areaId;
+    private String areaName;
     
     @ItemType(Long.class)
     private List<Long> contactGroupPrivileges;
@@ -61,129 +68,218 @@ public class EnterpriseDTO {
     //TODO address info ?
     //List<AddressDTO>
     
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getDisplayName() {
-        return displayName;
-    }
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-    public String getAvatarUri() {
-        return avatarUri;
-    }
-    public void setAvatarUri(String avatarUri) {
-        this.avatarUri = avatarUri;
-    }
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    public Long getContactCount() {
-        return contactCount;
-    }
-    public void setContactCount(Long contactCount) {
-        this.contactCount = contactCount;
-    }
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-    public Long getOwningGroupId() {
-        return owningGroupId;
-    }
-    public void setOwningGroupId(Long owningGroupId) {
-        this.owningGroupId = owningGroupId;
-    }
-    public String getTag() {
-        return tag;
-    }
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-    public Byte getContactOf() {
-        return contactOf;
-    }
-    public void setContactOf(Byte contactOf) {
-        this.contactOf = contactOf;
-    }
-    public Byte getContactStatus() {
-        return contactStatus;
-    }
-    public void setContactStatus(Byte contactStatus) {
-        this.contactStatus = contactStatus;
-    }
-    public String getContactNickName() {
-        return contactNickName;
-    }
-    public void setContactNickName(String contactNickName) {
-        this.contactNickName = contactNickName;
-    }
-    public Long getContactRole() {
-        return contactRole;
-    }
-    public void setContactRole(Long contactRole) {
-        this.contactRole = contactRole;
-    }
-    public Long getCreatorUid() {
-        return creatorUid;
-    }
-    public void setCreatorUid(Long creatorUid) {
-        this.creatorUid = creatorUid;
-    }
-    public String getCreatorName() {
-        return creatorName;
-    }
-    public void setCreatorName(String creatorName) {
-        this.creatorName = creatorName;
-    }
-    public List<Long> getContactGroupPrivileges() {
-        return contactGroupPrivileges;
-    }
-    public void setContactGroupPrivileges(List<Long> contactGroupPrivileges) {
-        this.contactGroupPrivileges = contactGroupPrivileges;
-    }
-    public List<Long> getContactForumPrivileges() {
-        return contactForumPrivileges;
-    }
-    public void setContactForumPrivileges(List<Long> contactForumPrivileges) {
-        this.contactForumPrivileges = contactForumPrivileges;
-    }
-    public Timestamp getUpdateTime() {
-        return updateTime;
-    }
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
-    }
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
-    }
+    
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getAvatarUri() {
+        return avatarUri;
+    }
+
+    public void setAvatarUri(String avatarUri) {
+        this.avatarUri = avatarUri;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getContactCount() {
+        return contactCount;
+    }
+
+    public void setContactCount(Long contactCount) {
+        this.contactCount = contactCount;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getOwningForumId() {
+        return owningForumId;
+    }
+
+    public void setOwningForumId(Long owningForumId) {
+        this.owningForumId = owningForumId;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public Byte getContactOf() {
+        return contactOf;
+    }
+
+    public void setContactOf(Byte contactOf) {
+        this.contactOf = contactOf;
+    }
+
+    public Byte getContactStatus() {
+        return contactStatus;
+    }
+
+    public void setContactStatus(Byte contactStatus) {
+        this.contactStatus = contactStatus;
+    }
+
+    public String getContactNickName() {
+        return contactNickName;
+    }
+
+    public void setContactNickName(String contactNickName) {
+        this.contactNickName = contactNickName;
+    }
+
+    public Long getContactRole() {
+        return contactRole;
+    }
+
+    public void setContactRole(Long contactRole) {
+        this.contactRole = contactRole;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public Long getCityId() {
+        return cityId;
+    }
+
+    public void setCityId(Long cityId) {
+        this.cityId = cityId;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public Long getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Long areaId) {
+        this.areaId = areaId;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public List<Long> getContactGroupPrivileges() {
+        return contactGroupPrivileges;
+    }
+
+    public void setContactGroupPrivileges(List<Long> contactGroupPrivileges) {
+        this.contactGroupPrivileges = contactGroupPrivileges;
+    }
+
+    public List<Long> getContactForumPrivileges() {
+        return contactForumPrivileges;
+    }
+
+    public void setContactForumPrivileges(List<Long> contactForumPrivileges) {
+        this.contactForumPrivileges = contactForumPrivileges;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 }

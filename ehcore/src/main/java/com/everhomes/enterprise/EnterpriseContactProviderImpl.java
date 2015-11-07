@@ -317,6 +317,27 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         
         return result[0];
     }
+    
+    @Override
+    public List<EnterpriseContactEntry> queryEnterpriseContactEntries(byte entryType, String entryValue) {
+        List<EnterpriseContactEntry> results = new ArrayList<EnterpriseContactEntry>();
+        
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class),
+            results, (DSLContext context, Object reducingContext) -> {
+                SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(entryType));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(entryValue));
+                
+                query.fetch().map((r) -> {
+                    results.add(ConvertHelper.convert(r, EnterpriseContactEntry.class));
+                    return null;
+                });
+
+                return true;
+            });
+        
+        return results;
+    }
      
     
     @Override

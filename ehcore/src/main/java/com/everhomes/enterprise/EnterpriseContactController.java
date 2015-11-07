@@ -55,14 +55,14 @@ public class EnterpriseContactController extends ControllerBase {
     @RequestMapping("createContactByUserIdCommand")
     @RestReturn(value=EnterpriseContactDTO.class)
     public RestResponse createContactByUserIdCommand(@Valid CreateContactByUserIdCommand cmd) {
-        EnterpriseContact contact = this.enterpriseContactService.applyForContact(cmd);
+        EnterpriseContactDTO contact = this.enterpriseContactService.applyForContact(cmd);
         
         RestResponse res = new RestResponse();
         if (null == contact) {
             //TODO for error code
             res.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION); 
         } else {
-            res.setResponseObject(ConvertHelper.convert(contact, EnterpriseContactDTO.class));
+            res.setResponseObject(contact);
         }
         
         res.setErrorCode(ErrorCodes.SUCCESS);

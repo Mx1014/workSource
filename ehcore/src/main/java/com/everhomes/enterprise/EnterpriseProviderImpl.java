@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
-import org.jooq.JoinType;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
-import org.jooq.Record1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +24,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
+import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -57,6 +56,13 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         //TODO for forum
         enterprise.setDiscriminator(GroupDiscriminator.Enterprise.getCode());
         this.groupProvider.createGroup(enterprise);
+    }
+    
+    @Override
+    public Enterprise findEnterpriseById(long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, id));
+        EhGroupsDao dao = new EhGroupsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), Enterprise.class);
     }
     
     @Override

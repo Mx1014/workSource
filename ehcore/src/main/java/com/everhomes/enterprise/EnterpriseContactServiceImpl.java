@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
@@ -35,6 +37,7 @@ import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -50,10 +53,16 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseContactServiceImpl.class);
     
     @Autowired
+    DbProvider dbProvider;
+    
+    @Autowired
     private UserProvider userProvider;
     
     @Autowired
     EnterpriseService enterpriseService;
+    
+    @Autowired 
+    EnterpriseProvider enterpriseProvider;
     
     @Autowired
     private EnterpriseContactProvider enterpriseContactProvider;
@@ -93,7 +102,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
     @Override
     public List<Enterprise> queryEnterpriseByPhone(String phone) {
-        return this.enterpriseService.listEnterpriseByPhone(phone);
+        return this.enterpriseProvider.queryEnterpriseByPhone(phone);
     }
     
     @Override
@@ -105,7 +114,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     public void processUserForContact(UserIdentifier identifier) {
         //UserInfo user = userService.getUserSnapshotInfoWithPhone(identifier.getOwnerUid());
         User user = userProvider.findUserById(identifier.getOwnerUid());
-        List<Enterprise> enterprises = this.enterpriseService.listEnterpriseByPhone(identifier.getIdentifierToken());
+        // List<Enterprise> enterprises = this.enterpriseService.listEnterpriseByPhone(identifier.getIdentifierToken());
+        List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
         Map<Long,Long> ctx = new HashMap<Long, Long>();
         for(Enterprise en : enterprises) {
             //Try to create a contact for this enterprise
@@ -180,47 +190,70 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
      * @param contact
      */
     @Override
-    public EnterpriseContact applyForContact(CreateContactByUserIdCommand cmd) {
+    public EnterpriseContactDTO applyForContact(CreateContactByUserIdCommand cmd) {
         //Check exists
         EnterpriseContact existContact = this.enterpriseContactProvider.queryContactByUserId(cmd.getEnterpriseId(), cmd.getUserId());
         if(null != existContact) {
             //Should response error hear
             //contact.setId(existContact.getId());
-            return existContact;
+            return ConvertHelper.convert(existContact, EnterpriseContactDTO.class);
         }
         
         //TODO check group?
-        
-        EnterpriseContact contact = ConvertHelper.convert(cmd, EnterpriseContact.class);
-        if (null == contact) {
-            return null;
-        }
-        
-        //Create it
-        contact.setStatus(EnterpriseContactStatus.WAITING_AUTH.getCode());
-        this.enterpriseContactProvider.createContact(contact);
-        
-        //Create contact entry from userinfo
-        UserInfo userInfo = this.userService.getUserSnapshotInfoWithPhone(contact.getUserId());
-        List<String> phones = userInfo.getPhones();
-        for(String phone : phones) {
-            //TODO for email
+        User user = UserContext.current().getUser();
+        Long userId = (user == null) ? 0L : user.getId();
+        EnterpriseContact result = this.dbProvider.execute((TransactionStatus status) -> {
+            EnterpriseContact contact = new EnterpriseContact();
+            contact.setCreatorUid(userId);
+            contact.setEnterpriseId(cmd.getEnterpriseId());
+            contact.setName(user.getNickName());
+            contact.setNickName(user.getNickName());
+            contact.setAvatar(user.getAvatar());
+            
+            //Create it
+            contact.setStatus(EnterpriseContactStatus.WAITING_AUTH.getCode());
+            this.enterpriseContactProvider.createContact(contact);
+
+            UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
             EnterpriseContactEntry entry = new EnterpriseContactEntry();
             entry.setContactId(contact.getId());
             entry.setCreatorUid(UserContext.current().getUser().getId());
             entry.setEnterpriseId(contact.getEnterpriseId());
             entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
-            entry.setEntryValue(phone);
-            try {
-                this.enterpriseContactProvider.createContactEntry(entry);   
-            } catch(Exception ex) {
-                LOGGER.info("create phone entry error contactId " + contact.getId() + " phone " + phone);
-            }
-        }
+            entry.setEntryValue(identifier.getIdentifierToken());
+            
+            this.enterpriseContactProvider.createContactEntry(entry); 
+            
+            return contact;
+        });
+        
+        
+        //Create contact entry from userinfo
+//        UserInfo userInfo = this.userService.getUserSnapshotInfoWithPhone(contact.getUserId());
+//        List<String> phones = userInfo.getPhones();
+//        for(String phone : phones) {
+//            //TODO for email
+//            EnterpriseContactEntry entry = new EnterpriseContactEntry();
+//            entry.setContactId(contact.getId());
+//            entry.setCreatorUid(UserContext.current().getUser().getId());
+//            entry.setEnterpriseId(contact.getEnterpriseId());
+//            entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
+//            entry.setEntryValue(phone);
+//            try {
+//                this.enterpriseContactProvider.createContactEntry(entry);   
+//            } catch(Exception ex) {
+//                LOGGER.info("create phone entry error contactId " + contact.getId() + " phone " + phone);
+//            }
+//        }
         
         //TODO 发消息给所有根管理员
         
-        return contact;
+        if(result ==  null) {
+            LOGGER.error("Failed to apply for enterprise contact, userId=" + userId + ", cmd=" + cmd);
+            return null;
+        } else {
+            return ConvertHelper.convert(result, EnterpriseContactDTO.class);
+        }
     }
     
     /**

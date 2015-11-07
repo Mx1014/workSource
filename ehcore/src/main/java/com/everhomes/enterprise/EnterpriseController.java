@@ -57,13 +57,13 @@ public class EnterpriseController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /enterprise/syncFromDb</b>
+     * <b>URL: /enterprise/syncIndex</b>
      * <p>搜索索引同步 TODO: 求敢哥优化</p>
      * @return {String.class}
      */
-    @RequestMapping("syncFromDb")
+    @RequestMapping("syncIndex")
     @RestReturn(value=String.class)
-    public RestResponse syncFromDb() {
+    public RestResponse syncIndex() {
     	enterpriseSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -165,10 +165,8 @@ public class EnterpriseController extends ControllerBase {
   @RestReturn(value=QueryEnterpriseByPhoneResponse.class)
    public RestResponse listEnterpriseByPhone(@Valid ListEnterpriseByPhoneCommand cmd) {
       QueryEnterpriseByPhoneResponse resp = new QueryEnterpriseByPhoneResponse();
-      List<EnterpriseDTO> dtos = new ArrayList<EnterpriseDTO>();
-      for(Enterprise en : this.enterpriseService.listEnterpriseByPhone(cmd.getPhone())) {
-          dtos.add(ConvertHelper.convert(en, EnterpriseDTO.class));
-      }
+      List<EnterpriseDTO> dtos = this.enterpriseService.listEnterpriseByPhone(cmd.getPhone());
+      
       resp.setEnterprises(dtos);
       RestResponse res = new RestResponse();
       res.setResponseObject(resp);
