@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-05 18:58:57
+// generated at 2015-11-07 11:22:20
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -53,15 +53,23 @@ public interface ApiConstants {
     public static final String ADMIN_BUSINESS_PROMOTEBUSINESS_URL = "/admin/business/promoteBusiness";
     public static final String ADMIN_BUSINESS_RECOMMENDBUSINESS_URL = "/admin/business/recommendBusiness";
     public static final String ADMIN_CODEGEN_URL = "/admin/codegen";
+    public static final String ADMIN_COMMUNITY_APPROVEBUILDING_URL = "/admin/community/approveBuilding";
     public static final String ADMIN_COMMUNITY_APPROVECOMMUNITY_URL = "/admin/community/approveCommunity";
+    public static final String ADMIN_COMMUNITY_DELETEBUILDING_URL = "/admin/community/deleteBuilding";
     public static final String ADMIN_COMMUNITY_GETCOMMUNITYBYID_URL = "/admin/community/getCommunityById";
     public static final String ADMIN_COMMUNITY_GETCOMMUNITYBYUUID_URL = "/admin/community/getCommunityByUuid";
+    public static final String ADMIN_COMMUNITY_GETCOMMUNITYMANAGERS_URL = "/admin/community/getCommunityManagers";
     public static final String ADMIN_COMMUNITY_GETNEARBYCOMMUNITIESBYID_URL = "/admin/community/getNearbyCommunitiesById";
+    public static final String ADMIN_COMMUNITY_GETUSERCOMMUNITIES_URL = "/admin/community/getUserCommunities";
+    public static final String ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL = "/admin/community/listBuildingsByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL = "/admin/community/listCommunitiesByKeyword";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
+    public static final String ADMIN_COMMUNITY_REJECTBUILDING_URL = "/admin/community/rejectBuilding";
     public static final String ADMIN_COMMUNITY_REJECTCOMMUNITY_URL = "/admin/community/rejectCommunity";
     public static final String ADMIN_COMMUNITY_SYNCINDEX_URL = "/admin/community/syncIndex";
+    public static final String ADMIN_COMMUNITY_UPDATEBUILDING_URL = "/admin/community/updateBuilding";
     public static final String ADMIN_COMMUNITY_UPDATECOMMUNITY_URL = "/admin/community/updateCommunity";
+    public static final String ADMIN_COMMUNITY_VERIFYBUILDINGNAME_URL = "/admin/community/verifyBuildingName";
     public static final String ADMIN_CONFIGURATION_DELETECONFIGURATION_URL = "/admin/configuration/deleteConfiguration";
     public static final String ADMIN_CONFIGURATION_LISTCONFIGURATIONS_URL = "/admin/configuration/listConfigurations";
     public static final String ADMIN_CONFIGURATION_UPDATECONFIGURATION_URL = "/admin/configuration/updateConfiguration";
@@ -202,6 +210,7 @@ public interface ApiConstants {
     public static final String ENTERPRISE_REQUESTTOJOINCOMMUNITY_URL = "/enterprise/requestToJoinCommunity";
     public static final String ENTERPRISE_SEARCHCOMMUNITIES_URL = "/enterprise/searchCommunities";
     public static final String ENTERPRISE_SEARCHENTERPRISE_URL = "/enterprise/searchEnterprise";
+    public static final String ENTERPRISE_SYNCFROMDB_URL = "/enterprise/syncFromDb";
     public static final String FAMILY_APPROVEMEMBER_URL = "/family/approveMember";
     public static final String FAMILY_FINDFAMILYBYADDRESSID_URL = "/family/findFamilyByAddressId";
     public static final String FAMILY_FINDFAMILYBYKEYWORD_URL = "/family/findFamilyByKeyword";
