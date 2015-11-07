@@ -24,7 +24,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.activity.ActivityRoster;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -32,7 +31,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.organization.pm.OrganizationScopeCode;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
@@ -41,7 +42,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
@@ -50,6 +51,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
@@ -58,7 +60,6 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.PaginationHelper;
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
@@ -1003,6 +1004,64 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(orgType).and(Tables.EH_ORGANIZATIONS.NAME.eq(orgName)))
 				.fetch().map(r -> {
 					return ConvertHelper.convert(r, Organization.class);
+				});
+				
+		if(list == null || list.isEmpty())
+			return null;
+		return list;
+	}
+
+
+	@Override
+	public void addPmBuilding(OrganizationAssignedScopes pmBuilding) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAssignedScopesRecord record = ConvertHelper.convert(pmBuilding, EhOrganizationAssignedScopesRecord.class);
+		InsertQuery<EhOrganizationAssignedScopesRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES);
+		query.setRecord(record);
+		query.setReturning(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES.ID);
+		query.execute();
+
+		pmBuilding.setId(query.getReturnedRecord().getId());
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationAssignedScopes.class, null); 
+	}
+
+
+	@Override
+	public void deletePmBuildingById(Long id) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAssignedScopesDao dao = new EhOrganizationAssignedScopesDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAssignedScopes.class, id);
+		
+	}
+
+
+	@Override
+	public List<OrganizationAssignedScopes> findPmBuildingId(Long orgId) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationAssignedScopes> list = context.select().from(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES)
+				.where(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES.SCOPE_CODE.eq(OrganizationScopeCode.BUILDING.getCode()).and(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES.ORGANIZATION_ID.eq(orgId)))
+				.fetch().map(r -> {
+					return ConvertHelper.convert(r, OrganizationAssignedScopes.class);
+				});
+				
+		if(list == null || list.isEmpty())
+			return null;
+		return list;
+	}
+
+
+	@Override
+	public List<OrganizationAssignedScopes> findUnassignedBuildingId(Long orgId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationAssignedScopes> list = context.select().from(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES)
+				.where(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES.SCOPE_CODE.eq(OrganizationScopeCode.BUILDING.getCode()).and(Tables.EH_ORGANIZATION_ASSIGNED_SCOPES.ORGANIZATION_ID.eq(orgId)))
+				.fetch().map(r -> {
+					return ConvertHelper.convert(r, OrganizationAssignedScopes.class);
 				});
 				
 		if(list == null || list.isEmpty())

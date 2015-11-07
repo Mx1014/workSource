@@ -1,5 +1,7 @@
 package com.everhomes.organization.admin;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -27,6 +29,12 @@ import com.everhomes.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.organization.ListOrganizationsCommand;
 import com.everhomes.organization.ListOrganizationsCommandResponse;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.AddPmBuildingCommand;
+import com.everhomes.organization.pm.CancelPmBuildingCommand;
+import com.everhomes.organization.pm.ListPmBuildingCommand;
+import com.everhomes.organization.pm.ListPmBuildingCommandResponse;
+import com.everhomes.organization.pm.PmBuildingDTO;
+import com.everhomes.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserTokenCommand;
@@ -246,4 +254,75 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /org/addPmBuilding</b>
+     * <p>增加物业楼栋</p>
+     */
+    @RequestMapping("addPmBuilding")
+    @RestReturn(value=String.class)
+    public RestResponse addPmBuilding(AddPmBuildingCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	this.organizationService.addPmBuilding(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/cancelPmBuilding</b>
+     * <p>删除物业楼栋</p>
+     */
+    @RequestMapping("cancelPmBuilding")
+    @RestReturn(value=String.class)
+    public RestResponse cancelPmBuilding(CancelPmBuildingCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	this.organizationService.cancelPmBuilding(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listPmBuildings</b>
+     * <p>查询物业管理楼栋列表</p>
+     */
+    @RequestMapping("listPmBuildings")
+    @RestReturn(value = PmBuildingDTO.class, collection = true)
+    public RestResponse listPmBuildings(ListPmBuildingCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        List<PmBuildingDTO> list = this.organizationService.listPmBuildings(cmd);
+    	RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listUnassignedBuilding</b>
+     * <p>查询物业管理小区内未管理到的楼栋列表</p>
+     */
+    @RequestMapping("listUnassignedBuilding")
+    @RestReturn(value = UnassignedBuildingDTO.class, collection = true)
+    public RestResponse listUnassignedBuilding(ListPmBuildingCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        List<UnassignedBuildingDTO> list = this.organizationService.listUnassignedBuilding(cmd);
+    	RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

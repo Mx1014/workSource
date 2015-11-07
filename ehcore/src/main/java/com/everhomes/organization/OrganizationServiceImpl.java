@@ -37,6 +37,7 @@ import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -63,18 +64,26 @@ import com.everhomes.forum.PostPrivacy;
 import com.everhomes.forum.QueryOrganizationTopicCommand;
 import com.everhomes.group.Group;
 import com.everhomes.launchpad.ItemKind;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.pm.AddPmBuildingCommand;
+import com.everhomes.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.organization.pm.CommunityPmContact;
+import com.everhomes.organization.pm.ListPmBuildingCommand;
+import com.everhomes.organization.pm.ListPmBuildingCommandResponse;
+import com.everhomes.organization.pm.OrganizationScopeCode;
+import com.everhomes.organization.pm.PmBuildingDTO;
 import com.everhomes.organization.pm.PmMemberGroup;
 import com.everhomes.organization.pm.PmMemberStatus;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
@@ -2525,6 +2534,67 @@ public class OrganizationServiceImpl implements OrganizationService {
 			result.add(dto);
 		}
 		return result;
+	}
+
+	@Override
+	public void addPmBuilding(AddPmBuildingCommand cmd) {
+		OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
+		pmBuilding.setOrganizationId(cmd.getOrganizationId());
+		pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
+		
+		for(Long buildingId: cmd.getBuildingIds()) {
+			pmBuilding.setScopeId(buildingId);
+			this.organizationProvider.addPmBuilding(pmBuilding);
+		}
+	}
+
+	@Override
+	public void cancelPmBuilding(CancelPmBuildingCommand cmd) {
+		
+		this.organizationProvider.deletePmBuildingById(cmd.getId());
+	}
+
+	@Override
+	public List<PmBuildingDTO> listPmBuildings(
+			ListPmBuildingCommand cmd) {
+		
+		List<PmBuildingDTO> pmBuildings =  this.organizationProvider.findPmBuildingId(cmd.getOrgId()).stream().map(r -> {
+			PmBuildingDTO dto = new PmBuildingDTO();
+			dto.setPmBuildingId(r.getId());
+			Building building = communityProvider.findBuildingById(r.getScopeId());
+			dto.setBuildingName(building.getName());
+			return dto;
+		}).collect(Collectors.toList());
+		
+		
+		return pmBuildings;
+	}
+
+	@Override
+	public List<UnassignedBuildingDTO> listUnassignedBuilding(ListPmBuildingCommand cmd) {
+
+		List<Long> pmBuildingIds =  this.organizationProvider.findPmBuildingId(cmd.getOrgId()).stream().map(r -> {
+			Long id = r.getScopeId();
+			return id;
+		}).collect(Collectors.toList());;
+		OrganizationCommunity community = this.organizationProvider.findOrganizationCommunityByOrgId(cmd.getOrgId());
+		
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId());
+        
+        for(Building building : buildings) {
+        	if(pmBuildingIds.contains(building.getId()))
+        		buildings.remove(building);
+        }
+        
+        List<UnassignedBuildingDTO> unassignedBuildings = buildings.stream().map(r -> {
+        	UnassignedBuildingDTO dto = new UnassignedBuildingDTO();
+        	dto.setBuildingId(r.getId());
+        	dto.setBuildingName(r.getName());
+        	return dto;
+        }).collect(Collectors.toList());
+		
+		return unassignedBuildings;
 	}
 
 }
