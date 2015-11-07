@@ -584,6 +584,17 @@ public class RentalServiceImpl implements RentalService {
 			// 20min cancel order if status still is locked or paying
 			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
 					cmd.getStartTime() - rentalRule.getPayStartTime());
+			
+
+			// 在支付时间截止时，取消未成功的订单
+			final Job job3 = new Job(
+					CancelUnsuccessRentalBillAction.class.getName(),
+					new Object[] { String.valueOf(rentalBill.getId()) });
+			// 20min cancel order if status still is locked or paying
+			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+					cmd.getStartTime() - rentalRule.getPayEndTime());
+			
+			
 		} else if (rentalBill.getStatus().equals(
 				SiteBillStatus.PAYINGFINAL.getCode())) {
 			// 20分钟后，取消未成功的订单
@@ -595,13 +606,6 @@ public class RentalServiceImpl implements RentalService {
 					System.currentTimeMillis() + cancelTime);
 
 		}
-		// 在支付时间截止时，取消未成功的订单
-		final Job job2 = new Job(
-				CancelUnsuccessRentalBillAction.class.getName(),
-				new Object[] { String.valueOf(rentalBill.getId()) });
-		// 20min cancel order if status still is locked or paying
-		jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
-				cmd.getStartTime() - rentalRule.getPayEndTime());
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
