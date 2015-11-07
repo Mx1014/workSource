@@ -127,7 +127,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid keyword paramter.");
         }
-        int pageNum = cmd.getPageOffset() == null ? 1: cmd.getPageOffset();
+        int pageNum = (cmd.getPageOffset() == null||cmd.getPageOffset()<=0) ? 1: cmd.getPageOffset();
         final int pageSize = cmd.getPageSize() == null ? this.configProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
