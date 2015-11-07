@@ -453,7 +453,7 @@ public class ForumServiceImpl implements ForumService {
                 + ", communityId=" + communityId + ", map=" + gaRegionIdMap);
         }
 
-        Condition visibilityCondition = buildPostCategoryQryCondition(user, entityTag, community, gaRegionIdMap, 
+        Condition visibilityCondition = buildPostCategoryQryCondition(user, entityTag, community, 
             cmd.getContentCategory(), cmd.getActionCategory());
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -1410,7 +1410,7 @@ public class ForumServiceImpl implements ForumService {
 
         // 根据查帖指定的可见性创建查询条件
         VisibilityScope scope = VisibilityScope.fromCode(cmd.getVisibilityScope());
-        Condition visibilityCondition = buildPostQryConditionByCommunity(user, community, scope);
+        Condition visibilityCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
@@ -1457,7 +1457,7 @@ public class ForumServiceImpl implements ForumService {
      * @param scope 范围（住宅小区才使用，里面指定是否需要扩展到周边小区）
      * @return 条件
      */
-    private Condition buildPostQryConditionByCommunity(User user, Community community, VisibilityScope scope) {
+    private Condition buildDefaultForumPostQryConditionForCommunity(User user, Community community, VisibilityScope scope) {
         Long userId = -1L;
         if(user != null) {
             userId = user.getId();
@@ -1471,6 +1471,30 @@ public class ForumServiceImpl implements ForumService {
         
         // 只有公开的帖子才能查到
         Condition c1 = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+        
+        // 如果类型是小区/园区，由于住宅小区含周边社区概念，故对于住宅小区需要增加周边小区范围，而商业园区则只限于本园区；
+        Condition c2 = buildDefaultForumPostQryConditionForNearbyCommunity(user, community, scope);
+        
+        // 如果类型是片区，则需要找覆盖当前小区的所有机构（含各级上级机构），不管是发给这些机构的帖还是这些机构发的帖都满足要求。
+        Condition c3 = buildDefaultForumPostQryConditionByOrganization(user, community);
+        
+        if(c3 == null) {
+            return (c1.and(c2)).or(condition);
+        } else {
+            return (c1.and(c2.or(c3))).or(condition);
+        }
+    }
+    
+    /**
+     * 如果类型是小区/园区，由于住宅小区含周边社区概念，故对于住宅小区需要增加周边小区范围，而商业园区则只限于本园区；
+     * 参考buildPostQryConditionForCommunity的条件二。
+     * @param user 当前用户信息
+     * @param community 小区信息
+     * @param scope 范围（住宅小区才使用，里面指定是否需要扩展到周边小区）
+     * @return 条件
+     */
+    private Condition buildDefaultForumPostQryConditionForNearbyCommunity(User user, Community community, VisibilityScope scope) {
+        Long userId = getUserIdWithDefault(user);
         
         Long communityId = community.getId();
         CommunityType communityType = CommunityType.fromCode(community.getCommunityType());
@@ -1490,26 +1514,46 @@ public class ForumServiceImpl implements ForumService {
                 cmntyIdList.add(c.getId());
             }
         }
-        Condition c2 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-        c2 = c2.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(cmntyIdList));
+        Condition condition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        condition = condition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(cmntyIdList));
         
+        return condition;
+    }
+    
+    /**
+     * 如果类型是片区，则需要找覆盖当前小区的所有机构（含各级上级机构），不管是发给这些机构的帖还是这些机构发的帖都满足要求。
+     * @param user 当前用户信息
+     * @param community 小区信息
+     * @return 条件
+     */
+    private Condition buildDefaultForumPostQryConditionByOrganization(User user, Community community) {
+        Long communityId = community.getId();
         // 对于发给机构的帖或者是机构发的帖，凡是覆盖该小区的所有机构都满足要求
         List<Organization> organizationList = this.organizationService.getOrganizationTreeUpToRoot(communityId);
         List<Long> organizationIdList = new ArrayList<Long>();
         for(Organization organization : organizationList) {
             organizationIdList.add(organization.getId());
         }
-        Condition c3 = null;
+        Condition condition = null;
         if(organizationIdList.size() > 0) {
-            c3 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
-            c3 = c3.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(organizationIdList));
+            condition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            condition = condition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(organizationIdList));
         }
         
-        if(c3 == null) {
-            return (c1.and(c2)).or(condition);
+        return condition;
+    }
+    
+    private Long getUserIdWithDefault(User user) {
+        Long userId = -1L;
+        if(user != null) {
+            userId = user.getId();
         } else {
-            return (c1.and(c2.or(c3))).or(condition);
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("User id is not found, -1 will be used");
+            }
         }
+        
+        return userId;
     }
     
     private ListPostCommandResponse listSimpleForumTopicsByUser(Forum forum, ListTopicCommand cmd) {
@@ -1768,8 +1812,69 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
+//    private Condition buildPostCategoryQryCondition(User user, PostEntityTag entityTag, Community community,  
+//        Map<String, Long> gaRegionIdMap, Long contentCategoryId, Long actionCategoryId) {
+//        Condition categoryCondition = null;
+//        
+//        Category contentCatogry = null;
+//        // contentCategoryId为0表示全部查，此时也不需要给category条件
+//        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
+//            contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
+//        }
+//        if(contentCatogry != null) {
+//            categoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+//        }
+//        
+//        Category actionCategory = null;
+//        if(actionCategoryId != null && actionCategoryId.longValue() > 0) {
+//            actionCategory = this.categoryProvider.findCategoryById(actionCategoryId);
+//        }
+//        if(actionCategory != null) {
+//            Condition tempCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
+//            if(categoryCondition != null) {
+//                categoryCondition = categoryCondition.and(tempCondition);
+//            } else {
+//                categoryCondition = tempCondition;
+//            }
+//        }
+//        
+//        Condition userCondition = null;
+//        if(entityTag != null) {
+//            switch(entityTag) {
+//            case USER:
+//                userCondition = buildPostQryConditionBySimpleUser(community, VisibilityScope.NEARBY_COMMUNITIES);
+//                break;
+//            case PM:
+//            case GARC:
+//            case GANC:
+//            case GAPS:
+//            case GACW:
+//                userCondition = buildGaRelatedPostQryConditionByCategory(user.getId(), entityTag, community, gaRegionIdMap);
+//                break;
+//            default:
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Entity tag is not supported, userId=" + user.getId() + ", communityId=" + community.getId() + ", entityTag=" + entityTag);
+//                }
+//            }
+//        } else {
+//            if(LOGGER.isInfoEnabled()) {
+//                LOGGER.info("Entity tag is null, userId=" + user.getId() + ", communityId=" + community.getId() + ", entityTag=" + entityTag);
+//            }
+//        }
+//        
+//        if(userCondition == null) {
+//            return categoryCondition;
+//        } else {
+//            if(categoryCondition == null) {
+//                return userCondition;
+//            } else {
+//                return categoryCondition.and(userCondition);
+//            }
+//        }
+//    }
+    
     private Condition buildPostCategoryQryCondition(User user, PostEntityTag entityTag, Community community,  
-        Map<String, Long> gaRegionIdMap, Long contentCategoryId, Long actionCategoryId) {
+        Long contentCategoryId, Long actionCategoryId) {
         Condition categoryCondition = null;
         
         Category contentCatogry = null;
@@ -1795,27 +1900,22 @@ public class ForumServiceImpl implements ForumService {
         }
         
         Condition userCondition = null;
-        if(entityTag != null) {
-            switch(entityTag) {
-            case USER:
-                userCondition = buildPostQryConditionBySimpleUser(community, VisibilityScope.NEARBY_COMMUNITIES);
-                break;
-            case PM:
-            case GARC:
-            case GANC:
-            case GAPS:
-            case GACW:
-                userCondition = buildGaRelatedPostQryConditionByCategory(user.getId(), entityTag, community, gaRegionIdMap);
-                break;
-            default:
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Entity tag is not supported, userId=" + user.getId() + ", communityId=" + community.getId() + ", entityTag=" + entityTag);
-                }
+        // 对于entityTag为普通用户，则是查普通用户所有能看到的帖（加上类型限制）：
+        // 1、若是政府相关类型的帖，住宅小区相关的帖的可见范围缩小到本小区范围
+        // 2、其它帖按指定小区进行限制可见范围
+        if(entityTag == null || entityTag == PostEntityTag.USER) {
+            VisibilityScope scope = VisibilityScope.NEARBY_COMMUNITIES;
+            if(contentCategoryId != null && CategoryConstants.GA_RELATED_CATEGORIES.contains(contentCategoryId)) {
+                scope = VisibilityScope.COMMUNITY;
             }
+            userCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
         } else {
-            if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("Entity tag is null, userId=" + user.getId() + ", communityId=" + community.getId() + ", entityTag=" + entityTag);
-            }
+            // 对于指定entityTag，则对creatorTag和targetTag进行限制
+            Condition privacyCondition = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+            Condition entityCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(entityTag.getCode());
+            entityCondition = entityCondition.or(Tables.EH_FORUM_POSTS.TARGET_TAG.eq(entityTag.getCode()));
+            Condition visibleCondition = buildDefaultForumPostQryConditionByOrganization(user, community);
+            userCondition = privacyCondition.and(entityCondition.and(visibleCondition));
         }
         
         if(userCondition == null) {
@@ -1868,7 +1968,7 @@ public class ForumServiceImpl implements ForumService {
         }
         
         VisibilityScope scope = VisibilityScope.NEARBY_COMMUNITIES;
-        Condition systemForumCondition = buildPostQryConditionByCommunity(user, community, scope);
+        Condition systemForumCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
         Long forumId = community.getDefaultForumId();
         if(forumId == null || forumId <= 0) {
             LOGGER.error("No default forum is found for community, system forum will used, userId=" + userId 
