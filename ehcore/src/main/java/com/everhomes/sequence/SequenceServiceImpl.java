@@ -50,6 +50,7 @@ import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
 import com.everhomes.server.schema.tables.pojos.EhPushMessageResults;
 import com.everhomes.server.schema.tables.pojos.EhQrcodes;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
@@ -339,6 +340,11 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(EhGroups.class, EhRentalSitesBills.class, Tables.EH_RENTAL_SITES_BILLS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_RENTAL_SITES_BILLS.ID.max()).from(Tables.EH_RENTAL_SITES_BILLS).fetchOne().value1(); 
+        });
+
+
+        syncTableSequence(EhGroups.class, EhRentalBillPaybillMap.class, Tables.EH_RENTAL_BILL_PAYBILL_MAP.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_RENTAL_BILL_PAYBILL_MAP.ID.max()).from(Tables.EH_RENTAL_BILL_PAYBILL_MAP).fetchOne().value1(); 
         });
  
         

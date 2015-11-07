@@ -11,6 +11,7 @@ package com.everhomes.launchpad;
  * <li>MEETINGROOM(24): 会议室预定</li>
  * <li>VIPPARKING(25): vip停车位预定</li>
  * <li>ELECSCREEN(26): 电子屏预定</li>
+ * <li>VIDEO_MEETING(27): 视频会议</li>
  * </ul>
  */
 public enum ActionType {
@@ -19,7 +20,7 @@ public enum ActionType {
       CHECKIN_ACTIVITY((byte)10),OPEN_MSG_SESSION((byte)11),SEND_MSG((byte)12),OFFICIAL_URL((byte)13),
       THIRDPART_URL((byte)14),POST_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),LAUNCH_APP((byte)18),
       POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22),PUNCH((byte)23),MEETINGROOM((byte)24),VIPPARKING((byte)25),
-      ELECSCREEN((byte)26) ,VEDIO_MEETING((byte)27);
+      ELECSCREEN((byte)26) ,VIDEO_MEETING((byte)27);
     
     private byte code;
     
