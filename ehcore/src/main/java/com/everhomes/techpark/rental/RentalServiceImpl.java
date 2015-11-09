@@ -1072,7 +1072,7 @@ public class RentalServiceImpl implements RentalService {
 									UserContext.current().getUser().getLocale(),
 									"BILL OVERTIME"));
 		}
-		if (cmd.getInvoiceFlag().equals(InvoiceFlag.NEED.getCode()))
+		if (!cmd.getInvoiceFlag().equals(bill.getInvoiceFlag()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
 					cmd.getInvoiceFlag());
 		if (null != cmd.getRentalItems()) {
