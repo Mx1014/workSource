@@ -3,14 +3,15 @@ package com.everhomes.organization;
 
 /**
  * <ul>
- * <li>1: 未处理</li>
+ * <li>1: 未分配</li>
  * <li>2: 处理中</li>
  * <li>3: 已处理</li>
  * <li>4: 其它</li>
+ * <li>5: 待处理</li>
  * </ul>
  */
 public enum OrganizationTaskStatus {
-    UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), OTHER((byte)4);
+	UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), OTHER((byte)4), WAITING((byte)5);
     
     private byte code;
     private OrganizationTaskStatus(byte code) {
