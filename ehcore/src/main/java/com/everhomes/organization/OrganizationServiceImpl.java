@@ -1409,8 +1409,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		dbProvider.execute((status) -> {
 			///////////////////////////////////////////////////
+			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
 			
-			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+			if(member != null && member.size() > 0){
+				String orgGroup = member.get(0).getMemberGroup();
+				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
+						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode())
+					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+				
+				task.setTaskStatus(OrganizationTaskStatus.WAITING.getCode());
+			}
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(desOrgMember.getTargetId());;
 			task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
@@ -2642,7 +2650,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			management.setPmName(pm.getName());
 			Address addr = this.addressProvider.findAddressById(pm.getAddressId());
-			management.setPlate(addr.getAddress());
+			if(addr != null)
+				management.setPlate(addr.getAddress());
 			return management;
 		}).collect(Collectors.toList());
 		
