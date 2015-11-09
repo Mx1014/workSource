@@ -208,6 +208,9 @@ public class ParkServiceImpl implements ParkService {
 		RechargeOrderDTO dto = new RechargeOrderDTO();
 		dto.setBillId(order.getBillId());
 		dto.setAmount(order.getRechargeAmount());
+		dto.setName(order.getRechargeUsername()+"的订单");
+		dto.setDescription("为"+order.getPlateNumber()+"充值"+order.getRechargeMonth()+"个月");
+		dto.setType("TCJF");
 		return dto;
 	}
 	
