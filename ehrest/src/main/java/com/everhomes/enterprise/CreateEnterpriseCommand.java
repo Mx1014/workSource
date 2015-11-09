@@ -1,5 +1,10 @@
 package com.everhomes.enterprise;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.forum.AttachmentDescriptor;
+
 /**
  * <ul>管理后台使用，应该使用批量添加实现</ul>
  * @author janson
@@ -11,7 +16,16 @@ public class CreateEnterpriseCommand {
     private java.lang.String   avatar;
     private java.lang.String   description;
     
-    public java.lang.String getName() {
+    @ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
+    
+    public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
+	}
+	public java.lang.String getName() {
         return name;
     }
     public void setName(java.lang.String name) {

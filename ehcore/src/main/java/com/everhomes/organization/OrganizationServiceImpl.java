@@ -75,9 +75,11 @@ import com.everhomes.organization.pm.AddPmBuildingCommand;
 import com.everhomes.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.ListPmBuildingCommand;
-import com.everhomes.organization.pm.ListPmBuildingCommandResponse;
+import com.everhomes.organization.pm.ListPmManagementsCommand;
 import com.everhomes.organization.pm.OrganizationScopeCode;
 import com.everhomes.organization.pm.PmBuildingDTO;
+import com.everhomes.organization.pm.PmManagementsDTO;
+import com.everhomes.organization.pm.PmManagementsResponse;
 import com.everhomes.organization.pm.PmMemberGroup;
 import com.everhomes.organization.pm.PmMemberStatus;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -439,7 +441,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		this.dbProvider.execute(s -> {
 			Organization organization = new Organization();
 			organization.setLevel(0);
-			organization.setAddressId(0l);
+			organization.setAddressId(cmd.getAddressId());
 			organization.setName(community.getName()+"物业");
 			organization.setOrganizationType(OrganizationType.PM.getCode());
 			organization.setParentId(0l);
@@ -2579,6 +2581,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}).collect(Collectors.toList());;
 		OrganizationCommunity community = this.organizationProvider.findOrganizationCommunityByOrgId(cmd.getOrgId());
 		
+		if(community == null) {
+			LOGGER.error("community not found.orgId="+cmd.getOrgId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"community not found.");
+		}
         CrossShardListingLocator locator = new CrossShardListingLocator();
         List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId());
         
@@ -2595,6 +2602,47 @@ public class OrganizationServiceImpl implements OrganizationService {
         }).collect(Collectors.toList());
 		
 		return unassignedBuildings;
+	}
+
+	@Override
+	public PmManagementsResponse listPmManagements(ListPmManagementsCommand cmd) {
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor()==null?0L:cmd.getPageAnchor());
+		if(cmd.getPageSize()==null) {
+	            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+	            cmd.setPageSize(value);
+		}
+		
+		List<Organization> org = this.organizationProvider.listPmManagements(locator, cmd.getPageSize()+1, cmd.getOrganizationId(), cmd.getCommunityId());
+		
+		Long nextPageAnchor = null;
+		if(org != null && org.size() > cmd.getPageSize()) {
+			org.remove(org.size() - 1);
+			nextPageAnchor = org.get(org.size() -1).getId();
+		}
+		PmManagementsResponse response = new PmManagementsResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		List<PmManagementsDTO> pmManagements = org.stream().map(pm -> {
+			PmManagementsDTO management = new PmManagementsDTO();
+			
+			List<PmBuildingDTO> buildings = this.organizationProvider.findPmBuildingId(pm.getId()).stream().map(r -> {
+				PmBuildingDTO dto = new PmBuildingDTO();
+				dto.setPmBuildingId(r.getId());
+				Building building = communityProvider.findBuildingById(r.getScopeId());
+				dto.setBuildingName(building.getName());
+				return dto;
+			}).collect(Collectors.toList());
+			
+			management.setPmName(pm.getName());
+			management.setBuildings(buildings);
+			Address addr = this.addressProvider.findAddressById(pm.getAddressId());
+			management.setPlate(addr.getAddress());
+			return management;
+		}).collect(Collectors.toList());
+		
+		response.setPmManagement(pmManagements);
+		return response;
 	}
 
 }

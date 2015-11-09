@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
@@ -22,10 +24,17 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
+import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
+import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
@@ -48,6 +57,9 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     
     @Autowired
     private ShardingProvider shardingProvider;
+    
+    @Autowired 
+    private SequenceProvider sequenceProvider;
     
     //TODO enterprise field
     @Override
@@ -332,4 +344,19 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         
         return enterprises;
     }
+
+	@Override
+	public void createEnterpriseAttachment(EnterpriseAttachment attachment) {
+
+		assert(attachment.getEnterpriseId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, attachment.getEnterpriseId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseAttachments.class));
+        attachment.setId(id);
+        
+        EhEnterpriseAttachmentsDao dao = new EhEnterpriseAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseAttachments.class, null);
+	}
 }

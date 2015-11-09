@@ -64,9 +64,9 @@ public class EnterpriseAdminController extends ControllerBase {
     @RequestMapping("createEnterprise")
     @RestReturn(value=EnterpriseDTO.class)
     public RestResponse createEnterpriseCommand(@Valid CreateEnterpriseCommand cmd) {
-        Enterprise entry = ConvertHelper.convert(cmd, Enterprise.class);
-        this.enterpriseService.createEnterprise(entry);
-        EnterpriseDTO dto = ConvertHelper.convert(entry, EnterpriseDTO.class);
+//        Enterprise entry = ConvertHelper.convert(cmd, Enterprise.class);
+        
+        EnterpriseDTO dto = this.enterpriseService.createEnterprise(cmd);
         RestResponse res = new RestResponse(dto);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

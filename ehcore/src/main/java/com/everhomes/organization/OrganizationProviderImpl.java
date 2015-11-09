@@ -28,6 +28,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
@@ -1067,6 +1068,40 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(list == null || list.isEmpty())
 			return null;
 		return list;
+	}
+
+
+	@Override
+	public List<Organization> listPmManagements(ListingLocator locator,
+			int count, Long orgId, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, 
+				Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+		query.setDistinct(true);
+		
+		if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
+		if(orgId != null) {
+			Condition con = Tables.EH_ORGANIZATIONS.ID.eq(orgId);
+			con.or(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(orgId));
+			query.addConditions(con);
+		}
+		if(communityId != null) {
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId));
+		}
+
+		query.addLimit(count);
+		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
+		List<Organization> organizations = records.stream().map((r) -> {
+			return ConvertHelper.convert(r, Organization.class);
+		}).collect(Collectors.toList());
+
+		if(organizations.size() > 0) {
+            locator.setAnchor(organizations.get(organizations.size() -1).getId());
+        }
+		return organizations;
 	}
 
 }

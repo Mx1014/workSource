@@ -33,7 +33,9 @@ import com.everhomes.organization.pm.AddPmBuildingCommand;
 import com.everhomes.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.organization.pm.ListPmBuildingCommand;
 import com.everhomes.organization.pm.ListPmBuildingCommandResponse;
+import com.everhomes.organization.pm.ListPmManagementsCommand;
 import com.everhomes.organization.pm.PmBuildingDTO;
+import com.everhomes.organization.pm.PmManagementsResponse;
 import com.everhomes.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserContext;
@@ -320,6 +322,25 @@ public class OrganizationAdminController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<UnassignedBuildingDTO> list = this.organizationService.listUnassignedBuilding(cmd);
+    	RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listPmManagements</b>
+     * <p>查询物业管理列表</p>
+     */
+    
+    @RequestMapping("listPmManagements")
+    @RestReturn(value=PmManagementsResponse.class)
+    public RestResponse listPmManagements(ListPmManagementsCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        PmManagementsResponse list = this.organizationService.listPmManagements(cmd);
     	RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

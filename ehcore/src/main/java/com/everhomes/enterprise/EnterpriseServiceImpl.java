@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,8 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.core.AppConfig;
+import com.everhomes.forum.AttachmentDescriptor;
+import com.everhomes.forum.PostDTO;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -41,11 +45,12 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.visibility.VisibleRegionType;
 
 @Component
 public class EnterpriseServiceImpl implements EnterpriseService {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseServiceImpl.class);
 
     @Autowired
     EnterpriseProvider enterpriseProvider;
@@ -129,9 +134,24 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
     
     @Override
-    public void createEnterprise(Enterprise enterprise) {
-        enterprise.setCreatorUid(UserContext.current().getUser().getId());
+    public EnterpriseDTO createEnterprise(CreateEnterpriseCommand cmd) {
+    	
+    	User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        
+    	Enterprise enterprise = new Enterprise();
+        enterprise.setCreatorUid(userId);
+        enterprise.setAvatar(cmd.getAvatar());
+        enterprise.setDescription(cmd.getDescription());
+        enterprise.setDisplayName(cmd.getDisplayName());
+        enterprise.setName(cmd.getName());
         this.enterpriseProvider.createEnterprise(enterprise);
+        
+        processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
+        
+        EnterpriseDTO enterpriseDto = ConvertHelper.convert(enterprise, EnterpriseDTO.class);
+        
+        return enterpriseDto;
     }
     
     @Override
@@ -344,6 +364,36 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     public void importToJoinCommunity(List<Enterprise> enterprises, EnterpriseCommunityDTO community) {
         // TODO Auto-generated method stub
         
+    }
+    
+    private void processEnterpriseAttachments(long userId, List<AttachmentDescriptor> attachmentList, Enterprise enterprise) {
+        List<EnterpriseAttachment> results = null;
+        
+        if(attachmentList != null) {
+            results = new ArrayList<EnterpriseAttachment>();
+            
+            EnterpriseAttachment attachment = null;
+            for(AttachmentDescriptor descriptor : attachmentList) {
+                attachment = new EnterpriseAttachment();
+                attachment.setCreatorUid(userId);
+                attachment.setEnterpriseId(enterprise.getId());
+                attachment.setContentType(descriptor.getContentType());
+                attachment.setContentUri(descriptor.getContentUri());
+                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                
+                // Make sure we can save as many attachments as possible even if any of them failed
+                try {
+                    this.enterpriseProvider.createEnterpriseAttachment(attachment);
+                    results.add(attachment);
+                } catch(Exception e) {
+                    LOGGER.error("Failed to save the attachment, userId=" + userId 
+                        + ", attachment=" + attachment, e);
+                }
+            }
+            
+            enterprise.setAttachments(results);
+            
+        }
     }
 
 }
