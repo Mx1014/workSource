@@ -4,10 +4,14 @@ package com.everhomes.organization;
 /**
  * <ul>
  * <li>MANAGER: 机构管理员</li>
+ * <li>CUSTOMER_SERVICE: 客服</li>
+ * <li>MAINTENANCE: 维修员</li>
+ * <li>CLEANER: 保洁员</li>
+ * <li>SECURITY: 保安</li>
  * </ul>
  */
 public enum OrganizationGroup {
-	MANAGER("manager");
+	MANAGER("manager"), CUSTOMER_SERVICE("customer service"), MAINTENANCE("maintenance"), CLEANER("cleaner"), SECURITY("security");
     
     private String code;
     private OrganizationGroup(String code) {
