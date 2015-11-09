@@ -13,17 +13,22 @@ public class CancelLockedRentalBillAction implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(CancelLockedRentalBillAction.class);
-	private final RentalBill rentalBill;
+	private   Long  rentalBillId;
 	@Autowired
-	RentalProvider rentalProvider;
+	private RentalProvider rentalProvider;
 
-	public CancelLockedRentalBillAction(final String id) {
-		this.rentalBill = rentalProvider.findRentalBillById(Long.valueOf(id));
+     
+    
+
+	public CancelLockedRentalBillAction(final String id) { 
+		this.rentalBillId =  Long.valueOf(id) ;
+		
 	}
 
 	@Override
 	public void run() {
 		// 取消订单
+		RentalBill rentalBill = rentalProvider.findRentalBillById(Long.valueOf(rentalBillId));
 		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
