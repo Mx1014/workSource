@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import net.greghaines.jesque.Job;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,6 +28,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.UserContext;
@@ -45,6 +48,16 @@ public class RentalServiceImpl implements RentalService {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String queueName = "rentalService";
+	
+
+    @Autowired
+    WorkerPoolFactory workerPoolFactory;
+    
+    @PostConstruct
+    public void setup() {
+        workerPoolFactory.getWorkerPool().addQueue(queueName);
+    }
+    
 	// N分钟后取消
 	private Long cancelTime = 5 * 60 * 1000L;
 	@Autowired
@@ -543,10 +556,10 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
 				- rentalRule.getPayEndTime()));
 		rentalBill.setPaidMoney(0.0);
-
-		if (reserveTime.before(new java.util.Date(cmd.getStartTime()
+		//
+		if (rentalRule.getPaymentRatio() <100 && reserveTime.before(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getPayStartTime()))) {
-			// 在支付时间之前 为锁定待支付
+			//定金比例在100以内 在支付时间之前 为锁定待支付
 			rentalBill.setStatus(SiteBillStatus.LOCKED.getCode());
 
 		} else {

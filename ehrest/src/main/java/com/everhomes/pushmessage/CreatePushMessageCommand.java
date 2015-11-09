@@ -33,7 +33,7 @@ public class CreatePushMessageCommand {
     @NotNull
     private Long     targetId;
     
-    private Timestamp startTime;
+    private Long startTime;
     
     private String   deviceType;
     private String   deviceTag;
@@ -87,12 +87,12 @@ public class CreatePushMessageCommand {
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
     }
-    public Timestamp getStartTime() {
-        return startTime;
-    }
-    public void setStartTime(Timestamp startTime) {
-        this.startTime = startTime;
-    }
+	public Long getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
     
     
 }
