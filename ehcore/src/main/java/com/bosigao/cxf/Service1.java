@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  * 
  */
 @WebServiceClient(name = "Service1", 
-                  wsdlLocation = "http://58.60.172.247:8066/zl_web/Service1.asmx?wsdl",
+                  wsdlLocation = "http://bosigao.wsdl:8066/zl_web/Service1.asmx?wsdl",
                   targetNamespace = "http://tempuri.org/") 
 public class Service1 extends Service {
 
@@ -26,14 +26,16 @@ public class Service1 extends Service {
     public final static QName Service1Soap = new QName("http://tempuri.org/", "Service1Soap");
     public final static QName Service1HttpPost = new QName("http://tempuri.org/", "Service1HttpPost");
     public final static QName Service1HttpGet = new QName("http://tempuri.org/", "Service1HttpGet");
+    public static String BOSIGAO_URL = "http://bosigao.wsdl:8066";
+    
     static {
         URL url = null;
         try {
-            url = new URL("http://58.60.172.247:8066/zl_web/Service1.asmx?wsdl");
+            url = new URL(BOSIGAO_URL+"/zl_web/Service1.asmx?wsdl");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(Service1.class.getName())
                 .log(java.util.logging.Level.INFO, 
-                     "Can not initialize the default wsdl from {0}", "http://58.60.175.77:8066/zl_web/Service1.asmx?wsdl");
+                     "Can not initialize the default wsdl from {0}", BOSIGAO_URL+"/zl_web/Service1.asmx?wsdl");
         }
         WSDL_LOCATION = url;
     }
