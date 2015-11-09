@@ -1408,6 +1408,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		OrganizationTask task = this.checkOrgTask(organization.getId(), cmd.getTopicId());
 
 		dbProvider.execute((status) -> {
+			///////////////////////////////////////////////////
+			
 			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(desOrgMember.getTargetId());;
@@ -2626,16 +2628,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<PmManagementsDTO> pmManagements = org.stream().map(pm -> {
 			PmManagementsDTO management = new PmManagementsDTO();
 			
-			List<PmBuildingDTO> buildings = this.organizationProvider.findPmBuildingId(pm.getId()).stream().map(r -> {
-				PmBuildingDTO dto = new PmBuildingDTO();
-				dto.setPmBuildingId(r.getId());
-				Building building = communityProvider.findBuildingById(r.getScopeId());
-				dto.setBuildingName(building.getName());
-				return dto;
-			}).collect(Collectors.toList());
-			
+			List<OrganizationAssignedScopes> scopes = this.organizationProvider.findPmBuildingId(pm.getId());
+			if(scopes != null) {
+				List<PmBuildingDTO> buildings = this.organizationProvider.findPmBuildingId(pm.getId()).stream().map(r -> {
+					PmBuildingDTO dto = new PmBuildingDTO();
+					dto.setPmBuildingId(r.getId());
+					Building building = communityProvider.findBuildingById(r.getScopeId());
+					dto.setBuildingName(building.getName());
+					return dto;
+				}).collect(Collectors.toList());
+				
+				management.setBuildings(buildings);
+			}
 			management.setPmName(pm.getName());
-			management.setBuildings(buildings);
 			Address addr = this.addressProvider.findAddressById(pm.getAddressId());
 			management.setPlate(addr.getAddress());
 			return management;
