@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *	<li>amount : 订单金额</li>
  *	<li>name : 商品名称</li>
  *	<li>description : 描述</li>
- *	<li>type : 支付方式</li>
+ *	<li>orderType : 支付方式</li>
  *</ul>
  *
  */
@@ -19,11 +19,11 @@ public class OrganizationOrderDTO {
 	private BigDecimal amount;
 	private String name;
 	private String description;
-	private String type = "wuye";
+	private String orderType  = "wuye";
 	
 	
-	public String getType() {
-		return type;
+	public String getOrderType() {
+		return orderType ;
 	}
 	public String getOrderNo() {
 		return orderNo;

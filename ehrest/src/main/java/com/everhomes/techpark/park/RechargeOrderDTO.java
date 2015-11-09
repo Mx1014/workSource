@@ -6,7 +6,7 @@ package com.everhomes.techpark.park;
  *  <li>amount : 金额</li>
  *  <li>name : 商品名称</li>
  *	<li>description : 描述</li>
- *  <li>type : 支付类型</li>
+ *  <li>orderType  : 支付类型</li>
  * </ul>
  */
 public class RechargeOrderDTO {
@@ -19,16 +19,13 @@ public class RechargeOrderDTO {
 	
 	private String description;
 	
-	private String type;
+	private String orderType = "tingche" ;
 	
-	public String getType() {
-		return type;
+	public String getOrderType() {
+		return orderType;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
+	
 	public String getName() {
 		return name;
 	}
