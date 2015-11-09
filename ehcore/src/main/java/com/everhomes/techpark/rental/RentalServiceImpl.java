@@ -30,7 +30,9 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
+import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -1111,18 +1113,26 @@ public class RentalServiceImpl implements RentalService {
 			}
 		}
 
-		Long olpbillId = null;
+		Long orderNo = null;
 		if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-			olpbillId = onlinePayService.createBillId(DateHelper
+			orderNo = onlinePayService.createBillId(DateHelper
 					.currentGMTTime().getTime());
 			response.setAmount(bill.getReserveMoney());
-			response.setOrderNo(String.valueOf(olpbillId));
+			response.setOrderNo(String.valueOf(orderNo));
+			switch(cmd.getSiteType()){
+			case("MEETINGROOM"):
+				response.setOrderType("huiyishiorder");
+			case("VIPPARKING"):
+				response.setOrderType("vipcheweiorder");
+			case("ELECSCREEN"):
+				response.setOrderType("dianzipingorder"); 
+			}
 		} else if (bill.getStatus()
 				.equals(SiteBillStatus.PAYINGFINAL.getCode())) {
-			olpbillId = onlinePayService.createBillId(DateHelper
+			orderNo = onlinePayService.createBillId(DateHelper
 					.currentGMTTime().getTime());
 			response.setAmount(bill.getPayTotalMoney() - bill.getPaidMoney());
-			response.setOrderNo(String.valueOf(olpbillId));
+			response.setOrderNo(String.valueOf(orderNo));
 		} else {
 			response.setAmount(0.0);
 		}
@@ -1131,7 +1141,7 @@ public class RentalServiceImpl implements RentalService {
 		billmap.setCommunityId(cmd.getCommunityId());
 		billmap.setSiteType(cmd.getSiteType());
 		billmap.setRentalBillId(cmd.getRentalBillId());
-		billmap.setOnlinePayBillId(olpbillId);
+		billmap.setOnlinePayBillId(orderNo);
 		billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
 		billmap.setCreatorUid(userId);
@@ -1214,6 +1224,39 @@ public class RentalServiceImpl implements RentalService {
 
 		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
 
+	}
+ 
+
+	@Override
+	public OnlinePayCallbackCommandResponse onlinePayCallback(
+			OnlinePayCallbackCommand cmd) {
+		// TODO Auto-generated method stub
+		OnlinePayCallbackCommandResponse response = new OnlinePayCallbackCommandResponse();
+		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
+			//TODO: 失败以后可能还是要做点什么
+			LOGGER.info(" ----------------- - - - PAY FAIL ");
+		}
+			
+		//success
+		if(cmd.getPayStatus().toLowerCase().equals("success"))
+		{
+			RentalBillPaybillMap bpbMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
+			RentalBill bill = rentalProvider.findRentalBillById(bpbMap.getRentalBillId());
+			bill.setPaidMoney(bill.getPaidMoney()+Double.valueOf(cmd.getPayAmount()));
+			if(bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
+				bill.setStatus(SiteBillStatus.RESERVED.getCode());
+			}
+			else if(bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
+				if(bill.getPayTotalMoney().equals(bill.getPaidMoney())){
+					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+				}
+				else{
+					
+				}
+			} 
+			rentalProvider.updateRentalBill(bill);
+		}
+		return response;
 	}
 
 }

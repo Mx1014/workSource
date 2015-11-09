@@ -98,6 +98,36 @@ public class EnterpriseContactController extends ControllerBase {
         return res;
     }
     
+    
+    
+    /**
+     * <b>URL: /contact/listContactsByEnterpriseId</b>
+     * <p>显示企业申请联系人</p>
+     * @return {@link ListContactsRequestByEnterpriseIdCommandResponse}
+     */
+    @RequestMapping("listContactsRequestByEnterpriseId")
+    @RestReturn(value=ListContactsRequestByEnterpriseIdCommandResponse.class)
+    public RestResponse listContactsRequestByEnterpriseId(@Valid ListContactsRequestByEnterpriseIdCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactsRequestByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize());
+        List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
+        for(EnterpriseContactDetail detail : details) {
+            dtos.add(ConvertHelper.convert(detail, EnterpriseContactDTO.class));
+        }
+        
+        ListEnterpriseContactResponse resp = new ListEnterpriseContactResponse();
+        resp.setContacts(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        RestResponse res = new RestResponse();
+        res.setResponseObject(resp);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+    }
+    
+    
     /**
      * <b>URL: /contact/listContactsByPhone</b>
      * <p>通过手机好查询联系人</p>
@@ -108,4 +138,40 @@ public class EnterpriseContactController extends ControllerBase {
     public RestResponse listContactsByPhone(@Valid ListContactsByPhone cmd) {
         return null;
     }
+    
+    
+
+    /**
+     * <b>URL: /contact/approveContact</b>
+     * <p>审批通过认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("approveContact")
+    @RestReturn(value=String.class)
+    public RestResponse approveContactCommand(@Valid ApproveContactCommand cmd) {
+    	this.enterpriseContactService.approveContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
+
+    /**
+     * <b>URL: /contact/rejectContact</b>
+     * <p>审批拒绝认证申请</p>
+     * @return {@link String}
+     */
+    @RequestMapping("rejectContact")
+    @RestReturn(value=String.class)
+    public RestResponse rejectContact(@Valid RejectContactCommand cmd) {
+    	this.enterpriseContactService.rejectContact(cmd);
+    	 RestResponse res = new RestResponse();
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+    }
+    
 }

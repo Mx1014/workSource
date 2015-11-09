@@ -7,6 +7,7 @@ public class AddRentalBillItemCommandResponse {
 	private Double amount;
 	private String name;
 	private String description;
+	private String orderType;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -34,5 +35,11 @@ public class AddRentalBillItemCommandResponse {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public String getOrderType() {
+		return orderType;
+	}
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
 	} 
 }

@@ -885,4 +885,22 @@ public class RentalProviderImpl implements RentalProvider {
 
 		return result;
 	}
+
+	@Override
+	public RentalBillPaybillMap findRentalBillPaybillMapByOrderNo(String orderNo) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_BILL_PAYBILL_MAP);
+		Condition condition = Tables.EH_RENTAL_BILL_PAYBILL_MAP.ONLINE_PAY_BILL_ID
+				.equal(Long.valueOf(orderNo));
+		step.where(condition);
+		List<RentalBillPaybillMap> result = step
+				.orderBy(Tables.EH_RENTAL_BILL_PAYBILL_MAP.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalBillPaybillMap.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+	}
 }

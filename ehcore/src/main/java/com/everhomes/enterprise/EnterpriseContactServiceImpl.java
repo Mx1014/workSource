@@ -534,4 +534,50 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
         }
     }
+
+	@Override
+	public List<EnterpriseContactDetail> listContactsRequestByEnterpriseId(
+			ListingLocator locator, Long enterpriseId, Integer pageSize) {
+		  int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+	        List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactRequestByEnterpriseId(locator, enterpriseId, count);
+	        List<EnterpriseContactDetail> details = new ArrayList<EnterpriseContactDetail>();
+	        for(EnterpriseContact contact : contacts) {
+	            EnterpriseContactDetail detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
+	            EnterpriseContactGroupMember member = this.enterpriseContactProvider.getContactGroupMemberByContactId(enterpriseId, contact.getId());
+	            if (member != null) {
+	                EnterpriseContactGroup group = this.enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+	                if(group != null) {
+	                    detail.setGroupName(group.getName());
+	                }
+	            }
+	            
+	            List<EnterpriseContactEntry> entries = this.enterpriseContactProvider.queryContactEntryByContactId(contact);
+	            if(entries != null && entries.size() > 0) {
+	                detail.setPhone(entries.get(0).getEntryValue());
+	            }
+	            
+	            details.add(detail);
+	            
+	        }
+	        
+	        return details; 
+	}
+
+	@Override
+	public void approveContact(ApproveContactCommand cmd) {
+		 
+		EnterpriseContact  contact = this.enterpriseContactProvider.queryContactById(cmd.getContactId());
+		contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
+		this.enterpriseContactProvider.updateContact(contact);
+		
+	}
+
+	@Override
+	public void rejectContact(RejectContactCommand cmd) {
+		 
+		EnterpriseContact  contact = this.enterpriseContactProvider.queryContactById(cmd.getContactId());
+		contact.setStatus(EnterpriseContactStatus.INACTIVE.getCode());
+		this.enterpriseContactProvider.updateContact(contact);
+		
+	}
 }

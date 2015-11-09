@@ -13,6 +13,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.techpark.punch.ListPunchExceptionRequestCommandResponse;
 import com.everhomes.techpark.punch.PunchController;
 
@@ -335,6 +336,23 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/rental/onlinePayCallback</b>
+	 * <p>
+	 * 取消订单
+	 * </p>
+	 */
+	@RequestMapping("onlinePayCallback")
+	@RestReturn(value =OnlinePayCallbackCommandResponse.class)
+	public RestResponse onlinePayCallback(@Valid OnlinePayCallbackCommand cmd)  {
+		OnlinePayCallbackCommandResponse resp = rentalService.onlinePayCallback(cmd); 
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /techpark/rental/findRentalBills</b>
 	 * <p>

@@ -757,6 +757,64 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
         return contacts;
     }
+
+	@Override
+	public List<EnterpriseContact> listContactRequestByEnterpriseId(
+			ListingLocator locator, Long enterpriseId, int count) {
+		 return this.queryContactByEnterpriseId(locator, enterpriseId, count, new ListingQueryBuilderCallback() {
+
+	            @Override
+	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+	                    SelectQuery<? extends Record> query) {
+	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.AUTHENTICATED.getCode()));
+	                return query;
+	            }
+	            
+	        });
+	}
+
+	@Override
+	public EnterpriseContact queryContactById(Long contactId) {
+		 ListingLocator locator = new ListingLocator();
+	        int count = 1;
+	        
+	        List<EnterpriseContact> contacts = this.queryContactById(locator, contactId, count, new ListingQueryBuilderCallback() {
+
+	            @Override
+	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+	                    SelectQuery<? extends Record> query) {
+	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.eq(contactId)); 
+	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.INACTIVE.getCode()));
+	                return query;
+	            }
+	            
+	        });
+	        
+	        if(contacts != null && contacts.size() > 0) {
+	            return contacts.get(0);
+	        }
+	        return null;
+	}
+
+	private List<EnterpriseContact> queryContactById(ListingLocator locator,
+			Long contactId, int count,
+			ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, contactId));
+        
+        SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+ 
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
+            }
+        
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContact.class);
+        });
+	}
     
 //    @Override
 //    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {
