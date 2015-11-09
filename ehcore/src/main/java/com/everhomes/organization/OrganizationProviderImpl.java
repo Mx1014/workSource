@@ -1085,7 +1085,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
 		if(orgId != null) {
 			Condition con = Tables.EH_ORGANIZATIONS.ID.eq(orgId);
-			con.or(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(orgId));
+			con = con.or(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(orgId));
 			query.addConditions(con);
 		}
 		if(communityId != null) {
