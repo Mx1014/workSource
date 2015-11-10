@@ -2553,11 +2553,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void addPmBuilding(AddPmBuildingCommand cmd) {
-		OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
-		pmBuilding.setOrganizationId(cmd.getOrganizationId());
-		pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
-		
 		for(Long buildingId: cmd.getBuildingIds()) {
+			OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
+			pmBuilding.setOrganizationId(cmd.getOrganizationId());
+			pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
 			pmBuilding.setScopeId(buildingId);
 			this.organizationProvider.addPmBuilding(pmBuilding);
 		}
