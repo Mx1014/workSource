@@ -2553,6 +2553,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void addPmBuilding(AddPmBuildingCommand cmd) {
+		
+		this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getOrganizationId());
+		if(cmd.getIsAll()) {
+			List<Long> buildingIds = this.communityProvider.listBuildingIdByCommunityId(cmd.getCommunityId());
+			cmd.setBuildingIds(buildingIds);
+		}
+		
 		for(Long buildingId: cmd.getBuildingIds()) {
 			OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
 			pmBuilding.setOrganizationId(cmd.getOrganizationId());
@@ -2560,6 +2567,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			pmBuilding.setScopeId(buildingId);
 			this.organizationProvider.addPmBuilding(pmBuilding);
 		}
+		
 	}
 
 	@Override
@@ -2644,28 +2652,34 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		PmManagementsResponse response = new PmManagementsResponse();
 		response.setNextPageAnchor(nextPageAnchor);
-		List<PmManagementsDTO> pmManagements = org.stream().map(pm -> {
-			PmManagementsDTO management = new PmManagementsDTO();
-			
-			List<OrganizationAssignedScopes> scopes = this.organizationProvider.findPmBuildingId(pm.getId());
-			if(scopes != null) {
-				List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
-					PmBuildingDTO dto = new PmBuildingDTO();
-					dto.setPmBuildingId(r.getId());
-					Building building = communityProvider.findBuildingById(r.getScopeId());
-					dto.setBuildingName(building.getName());
-					return dto;
-				}).collect(Collectors.toList());
-				
-				management.setBuildings(buildings);
-			}
-			management.setPmName(pm.getName());
-			management.setPmId(pm.getId());
-			Address addr = this.addressProvider.findAddressById(pm.getAddressId());
-			if(addr != null)
-				management.setPlate(addr.getAddress());
-			return management;
-		}).collect(Collectors.toList());
+		List<PmManagementsDTO> pmManagements = new ArrayList<PmManagementsDTO>();
+		if(org != null) {
+			pmManagements = org.stream().map(pm -> {
+				PmManagementsDTO management = new PmManagementsDTO();
+				management.setIsAll(false);
+				List<OrganizationAssignedScopes> scopes = this.organizationProvider.findPmBuildingId(pm.getId());
+				int size = this.communityProvider.countBuildingsBycommunityId(cmd.getCommunityId());
+				if(scopes != null && scopes.size() == size)
+					management.setIsAll(true);
+				if(scopes != null) {
+					List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
+						PmBuildingDTO dto = new PmBuildingDTO();
+						dto.setPmBuildingId(r.getId());
+						Building building = communityProvider.findBuildingById(r.getScopeId());
+						dto.setBuildingName(building.getName());
+						return dto;
+					}).collect(Collectors.toList());
+					
+					management.setBuildings(buildings);
+				}
+				management.setPmName(pm.getName());
+				management.setPmId(pm.getId());
+				Address addr = this.addressProvider.findAddressById(pm.getAddressId());
+				if(addr != null)
+					management.setPlate(addr.getAddress());
+				return management;
+			}).collect(Collectors.toList());
+		}
 		
 		response.setPmManagement(pmManagements);
 		return response;

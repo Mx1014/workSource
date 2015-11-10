@@ -10,6 +10,7 @@ import com.everhomes.discover.ItemType;
  *  <li>plate: 楼栋门牌</li>
  *  <li>pmId: 物业公司id</li>
  *  <li>buildings: 覆盖楼栋</li>
+ *  <li>isAll: 是否全部覆盖</li>
  * </ul>
  *
  */
@@ -23,6 +24,16 @@ public class PmManagementsDTO {
 	private String plate;
 	
 	private Long pmId;
+	
+	private Boolean isAll;
+
+	public Boolean getIsAll() {
+		return isAll;
+	}
+
+	public void setIsAll(Boolean isAll) {
+		this.isAll = isAll;
+	}
 
 	public Long getPmId() {
 		return pmId;
