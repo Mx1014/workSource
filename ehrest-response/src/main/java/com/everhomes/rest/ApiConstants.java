@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-10-29 16:34:51
+// generated at 2015-11-10 11:13:10
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -400,6 +400,7 @@ public interface ApiConstants {
     public static final String USER_FETCHPASTTORECENTMESSAGES_URL = "/user/fetchPastToRecentMessages";
     public static final String USER_FETCHRECENTTOPASTMESSAGES_URL = "/user/fetchRecentToPastMessages";
     public static final String USER_FINDTOKENBYUSERID_URL = "/user/findTokenByUserId";
+    public static final String USER_GETBIZSIGNATURE_URL = "/user/getBizSignature";
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
