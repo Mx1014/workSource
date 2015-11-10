@@ -2648,7 +2648,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
 					PmBuildingDTO dto = new PmBuildingDTO();
 					dto.setPmBuildingId(r.getId());
-					dto.setBuildingId(r.getScopeId());
+					dto.setOrganizationId(r.getOrganizationId());
 					Building building = communityProvider.findBuildingById(r.getScopeId());
 					dto.setBuildingName(building.getName());
 					return dto;
