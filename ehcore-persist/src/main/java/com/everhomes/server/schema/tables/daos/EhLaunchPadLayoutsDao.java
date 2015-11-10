@@ -95,4 +95,11 @@ public class EhLaunchPadLayoutsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>site_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchBySiteUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.SITE_URI, values);
+	}
 }

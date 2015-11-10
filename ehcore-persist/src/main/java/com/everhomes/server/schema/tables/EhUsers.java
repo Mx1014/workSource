@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUsersRecord> {
 
-	private static final long serialVersionUID = -250349582;
+	private static final long serialVersionUID = -2055026505;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_users</code>
@@ -185,6 +185,11 @@ public class EhUsers extends org.jooq.impl.TableImpl<com.everhomes.server.schema
 	 * The column <code>ehcore.eh_users.password_hash</code>. Note, password is stored as salted hash, salt is appended by hash together
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> PASSWORD_HASH = createField("password_hash", org.jooq.impl.SQLDataType.VARCHAR.length(128).defaulted(true), this, "Note, password is stored as salted hash, salt is appended by hash together");
+
+	/**
+	 * The column <code>ehcore.eh_users.site_uri</code>. the site uri of third-part system
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUsersRecord, java.lang.String> SITE_URI = createField("site_uri", org.jooq.impl.SQLDataType.VARCHAR.length(2048).nullable(false).defaulted(true), this, "the site uri of third-part system");
 
 	/**
 	 * Create a <code>ehcore.eh_users</code> table reference

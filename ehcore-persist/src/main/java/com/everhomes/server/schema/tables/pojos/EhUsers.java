@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1397618595;
+	private static final long serialVersionUID = -1720428589;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -45,6 +45,7 @@ public class EhUsers implements java.io.Serializable {
 	private java.lang.String   originalAvatar;
 	private java.lang.String   salt;
 	private java.lang.String   passwordHash;
+	private java.lang.String   siteUri;
 
 	public EhUsers() {}
 
@@ -80,7 +81,8 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.Long     regChannelId,
 		java.lang.String   originalAvatar,
 		java.lang.String   salt,
-		java.lang.String   passwordHash
+		java.lang.String   passwordHash,
+		java.lang.String   siteUri
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -114,6 +116,7 @@ public class EhUsers implements java.io.Serializable {
 		this.originalAvatar = originalAvatar;
 		this.salt = salt;
 		this.passwordHash = passwordHash;
+		this.siteUri = siteUri;
 	}
 
 	public java.lang.Long getId() {
@@ -370,5 +373,13 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setPasswordHash(java.lang.String passwordHash) {
 		this.passwordHash = passwordHash;
+	}
+
+	public java.lang.String getSiteUri() {
+		return this.siteUri;
+	}
+
+	public void setSiteUri(java.lang.String siteUri) {
+		this.siteUri = siteUri;
 	}
 }

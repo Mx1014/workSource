@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -331267573;
+	private static final long serialVersionUID = 1790941947;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -36,6 +36,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.String  tag;
 	private java.lang.String  targetType;
 	private java.lang.Long    targetId;
+	private java.lang.String  siteUri;
 
 	public EhLaunchPadItems() {}
 
@@ -62,7 +63,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Integer bgcolor,
 		java.lang.String  tag,
 		java.lang.String  targetType,
-		java.lang.Long    targetId
+		java.lang.Long    targetId,
+		java.lang.String  siteUri
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -87,6 +89,7 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.tag = tag;
 		this.targetType = targetType;
 		this.targetId = targetId;
+		this.siteUri = siteUri;
 	}
 
 	public java.lang.Long getId() {
@@ -271,5 +274,13 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setTargetId(java.lang.Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public java.lang.String getSiteUri() {
+		return this.siteUri;
+	}
+
+	public void setSiteUri(java.lang.String siteUri) {
+		this.siteUri = siteUri;
 	}
 }

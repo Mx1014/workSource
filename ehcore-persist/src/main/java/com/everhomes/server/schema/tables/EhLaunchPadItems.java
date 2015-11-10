@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = -1755338674;
+	private static final long serialVersionUID = 25057371;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -140,6 +140,11 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_launch_pad_items.target_id</code>. the entity id linked back to the orginal resource
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "the entity id linked back to the orginal resource");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_items.site_uri</code>. the site uri of third-part system
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> SITE_URI = createField("site_uri", org.jooq.impl.SQLDataType.VARCHAR.length(2048).nullable(false).defaulted(true), this, "the site uri of third-part system");
 
 	/**
 	 * Create a <code>ehcore.eh_launch_pad_items</code> table reference

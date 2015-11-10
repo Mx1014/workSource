@@ -584,6 +584,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserBlacklist EH_USER_BLACKLIST = com.everhomes.server.schema.tables.EhUserBlacklist.EH_USER_BLACKLIST;
 
 	/**
+	 * The table ehcore.eh_user_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserCommunities EH_USER_COMMUNITIES = com.everhomes.server.schema.tables.EhUserCommunities.EH_USER_COMMUNITIES;
+
+	/**
 	 * The table ehcore.eh_user_contacts
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserContacts EH_USER_CONTACTS = com.everhomes.server.schema.tables.EhUserContacts.EH_USER_CONTACTS;

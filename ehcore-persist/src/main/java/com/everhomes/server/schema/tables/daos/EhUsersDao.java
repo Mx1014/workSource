@@ -277,4 +277,11 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPasswordHash(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.PASSWORD_HASH, values);
 	}
+
+	/**
+	 * Fetch records that have <code>site_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySiteUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SITE_URI, values);
+	}
 }

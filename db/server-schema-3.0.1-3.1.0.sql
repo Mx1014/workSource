@@ -179,6 +179,9 @@ ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFA
 ALTER TABLE `eh_communities` ADD COLUMN `update_time` DATETIME;
 ALTER TABLE `eh_groups` ADD COLUMN `visible_region_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of region where the group belong to';
 ALTER TABLE `eh_groups` ADD COLUMN `visible_region_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of region where the group belong to';
+ALTER TABLE `eh_users` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 
 #
 # member of eh_communities partition
@@ -257,6 +260,25 @@ CREATE TABLE `eh_organization_assigned_scopes` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4;
+
+# 
+# member of eh_users partition
+# Used for duplicated recording of group membership that user is involved in order to store 
+# it in the same shard as of its owner user
+#
+DROP TABLE IF EXISTS `eh_user_communities`;
+CREATE TABLE `eh_user_communities` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'redendant info for quickly distinguishing associated community', 
+    `community_id` BIGINT NOT NULL DEFAULT 0,
+    `join_policy` TINYINT NOT NULL DEFAULT 1 COMMENT '1: register, 2: request to join',
+    `create_time` DATETIME NOT NULL,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_usr_community`(`owner_uid`, `community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 # TODO move to somewhare?
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
