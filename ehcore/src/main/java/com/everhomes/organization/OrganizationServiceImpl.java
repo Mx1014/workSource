@@ -2648,7 +2648,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
 					PmBuildingDTO dto = new PmBuildingDTO();
 					dto.setPmBuildingId(r.getId());
-					dto.setOrganizationId(r.getOrganizationId());
 					Building building = communityProvider.findBuildingById(r.getScopeId());
 					dto.setBuildingName(building.getName());
 					return dto;
@@ -2657,6 +2656,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				management.setBuildings(buildings);
 			}
 			management.setPmName(pm.getName());
+			management.setPmId(pm.getId());
 			Address addr = this.addressProvider.findAddressById(pm.getAddressId());
 			if(addr != null)
 				management.setPlate(addr.getAddress());

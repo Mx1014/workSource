@@ -8,6 +8,7 @@ import com.everhomes.discover.ItemType;
  * <ul>
  *  <li>pmName: 物业公司名称</li>
  *  <li>plate: 楼栋门牌</li>
+ *  <li>pmId: 物业公司id</li>
  *  <li>buildings: 覆盖楼栋</li>
  * </ul>
  *
@@ -20,6 +21,16 @@ public class PmManagementsDTO {
 	private String pmName;
 	
 	private String plate;
+	
+	private Long pmId;
+
+	public Long getPmId() {
+		return pmId;
+	}
+
+	public void setPmId(Long pmId) {
+		this.pmId = pmId;
+	}
 
 	public List<PmBuildingDTO> getBuildings() {
 		return buildings;

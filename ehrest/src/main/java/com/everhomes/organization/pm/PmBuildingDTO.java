@@ -4,7 +4,6 @@ package com.everhomes.organization.pm;
  * 
  * pmBuildingId: 物业楼栋表的id
  * buildingName: 楼栋名
- * organizationId: 物业机构id
  *
  */
 public class PmBuildingDTO {
@@ -13,16 +12,6 @@ public class PmBuildingDTO {
 	
 	private String buildingName;
 	
-	private Long organizationId;
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
 	public Long getPmBuildingId() {
 		return pmBuildingId;
 	}
