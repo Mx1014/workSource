@@ -11,6 +11,7 @@ import com.everhomes.forum.AttachmentDescriptor;
  *  <li>displayName: 公司简称</li>
  *  <li>avatar: 公司头像</li>
  *  <li>description: 公司描述</li>
+ *  <li>addressId: 公司地址门牌号id列表</li>
  *  <li>attachments: 公司的附件信息</li>
  * </ul>
  * @author janson
@@ -21,6 +22,8 @@ public class CreateEnterpriseCommand {
     private java.lang.String   displayName;
     private java.lang.String   avatar;
     private java.lang.String   description;
+    
+    private List<Long> addressId;
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
@@ -55,6 +58,11 @@ public class CreateEnterpriseCommand {
     public void setDescription(java.lang.String description) {
         this.description = description;
     }
-    
+	public List<Long> getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(List<Long> addressId) {
+		this.addressId = addressId;
+	}
     
 }

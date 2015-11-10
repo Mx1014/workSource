@@ -1,8 +1,10 @@
 package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.address.AddressDTO;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -28,6 +30,14 @@ import com.everhomes.util.StringHelper;
  * <li>contactForumPrivileges: 公司通讯录成员的论坛权限列表，参考{@link com.everhomes.acl.PrivilegeConstants}</li>
  * <li>updateTime: 公司实体更新时间</li>
  * <li>createTime: 公司实体创建时间</li>
+ * <li>address: 公司所在地址详情</li>
+ * <li>communityId: 园区Id</li>
+ * <li>communityName: 园区名称</li>
+ * <li>cityId: 城市Id</li>
+ * <li>cityName: 城市名称</li>
+ * <li>areaId: 区域Id（如南山区的Id）</li>
+ * <li>areaName: 区域名称</li>
+ * </ul>
  * @author janson
  *
  */
@@ -65,12 +75,32 @@ public class EnterpriseDTO {
     private Timestamp updateTime;
     private Timestamp createTime;
     
+    
+    
     //TODO address info ?
-    //List<AddressDTO>
+    @ItemType(value = AddressDTO.class)
+    private List<AddressDTO> address;
     
-    
+    @ItemType(value = EnterpriseAttachmentDTO.class)
+    private List<EnterpriseAttachmentDTO> attachments = new ArrayList<EnterpriseAttachmentDTO>();
 
-    @Override
+    public List<EnterpriseAttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<EnterpriseAttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
+	public List<AddressDTO> getAddress() {
+		return address;
+	}
+
+	public void setAddress(List<AddressDTO> address) {
+		this.address = address;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

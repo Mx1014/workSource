@@ -2,7 +2,9 @@ package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -12,6 +14,10 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Building;
+import com.everhomes.community.BuildingAttachment;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
@@ -27,15 +33,21 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
 import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhGroupsDao;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.records.EhAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -60,6 +72,9 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     
     @Autowired 
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private AddressProvider addressProvider;
     
     //TODO enterprise field
     @Override
@@ -358,5 +373,108 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         dao.insert(attachment);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseAttachments.class, null);
+	}
+
+	@Override
+	public void createEnterpriseAddress(EnterpriseAddress enterpriseAddr) {
+
+		assert(enterpriseAddr.getEnterpriseId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, enterpriseAddr.getEnterpriseId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseAddresses.class));
+        enterpriseAddr.setId(id);
+        
+        EhEnterpriseAddressesDao dao = new EhEnterpriseAddressesDao(context.configuration());
+        dao.insert(enterpriseAddr);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseAddresses.class, null);		
+	}
+
+	@Override
+	public void populateEnterpriseAttachments(Enterprise enterprise) {
+
+		if(enterprise == null) {
+            return;
+        } else {
+            List<Enterprise> enterprises = new ArrayList<Enterprise>();
+            enterprises.add(enterprise);
+            
+            populateEnterpriseAttachments(enterprises);
+        }
+	}
+
+	@Override
+	public void populateEnterpriseAttachments(List<Enterprise> enterprises) {
+
+		if(enterprises == null || enterprises.size() == 0) {
+            return;
+        }
+            
+        final List<Long> enterpriseIds = new ArrayList<Long>();
+        final Map<Long, Enterprise> mapEnterprises = new HashMap<Long, Enterprise>();
+        
+        for(Enterprise enterprise: enterprises) {
+        	enterpriseIds.add(enterprise.getId());
+        	mapEnterprises.put(enterprise.getId(), enterprise);
+        }
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhGroups.class, enterpriseIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseAttachmentsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ATTACHMENTS);
+            query.addConditions(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.in(enterpriseIds));
+            query.fetch().map((EhEnterpriseAttachmentsRecord record) -> {
+            	Enterprise enterprise = mapEnterprises.get(record.getEnterpriseId());
+                assert(enterprise != null);
+                enterprise.getAttachments().add(ConvertHelper.convert(record, EnterpriseAttachment.class));
+            
+                return null;
+            });
+            return true;
+        });
+	}
+
+	@Override
+	public void populateEnterpriseAddresses(Enterprise enterprise) {
+		if(enterprise == null) {
+            return;
+        } else {
+            List<Enterprise> enterprises = new ArrayList<Enterprise>();
+            enterprises.add(enterprise);
+            
+            populateEnterpriseAddresses(enterprises);
+        }
+		
+	}
+
+	@Override
+	public void populateEnterpriseAddresses(List<Enterprise> enterprises) {
+
+		if(enterprises == null || enterprises.size() == 0) {
+            return;
+        }
+            
+		final List<Long> enterpriseIds = new ArrayList<Long>();
+        final Map<Long, Enterprise> mapEnterprises = new HashMap<Long, Enterprise>();
+        
+        for(Enterprise enterprise: enterprises) {
+        	enterpriseIds.add(enterprise.getId());
+        	mapEnterprises.put(enterprise.getId(), enterprise);
+        }
+        
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhGroups.class, enterpriseIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhGroups.class), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseAddressesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ADDRESSES);
+            query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.in(enterpriseIds));
+            query.fetch().map((EhEnterpriseAddressesRecord record) -> {
+            	Enterprise enterprise = mapEnterprises.get(record.getEnterpriseId());
+                assert(enterprise != null);
+                Address addr = this.addressProvider.findAddressById(record.getAddressId());
+                enterprise.getAddress().add(addr);
+            
+                return null;
+            });
+            return true;
+        });
 	}
 }

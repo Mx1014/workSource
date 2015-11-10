@@ -11,35 +11,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.address.SearchCommunityCommand;
-import com.everhomes.app.AppConstants;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
+import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
-import com.everhomes.forum.PostDTO;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessageBodyType;
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
-import com.everhomes.messaging.MessageMetaConstant;
-import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.messaging.MetaObjectType;
-import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.GroupQueryResult;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -79,6 +72,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Autowired 
     EnterpriseContactProvider enterpriseContactProvider; 
     
+    @Autowired
+    private AddressProvider addressProvider;
+    
+    @Autowired
+	private ContentServerService contentServerService;
+    
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
         List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
@@ -105,6 +104,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             }
             
         }
+       
+        this.enterpriseProvider.populateEnterpriseAttachments(enterprises);
+        this.enterpriseProvider.populateEnterpriseAddresses(enterprises);
+        populateEnterprises(enterprises);
         
         return enterprises;
     }
@@ -116,6 +119,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<Enterprise> enterprises = this.listEnterpriseByCommunityId(locator, cmd.getCommunityId(), cmd.getStatus(), pageSize);
+        
+        this.enterpriseProvider.populateEnterpriseAttachments(enterprises);
+        this.enterpriseProvider.populateEnterpriseAddresses(enterprises);
+        populateEnterprises(enterprises);
        
         List<EnterpriseDTO> dtos = new ArrayList<EnterpriseDTO>();
         for(Enterprise enterprise : enterprises) {
@@ -130,7 +137,14 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Override
     public Enterprise getEnterpriseById(Long id) {
-        return this.enterpriseProvider.getEnterpriseById(id);
+    	
+    	Enterprise enterprise = this.enterpriseProvider.getEnterpriseById(id);
+    	
+    	this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
+    	this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
+        populateEnterprise(enterprise);
+        
+        return enterprise;
     }
     
     @Override
@@ -147,9 +161,30 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setName(cmd.getName());
         this.enterpriseProvider.createEnterprise(enterprise);
         
+        List<Long> addressIds = cmd.getAddressId();
+        if(addressIds != null && addressIds.size() > 0) {
+        	List<Address> address = new ArrayList<Address>();
+        	for(Long addressId :addressIds) {
+        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
+                enterpriseAddr.setAddressId(addressId);
+                enterpriseAddr.setEnterpriseId(enterprise.getId());
+                enterpriseAddr.setCreatorUid(userId);
+                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+
+                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
+                
+                Address addr = this.addressProvider.findAddressById(addressId);
+                address.add(addr);
+        	}
+        	enterprise.setAddress(address);
+        }
+        
+        
         processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
         
         EnterpriseDTO enterpriseDto = ConvertHelper.convert(enterprise, EnterpriseDTO.class);
+        
         
         return enterpriseDto;
     }
@@ -178,6 +213,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         List<EnterpriseDTO> ents = new ArrayList<EnterpriseDTO>();
         for(Long id : rlt.getIds()) {
             Enterprise enterprise = this.enterpriseProvider.getEnterpriseById(id);
+            
+            this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
+            this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
+            populateEnterprise(enterprise);
             
             EnterpriseDTO dto = toEnterpriseDto(userId, enterprise);
             if(dto != null) {
@@ -303,6 +342,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             EnterpriseDTO dto = null;
             for(EnterpriseContactEntry entry : entryList) {
                 enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
+                
+                this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
+                this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
+                populateEnterprise(enterprise);
+                
                 dto = toEnterpriseDto(userId, enterprise);
                 if(dto != null) {
                     enterpriseList.add(dto);
@@ -366,6 +410,36 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         
     }
     
+    private void processEnterpriseAddresses(long userId, List<Long> addressIds, Enterprise enterprise) {
+        List<Address> results = null;
+        
+        if(addressIds != null) {
+            results = new ArrayList<Address>();
+            
+            EnterpriseAddress address = null;
+            for(Long addressId : addressIds) {
+            	address = new EnterpriseAddress();
+            	address.setAddressId(addressId);
+            	address.setEnterpriseId(enterprise.getId());
+            	address.setCreatorUid(userId);
+            	address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            	address.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+
+                try {
+                    this.enterpriseProvider.createEnterpriseAddress(address);
+                    Address addr = this.addressProvider.findAddressById(addressId);
+                    results.add(addr);
+                } catch(Exception e) {
+                    LOGGER.error("Failed to save the address, userId=" + userId 
+                        + ", address=" + address, e);
+                }
+            }
+            
+            enterprise.setAddress(results);
+            
+        }
+    }
+    
     private void processEnterpriseAttachments(long userId, List<AttachmentDescriptor> attachmentList, Enterprise enterprise) {
         List<EnterpriseAttachment> results = null;
         
@@ -395,5 +469,84 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             
         }
     }
+    
+    private void populateEnterprises(List<Enterprise> enterpriseList) {
+        if(enterpriseList == null || enterpriseList.size() == 0) {
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("The enterprise list is empty");
+            }
+            return;
+        } else {
+            for(Enterprise enterprise : enterpriseList) {
+            	populateEnterprise(enterprise);
+            }
+        }
+    }
+
+	/**
+	 * 填充楼栋信息
+	 */
+	 private void populateEnterprise(Enterprise enterprise) {
+		 
+		 if(enterprise == null) {
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("The enterprise is null");
+            }
+		 } else {
+             
+			 populateEnterpriseAttachements(enterprise, enterprise.getAttachments());
+	        
+		 }
+	 }
+	 
+	 private void populateEnterpriseAttachements(Enterprise enterprise, List<EnterpriseAttachment> attachmentList) {
+		 
+		 if(attachmentList == null || attachmentList.size() == 0) {
+	            if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("The enterprise attachment list is empty, enterpriseId=" + enterprise.getId());
+	            }
+		 } else {
+	            for(EnterpriseAttachment attachment : attachmentList) {
+	                populateEnterpriseAttachement(enterprise, attachment);
+	            }
+		 }
+	 }
+	 
+	 private void populateEnterpriseAttachement(Enterprise enterprise, EnterpriseAttachment attachment) {
+        
+		 if(attachment == null) {
+			 if(LOGGER.isInfoEnabled()) {
+				 LOGGER.info("The enterprise attachment is null, enterpriseId=" + enterprise.getId());
+			 }
+		 } else {
+			 
+			 String contentUri = attachment.getContentUri();
+			 if(contentUri != null && contentUri.length() > 0) {
+				 try{
+                  
+					 String url = contentServerService.parserUri(contentUri, EntityType.GROUP.getCode(), enterprise.getId());
+                    
+					 attachment.setContentUrl(url);
+                    
+                
+				 }catch(Exception e){
+                    
+					 LOGGER.error("Failed to parse attachment uri, enterpriseId=" + enterprise.getId() + ", attachmentId=" + attachment.getId(), e);
+                
+				 }
+            
+			 } else {
+             
+				 if(LOGGER.isWarnEnabled()) {
+                 
+					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
+                
+				 }
+            
+			 }
+        
+		 }
+    
+	 }
 
 }

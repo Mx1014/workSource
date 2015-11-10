@@ -704,7 +704,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         	mapBuildings.put(building.getId(), building);
         }
         
-        List<Integer> shards = this.shardingProvider.getContentShards(EhForumPosts.class, buildingIds);
+        List<Integer> shards = this.shardingProvider.getContentShards(EhBuildings.class, buildingIds);
         this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhBuildings.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhBuildingAttachmentsRecord> query = context.selectQuery(Tables.EH_BUILDING_ATTACHMENTS);
             query.addConditions(Tables.EH_BUILDING_ATTACHMENTS.BUILDING_ID.in(buildingIds));
