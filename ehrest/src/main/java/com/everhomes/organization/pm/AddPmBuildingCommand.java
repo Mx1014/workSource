@@ -10,13 +10,13 @@ import com.everhomes.discover.ItemType;
  * <ul>
  *  <li>organizationId：机构id</li>
  *  <li>buildingIds：楼栋id列表</li>
- *  <li>isAll：全部或部分</li>
+ *  <li>isAll：全部或部分 0-全部；1-部分</li>
  *  <li>communityId：小区id</li>
  * </ul>
  */
 public class AddPmBuildingCommand {
 	
-	private Boolean isAll;
+	private int isAll;
 
 	private Long communityId;
 	@NotNull
@@ -50,12 +50,12 @@ public class AddPmBuildingCommand {
 		this.buildingIds = buildingIds;
 	}
 
-	public Boolean getIsAll() {
+	public int getIsAll() {
 		return isAll;
 	}
 
-	public void setIsAll(Boolean isAll) {
+	public void setIsAll(int isAll) {
 		this.isAll = isAll;
 	}
-	
+
 }

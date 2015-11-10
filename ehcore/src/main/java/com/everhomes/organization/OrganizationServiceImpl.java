@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -2554,19 +2555,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void addPmBuilding(AddPmBuildingCommand cmd) {
 		
-		this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getOrganizationId());
-		if(cmd.getIsAll()) {
-			List<Long> buildingIds = this.communityProvider.listBuildingIdByCommunityId(cmd.getCommunityId());
-			cmd.setBuildingIds(buildingIds);
-		}
+		dbProvider.execute((TransactionStatus status) -> {
+			this.organizationProvider.deletePmBuildingByOrganizationId(cmd.getOrganizationId());
+			if(cmd.getIsAll() == 0) {
+				List<Long> buildingIds = this.communityProvider.listBuildingIdByCommunityId(cmd.getCommunityId());
+				cmd.setBuildingIds(buildingIds);
+			}
+			
+			for(Long buildingId: cmd.getBuildingIds()) {
+				OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
+				pmBuilding.setOrganizationId(cmd.getOrganizationId());
+				pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
+				pmBuilding.setScopeId(buildingId);
+				this.organizationProvider.addPmBuilding(pmBuilding);
+			}
+			
+			return null;
+		});
 		
-		for(Long buildingId: cmd.getBuildingIds()) {
-			OrganizationAssignedScopes pmBuilding = new OrganizationAssignedScopes();
-			pmBuilding.setOrganizationId(cmd.getOrganizationId());
-			pmBuilding.setScopeCode(OrganizationScopeCode.BUILDING.getCode());
-			pmBuilding.setScopeId(buildingId);
-			this.organizationProvider.addPmBuilding(pmBuilding);
-		}
 		
 	}
 
@@ -2656,11 +2662,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(org != null) {
 			pmManagements = org.stream().map(pm -> {
 				PmManagementsDTO management = new PmManagementsDTO();
-				management.setIsAll(false);
+				management.setIsAll(1);
 				List<OrganizationAssignedScopes> scopes = this.organizationProvider.findPmBuildingId(pm.getId());
 				int size = this.communityProvider.countBuildingsBycommunityId(cmd.getCommunityId());
 				if(scopes != null && scopes.size() == size)
-					management.setIsAll(true);
+					management.setIsAll(0);
 				if(scopes != null) {
 					List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
 						PmBuildingDTO dto = new PmBuildingDTO();
