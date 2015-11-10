@@ -542,7 +542,7 @@ public class OrganizationController extends ControllerBase {
 	//8. 报修贴修改状态
 	/**
 	 * <b>URL: /org/setOrgTopicStatus</b>
-	 * <p>设置帖状态：未分配、待处理、处理中、已处理、其它</p>
+	 * <p>设置帖状态：待处理、处理中、已处理、其它</p>
 	 */
 	@RequestMapping("setOrgTopicStatus")
 	@RestReturn(value=String.class)

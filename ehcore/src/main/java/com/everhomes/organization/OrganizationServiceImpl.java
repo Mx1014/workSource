@@ -1409,20 +1409,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 		OrganizationTask task = this.checkOrgTask(organization.getId(), cmd.getTopicId());
 
 		dbProvider.execute((status) -> {
-			///////////////////////////////////////////////////
-			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
-			
-			if(member != null && member.size() > 0){
-				String orgGroup = member.get(0).getMemberGroup();
-				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
-						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
-					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
-				}
-				
-				else {
-					task.setTaskStatus(OrganizationTaskStatus.WAITING.getCode());
-				}
-			}
+//			///////////////////////////////////////////////////
+//			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
+//			
+//			if(member != null && member.size() > 0){
+//				String orgGroup = member.get(0).getMemberGroup();
+//				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
+//						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
+//					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+//				}
+//				
+//				else {
+//					task.setTaskStatus(OrganizationTaskStatus.WAITING.getCode());
+//				}
+//			}
+			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(desOrgMember.getTargetId());;
 			task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
@@ -2592,7 +2593,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			pmBuildings =  pm.stream().map(r -> {
 				PmBuildingDTO dto = new PmBuildingDTO();
-				dto.setPmBuildingId(r.getId());
+				dto.setBuildingId(r.getScopeId());
 				Building building = communityProvider.findBuildingById(r.getScopeId());
 				dto.setBuildingName(building.getName());
 				return dto;
@@ -2670,7 +2671,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(scopes != null) {
 					List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
 						PmBuildingDTO dto = new PmBuildingDTO();
-						dto.setPmBuildingId(r.getId());
+						dto.setBuildingId(r.getScopeId());
 						Building building = communityProvider.findBuildingById(r.getScopeId());
 						dto.setBuildingName(building.getName());
 						return dto;

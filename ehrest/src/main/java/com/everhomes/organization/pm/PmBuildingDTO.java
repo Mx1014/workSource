@@ -2,22 +2,22 @@ package com.everhomes.organization.pm;
 
 /**
  * 
- * pmBuildingId: 物业楼栋表的id
+ * buildingId: 楼栋id
  * buildingName: 楼栋名
  *
  */
 public class PmBuildingDTO {
 	
-	private Long pmBuildingId;
+	private Long buildingId;
 	
 	private String buildingName;
 	
-	public Long getPmBuildingId() {
-		return pmBuildingId;
+	public Long getBuildingId() {
+		return buildingId;
 	}
 
-	public void setPmBuildingId(Long pmBuildingId) {
-		this.pmBuildingId = pmBuildingId;
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
 	}
 
 	public String getBuildingName() {
