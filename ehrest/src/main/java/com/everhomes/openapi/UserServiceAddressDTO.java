@@ -10,6 +10,8 @@ public class UserServiceAddressDTO {
     private String province;
     private String city;
     private String area;
+    private Long communityId;
+    private String communityName;
     private String callPhone;
     private String address;
    
@@ -55,8 +57,19 @@ public class UserServiceAddressDTO {
     public void setAddress(String address) {
         this.address = address;
     }
-    
-    @Override
+    public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+	public String getCommunityName() {
+		return communityName;
+	}
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+	@Override
     public String toString(){
         return StringHelper.toJsonString(this);
         

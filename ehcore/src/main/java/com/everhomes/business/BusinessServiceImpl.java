@@ -1246,6 +1246,13 @@ public class BusinessServiceImpl implements BusinessService {
 					dto.setCity(addr.getCityName());
 					dto.setArea(addr.getAreaName());
 					dto.setAddress(addr.getAddress());
+					if(addr.getCommunityId() != null){
+						Community com = this.communityProvider.findCommunityById(addr.getCommunityId());
+						if(com != null){
+							dto.setCommunityId(addr.getCommunityId());
+							dto.setCommunityName(com.getName());
+						}
+					}
 					User user = this.userProvider.findUserById(userId);
 					LOGGER.error("getUserDefaultAddress-user=" +user.toString());
 					if(user != null)
@@ -1277,6 +1284,13 @@ public class BusinessServiceImpl implements BusinessService {
 				dto.setCity(addr.getCityName());
 				dto.setArea(addr.getAreaName());
 				dto.setAddress(addr.getAddress());
+				if(addr.getCommunityId() != null){
+					Community com = this.communityProvider.findCommunityById(addr.getCommunityId());
+					if(com != null){
+						dto.setCommunityId(addr.getCommunityId());
+						dto.setCommunityName(com.getName());
+					}
+				}
 				dto.setUserName(r.getContactName());
 				dto.setCallPhone(r.getContactToken());
 				break;
