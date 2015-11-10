@@ -542,7 +542,7 @@ public class OrganizationController extends ControllerBase {
 	//8. 报修贴修改状态
 	/**
 	 * <b>URL: /org/setOrgTopicStatus</b>
-	 * <p>设置帖状态：未处理、处理中、已处理、其它</p>
+	 * <p>设置帖状态：未分配、待处理、处理中、已处理、其它</p>
 	 */
 	@RequestMapping("setOrgTopicStatus")
 	@RestReturn(value=String.class)
@@ -624,6 +624,21 @@ public class OrganizationController extends ControllerBase {
         this.organizationService.updateTopicPrivacy(cmd);
         
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listUserTask</b>
+     * <p>查询分配给自己的任务</p>
+     */
+    @RequestMapping("listUserTask")
+    @RestReturn(value=ListTopicsByTypeCommandResponse.class)
+    public RestResponse listUserTask(ListUserTaskCommand cmd){
+    	ListTopicsByTypeCommandResponse tasks = this.organizationService.listUserTask(cmd);
+        
+        RestResponse response = new RestResponse(tasks);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

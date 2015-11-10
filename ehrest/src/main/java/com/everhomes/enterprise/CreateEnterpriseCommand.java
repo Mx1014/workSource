@@ -6,7 +6,13 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.forum.AttachmentDescriptor;
 
 /**
- * <ul>管理后台使用，应该使用批量添加实现</ul>
+ * <ul>管理后台使用，应该使用批量添加实现
+ *  <li>name: 公司名称</li>
+ *  <li>displayName: 公司简称</li>
+ *  <li>avatar: 公司头像</li>
+ *  <li>description: 公司描述</li>
+ *  <li>attachments: 公司的附件信息</li>
+ * </ul>
  * @author janson
  *
  */

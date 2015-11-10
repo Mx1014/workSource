@@ -1104,4 +1104,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return organizations;
 	}
 
+
+	@Override
+	public List<OrganizationTask> listOrganizationTasksByOperatorUid(
+			Long operatorUid, int pageSize, long offset) {
+		// TODO Auto-generated method stub
+		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.OPERATOR_UID.eq(operatorUid);
+		condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(OrganizationTaskStatus.WAITING.getCode()));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
+				.limit(pageSize).offset((int)offset)
+				.fetch();
+		if(records != null && !records.isEmpty()){
+			for(Record r : records){
+				list.add(ConvertHelper.convert(r, OrganizationTask.class));
+			}
+		}
+		return list;
+
+	}
+
 }

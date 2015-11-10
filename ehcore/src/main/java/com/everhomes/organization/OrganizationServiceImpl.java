@@ -1414,10 +1414,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(member != null && member.size() > 0){
 				String orgGroup = member.get(0).getMemberGroup();
 				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
-						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode())
+						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
 					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+				}
 				
-				task.setTaskStatus(OrganizationTaskStatus.WAITING.getCode());
+				else {
+					task.setTaskStatus(OrganizationTaskStatus.WAITING.getCode());
+				}
 			}
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(desOrgMember.getTargetId());;
@@ -2656,6 +2659,44 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}).collect(Collectors.toList());
 		
 		response.setPmManagement(pmManagements);
+		return response;
+	}
+
+	@Override
+	public ListTopicsByTypeCommandResponse listUserTask(ListUserTaskCommand cmd) {
+		
+		User user = UserContext.current().getUser();
+		Long commuId = user.getCommunityId();
+
+		if(cmd.getPageOffset() == null)
+			cmd.setPageOffset(1L);
+
+		ListTopicsByTypeCommandResponse response = new ListTopicsByTypeCommandResponse();
+		List<OrganizationTaskDTO2> list = new ArrayList<OrganizationTaskDTO2>();
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
+
+		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOperatorUid(user.getId(), pageSize+1, offset);
+		if(orgTaskList != null && !orgTaskList.isEmpty()){
+			if(orgTaskList.size() == pageSize+1){
+				response.setNextPageOffset(cmd.getPageOffset()+1);
+				orgTaskList.remove(orgTaskList.size()-1);
+			}
+			for(OrganizationTask task : orgTaskList){
+				try{
+					PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+					OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
+					this.convertTaskToDto(task,taskDto);
+					list.add(taskDto);
+				}
+				catch(Exception e){
+					LOGGER.error("could not found topic by task's applyEntityId.taskId="+task.getId()+",applyEntityId="+task.getApplyEntityId());
+				}
+			}
+		}
+
+		response.setRequests(list);
 		return response;
 	}
 
