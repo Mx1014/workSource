@@ -661,7 +661,7 @@ public class PunchProviderImpl implements PunchProvider {
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		if(userIds != null)
-			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -712,7 +712,7 @@ public class PunchProviderImpl implements PunchProvider {
 		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		if(userIds != null)
-			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.in(userIds));
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Table;
 
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -223,7 +224,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                     , Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(Tables.EH_ENTERPRISE_CONTACTS.ID));
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(EnterpriseContactEntryType.Mobile.getCode()));
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(phone));
-            
+            System.out.println(query.toString());
             List<EhEnterpriseContactsRecord> records = query.fetch().map(new EnterpriseContactRecordMapper());
             records.stream().map((r) -> {
                 contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
@@ -247,12 +248,11 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         }
         
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
-            SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
-            query.addJoin(Tables.EH_ENTERPRISE_CONTACT_ENTRIES
-                    , Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(Tables.EH_ENTERPRISE_CONTACTS.ID));
-            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(EnterpriseContactEntryType.Mobile.getCode()));
-            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.like("%"+keyword+"%"));
+            SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS); 
+            if(!StringUtils.isEmpty(keyword)){
             query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.NAME.like("%"+keyword+"%"));
+            }
+            System.out.println(query.toString());
             List<EhEnterpriseContactsRecord> records = query.fetch().map(new EnterpriseContactRecordMapper());
             records.stream().map((r) -> {
                 contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));

@@ -1309,6 +1309,8 @@ public class PunchServiceImpl implements PunchService {
     		PunchCountDTO dto = new PunchCountDTO();
     		dto.setUserId(userId);
     		EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getUserId()); 
+    		if(null == enterpriseContact)
+    			continue;
 			dto.setUserName(enterpriseContact.getName());
 			dto.setToken(enterpriseContactProvider.queryContactEntryByContactId(enterpriseContact,ContactType.MOBILE.getCode()).get(0).getEntryValue());
     		List<PunchDayLogDTO> list = map.get(userId);

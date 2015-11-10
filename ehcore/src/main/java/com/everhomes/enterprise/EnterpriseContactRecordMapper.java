@@ -24,16 +24,16 @@ public class EnterpriseContactRecordMapper implements RecordMapper<Record, EhEnt
         o.setStatus(r.getValue((Field<Byte>)r.field("status")));
         o.setCreatorUid(r.getValue((Field<Long>)r.field("creator_uid")));
         o.setCreateTime(r.getValue((Field<Timestamp>)r.field("create_time")));
-        o.setIntegralTag1(r.getValue((Field<Long>)r.field("integral_tag")));
-        o.setIntegralTag2(r.getValue((Field<Long>)r.field("integral_tag")));
-        o.setIntegralTag3(r.getValue((Field<Long>)r.field("integral_tag")));
-        o.setIntegralTag4(r.getValue((Field<Long>)r.field("integral_tag")));
-        o.setIntegralTag5(r.getValue((Field<Long>)r.field("integral_tag")));
-        o.setStringTag1(r.getValue((Field<String>)r.field("string_tag")));
-        o.setStringTag2(r.getValue((Field<String>)r.field("string_tag")));
-        o.setStringTag3(r.getValue((Field<String>)r.field("string_tag")));
-        o.setStringTag4(r.getValue((Field<String>)r.field("string_tag")));
-        o.setStringTag5(r.getValue((Field<String>)r.field("string_tag")));
+        o.setIntegralTag1(r.getValue((Field<Long>)r.field("integral_tag1")));
+        o.setIntegralTag2(r.getValue((Field<Long>)r.field("integral_tag2")));
+        o.setIntegralTag3(r.getValue((Field<Long>)r.field("integral_tag3")));
+        o.setIntegralTag4(r.getValue((Field<Long>)r.field("integral_tag4")));
+        o.setIntegralTag5(r.getValue((Field<Long>)r.field("integral_tag5")));
+        o.setStringTag1(r.getValue((Field<String>)r.field("string_tag1")));
+        o.setStringTag2(r.getValue((Field<String>)r.field("string_tag2")));
+        o.setStringTag3(r.getValue((Field<String>)r.field("string_tag3")));
+        o.setStringTag4(r.getValue((Field<String>)r.field("string_tag4")));
+        o.setStringTag5(r.getValue((Field<String>)r.field("string_tag5")));
 
         return o;
     }

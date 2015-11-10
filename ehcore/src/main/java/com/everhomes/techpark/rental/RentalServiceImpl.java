@@ -1112,21 +1112,30 @@ public class RentalServiceImpl implements RentalService {
 
 			}
 		}
-
+		switch(cmd.getSiteType()){
+		case("MEETINGROOM"): 
+			response.setName("会议室预定订单");
+			response.setDescription("会议室预定订单");
+			response.setOrderType("huiyishiorder");
+			break;
+		case("VIPPARKING"):
+			response.setName("VIP车位预定订单");
+			response.setDescription("VIP车位预定订单");
+			response.setOrderType("vipcheweiorder");
+			break;
+		case("ELECSCREEN"):
+			response.setName("电子屏预定订单");
+			response.setDescription("电子屏预定订单");
+			response.setOrderType("dianzipingorder"); 
+			break;
+		}
 		Long orderNo = null;
 		if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 			orderNo = onlinePayService.createBillId(DateHelper
 					.currentGMTTime().getTime());
 			response.setAmount(bill.getReserveMoney());
 			response.setOrderNo(String.valueOf(orderNo));
-			switch(cmd.getSiteType()){
-			case("MEETINGROOM"):
-				response.setOrderType("huiyishiorder");
-			case("VIPPARKING"):
-				response.setOrderType("vipcheweiorder");
-			case("ELECSCREEN"):
-				response.setOrderType("dianzipingorder"); 
-			}
+			
 		} else if (bill.getStatus()
 				.equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 			orderNo = onlinePayService.createBillId(DateHelper
