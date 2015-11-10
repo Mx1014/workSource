@@ -11,11 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 106528086;
+	private static final long serialVersionUID = 1944982358;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
-	private java.lang.String   addressId;
+	private java.lang.Long     addressId;
 	private java.lang.Byte     status;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
@@ -31,7 +31,7 @@ public class EhEnterpriseAddresses implements java.io.Serializable {
 	public EhEnterpriseAddresses(
 		java.lang.Long     id,
 		java.lang.Long     enterpriseId,
-		java.lang.String   addressId,
+		java.lang.Long     addressId,
 		java.lang.Byte     status,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
@@ -72,11 +72,11 @@ public class EhEnterpriseAddresses implements java.io.Serializable {
 		this.enterpriseId = enterpriseId;
 	}
 
-	public java.lang.String getAddressId() {
+	public java.lang.Long getAddressId() {
 		return this.addressId;
 	}
 
-	public void setAddressId(java.lang.String addressId) {
+	public void setAddressId(java.lang.Long addressId) {
 		this.addressId = addressId;
 	}
 
