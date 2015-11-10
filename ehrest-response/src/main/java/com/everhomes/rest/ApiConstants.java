@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-07 13:34:13
+// generated at 2015-11-10 14:30:36
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -113,6 +113,8 @@ public interface ApiConstants {
     public static final String ADMIN_LISTPERSISTSERVER_URL = "/admin/listPersistServer";
     public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
+    public static final String ADMIN_ORG_ADDPMBUILDING_URL = "/admin/org/addPmBuilding";
+    public static final String ADMIN_ORG_CANCELPMBUILDING_URL = "/admin/org/cancelPmBuilding";
     public static final String ADMIN_ORG_CREATEORGANIZATION_URL = "/admin/org/createOrganization";
     public static final String ADMIN_ORG_CREATEORGANIZATIONCOMMUNITY_URL = "/admin/org/createOrganizationCommunity";
     public static final String ADMIN_ORG_CREATEORGANIZATIONMEMBER_URL = "/admin/org/createOrganizationMember";
@@ -124,6 +126,9 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_IMPORTORGANIZATION_URL = "/admin/org/importOrganization";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
+    public static final String ADMIN_ORG_LISTPMBUILDINGS_URL = "/admin/org/listPmBuildings";
+    public static final String ADMIN_ORG_LISTPMMANAGEMENTS_URL = "/admin/org/listPmManagements";
+    public static final String ADMIN_ORG_LISTUNASSIGNEDBUILDING_URL = "/admin/org/listUnassignedBuilding";
     public static final String ADMIN_PINGBORDER_URL = "/admin/pingBorder";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
@@ -190,10 +195,13 @@ public interface ApiConstants {
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
+    public static final String CONTACT_APPROVECONTACT_URL = "/contact/approveContact";
     public static final String CONTACT_CREATECONTACTBYPHONECOMMAND_URL = "/contact/createContactByPhoneCommand";
     public static final String CONTACT_CREATECONTACTBYUSERIDCOMMAND_URL = "/contact/createContactByUserIdCommand";
     public static final String CONTACT_LISTCONTACTSBYENTERPRISEID_URL = "/contact/listContactsByEnterpriseId";
     public static final String CONTACT_LISTCONTACTSBYPHONE_URL = "/contact/listContactsByPhone";
+    public static final String CONTACT_LISTCONTACTSREQUESTBYENTERPRISEID_URL = "/contact/listContactsRequestByEnterpriseId";
+    public static final String CONTACT_REJECTCONTACT_URL = "/contact/rejectContact";
     public static final String CONTENTSERVER_ADDCONFIG_URL = "/contentServer/addConfig";
     public static final String CONTENTSERVER_ADDCONTENTSERVER_URL = "/contentServer/addContentServer";
     public static final String CONTENTSERVER_DELETECONTENTSERVER_URL = "/contentServer/deleteContentServer";
@@ -210,7 +218,7 @@ public interface ApiConstants {
     public static final String ENTERPRISE_REQUESTTOJOINCOMMUNITY_URL = "/enterprise/requestToJoinCommunity";
     public static final String ENTERPRISE_SEARCHCOMMUNITIES_URL = "/enterprise/searchCommunities";
     public static final String ENTERPRISE_SEARCHENTERPRISE_URL = "/enterprise/searchEnterprise";
-    public static final String ENTERPRISE_SYNCFROMDB_URL = "/enterprise/syncFromDb";
+    public static final String ENTERPRISE_SYNCINDEX_URL = "/enterprise/syncIndex";
     public static final String FAMILY_APPROVEMEMBER_URL = "/family/approveMember";
     public static final String FAMILY_FINDFAMILYBYADDRESSID_URL = "/family/findFamilyByAddressId";
     public static final String FAMILY_FINDFAMILYBYKEYWORD_URL = "/family/findFamilyByKeyword";
@@ -341,6 +349,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
+    public static final String ORG_LISTUSERTASK_URL = "/org/listUserTask";
     public static final String ORG_NEWCOOPERATION_URL = "/org/newCooperation";
     public static final String ORG_NEWORGCOMMENT_URL = "/org/newOrgComment";
     public static final String ORG_NEWORGTOPIC_URL = "/org/newOrgTopic";
@@ -469,6 +478,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_GETRENTALTYPERULE_URL = "/techpark/rental/getRentalTypeRule";
     public static final String TECHPARK_RENTAL_LISTRENTALBILLS_URL = "/techpark/rental/listRentalBills";
     public static final String TECHPARK_RENTAL_LISTRENTALSITEITEMS_URL = "/techpark/rental/listRentalSiteItems";
+    public static final String TECHPARK_RENTAL_ONLINEPAYCALLBACK_URL = "/techpark/rental/onlinePayCallback";
     public static final String TECHPARK_RENTAL_UPDATERENTALRULE_URL = "/techpark/rental/updateRentalRule";
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
@@ -484,6 +494,7 @@ public interface ApiConstants {
     public static final String USER_FETCHPASTTORECENTMESSAGES_URL = "/user/fetchPastToRecentMessages";
     public static final String USER_FETCHRECENTTOPASTMESSAGES_URL = "/user/fetchRecentToPastMessages";
     public static final String USER_FINDTOKENBYUSERID_URL = "/user/findTokenByUserId";
+    public static final String USER_GETBIZSIGNATURE_URL = "/user/getBizSignature";
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
