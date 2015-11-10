@@ -2574,9 +2574,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			ListPmBuildingCommand cmd) {
 		
 		List<OrganizationAssignedScopes> pm = this.organizationProvider.findPmBuildingId(cmd.getOrgId());
+		List<PmBuildingDTO> pmBuildings = new ArrayList<PmBuildingDTO>();
 		if(pm != null) {
 			
-			List<PmBuildingDTO> pmBuildings =  pm.stream().map(r -> {
+			pmBuildings =  pm.stream().map(r -> {
 				PmBuildingDTO dto = new PmBuildingDTO();
 				dto.setPmBuildingId(r.getId());
 				Building building = communityProvider.findBuildingById(r.getScopeId());
@@ -2584,9 +2585,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				return dto;
 			}).collect(Collectors.toList());
 			
-			return pmBuildings;
 		}
-		return null;
+		return pmBuildings;
 	}
 
 	@Override
@@ -2648,6 +2648,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
 					PmBuildingDTO dto = new PmBuildingDTO();
 					dto.setPmBuildingId(r.getId());
+					dto.setBuildingId(r.getScopeId());
 					Building building = communityProvider.findBuildingById(r.getScopeId());
 					dto.setBuildingName(building.getName());
 					return dto;
