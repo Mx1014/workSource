@@ -1108,11 +1108,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
+	public void deletePmBuildingByOrganizationId(Long organizationId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAssignedScopesDao dao = new EhOrganizationAssignedScopesDao(context.configuration()); 
+        List<EhOrganizationAssignedScopes> assignedScopes = dao.fetchByOrganizationId(organizationId);
+        if(assignedScopes != null && !assignedScopes.isEmpty()){
+            assignedScopes.forEach(r -> deletePmBuildingById(r.getId()));
+        }
+		
+	}
+
+
+	@Override
 	public List<OrganizationTask> listOrganizationTasksByOperatorUid(
-			Long operatorUid, int pageSize, long offset) {
+			Long operatorUid, String taskType, int pageSize, long offset) {
 		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
 		Condition condition = Tables.EH_ORGANIZATION_TASKS.OPERATOR_UID.eq(operatorUid);
-		condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(OrganizationTaskStatus.WAITING.getCode()));
+		condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(OrganizationTaskStatus.UNPROCESSED.getCode()));
+		if(taskType != null && !taskType.isEmpty())
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
@@ -1126,20 +1141,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			}
 		}
 		return list;
-
-	}
-
-
-	@Override
-	public void deletePmBuildingByOrganizationId(Long organizationId) {
-		 
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationAssignedScopesDao dao = new EhOrganizationAssignedScopesDao(context.configuration()); 
-        List<EhOrganizationAssignedScopes> assignedScopes = dao.fetchByOrganizationId(organizationId);
-        if(assignedScopes != null && !assignedScopes.isEmpty()){
-            assignedScopes.forEach(r -> deletePmBuildingById(r.getId()));
-        }
-		
 	}
 
 }

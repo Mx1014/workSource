@@ -2707,7 +2707,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
 
-		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOperatorUid(user.getId(), pageSize+1, offset);
+		List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOperatorUid(user.getId(), cmd.getTaskType(), pageSize+1, offset);
 		if(orgTaskList != null && !orgTaskList.isEmpty()){
 			if(orgTaskList.size() == pageSize+1){
 				response.setNextPageOffset(cmd.getPageOffset()+1);

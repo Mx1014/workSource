@@ -4,7 +4,8 @@ package com.everhomes.organization;
  * <ul>
  * 	<li>pageOffset : 页码</li>
  *	<li>pageSize : 页大小</li>
- *</ul>
+ *  <li>taskType : 任务类型 ，详情{@link com.everhomes.organization.OrganizationTaskType}</li>
+ * </ul>
  *
  */
 public class ListUserTaskCommand {
@@ -12,6 +13,16 @@ public class ListUserTaskCommand {
 	private Long pageOffset;
 	
 	private Integer pageSize;
+	
+	private String taskType;
+
+	public String getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(String taskType) {
+		this.taskType = taskType;
+	}
 
 	public Long getPageOffset() {
 		return pageOffset;
