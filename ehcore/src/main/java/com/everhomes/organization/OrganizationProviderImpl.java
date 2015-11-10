@@ -34,6 +34,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pm.OrganizationScopeCode;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhBusinessAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
@@ -43,6 +44,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhBusinessAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
@@ -1108,7 +1110,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<OrganizationTask> listOrganizationTasksByOperatorUid(
 			Long operatorUid, int pageSize, long offset) {
-		// TODO Auto-generated method stub
 		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
 		Condition condition = Tables.EH_ORGANIZATION_TASKS.OPERATOR_UID.eq(operatorUid);
 		condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(OrganizationTaskStatus.WAITING.getCode()));
@@ -1126,6 +1127,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 
+	}
+
+
+	@Override
+	public void deletePmBuildingByOrganizationId(Long organizationId) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAssignedScopesDao dao = new EhOrganizationAssignedScopesDao(context.configuration()); 
+        List<EhOrganizationAssignedScopes> assignedScopes = dao.fetchByOrganizationId(organizationId);
+        if(assignedScopes != null && !assignedScopes.isEmpty()){
+            assignedScopes.forEach(r -> deletePmBuildingById(r.getId()));
+        }
+		
 	}
 
 }

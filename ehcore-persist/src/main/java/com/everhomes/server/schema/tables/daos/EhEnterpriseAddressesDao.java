@@ -57,7 +57,7 @@ public class EhEnterpriseAddressesDao extends org.jooq.impl.DAOImpl<com.everhome
 	/**
 	 * Fetch records that have <code>address_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses> fetchByAddressId(java.lang.String... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses> fetchByAddressId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID, values);
 	}
 

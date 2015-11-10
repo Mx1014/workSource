@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord> {
 
-	private static final long serialVersionUID = 155083634;
+	private static final long serialVersionUID = 2004348962;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_addresses</code>
@@ -39,7 +39,7 @@ public class EhEnterpriseAddresses extends org.jooq.impl.TableImpl<com.everhomes
 	/**
 	 * The column <code>ehcore.eh_enterprise_addresses.address_id</code>. reference to id of eh_addresses
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord, java.lang.String> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this, "reference to id of eh_addresses");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "reference to id of eh_addresses");
 
 	/**
 	 * The column <code>ehcore.eh_enterprise_addresses.status</code>. 0: inactive, 1: waitingForApproval, 2: active

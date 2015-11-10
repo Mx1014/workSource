@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS `eh_enterprise_addresses`;
 CREATE TABLE `eh_enterprise_addresses` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_groups',
-    `address_id` VARCHAR(32) NOT NULL COMMENT 'reference to id of eh_addresses',
+    `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_addresses',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
     `creator_uid` BIGINT COMMENT 'record creator user id',
     `create_time` DATETIME,

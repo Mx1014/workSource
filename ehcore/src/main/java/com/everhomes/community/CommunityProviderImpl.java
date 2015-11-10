@@ -823,4 +823,54 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         return buildings;
 	}
+
+	@Override
+	public int countBuildingsBycommunityId(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Building> buildings = new ArrayList<Building>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+    
+       
+        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query buildings by count, sql=" + query.getSQL());
+            LOGGER.debug("Query buildings by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhBuildingsRecord record) -> {
+        	buildings.add(ConvertHelper.convert(record, Building.class));
+        	return null;
+        });
+        
+        
+        
+		return buildings.size();
+	}
+
+	@Override
+	public List<Long> listBuildingIdByCommunityId(Long communityId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> buildingIds = new ArrayList<Long>();
+        SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+    
+       
+        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query buildings by count, sql=" + query.getSQL());
+            LOGGER.debug("Query buildings by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhBuildingsRecord record) -> {
+        	buildingIds.add(record.getId());
+        	return null;
+        });
+        
+        
+        
+		return buildingIds;
+	}
 }
