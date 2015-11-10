@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-10 14:30:36
+// generated at 2015-11-10 15:49:05
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -349,7 +349,6 @@ public interface ApiConstants {
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
-    public static final String ORG_LISTUSERTASK_URL = "/org/listUserTask";
     public static final String ORG_NEWCOOPERATION_URL = "/org/newCooperation";
     public static final String ORG_NEWORGCOMMENT_URL = "/org/newOrgComment";
     public static final String ORG_NEWORGTOPIC_URL = "/org/newOrgTopic";
@@ -494,7 +493,6 @@ public interface ApiConstants {
     public static final String USER_FETCHPASTTORECENTMESSAGES_URL = "/user/fetchPastToRecentMessages";
     public static final String USER_FETCHRECENTTOPASTMESSAGES_URL = "/user/fetchRecentToPastMessages";
     public static final String USER_FINDTOKENBYUSERID_URL = "/user/findTokenByUserId";
-    public static final String USER_GETBIZSIGNATURE_URL = "/user/getBizSignature";
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";

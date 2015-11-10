@@ -7,7 +7,9 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -45,6 +47,21 @@ public class EnterpriseContactController extends ControllerBase {
     @RestReturn(value=EnterpriseContactDTO.class)
     public RestResponse createContactByPhoneCommand(@Valid CreateContactByPhoneCommand cmd) {
         return null;
+    }
+    
+    /**
+     * <b>URL: /contact/importContactsCommand</b>
+     * <p>企业导入通讯录</p>
+     * @return {@link EnterpriseContactDTO}
+     */
+    @RequestMapping("importContactsCommand")
+    @RestReturn(value=EnterpriseContactDTO.class)
+    public RestResponse importContacts(@Valid importContactsCommand cmd ,@RequestParam(value = "attachment") MultipartFile[] files) {
+    	this.enterpriseContactService.importContacts(cmd,files);
+    	RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
     }
     
     /**

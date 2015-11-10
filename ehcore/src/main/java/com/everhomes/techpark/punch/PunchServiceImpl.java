@@ -1216,6 +1216,8 @@ public class PunchServiceImpl implements PunchService {
 					processPunchStatisticsDTOTime(dto,r);
 					if(dto != null){
 						EnterpriseContact enterpriseContact =  enterpriseContactService.queryContactByUserId(cmd.getCompanyId(),dto.getUserId()); 
+						if(null != enterpriseContact){
+							 
 						dto.setUserName(enterpriseContact.getName());
 						dto.setUserPhoneNumber(enterpriseContactProvider.queryContactEntryByContactId(enterpriseContact,ContactType.MOBILE.getCode()).get(0).getEntryValue());
 //						dto.setUserDepartment(enterpriseContact.get);
@@ -1229,7 +1231,7 @@ public class PunchServiceImpl implements PunchService {
 						}
 						else{
 							dto.setApprovalStatus((byte) 0);
-						}
+						}}
 					}
 					return dto;
 				}).collect(Collectors.toList()));

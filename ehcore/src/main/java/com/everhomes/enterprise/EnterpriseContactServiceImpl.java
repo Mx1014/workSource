@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -329,9 +330,20 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
      */
     @Override
     public List<EnterpriseContactDetail> listContactByEnterpriseId(ListingLocator locator, Long enterpriseId, Integer pageSize) {
-        int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
-        List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactByEnterpriseId(locator, enterpriseId, count);
+
+		if(locator.getAnchor() == null)
+			locator.setAnchor(0L);
+    	int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+        List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactByEnterpriseId(locator, enterpriseId, count+1);
+
+		Long nextPageAnchor = null;
+		if(contacts != null && contacts.size() > count) {
+			contacts.remove(contacts.size() - 1);
+			nextPageAnchor = contacts.get(contacts.size() -1).getId();
+		}
+		locator.setAnchor(nextPageAnchor);
         List<EnterpriseContactDetail> details = new ArrayList<EnterpriseContactDetail>();
+		
         for(EnterpriseContact contact : contacts) {
             EnterpriseContactDetail detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
             EnterpriseContactGroupMember member = this.enterpriseContactProvider.getContactGroupMemberByContactId(enterpriseId, contact.getId());
@@ -538,8 +550,20 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	@Override
 	public List<EnterpriseContactDetail> listContactsRequestByEnterpriseId(
 			ListingLocator locator, Long enterpriseId, Integer pageSize) {
+
+		if(locator.getAnchor() == null)
+			locator.setAnchor(0L);
 		  int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
 	        List<EnterpriseContact> contacts = this.enterpriseContactProvider.listContactRequestByEnterpriseId(locator, enterpriseId, count);
+	        
+	        Long nextPageAnchor = null;
+			if(contacts != null && contacts.size() > count) {
+				contacts.remove(contacts.size() - 1);
+				nextPageAnchor = contacts.get(contacts.size() -1).getId();
+			}
+			locator.setAnchor(nextPageAnchor);
+			
+			
 	        List<EnterpriseContactDetail> details = new ArrayList<EnterpriseContactDetail>();
 	        for(EnterpriseContact contact : contacts) {
 	            EnterpriseContactDetail detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
@@ -578,6 +602,16 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		EnterpriseContact  contact = this.enterpriseContactProvider.queryContactById(cmd.getContactId());
 		contact.setStatus(EnterpriseContactStatus.INACTIVE.getCode());
 		this.enterpriseContactProvider.updateContact(contact);
+		
+	}
+
+	@Override
+	public void importContacts(importContactsCommand cmd, MultipartFile[] files) {
+		this.importContacts(cmd.getEnterpriseId(),files);		
+	}
+
+	private void importContacts(Long enterpriseId, MultipartFile[] files) {
+		// TODO Auto-generated method stub
 		
 	}
 }
