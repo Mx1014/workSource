@@ -2573,16 +2573,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public List<PmBuildingDTO> listPmBuildings(
 			ListPmBuildingCommand cmd) {
 		
-		List<PmBuildingDTO> pmBuildings =  this.organizationProvider.findPmBuildingId(cmd.getOrgId()).stream().map(r -> {
-			PmBuildingDTO dto = new PmBuildingDTO();
-			dto.setPmBuildingId(r.getId());
-			Building building = communityProvider.findBuildingById(r.getScopeId());
-			dto.setBuildingName(building.getName());
-			return dto;
-		}).collect(Collectors.toList());
-		
-		
-		return pmBuildings;
+		List<OrganizationAssignedScopes> pm = this.organizationProvider.findPmBuildingId(cmd.getOrgId());
+		if(pm != null) {
+			
+			List<PmBuildingDTO> pmBuildings =  pm.stream().map(r -> {
+				PmBuildingDTO dto = new PmBuildingDTO();
+				dto.setPmBuildingId(r.getId());
+				Building building = communityProvider.findBuildingById(r.getScopeId());
+				dto.setBuildingName(building.getName());
+				return dto;
+			}).collect(Collectors.toList());
+			
+			return pmBuildings;
+		}
+		return null;
 	}
 
 	@Override
@@ -2641,7 +2645,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			List<OrganizationAssignedScopes> scopes = this.organizationProvider.findPmBuildingId(pm.getId());
 			if(scopes != null) {
-				List<PmBuildingDTO> buildings = this.organizationProvider.findPmBuildingId(pm.getId()).stream().map(r -> {
+				List<PmBuildingDTO> buildings = scopes.stream().map(r -> {
 					PmBuildingDTO dto = new PmBuildingDTO();
 					dto.setPmBuildingId(r.getId());
 					Building building = communityProvider.findBuildingById(r.getScopeId());
