@@ -2592,10 +2592,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<UnassignedBuildingDTO> listUnassignedBuilding(ListPmBuildingCommand cmd) {
 
-		List<Long> pmBuildingIds =  this.organizationProvider.findPmBuildingId(cmd.getOrgId()).stream().map(r -> {
-			Long id = r.getScopeId();
-			return id;
-		}).collect(Collectors.toList());;
+		List<OrganizationAssignedScopes> scopes = this.organizationProvider.findPmBuildingId(cmd.getOrgId());
+		List<Long> pmBuildingIds = new ArrayList<Long>();
+		if(scopes != null) {
+			pmBuildingIds =  this.organizationProvider.findPmBuildingId(cmd.getOrgId()).stream().map(r -> {
+				Long id = r.getScopeId();
+				return id;
+			}).collect(Collectors.toList());
+		}
+		
 		OrganizationCommunity community = this.organizationProvider.findOrganizationCommunityByOrgId(cmd.getOrgId());
 		
 		if(community == null) {
