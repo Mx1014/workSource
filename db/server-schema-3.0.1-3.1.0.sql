@@ -288,3 +288,17 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 3, 'zh_CN', '拒绝加入公司', '$您被拒绝加入公司“${enterpriseName}”。');
 
 SET foreign_key_checks = 1;
+
+
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4012, 4, 0, '科技', '活动/科技', 0, 2, UTC_TIMESTAMP());	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4013, 4, 0, '论坛', '活动/论坛', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4014, 4, 0, '创客', '活动/创客', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4015, 4, 0, '项目', '活动/项目', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4016, 4, 0, '联谊', '活动/联谊', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(4017, 4, 0, '沙龙', '活动/沙龙', 0, 2, UTC_TIMESTAMP());     
