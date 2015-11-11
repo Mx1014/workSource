@@ -2637,13 +2637,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
         CrossShardListingLocator locator = new CrossShardListingLocator();
         List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId());
-        
+        List<Building> unassigned = new ArrayList<Building>();
         for(Building building : buildings) {
-        	if(pmBuildingIds.contains(building.getId()))
-        		buildings.remove(building);
+        	if(!pmBuildingIds.contains(building.getId()))
+        		unassigned.add(building);
         }
         
-        List<UnassignedBuildingDTO> unassignedBuildings = buildings.stream().map(r -> {
+        List<UnassignedBuildingDTO> unassignedBuildings = unassigned.stream().map(r -> {
         	UnassignedBuildingDTO dto = new UnassignedBuildingDTO();
         	dto.setBuildingId(r.getId());
         	dto.setBuildingName(r.getName());
