@@ -539,7 +539,7 @@ public class ParkServiceImpl implements ParkService {
 		String cost = (int)(info.getRechargeAmount()*100) +"";
 		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 		String payTime = info.getRechargeTime().toString();
-//		response.setSign(sign);
+//		response.setSign("sign");
 		String validStart = timestampToStr(info.getOldValidityperiod());
 		String validEnd = timestampToStr(info.getNewValidityperiod());
 		
@@ -549,7 +549,7 @@ public class ParkServiceImpl implements ParkService {
         Service1Soap port = ss.getService1Soap12();
         LOGGER.info("refreshParkingSystem");
         
-        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "");
+        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
 		
 		ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
 		this.checkResultHolderIsNull(resultHolder,carNumber);
@@ -579,7 +579,7 @@ public class ParkServiceImpl implements ParkService {
 		Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
         Service1Soap port = ss.getService1Soap12();
         LOGGER.info("verifyRechargedPlate");
-        String json = port.getCardInfo("", cmd.getPlateNumber(), "2", "");
+        String json = port.getCardInfo("", cmd.getPlateNumber(), "2", "sign");
         
         ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
         this.checkResultHolderIsNull(resultHolder,cmd.getPlateNumber());
