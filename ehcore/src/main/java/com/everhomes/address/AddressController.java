@@ -265,6 +265,22 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
-    
+    /**
+     * <b>URL: /address/listUnassignedApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询未入驻的门牌列表</p>
+     */
+    @RequestMapping("listUnassignedApartmentsByBuildingName")
+    @RestReturn(value=ApartmentDTO.class, collection = true)
+    public RestResponse listUnassignedApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+    	List<ApartmentDTO> result = this.addressService.listUnassignedApartmentsByBuildingName(cmd);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+        
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 
 }

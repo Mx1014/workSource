@@ -13,7 +13,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
+
 import javax.annotation.PostConstruct;
+
+
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -25,7 +29,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
+
+
 
 import com.everhomes.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.bus.LocalBus;
@@ -44,6 +52,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
@@ -128,6 +138,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private EnterpriseProvider enterpriseProvider;
     
     @PostConstruct
     public void setup() {
@@ -1308,6 +1321,41 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			map.put(communityId, count);
 		}
 		return count;
+	}
+
+	@Override
+	public List<ApartmentDTO> listUnassignedApartmentsByBuildingName(
+			ListApartmentByBuildingNameCommand cmd) {
+        
+        List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, (long)pageSize);
+        
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(), 
+                cmd.getBuildingName() , offset , pageSize);
+        
+        list.stream().map((r) ->{
+        	r.setLivingStatus(AddressLivingStatus.INACTIVE.getCode());
+            Family family = this.familyProvider.findFamilyByAddressId(r.getAddressId());
+            if(family != null && family.getMemberCount() > 0){
+                r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
+                r.setFamilyId(family.getId());
+            }
+            
+            Enterprise enterprise = this.enterpriseProvider.findEnterpriseByAddressId(r.getAddressId());
+            if(enterprise != null) {
+            	r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
+            }
+            
+            if(r.getLivingStatus() == AddressLivingStatus.INACTIVE.getCode()){
+            	results.add(r);
+            }
+            return null;
+        }).collect(Collectors.toList());
+        sortApartment(results);
+        return results;
 	}
 
 

@@ -24,6 +24,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.family.Family;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
@@ -476,5 +477,29 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             });
             return true;
         });
+	}
+
+	@Override
+	public Enterprise findEnterpriseByAddressId(long addressId) {
+		final Enterprise[] result = new Enterprise[1];
+		dbProvider.mapReduce(AccessSpec.readWriteWith(EhGroups.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<Enterprise> list = context.select().from(Tables.EH_GROUPS).leftOuterJoin(Tables.EH_ENTERPRISE_ADDRESSES)
+							.on(Tables.EH_GROUPS.ID.eq(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID))
+							.where(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(addressId))
+							.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.Enterprise.getCode()))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, Enterprise.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
 	}
 }
