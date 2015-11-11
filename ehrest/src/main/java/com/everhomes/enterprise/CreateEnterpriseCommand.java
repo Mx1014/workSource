@@ -13,6 +13,7 @@ import com.everhomes.forum.AttachmentDescriptor;
  *  <li>description: 公司描述</li>
  *  <li>addressId: 公司地址门牌号id列表</li>
  *  <li>attachments: 公司的附件信息</li>
+ *  <li>communityId: 公司入驻园区id</li>
  * </ul>
  * @author janson
  *
@@ -22,6 +23,7 @@ public class CreateEnterpriseCommand {
     private java.lang.String   displayName;
     private java.lang.String   avatar;
     private java.lang.String   description;
+    private Long communityId;;
     
     @ItemType(Long.class)
     private List<Long> addressId;
@@ -29,7 +31,13 @@ public class CreateEnterpriseCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
-    public List<AttachmentDescriptor> getAttachments() {
+    public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+	public List<AttachmentDescriptor> getAttachments() {
 		return attachments;
 	}
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
