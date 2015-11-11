@@ -39,6 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.visibility.VisibleRegionType;
+import com.mysql.jdbc.StringUtils;
 
 @Component
 public class EnterpriseServiceImpl implements EnterpriseService {
@@ -454,7 +455,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             
             EnterpriseAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
-            	if(descriptor != null) {
+            	if(!StringUtils.isNullOrEmpty(descriptor.getContentUri())) {
 	                attachment = new EnterpriseAttachment();
 	                attachment.setCreatorUid(userId);
 	                attachment.setEnterpriseId(enterprise.getId());
