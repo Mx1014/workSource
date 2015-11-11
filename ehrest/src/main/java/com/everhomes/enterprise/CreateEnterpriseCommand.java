@@ -23,6 +23,7 @@ public class CreateEnterpriseCommand {
     private java.lang.String   avatar;
     private java.lang.String   description;
     
+    @ItemType(Long.class)
     private List<Long> addressId;
     
     @ItemType(AttachmentDescriptor.class)
