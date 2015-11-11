@@ -2,6 +2,7 @@ package com.everhomes.enterprise;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
@@ -47,6 +48,7 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
+import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
@@ -57,8 +59,13 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.MySheetContentsHandler;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
 public class EnterpriseContactServiceImpl implements EnterpriseContactService {
@@ -760,138 +767,177 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	private void importContacts(Long enterpriseId, MultipartFile[] files) {
-		if (files == null) {
-			LOGGER.error("files is null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "files is null");
-		}
-		String rootPath = System.getProperty("user.dir");
-		String filePath1 = rootPath + File.separator
-				+ UUID.randomUUID().toString() + ".xlsx";
-		String filePath2 = rootPath + File.separator
-				+ UUID.randomUUID().toString() + ".xlsx";
-		String jarPath = this.getJarPath();
-		String command = this.setExecCommand(jarPath, enterpriseId, filePath1,
-				filePath2);
-
-		try {
-			// 将原文件暂存在服务器中
-			this.storeFile(files[0], filePath1);
-			// 启动进程解析原文件
-			Process process = Runtime.getRuntime().exec(command);
-			int i = 1;
-			while (process.isAlive()) {
-				if (LOGGER.isDebugEnabled()) {
-					System.out.println("isAliveTime=" + i * 1000);
-					LOGGER.info("isAliveTime=" + i * 1000);
-				}
-				Thread.sleep(i * 1000);
-				i++;
-				if (i > 10)
-					break;
-			}
-			File file2 = new File(filePath2);
-			if (file2 == null || !file2.exists()) {
-				LOGGER.error("parse file failure.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"parse file failure.");
-			}
-
-			convertContactExcelFile(enterpriseId, file2);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, e.getMessage());
-		} finally {
-			File file = new File(filePath1);
-			File file2 = new File(filePath2);
-			if (file.exists())
-				file.delete();
-			if (file2.exists())
-				file2.delete();
-		}
+		convertContactExcelFile(enterpriseId, files);
 	}
 
-	private void convertContactExcelFile(Long enterpriseId, File file) {
+	private void convertContactExcelFile(Long enterpriseId,
+			MultipartFile[] files) {
 		// TODO Auto-generated method stub
-		Long  creatorId = UserContext.current().getUser().getId();
+		Long creatorId = UserContext.current().getUser().getId();
 		List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
 		Map<String, Long> groupMap = new HashMap<String, Long>();
-		initContactGroupMap(enterpriseId , groupMap);
+		initContactGroupMap(enterpriseId, groupMap);
 		try {
-			Workbook wb = WorkbookFactory.create(file);
-			Sheet sheet = wb.getSheetAt(0);
-			for (int i = sheet.getFirstRowNum() + 1; i <= sheet.getLastRowNum(); i++) {
-				Row row = sheet.getRow(i);
-				String applyGroup= row.getCell(0).getStringCellValue().trim();
-				String name =row.getCell(1).getStringCellValue().trim();
-				String sex = row.getCell(2).getStringCellValue().trim();
-				String PhoneNum = row.getCell(3).getStringCellValue().trim();
-				String building = row.getCell(4).getStringCellValue().trim();
-				String apartment=row.getCell(5).getStringCellValue().trim();
-//				TODO: Role =
-				EnterpriseContact contact = new EnterpriseContact();
-				contact.setEnterpriseId(enterpriseId);
-				contact.setApplyGroup(applyGroup);
-				contact.setName(name);
-				contact.setSex(sex);
-				contact.setCreatorUid(creatorId); 
-				contact.setCreateTime(new Timestamp(System.currentTimeMillis()));
-				//phone find user
-				User user =userService.findUserByIndentifier(PhoneNum);
-				if (null!= user )
-					contact.setUserId(user.getId());
-				//TODO: map aparment 2 user
-				Long contactId = enterpriseContactProvider.createContact(contact);
-				EnterpriseContactEntry contactEntry = new EnterpriseContactEntry();
-				contactEntry.setContactId(contactId);
-				contactEntry.setEnterpriseId(enterpriseId);
-				contactEntry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
-				contactEntry.setEntryValue(PhoneNum);
-				contactEntry.setCreatorUid(creatorId); 
-				contactEntry.setCreateTime(new Timestamp(System.currentTimeMillis()));
-				enterpriseContactProvider.createContactEntry(contactEntry);
-				//TODO:contact group
-//				EnterpriseGroupMemberStatus
-				String[] groups = applyGroup.split("\\"); 
-				for (int groupNode = 0 ; groupNode < groups.length; groupNode++){
-					StringBuffer groupPath = new StringBuffer();
-					StringBuffer groupNamePath = new StringBuffer();
-					for(int groupSubNode = 0; groupSubNode <=groupNode ;groupSubNode++){
-						groupNamePath.append(groups[groupSubNode]);
+			ArrayList resultList = new ArrayList();
+			try {
+				resultList = PropMrgOwnerHandler.processorExcel(files[0]
+						.getInputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (resultList != null && resultList.size() > 0) {
+				int row = resultList.size();
+				if (resultList != null && resultList.size() > 0) {
+					for (int rowIndex = 1; rowIndex < row; rowIndex++) {
+						RowResult result = (RowResult) resultList.get(rowIndex);
+						String applyGroup = RowResult.trimString(result.getA());
+						String name = RowResult.trimString(result.getB());
+						String sex = RowResult.trimString(result.getC());
+						String PhoneNum = RowResult.trimString(result.getD());
+						String building = RowResult.trimString(result.getE());
+						String apartment = RowResult.trimString(result.getF());
+						// 如果已有该号码在该单位的通讯录，则删除EnterpriseContactEntry
+						// EnterpriseContactGroupMember EnterpriseContact
+						// 三个表的该contact记录
+						List<EnterpriseContactEntry> oldContactEntrys = enterpriseContactProvider
+								.queryContactEntryByEnterpriseIdAndPhone(null,
+										enterpriseId, PhoneNum, null);
+						if (oldContactEntrys.size() > 1)
+							throw RuntimeErrorException
+									.errorWith(ErrorCodes.SCOPE_GENERAL,
+											ErrorCodes.ERROR_GENERAL_EXCEPTION,
+											"more than one record for a phone num !!! ");
+						if (oldContactEntrys.size() == 1) {
+							List<EnterpriseContactGroupMember> enterpriseContactGroupMembers = enterpriseContactProvider
+									.queryContactGroupMemberByEnterpriseIdAndContactId(
+											null, enterpriseId,
+											oldContactEntrys.get(0)
+													.getContactId(), null);
+							for (EnterpriseContactGroupMember ecgm : enterpriseContactGroupMembers) {
+								enterpriseContactProvider
+										.deleteContactGroupMember(ecgm);
+							}
+							enterpriseContactProvider
+									.deleteContactById(enterpriseContactProvider
+											.queryContactById(oldContactEntrys
+													.get(0).getContactId()));
+							enterpriseContactProvider
+									.deleteContactEntry(oldContactEntrys.get(0));
+						}
+						// TODO: Role =
+						EnterpriseContact contact = new EnterpriseContact();
+						contact.setEnterpriseId(enterpriseId);
+						contact.setApplyGroup(applyGroup);
+						contact.setName(name);
+						contact.setSex(sex);
+						contact.setCreatorUid(creatorId);
+						contact.setCreateTime(new Timestamp(System
+								.currentTimeMillis()));
+						// phone find user
+						User user = userService.findUserByIndentifier(PhoneNum);
+						if (null != user)
+							contact.setUserId(user.getId());
+						// TODO: map aparment 2 user
+						Long contactId = enterpriseContactProvider
+								.createContact(contact);
+						EnterpriseContactEntry contactEntry = new EnterpriseContactEntry();
+						contactEntry.setContactId(contactId);
+						contactEntry.setEnterpriseId(enterpriseId);
+						contactEntry
+								.setEntryType(EnterpriseContactEntryType.Mobile
+										.getCode());
+						contactEntry.setEntryValue(PhoneNum);
+						contactEntry.setCreatorUid(creatorId);
+						contactEntry.setCreateTime(new Timestamp(System
+								.currentTimeMillis()));
+						enterpriseContactProvider
+								.createContactEntry(contactEntry);
+						// EnterpriseGroupMemberStatus
+						if (applyGroup.contains("\\")) {
+							String[] groups = applyGroup.split("\\");
+							for (int groupNode = 0; groupNode < groups.length; groupNode++) {
+								StringBuffer groupPath = new StringBuffer();
+								StringBuffer groupNamePath = new StringBuffer();
+								for (int groupSubNode = 0; groupSubNode <= groupNode; groupSubNode++) {
+									groupNamePath.append(groups[groupSubNode]);
+								}
+								if (null == groupMap.get(groupNamePath
+										.toString())) {
+									// 如果不存在则添加新group
+									EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
+									enterpriseContactGroup
+											.setEnterpriseId(enterpriseId);
+									enterpriseContactGroup
+											.setName(groups[groupNode]);
+									if (groupNode == 0) {
+
+									} else {
+										enterpriseContactGroup
+												.setParentId(groupMap
+														.get(groups[groupNode - 1]));
+
+									}
+									enterpriseContactGroup.setPath(groupPath
+											.toString());
+									enterpriseContactGroup
+											.setCreatorUid(creatorId);
+									enterpriseContactGroup
+											.setCreateTime(new Timestamp(System
+													.currentTimeMillis()));
+									enterpriseContactProvider
+											.createContactGroup(enterpriseContactGroup);
+									groupMap.put(groupNamePath.toString(),
+											enterpriseContactGroup.getId());
+									groupPath.append(enterpriseContactGroup
+											.getId());
+									groupNamePath.append("\\");
+
+								}
+
+							}
+						} else {
+							if (null == groupMap.get(applyGroup)) {
+								// 如果不存在则添加新group
+								EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
+								enterpriseContactGroup
+										.setEnterpriseId(enterpriseId);
+								enterpriseContactGroup.setName(applyGroup);
+								enterpriseContactGroup.setPath("\\");
+								enterpriseContactGroup.setCreatorUid(creatorId);
+								enterpriseContactGroup
+										.setCreateTime(new Timestamp(System
+												.currentTimeMillis()));
+								enterpriseContactProvider
+										.createContactGroup(enterpriseContactGroup);
+								groupMap.put(applyGroup,
+										enterpriseContactGroup.getId());
+							}
+							// 添加menber表
+							EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+							enterpriseContactGroupMember
+									.setContactGroupId(groupMap.get(applyGroup));
+							enterpriseContactGroupMember
+									.setEnterpriseId(enterpriseId);
+							enterpriseContactGroupMember
+									.setContactId(contactId);
+							enterpriseContactGroupMember
+									.setCreatorUid(creatorId);
+							enterpriseContactGroupMember
+									.setCreateTime(new Timestamp(System
+											.currentTimeMillis()));
+							enterpriseContactProvider
+									.createContactGroupMember(enterpriseContactGroupMember);
+
+						}
 					}
-					if(null != groupMap.get(groupNamePath.toString())){
-						//如果不存在则添加新group
-						EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
-						enterpriseContactGroup.setEnterpriseId(enterpriseId);
-						enterpriseContactGroup.setName(groups[groupNode]);
-						if(groupNode == 0 ){
-						
-						}else{
-							enterpriseContactGroup.setParentId(groupMap.get(groups[groupNode-1]));
-							
-						} 
-						enterpriseContactGroup.setPath(groupPath.toString());
-						enterpriseContactGroup.setCreatorUid(creatorId);
-						enterpriseContactGroup.setCreateTime(new Timestamp(System.currentTimeMillis()));
-						enterpriseContactProvider.createContactGroup(enterpriseContactGroup);
-						groupMap.put(groupNamePath.toString(), enterpriseContactGroup.getId());
-						groupPath.append(enterpriseContactGroup.getId());
-						groupNamePath.append("\\");
-						
-					}
-					
+				} else {
+					LOGGER.error("excel data format is not correct.rowCount="
+							+ resultList.size());
+					throw RuntimeErrorException.errorWith(
+							ErrorCodes.SCOPE_GENERAL,
+							ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"excel data format is not correct");
 				}
-//				EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
-				EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
-				enterpriseContactGroupMember.setContactGroupId(groupMap.get(applyGroup));
-				enterpriseContactGroupMember.setEnterpriseId(enterpriseId);
-				enterpriseContactGroupMember.setContactId(contactId);
-				enterpriseContactGroupMember.setCreatorUid(creatorId);
-				enterpriseContactGroupMember.setCreateTime(new Timestamp(System.currentTimeMillis()));
-				enterpriseContactProvider.createContactGroupMember(enterpriseContactGroupMember);
-				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -900,8 +946,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	private void initContactGroupMap(Long enterpriseId,
 			Map<String, Long> groupMap) {
-		// TODO Auto-generated method stub
-		
+		List<EnterpriseContactGroup> enterpriseContactGroups = enterpriseContactProvider
+				.queryContactGroupByEnterpriseId(null, enterpriseId, 999999,
+						null);
+		for (EnterpriseContactGroup enterpriseContactGroup : enterpriseContactGroups) {
+			groupMap.put(enterpriseContactGroup.getApplyGroup(),
+					enterpriseContactGroup.getId());
+		}
+
 	}
 
 }

@@ -43,6 +43,7 @@ import com.everhomes.server.schema.tables.records.EhEnterpriseContactGroupMember
 import com.everhomes.server.schema.tables.records.EhRecommendationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.techpark.company.ContactType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -360,7 +361,30 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             return ConvertHelper.convert(r, EnterpriseContactEntry.class);
         });
     }
-    
+
+    @Override
+    public List<EnterpriseContactEntry> queryContactEntryByEnterpriseIdAndPhone(ListingLocator locator, Long enterpriseId
+            , String phoneString , ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+ 
+        SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+ 
+
+        if(null!=locator && null != locator.getAnchor() ) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
+            }
+        
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(ContactType.MOBILE.getCode()));
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(phoneString));
+        
+        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+     
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContactEntry.class);
+        });
+    }
     @Override
     public List<EnterpriseContactEntry> queryContactEntryByContactId(ListingLocator locator , Integer count,  EnterpriseContact contact) {
     	return this.queryContactEntryByEnterpriseId(locator, contact.getEnterpriseId(), count, new ListingQueryBuilderCallback() {
@@ -526,7 +550,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
  
-        if(locator.getAnchor() != null) {
+        if(null!=locator && null != locator.getAnchor() ) {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
             }
         
@@ -815,6 +839,28 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return query.fetch().map((r) -> {
             return ConvertHelper.convert(r, EnterpriseContact.class);
         });
+	}
+
+	@Override
+	public List<EnterpriseContactGroupMember> queryContactGroupMemberByEnterpriseIdAndContactId(
+			ListingLocator locator, Long enterpriseId, Long contactId,
+			ListingQueryBuilderCallback queryBuilderCallback) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+		 
+	        SelectQuery<EhEnterpriseContactGroupMembersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS);
+	        if(queryBuilderCallback != null)
+	            queryBuilderCallback.buildCondition(locator, query);
+
+	        if(null!=locator && null != locator.getAnchor() ) {
+	            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
+	            }
+	        
+	        
+	        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc());
+	        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_ID.eq(contactId));
+	        return query.fetch().map((r) -> {
+	            return ConvertHelper.convert(r, EnterpriseContactGroupMember.class);
+	        });
 	}
     
 //    @Override
