@@ -167,17 +167,21 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         if(addressIds != null && addressIds.size() > 0) {
         	List<Address> address = new ArrayList<Address>();
         	for(Long addressId :addressIds) {
-        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-                enterpriseAddr.setAddressId(addressId);
-                enterpriseAddr.setEnterpriseId(enterprise.getId());
-                enterpriseAddr.setCreatorUid(userId);
-                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
-
-                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
-                
-                Address addr = this.addressProvider.findAddressById(addressId);
-                address.add(addr);
+        		if(addressId != null) {
+	        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
+	                enterpriseAddr.setAddressId(addressId);
+	                enterpriseAddr.setEnterpriseId(enterprise.getId());
+	                enterpriseAddr.setCreatorUid(userId);
+	                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+	
+	                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
+	                
+	                Address addr = this.addressProvider.findAddressById(addressId);
+	                if(addr != null)
+	                	address.add(addr);
+        		}
         	}
         	enterprise.setAddress(address);
         }
@@ -450,24 +454,27 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             
             EnterpriseAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
-                attachment = new EnterpriseAttachment();
-                attachment.setCreatorUid(userId);
-                attachment.setEnterpriseId(enterprise.getId());
-                attachment.setContentType(descriptor.getContentType());
-                attachment.setContentUri(descriptor.getContentUri());
-                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                
-                // Make sure we can save as many attachments as possible even if any of them failed
-                try {
-                    this.enterpriseProvider.createEnterpriseAttachment(attachment);
-                    results.add(attachment);
-                } catch(Exception e) {
-                    LOGGER.error("Failed to save the attachment, userId=" + userId 
-                        + ", attachment=" + attachment, e);
-                }
+            	if(descriptor != null) {
+	                attachment = new EnterpriseAttachment();
+	                attachment.setCreatorUid(userId);
+	                attachment.setEnterpriseId(enterprise.getId());
+	                attachment.setContentType(descriptor.getContentType());
+	                attachment.setContentUri(descriptor.getContentUri());
+	                attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                
+	                // Make sure we can save as many attachments as possible even if any of them failed
+	                try {
+	                    this.enterpriseProvider.createEnterpriseAttachment(attachment);
+	                    results.add(attachment);
+	                } catch(Exception e) {
+	                    LOGGER.error("Failed to save the attachment, userId=" + userId 
+	                        + ", attachment=" + attachment, e);
+	                }
+            	}
             }
             
             enterprise.setAttachments(results);
+            
             
         }
     }
