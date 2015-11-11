@@ -161,6 +161,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setName(cmd.getName());
         this.enterpriseProvider.createEnterprise(enterprise);
         
+        requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
+        
         List<Long> addressIds = cmd.getAddressId();
         if(addressIds != null && addressIds.size() > 0) {
         	List<Address> address = new ArrayList<Address>();
