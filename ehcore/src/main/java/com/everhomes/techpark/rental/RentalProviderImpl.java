@@ -833,8 +833,8 @@ public class RentalProviderImpl implements RentalProvider {
 
 		Condition condition = Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID
 				.equal(id);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
-				.ne(SiteBillStatus.FAIL.getCode()));
+//		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+//				.ne(SiteBillStatus.FAIL.getCode()));
 		step.where(condition);
 		List<EhRentalSitesBillsRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTAL_SITES_BILLS.ID.desc()).fetch()

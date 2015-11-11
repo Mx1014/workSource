@@ -54,7 +54,7 @@ public class EnterpriseContactController extends ControllerBase {
      * <p>企业导入通讯录</p>
      * @return {@link EnterpriseContactDTO}
      */
-    @RequestMapping("importContactsCommand")
+    @RequestMapping("importContacts")
     @RestReturn(value=EnterpriseContactDTO.class)
     public RestResponse importContacts(@Valid importContactsCommand cmd ,@RequestParam(value = "attachment") MultipartFile[] files) {
     	this.enterpriseContactService.importContacts(cmd,files);

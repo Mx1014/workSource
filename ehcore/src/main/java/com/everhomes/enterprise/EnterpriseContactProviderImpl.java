@@ -60,7 +60,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     
     // TODO for cache. member of eh_groups partition
     @Override
-    public void createContact(EnterpriseContact contact) {
+    public Long createContact(EnterpriseContact contact) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseContacts.class));
         //long id = this.shardingProvider.allocShardableContentId(EhGroups.class).second();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, contact.getEnterpriseId()));
@@ -73,6 +73,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         contact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
         dao.insert(contact);
+        return id;
     }
     
     @Override
