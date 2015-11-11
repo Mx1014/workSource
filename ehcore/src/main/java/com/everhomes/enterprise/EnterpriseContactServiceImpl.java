@@ -330,12 +330,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		sendMessageForContactApproved(null, contact);
 	}
 
-//	@Override
-//	public void approveByContactId(Long contactId) {
-//		EnterpriseContact contact = this.enterpriseContactProvider
-//				.getContactById(contactId);
-//		this.approveContact(contact);
-//	}
+	// @Override
+	// public void approveByContactId(Long contactId) {
+	// EnterpriseContact contact = this.enterpriseContactProvider
+	// .getContactById(contactId);
+	// this.approveContact(contact);
+	// }
 
 	/**
 	 * 将contact加入组
@@ -692,9 +692,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		EnterpriseContact contact = this.enterpriseContactProvider
 				.queryContactById(cmd.getContactId());
-		//contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
-		//this.enterpriseContactProvider.updateContact(contact);
-	    //this.approveByContactId(cmd.getContactId());
+		// contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
+		// this.enterpriseContactProvider.updateContact(contact);
+		// this.approveByContactId(cmd.getContactId());
 		this.approveContact(contact);
 	}
 
@@ -830,6 +830,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						contact.setName(name);
 						contact.setSex(sex);
 						contact.setCreatorUid(creatorId);
+						contact.setStatus(EnterpriseContactStatus.AUTHENTICATED
+								.getCode());
 						contact.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
 						// phone find user
@@ -853,11 +855,15 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 								.createContactEntry(contactEntry);
 						// EnterpriseGroupMemberStatus
 						if (applyGroup.contains("\\")) {
-							String[] groups = applyGroup.split("\\");
+							String[] groups = applyGroup.split("\\\\");
+							StringBuffer groupPath = new StringBuffer();
+							groupPath.append("\\");
 							for (int groupNode = 0; groupNode < groups.length; groupNode++) {
-								StringBuffer groupPath = new StringBuffer();
+								
 								StringBuffer groupNamePath = new StringBuffer();
 								for (int groupSubNode = 0; groupSubNode <= groupNode; groupSubNode++) {
+									if(groupSubNode>0)
+										groupNamePath.append("\\");
 									groupNamePath.append(groups[groupSubNode]);
 								}
 								if (null == groupMap.get(groupNamePath
@@ -878,6 +884,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 									}
 									enterpriseContactGroup.setPath(groupPath
 											.toString());
+									enterpriseContactGroup.setApplyGroup(groupNamePath.toString());
 									enterpriseContactGroup
 											.setCreatorUid(creatorId);
 									enterpriseContactGroup
@@ -888,8 +895,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 									groupMap.put(groupNamePath.toString(),
 											enterpriseContactGroup.getId());
 									groupPath.append(enterpriseContactGroup
-											.getId());
-									groupNamePath.append("\\");
+											.getId()); 
+									groupPath.append("\\");
 
 								}
 
@@ -901,43 +908,41 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 								enterpriseContactGroup
 										.setEnterpriseId(enterpriseId);
 								enterpriseContactGroup.setName(applyGroup);
+								enterpriseContactGroup.setApplyGroup(applyGroup);
 								enterpriseContactGroup.setPath("\\");
 								enterpriseContactGroup.setCreatorUid(creatorId);
-								enterpriseContactGroup
-										.setCreateTime(new Timestamp(System
+								enterpriseContactGroup.setCreateTime(new Timestamp(System
 												.currentTimeMillis()));
 								enterpriseContactProvider
 										.createContactGroup(enterpriseContactGroup);
 								groupMap.put(applyGroup,
 										enterpriseContactGroup.getId());
 							}
-							// 添加menber表
-							EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
-							enterpriseContactGroupMember
-									.setContactGroupId(groupMap.get(applyGroup));
-							enterpriseContactGroupMember
-									.setEnterpriseId(enterpriseId);
-							enterpriseContactGroupMember
-									.setContactId(contactId);
-							enterpriseContactGroupMember
-									.setCreatorUid(creatorId);
-							enterpriseContactGroupMember
-									.setCreateTime(new Timestamp(System
-											.currentTimeMillis()));
-							enterpriseContactProvider
-									.createContactGroupMember(enterpriseContactGroupMember);
-
 						}
+						// 添加menber表
+						EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+						enterpriseContactGroupMember.setContactGroupId(groupMap
+								.get(applyGroup));
+						enterpriseContactGroupMember
+								.setEnterpriseId(enterpriseId);
+						enterpriseContactGroupMember.setContactId(contactId);
+						enterpriseContactGroupMember.setCreatorUid(creatorId);
+						enterpriseContactGroupMember
+								.setCreateTime(new Timestamp(System
+										.currentTimeMillis()));
+						enterpriseContactProvider
+								.createContactGroupMember(enterpriseContactGroupMember);
+
 					}
-				} else {
-					LOGGER.error("excel data format is not correct.rowCount="
-							+ resultList.size());
-					throw RuntimeErrorException.errorWith(
-							ErrorCodes.SCOPE_GENERAL,
-							ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"excel data format is not correct");
 				}
+			} else {
+				LOGGER.error("excel data format is not correct.rowCount="
+						+ resultList.size());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+						ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"excel data format is not correct");
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
