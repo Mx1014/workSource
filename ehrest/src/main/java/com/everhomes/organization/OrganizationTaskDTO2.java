@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>task对象参数说明，参考 {@link com.everhomes.organization.OrganizationTaskDTO}，其中，task的id为taskId，task的创建用户为taskCreatorUid，创建时间为taskCreateTime</li>
  * 	<li>PostDTO对象参数说明，参考 {@link com.everhomes.forum.PostDTO}</li>
+ *  <li>assignStatus: 0-未分配; 1-已分配</li>
  * </ul>
  *
  */
@@ -31,6 +32,7 @@ public class OrganizationTaskDTO2 {
 	private java.sql.Timestamp operateTime;
 	private java.lang.Long     taskCreatorUid;
 	private java.sql.Timestamp taskCreateTime;
+	private int assignStatus;
 	
 	private java.sql.Timestamp unprocessedTime;
 	private java.sql.Timestamp processingTime;
@@ -114,6 +116,14 @@ public class OrganizationTaskDTO2 {
 	private String shareUrl;
 
 	private Byte privateFlag;
+
+	public int getAssignStatus() {
+		return assignStatus;
+	}
+
+	public void setAssignStatus(int assignStatus) {
+		this.assignStatus = assignStatus;
+	}
 
 	public java.lang.Long getTaskId() {
 		return taskId;

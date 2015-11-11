@@ -1384,6 +1384,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		taskDto.setUnprocessedTime(task.getUnprocessedTime());
 		taskDto.setProcessingTime(task.getProcessingTime());
 		taskDto.setProcessedTime(task.getProcessedTime());
+		
+		List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(task.getOperatorUid());
+		
+		if(member != null && member.size() > 0){
+			String orgGroup = member.get(0).getMemberGroup();
+			if(OrganizationGroup.MANAGER.getCode().equals(orgGroup) || 
+					orgGroup == OrganizationGroup.MANAGER.getCode()){
+				taskDto.setAssignStatus(0);
+			}
+			
+			else {
+				taskDto.setAssignStatus(1);
+			}
+		}
 	}
 
 	private void checkOrganizationIdIsNull(Long organizationId) {
@@ -1410,20 +1424,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		dbProvider.execute((status) -> {
 //			///////////////////////////////////////////////////
-//			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
-//			
-//			if(member != null && member.size() > 0){
-//				String orgGroup = member.get(0).getMemberGroup();
-//				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
-//						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
-//					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
-//				}
-//				
-//				else {
-//					task.setTaskStatus(OrganizationTaskStatus.WAITING.getCode());
-//				}
-//			}
-			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
+			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
+			
+			if(member != null && member.size() > 0){
+				String orgGroup = member.get(0).getMemberGroup();
+				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
+						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
+					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+				}
+				
+				else {
+					task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
+				}
+			}
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(desOrgMember.getTargetId());;
 			task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
