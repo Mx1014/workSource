@@ -22,7 +22,7 @@ CREATE TABLE `eh_enterprise_addresses` (
     `process_details` TEXT,
     `proof_resource_uri` VARCHAR(1024),
     `approve_time` DATETIME COMMENT 'redundant auditing info',
-    `update_time` DATETIME NOT NULL,
+    `update_time` DATETIME,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -307,8 +307,6 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
 		this.enterpriseContactProvider.updateContact(contact);
 
-		// TODO create group member for this user???
-
 		// Set group for this contact
 		String applyGroup = contact.getApplyGroup();
 		if (applyGroup != null && !applyGroup.isEmpty()) {
@@ -325,12 +323,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		sendMessageForContactApproved(null, contact);
 	}
 
-	@Override
-	public void approveByContactId(Long contactId) {
-		EnterpriseContact contact = this.enterpriseContactProvider
-				.getContactById(contactId);
-		this.approveContact(contact);
-	}
+//	@Override
+//	public void approveByContactId(Long contactId) {
+//		EnterpriseContact contact = this.enterpriseContactProvider
+//				.getContactById(contactId);
+//		this.approveContact(contact);
+//	}
 
 	/**
 	 * 将contact加入组
@@ -687,9 +685,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		EnterpriseContact contact = this.enterpriseContactProvider
 				.queryContactById(cmd.getContactId());
-		contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
-		this.enterpriseContactProvider.updateContact(contact);
-
+		//contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
+		//this.enterpriseContactProvider.updateContact(contact);
+	    //this.approveByContactId(cmd.getContactId());
+		this.approveContact(contact);
 	}
 
 	@Override
