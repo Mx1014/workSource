@@ -1177,7 +1177,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	private void initContactGroupMap(Long enterpriseId,
 			Map<String, Long> groupMap) {
 		List<EnterpriseContactGroup> enterpriseContactGroups = enterpriseContactProvider
-				.queryContactGroupByEnterpriseId(null, enterpriseId, 999999, null);
+				.queryContactGroupByEnterpriseId(null, enterpriseId, Integer.MAX_VALUE, null);
 		for (EnterpriseContactGroup enterpriseContactGroup : enterpriseContactGroups) {
 			groupMap.put(enterpriseContactGroup.getApplyGroup(),
 					enterpriseContactGroup.getId());
@@ -1275,8 +1275,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	@Override
-	public void deleteContactGroupById(DeleteContactGroupByIdCommand cmd) {
-		// TODO Auto-generated method stub
+	public void deleteContactGroupById(DeleteContactGroupByIdCommand cmd) { 
 		List<EnterpriseContactGroup> results = this.enterpriseContactProvider.queryContactGroupByPath(cmd.getEnterpriseId(),cmd.getGroupId());
 		if(null != results && results.size() >= 1){
 			throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_GROUP_HAS_CHILD, 
@@ -1287,5 +1286,72 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			this.enterpriseContactProvider.deleteContactGroup(group);
 			
 		}
+	}
+
+	@Override
+	public void addContact(AddContactCommand cmd) { 
+		List<EnterpriseContactEntry> oldContactEntrys = enterpriseContactProvider
+				.queryContactEntryByEnterpriseIdAndPhone(null,
+						cmd.getEnterpriseId(), cmd.getPhone(), null);
+		if (oldContactEntrys.size() >= 1)
+			throw RuntimeErrorException
+					.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_PHONENUM_USED,
+							"already used this phone num !!! ");
+		EnterpriseContactGroup contactGroup= this.enterpriseContactProvider.getContactGroupById(cmd.getGroupId());
+		EnterpriseContact contact = new EnterpriseContact();
+		contact.setEnterpriseId(cmd.getEnterpriseId());
+		if(null!=cmd.getEmployeeNo())
+			contact.setEmployeeNo(cmd.getEmployeeNo());
+		contact.setApplyGroup(contactGroup.getApplyGroup());
+		contact.setName(cmd.getName());
+		if(null!=cmd.getSex())
+			contact.setSex(cmd.getSex());
+		contact.setCreatorUid(UserContext.current().getUser().getId());
+		contact.setStatus(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
+		contact.setCreateTime(new Timestamp(System
+				.currentTimeMillis()));
+		// phone find user
+		User user = userService.findUserByIndentifier(cmd.getPhone());
+		if (null != user){
+			contact.setUserId(user.getId());
+			
+			Group group = groupProvider.findGroupById(cmd.getEnterpriseId());
+			UserGroup uGroup =new UserGroup();
+			uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+			uGroup.setOwnerUid(user.getId());
+			uGroup.setGroupId(group.getId());
+			uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+			uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+			uGroup.setRegionScopeId(group.getVisibleRegionId());
+			userProvider.createUserGroup(uGroup);
+		}
+		// TODO: map aparment 2 user
+		Long contactId = enterpriseContactProvider
+				.createContact(contact);
+		EnterpriseContactEntry contactEntry = new EnterpriseContactEntry();
+		contactEntry.setContactId(contactId);
+		contactEntry.setEnterpriseId(cmd.getEnterpriseId());
+		contactEntry
+				.setEntryType(EnterpriseContactEntryType.Mobile
+						.getCode());
+		contactEntry.setEntryValue(cmd.getPhone());
+		contactEntry.setCreatorUid(UserContext.current().getUser().getId());
+		contactEntry.setCreateTime(new Timestamp(System
+				.currentTimeMillis()));
+		enterpriseContactProvider
+				.createContactEntry(contactEntry);
+		 
+		// 添加menber表
+		EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+		enterpriseContactGroupMember.setContactGroupId(cmd.getGroupId());
+		enterpriseContactGroupMember
+				.setEnterpriseId(cmd.getEnterpriseId());
+		enterpriseContactGroupMember.setContactId(contactId);
+		enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
+		enterpriseContactGroupMember
+				.setCreateTime(new Timestamp(System
+						.currentTimeMillis()));
+		enterpriseContactProvider
+				.createContactGroupMember(enterpriseContactGroupMember);
 	}
 }

@@ -52,7 +52,7 @@ public class EnterpriseContactController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /contact/importContactsCommand</b>
+     * <b>URL: /contact/importContacts</b>
      * <p>企业导入通讯录</p>
      * @return {@link EnterpriseContactDTO}
      */
@@ -60,6 +60,20 @@ public class EnterpriseContactController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse importContacts(@Valid importContactsCommand cmd ,@RequestParam(value = "attachment") MultipartFile[] files) {
     	this.enterpriseContactService.importContacts(cmd,files);
+    	RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    /**
+     * <b>URL: /contact/addContact</b>
+     * <p>企业导入通讯录</p>
+     * @return {@link EnterpriseContactDTO}
+     */
+    @RequestMapping("addContact")
+    @RestReturn(value=String.class)
+    public RestResponse addContact(@Valid AddContactCommand cmd ) {
+    	this.enterpriseContactService.addContact(cmd);
     	RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
