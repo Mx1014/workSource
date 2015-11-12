@@ -487,7 +487,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 					List<Enterprise> list = context.select().from(Tables.EH_GROUPS).leftOuterJoin(Tables.EH_ENTERPRISE_ADDRESSES)
 							.on(Tables.EH_GROUPS.ID.eq(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID))
 							.where(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(addressId))
-							.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.Enterprise.getCode()))
+							.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.ENTERPRISE.getCode()))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, Enterprise.class);
 							});

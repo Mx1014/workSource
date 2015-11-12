@@ -1098,20 +1098,22 @@ public class RentalServiceImpl implements RentalService {
 					bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
 					bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
 				}
-				if (bill.getPayTotalMoney().equals(0.0)) {
-					// 总金额为0，直接预订成功状态
-					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-				} else if (bill.getReserveMoney().equals(0.0)
-						&& bill.getStatus().equals(
-								SiteBillStatus.LOCKED.getCode())) {
-					// 预付金额为0，且状态为locked，直接进入支付定金成功状态
-					bill.setStatus(SiteBillStatus.RESERVED.getCode());
-
-				}
-				rentalProvider.updateRentalBill(bill);
+			
 
 			}
 		}
+		if (bill.getPayTotalMoney().equals(0.0)) {
+			// 总金额为0，直接预订成功状态
+			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+		} else if (bill.getReserveMoney().equals(0.0)
+				&& bill.getStatus().equals(
+						SiteBillStatus.LOCKED.getCode())) {
+			// 预付金额为0，且状态为locked，直接进入支付定金成功状态
+			bill.setStatus(SiteBillStatus.RESERVED.getCode());
+
+		}
+		rentalProvider.updateRentalBill(bill);
+		
 		switch(cmd.getSiteType()){
 		case("MEETINGROOM"): 
 			response.setName("会议室预定订单");

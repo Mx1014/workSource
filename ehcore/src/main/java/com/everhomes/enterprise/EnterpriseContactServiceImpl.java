@@ -38,6 +38,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.group.GroupVisibilityScope;
@@ -54,6 +55,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
@@ -332,6 +334,17 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			}
 
 		}
+		//add UserGroup 
+		Group group = groupProvider.findGroupById(contact.getEnterpriseId());
+		UserGroup uGroup =new UserGroup();
+		uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+		uGroup.setOwnerUid(contact.getUserId());
+		uGroup.setGroupId(contact.getEnterpriseId());
+		uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+		uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+		uGroup.setRegionScopeId(group.getVisibleRegionId());
+		userProvider.createUserGroup(uGroup);
+		
 
 		// sendMessageForContactApproved(contact);
 		sendMessageForContactApproved(null, contact);
@@ -750,6 +763,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		EnterpriseContact contact = this.enterpriseContactProvider
 				.queryContactById(cmd.getContactId());
+		
 		// contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
 		// this.enterpriseContactProvider.updateContact(contact);
 		// this.approveByContactId(cmd.getContactId());
@@ -894,8 +908,19 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 								.currentTimeMillis()));
 						// phone find user
 						User user = userService.findUserByIndentifier(PhoneNum);
-						if (null != user)
+						if (null != user){
 							contact.setUserId(user.getId());
+							
+							Group group = groupProvider.findGroupById(enterpriseId);
+							UserGroup uGroup =new UserGroup();
+							uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+							uGroup.setOwnerUid(user.getId());
+							uGroup.setGroupId(enterpriseId);
+							uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+							uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+							uGroup.setRegionScopeId(group.getVisibleRegionId());
+							userProvider.createUserGroup(uGroup);
+						}
 						// TODO: map aparment 2 user
 						Long contactId = enterpriseContactProvider
 								.createContact(contact);

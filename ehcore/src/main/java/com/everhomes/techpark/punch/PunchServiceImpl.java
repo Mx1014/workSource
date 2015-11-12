@@ -84,6 +84,7 @@ public class PunchServiceImpl implements PunchService {
 		pyl.setPunchLogsMonthList(new ArrayList<PunchLogsMonthList>()); 
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance();
+		LOGGER.debug("*****************debug : begin getlistPunchLogs line 87");
 		try {
 			// 从年初开始，如果是查询今年，到今天截止，如果不是查询今年，则到该年年末
 			// 如果要修改，只需要修改范围即可
@@ -163,7 +164,7 @@ public class PunchServiceImpl implements PunchService {
 			Long companyId, Calendar logDay) throws ParseException { 
 		PunchLogsDayList pdl = new PunchLogsDayList();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH))); 
-
+//		Long beginFunctionTimeLong =  DateHelper.currentGMTTime().getTime();
 		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
 				companyId, dateSF.format(logDay.getTime()));
 		if (null == punchDayLog) {
@@ -174,6 +175,7 @@ public class PunchServiceImpl implements PunchService {
 				return null ;
 			}
 		} 
+//		Long endrefreshPunchDayLogTimeLong =  DateHelper.currentGMTTime().getTime();
 		Date now = new Date();
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		if (!isWorkDay(logDay.getTime())
@@ -191,6 +193,9 @@ public class PunchServiceImpl implements PunchService {
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 			}  
 		}
+//		Long endFunctionTimeLong =  DateHelper.currentGMTTime().getTime();
+//		LOGGER.debug("************* "+dateSF.format(logDay.getTime())+"refreshPunchDayLog time : ["+(endrefreshPunchDayLogTimeLong-beginFunctionTimeLong)
+//				+"]  makePunchLogsDayStatus time : ["+(endFunctionTimeLong-beginFunctionTimeLong) +"] "); 
 		return pdl;
 	}
 
