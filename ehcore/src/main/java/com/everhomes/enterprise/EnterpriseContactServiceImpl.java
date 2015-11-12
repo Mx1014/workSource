@@ -1354,4 +1354,25 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		enterpriseContactProvider
 				.createContactGroupMember(enterpriseContactGroupMember);
 	}
+
+	@Override
+	public void deleteContactById(DeleteContactByIdCommand cmd) {
+		// TODO Auto-generated method stub
+		EnterpriseContact contact = this.enterpriseContactProvider.getContactById(cmd.getContactId());
+		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(cmd.getEnterpriseId(), cmd.getContactId());
+		List<EnterpriseContactEntry> contactEntrys = this.enterpriseContactProvider.queryContactEntryByContactId(contact);
+		
+		UserGroup uGroup= this.userProvider.findUserGroupByOwnerAndGroup(contact.getUserId(), cmd.getEnterpriseId());
+		if (null != uGroup)
+				this.userProvider.deleteUserGroup(uGroup);
+		if(null !=contactEntrys &&contactEntrys.size()>0){
+			for(EnterpriseContactEntry entry : contactEntrys){
+				this.enterpriseContactProvider.deleteContactEntry(entry);
+			}
+		}
+		if (null!= enterpriseContactGroupMember)
+			this.enterpriseContactProvider.deleteContactGroupMember(enterpriseContactGroupMember);
+		
+		this.enterpriseContactProvider.deleteContactById(contact);
+	}
 }
