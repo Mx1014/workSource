@@ -129,7 +129,7 @@ public class ParkServiceImpl implements ParkService {
 		ParkCharge parkCharge = new ParkCharge();
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setCommunityId(233L);
+		parkCharge.setCommunityId(cmd.getEnterpriseCommunityId());
 		
 		parkProvider.addCharge(parkCharge);
 		
@@ -145,7 +145,7 @@ public class ParkServiceImpl implements ParkService {
 		parkCharge.setId(cmd.getId());
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setCommunityId(233L);
+		parkCharge.setCommunityId(cmd.getEnterpriseCommunityId());
 		
 		parkProvider.deleteCharge(parkCharge);
 	}
@@ -161,7 +161,7 @@ public class ParkServiceImpl implements ParkService {
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
         
 		ParkResponseList response = new ParkResponseList();
-		List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(233L, offset, pageSize);
+		List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getEnterpriseCommunityId(), offset, pageSize);
 		
 		if(parkCharge != null && parkCharge.size() == pageSize){
 			response.setNextPageOffset(pageOffset + 1);
@@ -206,7 +206,7 @@ public class ParkServiceImpl implements ParkService {
 		order.setBillId(bill);
 		order.setPaymentStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setRechargeStatus(RechargeStatus.HANDING.getCode());
-		order.setCommunityId(233L);
+		order.setCommunityId(cmd.getEnterpriseCommunityId());
 		order.setOldValidityperiod(addDays(cmd.getValidityPeriod(), 1));
 		order.setNewValidityperiod(addMonth(cmd.getValidityPeriod(), cmd.getMonths()));;
 		
@@ -288,7 +288,7 @@ public class ParkServiceImpl implements ParkService {
 		locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
-		List<RechargeInfo> recordInfo = parkProvider.listRechargeRecord(233L, user.getId(), locator, pageSize + 1);
+		List<RechargeInfo> recordInfo = parkProvider.listRechargeRecord(cmd.getEnterpriseCommunityId(), user.getId(), locator, pageSize + 1);
 		List<RechargeRecordDTO> rechargeRecord = new ArrayList<RechargeRecordDTO>();
 		
 		recordInfo.forEach(record -> {
@@ -403,7 +403,7 @@ public class ParkServiceImpl implements ParkService {
 		locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
-		List<RechargeInfo> recordInfo = parkProvider.searchRechargeRecord(233L, cmd.getOwnerName(), cmd.getRechargePhone(), cmd.getPlateNumber(), locator, pageSize + 1);
+		List<RechargeInfo> recordInfo = parkProvider.searchRechargeRecord(cmd.getEnterpriseCommunityId(), cmd.getOwnerName(), cmd.getRechargePhone(), cmd.getPlateNumber(), locator, pageSize + 1);
 		List<RechargeRecordDTO> rechargeRecord = new ArrayList<RechargeRecordDTO>();
 		
 		recordInfo.forEach(record -> {

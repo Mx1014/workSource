@@ -1,11 +1,21 @@
 package com.everhomes.techpark.park;
 
 public class RechargeRecordListCommand {
+	
+	private Long enterpriseCommunityId;
 
 	private Long pageAnchor;
 	
 	private Integer pageSize;
 	
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
+	}
+
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
