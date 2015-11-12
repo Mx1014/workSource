@@ -99,6 +99,7 @@ import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProfile;
@@ -919,6 +920,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		User user  = UserContext.current().getUser();
 		String organizationId = String.valueOf(cmd.getOrganizationId());
 		userActivityProvider.updateUserProfile(user.getId(), "currentOrganizationName", organizationId);
+        
+        String key = UserCurrentEntityType.ORGANIZATION.getUserProfileKey();
+        long timestemp = DateHelper.currentGMTTime().getTime();
+        userActivityProvider.updateUserCurrentEntityProfile(user.getId(), key, cmd.getOrganizationId(), timestemp);
 	}
 
 	@Override
@@ -926,7 +931,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		User user  = UserContext.current().getUser();
 
 		OrganizationDTO dto = new OrganizationDTO();
-		UserProfile userProfile = this.getUserProfileByUidAndItemName(user.getId(),"currentOrganizationName");
+		//UserProfile userProfile = this.getUserProfileByUidAndItemName(user.getId(),"currentOrganizationName");
+
+        String key = UserCurrentEntityType.ORGANIZATION.getUserProfileKey();
+        UserProfile userProfile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), key);
 
 		if(userProfile != null){
 			Long organizationId = Long.parseLong((userProfile.getItemValue()));
@@ -2743,4 +2751,49 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return response;
 	}
 
+	@Override
+	public void processPartnerOrganizationUser(Long userId, Long partnerId) {
+	    if(userId == null || userId <= 0) {
+	        LOGGER.info("User id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+	        return;
+	    }
+	    User user = userProvider.findUserById(userId);
+	    if(user == null) {
+            LOGGER.error("User not found, userId=" + userId + ", partnerId=" + partnerId);
+            return;
+        }
+	    
+	    if(partnerId == null || partnerId <= 0) {
+            LOGGER.info("Partner id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+            return;
+	    }
+        Organization organization = organizationProvider.findOrganizationById(partnerId);
+        if(organization == null) {
+            LOGGER.error("Organization not found, userId=" + userId + ", partnerId=" + partnerId);
+            return;
+        }
+        
+	    try {
+	        OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
+            if(type == OrganizationType.PARTNER) {
+                OrganizationMember member = new OrganizationMember();
+
+                member.setContactName(user.getNickName());
+                member.setOrganizationId(partnerId);
+                member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                member.setTargetId(user.getId());
+                member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+
+                UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
+                if(identifier != null){
+                    member.setContactToken(identifier.getIdentifierToken());
+                    member.setContactType(identifier.getIdentifierType());
+                }
+            } else {
+                LOGGER.error("Organization is not partner type, userId=" + userId + ", partnerId=" + partnerId + ", organizationType=" + type);
+            }
+	    } catch(Exception e) {
+	        LOGGER.error("Failed to process partner organization user, userId=" + userId + ", partnerId=" + partnerId, e);
+	    }
+	}
 }

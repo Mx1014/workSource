@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.Null;
-
 import org.apache.lucene.spatial.DistanceUtils;
-import org.hibernate.dialect.Ingres10Dialect;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -34,7 +31,6 @@ import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressServiceErrorCode;
 import com.everhomes.app.AppConstants;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -55,7 +51,6 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.launchpad.LaunchPadItemDTO;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -82,25 +77,21 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceErrorCode;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-
-import freemarker.core.ReturnInstruction.Return;
-
-
 
 /**
  * Family inherits from Group for family member management. GroupDiscriminator.FAMILY
@@ -120,8 +111,10 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private GroupProvider groupProvider;
+    
     @Autowired
     private FamilyProvider familyProvider;
+    
     @Autowired
     private UserProvider userProvider;
     
@@ -154,8 +147,12 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private UserPointService userPointService;
+    
     @Autowired
     private RecommendationService recommendationService;
+    
+    @Autowired 
+    private UserActivityProvider userActivityProvider;
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -1017,6 +1014,13 @@ public class FamilyServiceImpl implements FamilyService {
                 u.setAddressId(address.getId());
                 u.setAddress(address.getAddress());
                 u.setCommunityId(address.getCommunityId());
+                
+                String key = UserCurrentEntityType.COMMUNITY.getUserProfileKey();
+                long timestemp = DateHelper.currentGMTTime().getTime();
+                userActivityProvider.updateUserCurrentEntityProfile(userId, key, address.getCommunityId(), timestemp);
+                
+                key = UserCurrentEntityType.FAMILY.getUserProfileKey();
+                userActivityProvider.updateUserCurrentEntityProfile(userId, key, familyId, timestemp);
             }
         }
         else {

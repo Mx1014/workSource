@@ -74,6 +74,8 @@ public class UserInfo {
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
+    @ItemType(UserCurrentEntity.class)
+    private List<UserCurrentEntity> entityList;
 
     public UserInfo() {
     }
@@ -284,6 +286,14 @@ public class UserInfo {
 
     public void setFeedbackForumId(Long feedbackForumId) {
         this.feedbackForumId = feedbackForumId;
+    }
+
+    public List<UserCurrentEntity> getEntityList() {
+        return entityList;
+    }
+
+    public void setEntityList(List<UserCurrentEntity> entityList) {
+        this.entityList = entityList;
     }
 
     @Override

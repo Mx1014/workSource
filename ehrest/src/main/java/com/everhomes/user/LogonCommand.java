@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *<li>password:密码</li>
  *<li>deviceIdentifier:设备标识</li>
  *<li>namespaceId:名字空间，目前默认为0</li>
+ *<li>partnerId: 园区合作商</li>
  *</ul>
  */
 public class LogonCommand {
@@ -24,6 +25,8 @@ public class LogonCommand {
     private String deviceIdentifier;
     
     private Integer namespaceId;
+    
+    private Long partnerId;
     
     public LogonCommand() {
     }
@@ -59,6 +62,14 @@ public class LogonCommand {
     
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getPartnerId() {
+        return partnerId;
+    }
+
+    public void setPartnerId(Long partnerId) {
+        this.partnerId = partnerId;
     }
 
     @Override
