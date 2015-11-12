@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -68,7 +69,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         contact.setId(id);
         //Default approving state
         if(contact.getStatus() == null) {
-            contact.setStatus(EnterpriseContactStatus.WAITING_AUTH.getCode());    
+            contact.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());    
         }
         
         contact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -125,7 +126,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.INACTIVE.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
                 return query;
             }
             
@@ -164,7 +165,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.AUTHENTICATED.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
                 return query;
             }
             
@@ -791,7 +792,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	            @Override
 	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 	                    SelectQuery<? extends Record> query) {
-	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.AUTHENTICATED.getCode()));
+	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.ACTIVE.getCode()));
 	                return query;
 	            }
 	            
@@ -809,7 +810,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 	                    SelectQuery<? extends Record> query) {
 	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.eq(contactId)); 
-	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(EnterpriseContactStatus.INACTIVE.getCode()));
+	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
 	                return query;
 	            }
 	            

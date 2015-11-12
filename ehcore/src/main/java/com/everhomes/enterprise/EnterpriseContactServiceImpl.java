@@ -171,8 +171,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				contact.setUserId(user.getId());
 
 				// auto approved
-				contact.setStatus(EnterpriseContactStatus.AUTHENTICATED
-						.getCode());
+				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
 				this.enterpriseContactProvider.createContact(contact);
 
 				// create a entry for it, but not for all user identifier
@@ -188,8 +187,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			} else {
 				// auto approved
 				contact.setUserId(user.getId());
-				contact.setStatus(EnterpriseContactStatus.AUTHENTICATED
-						.getCode());
+				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
 				this.enterpriseContactProvider.createContact(contact);
 				sendMessageForContactApproved(ctx, contact);
 			}
@@ -212,7 +210,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	@Override
 	public void rejectUserFromContact(EnterpriseContact contact) {
 		// 设置为删除
-		contact.setStatus(EnterpriseContactStatus.INACTIVE.getCode());
+		contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
 		this.enterpriseContactProvider.updateContact(contact);
 
 		// 发消息
@@ -256,8 +254,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					contact.setUserId(userId);
 
 					// Create it
-					contact.setStatus(EnterpriseContactStatus.WAITING_AUTH
-							.getCode());
+					contact.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 					this.enterpriseContactProvider.createContact(contact);
 
 					UserIdentifier identifier = userProvider
@@ -312,23 +309,20 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	 */
 	@Override
 	public void approveContact(EnterpriseContact contact) {
-		// assert contact is from db and status is approve
-
-		// TODO generate a error code
-		if (contact.getStatus().equals(
-				EnterpriseContactStatus.AUTHENTICATED.getCode())) {
+		if (contact.getStatus().equals(GroupMemberStatus.ACTIVE.getCode())) {
+		    LOGGER.info("The contact is already authenticated in enterprise");
 			return;
 		}
 
-		contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
-		this.enterpriseContactProvider.updateContact(contact);
+		contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
+		//this.enterpriseContactProvider.updateContact(contact);
+		updatePendingEnterpriseContactToAuthenticated(contact);
 
 		// Set group for this contact
 		String applyGroup = contact.getApplyGroup();
 		if (applyGroup != null && !applyGroup.isEmpty()) {
 			EnterpriseContactGroup group = this.enterpriseContactProvider
-					.getContactGroupByName(contact.getEnterpriseId(),
-							applyGroup);
+					.getContactGroupByName(contact.getEnterpriseId(), applyGroup);
 			if (null != group) {
 				approveContactToGroup(contact, group);
 			}
@@ -497,8 +491,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Override
 	public List<EnterpriseContactDetail> listContactByStatus(
-			CrossShardListingLocator locator, EnterpriseContactStatus status,
-			Integer pageSize) {
+			CrossShardListingLocator locator, GroupMemberStatus status, Integer pageSize) {
 		int count = PaginationConfigHelper
 				.getPageSize(configProvider, pageSize);
 		List<EnterpriseContact> contacts = this.enterpriseContactProvider
@@ -775,7 +768,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		EnterpriseContact contact = this.enterpriseContactProvider
 				.queryContactById(cmd.getContactId());
-		contact.setStatus(EnterpriseContactStatus.INACTIVE.getCode());
+		contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
 		this.enterpriseContactProvider.updateContact(contact);
 
 	}
@@ -902,8 +895,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						contact.setName(name);
 						contact.setSex(sex);
 						contact.setCreatorUid(creatorId);
-						contact.setStatus(EnterpriseContactStatus.AUTHENTICATED
-								.getCode());
+						contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
 						contact.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
 						// phone find user

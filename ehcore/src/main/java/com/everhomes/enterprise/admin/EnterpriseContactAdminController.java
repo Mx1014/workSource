@@ -21,9 +21,9 @@ import com.everhomes.enterprise.EnterpriseContactDetail;
 import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactEntryDTO;
 import com.everhomes.enterprise.EnterpriseContactService;
-import com.everhomes.enterprise.EnterpriseContactStatus;
 import com.everhomes.enterprise.ListContactCommand;
 import com.everhomes.enterprise.ListEnterpriseContactResponse;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
@@ -74,7 +74,7 @@ public class EnterpriseContactAdminController extends ControllerBase {
     public RestResponse listAprovingContacts(@Valid ListContactCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByStatus(locator, EnterpriseContactStatus.WAITING_AUTH, cmd.getPageSize());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByStatus(locator, GroupMemberStatus.WAITING_FOR_APPROVAL, cmd.getPageSize());
         ListEnterpriseContactResponse o = new ListEnterpriseContactResponse();
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
         for(EnterpriseContactDetail detail : details) {
