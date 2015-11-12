@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RoleConstants;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
@@ -115,19 +117,21 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Override
     public ListEnterpriseResponse listEnterpriseByCommunityId(ListEnterpriseByCommunityIdCommand cmd) {
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        
+    	User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        
+    	int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<Enterprise> enterprises = this.listEnterpriseByCommunityId(locator, cmd.getCommunityId(), cmd.getStatus(), pageSize);
         
-        this.enterpriseProvider.populateEnterpriseAttachments(enterprises);
-        this.enterpriseProvider.populateEnterpriseAddresses(enterprises);
         populateEnterprises(enterprises);
        
         List<EnterpriseDTO> dtos = new ArrayList<EnterpriseDTO>();
         for(Enterprise enterprise : enterprises) {
-             dtos.add(ConvertHelper.convert(enterprise, EnterpriseDTO.class));
+             dtos.add(toEnterpriseDto(userId, enterprise));
         }
         
         ListEnterpriseResponse resp = new ListEnterpriseResponse();
@@ -160,7 +164,32 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setDescription(cmd.getDescription());
         enterprise.setDisplayName(cmd.getDisplayName());
         enterprise.setName(cmd.getName());
+        enterprise.setMemberCount(cmd.getMemberCount());
+        enterprise.setContactsPhone(cmd.getContactsPhone());
         this.enterpriseProvider.createEnterprise(enterprise);
+        
+        if(cmd.getEntries() != null) {
+        	
+    		EnterpriseContact ec = new EnterpriseContact();
+    		ec.setCreatorUid(userId);
+    		ec.setEnterpriseId(enterprise.getId());
+    		if(cmd.getContactor() != null) 
+    			ec.setName(cmd.getContactor());
+    		
+    		ec.setRole(RoleConstants.SystemAdmin);
+    		Long contactId = this.enterpriseContactProvider.createContact(ec);
+    		
+    		EnterpriseContactEntry entry = new EnterpriseContactEntry();
+    		entry.setEnterpriseId(ec.getEnterpriseId());
+    		entry.setCreatorUid(userId);
+    		entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
+    		entry.setEntryValue(cmd.getEntries());
+    		entry.setContactId(contactId);
+    		this.enterpriseContactProvider.createContactEntry(entry);
+    		
+    		enterprise.setEntries(entry.getEntryValue());
+    		enterprise.setContactor(ec.getName());
+        }
         
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
         
@@ -188,9 +217,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         }
         
         
+        
         processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
         
-        EnterpriseDTO enterpriseDto = ConvertHelper.convert(enterprise, EnterpriseDTO.class);
+        EnterpriseDTO enterpriseDto = toEnterpriseDto(userId, enterprise);
         
         
         return enterpriseDto;
@@ -286,6 +316,33 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             dto.setContactStatus(contact.getStatus());
             dto.setContactRole(contact.getRole());
         }
+        
+        String avatarUri = enterprise.getAvatar();
+		 if(avatarUri != null && avatarUri.length() > 0) {
+			 try{
+             
+				 dto.setAvatarUri(avatarUri);
+				 String url = contentServerService.parserUri(avatarUri, EntityType.GROUP.getCode(), enterprise.getId());
+               
+				 dto.setAvatarUrl(url);
+               
+           
+			 }catch(Exception e){
+               
+				 LOGGER.error("Failed to parse avatar uri, enterpriseId=" + enterprise.getId(), e);
+           
+			 }
+		 }
+		 
+		 EnterpriseContact contactor = this.enterpriseContactProvider.queryEnterpriseContactor(dto.getId());
+		 if(contactor != null) {
+			 String contactorName = contactor.getName();
+			 dto.setContactor(contactorName);
+			 
+			 List<EnterpriseContactEntry> ece = this.enterpriseContactProvider.queryContactEntryByContactId(contactor);
+			 if(ece != null && ece.size() > 0)
+				 dto.setEntries(ece.get(0).getEntryValue());
+		 }
         
         return dto;
     }
@@ -450,12 +507,14 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     private void processEnterpriseAttachments(long userId, List<AttachmentDescriptor> attachmentList, Enterprise enterprise) {
         List<EnterpriseAttachment> results = null;
         
+        this.enterpriseProvider.deleteEnterpriseAttachmentsByEnterpriseId(enterprise.getId());
         if(attachmentList != null) {
             results = new ArrayList<EnterpriseAttachment>();
             
             EnterpriseAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
             	if(!StringUtils.isNullOrEmpty(descriptor.getContentUri())) {
+            		
 	                attachment = new EnterpriseAttachment();
 	                attachment.setCreatorUid(userId);
 	                attachment.setEnterpriseId(enterprise.getId());
@@ -471,7 +530,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	                    LOGGER.error("Failed to save the attachment, userId=" + userId 
 	                        + ", attachment=" + attachment, e);
 	                }
-            	}
+        		} 
             }
             
             enterprise.setAttachments(results);
@@ -558,5 +617,81 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		 }
     
 	 }
+
+	@Override
+	public EnterpriseDTO updateEnterprise(UpdateEnterpriseCommand cmd) {
+		User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        
+    	Enterprise enterprise = new Enterprise();
+    	enterprise.setId(cmd.getId());
+        enterprise.setAvatar(cmd.getAvatar());
+        enterprise.setDescription(cmd.getDescription());
+        enterprise.setDisplayName(cmd.getDisplayName());
+        enterprise.setName(cmd.getName());
+        enterprise.setMemberCount(cmd.getMemberCount());
+        enterprise.setContactsPhone(cmd.getContactsPhone());
+        this.enterpriseProvider.updateEnterprise(enterprise);
+        
+        List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getId());
+        this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
+        if(cmd.getEntries() != null) {
+        		EnterpriseContact ec = new EnterpriseContact();
+        		ec.setCreatorUid(userId);
+        		ec.setEnterpriseId(enterprise.getId());
+        		if(cmd.getContactor() != null) 
+        			ec.setName(cmd.getContactor());
+        		
+        		ec.setRole(RoleConstants.SystemAdmin);
+        		Long contactId = this.enterpriseContactProvider.createContact(ec);
+        		
+        		EnterpriseContactEntry entry = new EnterpriseContactEntry();
+        		entry.setEnterpriseId(ec.getEnterpriseId());
+        		entry.setCreatorUid(userId);
+        		entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
+        		entry.setEntryValue(cmd.getEntries());
+        		entry.setContactId(contactId);
+        		this.enterpriseContactProvider.createContactEntry(entry);
+        		
+        		enterprise.setEntries(entry.getEntryValue());
+        		enterprise.setContactor(ec.getName());
+        	
+        }
+        
+        List<Long> addressIds = cmd.getAddressId();
+        if(addressIds != null && addressIds.size() > 0) {
+        	List<Address> address = new ArrayList<Address>();
+        	for(Long addressId :addressIds) {
+        		if(addressId != null) {
+        			if(this.enterpriseProvider.isExistInEnterpriseAddresses(cmd.getId(), addressId)) {
+        			
+		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
+		                enterpriseAddr.setAddressId(addressId);
+		                enterpriseAddr.setEnterpriseId(enterprise.getId());
+		                enterpriseAddr.setCreatorUid(userId);
+		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+		
+		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
+        			}
+	                
+	                Address addr = this.addressProvider.findAddressById(addressId);
+	                if(addr != null)
+	                	address.add(addr);
+        		}
+        	}
+        	enterprise.setAddress(address);
+        }
+        
+        
+        
+        processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
+        
+        EnterpriseDTO enterpriseDto = toEnterpriseDto(userId, enterprise);
+        
+        
+        return enterpriseDto;
+	}
 
 }

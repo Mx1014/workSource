@@ -15,6 +15,7 @@ import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseApproveCommand;
 import com.everhomes.enterprise.EnterpriseDTO;
 import com.everhomes.enterprise.EnterpriseService;
+import com.everhomes.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -67,6 +68,17 @@ public class EnterpriseAdminController extends ControllerBase {
 //        Enterprise entry = ConvertHelper.convert(cmd, Enterprise.class);
         
         EnterpriseDTO dto = this.enterpriseService.createEnterprise(cmd);
+        RestResponse res = new RestResponse(dto);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    @RequestMapping("updateEnterprise")
+    @RestReturn(value=EnterpriseDTO.class)
+    public RestResponse updateEnterprise(@Valid UpdateEnterpriseCommand cmd) {
+        
+        EnterpriseDTO dto = this.enterpriseService.updateEnterprise(cmd);
         RestResponse res = new RestResponse(dto);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
@@ -10,12 +11,15 @@ import java.util.stream.Collectors;
 import javax.persistence.Table;
 
 import org.elasticsearch.common.lang3.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Operator;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RoleConstants;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupMemberStatus;
@@ -871,6 +875,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	}
 
 	@Override
+
 	public List<EnterpriseContactGroup> listContactGroupsByEnterpriseId(
 			ListingLocator locator, Long enterpriseId, int count) { 
 		 return this.queryContactGroupByEnterpriseId(locator, enterpriseId, count, null );
@@ -915,6 +920,68 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
         
 		return groups;
+	}
+
+	public List<Long> deleteContactByEnterpriseId(Long enterpriseId) {
+
+		List<Long> contactIds = new ArrayList<Long>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+		 
+        SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(RoleConstants.SystemAdmin));
+ 
+        
+        query.fetch().map((r) -> {
+        	EnterpriseContact ec = ConvertHelper.convert(r, EnterpriseContact.class);
+        	contactIds.add(ec.getId());
+        	this.deleteContactById(ec);
+        	return null;
+        });
+        
+        return contactIds;
+	}
+
+	@Override
+	public void deleteContactEntryByContactId(List<Long> contactIds) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		 
+        SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
+        for(Long contactId : contactIds){
+        	query.addConditions(Operator.OR, Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(contactId));
+        }
+        
+        
+        query.fetch().map((r) -> {
+        	EnterpriseContactEntry ece = ConvertHelper.convert(r, EnterpriseContactEntry.class);
+        	this.deleteContactEntry(ece);
+        	return null;
+        });
+	}
+
+	@Override
+	public EnterpriseContact queryEnterpriseContactor(Long enterpriseId) {
+		ListingLocator locator = new ListingLocator();
+        int count = 1;
+        
+        List<EnterpriseContact> contacts = this.queryContactByEnterpriseId(locator, enterpriseId, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(RoleConstants.SystemAdmin));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(contacts != null && contacts.size() > 0) {
+            return contacts.get(0);
+        }
+        return null;
 	}
     
 //    @Override
