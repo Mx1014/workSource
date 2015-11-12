@@ -6,19 +6,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -28,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.Role;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -42,9 +33,6 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
-import com.everhomes.group.GroupServiceErrorCode;
-import com.everhomes.group.GroupVisibilityScope;
-import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -57,7 +45,6 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
-import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -70,12 +57,9 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
@@ -148,64 +132,42 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Override
 	public void processUserForContact(UserIdentifier identifier) {
-		// UserInfo user =
-		// userService.getUserSnapshotInfoWithPhone(identifier.getOwnerUid());
 		User user = userProvider.findUserById(identifier.getOwnerUid());
-		// List<Enterprise> enterprises =
-		// this.enterpriseService.listEnterpriseByPhone(identifier.getIdentifierToken());
-		List<Enterprise> enterprises = this.enterpriseProvider
-				.queryEnterpriseByPhone(identifier.getIdentifierToken());
+		List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
 		Map<Long, Long> ctx = new HashMap<Long, Long>();
-		for (Enterprise en : enterprises) {
-			// Try to create a contact for this enterprise
-			// TODO change to queryContactByPhone
-			// EnterpriseContact contact =
-			// this.enterpriseContactProvider.queryContactByUserId(en.getId(),
-			// identifier.getOwnerUid());
-			EnterpriseContact contact = this.getContactByPhone(en.getId(),
-					identifier.getIdentifierToken());
-			if (null == contact) {
-				// create new contact for it
-				contact = new EnterpriseContact();
-				contact.setAvatar(user.getAvatar());
-				contact.setEnterpriseId(en.getId());
-				contact.setName(user.getNickName());
-				contact.setNickName(user.getNickName());
-				contact.setUserId(user.getId());
-
-				// auto approved
-				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
-				this.enterpriseContactProvider.createContact(contact);
-
-				// create a entry for it, but not for all user identifier
-				EnterpriseContactEntry entry = new EnterpriseContactEntry();
-				entry.setContactId(contact.getId());
-				entry.setCreatorUid(UserContext.current().getUser().getId());
-				entry.setEnterpriseId(contact.getEnterpriseId());
-				entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
-				entry.setEntryValue(identifier.getIdentifierToken());
-				this.enterpriseContactProvider.createContactEntry(entry);
-
-				sendMessageForContactApproved(ctx, contact);
+		for (Enterprise enterprise : enterprises) {
+			EnterpriseContact contact = this.getContactByPhone(enterprise.getId(), identifier.getIdentifierToken());
+			if (contact != null) {
+			    GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
+			    if(status != GroupMemberStatus.ACTIVE) {
+    				contact.setUserId(user.getId());
+    				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
+    				updatePendingEnterpriseContactToAuthenticated(contact);
+    				
+    				sendMessageForContactApproved(ctx, contact);
+			    } else {
+			        if(LOGGER.isDebugEnabled()) {
+			            LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
+			                + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
+			        }
+			    }
 			} else {
-				// auto approved
-				contact.setUserId(user.getId());
-				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
-				this.enterpriseContactProvider.createContact(contact);
-				sendMessageForContactApproved(ctx, contact);
+			    if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Enterprise contact not found, ignore to match contact, userId=" + identifier.getOwnerUid() 
+                        + ", enterpriseId=" + enterprise.getId());
+                }
 			}
 		}
-
 	}
 
 	/**
 	 * 同意某用户绑定到某企业通讯录，此接口应该用不到
 	 */
-	@Override
-	public void approveUserToContact(User user, EnterpriseContact contact) {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void approveUserToContact(User user, EnterpriseContact contact) {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	/**
 	 * 拒绝用户申请某企业的通讯录
@@ -600,14 +562,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	public EnterpriseContactDetail getContactByPhone(Long enterpriseId,
 			String phone) {
 		EnterpriseContactDetail detail = null;
-		EnterpriseContactEntry entry = this.enterpriseContactProvider
-				.getEnterpriseContactEntryByPhone(enterpriseId, phone);
+		EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(enterpriseId, phone);
 		if (entry != null) {
-			EnterpriseContact contact = this.enterpriseContactProvider
-					.getContactById(entry.getContactId());
+			EnterpriseContact contact = this.enterpriseContactProvider.getContactById(entry.getContactId());
 			if (contact != null) {
-				detail = ConvertHelper.convert(contact,
-						EnterpriseContactDetail.class);
+				detail = ConvertHelper.convert(contact, EnterpriseContactDetail.class);
 				detail.setPhone(phone);
 			}
 		}
@@ -1218,13 +1177,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	private void initContactGroupMap(Long enterpriseId,
 			Map<String, Long> groupMap) {
 		List<EnterpriseContactGroup> enterpriseContactGroups = enterpriseContactProvider
-				.queryContactGroupByEnterpriseId(null, enterpriseId, 999999,
-						null);
+				.queryContactGroupByEnterpriseId(null, enterpriseId, 999999, null);
 		for (EnterpriseContactGroup enterpriseContactGroup : enterpriseContactGroups) {
 			groupMap.put(enterpriseContactGroup.getApplyGroup(),
 					enterpriseContactGroup.getId());
 		}
-
 	}
 
 	@Override
