@@ -149,7 +149,7 @@ public class EnterpriseContactController extends ControllerBase {
 
     /**
      * <b>URL: /contact/listContactGroupsByEnterpriseId</b>
-     * <p>显示企业组织架构</p>
+     * <p>显示企业组织架构-部门架构</p>
      * @return {@link ListContactGroupsByEnterpriseIdCommandResponse}
      */
     @RequestMapping("listContactGroupsByEnterpriseId")
@@ -164,6 +164,43 @@ public class EnterpriseContactController extends ControllerBase {
         
         return res;
     }  
+    
+    /**
+     * <b>URL: /contact/listContactGroupNamesByEnterpriseId</b>
+     * <p>列出部门名字-没有父节点</p>
+     * @return {@link ListContactGroupNamesByEnterpriseIdCommandResponse}
+     */
+    @RequestMapping("listContactGroupNamesByEnterpriseId")
+    @RestReturn(value=ListContactGroupNamesByEnterpriseIdCommandResponse.class)
+    public RestResponse listContactGroupNamesByEnterpriseId(@Valid ListContactGroupNamesByEnterpriseIdCommand cmd) {
+    	
+        ListContactGroupNamesByEnterpriseIdCommandResponse  response = enterpriseContactService.listContactGroupNamesByEnterpriseId(cmd);
+        RestResponse res = new RestResponse();
+        res.setResponseObject(response);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+    }  
+    /**
+     * <b>URL: /contact/addContactGroup</b>
+     * <p>列出部门名字-没有父节点</p>
+     * @return {@link AddContactGroupCommandResponse}
+     */
+    @RequestMapping("addContactGroup")
+    @RestReturn(value=String.class)
+    public RestResponse addContactGroup(@Valid AddContactGroupCommand cmd) {
+    	
+    	 enterpriseContactService.addContactGroup(cmd);
+        RestResponse res = new RestResponse(); 
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+    }  
+    
+    
+    
     /**
      * <b>URL: /contact/listContactsByPhone</b>
      * <p>通过手机好查询联系人</p>

@@ -7,6 +7,7 @@ public class EnterpriseContactGroupDTO {
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
 	private java.lang.String   name;
+	private String applyGroup;
 	private java.lang.Long     parentId;
 	private String parentGroupName;
 	
@@ -64,5 +65,15 @@ public class EnterpriseContactGroupDTO {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+
+	public String getApplyGroup() {
+		return applyGroup;
+	}
+
+
+	public void setApplyGroup(String applyGroup) {
+		this.applyGroup = applyGroup;
 	}
 }

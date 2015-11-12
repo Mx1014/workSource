@@ -1238,8 +1238,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
          List<EnterpriseContactGroupDTO> dtos = new ArrayList<EnterpriseContactGroupDTO>();
          for(EnterpriseContactGroup detail : details) {
              EnterpriseContactGroupDTO dto =  ConvertHelper.convert(detail, EnterpriseContactGroupDTO.class);
-             EnterpriseContactGroup parentGroup = this.enterpriseContactProvider.queryContactGroupById(detail.getParentId());
-             dto.setParentGroupName(parentGroup.getName());
+             if(null== detail.getParentId() || detail.getParentId() == 0){
+            	//has no parent id
+             }else {
+
+                 EnterpriseContactGroup parentGroup = this.enterpriseContactProvider.queryContactGroupById(detail.getParentId());
+                 dto.setParentGroupName(parentGroup.getName());
+			}
              dtos.add(dto);
          }
          
@@ -1267,5 +1272,48 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		locator.setAnchor(nextPageAnchor);
  
 		return contactGroups;
+	}
+
+	@Override
+	public ListContactGroupNamesByEnterpriseIdCommandResponse listContactGroupNamesByEnterpriseId(
+			ListContactGroupNamesByEnterpriseIdCommand cmd) { 
+		ListContactGroupNamesByEnterpriseIdCommandResponse response = new ListContactGroupNamesByEnterpriseIdCommandResponse();
+		  
+        
+		 List<EnterpriseContactGroup> contactGroups = this.enterpriseContactProvider
+					.listContactGroupsByEnterpriseId(null, cmd.getEnterpriseId(), Integer.MAX_VALUE);
+		 
+        List<EnterpriseContactGroupDTO> dtos = new ArrayList<EnterpriseContactGroupDTO>();
+        for(EnterpriseContactGroup detail : contactGroups) {
+            EnterpriseContactGroupDTO dto =  ConvertHelper.convert(detail, EnterpriseContactGroupDTO.class);
+           
+            dtos.add(dto);
+        }
+        
+        
+        response.setContactGroups(dtos);
+        
+		return response;
+	}
+
+	@Override
+	public void addContactGroup(AddContactGroupCommand cmd) { 
+		EnterpriseContactGroup group = new EnterpriseContactGroup() ;
+		group.setName(cmd.getGroupName());
+		group.setEnterpriseId(cmd.getEnterpriseId());
+
+		group.setCreatorUid(UserContext.current().getUser().getId());
+		group.setCreateTime(new Timestamp(System
+				.currentTimeMillis()));
+		if(null!= cmd.getParentId()){
+			 EnterpriseContactGroup parentGroup = this.enterpriseContactProvider.queryContactGroupById(cmd.getParentId());
+			 group.setApplyGroup(parentGroup.getApplyGroup()+"\\"+cmd.getGroupName());
+			 group.setPath(parentGroup.getPath()+parentGroup.getId()+"\\");
+			 group.setParentId(parentGroup.getId());
+		}else {
+			 group.setApplyGroup(cmd.getGroupName());
+			 group.setPath("\\");
+		}
+		this.enterpriseContactProvider.createContactGroup(group);
 	}
 }
