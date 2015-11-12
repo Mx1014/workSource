@@ -14,6 +14,10 @@ import com.everhomes.forum.AttachmentDescriptor;
  *  <li>addressId: 公司地址门牌号id列表</li>
  *  <li>attachments: 公司的附件信息</li>
  *  <li>communityId: 公司入驻园区id</li>
+ *  <li>memberCount: 公司员工人数</li>
+ *  <li>contactsPhone: 公司联系电话</li>
+ *  <li>contactor: 公司联系人</li>
+ *  <li>entries: 公司联系人电话</li>
  * </ul>
  * @author janson
  *
@@ -23,15 +27,42 @@ public class CreateEnterpriseCommand {
     private java.lang.String   displayName;
     private java.lang.String   avatar;
     private java.lang.String   description;
-    private Long communityId;;
-    
-    @ItemType(Long.class)
+    private Long communityId;
+    private Long memberCount;
+    private String contactsPhone;
+    private String contactor;
+    private String entries;
+	@ItemType(Long.class)
     private List<Long> addressId;
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
-    public Long getCommunityId() {
+    public Long getMemberCount() {
+		return memberCount;
+	}
+	public void setMemberCount(Long memberCount) {
+		this.memberCount = memberCount;
+	}
+	public String getContactsPhone() {
+		return contactsPhone;
+	}
+	public void setContactsPhone(String contactsPhone) {
+		this.contactsPhone = contactsPhone;
+	}
+	public String getContactor() {
+		return contactor;
+	}
+	public void setContactor(String contactor) {
+		this.contactor = contactor;
+	}
+	public String getEntries() {
+		return entries;
+	}
+	public void setEntries(String entries) {
+		this.entries = entries;
+	}
+	public Long getCommunityId() {
 		return communityId;
 	}
 	public void setCommunityId(Long communityId) {

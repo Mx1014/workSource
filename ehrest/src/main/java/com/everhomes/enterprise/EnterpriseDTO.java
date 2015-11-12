@@ -37,6 +37,9 @@ import com.everhomes.util.StringHelper;
  * <li>cityName: 城市名称</li>
  * <li>areaId: 区域Id（如南山区的Id）</li>
  * <li>areaName: 区域名称</li>
+ * <li>contactsPhone: 公司联系电话</li>
+ * <li>contactor: 公司联系人</li>
+ * <li>entries: 公司联系人手机号</li>
  * </ul>
  * @author janson
  *
@@ -75,9 +78,37 @@ public class EnterpriseDTO {
     private Timestamp updateTime;
     private Timestamp createTime;
     
+    private String contactsPhone;
+
+    private String contactor;
     
+    private String entries; 
     
-    //TODO address info ?
+    public String getContactsPhone() {
+		return contactsPhone;
+	}
+
+	public void setContactsPhone(String contactsPhone) {
+		this.contactsPhone = contactsPhone;
+	}
+
+	public String getContactor() {
+		return contactor;
+	}
+
+	public void setContactor(String contactor) {
+		this.contactor = contactor;
+	}
+
+	public String getEntries() {
+		return entries;
+	}
+
+	public void setEntries(String entries) {
+		this.entries = entries;
+	}
+
+	//TODO address info ?
     @ItemType(value = AddressDTO.class)
     private List<AddressDTO> address;
     

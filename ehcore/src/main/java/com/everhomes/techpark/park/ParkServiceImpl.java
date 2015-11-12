@@ -51,12 +51,15 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
@@ -71,6 +74,7 @@ import com.everhomes.techpark.onlinePay.OnlinePayProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.techpark.onlinePay.RechargeStatus;
+import com.everhomes.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
@@ -110,6 +114,9 @@ public class ParkServiceImpl implements ParkService {
 	
 	@Autowired
 	private OnlinePayService onlinePayService;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
 	
 	private static final QName SERVICE_NAME = new QName("http://tempuri.org/", "Service1");
 	
@@ -313,20 +320,26 @@ public class ParkServiceImpl implements ParkService {
 		if(cmd.getPlateNumber() == null || cmd.getPlateNumber().length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_LENGTH,
-					"the length of plateNumber is wrong.");
+					localeStringService.getLocalizedString(String.valueOf(ParkingServiceErrorCode.SCOPE), 
+							String.valueOf(ParkingServiceErrorCode.ERROR_PLATE_LENGTH),
+							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
 		}
 		PlateInfo info = verifyRechargedPlate(cmd);
 		
 		if(info != null && "true".equals(info.getIsValid())){
 			LOGGER.error("the plateNumber is already have a card.");
 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_EXIST,
-					"the plateNumber is already have a card.");
+					localeStringService.getLocalizedString(String.valueOf(ParkingServiceErrorCode.SCOPE), 
+							String.valueOf(ParkingServiceErrorCode.ERROR_PLATE_EXIST),
+							UserContext.current().getUser().getLocale(),"the plateNumber is already have a card."));
 		}
 		
 		if(parkProvider.isApplied(cmd.getPlateNumber())) {
 			LOGGER.error("the plateNumber is already applied.");
 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_APPLIED,
-					"the plateNumber is already applied.");
+					localeStringService.getLocalizedString(String.valueOf(ParkingServiceErrorCode.SCOPE), 
+							String.valueOf(ParkingServiceErrorCode.ERROR_PLATE_APPLIED),
+							UserContext.current().getUser().getLocale(),"the plateNumber is already applied."));
 		}
 			
 		User user = UserContext.current().getUser();

@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.sequence;
 
 import java.util.List;
@@ -26,6 +27,9 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
 import com.everhomes.server.schema.tables.pojos.EhCooperationRequests;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCommunityMap;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactEntries;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroups;
@@ -365,6 +369,18 @@ public class SequenceServiceImpl implements SequenceService {
  
         syncTableSequence(EhUsers.class, EhRechargeInfo.class, Tables.EH_RECHARGE_INFO.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_RECHARGE_INFO.ID.max()).from(Tables.EH_RECHARGE_INFO).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhEnterpriseCommunityMap.class, Tables.EH_ENTERPRISE_COMMUNITY_MAP.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_COMMUNITY_MAP.ID.max()).from(Tables.EH_ENTERPRISE_COMMUNITY_MAP).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhEnterpriseAddresses.class, Tables.EH_ENTERPRISE_ADDRESSES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_ADDRESSES.ID.max()).from(Tables.EH_ENTERPRISE_ADDRESSES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhEnterpriseAttachments.class, Tables.EH_ENTERPRISE_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_ATTACHMENTS.ID.max()).from(Tables.EH_ENTERPRISE_ATTACHMENTS).fetchOne().value1(); 
         });
     }
     
