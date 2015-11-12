@@ -1273,4 +1273,19 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		}
 		this.enterpriseContactProvider.createContactGroup(group);
 	}
+
+	@Override
+	public void deleteContactGroupById(DeleteContactGroupByIdCommand cmd) {
+		// TODO Auto-generated method stub
+		List<EnterpriseContactGroup> results = this.enterpriseContactProvider.queryContactGroupByPath(cmd.getEnterpriseId(),cmd.getGroupId());
+		if(null != results && results.size() >= 1){
+			throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_GROUP_HAS_CHILD, 
+                    "ERROR : cannot delete group which has children group !!!");
+		}
+		else{
+			EnterpriseContactGroup group = this.enterpriseContactProvider.getContactGroupById(cmd.getGroupId());
+			this.enterpriseContactProvider.deleteContactGroup(group);
+			
+		}
+	}
 }

@@ -897,6 +897,25 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	        
 	        return result[0];
 	}
+
+	@Override
+	public List<EnterpriseContactGroup> queryContactGroupByPath(
+			Long enterpriseId, Long groupId) {
+		List<EnterpriseContactGroup> groups = this.queryContactGroupByEnterpriseId(null, enterpriseId, 1
+                , new ListingQueryBuilderCallback() {
+
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                            SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ENTERPRISE_ID.eq(enterpriseId));
+                        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.PATH.like("%"+groupId+"%"));
+                        return query;
+                    }
+            
+        });
+        
+		return groups;
+	}
     
 //    @Override
 //    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {

@@ -199,6 +199,22 @@ public class EnterpriseContactController extends ControllerBase {
         return res;
     }  
     
+    /**
+     * <b>URL: /contact/deleteContactGroupById</b>
+     * <p>列出部门名字-没有父节点</p>
+     * @return {@link }
+     */
+    @RequestMapping("deleteContactGroupById")
+    @RestReturn(value=String.class)
+    public RestResponse deleteContactGroupById(@Valid DeleteContactGroupByIdCommand cmd) {
+    	
+    	 enterpriseContactService.deleteContactGroupById(cmd);
+        RestResponse res = new RestResponse(); 
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+    }  
     
     
     /**
