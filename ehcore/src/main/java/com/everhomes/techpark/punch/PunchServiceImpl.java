@@ -1254,7 +1254,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public GetPunchNewExceptionCommandResponse getPunchNewException(getPunchNewExceptionCommand cmd) {
+	public GetPunchNewExceptionCommandResponse getPunchNewException(GetPunchNewExceptionCommand cmd) {
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		Long userId = UserContext.current().getUser().getId();
 		GetPunchNewExceptionCommandResponse response = new GetPunchNewExceptionCommandResponse();

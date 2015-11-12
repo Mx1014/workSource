@@ -165,7 +165,10 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
+            	List<Byte> conditionList = new ArrayList<Byte>();
+            	conditionList.add(GroupMemberStatus.ACTIVE.getCode());
+            	conditionList.add(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.in(conditionList));
                 return query;
             }
             
@@ -792,7 +795,10 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	            @Override
 	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 	                    SelectQuery<? extends Record> query) {
-	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.ACTIVE.getCode()));
+	            	List<Byte> conditionList = new ArrayList<Byte>();
+	            	conditionList.add(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+	            	conditionList.add(GroupMemberStatus.INACTIVE.getCode());
+	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.in(conditionList));
 	                return query;
 	            }
 	            

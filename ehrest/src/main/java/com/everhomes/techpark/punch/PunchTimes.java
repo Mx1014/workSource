@@ -5,11 +5,11 @@ package com.everhomes.techpark.punch;
  * <li>FORTH(4): 4次</li>
  * </ul>
  */
-public enum punchTimes {
+public enum PunchTimes {
     TWICE(2),FORTH(4);
     
     private Integer code;
-    private punchTimes(Integer code) {
+    private PunchTimes(Integer code) {
         this.code = code;
     }
     
@@ -17,8 +17,8 @@ public enum punchTimes {
         return this.code;
     }
     
-    public static punchTimes fromCode(Integer code) {
-        for(punchTimes t : punchTimes.values()) {
+    public static PunchTimes fromCode(Integer code) {
+        for(PunchTimes t : PunchTimes.values()) {
             if (t.code == code) {
                 return t;
             }

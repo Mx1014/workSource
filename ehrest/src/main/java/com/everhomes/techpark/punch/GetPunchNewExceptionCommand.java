@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 * <li>companyId：企业Id</li> 
 * </ul>
 */
-public class getPunchNewExceptionCommand {
+public class GetPunchNewExceptionCommand {
  
     private Long companyId; 
     

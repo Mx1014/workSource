@@ -19,7 +19,9 @@ public class EnterpriseContactDTO {
     private java.lang.String   name;
     private java.lang.String   nickName;
     private java.lang.String   avatar;
+    private String employeeNo;
     private String groupName;
+    private String sex;
     private String phone;
     private java.lang.Long     userId;
     private java.lang.Long     role;
@@ -133,4 +135,20 @@ public class EnterpriseContactDTO {
     public void setEntries(List<EnterpriseContactEntryDTO> entries) {
         this.entries = entries;
     }
+
+	public String getEmployeeNo() {
+		return employeeNo;
+	}
+
+	public void setEmployeeNo(String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
 }

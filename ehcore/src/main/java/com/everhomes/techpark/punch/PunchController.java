@@ -84,7 +84,7 @@ public class PunchController extends ControllerBase {
 	 */
 	@RequestMapping("getPunchNewException")
 	@RestReturn(value = GetPunchNewExceptionCommandResponse.class)
-	public RestResponse getPunchNewException(@Valid getPunchNewExceptionCommand cmd) {
+	public RestResponse getPunchNewException(@Valid GetPunchNewExceptionCommand cmd) {
 		// 打卡返回打卡时间
 		GetPunchNewExceptionCommandResponse res = punchService.getPunchNewException(cmd);
 		RestResponse response = new RestResponse(res); 

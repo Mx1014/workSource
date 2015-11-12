@@ -854,12 +854,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				if (resultList != null && resultList.size() > 0) {
 					for (int rowIndex = 1; rowIndex < row; rowIndex++) {
 						RowResult result = (RowResult) resultList.get(rowIndex);
-						String applyGroup = RowResult.trimString(result.getA());
-						String name = RowResult.trimString(result.getB());
-						String sex = RowResult.trimString(result.getC());
-						String PhoneNum = RowResult.trimString(result.getD());
-						String building = RowResult.trimString(result.getE());
-						String apartment = RowResult.trimString(result.getF());
+						String employeeNo    = RowResult.trimString(result.getA());
+						String applyGroup    = RowResult.trimString(result.getB());
+						String name          = RowResult.trimString(result.getC());
+						String sex           = RowResult.trimString(result.getD());
+						String PhoneNum      = RowResult.trimString(result.getE());
+						String building      = RowResult.trimString(result.getF());
+						String apartment     = RowResult.trimString(result.getG());  
 						// 如果已有该号码在该单位的通讯录，则删除EnterpriseContactEntry
 						// EnterpriseContactGroupMember EnterpriseContact
 						// 三个表的该contact记录
@@ -891,11 +892,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						// TODO: Role =
 						EnterpriseContact contact = new EnterpriseContact();
 						contact.setEnterpriseId(enterpriseId);
+						contact.setEmployeeNo(employeeNo);
 						contact.setApplyGroup(applyGroup);
 						contact.setName(name);
 						contact.setSex(sex);
 						contact.setCreatorUid(creatorId);
-						contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
+						contact.setStatus(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 						contact.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
 						// phone find user
