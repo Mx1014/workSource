@@ -80,6 +80,25 @@ public class EnterpriseContactController extends ControllerBase {
 		return response;
     }
     
+    
+
+    /**
+     * <b>URL: /contact/addContact</b>
+     * <p>企业导入通讯录</p>
+     * @return {@link EnterpriseContactDTO}
+     */
+    @RequestMapping("deleteContactById")
+    @RestReturn(value=String.class)
+    public RestResponse deleteContactById(@Valid DeleteContactByIdCommand cmd ) {
+    	this.enterpriseContactService.deleteContactById(cmd);
+    	RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    
+    
+    
     /**
      * <b>URL: /contact/createContactByUserIdCommand</b>
      * <p>注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员</p>
