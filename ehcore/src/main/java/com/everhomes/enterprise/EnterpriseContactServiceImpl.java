@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.acl.Role;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -41,7 +42,9 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.group.GroupServiceErrorCode;
 import com.everhomes.group.GroupVisibilityScope;
+import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -207,24 +210,24 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	/**
 	 * 拒绝用户申请某企业的通讯录
 	 */
-	@Override
-	public void rejectUserFromContact(EnterpriseContact contact) {
-		// 设置为删除
-		contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
-		this.enterpriseContactProvider.updateContact(contact);
-
-		// 发消息
-		Map<String, Object> map = new HashMap<String, Object>();
-		Enterprise enterprise = this.enterpriseService
-				.getEnterpriseById(contact.getEnterpriseId());
-		User user = userProvider.findUserById(contact.getUserId());
-		map.put("enterpriseName", enterprise.getName());
-		String scope = EnterpriseNotifyTemplateCode.SCOPE;
-		int code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN;
-		String notifyTextForApplicant = localeTemplateService
-				.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
-		sendUserNotification(user.getId(), notifyTextForApplicant);
-	}
+//	@Override
+//	public void rejectUserFromContact(EnterpriseContact contact) {
+//		// 设置为删除
+//		contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
+//		this.enterpriseContactProvider.updateContact(contact);
+//
+//		// 发消息
+//		Map<String, Object> map = new HashMap<String, Object>();
+//		Enterprise enterprise = this.enterpriseService
+//				.getEnterpriseById(contact.getEnterpriseId());
+//		User user = userProvider.findUserById(contact.getUserId());
+//		map.put("enterpriseName", enterprise.getName());
+//		String scope = EnterpriseNotifyTemplateCode.SCOPE;
+//		int code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN;
+//		String notifyTextForApplicant = localeTemplateService
+//				.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+//		sendUserNotification(user.getId(), notifyTextForApplicant);
+//	}
 
 	/**
 	 * 申请加入企业
@@ -373,7 +376,6 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         }
 	}
 
-
     private void createUserGroup(EnterpriseContact contact) {
         Long enterpriseId = contact.getEnterpriseId();
         Long contactId = contact.getId();
@@ -395,6 +397,60 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         userProvider.updateUserGroup(userGroup);
     }
 	
+    /**
+     * 删除已认证联系人时，需要减去成员数量
+     * @param operatorUid
+     * @param contact
+     * @param reason
+     */
+    private void deleteActiveEnterpriseContact(Long operatorUid, EnterpriseContact contact, boolean removeFromDb, String reason) {
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
+            this.dbProvider.execute((status) -> {
+                if(removeFromDb) {
+                    this.enterpriseContactProvider.deleteContactById(contact);
+                } else {
+                    this.enterpriseContactProvider.updateContact(contact);
+                }
+                this.userProvider.deleteUserGroup(contact.getId(), contact.getEnterpriseId());
+                
+                Group group = this.groupProvider.findGroupById(contact.getEnterpriseId());
+                long memberCount = group.getMemberCount() - 1;
+                memberCount = (memberCount < 0) ? 0 : memberCount;
+                group.setMemberCount(memberCount);
+                this.groupProvider.updateGroup(group);
+                return null;
+            });
+            return null;
+        });
+        
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + contact.getId() 
+                + ", enterpriseId=" + contact.getEnterpriseId() + ", status=" + contact.getStatus() + ", removeFromDb=" + removeFromDb);
+        }
+    } 
+    
+    /**
+     * 对于通信录联系人，如果是主动申请进来的，若处理待审核状态则可直接删除
+     * @param operatorUid 操作者
+     * @param member 成员
+     */
+    private void deletePendingEnterpriseContact(Long operatorUid, EnterpriseContact contact, boolean removeFromDb) {
+        this.dbProvider.execute((status) -> {
+            if(removeFromDb) {
+                this.enterpriseContactProvider.deleteContactById(contact);
+            } else {
+                this.enterpriseContactProvider.updateContact(contact);
+            }
+            this.userProvider.deleteUserGroup(contact.getId(), contact.getEnterpriseId());
+            return null;
+        });
+        
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Enterprise contact is deleted(pending), operatorUid=" + operatorUid + ", contactId=" + contact.getId() 
+                + ", enterpriseId=" + contact.getEnterpriseId() + ", status=" + contact.getStatus() + ", removeFromDb=" + removeFromDb);
+        }
+    } 
+    
 //	@Override
 //	public void approveByContactId(Long contactId) {
 //		EnterpriseContact contact = this.enterpriseContactProvider
@@ -601,8 +657,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		return members;
 	}
 
-	private void sendMessageForContactApproved(Map<Long, Long> ctx,
-			EnterpriseContact contact) {
+	private void sendMessageForContactApproved(Map<Long, Long> ctx, EnterpriseContact contact) {
 		Long check = null;
 		if (ctx != null) {
 			check = ctx.get(contact.getEnterpriseId());
@@ -613,19 +668,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				ctx.put(contact.getEnterpriseId(), 1l);
 			}
 
-			Enterprise enterprise = this.enterpriseService
-					.getEnterpriseById(contact.getEnterpriseId());
+			Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
 			User user = userProvider.findUserById(contact.getUserId());
 
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("enterpriseName", enterprise.getName());
-			;
 
-			String userName = "";
-			if (contact.getNickName() != null
-					&& !contact.getNickName().trim().isEmpty()) {
-				userName = contact.getNickName();
-			} else {
+			String userName = contact.getNickName();
+			if (userName == null || userName.trim().isEmpty()) {
 				userName = contact.getName();
 				if (null != userName) {
 					userName = "";
@@ -637,21 +687,101 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			// send notification to who is requesting to join the enterprise
 			String scope = EnterpriseNotifyTemplateCode.SCOPE;
 			int code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF;
-			String notifyTextForApplicant = localeTemplateService
-					.getLocaleTemplateString(scope, code, locale, map, "");
+			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			List<Long> includeList = new ArrayList<Long>();
 			includeList.add(contact.getUserId());
-			sendEnterpriseNotification(enterprise.getId(), includeList, null,
-					notifyTextForApplicant, null, null);
+			sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, null, null);
 
 			// send notification to all the other members in the group
 			code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER;
-			notifyTextForApplicant = localeTemplateService
-					.getLocaleTemplateString(scope, code, locale, map, "");
-			sendEnterpriseNotification(enterprise.getId(), null, includeList,
-					notifyTextForApplicant, null, null);
+			notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendEnterpriseNotification(enterprise.getId(), null, includeList, notifyTextForApplicant, null, null);
 		}
 	}
+	
+   private void sendMessageForContactReject(Map<Long, Long> ctx, EnterpriseContact contact) {
+        Long check = null;
+        if (ctx != null) {
+            check = ctx.get(contact.getEnterpriseId());
+        }
+
+        if (check == null) {
+            if (ctx != null) {
+                ctx.put(contact.getEnterpriseId(), 1l);
+            }
+
+            Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
+            User user = userProvider.findUserById(contact.getUserId());
+
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("enterpriseName", enterprise.getName());
+
+            String userName = contact.getNickName();
+            if (userName == null || userName.trim().isEmpty()) {
+                userName = contact.getName();
+                if (null != userName) {
+                    userName = "";
+                }
+            }
+            map.put("userName", userName);
+            String locale = user.getLocale();
+
+            // send notification to who is requesting to join the enterprise
+            String scope = EnterpriseNotifyTemplateCode.SCOPE;
+            int code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_REJECT_JOIN;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            List<Long> includeList = new ArrayList<Long>();
+            includeList.add(contact.getUserId());
+            sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, null, null);
+
+            // send notification to all the other members in the group
+            // code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER;
+            // notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            // sendEnterpriseNotification(enterprise.getId(), null, includeList, notifyTextForApplicant, null, null);
+        }
+   }
+   
+   private void sendMessageForContactLeave(Map<Long, Long> ctx, EnterpriseContact contact) {
+       Long check = null;
+       if (ctx != null) {
+           check = ctx.get(contact.getEnterpriseId());
+       }
+
+       if (check == null) {
+           if (ctx != null) {
+               ctx.put(contact.getEnterpriseId(), 1l);
+           }
+
+           Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
+           User user = userProvider.findUserById(contact.getUserId());
+
+           Map<String, String> map = new HashMap<String, String>();
+           map.put("enterpriseName", enterprise.getName());
+
+           String userName = contact.getNickName();
+           if (userName == null || userName.trim().isEmpty()) {
+               userName = contact.getName();
+               if (null != userName) {
+                   userName = "";
+               }
+           }
+           map.put("userName", userName);
+           String locale = user.getLocale();
+
+           // send notification to who is requesting to join the enterprise
+           String scope = EnterpriseNotifyTemplateCode.SCOPE;
+           int code = EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT;
+           String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+           List<Long> includeList = new ArrayList<Long>();
+           includeList.add(contact.getUserId());
+           sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, null, null);
+
+           // send notification to all the other members in the enterprise
+           code = EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER;
+           notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+           sendEnterpriseNotification(enterprise.getId(), null, includeList, notifyTextForApplicant, null, null);
+       }
+   }
 
 	private void sendEnterpriseNotification(Long enterpriseId,
 			List<Long> includeList, List<Long> excludeList, String message,
@@ -765,13 +895,73 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Override
 	public void rejectContact(RejectContactCommand cmd) {
-
-		EnterpriseContact contact = this.enterpriseContactProvider
-				.queryContactById(cmd.getContactId());
-		contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
-		this.enterpriseContactProvider.updateContact(contact);
-
+        User operator = UserContext.current().getUser();
+        Long operatorUid = operator.getId();
+		EnterpriseContact contact = checkEnterpriseContactParameter(cmd.getContactId(), operatorUid, "rejectContact");
+		
+		GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
+		if(status == GroupMemberStatus.ACTIVE) {
+		    deleteActiveEnterpriseContact(operatorUid, contact, false, "");
+		} else {
+		    deletePendingEnterpriseContact(operatorUid, contact, true);
+		}
+		
+		sendMessageForContactReject(null, contact);
 	}
+	
+	@Override
+    public void leaveEnterprise(LeaveEnterpriseCommand cmd) {
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        String tag = "leaveGroup";
+        
+        Long enterpriseId = cmd.getEnterpriseId();
+        checkEnterpriseParameter(enterpriseId, userId, tag);
+
+        EnterpriseContact contact = checkEnterpriseContactParameter(userId, userId, tag);
+        GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
+        if(status == GroupMemberStatus.ACTIVE) {
+            deleteActiveEnterpriseContact(userId, contact, false, "");
+        } else {
+            deletePendingEnterpriseContact(userId, contact, true);
+        }
+        
+        sendMessageForContactLeave(null, contact);
+    }
+    
+    private Enterprise checkEnterpriseParameter(Long enterpriseId, Long operatorUid, String tag) {
+        if(enterpriseId == null) {
+            LOGGER.error("Enterprise id is null, operatorUid=" + operatorUid + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Enterprise id can not be null");
+        }
+        
+        Enterprise enterprise = this.enterpriseProvider.findEnterpriseById(enterpriseId);
+        if(enterprise == null) {
+            LOGGER.error("Enterprise not found, operatorUid=" + operatorUid + ", enterpriseId=" + enterpriseId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_NOT_FOUND, 
+                    "Unable to find the enterprise");
+        }
+        
+        return enterprise;
+    }
+	
+    private EnterpriseContact checkEnterpriseContactParameter(Long contactId, Long operatorUid, String tag) {
+        if(contactId == null) {
+            LOGGER.error("Enterprise contact id is null, operatorUid=" + operatorUid + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Enterprise contact id can not be null");
+        }
+        
+        EnterpriseContact contact = this.enterpriseContactProvider.queryContactById(contactId);
+        if(contact == null) {
+            LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid + ", contactId=" + contactId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
+                    "Unable to find the enterprise contact");
+        }
+        
+        return contact;
+    }
 
 	private String setExecCommand(String jarPath, Long orgId, String filePath1,
 			String filePath2) {

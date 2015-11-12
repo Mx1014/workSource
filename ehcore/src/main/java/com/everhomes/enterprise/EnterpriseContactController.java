@@ -16,6 +16,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
@@ -191,7 +192,6 @@ public class EnterpriseContactController extends ControllerBase {
          
          return res;
     }
-    
 
     /**
      * <b>URL: /contact/rejectContact</b>
@@ -208,5 +208,19 @@ public class EnterpriseContactController extends ControllerBase {
          
          return res;
     }
+
+    /**
+     * <b>URL: /contact/leave</b>
+     * <p>退出指定企业</p>
+     */
+    @RequestMapping("leave")
+    @RestReturn(value=String.class)
+    public RestResponse leave(@Valid LeaveEnterpriseCommand cmd) {
     
+        this.enterpriseContactService.leaveEnterprise(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
