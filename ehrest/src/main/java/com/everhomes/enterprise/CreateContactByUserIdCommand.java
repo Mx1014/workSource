@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.enterprise;
 
 import javax.validation.constraints.NotNull;

@@ -82,7 +82,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     public void createEnterprise(Enterprise enterprise) {
         
         //TODO for forum
-        enterprise.setDiscriminator(GroupDiscriminator.Enterprise.getCode());
+        enterprise.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
         this.groupProvider.createGroup(enterprise);
     }
     
@@ -162,7 +162,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
                     SelectQuery<? extends Record> query) {
                 if(callback != null)
                     callback.buildCondition(locator, query);
-                query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.Enterprise.getCode()));
+                query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.ENTERPRISE.getCode()));
                 return query;
             }
             

@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.enterprise;
 
 import java.io.File;
@@ -5,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
@@ -36,6 +40,7 @@ import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.group.GroupVisibilityScope;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -55,6 +60,7 @@ import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
@@ -104,6 +110,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Autowired
 	private GroupProvider groupProvider;
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
 	@Override
 	public void addContactGroupMember(EnterpriseContactGroupMember member) {
@@ -225,26 +234,24 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	@Override
 	public EnterpriseContactDTO applyForContact(CreateContactByUserIdCommand cmd) {
 		// Check exists
-		EnterpriseContact existContact = this.enterpriseContactProvider
-				.queryContactByUserId(cmd.getEnterpriseId(), cmd.getUserId());
+		EnterpriseContact existContact = this.enterpriseContactProvider.queryContactByUserId(cmd.getEnterpriseId(), cmd.getUserId());
 		if (null != existContact) {
 			// Should response error hear
 			// contact.setId(existContact.getId());
-			return ConvertHelper.convert(existContact,
-					EnterpriseContactDTO.class);
+			return ConvertHelper.convert(existContact, EnterpriseContactDTO.class);
 		}
 
 		// TODO check group?
 		User user = UserContext.current().getUser();
 		Long userId = (user == null) ? 0L : user.getId();
-		EnterpriseContact result = this.dbProvider
-				.execute((TransactionStatus status) -> {
+		EnterpriseContact result = this.dbProvider.execute((TransactionStatus status) -> {
 					EnterpriseContact contact = new EnterpriseContact();
 					contact.setCreatorUid(userId);
 					contact.setEnterpriseId(cmd.getEnterpriseId());
 					contact.setName(user.getNickName());
 					contact.setNickName(user.getNickName());
 					contact.setAvatar(user.getAvatar());
+					contact.setUserId(userId);
 
 					// Create it
 					contact.setStatus(EnterpriseContactStatus.WAITING_AUTH
@@ -329,13 +336,64 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		// sendMessageForContactApproved(contact);
 		sendMessageForContactApproved(null, contact);
 	}
+	
+    /**
+     * 当企业成员加入group或者接受别人邀请加入group时，成员状态则待审核变为active，
+     * 此时group里的成员数需要增加，为了保证成员数的正确性，需要添加锁；
+     * @param member 成员
+     */
+    private void updatePendingEnterpriseContactToAuthenticated(EnterpriseContact contact) {
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()).enter(()-> {
+            this.dbProvider.execute((status) -> {
+                this.enterpriseContactProvider.updateContact(contact);
+                createOrUpdateUserGroup(contact);
+                
+                Group group = this.groupProvider.findGroupById(contact.getEnterpriseId());
+                group.setMemberCount(group.getMemberCount() + 1);
+                this.groupProvider.updateGroup(group);
+                return null;
+            });
+            return null;
+        });
+    }
+	
+	private void createOrUpdateUserGroup(EnterpriseContact contact) {
+        UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contact.getId(), contact.getEnterpriseId());
+        if(userGroup == null) {
+            createUserGroup(contact);
+        } else {
+            updateUserGroupStatus(contact);
+        }
+	}
 
-	// @Override
-	// public void approveByContactId(Long contactId) {
-	// EnterpriseContact contact = this.enterpriseContactProvider
-	// .getContactById(contactId);
-	// this.approveContact(contact);
-	// }
+
+    private void createUserGroup(EnterpriseContact contact) {
+        Long enterpriseId = contact.getEnterpriseId();
+        Long contactId = contact.getId();
+        
+        UserGroup userGroup = new UserGroup();
+        userGroup.setOwnerUid(contactId);
+        userGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+        userGroup.setGroupId(enterpriseId);
+        userGroup.setMemberRole(contact.getRole());
+        userGroup.setMemberStatus(contact.getStatus());
+        this.userProvider.createUserGroup(userGroup);
+    }
+    
+    private void updateUserGroupStatus(EnterpriseContact contact) {
+        Long enterpriseId = contact.getEnterpriseId();
+        Long contactId = contact.getId();
+        UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contactId, enterpriseId);
+        userGroup.setMemberStatus(contact.getStatus());
+        userProvider.updateUserGroup(userGroup);
+    }
+	
+//	@Override
+//	public void approveByContactId(Long contactId) {
+//		EnterpriseContact contact = this.enterpriseContactProvider
+//				.getContactById(contactId);
+//		this.approveContact(contact);
+//	}
 
 	/**
 	 * 将contact加入组
@@ -522,7 +580,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	public List<GroupMember> listMessageGroupMembers(Group group, int pageSize) {
 		List<GroupMember> members = new ArrayList<GroupMember>();
 		if (group.getDiscriminator().equals(
-				GroupDiscriminator.Enterprise.getCode())) {
+				GroupDiscriminator.ENTERPRISE.getCode())) {
 			ListingLocator locator = new ListingLocator();
 			// List approved members
 			List<EnterpriseContact> contacts = this.enterpriseContactProvider
