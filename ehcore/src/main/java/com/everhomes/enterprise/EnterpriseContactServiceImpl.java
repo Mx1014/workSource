@@ -1037,4 +1037,45 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	}
 
+	@Override
+	public ListContactGroupsByEnterpriseIdCommandResponse listContactGroupsByEnterpriseId(
+			ListContactGroupsByEnterpriseIdCommand cmd) {
+		 ListContactGroupsByEnterpriseIdCommandResponse response = new ListContactGroupsByEnterpriseIdCommandResponse();
+		 
+		 ListingLocator locator = new ListingLocator();
+         locator.setAnchor(cmd.getPageAnchor());
+         List<EnterpriseContactGroup> details = this.listContactGroupsByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize());
+         List<EnterpriseContactGroupDTO> dtos = new ArrayList<EnterpriseContactGroupDTO>();
+         for(EnterpriseContactGroup detail : details) {
+             EnterpriseContactGroupDTO dto =  ConvertHelper.convert(detail, EnterpriseContactGroupDTO.class);
+             EnterpriseContactGroup parentGroup = this.enterpriseContactProvider.queryContactGroupById(detail.getParentId());
+             dto.setParentGroupName(parentGroup.getName());
+             dtos.add(dto);
+         }
+         
+         
+         response.setContactGroups(dtos);
+         response.setNextPageAnchor(locator.getAnchor());
+		return response;
+	}
+
+	public List<EnterpriseContactGroup> listContactGroupsByEnterpriseId(
+			ListingLocator locator, Long enterpriseId, Integer pageSize) {
+
+		if (locator.getAnchor() == null)
+			locator.setAnchor(0L);
+		int count = PaginationConfigHelper
+				.getPageSize(configProvider, pageSize);
+		List<EnterpriseContactGroup> contactGroups = this.enterpriseContactProvider
+				.listContactGroupsByEnterpriseId(locator, enterpriseId, count);
+
+		Long nextPageAnchor = null;
+		if (contactGroups != null && contactGroups.size() > count) {
+			contactGroups.remove(contactGroups.size() - 1);
+			nextPageAnchor = contactGroups.get(contactGroups.size() - 1).getId();
+		}
+		locator.setAnchor(nextPageAnchor);
+ 
+		return contactGroups;
+	}
 }

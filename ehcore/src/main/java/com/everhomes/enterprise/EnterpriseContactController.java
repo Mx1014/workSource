@@ -56,7 +56,7 @@ public class EnterpriseContactController extends ControllerBase {
      * @return {@link EnterpriseContactDTO}
      */
     @RequestMapping("importContacts")
-    @RestReturn(value=EnterpriseContactDTO.class)
+    @RestReturn(value=String.class)
     public RestResponse importContacts(@Valid importContactsCommand cmd ,@RequestParam(value = "attachment") MultipartFile[] files) {
     	this.enterpriseContactService.importContacts(cmd,files);
     	RestResponse response = new RestResponse();
@@ -145,7 +145,24 @@ public class EnterpriseContactController extends ControllerBase {
         return res;
     }
     
-    
+
+    /**
+     * <b>URL: /contact/listContactGroupsByEnterpriseId</b>
+     * <p>显示企业组织架构</p>
+     * @return {@link ListContactGroupsByEnterpriseIdCommandResponse}
+     */
+    @RequestMapping("listContactGroupsByEnterpriseId")
+    @RestReturn(value=ListContactGroupsByEnterpriseIdCommandResponse.class)
+    public RestResponse listContactGroupsByEnterpriseId(@Valid ListContactGroupsByEnterpriseIdCommand cmd) {
+    	
+        ListContactGroupsByEnterpriseIdCommandResponse  response = enterpriseContactService.listContactGroupsByEnterpriseId(cmd);
+        RestResponse res = new RestResponse();
+        res.setResponseObject(response);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+    }  
     /**
      * <b>URL: /contact/listContactsByPhone</b>
      * <p>通过手机好查询联系人</p>

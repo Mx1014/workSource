@@ -869,6 +869,34 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	            return ConvertHelper.convert(r, EnterpriseContactGroupMember.class);
 	        });
 	}
+
+	@Override
+	public List<EnterpriseContactGroup> listContactGroupsByEnterpriseId(
+			ListingLocator locator, Long enterpriseId, int count) { 
+		 return this.queryContactGroupByEnterpriseId(locator, enterpriseId, count, null );
+	}
+
+	@Override
+	public EnterpriseContactGroup queryContactGroupById(Long Id) { 
+		EnterpriseContactGroup[] result = new EnterpriseContactGroup[1];
+	        
+	        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
+	            (DSLContext context, Object reducingContext) -> {
+	                result[0] = context.select().from(Tables.EH_ENTERPRISE_CONTACT_GROUPS)
+	                    .where(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.eq(Id))
+	                    .fetchAny().map((r) -> {
+	                        return ConvertHelper.convert(r, EnterpriseContactGroup.class);
+	                    });
+
+	                if (result[0] != null) {
+	                    return false;
+	                } else {
+	                    return true;
+	                }
+	            });
+	        
+	        return result[0];
+	}
     
 //    @Override
 //    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {
