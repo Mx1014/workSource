@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.bootstrap.PlatformContext;
@@ -32,8 +34,12 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserServiceErrorCode;
+import com.everhomes.user.admin.ImportDataResponse;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Community admin controller", site="core")
 @RestController
@@ -356,6 +362,27 @@ public class CommunityAdminController extends ControllerBase {
         this.communityService.rejectBuilding(cmd);
         
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/importBuildingData</b>
+     * <p>导入楼栋信息excel</p>
+     */
+    @RequestMapping("importBuildingData")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importBuildingData(@RequestParam(value = "attachment_file_") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+        RestResponse response = new RestResponse(importDataResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

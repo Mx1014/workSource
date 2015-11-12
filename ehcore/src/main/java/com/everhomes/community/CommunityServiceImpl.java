@@ -2,6 +2,7 @@
 package com.everhomes.community;
 
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.address.CommunityDTO;
@@ -63,11 +65,16 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserServiceErrorCode;
+import com.everhomes.user.admin.ImportDataResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
 @Component
@@ -928,4 +935,90 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
+
+	@Override
+	public ImportDataResponse importBuildingData(MultipartFile mfile,
+			Long userId) {
+		ImportDataResponse importDataResponse = new ImportDataResponse();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+			
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+						"File content is empty");
+			}
+			LOGGER.debug("Start import data...,total:" + resultList.size());
+			//导入数据，返回导入错误的日志数据集
+			List<String> errorDataLogs = importBuilding(convertToStrList(resultList), userId);
+			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+			if(null == errorDataLogs || errorDataLogs.isEmpty()){
+				LOGGER.debug("Data import all success...");
+			}else{
+				//记录导入错误日志
+				for (String log : errorDataLogs) {
+					LOGGER.error(log);
+				}
+			}
+			
+			importDataResponse.setTotalCount((long)resultList.size()-1);
+			importDataResponse.setFailCount((long)errorDataLogs.size());
+			importDataResponse.setLogs(errorDataLogs);
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return importDataResponse;
+	}
+
+	private List<String> convertToStrList(List list) {
+		List<String> result = new ArrayList<String>();
+		boolean firstRow = true;
+		for (Object o : list) {
+			if(firstRow){
+				firstRow = false;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			StringBuffer sb = new StringBuffer();
+			sb.append(r.getA()).append("||");
+			sb.append(r.getB()).append("||");
+			sb.append(r.getC()).append("||");
+			sb.append(r.getD()).append("||");
+			sb.append(r.getE()).append("||");
+			sb.append(r.getF()).append("||");
+			sb.append(r.getG()).append("||");
+			sb.append(r.getH());
+			result.add(sb.toString());
+		}
+		return result;
+	}
+	
+	private List<String> importBuilding(List<String> list, Long userId){
+		List<String> errorDataLogs = new ArrayList<String>();
+		for (String str : list) {
+			String[] s = str.split("\\|\\|");
+			dbProvider.execute((TransactionStatus status) -> {
+				Building building = new Building();
+				building.setName(s[0]);
+				building.setAliasName(s[1]);
+				building.setAddress(s[2]);
+				building.setContact(s[3]);
+				building.setAreaSize(Double.valueOf(s[4]));
+				String identifierToken = s[6];
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(identifierToken);
+				if(userIdentifier != null)
+					building.setManagerUid(userIdentifier.getOwnerUid());
+				building.setDescription(s[7]);
+				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				
+				LOGGER.info("add building");
+				this.communityProvider.createBuilding(userId, building);
+				return null;
+			});
+		}
+		return errorDataLogs;
+		
+	}
 }
