@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkApplyCard extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord> {
 
-	private static final long serialVersionUID = -344350183;
+	private static final long serialVersionUID = -668549595;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_park_apply_card</code>
@@ -70,6 +70,11 @@ public class EhParkApplyCard extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_park_apply_card.deadline</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord, java.sql.Timestamp> DEADLINE = createField("deadline", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_park_apply_card.community_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_park_apply_card</code> table reference

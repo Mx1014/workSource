@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseContactsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord> implements org.jooq.Record20<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String> {
 
-	private static final long serialVersionUID = -346363409;
+	private static final long serialVersionUID = -1600115013;
 
 	/**
 	 * Setter for <code>ehcore.eh_enterprise_contacts.id</code>. id of the record
@@ -112,14 +112,14 @@ public class EhEnterpriseContactsRecord extends org.jooq.impl.UpdatableRecordImp
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_enterprise_contacts.status</code>. 0: inactive, 1: waiting_auth, 2: authenticated
+	 * Setter for <code>ehcore.eh_enterprise_contacts.status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
 	public void setStatus(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_enterprise_contacts.status</code>. 0: inactive, 1: waiting_auth, 2: authenticated
+	 * Getter for <code>ehcore.eh_enterprise_contacts.status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
 	public java.lang.Byte getStatus() {
 		return (java.lang.Byte) getValue(7);
