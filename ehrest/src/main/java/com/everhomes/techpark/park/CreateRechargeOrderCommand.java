@@ -27,6 +27,16 @@ public class CreateRechargeOrderCommand {
 	private String ownerName;
 	@NotNull
 	private String validityPeriod;
+	
+	private Long enterpriseCommunityId;
+
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
+	}
+
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
 
 	public String getValidityPeriod() {
 		return validityPeriod;

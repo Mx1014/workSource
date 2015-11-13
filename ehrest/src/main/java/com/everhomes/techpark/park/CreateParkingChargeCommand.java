@@ -10,6 +10,8 @@ public class CreateParkingChargeCommand {
 	
 	@NotNull
 	private Double amount;
+	
+	private Long enterpriseCommunityId;
 
 	public Byte getMonths() {
 		return months;
@@ -26,5 +28,14 @@ public class CreateParkingChargeCommand {
 	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
+
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
+	}
+
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
+	
 	
 }
