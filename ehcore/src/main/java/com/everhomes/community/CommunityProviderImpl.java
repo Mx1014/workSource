@@ -9,10 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +25,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+
 import ch.hsr.geohash.GeoHash;
 
+
+import com.everhomes.address.Address;
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -30,6 +37,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseContactStatus;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
@@ -47,6 +55,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
@@ -872,5 +881,61 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         
 		return buildingIds;
+	}
+	
+	@Override
+	public List<CommunityUser> listUserCommunities(CommunityUser communityUser,int pageOffset,int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		
+		Condition cond = Tables.EH_USER_COMMUNITIES.COMMUNITY_ID.eq(communityUser.getCommunityId());
+		if(1 == communityUser.getIsAuth()){
+			cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.INACTIVE.getCode()));
+		}else if(2 == communityUser.getIsAuth()){
+			cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.notEqual(EnterpriseContactStatus.INACTIVE.getCode()));
+		}
+		
+		if(!StringUtils.isEmpty(communityUser.getUserName())){
+			cond.or(Tables.EH_USERS.NICK_NAME.eq(communityUser.getUserName()));
+			cond.or(Tables.EH_ENTERPRISE_CONTACTS.NAME.eq(communityUser.getUserName()));
+		}
+		
+		if(!StringUtils.isEmpty(communityUser.getPhone())){
+			cond.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(communityUser.getPhone()));
+		}
+		List<CommunityUser> communityUsers = new ArrayList<CommunityUser>();
+		
+		context.select().from(Tables.EH_USER_COMMUNITIES).leftOuterJoin(Tables.EH_ENTERPRISE_CONTACTS).
+						on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_ENTERPRISE_CONTACTS.USER_ID)).
+						leftOuterJoin(Tables.EH_USERS).on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_USERS.ID)).
+						leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)).
+						leftOuterJoin(Tables.EH_GROUPS).on(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(Tables.EH_GROUPS.ID)).
+						where(cond).limit(pageSize).offset(pageOffset).fetch().map(r ->{
+							CommunityUser user = new CommunityUser();
+							user.setId(r.getValue(Tables.EH_USER_COMMUNITIES.ID));
+							user.setUserId(r.getValue(Tables.EH_USER_COMMUNITIES.OWNER_UID));
+							user.setUserName(StringUtils.isEmpty(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.NAME)) ? r.getValue(Tables.EH_USERS.NICK_NAME) : r.getValue(Tables.EH_ENTERPRISE_CONTACTS.NAME));
+							user.setApplyTime(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME));
+							user.setPhone(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+							user.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
+							user.setIsAuth(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.STATUS).equals(EnterpriseContactStatus.INACTIVE.getCode()) ? 1 : 2);
+							Long enterpriseId = r.getValue(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID);
+							
+							if(null != enterpriseId){
+								DSLContext cont = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+								Record record =  cont.select().from(Tables.EH_ENTERPRISE_ADDRESSES).leftOuterJoin(Tables.EH_ADDRESSES)
+												.on(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
+												.where(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId)).fetchOne();
+								
+								if(null != record){
+									user.setBuildingName(record.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+									user.setAddressName(record.getValue(Tables.EH_ADDRESSES.ADDRESS));
+									user.setAddressId(record.getValue(Tables.EH_ADDRESSES.ID));
+								}
+							}
+							
+							communityUsers.add(user);
+							return null;
+		                });
+		return communityUsers;
 	}
 }
