@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.naming.java.javaURLContextFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -1385,9 +1386,19 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchYear(yearSF.format(new java.sql.Date(cmd.getQueryTime()))); 
 		Calendar start = Calendar.getInstance();
 		Calendar end = Calendar.getInstance(); 
-		//start 为月初
+		//start 设置为本月月初
 		start.set(Calendar.DAY_OF_MONTH,
 				start.getActualMinimum(Calendar.DAY_OF_MONTH));
+		if(start.after(new java.sql.Date(cmd.getQueryTime()))){
+			//如果查询日在月初之前 则设置为查询月的月初和月末
+			start.setTime(new java.sql.Date(cmd.getQueryTime()) );
+			end.setTime(new java.sql.Date(cmd.getQueryTime()) );
+			start.set(Calendar.DAY_OF_MONTH,
+					start.getActualMinimum(Calendar.DAY_OF_MONTH));
+			end.set(Calendar.DAY_OF_MONTH,
+					end.getActualMaximum(Calendar.DAY_OF_MONTH));
+		}
+		 
 		ListYearPunchLogsCommandResponse pyl = new ListYearPunchLogsCommandResponse();
 		pyl.setPunchYear(response.getPunchYear());
 		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getCompanyId(),
