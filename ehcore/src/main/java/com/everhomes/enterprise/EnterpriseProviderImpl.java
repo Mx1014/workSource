@@ -543,7 +543,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 
     private void deleteEnterpriseAttachmentsById(long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class));
-        EhEnterpriseContactsDao dao = new EhEnterpriseContactsDao(context.configuration());
+        EhEnterpriseAttachmentsDao dao = new EhEnterpriseAttachmentsDao(context.configuration());
         dao.deleteById(id);        
     }
 	

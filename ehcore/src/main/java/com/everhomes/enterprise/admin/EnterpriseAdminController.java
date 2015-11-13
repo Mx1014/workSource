@@ -15,6 +15,9 @@ import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseApproveCommand;
 import com.everhomes.enterprise.EnterpriseDTO;
 import com.everhomes.enterprise.EnterpriseService;
+import com.everhomes.enterprise.ListEnterpriseByCommunityIdCommand;
+import com.everhomes.enterprise.ListEnterpriseResponse;
+import com.everhomes.enterprise.UpdateContactorCommand;
 import com.everhomes.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserContext;
@@ -85,4 +88,16 @@ public class EnterpriseAdminController extends ControllerBase {
         return res;
     }
     
+    @RequestMapping("updateContactor")
+    @RestReturn(value=ListEnterpriseResponse.class)
+    public RestResponse updateContactor(UpdateContactorCommand cmd) {
+    	
+    	enterpriseService.updateContactor(cmd);
+    	ListEnterpriseByCommunityIdCommand command = new ListEnterpriseByCommunityIdCommand();
+    	command.setCommunityId(cmd.getCommunityId());
+    	 RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(command));
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         return res;
+    }
 }

@@ -48,6 +48,7 @@ import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
 import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
@@ -55,10 +56,15 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -731,7 +737,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public void createBuilding(Long creatorId, Building building) {
 
-		long id = shardingProvider.allocShardableContentId(EhBuildings.class).second();
+		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBuildings.class));
         
 		building.setId(id);
 		building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -882,6 +888,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         
 		return buildingIds;
 	}
+
 	
 	@Override
 	public List<CommunityUser> listUserCommunities(CommunityUser communityUser,int pageOffset,int pageSize) {
@@ -939,4 +946,29 @@ public class CommunityProviderImpl implements CommunityProvider {
 		                });
 		return communityUsers;
 	}
+
+
+	@Override
+	public void deleteBuildingAttachmentsByBuildingId(Long buildingId) {
+		
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhBuildingAttachmentsRecord> query = context.selectQuery(Tables.EH_BUILDING_ATTACHMENTS);
+					query.addConditions(Tables.EH_BUILDING_ATTACHMENTS.BUILDING_ID.eq(buildingId));
+		            query.fetch().map((EhBuildingAttachmentsRecord record) -> {
+		            	deleteBuildingAttachmentsById(record.getId());
+		            	return null;
+					});
+
+					return true;
+				});
+
+	}
+	
+	private void deleteBuildingAttachmentsById(long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
+        EhBuildingAttachmentsDao dao = new EhBuildingAttachmentsDao(context.configuration());
+        dao.deleteById(id);        
+    }
+
 }

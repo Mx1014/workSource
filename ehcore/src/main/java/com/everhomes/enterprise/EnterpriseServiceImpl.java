@@ -175,29 +175,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setContactsPhone(cmd.getContactsPhone());
         this.enterpriseProvider.createEnterprise(enterprise);
         
-        if(cmd.getEntries() != null) {
-        	
-    		EnterpriseContact ec = new EnterpriseContact();
-    		ec.setCreatorUid(userId);
-    		ec.setEnterpriseId(enterprise.getId());
-    		if(cmd.getContactor() != null) 
-    			ec.setName(cmd.getContactor());
-    		
-    		ec.setRole(RoleConstants.SystemAdmin);
-    		Long contactId = this.enterpriseContactProvider.createContact(ec);
-    		
-    		EnterpriseContactEntry entry = new EnterpriseContactEntry();
-    		entry.setEnterpriseId(ec.getEnterpriseId());
-    		entry.setCreatorUid(userId);
-    		entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
-    		entry.setEntryValue(cmd.getEntries());
-    		entry.setContactId(contactId);
-    		this.enterpriseContactProvider.createContactEntry(entry);
-    		
-    		enterprise.setEntries(entry.getEntryValue());
-    		enterprise.setContactor(ec.getName());
-        }
-        
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
         
         List<Long> addressIds = cmd.getAddressId();
@@ -640,31 +617,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setContactsPhone(cmd.getContactsPhone());
         this.enterpriseProvider.updateEnterprise(enterprise);
         
-        List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getId());
-        this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
-        if(cmd.getEntries() != null) {
-        		EnterpriseContact ec = new EnterpriseContact();
-        		ec.setCreatorUid(userId);
-        		ec.setEnterpriseId(enterprise.getId());
-        		if(cmd.getContactor() != null) 
-        			ec.setName(cmd.getContactor());
-        		
-        		ec.setRole(RoleConstants.SystemAdmin);
-        		Long contactId = this.enterpriseContactProvider.createContact(ec);
-        		
-        		EnterpriseContactEntry entry = new EnterpriseContactEntry();
-        		entry.setEnterpriseId(ec.getEnterpriseId());
-        		entry.setCreatorUid(userId);
-        		entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
-        		entry.setEntryValue(cmd.getEntries());
-        		entry.setContactId(contactId);
-        		this.enterpriseContactProvider.createContactEntry(entry);
-        		
-        		enterprise.setEntries(entry.getEntryValue());
-        		enterprise.setContactor(ec.getName());
-        	
-        }
-        
         List<Long> addressIds = cmd.getAddressId();
         if(addressIds != null && addressIds.size() > 0) {
         	List<Address> address = new ArrayList<Address>();
@@ -718,6 +670,41 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			throw RuntimeErrorException
 			.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_USER_NOT_FOUND,
 					"you are not in the enterprise !");
+	}
+
+	@Override
+	public void updateContactor(UpdateContactorCommand cmd) {
+		
+		User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        
+        EnterpriseContact enterCon = this.enterpriseContactProvider.queryEnterpriseContactor(cmd.getEnterpriseId());
+        enterCon.setRole(RoleConstants.ResourceUser);
+        this.enterpriseContactProvider.updateContact(enterCon);
+        
+		EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(cmd.getEnterpriseId(), cmd.getEntryValue());
+		if(entry == null) {
+			EnterpriseContact ec = new EnterpriseContact();
+    		ec.setCreatorUid(userId);
+    		ec.setEnterpriseId(cmd.getEnterpriseId());
+    		if(cmd.getContactName() != null) 
+    			ec.setName(cmd.getContactName());
+    		
+    		ec.setRole(RoleConstants.SystemAdmin);
+    		Long contactId = this.enterpriseContactProvider.createContact(ec);
+    		
+    		EnterpriseContactEntry conentry = new EnterpriseContactEntry();
+    		conentry.setEnterpriseId(ec.getEnterpriseId());
+    		conentry.setCreatorUid(userId);
+    		conentry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
+    		conentry.setEntryValue(cmd.getEntryValue());
+    		conentry.setContactId(contactId);
+    		this.enterpriseContactProvider.createContactEntry(conentry);
+		} else {
+			EnterpriseContact enterpriseContact = this.enterpriseContactProvider.queryContactById(entry.getContactId());
+			enterpriseContact.setRole(RoleConstants.SystemAdmin);
+			this.enterpriseContactProvider.updateContact(enterpriseContact);
+		}
 	}
 
 }

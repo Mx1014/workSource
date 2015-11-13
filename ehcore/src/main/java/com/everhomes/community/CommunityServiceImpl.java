@@ -779,6 +779,8 @@ public class CommunityServiceImpl implements CommunityService {
     private void processBuildingAttachments(long userId, List<AttachmentDescriptor> attachmentList, Building building) {
         List<BuildingAttachment> results = null;
         
+        this.communityProvider.deleteBuildingAttachmentsByBuildingId(building.getId());
+        
         if(attachmentList != null) {
             results = new ArrayList<BuildingAttachment>();
             
