@@ -140,13 +140,19 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
-	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(String name,long versionCode) {
+	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(String siteUri, String name,long versionCode) {
 		List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
 		Condition condition = Tables.EH_LAUNCH_PAD_LAYOUTS.NAME.eq(name);
 		if(versionCode != 0){
 			condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.MIN_VERSION_CODE.lessOrEqual(versionCode));
+		}
+		if(siteUri !=null && !siteUri.isEmpty()){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SITE_URI.eq(siteUri));
+		}
+		else{
+			condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SITE_URI.isNull().or(Tables.EH_LAUNCH_PAD_LAYOUTS.SITE_URI.eq("")));
 		}
 		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
 		step.where(condition).orderBy(Tables.EH_LAUNCH_PAD_LAYOUTS.VERSION_CODE.desc()).fetch().map((r) ->{
@@ -157,7 +163,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return layouts;
 	}
 	@Override
-	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
+	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(String siteUri,String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
@@ -172,6 +178,12 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TAG.in(tags));
 		}else{
 		    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TAG.isNull().or(Tables.EH_LAUNCH_PAD_ITEMS.TAG.eq("")));
+		}
+		if(siteUri !=null && !siteUri.isEmpty()){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SITE_URI.eq(siteUri));
+		}
+		else{
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SITE_URI.isNull().or(Tables.EH_LAUNCH_PAD_ITEMS.SITE_URI.eq("")));
 		}
 		step.where(condition).fetch().map((r) ->{
 			items.add(ConvertHelper.convert(r, LaunchPadItem.class));

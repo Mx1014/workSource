@@ -10,7 +10,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>itemLocation: item的路径</li>
  *  <li>itemGroup: 当前item归属哪个组</li>
- * <li>communityId: 小区id</li>
+ * 	<li>communityId: 小区id</li>
+ * 	<li>siteUri: 链接</li>
  * </ul>
  */
 public class GetLaunchPadItemsCommand {
@@ -21,6 +22,8 @@ public class GetLaunchPadItemsCommand {
     private String    itemGroup;
     @NotNull
     private Long    communityId;
+    @NotNull
+    private String siteUri;
 
     public GetLaunchPadItemsCommand() {
     }
@@ -48,8 +51,16 @@ public class GetLaunchPadItemsCommand {
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
+    
+    public String getSiteUri() {
+		return siteUri;
+	}
 
-    @Override
+	public void setSiteUri(String siteUri) {
+		this.siteUri = siteUri;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

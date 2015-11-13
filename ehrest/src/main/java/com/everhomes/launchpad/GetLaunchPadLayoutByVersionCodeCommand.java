@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>name: layout的名称</li>
  * <li>versionCode: 当前版本号</li>
+ * <li>siteUri: 链接</li>
  * </ul>
  */
 public class GetLaunchPadLayoutByVersionCodeCommand {
@@ -18,6 +19,8 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
     private Long     versionCode;
     @NotNull
     private String   name;
+    @NotNull
+    private String siteUri;
 
     public GetLaunchPadLayoutByVersionCodeCommand() {
     }
@@ -38,7 +41,15 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
         this.versionCode = versionCode;
     }
 
-    @Override
+    public String getSiteUri() {
+		return siteUri;
+	}
+
+	public void setSiteUri(String siteUri) {
+		this.siteUri = siteUri;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
