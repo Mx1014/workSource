@@ -40,6 +40,8 @@ import com.everhomes.util.StringHelper;
  * <li>contactsPhone: 公司联系电话</li>
  * <li>contactor: 公司联系人</li>
  * <li>entries: 公司联系人手机号</li>
+ * <li>enterpriseAddress: 公司地址</li>
+ * <li>enterpriseCheckinDate: 公司入驻时间</li>
  * </ul>
  * @author janson
  *
@@ -84,7 +86,27 @@ public class EnterpriseDTO {
     
     private String entries; 
     
-    public String getContactsPhone() {
+    private String enterpriseCheckinDate;
+    
+    private String enterpriseAddress;
+    
+    public String getEnterpriseCheckinDate() {
+		return enterpriseCheckinDate;
+	}
+
+	public void setEnterpriseCheckinDate(String enterpriseCheckinDate) {
+		this.enterpriseCheckinDate = enterpriseCheckinDate;
+	}
+
+	public String getEnterpriseAddress() {
+		return enterpriseAddress;
+	}
+
+	public void setEnterpriseAddress(String enterpriseAddress) {
+		this.enterpriseAddress = enterpriseAddress;
+	}
+
+	public String getContactsPhone() {
 		return contactsPhone;
 	}
 

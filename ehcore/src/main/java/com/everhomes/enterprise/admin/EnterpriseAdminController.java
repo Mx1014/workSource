@@ -11,6 +11,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.enterprise.CreateEnterpriseCommand;
+import com.everhomes.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseApproveCommand;
 import com.everhomes.enterprise.EnterpriseDTO;
@@ -95,9 +96,24 @@ public class EnterpriseAdminController extends ControllerBase {
     	enterpriseService.updateContactor(cmd);
     	ListEnterpriseByCommunityIdCommand command = new ListEnterpriseByCommunityIdCommand();
     	command.setCommunityId(cmd.getCommunityId());
-    	 RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(command));
-         res.setErrorCode(ErrorCodes.SUCCESS);
-         res.setErrorDescription("OK");
-         return res;
+    	
+    	RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(command));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+         
+        return res;
+    }
+    
+    public RestResponse deleteEnterprise(DeleteEnterpriseCommand cmd) {
+    	
+    	enterpriseService.deleteEnterprise(cmd);
+    	ListEnterpriseByCommunityIdCommand command = new ListEnterpriseByCommunityIdCommand();
+    	command.setCommunityId(cmd.getCommunityId());
+    	 
+    	RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(command));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+         
+        return res;
     }
 }
