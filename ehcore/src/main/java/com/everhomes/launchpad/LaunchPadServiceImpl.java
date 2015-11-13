@@ -195,7 +195,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 		}
 
-		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
 		defaultItems.forEach(r ->{
 			LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
 			itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
@@ -242,10 +242,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		long userId = user.getId();
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
-		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
-		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
-		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
+		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
+		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
+		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
 		List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
 		if(defaultItems == null || defaultItems.isEmpty()){
@@ -785,7 +785,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					"Invalid versionCode paramter.versionCode is null");
 		}
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
-		this.launchPadProvider.findLaunchPadItemsByVersionCode(cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
+		this.launchPadProvider.findLaunchPadItemsByVersionCode(cmd.getSiteUri(),cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
 		results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));
 		return null;
 		}).collect(Collectors.toList());

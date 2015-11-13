@@ -933,7 +933,6 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 		 
         SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
-        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(RoleConstants.SystemAdmin));
  
         
         query.fetch().map((r) -> {

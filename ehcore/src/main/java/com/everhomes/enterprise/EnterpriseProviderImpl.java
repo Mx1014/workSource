@@ -546,5 +546,33 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         EhEnterpriseAttachmentsDao dao = new EhEnterpriseAttachmentsDao(context.configuration());
         dao.deleteById(id);        
     }
+
+	@Override
+	public List<EnterpriseAddress> findEnterpriseAddressByEnterpriseId(
+			Long enterpriseId) {
+		
+		List<EnterpriseAddress> ea = new ArrayList<EnterpriseAddress>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhEnterpriseAddressesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ADDRESSES);
+					query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId));
+					query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.STATUS.ne(EnterpriseAddressStatus.INACTIVE.getCode()));
+					query.fetch().map((EhEnterpriseAddressesRecord record) -> {
+						ea.add(ConvertHelper.convert(record, EnterpriseAddress.class));
+		            	return null;
+					});
+					
+					return true;
+				});
+		return ea;
+	}
+
+	@Override
+	public void deleteEnterpriseAddress(EnterpriseAddress enterpriseAddr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, enterpriseAddr.getEnterpriseId()));
+		enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseAddressesDao dao = new EhEnterpriseAddressesDao(context.configuration());
+        dao.delete(enterpriseAddr); 		
+	}
 	
 }

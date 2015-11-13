@@ -626,7 +626,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         	List<Address> address = new ArrayList<Address>();
         	for(Long addressId :addressIds) {
         		if(addressId != null) {
-        			if(this.enterpriseProvider.isExistInEnterpriseAddresses(cmd.getId(), addressId)) {
+        			Boolean isExist = this.enterpriseProvider.isExistInEnterpriseAddresses(cmd.getId(), addressId);
+        			if(!isExist) {
         			
 		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
 		                enterpriseAddr.setAddressId(addressId);
@@ -710,6 +711,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			enterpriseContact.setRole(RoleConstants.SystemAdmin);
 			this.enterpriseContactProvider.updateContact(enterpriseContact);
 		}
+	}
+
+	@Override
+	public void deleteEnterprise(DeleteEnterpriseCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
