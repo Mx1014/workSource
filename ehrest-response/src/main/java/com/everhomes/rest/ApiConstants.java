@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-10 15:49:05
+// generated at 2015-11-12 20:02:25
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -29,6 +29,7 @@ public interface ApiConstants {
     public static final String ADDRESS_LISTCOMMUNITIESBYKEYWORD_URL = "/address/listCommunitiesByKeyword";
     public static final String ADDRESS_LISTNEARBYCOMMUNITIES_URL = "/address/listNearbyCommunities";
     public static final String ADDRESS_LISTSUGGESTEDCOMMUNITIES_URL = "/address/listSuggestedCommunities";
+    public static final String ADDRESS_LISTUNASSIGNEDAPARTMENTSBYBUILDINGNAME_URL = "/address/listUnassignedApartmentsByBuildingName";
     public static final String ADDRESS_SEARCHCOMMUNITIES_URL = "/address/searchCommunities";
     public static final String ADDRESS_SUGGESTCOMMUNITY_URL = "/address/suggestCommunity";
     public static final String ADMIN_ACL_ASSIGNUSERROLE_URL = "/admin/acl/assignUserRole";
@@ -61,6 +62,7 @@ public interface ApiConstants {
     public static final String ADMIN_COMMUNITY_GETCOMMUNITYMANAGERS_URL = "/admin/community/getCommunityManagers";
     public static final String ADMIN_COMMUNITY_GETNEARBYCOMMUNITIESBYID_URL = "/admin/community/getNearbyCommunitiesById";
     public static final String ADMIN_COMMUNITY_GETUSERCOMMUNITIES_URL = "/admin/community/getUserCommunities";
+    public static final String ADMIN_COMMUNITY_IMPORTBUILDINGDATA_URL = "/admin/community/importBuildingData";
     public static final String ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL = "/admin/community/listBuildingsByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL = "/admin/community/listCommunitiesByKeyword";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
@@ -195,9 +197,17 @@ public interface ApiConstants {
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
+    public static final String CONTACT_ADDCONTACT_URL = "/contact/addContact";
+    public static final String CONTACT_ADDCONTACTGROUP_URL = "/contact/addContactGroup";
     public static final String CONTACT_APPROVECONTACT_URL = "/contact/approveContact";
     public static final String CONTACT_CREATECONTACTBYPHONECOMMAND_URL = "/contact/createContactByPhoneCommand";
     public static final String CONTACT_CREATECONTACTBYUSERIDCOMMAND_URL = "/contact/createContactByUserIdCommand";
+    public static final String CONTACT_DELETECONTACTBYID_URL = "/contact/deleteContactById";
+    public static final String CONTACT_DELETECONTACTGROUPBYID_URL = "/contact/deleteContactGroupById";
+    public static final String CONTACT_IMPORTCONTACTS_URL = "/contact/importContacts";
+    public static final String CONTACT_LEAVE_URL = "/contact/leave";
+    public static final String CONTACT_LISTCONTACTGROUPNAMESBYENTERPRISEID_URL = "/contact/listContactGroupNamesByEnterpriseId";
+    public static final String CONTACT_LISTCONTACTGROUPSBYENTERPRISEID_URL = "/contact/listContactGroupsByEnterpriseId";
     public static final String CONTACT_LISTCONTACTSBYENTERPRISEID_URL = "/contact/listContactsByEnterpriseId";
     public static final String CONTACT_LISTCONTACTSBYPHONE_URL = "/contact/listContactsByPhone";
     public static final String CONTACT_LISTCONTACTSREQUESTBYENTERPRISEID_URL = "/contact/listContactsRequestByEnterpriseId";
@@ -349,6 +359,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
+    public static final String ORG_LISTUSERTASK_URL = "/org/listUserTask";
     public static final String ORG_NEWCOOPERATION_URL = "/org/newCooperation";
     public static final String ORG_NEWORGCOMMENT_URL = "/org/newOrgComment";
     public static final String ORG_NEWORGTOPIC_URL = "/org/newOrgTopic";
@@ -493,6 +504,7 @@ public interface ApiConstants {
     public static final String USER_FETCHPASTTORECENTMESSAGES_URL = "/user/fetchPastToRecentMessages";
     public static final String USER_FETCHRECENTTOPASTMESSAGES_URL = "/user/fetchRecentToPastMessages";
     public static final String USER_FINDTOKENBYUSERID_URL = "/user/findTokenByUserId";
+    public static final String USER_GETBIZSIGNATURE_URL = "/user/getBizSignature";
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
