@@ -1035,7 +1035,8 @@ public class CommunityServiceImpl implements CommunityService {
 		communityUser.setPhone(cmd.getKeywords());
 		communityUser.setIsAuth(cmd.getIsAuth());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<CommunityUser> communityUsers = this.communityProvider.listUserCommunities(communityUser, pageSize + 1, cmd.getPageOffset());
+		Integer offset = cmd.getPageOffset() == null ? 1 : (cmd.getPageOffset() - 1 ) * pageSize;
+		List<CommunityUser> communityUsers = this.communityProvider.listUserCommunities(communityUser, offset, pageSize + 1);
 		
 		if(communityUsers != null && communityUsers.size() > pageSize) {
 			communityUsers.remove(communityUsers.size() - 1);

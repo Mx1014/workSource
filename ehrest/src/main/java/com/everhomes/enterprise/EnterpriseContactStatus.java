@@ -8,7 +8,7 @@ package com.everhomes.enterprise;
  * </ul>
  */
 public enum EnterpriseContactStatus {
-	INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), ACTIVE((byte)2);
+	INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2), ACTIVE((byte)3);
     
     private byte code;
     private EnterpriseContactStatus(byte code) {

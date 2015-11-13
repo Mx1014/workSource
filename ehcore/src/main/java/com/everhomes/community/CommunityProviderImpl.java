@@ -889,19 +889,20 @@ public class CommunityProviderImpl implements CommunityProvider {
 		
 		Condition cond = Tables.EH_USER_COMMUNITIES.COMMUNITY_ID.eq(communityUser.getCommunityId());
 		if(1 == communityUser.getIsAuth()){
-			cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.INACTIVE.getCode()));
+			cond = cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.ACTIVE.getCode()));
 		}else if(2 == communityUser.getIsAuth()){
-			cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.notEqual(EnterpriseContactStatus.INACTIVE.getCode()));
+			Condition cond2 = Tables.EH_ENTERPRISE_CONTACTS.STATUS.notEqual(EnterpriseContactStatus.ACTIVE.getCode());
+			cond2 = cond2.or(Tables.EH_ENTERPRISE_CONTACTS.STATUS.isNull());
+			cond = cond.and(cond2);
 		}
 		
 		if(!StringUtils.isEmpty(communityUser.getUserName())){
-			cond.or(Tables.EH_USERS.NICK_NAME.eq(communityUser.getUserName()));
-			cond.or(Tables.EH_ENTERPRISE_CONTACTS.NAME.eq(communityUser.getUserName()));
+			Condition cond1 = Tables.EH_USERS.NICK_NAME.eq(communityUser.getUserName());
+			cond1 = cond1.or(Tables.EH_ENTERPRISE_CONTACTS.NAME.eq(communityUser.getUserName()));
+			cond1 = cond1.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(communityUser.getPhone()));
+			cond = cond.and(cond1);
 		}
 		
-		if(!StringUtils.isEmpty(communityUser.getPhone())){
-			cond.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(communityUser.getPhone()));
-		}
 		List<CommunityUser> communityUsers = new ArrayList<CommunityUser>();
 		
 		context.select().from(Tables.EH_USER_COMMUNITIES).leftOuterJoin(Tables.EH_ENTERPRISE_CONTACTS).
@@ -917,14 +918,14 @@ public class CommunityProviderImpl implements CommunityProvider {
 							user.setApplyTime(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME));
 							user.setPhone(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
 							user.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
-							user.setIsAuth(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.STATUS).equals(EnterpriseContactStatus.INACTIVE.getCode()) ? 1 : 2);
+							user.setIsAuth(null != r.getValue(Tables.EH_ENTERPRISE_CONTACTS.STATUS) && r.getValue(Tables.EH_ENTERPRISE_CONTACTS.STATUS).equals(EnterpriseContactStatus.ACTIVE.getCode()) ? 1 : 2);
 							Long enterpriseId = r.getValue(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID);
 							
 							if(null != enterpriseId){
 								DSLContext cont = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
 								Record record =  cont.select().from(Tables.EH_ENTERPRISE_ADDRESSES).leftOuterJoin(Tables.EH_ADDRESSES)
 												.on(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
-												.where(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId)).fetchOne();
+												.where(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId)).fetch().get(0);
 								
 								if(null != record){
 									user.setBuildingName(record.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
