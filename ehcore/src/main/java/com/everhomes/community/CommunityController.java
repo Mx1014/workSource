@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
+import com.everhomes.community.admin.CommunityUserDto;
+import com.everhomes.community.admin.CommunityUserResponse;
+import com.everhomes.community.admin.ListCommunityUsersCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -148,6 +151,20 @@ public class CommunityController extends ControllerBase {
 		BuildingDTO dto = communityService.getBuilding(cmd);
 		RestResponse response =  new RestResponse(dto);
 
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+	/**
+	 * <b>URL: /community/listCommunityUsers</b>
+	 * <p>查询园区用户列表</p>
+	 */
+	@RequestMapping("listCommunityUsers")
+    @RestReturn(value=CommunityUserDto.class)
+	public RestResponse listCommunityUsers(ListCommunityUsersCommand cmd) {
+		CommunityUserResponse res = communityService.listUserCommunities(cmd);
+		RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkApplyCard implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1996153751;
+	private static final long serialVersionUID = -1746063973;
 
 	private java.lang.Long     id;
 	private java.lang.Long     applierId;
@@ -22,6 +22,7 @@ public class EhParkApplyCard implements java.io.Serializable {
 	private java.lang.Byte     applyStatus;
 	private java.lang.Byte     fetchStatus;
 	private java.sql.Timestamp deadline;
+	private java.lang.Long     communityId;
 
 	public EhParkApplyCard() {}
 
@@ -34,7 +35,8 @@ public class EhParkApplyCard implements java.io.Serializable {
 		java.sql.Timestamp applyTime,
 		java.lang.Byte     applyStatus,
 		java.lang.Byte     fetchStatus,
-		java.sql.Timestamp deadline
+		java.sql.Timestamp deadline,
+		java.lang.Long     communityId
 	) {
 		this.id = id;
 		this.applierId = applierId;
@@ -45,6 +47,7 @@ public class EhParkApplyCard implements java.io.Serializable {
 		this.applyStatus = applyStatus;
 		this.fetchStatus = fetchStatus;
 		this.deadline = deadline;
+		this.communityId = communityId;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhParkApplyCard implements java.io.Serializable {
 
 	public void setDeadline(java.sql.Timestamp deadline) {
 		this.deadline = deadline;
+	}
+
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
+	}
+
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 }

@@ -9,10 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +25,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
+
 import ch.hsr.geohash.GeoHash;
 
+
+import com.everhomes.address.Address;
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -30,6 +37,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseContactStatus;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
@@ -40,6 +48,7 @@ import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
 import com.everhomes.server.schema.tables.daos.EhCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhCommunityGeopointsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
 import com.everhomes.server.schema.tables.daos.EhForumAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
@@ -47,9 +56,15 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
+
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -722,7 +737,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public void createBuilding(Long creatorId, Building building) {
 
-		long id = shardingProvider.allocShardableContentId(EhBuildings.class).second();
+		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBuildings.class));
         
 		building.setId(id);
 		building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -873,4 +888,87 @@ public class CommunityProviderImpl implements CommunityProvider {
         
 		return buildingIds;
 	}
+
+	
+	@Override
+	public List<CommunityUser> listUserCommunities(CommunityUser communityUser,int pageOffset,int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		
+		Condition cond = Tables.EH_USER_COMMUNITIES.COMMUNITY_ID.eq(communityUser.getCommunityId());
+		if(1 == communityUser.getIsAuth()){
+			cond = cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.ACTIVE.getCode()));
+		}else if(2 == communityUser.getIsAuth()){
+			Condition cond2 = Tables.EH_ENTERPRISE_CONTACTS.STATUS.notEqual(EnterpriseContactStatus.ACTIVE.getCode());
+			cond2 = cond2.or(Tables.EH_ENTERPRISE_CONTACTS.STATUS.isNull());
+			cond = cond.and(cond2);
+		}
+		
+		if(!StringUtils.isEmpty(communityUser.getUserName())){
+			Condition cond1 = Tables.EH_USERS.NICK_NAME.eq(communityUser.getUserName());
+			cond1 = cond1.or(Tables.EH_ENTERPRISE_CONTACTS.NAME.eq(communityUser.getUserName()));
+			cond1 = cond1.or(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(communityUser.getPhone()));
+			cond = cond.and(cond1);
+		}
+		
+		List<CommunityUser> communityUsers = new ArrayList<CommunityUser>();
+		
+		context.select().from(Tables.EH_USER_COMMUNITIES).leftOuterJoin(Tables.EH_ENTERPRISE_CONTACTS).
+						on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_ENTERPRISE_CONTACTS.USER_ID)).
+						leftOuterJoin(Tables.EH_USERS).on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_USERS.ID)).
+						leftOuterJoin(Tables.EH_USER_IDENTIFIERS).on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID)).
+						leftOuterJoin(Tables.EH_GROUPS).on(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(Tables.EH_GROUPS.ID)).
+						where(cond).limit(pageSize).offset(pageOffset).fetch().map(r ->{
+							CommunityUser user = new CommunityUser();
+							user.setId(r.getValue(Tables.EH_USER_COMMUNITIES.ID));
+							user.setUserId(r.getValue(Tables.EH_USER_COMMUNITIES.OWNER_UID));
+							user.setUserName(StringUtils.isEmpty(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.NAME)) ? r.getValue(Tables.EH_USERS.NICK_NAME) : r.getValue(Tables.EH_ENTERPRISE_CONTACTS.NAME));
+							user.setApplyTime(r.getValue(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME));
+							user.setPhone(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+							user.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
+							user.setIsAuth(null != r.getValue(Tables.EH_ENTERPRISE_CONTACTS.STATUS) && r.getValue(Tables.EH_ENTERPRISE_CONTACTS.STATUS).equals(EnterpriseContactStatus.ACTIVE.getCode()) ? 1 : 2);
+							Long enterpriseId = r.getValue(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID);
+							
+							if(null != enterpriseId){
+								DSLContext cont = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+								Record record =  cont.select().from(Tables.EH_ENTERPRISE_ADDRESSES).leftOuterJoin(Tables.EH_ADDRESSES)
+												.on(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
+												.where(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId)).fetch().get(0);
+								
+								if(null != record){
+									user.setBuildingName(record.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+									user.setAddressName(record.getValue(Tables.EH_ADDRESSES.ADDRESS));
+									user.setAddressId(record.getValue(Tables.EH_ADDRESSES.ID));
+								}
+							}
+							
+							communityUsers.add(user);
+							return null;
+		                });
+		return communityUsers;
+	}
+
+
+	@Override
+	public void deleteBuildingAttachmentsByBuildingId(Long buildingId) {
+		
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhBuildingAttachmentsRecord> query = context.selectQuery(Tables.EH_BUILDING_ATTACHMENTS);
+					query.addConditions(Tables.EH_BUILDING_ATTACHMENTS.BUILDING_ID.eq(buildingId));
+		            query.fetch().map((EhBuildingAttachmentsRecord record) -> {
+		            	deleteBuildingAttachmentsById(record.getId());
+		            	return null;
+					});
+
+					return true;
+				});
+
+	}
+	
+	private void deleteBuildingAttachmentsById(long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
+        EhBuildingAttachmentsDao dao = new EhBuildingAttachmentsDao(context.configuration());
+        dao.deleteById(id);        
+    }
+
 }

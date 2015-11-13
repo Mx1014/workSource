@@ -25,9 +25,12 @@ import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.community.admin.CommunityManagerDTO;
+import com.everhomes.community.admin.CommunityUserDto;
+import com.everhomes.community.admin.CommunityUserResponse;
 import com.everhomes.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.community.admin.ListCommunityManagersAdminCommand;
+import com.everhomes.community.admin.ListCommunityUsersCommand;
 import com.everhomes.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.community.admin.RejectCommunityAdminCommand;
@@ -776,6 +779,8 @@ public class CommunityServiceImpl implements CommunityService {
     private void processBuildingAttachments(long userId, List<AttachmentDescriptor> attachmentList, Building building) {
         List<BuildingAttachment> results = null;
         
+        this.communityProvider.deleteBuildingAttachmentsByBuildingId(building.getId());
+        
         if(attachmentList != null) {
             results = new ArrayList<BuildingAttachment>();
             
@@ -1020,5 +1025,30 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return errorDataLogs;
 		
+	}
+	
+	@Override
+	public CommunityUserResponse listUserCommunities(
+			ListCommunityUsersCommand cmd) {
+		CommunityUserResponse res = new CommunityUserResponse();
+		CommunityUser communityUser = new CommunityUser();
+		communityUser.setCommunityId(cmd.getCommunityId());
+		communityUser.setUserName(cmd.getKeywords());
+		communityUser.setPhone(cmd.getKeywords());
+		communityUser.setIsAuth(cmd.getIsAuth());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer offset = cmd.getPageOffset() == null ? 1 : (cmd.getPageOffset() - 1 ) * pageSize;
+		List<CommunityUser> communityUsers = this.communityProvider.listUserCommunities(communityUser, offset, pageSize + 1);
+		
+		if(communityUsers != null && communityUsers.size() > pageSize) {
+			communityUsers.remove(communityUsers.size() - 1);
+			res.setNextPageOffset(cmd.getPageOffset() + 1);
+		}
+		List<CommunityUserDto> communityUserDtos = communityUsers.stream().map((c) ->{
+			CommunityUserDto dto = ConvertHelper.convert(c, CommunityUserDto.class);
+			return dto;
+		}).collect(Collectors.toList());
+		res.setUserCommunities(communityUserDtos);
+		return res;
 	}
 }

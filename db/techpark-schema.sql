@@ -417,6 +417,6 @@ CREATE TABLE `eh_park_apply_card` (
   `apply_status` TINYINT,
   `fetch_status` TINYINT,
   `deadline` DATETIME,
-  `community_id` BIGINT,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

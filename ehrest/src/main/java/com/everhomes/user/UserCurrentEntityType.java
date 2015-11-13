@@ -1,8 +1,21 @@
 // @formatter:off
 package com.everhomes.user;
 
+/**
+ * <ul>用户当前切换的实体
+ * <li>COMMUNITY_RESIDENTIAL(community_residential): 住宅类型小区</li>
+ * <li>COMMUNITY_COMMERCIAL(community_commercial): 商用类型园区</li>
+ * <li>FAMILY(family): 家庭</li>
+ * <li>ORGANIZATION(organization): 机构</li>
+ * <li>ENTERPRISE(enterprise): 企业</li>
+ * </ul>
+ */
 public enum UserCurrentEntityType {
-    COMMUNITY("community"), FAMILY("family"), ORGANIZATION("organization"),ENTERPRISE("enterprise");
+    COMMUNITY_RESIDENTIAL("community_residential"), 
+    COMMUNITY_COMMERCIAL("community_commercial"), 
+    FAMILY("family"), 
+    ORGANIZATION("organization"),
+    ENTERPRISE("enterprise");
 
     private String code;
     

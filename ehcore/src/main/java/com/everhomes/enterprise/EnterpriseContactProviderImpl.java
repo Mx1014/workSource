@@ -987,7 +987,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         }
         return null;
 	}
-    
+
 //    @Override
 //    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {
 //        EnterpriseContactRecordMapper
