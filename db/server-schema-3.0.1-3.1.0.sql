@@ -1,15 +1,14 @@
 # It is mainly for enterprise communities, which is a little different from communities;
 # so the enterprise related tables are added below.
 
-USE ehcore;
+use ehcore;
 
 SET foreign_key_checks = 0;
-
 
 # member of eh_groups partition
 # the relationship between eh_enterprises and eh_enterprise_communities
 #
-DROP TABLE IF EXISTS `eh_enterprise_addresses`;
+-- DROP TABLE IF EXISTS `eh_enterprise_addresses`;
 CREATE TABLE `eh_enterprise_addresses` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_groups',
@@ -31,7 +30,7 @@ CREATE TABLE `eh_enterprise_addresses` (
 # member of eh_groups partition
 # TODO for index field
 #
-DROP TABLE IF EXISTS `eh_enterprise_contacts`;
+-- DROP TABLE IF EXISTS `eh_enterprise_contacts`;
 CREATE TABLE `eh_enterprise_contacts` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
@@ -61,7 +60,7 @@ CREATE TABLE `eh_enterprise_contacts` (
 # member of eh_enterprises partition
 # entry info of eh_enterprise_contacts
 #
-DROP TABLE IF EXISTS `eh_enterprise_contact_entries`;
+-- DROP TABLE IF EXISTS `eh_enterprise_contact_entries`;
 CREATE TABLE `eh_enterprise_contact_entries` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
@@ -78,7 +77,7 @@ CREATE TABLE `eh_enterprise_contact_entries` (
 # member of eh_enterprises partition
 # internal group in enterprise
 #
-DROP TABLE IF EXISTS `eh_enterprise_contact_groups`;
+-- DROP TABLE IF EXISTS `eh_enterprise_contact_groups`;
 CREATE TABLE `eh_enterprise_contact_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
@@ -107,7 +106,7 @@ CREATE TABLE `eh_enterprise_contact_groups` (
 # member of eh_enterprises partition
 # role of member inside the group (internal)
 #
-DROP TABLE IF EXISTS `eh_enterprise_contact_group_members`;
+-- DROP TABLE IF EXISTS `eh_enterprise_contact_group_members`;
 CREATE TABLE `eh_enterprise_contact_group_members` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
@@ -138,7 +137,7 @@ CREATE TABLE `eh_enterprise_contact_group_members` (
 # member of eh_communities partition
 # the relationship between eh_enterprises and eh_enterprise_communities
 #
-DROP TABLE IF EXISTS `eh_enterprise_community_map`;
+-- DROP TABLE IF EXISTS `eh_enterprise_community_map`;
 CREATE TABLE `eh_enterprise_community_map` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_communities',
@@ -172,22 +171,10 @@ CREATE TABLE `eh_enterprise_community_map` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-# reuse eh_communities for eh_enterprise_communities
-ALTER TABLE `eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: residential, 1: commercial';
-ALTER TABLE `eh_communities` ADD COLUMN `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum';
-ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum';
-ALTER TABLE `eh_communities` ADD COLUMN `update_time` DATETIME;
-ALTER TABLE `eh_groups` ADD COLUMN `visible_region_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of region where the group belong to';
-ALTER TABLE `eh_groups` ADD COLUMN `visible_region_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of region where the group belong to';
-ALTER TABLE `eh_users` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
-ALTER TABLE `eh_users` ADD COLUMN `site_user_token` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site user token of third-part system';
-ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
-ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
-
 #
 # member of eh_communities partition
 #
-DROP TABLE IF EXISTS `eh_buildings`;
+-- DROP TABLE IF EXISTS `eh_buildings`;
 CREATE TABLE `eh_buildings` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refering to eh_communities',
@@ -227,7 +214,7 @@ CREATE TABLE `eh_buildings` (
 #
 # member of eh_communities sharding group
 #
-DROP TABLE IF EXISTS `eh_building_attachments`;
+-- DROP TABLE IF EXISTS `eh_building_attachments`;
 CREATE TABLE `eh_building_attachments` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `building_id` BIGINT NOT NULL DEFAULT 0,
@@ -241,7 +228,7 @@ CREATE TABLE `eh_building_attachments` (
 #
 # member of eh_groups sharding group
 #
-DROP TABLE IF EXISTS `eh_enterprise_attachments`;
+-- DROP TABLE IF EXISTS `eh_enterprise_attachments`;
 CREATE TABLE `eh_enterprise_attachments` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `enterprise_id` bigint(20) NOT NULL DEFAULT '0',
@@ -252,7 +239,11 @@ CREATE TABLE `eh_enterprise_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+-- DROP TABLE IF EXISTS `eh_organization_assigned_scopes`;
 CREATE TABLE `eh_organization_assigned_scopes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `organization_id` bigint(20) NOT NULL,
@@ -267,7 +258,7 @@ CREATE TABLE `eh_organization_assigned_scopes` (
 # Used for duplicated recording of group membership that user is involved in order to store 
 # it in the same shard as of its owner user
 #
-DROP TABLE IF EXISTS `eh_user_communities`;
+-- DROP TABLE IF EXISTS `eh_user_communities`;
 CREATE TABLE `eh_user_communities` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
@@ -280,17 +271,25 @@ CREATE TABLE `eh_user_communities` (
     UNIQUE `u_eh_usr_community`(`owner_uid`, `community_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+# reuse eh_communities for eh_enterprise_communities
+ALTER TABLE `eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: residential, 1: commercial';
+ALTER TABLE `eh_communities` ADD COLUMN `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum';
+ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum';
+ALTER TABLE `eh_communities` ADD COLUMN `update_time` DATETIME;
+ALTER TABLE `eh_groups` ADD COLUMN `visible_region_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of region where the group belong to';
+ALTER TABLE `eh_groups` ADD COLUMN `visible_region_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of region where the group belong to';
+ALTER TABLE `eh_users` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+ALTER TABLE `eh_users` ADD COLUMN `site_user_token` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site user token of third-part system';
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 
-# TODO move to somewhare?
-INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 2, 'zh_CN', '发给企业其它所有成员', '${userName}已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 3, 'zh_CN', '拒绝加入公司', '您被拒绝加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 4, 'zh_CN', '发给企业其它所有成员', '您已离开公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 5, 'zh_CN', '发给企业其它所有成员', '${userName}已离开公司“${enterpriseName}”。');
-
-SET foreign_key_checks = 1;
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'park.notification', 1, 'zh_CN', '有新的月卡发放通知排队用户申请月卡成功', '月卡申报成功，请于“${deadline}” 18:00前去领取，否则自动失效。');
 
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
@@ -306,11 +305,9 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
     VALUES(4017, 4, 0, '沙龙', '活动/沙龙', 0, 2, UTC_TIMESTAMP());     
 
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
-
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10002', 'zh_CN', '该车牌已有月卡');
-
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10003', 'zh_CN', '该车牌已申请月卡');
 
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'park.notification', 1, 'zh_CN', '有新的月卡发放通知排队用户申请月卡成功', '月卡申报成功，请于“${deadline}” 18:00前去领取，否则自动失效。');
-
+SET foreign_key_checks = 1;

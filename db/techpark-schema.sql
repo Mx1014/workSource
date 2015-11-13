@@ -1,4 +1,4 @@
-USE `ehcore`;
+use ehcore;
 
 
 /*Table structure for table `eh_company_phone_list` */
