@@ -53,6 +53,7 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
@@ -355,9 +356,10 @@ public class ParkServiceImpl implements ParkService {
 		apply.setApplyTime(new Timestamp(System.currentTimeMillis()));
 		apply.setFetchStatus(FetchStatus.NO.getCode());
 		apply.setPlateNumber(cmd.getPlateNumber());
+		apply.setCommunityId(cmd.getEnterpriseCommunityId());
 		
 		parkProvider.applyParkingCard(apply);
-		String count = parkProvider.waitingCardCount() - 1 + "";
+		String count = parkProvider.waitingCardCount(cmd.getEnterpriseCommunityId()) - 1 + "";
 		return count;
 	}
 
@@ -376,7 +378,7 @@ public class ParkServiceImpl implements ParkService {
 			Timestamp time = strToTimestamp(cmd.getEndDay());
 			end = addDays(cmd.getEndDay(), 1);
 		}
- 		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);
+ 		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getEnterpriseCommunityId(),cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);
 		List<ApplyParkCardDTO> applyDto = new ArrayList<ApplyParkCardDTO>();
 		
 		appliers.forEach(apply -> {
@@ -438,7 +440,7 @@ public class ParkServiceImpl implements ParkService {
 					"offering cards number is null.");
 		}
 		
-		int count = parkProvider.waitingCardCount();
+		int count = parkProvider.waitingCardCount(cmd.getEnterpriseCommunityId());
 		
 		if(cmd.getAmount() > count) {
 			LOGGER.error(" offering cards number is greater than waiting people, there are only " + count + " people waiting for cards.");
@@ -446,7 +448,7 @@ public class ParkServiceImpl implements ParkService {
 					"offering cards number is greater than waiting people, there are only " + count + " people waiting for cards.");
 		}
 		
-		List<ParkApplyCard> topAppliers = parkProvider.searchTopAppliers(cmd.getAmount());
+		List<ParkApplyCard> topAppliers = parkProvider.searchTopAppliers(cmd.getAmount(), cmd.getEnterpriseCommunityId());
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		String deadline = deadline();
@@ -506,7 +508,7 @@ public class ParkServiceImpl implements ParkService {
 	@Override
 	public ApplyParkCardDTO fetchCard(FetchCardCommand cmd) {
 		
-		ParkApplyCard applier = parkProvider.findApplierByPhone(cmd.getApplierPhone());
+		ParkApplyCard applier = parkProvider.findApplierByPhone(cmd.getApplierPhone(), cmd.getEnterpriseCommunityId());
 		
 		if(applier == null) {
 			LOGGER.error("the applier is unable to fetch card now");

@@ -11,6 +11,7 @@ import java.sql.Timestamp;
  *  <li>plateNumber: 车牌号</li>
  *  <li>beginDay: 查询申请时间开始日期</li>
  *  <li>endDay: 查询申请时间结束日期</li>
+ *  <li>enterpriseCommunityId: 园区id</li>
  * </ul>
  *
  */
@@ -28,9 +29,19 @@ public class SearchApplyCardCommand {
 	
 	private String endDay;
 	
+	private Long enterpriseCommunityId;
+	
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+
+	public Long getEnterpriseCommunityId() {
+		return enterpriseCommunityId;
+	}
+
+	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
+		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
 
 	public Byte getApplyStatus() {
 		return applyStatus;

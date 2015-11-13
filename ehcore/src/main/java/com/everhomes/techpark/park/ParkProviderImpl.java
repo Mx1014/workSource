@@ -164,12 +164,13 @@ public class ParkProviderImpl implements ParkProvider {
 	}
 
 	@Override
-	public int waitingCardCount() {
+	public int waitingCardCount(Long communityId) {
 		final Integer[] count = new Integer[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     count[0] = context.selectCount().from(Tables.EH_PARK_APPLY_CARD)
                             .where(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.WAITING.getCode()))
+                            .and(Tables.EH_PARK_APPLY_CARD.COMMUNITY_ID.equal(communityId))
                     .fetchOneInto(Integer.class);
                     return true;
                 });
@@ -197,7 +198,7 @@ public class ParkProviderImpl implements ParkProvider {
 	}
 
 	@Override
-	public List<ParkApplyCard> searchApply(String applierName, String applierPhone,
+	public List<ParkApplyCard> searchApply(Long communityId, String applierName, String applierPhone,
 			 String plateNumber, Byte applyStatus, Timestamp beginDay, Timestamp endDay, 
 			 CrossShardListingLocator locator,  int count) {
 		
@@ -229,6 +230,9 @@ public class ParkProviderImpl implements ParkProvider {
 			
 			if(endDay != null && !"".equals(endDay))
 				query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_TIME.le(endDay));
+			
+			if(communityId != null && !"".equals(communityId))
+				query.addConditions(Tables.EH_PARK_APPLY_CARD.COMMUNITY_ID.eq(communityId));
 			
 			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
 			query.addLimit(count);
@@ -301,7 +305,7 @@ public class ParkProviderImpl implements ParkProvider {
 	}
 
 	@Override
-	public List<ParkApplyCard> searchTopAppliers(int count) {
+	public List<ParkApplyCard> searchTopAppliers(int count, Long communityId) {
 		
 		List<ParkApplyCard> apply = new ArrayList<ParkApplyCard>();
 		
@@ -317,6 +321,7 @@ public class ParkProviderImpl implements ParkProvider {
 				query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
 			
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.WAITING.getCode()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.COMMUNITY_ID.eq(communityId));
 			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
 			query.addLimit(count);
 			
@@ -339,7 +344,7 @@ public class ParkProviderImpl implements ParkProvider {
 	}
 
 	@Override
-	public ParkApplyCard findApplierByPhone(String applierPhone) {
+	public ParkApplyCard findApplierByPhone(String applierPhone, Long communityId) {
 		
 		List<ParkApplyCard> apply = new ArrayList<ParkApplyCard>();
 		
@@ -356,6 +361,7 @@ public class ParkProviderImpl implements ParkProvider {
 				query.addConditions(Tables.EH_PARK_APPLY_CARD.ID.gt(locator.getAnchor()));
 			
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.eq(ApplyParkingCardStatus.NOTIFIED.getCode()));
+			query.addConditions(Tables.EH_PARK_APPLY_CARD.COMMUNITY_ID.eq(communityId));
 			query.addConditions(Tables.EH_PARK_APPLY_CARD.APPLIER_PHONE.eq(applierPhone));
 			query.addOrderBy(Tables.EH_PARK_APPLY_CARD.ID.asc());
 			
