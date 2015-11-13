@@ -1055,7 +1055,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 							contact.setUserId(user.getId());
 							
 							Group group = groupProvider.findGroupById(enterpriseId);
-							UserGroup uGroup =new UserGroup();
+							UserGroup uGroup = userProvider.findUserGroupByOwnerAndGroup(user.getId(), enterpriseId) ;
+							if(null == uGroup){
+							uGroup=new UserGroup();
 							uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
 							uGroup.setOwnerUid(user.getId());
 							uGroup.setGroupId(enterpriseId);
@@ -1063,6 +1065,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 							uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
 							uGroup.setRegionScopeId(group.getVisibleRegionId());
 							userProvider.createUserGroup(uGroup);
+							}
 						}
 						// TODO: map aparment 2 user
 						Long contactId = enterpriseContactProvider
