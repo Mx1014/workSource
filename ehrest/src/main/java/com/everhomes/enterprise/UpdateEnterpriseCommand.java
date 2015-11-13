@@ -19,6 +19,8 @@ import com.everhomes.forum.AttachmentDescriptor;
  *  <li>contactsPhone: 公司联系电话</li>
  *  <li>contactor: 公司联系人</li>
  *  <li>entries: 公司联系人电话</li>
+ *  <li>enterpriseAddress: 公司地址</li>
+ *  <li>enterpriseCheckinDate: 公司入驻时间</li>
  * </ul>
  *
  */
@@ -33,13 +35,27 @@ public class UpdateEnterpriseCommand {
     private String contactsPhone;
     private String contactor;
     private String entries;
+    private String enterpriseAddress;
+    private String enterpriseCheckinDate;
 	@ItemType(Long.class)
     private List<Long> addressId;
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
-    public Long getMemberCount() {
+    public String getEnterpriseCheckinDate() {
+		return enterpriseCheckinDate;
+	}
+	public void setEnterpriseCheckinDate(String enterpriseCheckinDate) {
+		this.enterpriseCheckinDate = enterpriseCheckinDate;
+	}
+	public String getEnterpriseAddress() {
+		return enterpriseAddress;
+	}
+	public void setEnterpriseAddress(String enterpriseAddress) {
+		this.enterpriseAddress = enterpriseAddress;
+	}
+	public Long getMemberCount() {
 		return memberCount;
 	}
 	public void setMemberCount(Long memberCount) {

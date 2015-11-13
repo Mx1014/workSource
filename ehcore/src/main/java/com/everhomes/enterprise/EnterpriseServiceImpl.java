@@ -173,6 +173,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setName(cmd.getName());
         enterprise.setMemberCount(cmd.getMemberCount());
         enterprise.setContactsPhone(cmd.getContactsPhone());
+        enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
+        enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
         this.enterpriseProvider.createEnterprise(enterprise);
         
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
@@ -615,6 +617,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setName(cmd.getName());
         enterprise.setMemberCount(cmd.getMemberCount());
         enterprise.setContactsPhone(cmd.getContactsPhone());
+        enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
+        enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
         this.enterpriseProvider.updateEnterprise(enterprise);
         
         List<Long> addressIds = cmd.getAddressId();
