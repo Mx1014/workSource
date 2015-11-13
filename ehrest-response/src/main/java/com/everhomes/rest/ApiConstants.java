@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-12 20:02:25
+// generated at 2015-11-13 16:28:52
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -83,6 +83,7 @@ public interface ApiConstants {
     public static final String ADMIN_ENTERPRISE_CREATEENTERPRISE_URL = "/admin/enterprise/createEnterprise";
     public static final String ADMIN_ENTERPRISE_REJECT_URL = "/admin/enterprise/reject";
     public static final String ADMIN_ENTERPRISE_REVOKE_URL = "/admin/enterprise/revoke";
+    public static final String ADMIN_ENTERPRISE_UPDATEENTERPRISE_URL = "/admin/enterprise/updateEnterprise";
     public static final String ADMIN_FAMILY_ADMINAPPROVEMEMBER_URL = "/admin/family/adminApproveMember";
     public static final String ADMIN_FAMILY_ADMINREJECTMEMBER_URL = "/admin/family/adminRejectMember";
     public static final String ADMIN_FAMILY_LISTALLFAMILYMEMBERS_URL = "/admin/family/listAllFamilyMembers";
@@ -196,6 +197,7 @@ public interface ApiConstants {
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
+    public static final String COMMUNITY_LISTCOMMUNITYUSERS_URL = "/community/listCommunityUsers";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
     public static final String CONTACT_ADDCONTACT_URL = "/contact/addContact";
     public static final String CONTACT_ADDCONTACTGROUP_URL = "/contact/addContactGroup";
@@ -228,6 +230,7 @@ public interface ApiConstants {
     public static final String ENTERPRISE_REQUESTTOJOINCOMMUNITY_URL = "/enterprise/requestToJoinCommunity";
     public static final String ENTERPRISE_SEARCHCOMMUNITIES_URL = "/enterprise/searchCommunities";
     public static final String ENTERPRISE_SEARCHENTERPRISE_URL = "/enterprise/searchEnterprise";
+    public static final String ENTERPRISE_SETCURRENTENTERPRISE_URL = "/enterprise/setCurrentEnterprise";
     public static final String ENTERPRISE_SYNCINDEX_URL = "/enterprise/syncIndex";
     public static final String FAMILY_APPROVEMEMBER_URL = "/family/approveMember";
     public static final String FAMILY_FINDFAMILYBYADDRESSID_URL = "/family/findFamilyByAddressId";
