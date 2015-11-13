@@ -99,6 +99,7 @@ import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserCurrentEntity;
 import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
@@ -2774,27 +2775,75 @@ public class OrganizationServiceImpl implements OrganizationService {
             return;
         }
         
+        OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
+        if(type == OrganizationType.PARTNER) {
+            joinPartnerOrganization(user, organization);
+            setDefaultPartnerCommunity(user, organization);
+        } else {
+            LOGGER.error("Organization is not partner type, userId=" + userId + ", partnerId=" + partnerId + ", organizationType=" + type);
+        }
+	}
+	
+	private void setDefaultPartnerCommunity(User user, Organization organization) {
 	    try {
-	        OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
-            if(type == OrganizationType.PARTNER) {
-                OrganizationMember member = new OrganizationMember();
-
-                member.setContactName(user.getNickName());
-                member.setOrganizationId(partnerId);
-                member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-                member.setTargetId(user.getId());
-                member.setTargetType(OrganizationMemberTargetType.USER.getCode());
-
-                UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
-                if(identifier != null){
-                    member.setContactToken(identifier.getIdentifierToken());
-                    member.setContactType(identifier.getIdentifierType());
-                }
-            } else {
-                LOGGER.error("Organization is not partner type, userId=" + userId + ", partnerId=" + partnerId + ", organizationType=" + type);
-            }
+	        List<UserCurrentEntity> entityList = userService.listUserCurrentEntity(user.getId());
+	        if(!containPartnerCommunity(entityList)) {
+	            List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(organization.getId(), 0, 1);
+	            if(result != null && result.size() > 0) {
+	                Long communityId = result.get(0).getCommunityId();
+	                userService.updateUserCurrentCommunityToProfile(user.getId(), communityId);
+	                if(LOGGER.isInfoEnabled()) {
+	                    LOGGER.info("Set default partner community, userId=" + user.getId() + ", communityId=" + communityId 
+	                        + ", partnerId=" + organization.getId());
+	                }
+	            } else {
+	                if(LOGGER.isInfoEnabled()) {
+	                    LOGGER.info("Community not found, ignore to set default partner community, userId=" + user.getId()  
+	                        + ", partnerId=" + organization.getId());
+	                }
+	            }
+	        }
 	    } catch(Exception e) {
-	        LOGGER.error("Failed to process partner organization user, userId=" + userId + ", partnerId=" + partnerId, e);
+	        LOGGER.error("Failed to set default partner community, userId=" + user.getId() + ", partnerId=" + organization.getId());
 	    }
+	}
+	
+	private boolean containPartnerCommunity(List<UserCurrentEntity> entityList) {
+	    if(entityList == null || entityList.size() == 0) {
+	        return false;
+	    }
+	    
+	    boolean isFound = false;
+	    for(UserCurrentEntity entity : entityList) {
+	        UserCurrentEntityType type = UserCurrentEntityType.fromCode(entity.getEntityType());
+	        if(type == UserCurrentEntityType.COMMUNITY_COMMERCIAL) {
+	            isFound = true;
+	            break;
+	        }
+	    }
+	    
+	    return isFound;
+	}
+	
+	private void joinPartnerOrganization(User user, Organization organization) {
+        try {
+            OrganizationMember member = new OrganizationMember();
+
+            member.setContactName(user.getNickName());
+            member.setOrganizationId(organization.getId());
+            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+            member.setTargetId(user.getId());
+            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+
+            UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
+            if(identifier != null){
+                member.setContactToken(identifier.getIdentifierToken());
+                member.setContactType(identifier.getIdentifierType());
+            }
+            
+            this.organizationProvider.createOrganizationMember(member);
+        } catch(Exception e) {
+            LOGGER.error("Failed to join partner organization, userId=" + user.getId() + ", partnerId=" + organization.getId(), e);
+        }
 	}
 }

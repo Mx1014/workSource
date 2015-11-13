@@ -33,6 +33,7 @@ import com.everhomes.address.AddressServiceErrorCode;
 import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityType;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -1014,12 +1015,11 @@ public class FamilyServiceImpl implements FamilyService {
                 u.setAddressId(address.getId());
                 u.setAddress(address.getAddress());
                 u.setCommunityId(address.getCommunityId());
+
+                userService.updateUserCurrentCommunityToProfile(userId, address.getCommunityId());
                 
-                String key = UserCurrentEntityType.COMMUNITY.getUserProfileKey();
                 long timestemp = DateHelper.currentGMTTime().getTime();
-                userActivityProvider.updateUserCurrentEntityProfile(userId, key, address.getCommunityId(), timestemp);
-                
-                key = UserCurrentEntityType.FAMILY.getUserProfileKey();
+                String key = UserCurrentEntityType.FAMILY.getUserProfileKey();
                 userActivityProvider.updateUserCurrentEntityProfile(userId, key, familyId, timestemp);
             }
         }
