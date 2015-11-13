@@ -1,7 +1,7 @@
-﻿INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`,  `avatar`,  `status`,  `points`,  `level`,  `gender`,  `locale`,  `salt`,  `password_hash`)
-	VALUES (193501, UUID(), '9200857', '徐明晓', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ', 1, 45, '1', '0',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199');
-INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`)
-	VALUES (190857,  193501,  '0',  '13632650699',  '221616',  3);
+﻿INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`)
+	VALUES (193501, UUID(), '9200857', '徐明晓', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ', 1, 45, '1', '0',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP());
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`)
+	VALUES (190857,  193501,  '0',  '13632650699',  '221616',  3, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
 		VALUES(1760000, 0, 'PARTNER', '科技园版', 0, '', '/1000000', 1, 2);
@@ -9,13 +9,13 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 		VALUES(1760001, 0, 'GANC', '科技园物业', 0, '', '/1000001', 1, 2);
 
 
-INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`, `update_time`, `create_time`) 
+INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 		VALUES(176520, UUID(), 0, 2, '', 0, '科技园论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`, `update_time`, `create_time`) 
+INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 		VALUES(176521, UUID(), 0, 2, '', 0, '科技园意见反馈论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());	
 	
-INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`) 
-	VALUES( 240111044331046562, UUID(), 13905, '深圳市',  13908, '南山区', '科技园', '科技工业园', '深圳市南山区科技园', NULL, '深圳科技工业园是我国大陆第一个高新科技产业园', '深圳科技工业园是我国大陆第一个高新科技产业园，于1985年由深圳市政府和中国科学院共同创办。1991年，经国务院批准，深圳科技工业园成为首批国家级高新技术产业园区。\r\n\r\n园区占地面积1.15平方公里，经过不断的开发建设，深圳科技工业园已成为投资环境优越、高新技术企业云集、科技开发实力雄厚、人才济济的科技园区。\r\n\r\n近几年来，公司紧紧抓住深圳市产业结构调整的机遇，重点推进深圳市金融服务技术创新基地、深港动漫及网游产业孵化基地、深港生产力基地的建设工作。走出了一条金融产业、文化产业与科技产业相互融合、共同发展的新型道路，力将科技园打造成为具有高科技含量的金融创新区与文化创意园。科技园金融基地作为深圳市率先启用的金融基地于2009年3月投入使用，目前已吸引大批知名的金融企业、金融服务类企业入驻，品牌效应初步树立。', NULL, NULL, NULL, NULL, NULL,NULL,NULL,'1000087',NULL,'2','2015-11-05 14:43:25', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1','3','4',NULL);
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`)
+	VALUES( 240111044331046562, UUID(), 13905, '深圳市',  13908, '南山区', '科技园', '科技工业园', '深圳市南山区科技园', NULL, '深圳科技工业园是我国大陆第一个高新科技产业园', '深圳科技工业园是我国大陆第一个高新科技产业园，于1985年由深圳市政府和中国科学院共同创办。1991年，经国务院批准，深圳科技工业园成为首批国家级高新技术产业园区。\r\n\r\n园区占地面积1.15平方公里，经过不断的开发建设，深圳科技工业园已成为投资环境优越、高新技术企业云集、科技开发实力雄厚、人才济济的科技园区。\r\n\r\n近几年来，公司紧紧抓住深圳市产业结构调整的机遇，重点推进深圳市金融服务技术创新基地、深港动漫及网游产业孵化基地、深港生产力基地的建设工作。走出了一条金融产业、文化产业与科技产业相互融合、共同发展的新型道路，力将科技园打造成为具有高科技含量的金融创新区与文化创意园。科技园金融基地作为深圳市率先启用的金融基地于2009年3月投入使用，目前已吸引大批知名的金融企业、金融服务类企业入驻，品牌效应初步树立。', NULL, NULL, NULL, NULL, NULL,NULL, 389, 1,NULL,'2','2015-11-05 14:43:25', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1','3','4', UTC_TIMESTAMP());
 INSERT INTO `eh_organization_communities`(organization_id, community_id) VALUES(1760000, 240111044331046562);
 
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
@@ -806,784 +806,784 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`,`address`, `building_name`, `apartment_name`, `status`, `create_time`)
 	VALUES (239825274387091388, UUID(), 240111044331046562, 13905, '深圳市', 13908, '南山区', '生产力大楼-F2', '生产力大楼', 'D-1层', 2, '2015-11-12 22:20:25');
 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176000, UUID(), '深圳市宇轩网络技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176530); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176001, UUID(), '深圳市捷时行科技服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176531); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176002, UUID(), '深圳市沿海世纪地产有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176532); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176003, UUID(), '深圳市爱倍多科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176533); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176004, UUID(), '浙江宇视科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176534); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176005, UUID(), '网宿科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176535); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176006, UUID(), '深圳福江科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176536); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176007, UUID(), '深圳市睿智专利事务所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176537); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176008, UUID(), '无锡盈达聚力科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176538); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176009, UUID(), '深圳市海润鑫文化传播有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176539); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176010, UUID(), '中联认证中心广东分中心','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176540); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176011, UUID(), '深圳大德飞天科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176541); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176012, UUID(), '深圳市文字传媒有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176542); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176013, UUID(), '无锡盈达聚力科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176543); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176014, UUID(), '费斯托(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176544); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176015, UUID(), '中正国际认证（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176545); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176016, UUID(), '深圳市龙晟光电有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176546); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176017, UUID(), '王才梅','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176547); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176018, UUID(), '深圳市清源铸造材料有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176548); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176019, UUID(), '费斯托(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176549); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176020, UUID(), '郭皓','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176550); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176021, UUID(), '深圳市启智有声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176551); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176022, UUID(), '苏州工业园区艾思科技公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176552); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176023, UUID(), '深圳今日文化发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176553); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176024, UUID(), '深圳市车音网科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176554); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176025, UUID(), '深圳今日文化发展有限公司办公用品中心','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176555); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176026, UUID(), '深圳市炫彩科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176556); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176027, UUID(), '深圳市爱倍多科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176557); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176028, UUID(), '深圳市爱倍多科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176558); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176029, UUID(), '深圳财富支付有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176559); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176030, UUID(), '深圳桑蒲通信设备有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176560); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176031, UUID(), '深圳市精玻仪器有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176561); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176032, UUID(), '新盛合绿科技（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176562); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176033, UUID(), '深圳联智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176563); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176034, UUID(), '深圳易莱特科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176564); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176035, UUID(), '深圳市华美视科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176565); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176036, UUID(), '深圳市拓展信息咨询有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176566); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176037, UUID(), '深圳市创飞领域科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176567); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176038, UUID(), '深圳市创飞领域科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176568); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176039, UUID(), '深圳市创飞领域科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176569); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176040, UUID(), '深圳市视显光电技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176570); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176041, UUID(), '深圳市视显光电技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176571); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176042, UUID(), '深圳市碧水蓝天科技发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176572); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176043, UUID(), '上海芯旺微电子技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176573); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176044, UUID(), '深圳市诺恒管理策划有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176574); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176045, UUID(), '深圳市万通食品有限责任公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176575); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176046, UUID(), '上海芯旺电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176576); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176047, UUID(), '深圳财富支付有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176577); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176048, UUID(), '深圳市天智未来科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176578); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176049, UUID(), '聚辰半导体（上海）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176579); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176050, UUID(), '聚辰半导体（上海）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176580); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176051, UUID(), '华瑞昇电子(深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176581); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176052, UUID(), '网宿科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176582); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176053, UUID(), '福瑞博德软件开发深圳有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176583); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176054, UUID(), '福瑞博德软件开发深圳有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176584); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176055, UUID(), '深圳市银证通云网科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176585); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176056, UUID(), '深圳市银证通云网科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176586); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176057, UUID(), '湖州明芯微电子设计有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176587); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176058, UUID(), '珠海奔图电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176588); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176059, UUID(), '深圳市巨龙城投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176589); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176060, UUID(), '深圳市富泓电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176590); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176061, UUID(), '深圳市安睿立电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176591); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176062, UUID(), '浙江宇视科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176592); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176063, UUID(), '广东乙纬电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176593); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176064, UUID(), '通联支付网络服务股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176594); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176065, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176595); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176066, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176596); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176067, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176597); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176068, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176598); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176069, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176599); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176070, UUID(), '神州数码系统集成服务有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176600); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176071, UUID(), '深圳市汇杰投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176601); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176072, UUID(), '深圳市深商创投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176602); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176073, UUID(), '阿尔科斯科技（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176603); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176074, UUID(), '深圳容德投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176604); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176075, UUID(), '深圳市晶科迪电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176605); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176076, UUID(), '深圳市易联科软件研发有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176606); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176077, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176607); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176078, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176608); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176079, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176609); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176080, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176610); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176081, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176611); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176082, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176612); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176083, UUID(), '爱康科商贸（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176613); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176084, UUID(), '新趣品商贸(深圳)有限公司(李继邦)','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176614); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176085, UUID(), '安信证券股份有限公司深圳科发路证券营业部','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176615); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176086, UUID(), '安信证券股份有限公司深圳科发路证券营业部','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176616); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176087, UUID(), '深圳市高科金信净化科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176617); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176088, UUID(), '深圳市康迈科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176618); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176089, UUID(), '深圳市四季轩餐饮有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176619); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176090, UUID(), '深圳市融泰衡实业有公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176620); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176091, UUID(), '深圳多多益善电子商务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176621); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176092, UUID(), '深圳市小牛普惠投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176622); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176093, UUID(), '君丰创业投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176623); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176094, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176624); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176095, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176625); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176096, UUID(), '欣旺达电子股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176626); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176097, UUID(), '深圳市瓷爱谷文化有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176627); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176098, UUID(), '神州数码信息服务股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176628); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176099, UUID(), '北京三浦教育投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176629); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176100, UUID(), '深圳市独尊科技开发有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176630); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176101, UUID(), '深圳市信息大成网络有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176631); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176102, UUID(), '深圳通联金融网络科技服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176632); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176103, UUID(), '深圳通联金融网络科技服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176633); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176104, UUID(), '通联支付网络服务股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176634); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176105, UUID(), '深圳市软晶科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176635); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176106, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176636); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176107, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176637); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176108, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176638); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176109, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176639); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176110, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176640); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176111, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176641); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176112, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176642); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176113, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176643); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176114, UUID(), '深圳市江波龙商用设备有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176644); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176115, UUID(), '深圳市志鼎科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176645); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176116, UUID(), '北京银联金卡科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176646); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176117, UUID(), '深圳神州数码信息技术服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176647); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176118, UUID(), '神州数码(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176648); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176119, UUID(), '神州数码(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176649); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176120, UUID(), '上海神州数码有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176650); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176121, UUID(), '深圳市中天普创投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176651); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176122, UUID(), '深圳市安卓信创业投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176652); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176123, UUID(), '太平人寿保险有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176653); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176124, UUID(), '和阳（深圳）投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176654); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176125, UUID(), '深圳市昆鹏股权投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176655); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176126, UUID(), '深圳市盘龙环境技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176656); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176127, UUID(), '深圳壹昊金融控股股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176657); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176128, UUID(), '深圳市贷帮投资担保有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176658); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176129, UUID(), '深圳市人和投资集团有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176659); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176130, UUID(), '川奇光电科技（扬州）有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176660); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176131, UUID(), '川元电子（扬州）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176661); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176132, UUID(), '深圳市志鼎科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176662); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176133, UUID(), '深圳市惠邦知识产权代理事务所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176663); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176134, UUID(), '通联支付网络服务股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176664); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176135, UUID(), '深圳嘉德瑞碳资产股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176665); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176136, UUID(), '深圳前海南方增长资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176666); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176137, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176667); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176138, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176668); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176139, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176669); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176140, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176670); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176141, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176671); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176142, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176672); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176143, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176673); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176144, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176674); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176145, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176675); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176146, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176676); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176147, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176677); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176148, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176678); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176149, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176679); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176150, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176680); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176151, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176681); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176152, UUID(), '深圳中泽明芯集团有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176682); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176153, UUID(), '深圳市漫步者科技股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176683); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176154, UUID(), '是德科技（中国）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176684); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176155, UUID(), '是德科技（中国）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176685); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176156, UUID(), '博尔科通讯系统（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176686); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176157, UUID(), '招商银行股份有限公司深圳车公庙支行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176687); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176158, UUID(), '招商银行股份有限公司深圳车公庙支行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176688); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176159, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176689); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176160, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176690); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176161, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176691); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176162, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176692); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176163, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176693); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176164, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176694); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176165, UUID(), '深圳市广源餐饮管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176695); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176166, UUID(), '深圳市广源餐饮管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176696); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176167, UUID(), '上海联广认证有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176697); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176168, UUID(), '上海联广认证有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176698); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176169, UUID(), '广东万诺律师事务所(李亚光)','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176699); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176170, UUID(), '杭州华三通信技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176700); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176171, UUID(), '杭州华三通信技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176701);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176172, UUID(), '深圳市恒源昊资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176702);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176173, UUID(), '深圳市恒源昊资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176703);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176174, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176704);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176175, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176705);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176176, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176706);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176177, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176707);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176178, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176708);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176179, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176709);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176180, UUID(), '塔塔信息技术(中国)股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176710);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176181, UUID(), '塔塔信息技术(中国)股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176711);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176182, UUID(), '深圳格兰泰克科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176712);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176183, UUID(), '深圳格兰泰克科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176713);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176184, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176714);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176185, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176715);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176186, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176716);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176187, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176717);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176188, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176718);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176189, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176719);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176190, UUID(), '深圳五维微品金融信息服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176720);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176191, UUID(), '深圳五维微品金融信息服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176721);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176192, UUID(), '深圳新为软件股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176722);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176193, UUID(), '深圳新为软件股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176723);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176194, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176724);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176195, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176725);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176196, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176726);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176197, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176727);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176198, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176728);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176199, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176729);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176200, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176730);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176201, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176731);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176202, UUID(), '深圳格兰泰克汽车电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176732);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176203, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176733);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176204, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176734);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176205, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176735);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176206, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176736);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176207, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176737);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176208, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176738);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176209, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176739);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176210, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176740);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176211, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176741);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176212, UUID(), '吴炎雄(深圳市南山区南风舍餐馆)','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176742);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176213, UUID(), '深圳集群壹家股权投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176743);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176214, UUID(), '深圳集群壹家股权投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176744);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176215, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176745);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176216, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176746);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176217, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176747);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176218, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176748);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176219, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176749);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176220, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176750);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176221, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176751);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176222, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176752);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176223, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176753);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176224, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176754);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176225, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176755);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176226, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176756);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176227, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176757);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176228, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176758);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176229, UUID(), '东吴证券股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176759);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176230, UUID(), '东吴证券股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176760);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176231, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176761);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176232, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176762);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176233, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176763);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176234, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176764);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176235, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176765);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176236, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176766);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176237, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176767);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176238, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176768);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176239, UUID(), '深圳市中兴小额贷款有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176769);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176240, UUID(), '深圳市中兴小额贷款有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176770);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176241, UUID(), '深圳市中兴小额贷款有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176771);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176242, UUID(), '深圳市研信科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176772);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176243, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176773);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176244, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176774);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176245, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176775);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176246, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176776);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176247, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176777);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176248, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176778);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176249, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176779);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176250, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176780);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176251, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176781);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176252, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176782);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176253, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176783);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176254, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176784);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176255, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176785);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176256, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176786);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176257, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176787);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176258, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176788);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176259, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176789);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176260, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176790);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176261, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176791);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176262, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176792);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176263, UUID(), '中国银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176793);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176264, UUID(), '中国银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176794);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176265, UUID(), '中国银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176795);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176266, UUID(), '众华会计师事务所(特殊普通合伙)深圳分所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176796);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176267, UUID(), '众华会计师事务所(特殊普通合伙)深圳分所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176797);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176268, UUID(), '同方(深圳)云计算技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176798);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176269, UUID(), '同方(深圳)云计算技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176799);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176270, UUID(), '杭州银行股份有限公司深圳分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176800);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176271, UUID(), '杭州银行股份有限公司深圳分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176801);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176272, UUID(), '杭州银行股份有限公司深圳分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176802);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176273, UUID(), '泰诺风保泰（苏州）隔热材料有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176803);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176274, UUID(), '泰诺风保泰（苏州）隔热材料有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176804);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176275, UUID(), '泰诺风保泰（苏州）隔热材料有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176805);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176276, UUID(), '深圳太东资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176806);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176277, UUID(), '深圳太东资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176807);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176278, UUID(), '中国人民健康保险公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176808);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176279, UUID(), '中国人民健康保险公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176809);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176280, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176810);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176281, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176811);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176282, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176812);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176283, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176813);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176284, UUID(), '深圳市慧峰高科产业园投资发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176814);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176285, UUID(), '深圳市慧峰高科产业园投资发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176815);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176286, UUID(), '丰益(上海)信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176816);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176287, UUID(), '丰益(上海)信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176817);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176288, UUID(), '深圳市鼎恒瑞投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176818);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176289, UUID(), '惠州硕贝德无线科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176819);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176290, UUID(), '惠州硕贝德无线科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176820);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176291, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176821);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176292, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176822);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176293, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176823);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176294, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176824);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176295, UUID(), '深圳市新天域文化产业有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176825);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176296, UUID(), '深圳市新天域文化产业有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176826);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176297, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176827);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176298, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176828);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176299, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176829);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176300, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176830);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176301, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176831);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176302, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176832);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176303, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176833);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176304, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176834);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176305, UUID(), '深圳市工夫百味投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176835);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176306, UUID(), '深圳市工夫百味投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176836);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176307, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176837);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176308, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176838);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176309, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176839);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176310, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176840);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176311, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176841);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176312, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176842);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176313, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176843);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176314, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176844);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176315, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176845);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176316, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176846);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176317, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176847);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176318, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176848);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176319, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176849);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176320, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176850);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176321, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176851);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176322, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176852);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176323, UUID(), '上海赫丝蒂化妆品有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176853);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176324, UUID(), '上海赫丝蒂化妆品有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176854);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176325, UUID(), '深圳市恒顺合鑫科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176855);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176326, UUID(), '深圳市华讯万通科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176856);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176327, UUID(), '中信证券股份有限公司深圳科技园科苑路证券营业部','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176857);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176328, UUID(), '深圳市百益亚太电效工程有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176858);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176329, UUID(), '移动财经软件（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176859);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176330, UUID(), '深圳金桥融付科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176860);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176331, UUID(), '深圳金桥融付科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176861);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176332, UUID(), '深圳市浅葱小唱音乐餐厅有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176862);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176333, UUID(), '深圳市城道通环保科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176863);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176334, UUID(), '深圳市城道通环保科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176864);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176335, UUID(), '北京玖富时代投资顾问有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176865);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176336, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176866);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176337, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176867);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176338, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176868);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176339, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176869);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176340, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176870);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176341, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176871);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176342, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176872);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176343, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176873);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176344, UUID(), '深圳市宽域智联科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176874);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176345, UUID(), '深圳市宽域智联科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176875);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176346, UUID(), '深圳前海方舟资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176876);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176347, UUID(), '深圳前海方舟资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176877);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176348, UUID(), '前海东方金德资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176878);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176349, UUID(), '前海东方金德资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176879);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176350, UUID(), '中民保险经纪股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176880);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176351, UUID(), '中民保险经纪股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176881);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176352, UUID(), '中民保险经纪股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176882);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176353, UUID(), '中民电子商务股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176883);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176354, UUID(), '深圳市前海野文投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176884);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176355, UUID(), '深圳市前海野文投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176885);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176356, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176886);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176357, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176887);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176358, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176888);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176359, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176889);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176360, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176890);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176361, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176891);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176362, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176892);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176363, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176893);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176364, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176894);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176365, UUID(), '百度(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176895);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176366, UUID(), '百度(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176896);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176367, UUID(), '北京百度网讯科技有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176897);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176368, UUID(), '北京百度网讯科技有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176898);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176369, UUID(), '深圳市福尔科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176899);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176370, UUID(), '深圳市德维莱科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176900);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176371, UUID(), '深圳市宝富利科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176901);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176372, UUID(), '深圳市大维纳米科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176902);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176373, UUID(), '金宝通电子(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176903);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176374, UUID(), '深圳市亮信科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176904);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176375, UUID(), '汎达科技(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176905);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176376, UUID(), '群锋电子(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176906);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176377, UUID(), '诺华达电子(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176907);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176378, UUID(), '新纬科技(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176908);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176379, UUID(), '深圳市领平科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176909);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176380, UUID(), '北京美餐巧达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176910);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176381, UUID(), '镭射谷科(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176911);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176382, UUID(), '镭射谷科(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176912);
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176383, UUID(), '镭射谷科(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176913); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176384, UUID(), '深圳市安普盛科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176914); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176385, UUID(), '深圳市安特讯科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176915); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176386, UUID(), '深圳市开拓汽车电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176916); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176387, UUID(), '深圳深港生产力基地有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176917); 
-INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`) 
-	VALUES(176388, UUID(), '深圳市商业联合会','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176918); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176000, UUID(), '深圳市宇轩网络技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176530, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176001, UUID(), '深圳市捷时行科技服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176531, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176002, UUID(), '深圳市沿海世纪地产有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176532, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176003, UUID(), '深圳市爱倍多科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176533, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176004, UUID(), '浙江宇视科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176534, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176005, UUID(), '网宿科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176535, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176006, UUID(), '深圳福江科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176536, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176007, UUID(), '深圳市睿智专利事务所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176537, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176008, UUID(), '无锡盈达聚力科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176538, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176009, UUID(), '深圳市海润鑫文化传播有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176539, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176010, UUID(), '中联认证中心广东分中心','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176540, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176011, UUID(), '深圳大德飞天科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176541, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176012, UUID(), '深圳市文字传媒有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176542, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176013, UUID(), '无锡盈达聚力科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176543, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176014, UUID(), '费斯托(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176544, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176015, UUID(), '中正国际认证（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176545, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176016, UUID(), '深圳市龙晟光电有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176546, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176017, UUID(), '王才梅','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176547, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176018, UUID(), '深圳市清源铸造材料有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176548, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176019, UUID(), '费斯托(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176549, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176020, UUID(), '郭皓','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176550, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176021, UUID(), '深圳市启智有声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176551, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176022, UUID(), '苏州工业园区艾思科技公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176552, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176023, UUID(), '深圳今日文化发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176553, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176024, UUID(), '深圳市车音网科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176554, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176025, UUID(), '深圳今日文化发展有限公司办公用品中心','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176555, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176026, UUID(), '深圳市炫彩科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176556, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176027, UUID(), '深圳市爱倍多科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176557, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176028, UUID(), '深圳市爱倍多科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176558, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176029, UUID(), '深圳财富支付有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176559, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176030, UUID(), '深圳桑蒲通信设备有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176560, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176031, UUID(), '深圳市精玻仪器有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176561, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176032, UUID(), '新盛合绿科技（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176562, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176033, UUID(), '深圳联智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176563, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176034, UUID(), '深圳易莱特科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176564, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176035, UUID(), '深圳市华美视科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176565, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176036, UUID(), '深圳市拓展信息咨询有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176566, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176037, UUID(), '深圳市创飞领域科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176567, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176038, UUID(), '深圳市创飞领域科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176568, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176039, UUID(), '深圳市创飞领域科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176569, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176040, UUID(), '深圳市视显光电技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176570, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176041, UUID(), '深圳市视显光电技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176571, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176042, UUID(), '深圳市碧水蓝天科技发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176572, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176043, UUID(), '上海芯旺微电子技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176573, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176044, UUID(), '深圳市诺恒管理策划有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176574, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176045, UUID(), '深圳市万通食品有限责任公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176575, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176046, UUID(), '上海芯旺电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176576, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176047, UUID(), '深圳财富支付有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176577, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176048, UUID(), '深圳市天智未来科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176578, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176049, UUID(), '聚辰半导体（上海）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176579, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176050, UUID(), '聚辰半导体（上海）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176580, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176051, UUID(), '华瑞昇电子(深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176581, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176052, UUID(), '网宿科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176582, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176053, UUID(), '福瑞博德软件开发深圳有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176583, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176054, UUID(), '福瑞博德软件开发深圳有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176584, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176055, UUID(), '深圳市银证通云网科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176585, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176056, UUID(), '深圳市银证通云网科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176586, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176057, UUID(), '湖州明芯微电子设计有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176587, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176058, UUID(), '珠海奔图电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176588, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176059, UUID(), '深圳市巨龙城投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176589, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176060, UUID(), '深圳市富泓电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176590, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176061, UUID(), '深圳市安睿立电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176591, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176062, UUID(), '浙江宇视科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176592, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176063, UUID(), '广东乙纬电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176593, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176064, UUID(), '通联支付网络服务股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176594, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176065, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176595, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176066, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176596, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176067, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176597, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176068, UUID(), '中国建设银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176598, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176069, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176599, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176070, UUID(), '神州数码系统集成服务有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176600, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176071, UUID(), '深圳市汇杰投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176601, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176072, UUID(), '深圳市深商创投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176602, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176073, UUID(), '阿尔科斯科技（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176603, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176074, UUID(), '深圳容德投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176604, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176075, UUID(), '深圳市晶科迪电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176605, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176076, UUID(), '深圳市易联科软件研发有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176606, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176077, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176607, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176078, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176608, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176079, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176609, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176080, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176610, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176081, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176611, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176082, UUID(), '广州中慧电子有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176612, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176083, UUID(), '爱康科商贸（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176613, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176084, UUID(), '新趣品商贸(深圳)有限公司(李继邦)','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176614, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176085, UUID(), '安信证券股份有限公司深圳科发路证券营业部','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176615, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176086, UUID(), '安信证券股份有限公司深圳科发路证券营业部','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176616, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176087, UUID(), '深圳市高科金信净化科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176617, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176088, UUID(), '深圳市康迈科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176618, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176089, UUID(), '深圳市四季轩餐饮有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176619, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176090, UUID(), '深圳市融泰衡实业有公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176620, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176091, UUID(), '深圳多多益善电子商务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176621, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176092, UUID(), '深圳市小牛普惠投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176622, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176093, UUID(), '君丰创业投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176623, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176094, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176624, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176095, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176625, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176096, UUID(), '欣旺达电子股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176626, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176097, UUID(), '深圳市瓷爱谷文化有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176627, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176098, UUID(), '神州数码信息服务股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176628, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176099, UUID(), '北京三浦教育投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176629, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176100, UUID(), '深圳市独尊科技开发有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176630, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176101, UUID(), '深圳市信息大成网络有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176631, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176102, UUID(), '深圳通联金融网络科技服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176632, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176103, UUID(), '深圳通联金融网络科技服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176633, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176104, UUID(), '通联支付网络服务股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176634, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176105, UUID(), '深圳市软晶科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176635, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176106, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176636, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176107, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176637, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176108, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176638, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176109, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176639, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176110, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176640, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176111, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176641, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176112, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176642, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176113, UUID(), '深圳市江波龙电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176643, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176114, UUID(), '深圳市江波龙商用设备有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176644, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176115, UUID(), '深圳市志鼎科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176645, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176116, UUID(), '北京银联金卡科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176646, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176117, UUID(), '深圳神州数码信息技术服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176647, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176118, UUID(), '神州数码(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176648, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176119, UUID(), '神州数码(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176649, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176120, UUID(), '上海神州数码有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176650, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176121, UUID(), '深圳市中天普创投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176651, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176122, UUID(), '深圳市安卓信创业投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176652, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176123, UUID(), '太平人寿保险有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176653, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176124, UUID(), '和阳（深圳）投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176654, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176125, UUID(), '深圳市昆鹏股权投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176655, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176126, UUID(), '深圳市盘龙环境技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176656, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176127, UUID(), '深圳壹昊金融控股股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176657, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176128, UUID(), '深圳市贷帮投资担保有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176658, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176129, UUID(), '深圳市人和投资集团有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176659, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176130, UUID(), '川奇光电科技（扬州）有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176660, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176131, UUID(), '川元电子（扬州）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176661, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176132, UUID(), '深圳市志鼎科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176662, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176133, UUID(), '深圳市惠邦知识产权代理事务所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176663, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176134, UUID(), '通联支付网络服务股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176664, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176135, UUID(), '深圳嘉德瑞碳资产股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176665, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176136, UUID(), '深圳前海南方增长资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176666, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176137, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176667, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176138, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176668, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176139, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176669, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176140, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176670, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176141, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176671, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176142, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176672, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176143, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176673, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176144, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176674, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176145, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176675, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176146, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176676, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176147, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176677, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176148, UUID(), '萃冠电子贸易（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176678, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176149, UUID(), '安富利物流(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176679, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176150, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176680, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176151, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176681, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176152, UUID(), '深圳中泽明芯集团有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176682, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176153, UUID(), '深圳市漫步者科技股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176683, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176154, UUID(), '是德科技（中国）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176684, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176155, UUID(), '是德科技（中国）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176685, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176156, UUID(), '博尔科通讯系统（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176686, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176157, UUID(), '招商银行股份有限公司深圳车公庙支行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176687, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176158, UUID(), '招商银行股份有限公司深圳车公庙支行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176688, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176159, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176689, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176160, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176690, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176161, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176691, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176162, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176692, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176163, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176693, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176164, UUID(), '深圳市润利丰实业发展有限公司（老绍兴酒楼）','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176694, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176165, UUID(), '深圳市广源餐饮管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176695, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176166, UUID(), '深圳市广源餐饮管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176696, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176167, UUID(), '上海联广认证有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176697, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176168, UUID(), '上海联广认证有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176698, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176169, UUID(), '广东万诺律师事务所(李亚光)','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176699, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176170, UUID(), '杭州华三通信技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176700, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176171, UUID(), '杭州华三通信技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176701, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176172, UUID(), '深圳市恒源昊资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176702, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176173, UUID(), '深圳市恒源昊资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176703, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176174, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176704, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176175, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176705, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176176, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176706, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176177, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176707, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176178, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176708, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176179, UUID(), '深圳前海星润股权投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176709, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176180, UUID(), '塔塔信息技术(中国)股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176710, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176181, UUID(), '塔塔信息技术(中国)股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176711, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176182, UUID(), '深圳格兰泰克科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176712, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176183, UUID(), '深圳格兰泰克科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176713, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176184, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176714, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176185, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176715, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176186, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176716, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176187, UUID(), '深圳市民声科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176717, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176188, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176718, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176189, UUID(), '深圳证券通信有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176719, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176190, UUID(), '深圳五维微品金融信息服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176720, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176191, UUID(), '深圳五维微品金融信息服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176721, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176192, UUID(), '深圳新为软件股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176722, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176193, UUID(), '深圳新为软件股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176723, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176194, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176724, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176195, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176725, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176196, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176726, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176197, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176727, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176198, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176728, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176199, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176729, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176200, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176730, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176201, UUID(), '深圳市瑞格尔健康管理科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176731, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176202, UUID(), '深圳格兰泰克汽车电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176732, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176203, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176733, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176204, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176734, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176205, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176735, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176206, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176736, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176207, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176737, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176208, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176738, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176209, UUID(), '华美优科网络技术（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176739, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176210, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176740, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176211, UUID(), '安霸半导体技术(上海)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176741, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176212, UUID(), '吴炎雄(深圳市南山区南风舍餐馆)','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176742, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176213, UUID(), '深圳集群壹家股权投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176743, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176214, UUID(), '深圳集群壹家股权投资基金管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176744, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176215, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176745, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176216, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176746, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176217, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176747, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176218, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176748, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176219, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176749, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176220, UUID(), '深圳华智融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176750, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176221, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176751, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176222, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176752, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176223, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176753, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176224, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176754, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176225, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176755, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176226, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176756, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176227, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176757, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176228, UUID(), '深圳市智美达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176758, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176229, UUID(), '东吴证券股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176759, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176230, UUID(), '东吴证券股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176760, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176231, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176761, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176232, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176762, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176233, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176763, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176234, UUID(), '湖南南方稀贵金属交易所股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176764, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176235, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176765, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176236, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176766, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176237, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176767, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176238, UUID(), '深圳市佳信捷技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176768, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176239, UUID(), '深圳市中兴小额贷款有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176769, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176240, UUID(), '深圳市中兴小额贷款有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176770, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176241, UUID(), '深圳市中兴小额贷款有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176771, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176242, UUID(), '深圳市研信科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176772, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176243, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176773, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176244, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176774, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176245, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176775, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176246, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176776, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176247, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176777, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176248, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176778, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176249, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176779, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176250, UUID(), '深圳中兴飞贷金融科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176780, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176251, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176781, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176252, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176782, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176253, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176783, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176254, UUID(), '深圳市芯智科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176784, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176255, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176785, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176256, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176786, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176257, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176787, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176258, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176788, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176259, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176789, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176260, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176790, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176261, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176791, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176262, UUID(), '珠海华润银行股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176792, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176263, UUID(), '中国银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176793, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176264, UUID(), '中国银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176794, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176265, UUID(), '中国银行股份有限公司深圳市分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176795, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176266, UUID(), '众华会计师事务所(特殊普通合伙)深圳分所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176796, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176267, UUID(), '众华会计师事务所(特殊普通合伙)深圳分所','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176797, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176268, UUID(), '同方(深圳)云计算技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176798, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176269, UUID(), '同方(深圳)云计算技术股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176799, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176270, UUID(), '杭州银行股份有限公司深圳分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176800, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176271, UUID(), '杭州银行股份有限公司深圳分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176801, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176272, UUID(), '杭州银行股份有限公司深圳分行','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176802, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176273, UUID(), '泰诺风保泰（苏州）隔热材料有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176803, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176274, UUID(), '泰诺风保泰（苏州）隔热材料有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176804, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176275, UUID(), '泰诺风保泰（苏州）隔热材料有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176805, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176276, UUID(), '深圳太东资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176806, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176277, UUID(), '深圳太东资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176807, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176278, UUID(), '中国人民健康保险公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176808, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176279, UUID(), '中国人民健康保险公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176809, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176280, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176810, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176281, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176811, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176282, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176812, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176283, UUID(), '深圳排放权交易所有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176813, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176284, UUID(), '深圳市慧峰高科产业园投资发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176814, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176285, UUID(), '深圳市慧峰高科产业园投资发展有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176815, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176286, UUID(), '丰益(上海)信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176816, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176287, UUID(), '丰益(上海)信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176817, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176288, UUID(), '深圳市鼎恒瑞投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176818, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176289, UUID(), '惠州硕贝德无线科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176819, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176290, UUID(), '惠州硕贝德无线科技股份有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176820, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176291, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176821, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176292, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176822, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176293, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176823, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176294, UUID(), '深圳市前海德融资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176824, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176295, UUID(), '深圳市新天域文化产业有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176825, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176296, UUID(), '深圳市新天域文化产业有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176826, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176297, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176827, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176298, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176828, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176299, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176829, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176300, UUID(), '深圳前海厚诚敏投资控股有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176830, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176301, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176831, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176302, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176832, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176303, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176833, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176304, UUID(), '深圳市多元世纪信息技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176834, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176305, UUID(), '深圳市工夫百味投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176835, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176306, UUID(), '深圳市工夫百味投资有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176836, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176307, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176837, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176308, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176838, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176309, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176839, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176310, UUID(), '北京集创北方科技有限公司深圳办事处','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176840, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176311, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176841, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176312, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176842, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176313, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176843, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176314, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176844, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176315, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176845, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176316, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176846, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176317, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176847, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176318, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176848, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176319, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176849, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176320, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176850, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176321, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176851, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176322, UUID(), '普联技术有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176852, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176323, UUID(), '上海赫丝蒂化妆品有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176853, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176324, UUID(), '上海赫丝蒂化妆品有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176854, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176325, UUID(), '深圳市恒顺合鑫科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176855, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176326, UUID(), '深圳市华讯万通科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176856, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176327, UUID(), '中信证券股份有限公司深圳科技园科苑路证券营业部','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176857, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176328, UUID(), '深圳市百益亚太电效工程有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176858, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176329, UUID(), '移动财经软件（深圳）有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176859, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176330, UUID(), '深圳金桥融付科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176860, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176331, UUID(), '深圳金桥融付科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176861, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176332, UUID(), '深圳市浅葱小唱音乐餐厅有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176862, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176333, UUID(), '深圳市城道通环保科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176863, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176334, UUID(), '深圳市城道通环保科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176864, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176335, UUID(), '北京玖富时代投资顾问有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176865, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176336, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176866, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176337, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176867, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176338, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176868, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176339, UUID(), '深圳易兰德金融服务有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176869, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176340, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176870, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176341, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176871, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176342, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176872, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176343, UUID(), '深圳铂睿智恒科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176873, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176344, UUID(), '深圳市宽域智联科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176874, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176345, UUID(), '深圳市宽域智联科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176875, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176346, UUID(), '深圳前海方舟资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176876, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176347, UUID(), '深圳前海方舟资本管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176877, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176348, UUID(), '前海东方金德资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176878, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176349, UUID(), '前海东方金德资产管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176879, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176350, UUID(), '中民保险经纪股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176880, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176351, UUID(), '中民保险经纪股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176881, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176352, UUID(), '中民保险经纪股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176882, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176353, UUID(), '中民电子商务股份有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176883, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176354, UUID(), '深圳市前海野文投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176884, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176355, UUID(), '深圳市前海野文投资管理有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176885, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176356, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176886, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176357, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176887, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176358, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176888, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176359, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176889, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176360, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176890, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176361, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176891, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176362, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176892, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176363, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176893, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176364, UUID(), '英伟达半导体(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176894, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176365, UUID(), '百度(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176895, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176366, UUID(), '百度(中国)有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176896, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176367, UUID(), '北京百度网讯科技有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176897, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176368, UUID(), '北京百度网讯科技有限公司深圳分公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176898, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176369, UUID(), '深圳市福尔科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176899, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176370, UUID(), '深圳市德维莱科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176900, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176371, UUID(), '深圳市宝富利科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176901, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176372, UUID(), '深圳市大维纳米科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176902, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176373, UUID(), '金宝通电子(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176903, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176374, UUID(), '深圳市亮信科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176904, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176375, UUID(), '汎达科技(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176905, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176376, UUID(), '群锋电子(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176906, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176377, UUID(), '诺华达电子(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176907, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176378, UUID(), '新纬科技(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176908, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176379, UUID(), '深圳市领平科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176909, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176380, UUID(), '北京美餐巧达科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176910, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176381, UUID(), '镭射谷科(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176911, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176382, UUID(), '镭射谷科(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176912, 1);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176383, UUID(), '镭射谷科(深圳)有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176913, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176384, UUID(), '深圳市安普盛科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176914, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176385, UUID(), '深圳市安特讯科技有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176915, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176386, UUID(), '深圳市开拓汽车电子有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176916, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176387, UUID(), '深圳深港生产力基地有限公司','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176917, 1); 
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`) 
+	VALUES(176388, UUID(), '深圳市商业联合会','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176918, 1); 
 
 
 INSERT INTO `eh_enterprise_addresses` (`id`, `enterprise_id`, `address_id`, `status`, `create_time`) VALUES(100000, 176000, 239825274387091000, 2, '2015-11-12 22:20:25');
