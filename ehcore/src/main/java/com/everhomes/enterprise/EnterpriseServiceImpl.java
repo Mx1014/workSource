@@ -679,9 +679,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         Long userId = user.getId();
         
         EnterpriseContact enterCon = this.enterpriseContactProvider.queryEnterpriseContactor(cmd.getEnterpriseId());
-        enterCon.setRole(RoleConstants.ResourceUser);
-        this.enterpriseContactProvider.updateContact(enterCon);
-        
+        if(enterCon != null) {
+        	enterCon.setRole(RoleConstants.ResourceUser);
+        	this.enterpriseContactProvider.updateContact(enterCon);
+        }
 		EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(cmd.getEnterpriseId(), cmd.getEntryValue());
 		if(entry == null) {
 			EnterpriseContact ec = new EnterpriseContact();
