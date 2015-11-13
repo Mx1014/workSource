@@ -72,6 +72,22 @@ public class EnterpriseController extends ControllerBase {
     }
     
     
+    /**
+     * <b>URL: /enterprise/setCurrentEnterprise</b>
+     * <p>设置当前的企业</p>
+     * @return {String.class}
+     */
+    @RequestMapping("setCurrentEnterprise")
+    @RestReturn(value=String.class)
+    public RestResponse setCurrentEnterprise(@Valid SetCurrentEnterpriseCommand cmd ) {
+    	enterpriseService.setCurrentEnterprise(cmd);
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    
     
     
     /**

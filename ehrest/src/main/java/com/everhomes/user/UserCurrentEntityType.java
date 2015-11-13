@@ -2,7 +2,7 @@
 package com.everhomes.user;
 
 public enum UserCurrentEntityType {
-    COMMUNITY("community"), FAMILY("family"), ORGANIZATION("organization");
+    COMMUNITY("community"), FAMILY("family"), ORGANIZATION("organization"),ENTERPRISE("enterprise");
 
     private String code;
     

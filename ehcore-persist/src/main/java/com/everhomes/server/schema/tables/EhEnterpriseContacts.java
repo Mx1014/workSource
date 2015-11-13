@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseContacts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord> {
 
-	private static final long serialVersionUID = -1254720268;
+	private static final long serialVersionUID = 1169162770;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_contacts</code>
@@ -62,9 +62,9 @@ public class EhEnterpriseContacts extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord, java.lang.Long> ROLE = createField("role", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "The role in company");
 
 	/**
-	 * The column <code>ehcore.eh_enterprise_contacts.status</code>. 0: inactive, 1: waiting_auth, 2: authenticated
+	 * The column <code>ehcore.eh_enterprise_contacts.status</code>. 0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waiting_auth, 2: authenticated");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseContactsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active");
 
 	/**
 	 * The column <code>ehcore.eh_enterprise_contacts.creator_uid</code>. record creator user id

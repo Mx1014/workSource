@@ -102,4 +102,11 @@ public class EhParkApplyCardDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkApplyCard> fetchByDeadline(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD.DEADLINE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>community_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkApplyCard> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD.COMMUNITY_ID, values);
+	}
 }

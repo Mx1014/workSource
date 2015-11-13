@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord> {
 
-	private static final long serialVersionUID = 2004348962;
+	private static final long serialVersionUID = -543546365;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_addresses</code>
@@ -84,7 +84,7 @@ public class EhEnterpriseAddresses extends org.jooq.impl.TableImpl<com.everhomes
 	/**
 	 * The column <code>ehcore.eh_enterprise_addresses.update_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_enterprise_addresses</code> table reference

@@ -151,6 +151,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
  
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
             }
@@ -358,7 +359,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
- 
+
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(enterpriseId));
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ID.gt(locator.getAnchor()));
             }
@@ -557,7 +559,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         SelectQuery<EhEnterpriseContactGroupsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUPS);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
- 
+
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ENTERPRISE_ID.eq(enterpriseId));
         if(null!=locator && null != locator.getAnchor() ) {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
             }
@@ -685,7 +688,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         SelectQuery<EhEnterpriseContactGroupMembersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
- 
+
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ENTERPRISE_ID.eq(enterpriseId));
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
             }

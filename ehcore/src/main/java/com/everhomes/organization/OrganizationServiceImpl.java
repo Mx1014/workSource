@@ -762,6 +762,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setCityName(community.getCityName());
 				dto.setAreaName(community.getAreaName());
 				dto.setStatus(community.getStatus());
+				dto.setCommunityType(community.getCommunityType());
 				orgComms.add(dto);
 			}
 		}

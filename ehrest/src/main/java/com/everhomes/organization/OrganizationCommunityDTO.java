@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>cityName：城市名称</li>
  * <li>areaName：区域名称</li>
  * <li>status：小区状态,参考:{@link com.everhomes.address.CommunityAdminStatus}</li>	
+ * <li>communityType: 园区类型，参考{@link com.everhomes.community.CommunityType}</li>
  * </ul>
  */
 public class OrganizationCommunityDTO {
@@ -23,98 +24,77 @@ public class OrganizationCommunityDTO {
 	private String cityName;
 	private String areaName;
 	private Byte status;
+    private Byte communityType;
 	
 	public OrganizationCommunityDTO() {
 		
 	}
 	
-	
-
-	public String getAreaName() {
-		return areaName;
-	}
-
-
-
-	public void setAreaName(String areaName) {
-		this.areaName = areaName;
-	}
-
-
-
-	public String getCityName() {
-		return cityName;
-	}
-
-
-
-	public void setCityName(String cityName) {
-		this.cityName = cityName;
-	}
-
-
-
-	public Byte getStatus() {
-		return status;
-	}
-
-
-
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
-
-
 	public Long getId() {
-		return id;
-	}
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
+    public Long getCommunityId() {
+        return communityId;
+    }
 
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
-	public Long getOrganizationId() {
-		return organizationId;
-	}
+    public String getCommunityName() {
+        return communityName;
+    }
 
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
 
+    public String getCityName() {
+        return cityName;
+    }
 
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
 
+    public String getAreaName() {
+        return areaName;
+    }
 
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
 
-	public Long getCommunityId() {
-		return communityId;
-	}
+    public Byte getStatus() {
+        return status;
+    }
 
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
+    public Byte getCommunityType() {
+        return communityType;
+    }
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
-	}
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
+    }
 
-
-
-	public String getCommunityName() {
-		return communityName;
-	}
-
-
-
-	public void setCommunityName(String communityName) {
-		this.communityName = communityName;
-	}
-
-
-
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

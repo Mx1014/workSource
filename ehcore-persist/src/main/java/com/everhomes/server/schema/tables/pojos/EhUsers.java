@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1720428589;
+	private static final long serialVersionUID = -1790317449;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -46,6 +46,7 @@ public class EhUsers implements java.io.Serializable {
 	private java.lang.String   salt;
 	private java.lang.String   passwordHash;
 	private java.lang.String   siteUri;
+	private java.lang.String   siteUserToken;
 
 	public EhUsers() {}
 
@@ -82,7 +83,8 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.String   originalAvatar,
 		java.lang.String   salt,
 		java.lang.String   passwordHash,
-		java.lang.String   siteUri
+		java.lang.String   siteUri,
+		java.lang.String   siteUserToken
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -117,6 +119,7 @@ public class EhUsers implements java.io.Serializable {
 		this.salt = salt;
 		this.passwordHash = passwordHash;
 		this.siteUri = siteUri;
+		this.siteUserToken = siteUserToken;
 	}
 
 	public java.lang.Long getId() {
@@ -381,5 +384,13 @@ public class EhUsers implements java.io.Serializable {
 
 	public void setSiteUri(java.lang.String siteUri) {
 		this.siteUri = siteUri;
+	}
+
+	public java.lang.String getSiteUserToken() {
+		return this.siteUserToken;
+	}
+
+	public void setSiteUserToken(java.lang.String siteUserToken) {
+		this.siteUserToken = siteUserToken;
 	}
 }

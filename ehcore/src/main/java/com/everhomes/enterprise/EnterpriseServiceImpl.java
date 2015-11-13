@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -36,7 +38,9 @@ import com.everhomes.search.GroupQueryResult;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -48,6 +52,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseServiceImpl.class);
 
+    @Autowired 
+    private UserActivityProvider userActivityProvider;
+    
     @Autowired
     EnterpriseProvider enterpriseProvider;
    
@@ -692,6 +699,25 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         
         
         return enterpriseDto;
+	}
+
+	@Override
+	public void setCurrentEnterprise(SetCurrentEnterpriseCommand cmd) { 
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		long timestemp = DateHelper.currentGMTTime().getTime();	
+		validUserEnterprise(userId,cmd.getEnterpriseId());
+		   
+		String key = UserCurrentEntityType.ENTERPRISE.getUserProfileKey();
+        userActivityProvider.updateUserCurrentEntityProfile(userId, key, cmd.getEnterpriseId(), timestemp);
+	}
+
+	public void validUserEnterprise(Long userId, Long enterpriseId) { 
+		EnterpriseContact  contact = enterpriseContactProvider.queryContactByUserId(enterpriseId, userId);
+		if(null==contact)
+			throw RuntimeErrorException
+			.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_USER_NOT_FOUND,
+					"you are not in the enterprise !");
 	}
 
 }
