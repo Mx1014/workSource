@@ -67,7 +67,7 @@ public class EnterpriseContactController extends ControllerBase {
     }
     /**
      * <b>URL: /contact/addContact</b>
-     * <p>企业导入通讯录</p>
+     * <p>企业添加通讯录</p>
      * @return {@link EnterpriseContactDTO}
      */
     @RequestMapping("addContact")
@@ -84,7 +84,7 @@ public class EnterpriseContactController extends ControllerBase {
 
     /**
      * <b>URL: /contact/addContact</b>
-     * <p>企业导入通讯录</p>
+     * <p>企业删除通讯录</p>
      * @return {@link EnterpriseContactDTO}
      */
     @RequestMapping("deleteContactById")

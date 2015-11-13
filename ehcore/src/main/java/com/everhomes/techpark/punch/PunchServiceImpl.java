@@ -1373,6 +1373,28 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return count;
 	}
+
+	@Override
+	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
+			ListMonthPunchLogsCommand cmd) {
+
+		checkCompanyIdIsNull(cmd.getCompanyId()); 
+		SimpleDateFormat yearSF = new SimpleDateFormat("yyyy");
+
+		ListMonthPunchLogsCommandResponse response = new ListMonthPunchLogsCommandResponse();
+		response.setPunchYear(yearSF.format(new java.sql.Date(cmd.getQueryTime()))); 
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance(); 
+		//start 为月初
+		start.set(Calendar.DAY_OF_MONTH,
+				start.getActualMinimum(Calendar.DAY_OF_MONTH));
+		ListYearPunchLogsCommandResponse pyl = new ListYearPunchLogsCommandResponse();
+		pyl.setPunchYear(response.getPunchYear());
+		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getCompanyId(),
+				start, end);
+		response.setPunchLogsMonthList(pyl.getPunchLogsMonthList());
+		return response;
+	}
 	
 	
 }
