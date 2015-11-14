@@ -3,7 +3,9 @@ package com.everhomes.enterprise;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -87,6 +89,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
 	private ContentServerService contentServerService;
+    
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
@@ -715,7 +718,22 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public void deleteEnterprise(DeleteEnterpriseCommand cmd) {
-		// TODO Auto-generated method stub
+		EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(cmd.getCommunityId(), cmd.getEnterprisId());
+		this.enterpriseProvider.deleteEnterpriseCommunityMapById(ec);
+
+		List<EnterpriseAddress> eas = this.enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getEnterprisId());
+		
+		for(EnterpriseAddress ea : eas) {
+			Address addr = addressProvider.findAddressById(ea.getAddressId());
+			if(addr != null && addr.getCommunityId() == cmd.getCommunityId())
+				this.enterpriseProvider.deleteEnterpriseAddress(ea);
+
+		}
+		
+		this.enterpriseProvider.deleteEnterpriseAttachmentsByEnterpriseId(cmd.getEnterprisId());
+		
+		List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getEnterprisId());
+		this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
 		
 	}
 

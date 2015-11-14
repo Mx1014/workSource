@@ -104,6 +104,8 @@ public class EnterpriseAdminController extends ControllerBase {
         return res;
     }
     
+    @RequestMapping("deleteEnterprise")
+    @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse deleteEnterprise(DeleteEnterpriseCommand cmd) {
     	
     	enterpriseService.deleteEnterprise(cmd);
