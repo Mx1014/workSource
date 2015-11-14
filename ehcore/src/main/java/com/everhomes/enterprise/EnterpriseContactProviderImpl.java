@@ -359,6 +359,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
+         
 
         query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(enterpriseId));
         if(locator.getAnchor() != null) {
@@ -380,7 +381,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
- 
+        if(null != enterpriseId)
+        	query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ENTERPRISE_ID.eq(enterpriseId));
 
         if(null!=locator && null != locator.getAnchor() ) {
             query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
