@@ -150,9 +150,9 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("listOrganizationCommunities")
 	@RestReturn(value=ListOrganizationCommunityCommandResponse.class)
 	public RestResponse listOrganizationCommunities(@Valid ListOrganizationCommunityCommand cmd) {
-	    if(cmd.getOrganizationId() == null) {
-	        cmd.setOrganizationId(1000000L);
-	    }
+//	    if(cmd.getOrganizationId() == null) {
+//	        cmd.setOrganizationId(1000000L);
+//	    }
 		ListOrganizationCommunityCommandResponse commandResponse = organizationService.listOrganizationCommunities(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

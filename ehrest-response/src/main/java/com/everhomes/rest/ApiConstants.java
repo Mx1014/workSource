@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-13 16:28:52
+// generated at 2015-11-14 10:52:19
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -83,6 +83,7 @@ public interface ApiConstants {
     public static final String ADMIN_ENTERPRISE_CREATEENTERPRISE_URL = "/admin/enterprise/createEnterprise";
     public static final String ADMIN_ENTERPRISE_REJECT_URL = "/admin/enterprise/reject";
     public static final String ADMIN_ENTERPRISE_REVOKE_URL = "/admin/enterprise/revoke";
+    public static final String ADMIN_ENTERPRISE_UPDATECONTACTOR_URL = "/admin/enterprise/updateContactor";
     public static final String ADMIN_ENTERPRISE_UPDATEENTERPRISE_URL = "/admin/enterprise/updateEnterprise";
     public static final String ADMIN_FAMILY_ADMINAPPROVEMEMBER_URL = "/admin/family/adminApproveMember";
     public static final String ADMIN_FAMILY_ADMINREJECTMEMBER_URL = "/admin/family/adminRejectMember";
@@ -338,6 +339,8 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERCANCELFAVORITE_URL = "/openapi/syncUserCancelFavorite";
     public static final String OPENAPI_SYNCUSERFAVORITE_URL = "/openapi/syncUserFavorite";
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
+    public static final String OPENAPI_USER_GETBIZSIGNATURE_URL = "/openapi/user/getBizSignature";
+    public static final String OPENAPI_USER_SYNCOUPON_URL = "/openapi/user/synCoupon";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
     public static final String ORG_APPROVEORGANIZATIONMEMBER_URL = "/org/approveOrganizationMember";
@@ -465,6 +468,7 @@ public interface ApiConstants {
     public static final String TECHPARK_PUNCH_GETDAYPUNCHLOGS_URL = "/techpark/punch/getDayPunchLogs";
     public static final String TECHPARK_PUNCH_GETPUNCHNEWEXCEPTION_URL = "/techpark/punch/getPunchNewException";
     public static final String TECHPARK_PUNCH_GETPUNCHRULE_URL = "/techpark/punch/getPunchRule";
+    public static final String TECHPARK_PUNCH_LISTMONTHPUNCHLOGS_URL = "/techpark/punch/listMonthPunchLogs";
     public static final String TECHPARK_PUNCH_LISTPUNCHCOUNT_URL = "/techpark/punch/listPunchCount";
     public static final String TECHPARK_PUNCH_LISTPUNCHEXCEPTIONAPPROVAL_URL = "/techpark/punch/listPunchExceptionApproval";
     public static final String TECHPARK_PUNCH_LISTPUNCHEXCEPTIONREQUEST_URL = "/techpark/punch/listPunchExceptionRequest";
