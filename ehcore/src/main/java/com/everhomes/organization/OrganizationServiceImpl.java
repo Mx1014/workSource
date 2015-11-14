@@ -2788,7 +2788,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    try {
 	        List<UserCurrentEntity> entityList = userService.listUserCurrentEntity(user.getId());
 	        if(!containPartnerCommunity(entityList)) {
-	            List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(organization.getId(), 0, 1);
+	            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 1);
+	            List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(organization.getId(), 1, pageSize);
 	            if(result != null && result.size() > 0) {
 	                Long communityId = result.get(0).getCommunityId();
 	                userService.updateUserCurrentCommunityToProfile(user.getId(), communityId);
