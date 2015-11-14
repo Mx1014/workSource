@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2031162576;
+	private static final long serialVersionUID = -608752790;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -32,6 +32,7 @@ public class EhBanners implements java.io.Serializable {
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   siteUri;
 
 	public EhBanners() {}
 
@@ -54,7 +55,8 @@ public class EhBanners implements java.io.Serializable {
 		java.lang.Integer  order,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   siteUri
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -75,6 +77,7 @@ public class EhBanners implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
+		this.siteUri = siteUri;
 	}
 
 	public java.lang.Long getId() {
@@ -227,5 +230,13 @@ public class EhBanners implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getSiteUri() {
+		return this.siteUri;
+	}
+
+	public void setSiteUri(java.lang.String siteUri) {
+		this.siteUri = siteUri;
 	}
 }
