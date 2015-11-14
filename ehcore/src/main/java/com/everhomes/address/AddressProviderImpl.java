@@ -211,6 +211,7 @@ public class AddressProviderImpl implements AddressProvider {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+                            apartment.setAddress(r.getValue(Tables.EH_ADDRESSES.ADDRESS));
                             results.add(apartment);
                             return null;
                         });
