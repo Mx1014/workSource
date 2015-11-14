@@ -257,9 +257,22 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		// " phone " + phone);
 		// }
 		// }
-
+		
+		//添加企业部门member表记录
+		if(null!= cmd.getGroupId() ){
+			EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+			enterpriseContactGroupMember.setContactGroupId(cmd.getGroupId());
+			enterpriseContactGroupMember
+					.setEnterpriseId(cmd.getEnterpriseId());
+			enterpriseContactGroupMember.setContactId(result.getId());
+			enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
+			enterpriseContactGroupMember
+					.setCreateTime(new Timestamp(System
+							.currentTimeMillis()));
+			enterpriseContactProvider
+					.createContactGroupMember(enterpriseContactGroupMember);
+		}
 		// TODO 发消息给所有根管理员
-
 		if (result == null) {
 			LOGGER.error("Failed to apply for enterprise contact, userId="
 					+ userId + ", cmd=" + cmd);
@@ -844,11 +857,22 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	public void approveContact(ApproveContactCommand cmd) {
 
 		EnterpriseContact contact = this.enterpriseContactProvider
-				.queryContactById(cmd.getContactId());
+			.queryContactById(cmd.getContactId());
+	
+	 
+		 
 		
-		// contact.setStatus(EnterpriseContactStatus.AUTHENTICATED.getCode());
-		// this.enterpriseContactProvider.updateContact(contact);
-		// this.approveByContactId(cmd.getContactId());
+		Group group = groupProvider.findGroupById(contact.getEnterpriseId());
+		UserGroup uGroup =new UserGroup();
+		uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+		uGroup.setOwnerUid(contact.getUserId());
+		uGroup.setGroupId(group.getId());
+		uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+		uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+		uGroup.setRegionScopeId(group.getVisibleRegionId());
+		userProvider.createUserGroup(uGroup);
+		 
+		// 添加menber表 
 		this.approveContact(contact);
 	}
 
@@ -984,8 +1008,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	private void convertContactExcelFile(Long enterpriseId,
-			MultipartFile[] files) {
-		// TODO Auto-generated method stub
+			MultipartFile[] files) { 
 		Long creatorId = UserContext.current().getUser().getId();
 		List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
 		Map<String, Long> groupMap = new HashMap<String, Long>();
@@ -1083,85 +1106,86 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						enterpriseContactProvider
 								.createContactEntry(contactEntry);
 						// EnterpriseGroupMemberStatus
-						if (applyGroup.contains("\\")) {
-							String[] groups = applyGroup.split("\\\\");
-							StringBuffer groupPath = new StringBuffer();
-							groupPath.append("\\");
-							for (int groupNode = 0; groupNode < groups.length; groupNode++) {
-								
-								StringBuffer groupNamePath = new StringBuffer();
-								for (int groupSubNode = 0; groupSubNode <= groupNode; groupSubNode++) {
-									if(groupSubNode>0)
-										groupNamePath.append("\\");
-									groupNamePath.append(groups[groupSubNode]);
+						if(null!= applyGroup){
+							if (applyGroup.contains("\\")) {
+								String[] groups = applyGroup.split("\\\\");
+								StringBuffer groupPath = new StringBuffer();
+								groupPath.append("\\");
+								for (int groupNode = 0; groupNode < groups.length; groupNode++) {
+									
+									StringBuffer groupNamePath = new StringBuffer();
+									for (int groupSubNode = 0; groupSubNode <= groupNode; groupSubNode++) {
+										if(groupSubNode>0)
+											groupNamePath.append("\\");
+										groupNamePath.append(groups[groupSubNode]);
+									}
+									if (null == groupMap.get(groupNamePath
+											.toString())) {
+										// 如果不存在则添加新group
+										EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
+										enterpriseContactGroup
+												.setEnterpriseId(enterpriseId);
+										enterpriseContactGroup
+												.setName(groups[groupNode]);
+										if (groupNode == 0) {
+	
+										} else {
+											enterpriseContactGroup
+													.setParentId(groupMap
+															.get(groups[groupNode - 1]));
+	
+										}
+										enterpriseContactGroup.setPath(groupPath
+												.toString());
+										enterpriseContactGroup.setApplyGroup(groupNamePath.toString());
+										enterpriseContactGroup
+												.setCreatorUid(creatorId);
+										enterpriseContactGroup
+												.setCreateTime(new Timestamp(System
+														.currentTimeMillis()));
+										enterpriseContactProvider
+												.createContactGroup(enterpriseContactGroup);
+										groupMap.put(groupNamePath.toString(),
+												enterpriseContactGroup.getId());
+										groupPath.append(enterpriseContactGroup
+												.getId()); 
+										groupPath.append("\\");
+	
+									}
+	
 								}
-								if (null == groupMap.get(groupNamePath
-										.toString())) {
+							} else {
+								if (null == groupMap.get(applyGroup)) {
 									// 如果不存在则添加新group
 									EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
 									enterpriseContactGroup
 											.setEnterpriseId(enterpriseId);
-									enterpriseContactGroup
-											.setName(groups[groupNode]);
-									if (groupNode == 0) {
-
-									} else {
-										enterpriseContactGroup
-												.setParentId(groupMap
-														.get(groups[groupNode - 1]));
-
-									}
-									enterpriseContactGroup.setPath(groupPath
-											.toString());
-									enterpriseContactGroup.setApplyGroup(groupNamePath.toString());
-									enterpriseContactGroup
-											.setCreatorUid(creatorId);
-									enterpriseContactGroup
-											.setCreateTime(new Timestamp(System
+									enterpriseContactGroup.setName(applyGroup);
+									enterpriseContactGroup.setApplyGroup(applyGroup);
+									enterpriseContactGroup.setPath("\\");
+									enterpriseContactGroup.setCreatorUid(creatorId);
+									enterpriseContactGroup.setCreateTime(new Timestamp(System
 													.currentTimeMillis()));
 									enterpriseContactProvider
 											.createContactGroup(enterpriseContactGroup);
-									groupMap.put(groupNamePath.toString(),
+									groupMap.put(applyGroup,
 											enterpriseContactGroup.getId());
-									groupPath.append(enterpriseContactGroup
-											.getId()); 
-									groupPath.append("\\");
-
 								}
-
 							}
-						} else {
-							if (null == groupMap.get(applyGroup)) {
-								// 如果不存在则添加新group
-								EnterpriseContactGroup enterpriseContactGroup = new EnterpriseContactGroup();
-								enterpriseContactGroup
-										.setEnterpriseId(enterpriseId);
-								enterpriseContactGroup.setName(applyGroup);
-								enterpriseContactGroup.setApplyGroup(applyGroup);
-								enterpriseContactGroup.setPath("\\");
-								enterpriseContactGroup.setCreatorUid(creatorId);
-								enterpriseContactGroup.setCreateTime(new Timestamp(System
-												.currentTimeMillis()));
-								enterpriseContactProvider
-										.createContactGroup(enterpriseContactGroup);
-								groupMap.put(applyGroup,
-										enterpriseContactGroup.getId());
-							}
+							// 添加menber表
+							EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+							enterpriseContactGroupMember.setContactGroupId(groupMap
+									.get(applyGroup));
+							enterpriseContactGroupMember
+									.setEnterpriseId(enterpriseId);
+							enterpriseContactGroupMember.setContactId(contactId);
+							enterpriseContactGroupMember.setCreatorUid(creatorId);
+							enterpriseContactGroupMember
+									.setCreateTime(new Timestamp(System
+											.currentTimeMillis()));
+							enterpriseContactProvider
+									.createContactGroupMember(enterpriseContactGroupMember);
 						}
-						// 添加menber表
-						EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
-						enterpriseContactGroupMember.setContactGroupId(groupMap
-								.get(applyGroup));
-						enterpriseContactGroupMember
-								.setEnterpriseId(enterpriseId);
-						enterpriseContactGroupMember.setContactId(contactId);
-						enterpriseContactGroupMember.setCreatorUid(creatorId);
-						enterpriseContactGroupMember
-								.setCreateTime(new Timestamp(System
-										.currentTimeMillis()));
-						enterpriseContactProvider
-								.createContactGroupMember(enterpriseContactGroupMember);
-
 					}
 				}
 			} else {
@@ -1345,17 +1369,19 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				.createContactEntry(contactEntry);
 		 
 		// 添加menber表
-		EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
-		enterpriseContactGroupMember.setContactGroupId(cmd.getGroupId());
-		enterpriseContactGroupMember
-				.setEnterpriseId(cmd.getEnterpriseId());
-		enterpriseContactGroupMember.setContactId(contactId);
-		enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
-		enterpriseContactGroupMember
-				.setCreateTime(new Timestamp(System
-						.currentTimeMillis()));
-		enterpriseContactProvider
-				.createContactGroupMember(enterpriseContactGroupMember);
+		if(null!=cmd.getGroupId()){
+			EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+			enterpriseContactGroupMember.setContactGroupId(cmd.getGroupId());
+			enterpriseContactGroupMember
+					.setEnterpriseId(cmd.getEnterpriseId());
+			enterpriseContactGroupMember.setContactId(contactId);
+			enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
+			enterpriseContactGroupMember
+					.setCreateTime(new Timestamp(System
+							.currentTimeMillis()));
+			enterpriseContactProvider
+					.createContactGroupMember(enterpriseContactGroupMember);
+		}
 	}
 
 	@Override

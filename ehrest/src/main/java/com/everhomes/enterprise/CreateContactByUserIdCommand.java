@@ -17,6 +17,7 @@ public class CreateContactByUserIdCommand {
     private Long userId;
     
     private Long enterpriseId;
+    private Long groupId;
     private String   name;
     private String   nickName;
     private String   avatar;
@@ -58,5 +59,11 @@ public class CreateContactByUserIdCommand {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+	public Long getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
     
 }

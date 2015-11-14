@@ -31,7 +31,6 @@ import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
-import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
@@ -45,9 +44,9 @@ import com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord;
+import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord;
-import com.everhomes.techpark.company.OwnerType;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -126,13 +125,18 @@ public class PunchProviderImpl implements PunchProvider {
 	// })
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec
-				.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
 		punchLog.setId(id);
-		EhPunchLogsDao dao = new EhPunchLogsDao(context.configuration());
-		dao.insert(punchLog);
+		EhPunchLogsRecord record = ConvertHelper.convert(punchLog,
+				EhPunchLogsRecord.class);
+		InsertQuery<EhPunchLogsRecord> query = context
+				.insertQuery(Tables.EH_PUNCH_LOGS);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPunchLogs.class, null);
 
 	}
 

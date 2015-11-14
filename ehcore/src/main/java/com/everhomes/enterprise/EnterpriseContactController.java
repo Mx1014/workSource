@@ -102,6 +102,7 @@ public class EnterpriseContactController extends ControllerBase {
     /**
      * <b>URL: /contact/createContactByUserIdCommand</b>
      * <p>注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员</p>
+     * 申请加入企业
      * @return {@link EnterpriseContactDTO}
      */
     @RequestMapping("createContactByUserIdCommand")
@@ -217,7 +218,7 @@ public class EnterpriseContactController extends ControllerBase {
     }  
     /**
      * <b>URL: /contact/addContactGroup</b>
-     * <p>列出部门名字-没有父节点</p>
+     * <p>添加部门</p>
      * @return {@link AddContactGroupCommandResponse}
      */
     @RequestMapping("addContactGroup")
@@ -234,7 +235,7 @@ public class EnterpriseContactController extends ControllerBase {
     
     /**
      * <b>URL: /contact/deleteContactGroupById</b>
-     * <p>列出部门名字-没有父节点</p>
+     * <p>删除部门-没有父节点</p>
      * @return {@link }
      */
     @RequestMapping("deleteContactGroupById")
