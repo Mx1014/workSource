@@ -1389,6 +1389,9 @@ public class PunchServiceImpl implements PunchService {
 		//start 设置为本月月初
 		start.set(Calendar.DAY_OF_MONTH,
 				start.getActualMinimum(Calendar.DAY_OF_MONTH));
+		start.set(Calendar.HOUR_OF_DAY, 0);
+		start.set(Calendar.SECOND,0);
+		start.set(Calendar.MINUTE,0);
 		if(start.getTime().after(new java.sql.Date(cmd.getQueryTime()))){
 			//如果查询日在月初之前 则设置为查询月的月初和月末
 			start.setTime(new java.sql.Date(cmd.getQueryTime()) );
