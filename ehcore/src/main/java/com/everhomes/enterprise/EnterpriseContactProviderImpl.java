@@ -381,13 +381,13 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
-        if(null != enterpriseId)
-        	query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ENTERPRISE_ID.eq(enterpriseId));
+        
 
         if(null!=locator && null != locator.getAnchor() ) {
-            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUPS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ID.gt(locator.getAnchor()));
             }
         
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTERPRISE_ID.eq(enterpriseId));
         query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(ContactType.MOBILE.getCode()));
         query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(phoneString));
         
