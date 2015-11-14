@@ -2755,6 +2755,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void processPartnerOrganizationUser(Long userId, Long partnerId) {
+	    long startTime = System.currentTimeMillis();
 	    if(userId == null || userId <= 0) {
 	        LOGGER.info("User id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
 	        return;
@@ -2781,6 +2782,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             setDefaultPartnerCommunity(user, organization);
         } else {
             LOGGER.error("Organization is not partner type, userId=" + userId + ", partnerId=" + partnerId + ", organizationType=" + type);
+        }
+        
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Process partner organization user, userId=" + userId + ", partnerId=" + partnerId + ", elapse=" + (endTime - startTime));
         }
 	}
 	
@@ -2828,7 +2834,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	private void joinPartnerOrganization(User user, Organization organization) {
         try {
-            OrganizationMember member = new OrganizationMember();
+            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+            if(member != null) {
+                LOGGER.error("Organization member already existed, userId=" + user.getId() + ", partnerId=" + organization.getId());
+                return;
+            }
+            
+            member = new OrganizationMember();
 
             member.setContactName(user.getNickName());
             member.setOrganizationId(organization.getId());
