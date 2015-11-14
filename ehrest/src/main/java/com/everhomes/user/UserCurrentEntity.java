@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.user;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 用户当前切换的实体，有可能是小区、家庭、机构等
  * <ul>
@@ -14,6 +16,8 @@ public class UserCurrentEntity {
     private String entityType;
     
     private String entityId;
+    
+    private String entityName;
     
     private Long timestamp;
     
@@ -36,6 +40,14 @@ public class UserCurrentEntity {
         this.entityId = entityId;
     }
 
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
     public Long getTimestamp() {
         return timestamp;
     }
@@ -43,5 +55,9 @@ public class UserCurrentEntity {
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
-    
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
