@@ -656,7 +656,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId) {
 		assert(locator.getEntityId() != 0);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class, locator.getEntityId()));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
     
