@@ -574,5 +574,15 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         EhEnterpriseAddressesDao dao = new EhEnterpriseAddressesDao(context.configuration());
         dao.delete(enterpriseAddr); 		
 	}
+
+	@Override
+	public void updateEnterpriseAddress(EnterpriseAddress ea) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, ea.getEnterpriseId()));
+		ea.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhEnterpriseAddressesDao dao = new EhEnterpriseAddressesDao(context.configuration());
+        ea.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(ea);
+		
+	}
 	
 }

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 门牌号</li>
  * <li>familyId: 家庭ID，如果为0，则表示地址不存在家庭</li>
  * <li>apartmentName: 门牌号</li>
+ * <li>address: 楼栋门牌地址</li>
   * <li>livingStatus: 地址入住状态 ，参考{@link com.everhomes.address.AddressLivingStatus}</li>
  * </ul>
  */
@@ -18,12 +19,23 @@ public class ApartmentDTO {
     private Long addressId;
     private Long familyId;
     private String apartmentName;
+    private String address;
     private Byte livingStatus;
     
     public ApartmentDTO() {
     }
     
-    public Long getAddressId() {
+    public String getAddress() {
+		return address;
+	}
+
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+	public Long getAddressId() {
         return addressId;
     }
 
