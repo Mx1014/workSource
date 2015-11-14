@@ -2,23 +2,23 @@ package com.everhomes.enterprise;
 
 /**
  * <ul>
- *  <li>enterprisId: 企业id</li>
+ *  <li>enterpriseId: 企业id</li>
  *  <li>communityId: 园区id</li>
  * </ul>
  *
  */
 public class DeleteEnterpriseCommand {
 	
-	private Long enterprisId;
+	private Long enterpriseId;
 	
 	private Long communityId;
 
-	public Long getEnterprisId() {
-		return enterprisId;
+	public Long getEnterpriseId() {
+		return enterpriseId;
 	}
 
-	public void setEnterprisId(Long enterprisId) {
-		this.enterprisId = enterprisId;
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public Long getCommunityId() {

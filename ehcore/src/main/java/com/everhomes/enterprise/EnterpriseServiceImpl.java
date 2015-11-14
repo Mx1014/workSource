@@ -626,6 +626,14 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         this.enterpriseProvider.updateEnterprise(enterprise);
         
         List<Long> addressIds = cmd.getAddressId();
+        List<EnterpriseAddress> eas = enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getId());
+        if(eas != null && eas.size() > 0) {
+        	for(EnterpriseAddress ea : eas) {
+        		if(!addressIds.contains(ea.getAddressId())) {
+        			enterpriseProvider.deleteEnterpriseAddress(ea);
+        		}
+        	}
+        }
         if(addressIds != null && addressIds.size() > 0) {
         	List<Address> address = new ArrayList<Address>();
         	for(Long addressId :addressIds) {
@@ -719,12 +727,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public void deleteEnterprise(DeleteEnterpriseCommand cmd) {
-		EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(cmd.getCommunityId(), cmd.getEnterprisId());
+		EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(cmd.getCommunityId(), cmd.getEnterpriseId());
 		if(ec != null) {
 			ec.setMemberStatus(EnterpriseCommunityMapStatus.Inactive.getCode());
 			this.enterpriseProvider.updateEnterpriseCommunityMap(ec);
 	
-			List<EnterpriseAddress> eas = this.enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getEnterprisId());
+			List<EnterpriseAddress> eas = this.enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getEnterpriseId());
 			
 			for(EnterpriseAddress ea : eas) {
 				Address addr = addressProvider.findAddressById(ea.getAddressId());
@@ -735,9 +743,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	
 			}
 			
-			this.enterpriseProvider.deleteEnterpriseAttachmentsByEnterpriseId(cmd.getEnterprisId());
+			this.enterpriseProvider.deleteEnterpriseAttachmentsByEnterpriseId(cmd.getEnterpriseId());
 			
-			List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getEnterprisId());
+			List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getEnterpriseId());
 			this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
 		}
 	}
