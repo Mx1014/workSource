@@ -1105,11 +1105,13 @@ public class RentalServiceImpl implements RentalService {
 		if (bill.getPayTotalMoney().equals(0.0)) {
 			// 总金额为0，直接预订成功状态
 			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-		} else if (bill.getReserveMoney().equals(0.0)
-				&& bill.getStatus().equals(
+		} else if ( bill.getStatus().equals(
 						SiteBillStatus.LOCKED.getCode())) {
 			// 预付金额为0，且状态为locked，直接进入支付定金成功状态
-			bill.setStatus(SiteBillStatus.RESERVED.getCode());
+			if(bill.getReserveMoney().equals(0.0))
+				bill.setStatus(SiteBillStatus.RESERVED.getCode());
+			else if (bill.getReserveMoney().equals(bill.getPayTotalMoney()-bill.getPaidMoney()))
+				bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 
 		}
 		rentalProvider.updateRentalBill(bill);
