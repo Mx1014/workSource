@@ -951,9 +951,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		 
         SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
-        for(Long contactId : contactIds){
-        	query.addConditions(Operator.OR, Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.eq(contactId));
-        }
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.CONTACT_ID.in(contactIds));
         
         
         query.fetch().map((r) -> {
