@@ -201,7 +201,7 @@ public class AddressProviderImpl implements AddressProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
-                    context.select(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME)
+                    context.select(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME, Tables.EH_ADDRESSES.ADDRESS)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(communityId)
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)))
