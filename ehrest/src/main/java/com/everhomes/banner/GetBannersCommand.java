@@ -17,6 +17,8 @@ public class GetBannersCommand {
     private Long communityId;
     private String bannerLocation;
     private String bannerGroup;
+    @NotNull
+    private String siteUri;
 
     public GetBannersCommand() {
     }
@@ -49,4 +51,12 @@ public class GetBannersCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getSiteUri() {
+		return siteUri;
+	}
+
+	public void setSiteUri(String siteUri) {
+		this.siteUri = siteUri;
+	}
 }

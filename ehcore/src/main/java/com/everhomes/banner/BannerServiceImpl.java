@@ -84,10 +84,10 @@ public class BannerServiceImpl implements BannerService {
         long userId = user.getId();
         //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //query user relate banners
-        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),
+        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(cmd.getSiteUri(),cmd.getBannerLocation(),cmd.getBannerGroup(),
                 ScopeType.ALL.getCode(), 0L);
-        List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),ScopeType.CITY.getCode(), cityId);
-        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(cmd.getBannerLocation(),cmd.getBannerGroup(),ScopeType.COMMUNITY.getCode(), communityId);
+        List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(cmd.getSiteUri(),cmd.getBannerLocation(),cmd.getBannerGroup(),ScopeType.CITY.getCode(), cityId);
+        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(cmd.getSiteUri(),cmd.getBannerLocation(),cmd.getBannerGroup(),ScopeType.COMMUNITY.getCode(), communityId);
         List<Banner> allBanners = new ArrayList<Banner>();
         if(countryBanners != null)
             allBanners.addAll(countryBanners);
