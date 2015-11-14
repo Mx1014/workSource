@@ -308,6 +308,7 @@ public class PunchServiceImpl implements PunchService {
 			punchDayLog.setWorkTime(java.sql.Time.valueOf(getGMTtimeString(
 					"HH:mm:ss", workTime)));
 			punchDayLog.setStatus(pdl.getPunchStatus());
+			punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 			punchProvider.createPunchDayLog(punchDayLog);
 
 		} else {
@@ -967,6 +968,7 @@ public class PunchServiceImpl implements PunchService {
 				.getPunchDate()));
 		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR
 				.getCode());
+		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
 
 	}
@@ -1155,6 +1157,7 @@ public class PunchServiceImpl implements PunchService {
 		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
 				.getPunchDate()));
 		punchExceptionRequest.setStatus(cmd.getStatus());
+		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
 		// 查eh_punch_exception_approvals有无数据：无数据，结果是同意则插入 /有数据 如果结果是同意
 		// 则修改，结果是驳回则删除
@@ -1175,6 +1178,7 @@ public class PunchServiceImpl implements PunchService {
 						.currentGMTTime().getTime()));
 				punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd
 						.getPunchDate()));
+				punchExceptionApproval.setViewFlag(ViewFlags.NOTVIEW.getCode());
 				punchProvider
 						.createPunchExceptionApproval(punchExceptionApproval);
 			}
@@ -1191,6 +1195,7 @@ public class PunchServiceImpl implements PunchService {
 						.currentGMTTime().getTime()));
 				punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd
 						.getPunchDate()));
+				punchExceptionApproval.setViewFlag(ViewFlags.NOTVIEW.getCode());
 				punchProvider
 						.updatePunchExceptionApproval(punchExceptionApproval);
 			} else {
