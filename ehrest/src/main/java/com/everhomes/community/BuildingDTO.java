@@ -67,7 +67,8 @@ public class BuildingDTO {
 	private Double latitude;
 	
 	private String description;
-	
+
+	private String posterUri;
 	private String posterUrl;
 	
 	private Long operatorUid;
@@ -228,15 +229,7 @@ public class BuildingDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	public String getPosterUrl() {
-		return posterUrl;
-	}
-
-	public void setPosterUrl(String posterUrl) {
-		this.posterUrl = posterUrl;
-	}
-
+ 
 	public Long getOperatorUid() {
 		return operatorUid;
 	}
@@ -299,6 +292,22 @@ public class BuildingDTO {
 
 	public void setAttachments(List<BuildingAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public String getPosterUrl() {
+		return posterUrl;
+	}
+
+	public void setPosterUrl(String posterUrl) {
+		this.posterUrl = posterUrl;
 	}
 	
 	

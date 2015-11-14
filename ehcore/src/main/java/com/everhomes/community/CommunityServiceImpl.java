@@ -47,6 +47,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
+import com.everhomes.group.GroupDTO;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -539,10 +540,28 @@ public class CommunityServiceImpl implements CommunityService {
           return ConvertHelper.convert(r, BuildingDTO.class);  
         }).collect(Collectors.toList());
         
+        for(BuildingDTO buildingDTO : dtoList){
+        	populateBuildingDTO(buildingDTO);
+        }
         
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
+    private void populateBuildingDTO( BuildingDTO building) {
+        if(building == null) {
+            return;
+        }
+        
+        String posterUrl = building.getPosterUri();
+        if(posterUrl != null && posterUrl.length() > 0) {
+            try{
+                String url = contentServerService.parserUri(posterUrl, EntityType.BUILDING.getCode(), building.getId());
+                building.setPosterUrl(url);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
+            }
+        }
+    }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
 		
