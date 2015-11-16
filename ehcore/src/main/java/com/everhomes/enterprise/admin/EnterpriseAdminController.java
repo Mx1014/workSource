@@ -132,7 +132,7 @@ public class EnterpriseAdminController extends ControllerBase {
    
     @RequestMapping("importEnterpriseData")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importEnterpriseData(@RequestParam(value = "attachment_file_") MultipartFile[] files){
+    public RestResponse importEnterpriseData(@RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){

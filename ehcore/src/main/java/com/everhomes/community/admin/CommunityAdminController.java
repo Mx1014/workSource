@@ -373,7 +373,7 @@ public class CommunityAdminController extends ControllerBase {
      */
     @RequestMapping("importBuildingData")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importBuildingData(@RequestParam(value = "attachment_file_") MultipartFile[] files){
+    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
