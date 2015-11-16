@@ -12,6 +12,8 @@ public class UpdateContactCommand {
     private java.lang.String   avatar;
     private java.lang.Long     role;  
     private java.lang.Long     contactGroupId;  
+    private String employeeNo;
+    private String sex;
       
     public java.lang.String getName() {
         return name;
@@ -49,5 +51,17 @@ public class UpdateContactCommand {
 	}
 	public void setContactGroupId(java.lang.Long contactGroupId) {
 		this.contactGroupId = contactGroupId;
+	}
+	public String getEmployeeNo() {
+		return employeeNo;
+	}
+	public void setEmployeeNo(String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+	public String getSex() {
+		return sex;
+	}
+	public void setSex(String sex) {
+		this.sex = sex;
 	}
 }
