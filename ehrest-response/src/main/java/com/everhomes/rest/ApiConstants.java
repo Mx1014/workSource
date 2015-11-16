@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-14 11:57:06
+// generated at 2015-11-16 17:43:23
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -81,6 +81,8 @@ public interface ApiConstants {
     public static final String ADMIN_CREATEAPP_URL = "/admin/createApp";
     public static final String ADMIN_ENTERPRISE_APPROVE_URL = "/admin/enterprise/approve";
     public static final String ADMIN_ENTERPRISE_CREATEENTERPRISE_URL = "/admin/enterprise/createEnterprise";
+    public static final String ADMIN_ENTERPRISE_DELETEENTERPRISE_URL = "/admin/enterprise/deleteEnterprise";
+    public static final String ADMIN_ENTERPRISE_IMPORTENTERPRISEDATA_URL = "/admin/enterprise/importEnterpriseData";
     public static final String ADMIN_ENTERPRISE_REJECT_URL = "/admin/enterprise/reject";
     public static final String ADMIN_ENTERPRISE_REVOKE_URL = "/admin/enterprise/revoke";
     public static final String ADMIN_ENTERPRISE_UPDATECONTACTOR_URL = "/admin/enterprise/updateContactor";
@@ -372,6 +374,7 @@ public interface ApiConstants {
     public static final String ORG_QUERYORGTOPICSBYCATEGORY_URL = "/org/queryOrgTopicsByCategory";
     public static final String ORG_REJECTORGANIZATION_URL = "/org/rejectOrganization";
     public static final String ORG_REJECTORGANIZATIONMEMBER_URL = "/org/rejectOrganizationMember";
+    public static final String ORG_SEARCHTOPICSBYTYPE_URL = "/org/searchTopicsByType";
     public static final String ORG_SENDORGMESSAGE_URL = "/org/sendOrgMessage";
     public static final String ORG_SETCURRENTORGANIZATION_URL = "/org/setCurrentOrganization";
     public static final String ORG_SETORGTOPICSTATUS_URL = "/org/setOrgTopicStatus";
