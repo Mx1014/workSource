@@ -421,6 +421,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             } else {
                 this.enterpriseContactProvider.updateContact(contact);
             }
+            List<Long> contactIds = new ArrayList<Long>();
+            contactIds.add(contact.getId());
+            this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
             this.userProvider.deleteUserGroup(contact.getId(), contact.getEnterpriseId());
             return null;
         });

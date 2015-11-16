@@ -340,10 +340,6 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
                 SelectQuery<EhEnterpriseContactEntriesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACT_ENTRIES);
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_TYPE.eq(entryType));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACT_ENTRIES.ENTRY_VALUE.eq(entryValue));
-                List<Byte> conditionList = new ArrayList<Byte>();
-            	conditionList.add(GroupMemberStatus.ACTIVE.getCode());
-            	conditionList.add(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.in(conditionList));
                 query.fetch().map((r) -> {
                     results.add(ConvertHelper.convert(r, EnterpriseContactEntry.class));
                     return null;
