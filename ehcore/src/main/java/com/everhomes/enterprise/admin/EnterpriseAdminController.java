@@ -2,9 +2,13 @@ package com.everhomes.enterprise.admin;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -21,13 +25,19 @@ import com.everhomes.enterprise.ListEnterpriseResponse;
 import com.everhomes.enterprise.UpdateContactorCommand;
 import com.everhomes.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserServiceErrorCode;
+import com.everhomes.user.admin.ImportDataResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Enterprise Admin controller", site="core")
 @RestController
 @RequestMapping("/admin/enterprise")
 public class EnterpriseAdminController extends ControllerBase {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseAdminController.class);
     @Autowired
     EnterpriseService enterpriseService;
     
@@ -117,5 +127,23 @@ public class EnterpriseAdminController extends ControllerBase {
         res.setErrorDescription("OK");
          
         return res;
+    }
+    
+   
+    @RequestMapping("importEnterpriseData")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importEnterpriseData(@RequestParam(value = "attachment_file_") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.enterpriseService.importEnterpriseData(files[0], userId);
+        RestResponse response = new RestResponse(importDataResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }
