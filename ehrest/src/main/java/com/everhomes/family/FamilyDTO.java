@@ -40,6 +40,9 @@ import com.everhomes.util.StringHelper;
  * <li>proofResourceUri: 用于加速审核的图片URI</li>
  * <li>proofResourceUrl: 用于加速审核的图片URI</li>
  * <li>createTime: 创建时间</li>
+ * <li>communityType: 园区类型，参考{@link com.everhomes.community.CommunityType}</li>
+ * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
+ * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  * </ul>
  */
 public class FamilyDTO {
@@ -80,6 +83,9 @@ public class FamilyDTO {
     
     private Timestamp createTime;
     
+    private Byte communityType;
+    private Long defaultForumId;
+    private Long feedbackForumId;
     
     
     public FamilyDTO () {
@@ -326,6 +332,30 @@ public class FamilyDTO {
 
     public void setCellPhone(String cellPhone) {
         this.cellPhone = cellPhone;
+    }
+
+    public Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
+    }
+
+    public Long getDefaultForumId() {
+        return defaultForumId;
+    }
+
+    public void setDefaultForumId(Long defaultForumId) {
+        this.defaultForumId = defaultForumId;
+    }
+
+    public Long getFeedbackForumId() {
+        return feedbackForumId;
+    }
+
+    public void setFeedbackForumId(Long feedbackForumId) {
+        this.feedbackForumId = feedbackForumId;
     }
 
     @Override

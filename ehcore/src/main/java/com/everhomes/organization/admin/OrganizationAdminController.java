@@ -347,17 +347,4 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /admin/org/searchTopicsByType</b>
-     * <p>搜索保修贴</p>
-     */
-    @RequestMapping("searchTopicsByType")
-	@RestReturn(value=SearchTopicsByTypeResponse.class)
-	public RestResponse searchTopicsByType(SearchTopicsByTypeCommand cmd) {
-    	SearchTopicsByTypeResponse result= organizationService.searchTopicsByType(cmd);
-		RestResponse response = new RestResponse(result);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 }

@@ -308,6 +308,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     dto.setAreaName(community.getAreaName());
                     dto.setCityId(community.getCityId());
                     dto.setCityName(community.getCityName());
+                    dto.setCommunityType(community.getCommunityType());
+                    dto.setDefaultForumId(community.getDefaultForumId());
+                    dto.setFeedbackForumId(community.getFeedbackForumId());
                 }
             }
         }
