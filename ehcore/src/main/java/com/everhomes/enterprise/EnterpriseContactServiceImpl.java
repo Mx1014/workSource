@@ -307,16 +307,20 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		}
 		//add UserGroup 
-		Group group = groupProvider.findGroupById(contact.getEnterpriseId());
-		UserGroup uGroup =new UserGroup();
-		uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-		uGroup.setOwnerUid(contact.getUserId());
-		uGroup.setGroupId(contact.getEnterpriseId());
-		uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-		uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-		uGroup.setRegionScopeId(group.getVisibleRegionId());
-		userProvider.createUserGroup(uGroup);
-		
+
+		 
+		UserGroup uGroup= this.userProvider.findUserGroupByOwnerAndGroup(contact.getUserId(), contact.getEnterpriseId());
+		if (null == uGroup){
+			Group group = groupProvider.findGroupById(contact.getEnterpriseId());
+			uGroup =new UserGroup();
+			uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+			uGroup.setOwnerUid(contact.getUserId());
+			uGroup.setGroupId(group.getId());
+			uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
+			uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
+			uGroup.setRegionScopeId(group.getVisibleRegionId());
+			userProvider.createUserGroup(uGroup);
+		}
 
 		// sendMessageForContactApproved(contact);
 		sendMessageForContactApproved(null, contact);
@@ -860,19 +864,6 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			.queryContactById(cmd.getContactId());
 	
 	 
-		 
-		UserGroup uGroup= this.userProvider.findUserGroupByOwnerAndGroup(contact.getUserId(), contact.getEnterpriseId());
-		if (null == uGroup){
-			Group group = groupProvider.findGroupById(contact.getEnterpriseId());
-			uGroup =new UserGroup();
-			uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-			uGroup.setOwnerUid(contact.getUserId());
-			uGroup.setGroupId(group.getId());
-			uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-			uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-			uGroup.setRegionScopeId(group.getVisibleRegionId());
-			userProvider.createUserGroup(uGroup);
-		}
 		// 添加menber表 
 		this.approveContact(contact);
 	}
