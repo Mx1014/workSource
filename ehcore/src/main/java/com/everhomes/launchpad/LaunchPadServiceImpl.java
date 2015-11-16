@@ -219,13 +219,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			LOGGER.error("Buiness authenticate prefix url is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			//businessDetailUrl = detailUrl.trim() + business.getTargetId();
 			try {
-				businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
+				if(detailUrl.contains("#sign_suffix")){
+					detailUrl = detailUrl.trim();
+					String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
+					String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
+					businessDetailUrl = URLEncoder.encode(prefix+business.getTargetId(), "utf-8")+suffix;
+				}
+				else
+					businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
 			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("unsported encoding.");
 			}
-			return authenticatePrefix.trim()+businessDetailUrl;
+			return authenticatePrefix.trim() + businessDetailUrl;
 		}
 		return business.getUrl();
 	}
@@ -296,7 +302,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
 					itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
 				}
-				
+
 				distinctDto.add(itemDTO);
 			});
 			if(distinctDto != null && !distinctDto.isEmpty()){
@@ -510,7 +516,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode() && ((d.getTargetType() == null && o.getTargetType() == null) || (d.getTargetType() != null && o.getTargetType() != null && d.getTargetType().trim().equals(o.getTargetType().trim()) && d.getTargetId().longValue() == o.getTargetId().longValue())))
 						allItems.add(o);
 					//                    if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode())
-						//                        allItems.add(o);
+					//                        allItems.add(o);
 					flag = true;
 					break;
 				}
@@ -540,7 +546,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		}
 		//        userProfiles.forEach((userProfile) ->{
-			//            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
+		//            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
 		//                String jsonString = userProfile.getItemValue();
 		//                userItems.add((LaunchPadItem) StringHelper.fromJsonString(jsonString, LaunchPadItem.class));
 		//            }
