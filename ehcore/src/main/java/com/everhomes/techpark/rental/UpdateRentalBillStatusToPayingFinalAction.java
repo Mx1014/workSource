@@ -58,7 +58,7 @@ public class UpdateRentalBillStatusToPayingFinalAction implements Runnable {
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 			//TODO: 发通知
-			sendMessageToUser(rentalBill.getRentalUid(),"你有一个预定场所需要付全款");
+			sendMessageToUser(rentalBill.getRentalUid(),"你有一个预定场所需要付全款，请及时支付，小心过期被取消哦");
 		}
 	}
 
