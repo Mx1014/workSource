@@ -1123,6 +1123,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		List<String> geoHashCodes = new ArrayList<String>();
 		
+		StringBuilder strBuilder = new StringBuilder();
 		for(CommunityGeoPoint geoPoint : geoPoints){
 			
 			double latitude = geoPoint.getLatitude();
@@ -1135,6 +1136,15 @@ public class ActivityServiceImpl implements ActivityService {
 	        for(GeoHash g : adjacents) {
 	           geoHashCodes.add(g.toBase32());
 	        }
+	        
+	        if(strBuilder.length() > 0) {
+	            strBuilder.append(",");
+	        } else {
+	            strBuilder.append(geoPoint.getCommunityId());
+	        }
+		}
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("Query activities by geohash, communityId=" + cmd.getCommunity_id() + ", communities=" + strBuilder);
 		}
 		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         
