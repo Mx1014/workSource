@@ -2,6 +2,17 @@ package com.everhomes.user;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * 	<li>id:用户id</li>
+ * 	<li>name:用户名</li>
+ * 	<li>signature:签名</li>
+ * 	<li>appKey:公钥</li>
+ * 	<li>timeStamp:时间戳</li>
+ * 	<li>randomNum:随机数</li>
+ * </ul>
+ * 
+ */
 public class GetSignatureCommandResponse {
 	private Long id;
 	private String name;

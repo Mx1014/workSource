@@ -8,8 +8,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>siteUserToken : 第三方用户标识</li>
  * 	<li>siteUri : 链接</li>
- * 	<li>name : 用户名</li>
- * 	<li>phone : 电话</li>
  * 	<li>signature : 签名</li>
  * 	<li>randomNum : 随机数</li>
  * 	<li>timeStamp : 时间戳</li>
@@ -22,9 +20,6 @@ public class SynThridUserCommand {
 	private String siteUserToken;
 	@NotNull
 	private String siteUri;
-	
-	private String name;
-	private String phone;
 	
 	@NotNull
 	private String signature;
@@ -41,18 +36,6 @@ public class SynThridUserCommand {
 	}
 	public void setSiteUserToken(String siteUserToken) {
 		this.siteUserToken = siteUserToken;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getPhone() {
-		return phone;
-	}
-	public void setPhone(String phone) {
-		this.phone = phone;
 	}
 	public String getSignature() {
 		return signature;
@@ -88,6 +71,5 @@ public class SynThridUserCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
 	
 }
