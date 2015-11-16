@@ -266,6 +266,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 				family.setCommunityName(community.getName());
 				family.setCityId(community.getCityId());
 				family.setCityName(community.getCityName()+community.getAreaName());
+				family.setCommunityType(community.getCommunityType());
+				family.setDefaultForumId(community.getDefaultForumId());
+				family.setFeedbackForumId(community.getFeedbackForumId());
 				
 			}
 			if(group.getCreatorUid().longValue() == userId.longValue())
@@ -297,6 +300,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		return familyList;
 	}
+	
 	// @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
 	@Override
 	public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
@@ -427,6 +431,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 	                        f.setAreaName(community.getAreaName());
 	                        f.setCommunityId(community.getId());
 	                        f.setCommunityName(community.getName());
+	                        f.setCommunityType(community.getCommunityType());
+	                        f.setDefaultForumId(community.getDefaultForumId());
+	                        f.setFeedbackForumId(community.getFeedbackForumId());
 						}
 						f.setId(r.getValue(Tables.EH_GROUPS.ID));
 						f.setMemberCount(r.getValue(Tables.EH_GROUPS.MEMBER_COUNT));
