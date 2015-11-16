@@ -2897,7 +2897,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setKeywords(queryResponse.getKeywords());
         response.setNextPageAnchor(queryResponse.getNextPageAnchor());
         
-        List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(cmd.getOrganizationId(),cmd.getTaskType(),cmd.getTaskStatus(),AppConstants.PAGINATION_MAX_SIZE,0);
+        List<OrganizationTask> orgTaskList = new ArrayList<OrganizationTask>();
+        if("mytask".equals(cmd.getFlag())) {
+        	User user = UserContext.current().getUser();
+        	orgTaskList = this.organizationProvider.listOrganizationTasksByOperatorUid(user.getId(), cmd.getTaskType(), AppConstants.PAGINATION_MAX_SIZE, 0);
+        } else {
+        	
+        	orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(cmd.getOrganizationId(),cmd.getTaskType(),cmd.getTaskStatus(),AppConstants.PAGINATION_MAX_SIZE,0);
+        			
+        }
+        		
         
         if(orgTaskList != null && orgTaskList.size() > 0) {
         	Map<Long, OrganizationTask> taskMap = new HashMap<Long, OrganizationTask>();
