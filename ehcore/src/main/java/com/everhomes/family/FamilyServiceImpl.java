@@ -1473,37 +1473,39 @@ public class FamilyServiceImpl implements FamilyService {
             return null;
         }
         
-        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
-        //familyDTO.setAddressId(cmd.getAddressId());
-        if(family.getCreatorUid() == user.getId())
-            familyDTO.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+//        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
+//        //familyDTO.setAddressId(cmd.getAddressId());
+//        if(family.getCreatorUid() == user.getId())
+//            familyDTO.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+//        
+//        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+//                EntityType.USER.getCode(), user.getId());
+//        if(m != null){
+//            familyDTO.setMemberUid(m.getMemberId());
+//            familyDTO.setMemberNickName(m.getMemberNickName());
+//            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),m.getCreatorUid()));
+//            familyDTO.setMemberAvatarUri(m.getMemberAvatar());
+//            familyDTO.setMembershipStatus(m.getMemberStatus());
+//            Address address = this.addressProvider.findAddressById(addressId);
+//            if(address != null){
+//                familyDTO.setAddress(address.getAddress());
+//                familyDTO.setAddressId(address.getId());
+//                familyDTO.setApartmentName(address.getApartmentName());
+//                familyDTO.setBuildingName(address.getBuildingName());
+//                familyDTO.setAddressStatus(address.getStatus());
+//            }
+//            
+//            Community community = communityProvider.findCommunityById(family.getCommunityId());
+//            if(community != null){
+//                familyDTO.setCityName(community.getCityName());
+//                familyDTO.setAreaName(community.getAreaName());
+//                familyDTO.setCommunityName(community.getName());
+//            }
+//            
+//        }
+//        return familyDTO;
         
-        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-                EntityType.USER.getCode(), user.getId());
-        if(m != null){
-            familyDTO.setMemberUid(m.getMemberId());
-            familyDTO.setMemberNickName(m.getMemberNickName());
-            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),m.getCreatorUid()));
-            familyDTO.setMemberAvatarUri(m.getMemberAvatar());
-            familyDTO.setMembershipStatus(m.getMemberStatus());
-            Address address = this.addressProvider.findAddressById(addressId);
-            if(address != null){
-                familyDTO.setAddress(address.getAddress());
-                familyDTO.setAddressId(address.getId());
-                familyDTO.setApartmentName(address.getApartmentName());
-                familyDTO.setBuildingName(address.getBuildingName());
-                familyDTO.setAddressStatus(address.getStatus());
-            }
-            
-            Community community = communityProvider.findCommunityById(family.getCommunityId());
-            if(community != null){
-                familyDTO.setCityName(community.getCityName());
-                familyDTO.setAreaName(community.getAreaName());
-                familyDTO.setCommunityName(community.getName());
-            }
-            
-        }
-        return familyDTO;
+        return toFamilyDto(user.getId(), family);
     }
 
     @Override
@@ -1868,7 +1870,56 @@ public class FamilyServiceImpl implements FamilyService {
         
         return result;
     }
-
-
+    
+    private FamilyDTO toFamilyDto(Long userId, Family family) {
+        FamilyDTO familyDto = ConvertHelper.convert(family, FamilyDTO.class);
+        
+        if(family.getCreatorUid() == userId)
+            familyDto.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+        
+        familyDto.setAvatarUrl(parserUri(family.getAvatar(),EntityType.FAMILY.getCode(),family.getCreatorUid()));
+        familyDto.setAvatarUri(family.getAvatar());
+        familyDto.setAddressId(family.getIntegralTag1());
+        Long communityId = family.getIntegralTag2();
+        Community community = this.communityProvider.findCommunityById(communityId);
+        if(community != null){
+            familyDto.setCommunityId(communityId);
+            familyDto.setCommunityName(community.getName());
+            familyDto.setCityId(community.getCityId());
+            familyDto.setCityName(community.getCityName()+community.getAreaName());
+            familyDto.setCommunityType(community.getCommunityType());
+            familyDto.setDefaultForumId(community.getDefaultForumId());
+            familyDto.setFeedbackForumId(community.getFeedbackForumId());
+        }
+        
+      if(family.getCreatorUid().longValue() == userId.longValue())
+          familyDto.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+    
+      GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyDto.getId(), 
+              EntityType.USER.getCode(), userId);
+      if(member != null){
+          familyDto.setMemberUid(member.getMemberId());
+          familyDto.setMemberNickName(member.getMemberNickName());
+          familyDto.setMembershipStatus(member.getMemberStatus());
+          familyDto.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
+          familyDto.setMemberAvatarUri(member.getMemberAvatar());
+          familyDto.setProofResourceUri(member.getProofResourceUri());
+          familyDto.setProofResourceUrl(parserUri(member.getProofResourceUri(), EntityType.USER.getCode(), member.getCreatorUid()));
+      }
+    
+      Address address = this.addressProvider.findAddressById(family.getIntegralTag1());
+      if(address != null){
+          familyDto.setBuildingName(address.getBuildingName());
+          familyDto.setApartmentName(address.getApartmentName());
+          familyDto.setAddressStatus(address.getStatus());
+          String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+                  address.getBuildingName(), address.getApartmentName());
+          familyDto.setDisplayName(addrStr);
+          familyDto.setAddress(addrStr);
+          familyDto.setAddressId(address.getId());
+      }
+             
+      return familyDto;
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.everhomes.user;
 
+import com.everhomes.util.StringHelper;
+
 public class UserLoginDTO {
     private long userId;
     private int loginId;
@@ -12,6 +14,8 @@ public class UserLoginDTO {
     private long lastAccessTick;
     
     private Long portalRole;
+    
+    private Long partnerId;
 
     public UserLoginDTO() {
     }
@@ -86,5 +90,18 @@ public class UserLoginDTO {
 
     public void setPortalRole(Long portalRole) {
         this.portalRole = portalRole;
+    }
+
+    public Long getPartnerId() {
+        return partnerId;
+    }
+
+    public void setPartnerId(Long partnerId) {
+        this.partnerId = partnerId;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

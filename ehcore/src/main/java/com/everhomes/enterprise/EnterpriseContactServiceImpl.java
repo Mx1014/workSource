@@ -214,8 +214,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					EnterpriseContact contact = new EnterpriseContact();
 					contact.setCreatorUid(userId);
 					contact.setEnterpriseId(cmd.getEnterpriseId());
-					contact.setName(user.getNickName());
-					contact.setNickName(user.getNickName());
+					contact.setName(cmd.getName());
+					contact.setNickName(cmd.getNickName());
 					contact.setAvatar(user.getAvatar());
 					contact.setUserId(userId);
 
@@ -1400,5 +1400,41 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			this.enterpriseContactProvider.deleteContactGroupMember(enterpriseContactGroupMember);
 		
 		this.enterpriseContactProvider.deleteContactById(contact);
+	}
+
+	@Override
+	public EnterpriseContactDTO updateContact(UpdateContactCommand cmd) {
+		EnterpriseContact contact = this.enterpriseContactProvider.getContactById(cmd.getContactId());
+		contact.setName(cmd.getName());
+		contact.setNickName(cmd.getNickName());
+		contact.setRole(cmd.getRole());
+		contact.setSex(cmd.getSex());
+		contact.setEmployeeNo(cmd.getEmployeeNo());
+		//phone num change
+		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), cmd.getContactId());
+		if(null!=cmd.getContactGroupId()){
+			if(null == enterpriseContactGroupMember){
+				if(null != cmd.getContactGroupId()){
+					enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+					enterpriseContactGroupMember.setContactGroupId(cmd.getContactGroupId());
+					enterpriseContactGroupMember
+							.setEnterpriseId(contact.getEnterpriseId());
+					enterpriseContactGroupMember.setContactId(contact.getId());
+					enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
+					enterpriseContactGroupMember
+							.setCreateTime(new Timestamp(System
+									.currentTimeMillis()));
+					enterpriseContactProvider
+							.createContactGroupMember(enterpriseContactGroupMember);
+				}
+			}else if(!enterpriseContactGroupMember.getContactGroupId().equals(cmd.getContactGroupId())){
+				enterpriseContactGroupMember.setContactGroupId(cmd.getContactGroupId());
+				contact.setApplyGroup(this.enterpriseContactProvider.getContactGroupById(cmd.getContactGroupId()).getApplyGroup());
+	
+				enterpriseContactProvider.updateContactGroupMember(enterpriseContactGroupMember);
+			}
+		}
+		this.enterpriseContactProvider.updateContact(contact);
+		return ConvertHelper.convert(contact, EnterpriseContactDTO.class);
 	}
 }

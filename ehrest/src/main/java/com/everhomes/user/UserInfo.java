@@ -72,8 +72,6 @@ public class UserInfo {
     private List<String> emails;
     
     private Byte communityType;
-    private Long defaultForumId;
-    private Long feedbackForumId;
     @ItemType(UserCurrentEntity.class)
     private List<UserCurrentEntity> entityList;
 
@@ -270,22 +268,6 @@ public class UserInfo {
 
     public void setCommunityType(Byte communityType) {
         this.communityType = communityType;
-    }
-
-    public Long getDefaultForumId() {
-        return defaultForumId;
-    }
-
-    public void setDefaultForumId(Long defaultForumId) {
-        this.defaultForumId = defaultForumId;
-    }
-
-    public Long getFeedbackForumId() {
-        return feedbackForumId;
-    }
-
-    public void setFeedbackForumId(Long feedbackForumId) {
-        this.feedbackForumId = feedbackForumId;
     }
 
     public List<UserCurrentEntity> getEntityList() {

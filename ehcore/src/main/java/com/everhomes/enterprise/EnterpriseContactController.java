@@ -124,6 +124,28 @@ public class EnterpriseContactController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /contact/updateContact</b>
+     * <p>注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员</p>
+     * 申请加入企业
+     * @return {@link EnterpriseContactDTO}
+     */
+    @RequestMapping("updateContact")
+    @RestReturn(value=EnterpriseContactDTO.class)
+    public RestResponse updateContact(@Valid UpdateContactCommand cmd) {
+        EnterpriseContactDTO contact = this.enterpriseContactService.updateContact(cmd);
+        
+        RestResponse res = new RestResponse();
+        
+        res.setResponseObject(contact);
+         
+        
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+    }
+    
+    /**
      * <b>URL: /contact/listContactsByEnterpriseId</b>
      * <p>显示企业联系人</p>
      * @return {@link ListEnterpriseContactResponse}
