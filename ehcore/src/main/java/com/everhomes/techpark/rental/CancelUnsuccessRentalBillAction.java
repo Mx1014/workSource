@@ -43,12 +43,12 @@ public class CancelUnsuccessRentalBillAction implements Runnable {
 	
 
 	private void sendMessageToUser(Long userId, String content) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(user.getId());
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
