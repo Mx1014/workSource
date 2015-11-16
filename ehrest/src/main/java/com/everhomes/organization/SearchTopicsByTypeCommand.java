@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *  <li>keyword: 帖子标题、内容关键字</li>
  *  <li>taskStatus : 任务状态，详情 {@link com.everhomes.organization.OrganizationTaskStatus}</li>
  *  <li>taskType : 任务类型 ，详情{@link com.everhomes.organization.OrganizationTaskType}</li>
+ *  <li>flag: 标识是我的任务查询还是所有任务查询</li>
  *  <li>pageAnchor: 本页开始锚点</li>
  *  <li>pageSize: 每页的数量</li>
  * </ul>
@@ -26,6 +27,8 @@ public class SearchTopicsByTypeCommand {
 	private Byte taskStatus;
 	
 	private String taskType;
+	
+	private String flag;
 
     private Long pageAnchor;
     
@@ -69,6 +72,14 @@ public class SearchTopicsByTypeCommand {
 
 	public void setTaskType(String taskType) {
 		this.taskType = taskType;
+	}
+
+	public String getFlag() {
+		return flag;
+	}
+
+	public void setFlag(String flag) {
+		this.flag = flag;
 	}
 
 	public Long getPageAnchor() {
