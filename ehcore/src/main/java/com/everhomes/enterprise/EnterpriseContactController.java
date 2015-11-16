@@ -16,7 +16,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.util.ConvertHelper;
@@ -134,7 +133,7 @@ public class EnterpriseContactController extends ControllerBase {
     public RestResponse listContactsByEnterpriseId(@Valid ListContactsByEnterpriseIdCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize(),cmd.getKeyWord());
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
         for(EnterpriseContactDetail detail : details) {
             dtos.add(ConvertHelper.convert(detail, EnterpriseContactDTO.class));
@@ -154,8 +153,8 @@ public class EnterpriseContactController extends ControllerBase {
     
     
     /**
-     * <b>URL: /contact/listContactsByEnterpriseId</b>
-     * <p>显示企业申请联系人</p>
+     * <b>URL: /contact/listContactsRequestByEnterpriseId</b>
+     * <p>显示企业 申请 联系人</p>
      * @return {@link ListContactsRequestByEnterpriseIdCommandResponse}
      */
     @RequestMapping("listContactsRequestByEnterpriseId")
@@ -163,7 +162,7 @@ public class EnterpriseContactController extends ControllerBase {
     public RestResponse listContactsRequestByEnterpriseId(@Valid ListContactsRequestByEnterpriseIdCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactsRequestByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize());
+        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactsRequestByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize(),cmd.getKeyWord());
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
         for(EnterpriseContactDetail detail : details) {
             dtos.add(ConvertHelper.convert(detail, EnterpriseContactDTO.class));

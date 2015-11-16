@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -480,14 +481,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	 */
 	@Override
 	public List<EnterpriseContactDetail> listContactByEnterpriseId(
-			ListingLocator locator, Long enterpriseId, Integer pageSize) {
+			ListingLocator locator, Long enterpriseId, Integer pageSize,String keyWord) {
 
 		if (locator.getAnchor() == null)
 			locator.setAnchor(0L);
 		int count = PaginationConfigHelper
 				.getPageSize(configProvider, pageSize);
 		List<EnterpriseContact> contacts = this.enterpriseContactProvider
-				.listContactByEnterpriseId(locator, enterpriseId, count + 1);
+				.listContactByEnterpriseId(locator, enterpriseId, count + 1,keyWord);
 
 		Long nextPageAnchor = null;
 		if (contacts != null && contacts.size() > count) {
@@ -622,7 +623,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			ListingLocator locator = new ListingLocator();
 			// List approved members
 			List<EnterpriseContact> contacts = this.enterpriseContactProvider
-					.listContactByEnterpriseId(locator, group.getId(), pageSize);
+					.listContactByEnterpriseId(locator, group.getId(), pageSize,null);
 			for (EnterpriseContact contact : contacts) {
 				GroupMember gb = new GroupMember();
 				gb.setMemberId(contact.getUserId());
@@ -813,14 +814,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Override
 	public List<EnterpriseContactDetail> listContactsRequestByEnterpriseId(
-			ListingLocator locator, Long enterpriseId, Integer pageSize) {
+			ListingLocator locator, Long enterpriseId, Integer pageSize,String keyWord) {
 
 		if (locator.getAnchor() == null)
 			locator.setAnchor(0L);
 		int count = PaginationConfigHelper
 				.getPageSize(configProvider, pageSize);
 		List<EnterpriseContact> contacts = this.enterpriseContactProvider
-				.listContactRequestByEnterpriseId(locator, enterpriseId, count);
+				.listContactRequestByEnterpriseId(locator, enterpriseId, count,keyWord);
 
 		Long nextPageAnchor = null;
 		if (contacts != null && contacts.size() > count) {

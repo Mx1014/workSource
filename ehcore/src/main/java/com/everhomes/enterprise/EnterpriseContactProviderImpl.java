@@ -164,7 +164,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     }
     
     @Override
-    public List<EnterpriseContact> listContactByEnterpriseId(ListingLocator locator, Long enterpriseId, int count) {
+    public List<EnterpriseContact> listContactByEnterpriseId(ListingLocator locator, Long enterpriseId, int count,String keyWord) {
         return this.queryContactByEnterpriseId(locator, enterpriseId, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -174,6 +174,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             	conditionList.add(GroupMemberStatus.ACTIVE.getCode());
             	conditionList.add(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.in(conditionList));
+            	if (null!= keyWord)
+            		 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.NAME.like(keyWord).or(Tables.EH_ENTERPRISE_CONTACTS.NICK_NAME.like(keyWord)).or(Tables.EH_ENTERPRISE_CONTACTS.STRING_TAG1.like(keyWord)));
                 return query;
             }
             
@@ -799,7 +801,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 
 	@Override
 	public List<EnterpriseContact> listContactRequestByEnterpriseId(
-			ListingLocator locator, Long enterpriseId, int count) {
+			ListingLocator locator, Long enterpriseId, int count,String keyWord) {
 		 return this.queryContactByEnterpriseId(locator, enterpriseId, count, new ListingQueryBuilderCallback() {
 
 	            @Override
@@ -809,6 +811,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	            	conditionList.add(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
 	            	conditionList.add(GroupMemberStatus.INACTIVE.getCode());
 	                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.in(conditionList));
+	                if (null!=keyWord)
+	                	 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.NAME.like(keyWord).or(Tables.EH_ENTERPRISE_CONTACTS.NICK_NAME.like(keyWord)).or(Tables.EH_ENTERPRISE_CONTACTS.STRING_TAG1.like(keyWord)));
 	                return query;
 	            }
 	            

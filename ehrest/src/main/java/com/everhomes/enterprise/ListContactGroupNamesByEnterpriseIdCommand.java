@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 
 public class ListContactGroupNamesByEnterpriseIdCommand {
     @NotNull
-    private Long enterpriseId;
+    private Long enterpriseId; 
+    
      
 
     public Long getEnterpriseId() {
@@ -21,5 +22,6 @@ public class ListContactGroupNamesByEnterpriseIdCommand {
 
 		
         return StringHelper.toJsonString(this);
-    } 
+    }
+ 
 }

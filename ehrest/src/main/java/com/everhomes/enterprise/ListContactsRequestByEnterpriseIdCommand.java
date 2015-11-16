@@ -8,6 +8,7 @@ public class ListContactsRequestByEnterpriseIdCommand {
     
     private Long pageAnchor;
     private Integer pageSize;
+    private String keyWord;
 
     public Long getEnterpriseId() {
         return enterpriseId;
@@ -32,4 +33,12 @@ public class ListContactsRequestByEnterpriseIdCommand {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
+
+	public String getKeyWord() {
+		return keyWord;
+	}
+
+	public void setKeyWord(String keyWord) {
+		this.keyWord = keyWord;
+	}
 }
