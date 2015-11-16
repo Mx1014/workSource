@@ -1067,8 +1067,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						// phone find user
 						User user = userService.findUserByIndentifier(PhoneNum);
 						if (null != user){
+							//已有用户，设置为正常状态，并把userId放入contact表 新家usergroup记录
 							contact.setUserId(user.getId());
-							
+							contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
 							Group group = groupProvider.findGroupById(enterpriseId);
 							UserGroup uGroup = userProvider.findUserGroupByOwnerAndGroup(user.getId(), enterpriseId) ;
 							if(null == uGroup){
@@ -1082,7 +1083,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 							userProvider.createUserGroup(uGroup);
 							}
 						}
-						// TODO: map aparment 2 user
+						// TODO: map aparment 2 user 
 						Long contactId = enterpriseContactProvider
 								.createContact(contact);
 						EnterpriseContactEntry contactEntry = new EnterpriseContactEntry();
