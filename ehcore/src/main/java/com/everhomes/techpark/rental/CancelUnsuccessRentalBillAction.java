@@ -52,7 +52,7 @@ public class CancelUnsuccessRentalBillAction implements Runnable {
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
+        LOGGER.debug("messageDTO : ++++ \n "+messageDto);
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}

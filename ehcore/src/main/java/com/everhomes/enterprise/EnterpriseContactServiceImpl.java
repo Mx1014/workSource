@@ -214,8 +214,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					EnterpriseContact contact = new EnterpriseContact();
 					contact.setCreatorUid(userId);
 					contact.setEnterpriseId(cmd.getEnterpriseId());
-					contact.setName(user.getNickName());
-					contact.setNickName(user.getNickName());
+					contact.setName(cmd.getName());
+					contact.setNickName(cmd.getNickName());
 					contact.setAvatar(user.getAvatar());
 					contact.setUserId(userId);
 
