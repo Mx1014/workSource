@@ -1408,6 +1408,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		contact.setName(cmd.getName());
 		contact.setNickName(cmd.getNickName());
 		contact.setRole(cmd.getRole());
+		contact.setSex(cmd.getSex());
+		contact.setEmployeeNo(cmd.getEmployeeNo());
 		//phone num change
 		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), cmd.getContactId());
 		if(null!=cmd.getContactGroupId()){
