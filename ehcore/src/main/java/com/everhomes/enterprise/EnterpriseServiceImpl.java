@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.enterprise;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,10 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.RoleConstants;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.address.CommunityAdminStatus;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
@@ -26,6 +31,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.core.AppConfig;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -33,6 +39,9 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.EnterpriseSearcher;
@@ -43,9 +52,13 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserCurrentEntityType;
+import com.everhomes.user.UserServiceErrorCode;
+import com.everhomes.user.admin.ImportDataResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.visibility.VisibleRegionType;
 import com.mysql.jdbc.StringUtils;
 
@@ -90,6 +103,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Autowired
 	private ContentServerService contentServerService;
     
+    @Autowired
+	private DbProvider dbProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
@@ -748,6 +766,100 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getEnterpriseId());
 			this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
 		}
+	}
+
+	@Override
+	public ImportDataResponse importEnterpriseData(MultipartFile mfile,
+			Long userId) {
+		ImportDataResponse importDataResponse = new ImportDataResponse();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+			
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+						"File content is empty");
+			}
+			LOGGER.debug("Start import data...,total:" + resultList.size());
+			//导入数据，返回导入错误的日志数据集
+			List<String> errorDataLogs = importEnterprise(convertToStrList(resultList), userId);
+			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+			if(null == errorDataLogs || errorDataLogs.isEmpty()){
+				LOGGER.debug("Data import all success...");
+			}else{
+				//记录导入错误日志
+				for (String log : errorDataLogs) {
+					LOGGER.error(log);
+				}
+			}
+			
+			importDataResponse.setTotalCount((long)resultList.size()-1);
+			importDataResponse.setFailCount((long)errorDataLogs.size());
+			importDataResponse.setLogs(errorDataLogs);
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return importDataResponse;
+	}
+
+	private List<String> convertToStrList(List list) {
+		List<String> result = new ArrayList<String>();
+		boolean firstRow = true;
+		for (Object o : list) {
+			if(firstRow){
+				firstRow = false;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			StringBuffer sb = new StringBuffer();
+			sb.append(r.getA()).append("||");
+			sb.append(r.getB()).append("||");
+			sb.append(r.getC()).append("||");
+			sb.append(r.getD()).append("||");
+			sb.append(r.getE()).append("||");
+			sb.append(r.getF()).append("||");
+			sb.append(r.getG()).append("||");
+			sb.append(r.getH());
+			result.add(sb.toString());
+		}
+		return result;
+	}
+	
+	private List<String> importEnterprise(List<String> list, Long userId){
+		List<String> errorDataLogs = new ArrayList<String>();
+
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		for (String str : list) {
+			String[] s = str.split("\\|\\|");
+			dbProvider.execute((TransactionStatus status) -> {
+				Enterprise enterprise = new Enterprise();
+				enterprise.setName(s[0]);
+				enterprise.setDisplayName(s[1]);
+				enterprise.setEnterpriseAddress(s[2]);;
+				enterprise.setContactsPhone(s[3]);;
+				
+				enterprise.setDescription(s[7]);
+				enterprise.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				
+				LOGGER.info("add enterprise");
+				this.enterpriseProvider.createEnterprise(enterprise);
+				
+				String contactName = s[5];
+				String contactToken = s[6];
+				UpdateContactorCommand command = new UpdateContactorCommand();
+				command.setContactName(contactName);
+				command.setEntryValue(contactToken);
+				command.setEnterpriseId(enterprise.getId());
+				//userId查communityId
+				command.setCommunityId(org.getCommunityId());
+				updateContactor(command);
+				return null;
+			});
+		}
+		return errorDataLogs;
+		
 	}
 
 }

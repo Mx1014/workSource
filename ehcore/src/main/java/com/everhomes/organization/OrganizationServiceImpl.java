@@ -90,6 +90,8 @@ import com.everhomes.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
+import com.everhomes.search.PostAdminQueryFilter;
+import com.everhomes.search.PostSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
@@ -179,6 +181,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
 	private CategoryProvider categoryProvider;
+	
+	@Autowired
+	private ConfigurationProvider configProvider;
+	
+	@Autowired
+    private PostSearcher postSearcher; 
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -2858,5 +2866,66 @@ public class OrganizationServiceImpl implements OrganizationService {
         } catch(Exception e) {
             LOGGER.error("Failed to join partner organization, userId=" + user.getId() + ", partnerId=" + organization.getId(), e);
         }
+	}
+
+	@Override
+	public SearchTopicsByTypeResponse searchTopicsByType(
+			SearchTopicsByTypeCommand cmd) {
+		PostAdminQueryFilter filter = new PostAdminQueryFilter();
+        String keyword = cmd.getKeyword();
+        if(!StringUtils.isEmpty(keyword)) {
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_CONTENT);
+            filter.addQueryTerm(PostAdminQueryFilter.TERM_SUBJECT);
+            filter.setQueryString(keyword);
+        }
+        
+        List<Long> parentPostId = new ArrayList<Long>();
+        parentPostId.add(0L);
+        filter.includeFilter(PostAdminQueryFilter.TERM_PARENTPOSTID, parentPostId);
+        
+        int pageNum = 0;
+        if(cmd.getPageAnchor() != null) {
+            pageNum = cmd.getPageAnchor().intValue();
+        } else {
+            pageNum = 0;
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        filter.setPageInfo(pageNum, pageSize);
+        ListPostCommandResponse queryResponse = postSearcher.query(filter);
+        
+        SearchTopicsByTypeResponse response = new SearchTopicsByTypeResponse();
+        response.setKeywords(queryResponse.getKeywords());
+        response.setNextPageAnchor(queryResponse.getNextPageAnchor());
+        
+        List<OrganizationTask> orgTaskList = this.organizationProvider.listOrganizationTasksByOrgIdAndType(cmd.getOrganizationId(),cmd.getTaskType(),cmd.getTaskStatus(),AppConstants.PAGINATION_MAX_SIZE,0);
+        
+        if(orgTaskList != null && orgTaskList.size() > 0) {
+        	Map<Long, OrganizationTask> taskMap = new HashMap<Long, OrganizationTask>();
+            for(OrganizationTask orgTask: orgTaskList) {
+            	taskMap.put(orgTask.getApplyEntityId(), orgTask);
+            }
+            
+            List<OrganizationTaskDTO2> taskList = new ArrayList<OrganizationTaskDTO2>();
+            List<PostDTO> postList = queryResponse.getPosts();
+            for(PostDTO post : postList) {
+                try {
+                	if(taskMap.get(post.getId()) != null) {
+                		OrganizationTask task = taskMap.get(post.getId());
+                		PostDTO temp = this.forumService.getTopicById(post.getId(), cmd.getCommunityId(), false);
+                        OrganizationTaskDTO2 taskDto = ConvertHelper.convert(temp, OrganizationTaskDTO2.class);
+                        this.convertTaskToDto(task,taskDto);
+                        
+                        taskList.add(taskDto);
+                	}
+                    
+                } catch(Exception e) {
+                    LOGGER.error(e.toString());
+                }
+            }
+            
+            response.setRequests(taskList);
+        }
+        
+        return response;
 	}
 }

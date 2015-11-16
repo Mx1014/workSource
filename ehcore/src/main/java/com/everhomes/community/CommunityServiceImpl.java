@@ -59,8 +59,10 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionServiceErrorCode;
@@ -107,6 +109,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1021,6 +1026,16 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	private List<String> importBuilding(List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
+		//userID查orgid
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
+		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
+		if(orgMem != null) {
+			orgMem.stream().map(r -> {
+				ct.put(r.getContactToken(), r);
+				return null;
+			});
+		}
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
 			dbProvider.execute((TransactionStatus status) -> {
@@ -1030,10 +1045,14 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setAddress(s[2]);
 				building.setContact(s[3]);
 				building.setAreaSize(Double.valueOf(s[4]));
-				String identifierToken = s[6];
-				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(identifierToken);
-				if(userIdentifier != null)
-					building.setManagerUid(userIdentifier.getOwnerUid());
+				String contactToken = s[6];
+				
+				if(ct.get(contactToken) != null) {
+					OrganizationMember om = ct.get(contactToken);
+					building.setManagerUid(om.getTargetId());
+				}else {
+					///////////////////////////////////
+				}
 				building.setDescription(s[7]);
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				

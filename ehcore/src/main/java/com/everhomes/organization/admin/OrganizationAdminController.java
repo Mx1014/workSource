@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,10 +28,11 @@ import com.everhomes.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.organization.ListOrganizationsCommand;
 import com.everhomes.organization.ListOrganizationsCommandResponse;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.SearchTopicsByTypeCommand;
+import com.everhomes.organization.SearchTopicsByTypeResponse;
 import com.everhomes.organization.pm.AddPmBuildingCommand;
 import com.everhomes.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.organization.pm.ListPmBuildingCommand;
-import com.everhomes.organization.pm.ListPmBuildingCommandResponse;
 import com.everhomes.organization.pm.ListPmManagementsCommand;
 import com.everhomes.organization.pm.PmBuildingDTO;
 import com.everhomes.organization.pm.PmManagementsResponse;
@@ -346,4 +346,18 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/org/searchTopicsByType</b>
+     * <p>搜索保修贴</p>
+     */
+    @RequestMapping("searchTopicsByType")
+	@RestReturn(value=SearchTopicsByTypeResponse.class)
+	public RestResponse searchTopicsByType(SearchTopicsByTypeCommand cmd) {
+    	SearchTopicsByTypeResponse result= organizationService.searchTopicsByType(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
